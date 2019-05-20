@@ -1,5 +1,7 @@
 # @polkadot/extension
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/polkadot-js/extension.svg)](https://greenkeeper.io/)
+
 A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by the application. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. (It does not inject providers for use by dapps, not does it perform the function of a wallet where it submits txs to the network).

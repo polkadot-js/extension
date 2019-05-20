@@ -8,9 +8,11 @@ import { Address, Button, Header, TextArea } from '../components';
 import { createAccount, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-type Props = {};
+type Props = {
+  onAction: () => void
+};
 
-export default function Import (props: Props) {
+export default function Import ({ onAction }: Props) {
   const [account, setAccount] = useState(null as null | { address: string, seed: string });
   const [name, setName] = useState(null as string | null);
   const [password, setPassword] = useState(null as string | null);
@@ -31,6 +33,7 @@ export default function Import (props: Props) {
     if (name && password && account) {
       createAccount(name, password, account.seed)
         .then(() => {
+          onAction();
           window.location.hash = '/';
         })
         .catch(console.error);

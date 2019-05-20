@@ -21,13 +21,8 @@ export default function Popup (props: Props) {
   const [accounts, setAccounts] = useState(null as null | Array<KeyringJson>);
   const [requests, setRequests] = useState(null as null | Array<[number, MessageExtrinsicSign, string]>);
 
-  const _onAction = (): void => {
-    getRequests()
-      .then(setRequests)
-      .catch(console.error);
-  };
-
-  useEffect((): void => {
+  const onAction = (): void => {
+    // loads all accounts & requests (this is passed through to children to trigger changes)
     Promise
       .all([getAccounts(), getRequests()])
       .then(([accounts, requests]) => {
@@ -35,18 +30,28 @@ export default function Popup (props: Props) {
         setRequests(requests);
       })
       .catch(console.error);
+  };
+
+  useEffect((): void => {
+    // with an empty state, load the accounts & requests
+    onAction();
   }, []);
 
   return (
     <Loading>{accounts && requests && (
       <Switch>
-        <Route path='/account/create' component={Create} />
-        <Route path='/account/import' component={Import} />
-        <Route exact path='/' component={() => {
-          return requests.length
-            ? <Signing accounts={accounts} onAction={_onAction} requests={requests} />
-            : <Accounts accounts={accounts} />;
-        }} />
+        <Route path='/account/create' component={() =>
+          <Create onAction={onAction} />
+        } />
+        <Route path='/account/import' component={() =>
+          <Import onAction={onAction} />
+        } />
+        <Route
+          exact path='/' component={() =>
+          requests.length
+            ? <Signing accounts={accounts} onAction={onAction} requests={requests} />
+            : <Accounts accounts={accounts} onAction={onAction} />
+        } />
       </Switch>
     )}</Loading>
   );

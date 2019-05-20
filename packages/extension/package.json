@@ -1,0 +1,19 @@
+{
+  "name": "@polkadot/extension",
+  "description": "A sample signer extension for the @polkadot/api",
+  "version": "0.1.0",
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "license": "Apache-2",
+  "dependencies": {
+    "@polkadot/api": "^0.79.0-beta.31",
+    "@polkadot/extension-inject": "^0.1.0",
+    "@polkadot/extension-ui": "^0.1.0",
+    "@polkadot/ui-keyring": "^0.39.0-beta.5"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.85",
+    "extract-loader": "^3.1.0",
+    "file-loader": "^3.0.1",
+    "html-loader": "^0.5.5"
+  }
+}

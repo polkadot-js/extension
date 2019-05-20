@@ -22,51 +22,52 @@ export default function Create (props: Props) {
       .catch(console.error);
   }, []);
 
-  // FIXME Duplicated between here and Import.tsx
-  const onCreate = (onAction: (to: string) => void) =>
-    (): void => {
-      // this should always be the case
-      if (name && password && account) {
-        createAccount(name, password, account.seed)
-          .then(() => onAction('/'))
-          .catch(console.error);
-      }
-    };
-
   return (
     <ActionContext.Consumer>
-      {(onAction) => (
-        <div>
-          <Header label='create account' />
-          <Back />
-          <Loading>{account && (
-            <>
-              <TextArea
-                isReadOnly
-                label={`generated 12-word mnemonic seed`}
-                value={account.seed}
-              />
-              <Name
-                isFocussed
-                onChange={setName}
-              />
-              {name && <Password onChange={setPassword} />}
-              {name && password && (
-                <>
-                  <Address
-                    address={account.address}
-                    name={name}
-                  />
-                  <Button
-                    label='Add the account with the generated seed'
-                    onClick={onCreate(onAction)}
-                  />
-                </>
-              )}
-            </>
-          )}</Loading>
-        </div>
-      )}
+      {(onAction) => {
+        // FIXME Duplicated between here and Import.tsx
+        const onCreate = (): void => {
+          // this should always be the case
+          if (name && password && account) {
+            createAccount(name, password, account.seed)
+              .then(() => onAction('/'))
+              .catch(console.error);
+          }
+        };
+
+        return (
+          <div>
+            <Header label='create account' />
+            <Back />
+            <Loading>{account && (
+              <>
+                <TextArea
+                  isReadOnly
+                  label={`generated 12-word mnemonic seed`}
+                  value={account.seed}
+                />
+                <Name
+                  isFocussed
+                  onChange={setName}
+                />
+                {name && <Password onChange={setPassword} />}
+                {name && password && (
+                  <>
+                    <Address
+                      address={account.address}
+                      name={name}
+                    />
+                    <Button
+                      label='Add the account with the generated seed'
+                      onClick={onCreate}
+                    />
+                  </>
+                )}
+              </>
+            )}</Loading>
+          </div>
+        );
+      }}
     </ActionContext.Consumer>
   );
 }

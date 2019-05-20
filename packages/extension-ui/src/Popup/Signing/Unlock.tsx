@@ -27,33 +27,34 @@ export default function Unlock ({ isVisible, signId }: Props) {
     }
   }, [password]);
 
-  const onSign = (onAction: () => void) =>
-    (): void => {
-      approveRequest(signId, password)
-        .then(() => onAction())
-        .catch((error) => {
-          console.error(error);
-          setError(error.message);
-        });
-    };
-
   return (
     <ActionContext.Consumer>
-      {(onAction) => (
-        <>
-          <Input
-            isError={!password || !!error}
-            isFocussed
-            label='password for this account'
-            onChange={setPassword}
-            type='password'
-          />
-          <Button
-            label='Sign the extrinsic'
-            onClick={onSign(onAction)}
-          />
-        </>
-      )}
+      {(onAction) => {
+        const onSign = (): void => {
+          approveRequest(signId, password)
+            .then(() => onAction())
+            .catch((error) => {
+              console.error(error);
+              setError(error.message);
+            });
+        };
+
+        return (
+          <>
+            <Input
+              isError={!password || !!error}
+              isFocussed
+              label='password for this account'
+              onChange={setPassword}
+              type='password'
+            />
+            <Button
+              label='Sign the extrinsic'
+              onClick={onSign}
+            />
+          </>
+        );
+      }}
     </ActionContext.Consumer>
   );
 }

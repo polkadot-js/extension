@@ -21,31 +21,32 @@ type Props = {
 };
 
 export default function Request ({ isFirst, request: { address, method, nonce }, signId, url }: Props) {
-  const onCancel = (onAction: () => void) =>
-    (): void => {
-      cancelRequest(signId)
-        .then(() => onAction())
-        .catch(console.error);
-    };
-
   return (
     <ActionContext.Consumer>
-      {(onAction) => (
-        <Address address={address}>
-          <Details
-            method={method}
-            nonce={nonce}
-            url={url}
-          />
-          <ActionBar>
-            <a onClick={onCancel(onAction)}>Cancel</a>
-          </ActionBar>
-          <Unlock
-            isVisible={isFirst}
-            signId={signId}
-          />
-        </Address>
-      )}
+      {(onAction) => {
+        const onCancel = (): void => {
+          cancelRequest(signId)
+            .then(() => onAction())
+            .catch(console.error);
+        };
+
+        return (
+          <Address address={address}>
+            <Details
+              method={method}
+              nonce={nonce}
+              url={url}
+            />
+            <ActionBar>
+              <a onClick={onCancel}>Cancel</a>
+            </ActionBar>
+            <Unlock
+              isVisible={isFirst}
+              signId={signId}
+            />
+          </Address>
+        );
+      }}
     </ActionContext.Consumer>
   );
 }

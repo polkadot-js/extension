@@ -7,7 +7,7 @@ import { KeyringJson } from '@polkadot/ui-keyring/types';
 
 import React from 'react';
 
-const noop = () => {
+const noop = (to?: string) => {
   // do nothing
 };
 

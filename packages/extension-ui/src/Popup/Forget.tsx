@@ -15,27 +15,28 @@ type Props = RouteComponentProps<{ address: string }> & {};
 function Forget (props: Props) {
   const { match: { params: { address } } } = props;
 
-  const onClick = (onAction: (to: string) => void) =>
-    (): void => {
-      forgetAccount(address)
-        .then(() => onAction('/'))
-        .catch(console.error);
-    };
-
   return (
     <ActionContext.Consumer>
-      {(onAction) => (
-        <div>
-          <Header label='forget account' />
-          <Back />
-          <Tip header='danger' type='error'>You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.</Tip>
-          <Address address={address} />
-          <Button
-            label='I want to forget this account'
-            onClick={onClick(onAction)}
-          />
-        </div>
-      )}
+      {(onAction) => {
+        const onClick = (): void => {
+          forgetAccount(address)
+            .then(() => onAction('/'))
+            .catch(console.error);
+        };
+
+        return (
+          <div>
+            <Header label='forget account' />
+            <Back />
+            <Tip header='danger' type='error'>You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.</Tip>
+            <Address address={address} />
+            <Button
+              label='I want to forget this account'
+              onClick={onClick}
+            />
+          </div>
+        );
+      }}
     </ActionContext.Consumer>
   );
 }

@@ -26,46 +26,46 @@ export default function Import (props: Props) {
       });
   };
 
-  // FIXME Duplicated between here and Create.tsx
-  const onCreate = (onAction: (to: string) => void) =>
-    (): void => {
-      // this should always be the case
-      if (name && password && account) {
-        createAccount(name, password, account.seed)
-          .then(() => onAction('/'))
-          .catch(console.error);
-      }
-    };
-
   return (
     <ActionContext.Consumer>
-      {(onAction) => (
-        <div>
-          <Header label='import account' />
-          <Back />
-          <TextArea
-            isError={!account}
-            isFocussed
-            label={`existing 12 or 24-word mnemonic seed`}
-            onChange={onChangeSeed}
-          />
-          {account && <Name onChange={setName} />}
-          {account && name && <Password onChange={setPassword} />}
-          {account && name && password && (
-            <>
-              <Address
-                address={account.address}
-                name={name}
-              />
-              <Button
-                label='Add the account with the supplied seed'
-                onClick={onCreate(onAction)}
-              />
-            </>
-          )}
+      {(onAction) => {
+        // FIXME Duplicated between here and Create.tsx
+        const onCreate = (): void => {
+          // this should always be the case
+          if (name && password && account) {
+            createAccount(name, password, account.seed)
+              .then(() => onAction('/'))
+              .catch(console.error);
+          }
+        };
 
-        </div>
-      )}
+        return (
+          <div>
+            <Header label='import account' />
+            <Back />
+            <TextArea
+              isError={!account}
+              isFocussed
+              label={`existing 12 or 24-word mnemonic seed`}
+              onChange={onChangeSeed}
+            />
+            {account && <Name onChange={setName} />}
+            {account && name && <Password onChange={setPassword} />}
+            {account && name && password && (
+              <>
+                <Address
+                  address={account.address}
+                  name={name}
+                />
+                <Button
+                  label='Add the account with the supplied seed'
+                  onClick={onCreate}
+                />
+              </>
+            )}
+          </div>
+        );
+      }}
     </ActionContext.Consumer>
   );
 }

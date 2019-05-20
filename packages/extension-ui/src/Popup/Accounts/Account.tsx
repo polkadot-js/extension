@@ -22,43 +22,45 @@ export default function Account ({ address, className }: Props) {
   const toggleEdit = (): void => {
     setEditing(!isEditing);
   };
-  const saveChanges = (onAction: () => void) =>
-    (): void => {
-      if (editedname && editedname !== name) {
-        editAccount(address, editedname)
-          .then(() => onAction())
-          .catch(console.error);
-      }
-
-      toggleEdit();
-    };
 
   return (
     <ActionContext.Consumer>
-      {(onAction) => (
-        <Address
-          address={address}
-          className={className}
-          name={
-            isEditing
-              ? (
-                <Name
-                  address={address}
-                  isFocussed
-                  label={null}
-                  onBlur={saveChanges(onAction)}
-                  onChange={setName}
-                />
-              )
-              : undefined
+      {(onAction) => {
+        const saveChanges = (): void => {
+          if (editedname && editedname !== name) {
+            editAccount(address, editedname)
+              .then(() => onAction())
+              .catch(console.error);
           }
-        >
-          <ActionBar>
-            <a onClick={toggleEdit}>Edit</a>
-            <Link to={`/account/forget/${address}`}>Forget</Link>
-          </ActionBar>
-        </Address>
-      )}
+
+          toggleEdit();
+        };
+
+        return (
+          <Address
+            address={address}
+            className={className}
+            name={
+              isEditing
+                ? (
+                  <Name
+                    address={address}
+                    isFocussed
+                    label={null}
+                    onBlur={saveChanges}
+                    onChange={setName}
+                  />
+                )
+                : undefined
+            }
+          >
+            <ActionBar>
+              <a onClick={toggleEdit}>Edit</a>
+              <Link to={`/account/forget/${address}`}>Forget</Link>
+            </ActionBar>
+          </Address>
+        );
+      }}
     </ActionContext.Consumer>
   );
 }

@@ -11,4 +11,4 @@ cache:
 install:
   - yarn
 script:
-  - yarn polkadot-dev-build-travis
+  - yarn polkadot-dev-travis-build

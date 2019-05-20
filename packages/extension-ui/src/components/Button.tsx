@@ -11,7 +11,7 @@ type Props = {
   className?: string;
   children?: React.ReactNode,
   isDisabled?: boolean,
-  isFull?: boolean,
+  isSmall?: boolean,
   label?: string,
   onClick?: () => void,
   to?: string
@@ -43,17 +43,17 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
 
 export default styled(Button)`
   box-sizing: border-box;
-  display: ${({ isFull }) =>
-    isFull
-      ? 'block'
-      : 'inline-block'
+  display: ${({ isSmall }) =>
+    isSmall
+      ? 'inline-block'
+      : 'block'
   };
   margin: ${defaults.boxMargin};
   padding: ${defaults.boxPadding};
-  width: ${({ isFull }) =>
-    isFull
-      ? '100%'
-      : 'auto'
+  width: ${({ isSmall }) =>
+    isSmall
+      ? 'auto'
+      : '100%'
   };
 
   button {

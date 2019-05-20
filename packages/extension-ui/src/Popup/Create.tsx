@@ -5,14 +5,13 @@
 import React, { useState, useEffect } from 'react';
 
 import { Address, Button, Header, Loading, TextArea } from '../components';
+import { ActionContext } from '../components/contexts';
 import { createAccount, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-type Props = {
-  onAction: () => void
-};
+type Props = {};
 
-export default function Create ({ onAction }: Props) {
+export default function Create (props: Props) {
   const [account, setAccount] = useState(null as null | { address: string, seed: string });
   const [name, setName] = useState(null as string | null);
   const [password, setPassword] = useState(null as string | null);
@@ -23,50 +22,52 @@ export default function Create ({ onAction }: Props) {
       .catch(console.error);
   }, []);
 
-  // FIXME Duplicated between here and Import.tsx
-  const _onCreate = (): void => {
-    // this should always be the case
-    if (name && password && account) {
-      createAccount(name, password, account.seed)
-        .then(() => {
-          onAction();
-          window.location.hash = '/';
-        })
-        .catch(console.error);
-    }
-  };
-
   return (
-    <div>
-      <Header label='create account' />
-      <Back />
-      <Loading>{account && (
-        <>
-          <TextArea
-            isReadOnly
-            label={`generated 12-word mnemonic seed`}
-            value={account.seed}
-          />
-          <Name
-            isFocussed
-            onChange={setName}
-          />
-          {name && <Password onChange={setPassword} />}
-          {name && password && (
-            <>
-              <Address
-                address={account.address}
-                name={name}
-              />
-              <Button
-                isFull
-                label='Add the account with the generated seed'
-                onClick={_onCreate}
-              />
-            </>
-          )}
-        </>
-      )}</Loading>
-    </div>
+    <ActionContext.Consumer>
+      {(onAction) => {
+        // FIXME Duplicated between here and Import.tsx
+        const onCreate = (): void => {
+          // this should always be the case
+          if (name && password && account) {
+            createAccount(name, password, account.seed)
+              .then(() => onAction('/'))
+              .catch(console.error);
+          }
+        };
+
+        return (
+          <div>
+            <Header label='create account' />
+            <Back />
+            <Loading>{account && (
+              <>
+                <TextArea
+                  isReadOnly
+                  label={`generated 12-word mnemonic seed`}
+                  value={account.seed}
+                />
+                <Name
+                  isFocussed
+                  onChange={setName}
+                />
+                {name && <Password onChange={setPassword} />}
+                {name && password && (
+                  <>
+                    <Address
+                      address={account.address}
+                      name={name}
+                    />
+                    <Button
+                      label='Add the account with the generated seed'
+                      onClick={onCreate}
+                    />
+                  </>
+                )}
+              </>
+            )}</Loading>
+          </div>
+        );
+      }}
+    </ActionContext.Consumer>
   );
 }

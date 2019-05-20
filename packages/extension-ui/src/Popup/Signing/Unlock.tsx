@@ -5,15 +5,15 @@
 import React, { useState, useEffect } from 'react';
 
 import { Button, Input } from '../../components';
+import { ActionContext } from '../../components/contexts';
 import { approveRequest } from '../../messaging';
 
 type Props = {
   signId: number,
-  isVisible: boolean,
-  onAction: () => void
+  isVisible: boolean
 };
 
-export default function Unlock ({ isVisible, onAction, signId }: Props) {
+export default function Unlock ({ isVisible, signId }: Props) {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
@@ -27,29 +27,34 @@ export default function Unlock ({ isVisible, onAction, signId }: Props) {
     }
   }, [password]);
 
-  const _onSign = (): void => {
-    approveRequest(signId, password)
-      .then(onAction)
-      .catch((error) => {
-        console.error(error);
-        setError(error.message);
-      });
-  };
-
   return (
-    <>
-      <Input
-        isError={!password || !!error}
-        isFocussed
-        label='password for this account'
-        onChange={setPassword}
-        type='password'
-      />
-      <Button
-        isFull
-        label='Sign the extrinsic'
-        onClick={_onSign}
-      />
-    </>
+    <ActionContext.Consumer>
+      {(onAction) => {
+        const onSign = (): void => {
+          approveRequest(signId, password)
+            .then(() => onAction())
+            .catch((error) => {
+              console.error(error);
+              setError(error.message);
+            });
+        };
+
+        return (
+          <>
+            <Input
+              isError={!password || !!error}
+              isFocussed
+              label='password for this account'
+              onChange={setPassword}
+              type='password'
+            />
+            <Button
+              label='Sign the extrinsic'
+              onClick={onSign}
+            />
+          </>
+        );
+      }}
+    </ActionContext.Consumer>
   );
 }

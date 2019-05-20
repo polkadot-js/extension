@@ -1,5 +1,4 @@
 {
-  "name": "@polkadot/extension",
   "version": "0.1.0",
   "description": "A sample signer extension for the @polkadot/api",
   "repository": "https://github.com/polkadot-js/extension",
@@ -23,7 +22,7 @@
     "lint": "tslint --project . && tsc --noEmit --pretty",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
-    "test": "jest --coverage",
+    "test": "echo \"no tests... yet\"",
     "watch": "cd packages/extension && webpack --config webpack.config.js --watch"
   },
   "devDependencies": {

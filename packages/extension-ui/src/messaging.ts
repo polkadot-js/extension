@@ -22,6 +22,10 @@ function sendMessage (message: MessageTypes, request: any = {}): Promise<any> {
   });
 }
 
+export async function forgetAccount (address: string): Promise<boolean> {
+  return sendMessage('accounts.forget', { address });
+}
+
 export async function getAccounts (): Promise<Array<KeyringJson>> {
   return sendMessage('accounts.list');
 }

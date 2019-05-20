@@ -6,13 +6,15 @@ import { KeyringJson } from '@polkadot/ui-keyring/types';
 
 import React from 'react';
 
-import { Address, Button, Header, Tip } from '../components';
+import { Button, Header, Tip } from '../../components';
+import Account from './Account';
 
 type Props = {
-  accounts: Array<KeyringJson>
+  accounts: Array<KeyringJson>,
+  onAction: () => void
 };
 
-export default function Accounts ({ accounts }: Props) {
+export default function Accounts ({ accounts, onAction }: Props) {
   return (
     <div>
       <Header label='accounts' />
@@ -20,10 +22,11 @@ export default function Accounts ({ accounts }: Props) {
         (accounts.length === 0)
           ? <Tip header='add accounts' type='warn'>You currently don't have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
           : accounts.map(({ address, meta: { name } }) => (
-            <Address
+            <Account
               address={address}
               key={address}
               name={name}
+              onAction={onAction}
             />
           ))
       }

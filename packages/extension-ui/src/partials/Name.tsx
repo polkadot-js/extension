@@ -5,20 +5,21 @@
 import React, { useEffect, useState } from 'react';
 
 import { Input } from '../components';
+import { AccountContext } from '../components/contexts';
 
 type Props = {
+  address?: string,
   defaultValue?: string | null,
   isFocussed?: boolean,
   label?: string | null,
   onBlur?: () => void,
-  onChange: (name: string | null) => void,
-  value?: string
+  onChange: (name: string | null) => void
 };
 
 const MIN_LENGTH = 3;
 
-export default function Name ({ defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange, value }: Props) {
-  const [name, setName] = useState(defaultValue || '');
+export default function Name ({ address, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props) {
+  const [name, setName] = useState('');
 
   useEffect(() => {
     onChange(
@@ -29,15 +30,26 @@ export default function Name ({ defaultValue, isFocussed, label = 'a descriptive
   }, [name]);
 
   return (
-    <Input
-      defaultValue={defaultValue}
-      isError={name.length < MIN_LENGTH}
-      isFocussed={isFocussed}
-      label={label}
-      onBlur={onBlur}
-      onChange={setName}
-      type='text'
-      value={value}
-    />
+    <AccountContext.Consumer>
+      {(accounts) => {
+        const account = accounts.find((account) => account.address === address);
+        const startValue = (account && account.meta.name) || defaultValue;
+        const isError = !name && startValue
+          ? false
+          : (name.length < MIN_LENGTH);
+
+        return (
+          <Input
+            defaultValue={startValue}
+            isError={isError}
+            isFocussed={isFocussed}
+            label={label}
+            onBlur={onBlur}
+            onChange={setName}
+            type='text'
+          />
+        );
+      }}
+    </AccountContext.Consumer>
   );
 }

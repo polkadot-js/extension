@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { Loading } from '../components';
+import { AccountContext, ActionContext, SigningContext } from '../components/contexts';
 import { getAccounts, getRequests } from '../messaging';
 import Accounts from './Accounts';
 import Create from './Create';
@@ -22,7 +23,7 @@ export default function Popup (props: Props) {
   const [accounts, setAccounts] = useState(null as null | Array<KeyringJson>);
   const [requests, setRequests] = useState(null as null | Array<[number, MessageExtrinsicSign, string]>);
 
-  const onAction = (): void => {
+  const onAction = (to?: string): void => {
     // loads all accounts & requests (this is passed through to children to trigger changes)
     Promise
       .all([getAccounts(), getRequests()])
@@ -31,6 +32,10 @@ export default function Popup (props: Props) {
         setRequests(requests);
       })
       .catch(console.error);
+
+    if (to) {
+      window.location.hash = to;
+    }
   };
 
   useEffect((): void => {
@@ -40,23 +45,18 @@ export default function Popup (props: Props) {
 
   return (
     <Loading>{accounts && requests && (
-      <Switch>
-        <Route path='/account/create' component={() =>
-          <Create onAction={onAction} />
-        } />
-        <Route path='/account/forget/:address' component={() =>
-          <Forget accounts={accounts} onAction={onAction} />
-        } />
-        <Route path='/account/import' component={() =>
-          <Import onAction={onAction} />
-        } />
-        <Route
-          exact path='/' component={() =>
-          requests.length
-            ? <Signing accounts={accounts} onAction={onAction} requests={requests} />
-            : <Accounts accounts={accounts} onAction={onAction} />
-        } />
-      </Switch>
+      <ActionContext.Provider value={onAction}>
+        <AccountContext.Provider value={accounts}>
+          <SigningContext.Provider value={requests}>
+            <Switch>
+              <Route path='/account/create' component={Create} />
+              <Route path='/account/forget/:address' component={Forget} />
+              <Route path='/account/import' component={Import} />
+              <Route exact path='/' component={requests.length ? Signing : Accounts} />
+            </Switch>
+          </SigningContext.Provider>
+        </AccountContext.Provider>
+      </ActionContext.Provider>
     )}</Loading>
   );
 }

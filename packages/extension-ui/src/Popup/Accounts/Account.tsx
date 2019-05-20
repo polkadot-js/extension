@@ -6,55 +6,59 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { ActionBar, Address } from '../../components';
+import { ActionContext } from '../../components/contexts';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
 type Props = {
   className?: string,
-  address: string,
-  name?: string | null,
-  onAction: () => void
+  address: string
 };
 
-export default function Account ({ address, className, name, onAction }: Props) {
+export default function Account ({ address, className }: Props) {
   const [isEditing, setEditing] = useState(false);
-  const [editedname, setName] = useState(name);
+  const [editedname, setName] = useState(null as string | null);
 
-  const _toggleEdit = (): void => {
+  const toggleEdit = (): void => {
     setEditing(!isEditing);
   };
-  const _saveChanges = (): void => {
-    if (editedname && editedname !== name) {
-      editAccount(address, editedname)
-        .then(onAction)
-        .catch(console.error);
-    }
+  const saveChanges = (onAction: () => void) =>
+    (): void => {
+      if (editedname && editedname !== name) {
+        editAccount(address, editedname)
+          .then(() => onAction())
+          .catch(console.error);
+      }
 
-    _toggleEdit();
-  };
+      toggleEdit();
+    };
 
   return (
-    <Address
-      address={address}
-      className={className}
-      name={
-        isEditing
-          ? (
-            <Name
-              defaultValue={name}
-              isFocussed
-              label={null}
-              onBlur={_saveChanges}
-              onChange={setName}
-            />
-          )
-          : name
-      }
-    >
-      <ActionBar>
-        <a onClick={_toggleEdit}>Edit</a>
-        <Link to={`/account/forget/${address}`}>Forget</Link>
-      </ActionBar>
-    </Address>
+    <ActionContext.Consumer>
+      {(onAction) => (
+        <Address
+          address={address}
+          className={className}
+          name={
+            isEditing
+              ? (
+                <Name
+                  address={address}
+                  isFocussed
+                  label={null}
+                  onBlur={saveChanges(onAction)}
+                  onChange={setName}
+                />
+              )
+              : undefined
+          }
+        >
+          <ActionBar>
+            <a onClick={toggleEdit}>Edit</a>
+            <Link to={`/account/forget/${address}`}>Forget</Link>
+          </ActionBar>
+        </Address>
+      )}
+    </ActionContext.Consumer>
   );
 }

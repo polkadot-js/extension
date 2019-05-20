@@ -22,6 +22,10 @@ function sendMessage (message: MessageTypes, request: any = {}): Promise<any> {
   });
 }
 
+export async function editAccount (address: string, name: string): Promise<boolean> {
+  return sendMessage('accounts.edit', { address, name });
+}
+
 export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('accounts.forget', { address });
 }

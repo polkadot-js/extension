@@ -14,7 +14,7 @@ type Props = {
   children?: React.ReactNode;
   className?: string,
   isHidden?: boolean,
-  name?: string | null,
+  name?: React.ReactNode | null,
   theme?: 'polkadot' | 'substrate'
 };
 

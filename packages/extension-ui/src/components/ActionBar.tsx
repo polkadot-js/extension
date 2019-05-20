@@ -5,8 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 type Props = {
   children: React.ReactNode;
   className?: string;
@@ -21,7 +19,7 @@ function ActionBar ({ children, className }: Props) {
 }
 
 export default styled(ActionBar)`
-  padding: ${defaults.boxPadding};
+  padding: 0.25rem;
   text-align: right;
 
   a {

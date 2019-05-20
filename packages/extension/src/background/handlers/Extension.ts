@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { MessageTypes, MessageAccountCreate, MessageExtrinsicSign, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget } from '../types';
+import { MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageExtrinsicSign, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -25,6 +25,16 @@ export default class Extension {
 
   private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
     keyring.addUri(suri, password, { name }, type);
+
+    return true;
+  }
+
+  private accountsEdit ({ address, name }: MessageAccountEdit): boolean {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    keyring.saveAccountMeta(pair, { ...pair.getMeta(), name });
 
     return true;
   }
@@ -112,6 +122,9 @@ export default class Extension {
 
       case 'accounts.forget':
         return this.accountsForget(request);
+
+      case 'accounts.edit':
+        return this.accountsEdit(request);
 
       case 'accounts.list':
         return this.accountsList();

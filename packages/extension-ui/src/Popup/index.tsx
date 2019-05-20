@@ -12,6 +12,7 @@ import { Loading } from '../components';
 import { getAccounts, getRequests } from '../messaging';
 import Accounts from './Accounts';
 import Create from './Create';
+import Forget from './Forget';
 import Import from './Import';
 import Signing from './Signing';
 
@@ -42,6 +43,9 @@ export default function Popup (props: Props) {
       <Switch>
         <Route path='/account/create' component={() =>
           <Create onAction={onAction} />
+        } />
+        <Route path='/account/forget/:address' component={() =>
+          <Forget accounts={accounts} onAction={onAction} />
         } />
         <Route path='/account/import' component={() =>
           <Import onAction={onAction} />

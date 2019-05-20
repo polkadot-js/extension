@@ -16,7 +16,7 @@ type Props = {
 function Back ({ className, to = '/' }: Props) {
   return (
     <div className={className}>
-      <Link to='/'>{unicode.BACK} Back</Link>
+      <Link to={to}>{unicode.BACK} Back</Link>
     </div>
   );
 }

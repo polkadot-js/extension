@@ -34,7 +34,7 @@ export default function Request ({ accounts, isFirst, onAction, request: { addre
   return (
     <Address
       address={address}
-      name={account ? account.meta.name : '<invalid account>'}
+      name={account && account.meta.name}
     >
       <Details
         method={method}

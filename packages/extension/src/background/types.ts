@@ -4,7 +4,7 @@
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export type MessageTypes = 'accounts.create' | 'accounts.forget' | 'accounts.list' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests';
+export type MessageTypes = 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests';
 
 export type MessageRequest = {
   id: number,
@@ -23,6 +23,11 @@ export type MessageAccountCreate = {
   password: string,
   suri: string,
   type?: KeypairType
+};
+
+export type MessageAccountEdit= {
+  address: string,
+  name: string
 };
 
 export type MessageAccountForget = {

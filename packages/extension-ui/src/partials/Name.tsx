@@ -7,14 +7,18 @@ import React, { useEffect, useState } from 'react';
 import { Input } from '../components';
 
 type Props = {
+  defaultValue?: string | null,
   isFocussed?: boolean,
-  onChange: (name: string | null) => void
+  label?: string | null,
+  onBlur?: () => void,
+  onChange: (name: string | null) => void,
+  value?: string
 };
 
 const MIN_LENGTH = 3;
 
-export default function Name ({ isFocussed, onChange }: Props) {
-  const [name, setName] = useState('');
+export default function Name ({ defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange, value }: Props) {
+  const [name, setName] = useState(defaultValue || '');
 
   useEffect(() => {
     onChange(
@@ -25,14 +29,15 @@ export default function Name ({ isFocussed, onChange }: Props) {
   }, [name]);
 
   return (
-    <>
-      <Input
-        isError={name.length < MIN_LENGTH}
-        isFocussed={isFocussed}
-        label='a descriptive name for this account'
-        onChange={setName}
-        type='text'
-      />
-    </>
+    <Input
+      defaultValue={defaultValue}
+      isError={name.length < MIN_LENGTH}
+      isFocussed={isFocussed}
+      label={label}
+      onBlur={onBlur}
+      onChange={setName}
+      type='text'
+      value={value}
+    />
   );
 }

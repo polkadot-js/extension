@@ -10,32 +10,44 @@ import defaults from './defaults';
 
 type Props = {
   className?: string,
+  defaultValue?: string | null,
   isError?: boolean,
   isFocussed?: boolean,
   isReadOnly?: boolean,
-  label: string,
+  label?: string | null,
+  onBlur?: () => void,
   onChange?: (value: string) => void,
   type?: 'text' | 'password',
   value?: string
 };
 
-function Input ({ className, label, isFocussed, isReadOnly, onChange, type = 'text', value }: Props) {
+function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur, onChange, type = 'text', value }: Props) {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
     onChange && onChange(value.trim());
   };
+
+  const element = (
+    <input
+      autoFocus={isFocussed}
+      defaultValue={defaultValue || undefined}
+      readOnly={isReadOnly}
+      onBlur={onBlur}
+      onChange={_onChange}
+      type={type}
+      value={value}
+    />
+  );
+
+  if (!label) {
+    return <div className={className}>{element}</div>;
+  }
 
   return (
     <Label
       className={className}
       label={label}
     >
-      <input
-        autoFocus={isFocussed}
-        readOnly={isReadOnly}
-        onChange={_onChange}
-        type={type}
-        value={value}
-      />
+      {element}
     </Label>
   );
 }

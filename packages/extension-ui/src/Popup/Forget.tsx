@@ -22,7 +22,10 @@ function Forget (props: Props) {
 
   const _onClick = (): void => {
     forgetAccount(address)
-      .then(onAction)
+      .then(() => {
+        onAction();
+        window.location.hash = '/';
+      })
       .catch(console.error);
   };
 

@@ -3,50 +3,45 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
+import { OnActionFromCtx } from '../../components/types';
 
 import React from 'react';
 
-import { ActionBar, Address } from '../../components';
-import { ActionContext } from '../../components/contexts';
-import { cancelRequest } from '../../messaging';
+import { ActionBar, Address, withAction } from '../../components';
+import { approveRequest, cancelRequest } from '../../messaging';
 import Details from './Details';
 import Unlock from './Unlock';
 
 type Props = {
-  className?: string,
   isFirst: boolean,
+  onAction: OnActionFromCtx,
   request: MessageExtrinsicSign,
   signId: number,
   url: string
 };
 
-export default function Request ({ isFirst, request: { address, method, nonce }, signId, url }: Props) {
-  return (
-    <ActionContext.Consumer>
-      {(onAction) => {
-        const onCancel = (): void => {
-          cancelRequest(signId)
-            .then(() => onAction())
-            .catch(console.error);
-        };
+function Request ({ isFirst, onAction, request: { address, method, nonce }, signId, url }: Props) {
+  const onCancel = (): void => {
+    cancelRequest(signId)
+      .then(() => onAction())
+      .catch(console.error);
+  };
+  const onSign = (password: string): Promise<void> =>
+    approveRequest(signId, password).then(() => onAction());
 
-        return (
-          <Address address={address}>
-            <Details
-              method={method}
-              nonce={nonce}
-              url={url}
-            />
-            <ActionBar>
-              <a href='#' onClick={onCancel}>Cancel</a>
-            </ActionBar>
-            <Unlock
-              isVisible={isFirst}
-              signId={signId}
-            />
-          </Address>
-        );
-      }}
-    </ActionContext.Consumer>
+  return (
+    <Address address={address}>
+      <Details
+        method={method}
+        nonce={nonce}
+        url={url}
+      />
+      <ActionBar>
+        <a href='#' onClick={onCancel}>Cancel</a>
+      </ActionBar>
+      {isFirst && <Unlock onSign={onSign} />}
+    </Address>
   );
 }
+
+export default withAction(Request);

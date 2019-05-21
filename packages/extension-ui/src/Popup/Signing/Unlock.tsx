@@ -3,23 +3,25 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 import { Button, Input } from '../../components';
-import { ActionContext } from '../../components/contexts';
-import { approveRequest } from '../../messaging';
 
 type Props = {
-  signId: number,
-  isVisible: boolean
+  className?: string,
+  onSign: (password: string) => Promise<void>
 };
 
-export default function Unlock ({ isVisible, signId }: Props) {
+function Unlock ({ className, onSign }: Props) {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
-  if (!isVisible) {
-    return null;
-  }
+  const onClick = (): void => {
+    onSign(password).catch((error) => {
+      console.error(error);
+      setError(error.message);
+    });
+  };
 
   useEffect(() => {
     if (error) {
@@ -28,33 +30,22 @@ export default function Unlock ({ isVisible, signId }: Props) {
   }, [password]);
 
   return (
-    <ActionContext.Consumer>
-      {(onAction) => {
-        const onSign = (): void => {
-          approveRequest(signId, password)
-            .then(() => onAction())
-            .catch((error) => {
-              console.error(error);
-              setError(error.message);
-            });
-        };
-
-        return (
-          <>
-            <Input
-              isError={!password || !!error}
-              isFocussed
-              label='password for this account'
-              onChange={setPassword}
-              type='password'
-            />
-            <Button
-              label='Sign the extrinsic'
-              onClick={onSign}
-            />
-          </>
-        );
-      }}
-    </ActionContext.Consumer>
+    <div className={className}>
+      <Input
+        isError={!password || !!error}
+        isFocussed
+        label='password for this account'
+        onChange={setPassword}
+        type='password'
+      />
+      <Button
+        label='Sign the extrinsic'
+        onClick={onClick}
+      />
+    </div>
   );
 }
+
+export default styled(Unlock)`
+  margin-bottom: -0.75rem;
+`;

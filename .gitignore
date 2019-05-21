@@ -9,6 +9,7 @@ tmp/
 .env.production.local
 .npmrc
 lerna-debug.log*
+master-build.zip
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

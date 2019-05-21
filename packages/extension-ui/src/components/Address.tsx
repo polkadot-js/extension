@@ -58,22 +58,27 @@ export default styled(Address)`
     padding: ${defaults.boxPadding};
     position: relative;
 
-    .address,
-    .name {
-      padding-left: 4.75rem;
-    }
-
     .address {
       opacity: 0.5;
       overflow: hidden;
+      padding-left: 4.75rem;
       text-overflow: ellipsis;
     }
 
     .icon {
       left: 0;
       position: absolute;
-      top: -0.75rem;
+      top: 0;
       z-index: 1;
+    }
+
+    .name {
+      padding: 0.5rem 0 0.5rem 4.75rem;
+      margin-top: -0.75rem;
+
+      input {
+        margin: -0.5rem 0;
+      }
     }
   }
 `;

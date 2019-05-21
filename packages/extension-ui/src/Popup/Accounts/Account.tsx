@@ -11,8 +11,8 @@ import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
 type Props = {
-  className?: string,
-  address: string
+  address: string,
+  className?: string
 };
 
 export default function Account ({ address, className }: Props) {

@@ -38,7 +38,7 @@ export default function Request ({ isFirst, request: { address, method, nonce },
               url={url}
             />
             <ActionBar>
-              <a onClick={onCancel}>Cancel</a>
+              <a href='#' onClick={onCancel}>Cancel</a>
             </ActionBar>
             <Unlock
               isVisible={isFirst}

@@ -55,7 +55,7 @@ export default function Account ({ address, className }: Props) {
             }
           >
             <ActionBar>
-              <a onClick={toggleEdit}>Edit</a>
+              <a href='#' onClick={toggleEdit}>Edit</a>
               <Link to={`/account/forget/${address}`}>Forget</Link>
             </ActionBar>
           </Address>

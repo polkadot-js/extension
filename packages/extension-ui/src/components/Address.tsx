@@ -30,19 +30,19 @@ function Address ({ address, children, className, isHidden, name, theme = 'polka
         const account = accounts.find((account) => account.address === address);
 
         return (
-          <Box className={className}>
-            <div>
+          <div className={className}>
+            <Box className='details'>
               <div className='name'>{name || (account && account.meta.name) || '<unknown>'}</div>
               <div className='address'>{address || '<unknown>'}</div>
               <div className='children'>{children}</div>
-              <Identicon
-                className='icon'
-                size={64}
-                theme={theme}
-                value={address}
-              />
-            </div>
-          </Box>
+            </Box>
+            <Identicon
+              className='icon'
+              size={64}
+              theme={theme}
+              value={address}
+            />
+          </div>
         );
       }}
     </AccountContext.Consumer>
@@ -50,35 +50,36 @@ function Address ({ address, children, className, isHidden, name, theme = 'polka
 }
 
 export default styled(Address)`
-  background: transparent;
-  padding: 1rem;
+  position: relative;
+  box-sizing: border-box;
+  margin: ${defaults.boxMargin};
+  padding: ${defaults.boxPadding};
+  padding-left: 1.5rem;
+  padding-top: 0.75rem;
 
-  > div {
-    box-sizing: border-box;
-    padding: ${defaults.boxPadding};
-    position: relative;
+  .details {
+    margin: 0;
+    padding-left: 4rem;
 
     .address {
       opacity: 0.5;
       overflow: hidden;
-      padding-left: 4.75rem;
       text-overflow: ellipsis;
     }
 
-    .icon {
-      left: 0;
-      position: absolute;
-      top: 0;
-      z-index: 1;
-    }
-
     .name {
-      padding: 0.5rem 0 0.5rem 4.75rem;
-      margin-top: -0.75rem;
+      padding: 0 0 0.5rem 0;
 
       input {
         margin: -0.5rem 0;
       }
     }
+  }
+
+  .icon {
+    left: 0.25rem;
+    position: absolute;
+    top: 0;
+    z-index: 1;
   }
 `;

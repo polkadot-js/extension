@@ -11,14 +11,16 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 Currently is not packaged since it is under heavy development. To use -
 
 1. Build via `yarn build` or `yarn watch`
-2. Add the extension under `chrome://extensions/` (ensure you have the Development flag set) and "Load unpacked"
-3. When visiting `http://localhost:3000` or `https://polkadot.js.org/apps/` it will inject (the menifest currently only lists these 2 endpoints)
+2. Add the extension under `chrome://extensions/`
+  - ensure you have the Development flag set
+  - "Load unpacked" and point to `packages/extension/build`
+3. When visiting `http://localhost:3000` or `https://polkadot.js.org/apps/` it will inject the extension (the manifest currently only lists these 2 endpoints)
 
-Once added, you can create an account (via a generated seed) or import via an existing seed.
+Once added, you can create an account (via a generated seed) or import via an existing seed. The UI, when loaded, will show these accounts as `<account name> (extension)`
 
-## Overview
+## Technical
 
-It injects `injectedWeb3` into the global `window` object, exposing the following:
+The extension injects `injectedWeb3` into the global `window` object, exposing the following:
 
 ```js
 // a version that identifies the actual injection version (future-use)
@@ -32,7 +34,7 @@ interface Account {
 
 // exposes accounts
 interface Accounts {
-  readonly all: Array<Account>;
+  get: () => Promise<Array<Account>>;
 }
 
 // a signer that communicates with the extension via sendMessage

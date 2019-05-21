@@ -37,7 +37,7 @@ export default styled(Details)`
   border: 0;
   display: block;
   font-size: 0.75rem;
-  margin-left: 4.75rem;
+  margin-top: 0.75rem;
 
   td.data {
     max-width: 0;

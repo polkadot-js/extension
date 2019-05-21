@@ -14,7 +14,7 @@ type Props = {
   isDisabled?: boolean,
   isSmall?: boolean,
   label?: string,
-  onClick?: () => void,
+  onClick?: () => any,
   to?: string
 };
 

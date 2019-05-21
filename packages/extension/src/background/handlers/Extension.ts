@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageExtrinsicSign, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget } from '../types';
+import { MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget, SigningRequest } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -111,7 +111,7 @@ export default class Extension {
     return true;
   }
 
-  private signingRequests (): Array<[number, MessageExtrinsicSign, string]> {
+  private signingRequests (): Array<SigningRequest> {
     return this.signing.requests;
   }
 

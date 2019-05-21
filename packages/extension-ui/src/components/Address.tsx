@@ -54,8 +54,8 @@ export default styled(Address)`
   box-sizing: border-box;
   margin: ${defaults.boxMargin};
   padding: ${defaults.boxPadding};
-  padding-left: 1.5rem;
-  padding-top: 0.75rem;
+  padding-left: 1.25rem;
+  padding-top: 0.5rem;
 
   .details {
     margin: 0;

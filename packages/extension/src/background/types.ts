@@ -6,6 +6,8 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 export type MessageTypes = 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests';
 
+export type SigningRequest = [number, MessageExtrinsicSign, string];
+
 export type MessageRequest = {
   id: number,
   message: MessageTypes,

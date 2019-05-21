@@ -10,6 +10,7 @@ import defaults from './defaults';
 type Props = {
   className?: string;
   children?: React.ReactNode,
+  isDanger?: boolean,
   isDisabled?: boolean,
   isSmall?: boolean,
   label?: string,
@@ -58,9 +59,17 @@ export default styled(Button)`
 
   button {
     background: ${defaults.btnBg};
-    border: ${defaults.btnBorder};
+    border: ${defaults.btnBorder}${({ isDanger }) =>
+      isDanger
+        ? defaults.btnColorDanger
+        : defaults.btnColor
+    };
     border-radius: ${defaults.borderRadius};
-    color: ${defaults.btnColor};
+    color: ${({ isDanger }) =>
+      isDanger
+        ? defaults.btnColorDanger
+        : defaults.btnColor
+    };
     cursor: pointer;
     display: block;
     font-size: ${defaults.fontSize};

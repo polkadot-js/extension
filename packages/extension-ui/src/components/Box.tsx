@@ -21,7 +21,8 @@ function Box ({ children, className }: Props) {
 }
 
 export default styled(Box)`
-  background: ${defaults.box.info.background};
+  background: transparent;
+  border-top: ${defaults.hdrBorder};
   border-radius: ${defaults.borderRadius};
   color: ${defaults.color};
   font-family: ${defaults.fontFamily};

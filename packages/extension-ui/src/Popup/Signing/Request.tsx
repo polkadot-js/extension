@@ -20,7 +20,7 @@ type Props = {
   url: string
 };
 
-function Request ({ isFirst, onAction, request: { address, method, nonce }, signId, url }: Props) {
+function Request ({ isFirst, onAction, request: { address, genesisHash, method, nonce }, signId, url }: Props) {
   const onCancel = (): void => {
     cancelRequest(signId)
       .then(() => onAction())
@@ -32,6 +32,7 @@ function Request ({ isFirst, onAction, request: { address, method, nonce }, sign
   return (
     <Address address={address}>
       <Details
+        genesisHash={genesisHash}
         method={method}
         nonce={nonce}
         url={url}

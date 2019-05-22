@@ -23,6 +23,7 @@ function Header ({ children, className, label }: Props) {
 
 export default styled(Header)`
   background: ${defaults.hdrBg};
+  border-top: ${defaults.hdrBorder};
   box-sizing: border-box;
   color: ${defaults.hdrColor};
   font-family: ${defaults.fontFamily};

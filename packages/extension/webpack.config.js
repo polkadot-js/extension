@@ -2,18 +2,15 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { WebpackPluginServe } = require('webpack-plugin-serve');
 
 const packages = [
+  'extension',
   'extension-ui'
 ];
-
-const DEFAULT_THEME = 'polkadot';
 
 function createWebpack ({ alias = {}, context }) {
   const pkgJson = require(path.join(context, 'package.json'));
@@ -22,7 +19,7 @@ function createWebpack ({ alias = {}, context }) {
 
   return {
     context,
-    devtool: 'source-map',
+    devtool: false,
     entry: {
       background: './src/background/index.ts',
       inject: './src/inject/index.ts',
@@ -78,20 +75,11 @@ function createWebpack ({ alias = {}, context }) {
       hints: false
     },
     plugins: [
-      isProd
-        ? null
-        : new WebpackPluginServe({
-          port: 3001,
-          static: path.join(process.cwd(), '/build')
-        }),
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       new webpack.DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify(ENV),
-          VERSION: JSON.stringify(pkgJson.version),
-          UI_MODE: JSON.stringify(process.env.UI_MODE || 'full'),
-          UI_THEME: JSON.stringify(process.env.UI_THEME || DEFAULT_THEME),
-          WS_URL: JSON.stringify(process.env.WS_URL)
+          VERSION: JSON.stringify(pkgJson.version)
         }
       }),
       new CopyWebpackPlugin([{ from: 'public' }])

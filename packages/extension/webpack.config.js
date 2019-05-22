@@ -19,7 +19,7 @@ function createWebpack ({ alias = {}, context }) {
 
   return {
     context,
-    devtool: 'source-map',
+    devtool: false,
     entry: {
       background: './src/background/index.ts',
       inject: './src/inject/index.ts',

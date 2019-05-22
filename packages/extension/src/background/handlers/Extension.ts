@@ -11,16 +11,16 @@ import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { assert, u8aToHex } from '@polkadot/util';
 
 import RawPayload from '../RawPayload';
-import SigningRequests from './SigningRequests';
+import State from './State';
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
 export default class Extension {
-  private signing: SigningRequests;
+  private _state: State;
 
-  constructor (signing: SigningRequests) {
-    this.signing = signing;
+  constructor (state: State) {
+    this._state = state;
   }
 
   private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
@@ -71,7 +71,7 @@ export default class Extension {
   }
 
   private signingApprove ({ id, password }: MessageExtrinsicSignApprove): boolean {
-    const queued = this.signing.get(id);
+    const queued = this._state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -100,7 +100,7 @@ export default class Extension {
   }
 
   private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
-    const queued = this.signing.get(id);
+    const queued = this._state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -112,7 +112,7 @@ export default class Extension {
   }
 
   private signingRequests (): Array<SigningRequest> {
-    return this.signing.requests;
+    return this._state.allSignRequests;
   }
 
   async handle (type: MessageTypes, request: any): Promise<any> {

@@ -16,7 +16,7 @@ type Props = {
 function Signing ({ requests }: Props) {
   return (
     <div>
-      <Header label='signing requests' />
+      <Header label='signing' />
       {requests.map(([id, request, url], index) => (
         <Request
           isFirst={index === 0}

@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { Loading } from '../components';
-import { AccountContext, ActionContext, SigningContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeContext, SigningContext } from '../components/contexts';
 import { getAccounts, getAuthRequests, getSignRequests } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
@@ -53,17 +53,19 @@ export default function Popup (props: Props) {
       : Accounts;
 
   return (
-    <Loading>{accounts && signRequests && (
+    <Loading>{accounts && authRequests && signRequests && (
       <ActionContext.Provider value={onAction}>
         <AccountContext.Provider value={accounts}>
-          <SigningContext.Provider value={signRequests}>
-            <Switch>
-              <Route path='/account/create' component={Create} />
-              <Route path='/account/forget/:address' component={Forget} />
-              <Route path='/account/import' component={Import} />
-              <Route exact path='/' component={Root} />
-            </Switch>
-          </SigningContext.Provider>
+          <AuthorizeContext.Provider value={authRequests}>
+            <SigningContext.Provider value={signRequests}>
+              <Switch>
+                <Route path='/account/create' component={Create} />
+                <Route path='/account/forget/:address' component={Forget} />
+                <Route path='/account/import' component={Import} />
+                <Route exact path='/' component={Root} />
+              </Switch>
+            </SigningContext.Provider>
+          </AuthorizeContext.Provider>
         </AccountContext.Provider>
       </ActionContext.Provider>
     )}</Loading>

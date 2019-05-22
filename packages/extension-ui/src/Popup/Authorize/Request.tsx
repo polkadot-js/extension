@@ -30,7 +30,7 @@ function Request ({ authId, onAction, request: { origin }, url }: Props) {
 
   return (
     <Box>
-      The application, identified as {origin} is requesting access from {url} to the accounts and signing capabilities of this extension. Only approve the request if you trust the applucation.
+      The application, identified as {origin} is requesting access from {url} to the accounts and signing capabilities of this extension. Only approve the request if you trust the application.
       <Button
         label='Yes, allow this application access'
         onClick={onApprove}

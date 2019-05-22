@@ -8,6 +8,7 @@ import { assert } from '@polkadot/util';
 
 type AuthRequest = {
   id: number,
+  idStr: string,
   request: MessageAuthorize,
   resolve: (result: boolean) => void,
   reject: (error: Error) => void,
@@ -70,6 +71,17 @@ export default class State {
 
   private authComplete = (id: number, fn: Function) => {
     return (result: boolean | Error): void => {
+      const isAllowed = result === true;
+      const { idStr, request: { origin }, url } = this._authRequests[id];
+
+      this._authUrls[this.stripUrl(url)] = {
+        count: 0,
+        id: idStr,
+        isAllowed,
+        origin,
+        url
+      };
+
       delete this._authRequests[id];
       this.updateIcon();
 
@@ -99,18 +111,18 @@ export default class State {
     const signCount = this.numSignRequests;
     const text = (
       authCount
-        ? `! ${authCount}`
-        : (signCount ? `+ ${signCount}` : '')
+        ? 'Auth'
+        : (signCount ? `${signCount}` : '')
     );
 
     chrome.browserAction.setBadgeText({ text });
   }
 
-  async autorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
-    const id = this.stripUrl(url);
+  async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
+    const idStr = this.stripUrl(url);
 
-    if (this._authUrls[id]) {
-      assert(this._authUrls[id].isAllowed, `The source ${url} is not allowed to interact with this extension`);
+    if (this._authUrls[idStr]) {
+      assert(this._authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return true;
     }
@@ -120,6 +132,7 @@ export default class State {
 
       this._authRequests[id] = {
         id,
+        idStr,
         request,
         resolve: this.authComplete(id, resolve),
         reject: this.authComplete(id, reject),

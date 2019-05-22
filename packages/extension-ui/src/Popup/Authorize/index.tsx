@@ -16,7 +16,7 @@ type Props = {
 function Authorize ({ requests }: Props) {
   return (
     <div>
-      <Header label='signing requests' />
+      <Header label='authorize' />
       {requests.map(([id, request, url]) => (
         <Request
           authId={id}

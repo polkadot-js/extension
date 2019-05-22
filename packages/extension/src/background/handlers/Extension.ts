@@ -70,7 +70,7 @@ export default class Extension {
 
     const { reject } = queued;
 
-    reject(new Error('Cancelled'));
+    reject(new Error('Rejected'));
 
     return true;
   }

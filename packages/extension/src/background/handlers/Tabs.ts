@@ -18,7 +18,7 @@ export default class Tabs {
   }
 
   private authorize (url: string, request: MessageAuthorize) {
-    return this._state.autorizeUrl(url, request);
+    return this._state.authorizeUrl(url, request);
   }
 
   private accountsList (url: string): Array<{ address: string, name?: string }> {

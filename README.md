@@ -47,7 +47,8 @@ When there is more than one extension, each will populate an entry above, so fro
 interface Injected {
   readonly accounts: Accounts;
   readonly signer: Signer;
-  readonly version: string;
+  // not injected as of yet, subscriptable provider for polkadot-js injection
+  // readonly provider: Provider
 }
 
 // exposes accounts

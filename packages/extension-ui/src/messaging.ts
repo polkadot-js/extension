@@ -43,7 +43,7 @@ export async function rejectAuthRequest (id: number): Promise<boolean> {
 }
 
 export async function approveAuthRequest (id: number): Promise<boolean> {
-  return sendMessage('authorize.approve', { id, });
+  return sendMessage('authorize.approve', { id });
 }
 
 export async function getSignRequests (): Promise<Array<SigningRequest>> {

@@ -58,7 +58,7 @@ document.addEventListener(events.response, (event) => {
   }
 });
 
-// don't clobber the xisting object, we will add it it (or create as needed)
+// don't clobber the existing object, we will add it it (or create as needed)
 (window as WindowInjected).injectedWeb3 = (window as WindowInjected).injectedWeb3 || {};
 
 // add our enable function
@@ -66,5 +66,5 @@ document.addEventListener(events.response, (event) => {
   name: 'polkadot-js', // process.env.PKG_NAME as string,
   version: process.env.PKG_VERSION as string,
   enable: (origin: string): Promise<Injected> =>
-    sendMessage('authorize', { origin }).then(() => new Injected(sendMessage))
+    sendMessage('authorize.tab', { origin }).then(() => new Injected(sendMessage))
 };

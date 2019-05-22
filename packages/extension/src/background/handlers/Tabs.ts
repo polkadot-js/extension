@@ -40,7 +40,7 @@ export default class Tabs {
 
   async handle (type: MessageTypes, request: any, url: string = 'unknown'): Promise<any> {
     switch (type) {
-      case 'authorize':
+      case 'authorize.tab':
         return this.authorize(url, request);
 
       case 'accounts.list':

@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget, SigningRequest } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -49,6 +49,34 @@ export default class Extension {
     return Object
       .values(accountsObservable.subject.getValue())
       .map(({ json }) => json);
+  }
+
+  private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
+    const queued = this._state.getAuthRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { resolve } = queued;
+
+    resolve(true);
+
+    return true;
+  }
+
+  private authorizeReject ({ id }: MessageAuthorizeReject): boolean {
+    const queued = this._state.getAuthRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { reject } = queued;
+
+    reject(new Error('Cancelled'));
+
+    return true;
+  }
+
+  private authorizeRequests (): Array<AuthorizeRequest> {
+    return this._state.allAuthRequests;
   }
 
   private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreate$Response {
@@ -117,6 +145,15 @@ export default class Extension {
 
   async handle (type: MessageTypes, request: any): Promise<any> {
     switch (type) {
+      case 'authorize.approve':
+        return this.authorizeApprove(request);
+
+      case 'authorize.reject':
+        return this.authorizeReject(request);
+
+      case 'authorize.requests':
+        return this.authorizeRequests();
+
       case 'accounts.create':
         return this.accountsCreate(request);
 

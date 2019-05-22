@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response } from '../types';
+import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response, SigningRequest } from '../types';
 
 import { assert } from '@polkadot/util';
 
@@ -56,13 +56,13 @@ export default class State {
     return Object.keys(this._signRequests).length;
   }
 
-  get allAuthRequests (): Array<[number, MessageAuthorize, string]> {
+  get allAuthRequests (): Array<AuthorizeRequest> {
     return Object
       .values(this._authRequests)
       .map(({ id, request, url }) => [id, request, url]);
   }
 
-  get allSignRequests (): Array<[number, MessageExtrinsicSign, string]> {
+  get allSignRequests (): Array<SigningRequest> {
     return Object
       .values(this._signRequests)
       .map(({ id, request, url }) => [id, request, url]);

@@ -7,7 +7,7 @@ import { OnActionFromCtx } from '../../components/types';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ActionBar, Address, withAction } from '../../components';
+import { ActionBar, Address, withOnAction } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
@@ -60,4 +60,4 @@ function Account ({ address, className, onAction }: Props) {
   );
 }
 
-export default withAction(Account);
+export default withOnAction(Account);

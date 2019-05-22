@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 
 import React, { useEffect, useState } from 'react';
@@ -10,8 +10,9 @@ import { Route, Switch } from 'react-router';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, SigningContext } from '../components/contexts';
-import { getAccounts, getRequests } from '../messaging';
+import { getAccounts, getAuthRequests, getSignRequests } from '../messaging';
 import Accounts from './Accounts';
+import Authorize from './Authorize';
 import Create from './Create';
 import Forget from './Forget';
 import Import from './Import';
@@ -21,15 +22,17 @@ type Props = {};
 
 export default function Popup (props: Props) {
   const [accounts, setAccounts] = useState(null as null | Array<KeyringJson>);
-  const [requests, setRequests] = useState(null as null | Array<[number, MessageExtrinsicSign, string]>);
+  const [authRequests, setAuthRequests] = useState(null as null | Array<AuthorizeRequest>);
+  const [signRequests, setSignRequests] = useState(null as null | Array<SigningRequest>);
 
   const onAction = (to?: string): void => {
     // loads all accounts & requests (this is passed through to children to trigger changes)
     Promise
-      .all([getAccounts(), getRequests()])
-      .then(([accounts, requests]) => {
+      .all([getAccounts(), getAuthRequests(), getSignRequests()])
+      .then(([accounts, authRequests, signRequests]) => {
         setAccounts(accounts);
-        setRequests(requests);
+        setAuthRequests(authRequests);
+        setSignRequests(signRequests);
       })
       .catch(console.error);
 
@@ -43,16 +46,22 @@ export default function Popup (props: Props) {
     onAction();
   }, []);
 
+  const Root = authRequests && authRequests.length
+    ? Authorize
+    : signRequests && signRequests.length
+      ? Signing
+      : Accounts;
+
   return (
-    <Loading>{accounts && requests && (
+    <Loading>{accounts && signRequests && (
       <ActionContext.Provider value={onAction}>
         <AccountContext.Provider value={accounts}>
-          <SigningContext.Provider value={requests}>
+          <SigningContext.Provider value={signRequests}>
             <Switch>
               <Route path='/account/create' component={Create} />
               <Route path='/account/forget/:address' component={Forget} />
               <Route path='/account/import' component={Import} />
-              <Route exact path='/' component={requests.length ? Signing : Accounts} />
+              <Route exact path='/' component={Root} />
             </Switch>
           </SigningContext.Provider>
         </AccountContext.Provider>

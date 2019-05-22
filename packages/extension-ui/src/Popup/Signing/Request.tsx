@@ -7,8 +7,8 @@ import { OnActionFromCtx } from '../../components/types';
 
 import React from 'react';
 
-import { ActionBar, Address, withAction } from '../../components';
-import { approveRequest, cancelRequest } from '../../messaging';
+import { ActionBar, Address, withOnAction } from '../../components';
+import { approveSignRequest, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Unlock from './Unlock';
 
@@ -22,12 +22,12 @@ type Props = {
 
 function Request ({ isFirst, onAction, request: { address, genesisHash, method, nonce }, signId, url }: Props) {
   const onCancel = (): void => {
-    cancelRequest(signId)
+    cancelSignRequest(signId)
       .then(() => onAction())
       .catch(console.error);
   };
   const onSign = (password: string): Promise<void> =>
-    approveRequest(signId, password).then(() => onAction());
+    approveSignRequest(signId, password).then(() => onAction());
 
   return (
     <Address address={address}>
@@ -45,4 +45,4 @@ function Request ({ isFirst, onAction, request: { address, genesisHash, method, 
   );
 }
 
-export default withAction(Request);
+export default withOnAction(Request);

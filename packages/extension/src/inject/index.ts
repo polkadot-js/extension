@@ -8,6 +8,13 @@ import { WindowInjected } from './types';
 import events from '../events';
 import Injected from './Injected';
 
+// when sending a message from the injector to the expension, we
+//  - create an event - this we send to the loader
+//  - the loader takes this evend and uses sendMessage to the extension background
+//  - on respoinse, the loader creates a reponse event
+//  - this injector, reads listends on the events, maps it to the original
+//  - resolves/rejects the promise with the result
+
 type Callbacks = {
   [index: number]: {
     resolve: (data: any) => void,
@@ -51,9 +58,12 @@ document.addEventListener(events.response, (event) => {
   }
 });
 
+// don't clobber the xisting object, we will add it it (or create as needed)
 (window as WindowInjected).injectedWeb3 = (window as WindowInjected).injectedWeb3 || {};
-(window as WindowInjected).injectedWeb3[process.env.PKG_NAME as string] = {
-  name: process.env.PKG_NAME as string,
+
+// add our enable function
+(window as WindowInjected).injectedWeb3['polkadot-js'] = {
+  name: 'polkadot-js', // process.env.PKG_NAME as string,
   version: process.env.PKG_VERSION as string,
   enable: (origin: string): Promise<Injected> =>
     sendMessage('authorize', { origin }).then(() => new Injected(sendMessage))

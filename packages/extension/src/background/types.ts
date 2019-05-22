@@ -48,6 +48,7 @@ export type MessageExtrinsicSignCancel = {
 export type MessageExtrinsicSign = {
   address: string,
   blockHash: string,
+  genesisHash: string,
   method: string,
   nonce: string
 };

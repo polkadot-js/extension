@@ -4,21 +4,29 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import findChain from '@polkadot/extension/chains';
 
 type Props = {
   className?: string,
+  genesisHash: string,
   method: string,
   nonce: string,
   url: string
 };
 
-function Details ({ className, method, nonce, url }: Props) {
+function Details ({ className, genesisHash, method, nonce, url }: Props) {
+  const chain = findChain(genesisHash);
+
   return (
     <table className={className}>
       <tbody>
         <tr>
           <td className='label'>from</td>
           <td className='data'>{url}</td>
+        </tr>
+        <tr>
+          <td className='label'>{chain ? 'chain' : 'genesis'}</td>
+          <td className='data'>{chain || genesisHash}</td>
         </tr>
         <tr>
           <td className='label'>nonce</td>

@@ -21,6 +21,7 @@ const defaults: { [index: string]: any } = {
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
   fontSize: '1rem',
   hdrBg: 'transparent',
+  hdrBorder: '0.25rem solid #eee',
   hdrColor: '#ccc',
   inputBorder: '#ccc',
   inputPadding: '0.5rem 0.75rem',

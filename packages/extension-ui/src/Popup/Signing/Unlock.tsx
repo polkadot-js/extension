@@ -39,7 +39,7 @@ function Unlock ({ className, onSign }: Props) {
         type='password'
       />
       <Button
-        label='Sign the extrinsic'
+        label='Sign the transaction'
         onClick={onClick}
       />
     </div>

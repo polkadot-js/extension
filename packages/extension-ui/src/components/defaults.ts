@@ -46,7 +46,7 @@ const defaults: { [index: string]: any } = {
       color: 'inherit'
     },
     warn: {
-      background: 'rgba(255, 229, 100, .3)',
+      background: '#fff6cb',
       border: '#e7c000',
       color: '#6b5900'
     }

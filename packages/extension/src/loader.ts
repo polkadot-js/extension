@@ -4,14 +4,15 @@
 
 import extension from 'extensionizer';
 
-import events from './events';
+import events, { eventTarget } from './events';
 
 function sendResponse (detail: any): void {
-  document.dispatchEvent(new CustomEvent(events.response, { detail }));
+  // create the custom event, this will be handled on the injection script
+  eventTarget.dispatchEvent(new CustomEvent(events.response, { detail }));
 }
 
 // Handle all custom events, passing messages to the extension
-document.addEventListener(events.request, (event) => {
+eventTarget.addEventListener(events.request, (event) => {
   // get the request as part of the the event detailt
   const request = (event as CustomEvent).detail;
 

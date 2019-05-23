@@ -27,6 +27,7 @@ const defaults: { [index: string]: any } = {
   inputPadding: '0.5rem 0.75rem',
   lineHeight: '1.25',
   linkColor: LINK_COLOR,
+  linkColorDanger: DANGER_COLOR,
   box: {
     error: {
       background: '#ffe6e6',

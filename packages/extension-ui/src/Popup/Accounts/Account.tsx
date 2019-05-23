@@ -5,9 +5,8 @@
 import { OnActionFromCtx } from '../../components/types';
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
-import { ActionBar, Address, withOnAction } from '../../components';
+import { ActionBar, Address, Link, withOnAction } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
@@ -53,7 +52,7 @@ function Account ({ address, className, onAction }: Props) {
       }
     >
       <ActionBar>
-        <a href='#' onClick={toggleEdit}>Edit</a>
+        <Link onClick={toggleEdit}>Edit</Link>
         <Link to={`/account/forget/${address}`}>Forget</Link>
       </ActionBar>
     </Address>

@@ -7,7 +7,7 @@ import { OnActionFromCtx } from '../../components/types';
 
 import React from 'react';
 
-import { ActionBar, Address, withOnAction } from '../../components';
+import { ActionBar, Address, Link, withOnAction } from '../../components';
 import { approveSignRequest, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Unlock from './Unlock';
@@ -38,7 +38,7 @@ function Request ({ isFirst, onAction, request: { address, genesisHash, method, 
         url={url}
       />
       <ActionBar>
-        <a href='#' onClick={onCancel}>Cancel</a>
+        <Link isDanger onClick={onCancel}>Cancel</Link>
       </ActionBar>
       {isFirst && <Unlock onSign={onSign} />}
     </Address>

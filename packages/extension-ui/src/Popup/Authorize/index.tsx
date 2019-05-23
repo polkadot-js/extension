@@ -17,9 +17,10 @@ function Authorize ({ requests }: Props) {
   return (
     <div>
       <Header label='authorize' />
-      {requests.map(([id, request, url]) => (
+      {requests.map(([id, request, url], index) => (
         <Request
           authId={id}
+          isFirst={index === 0}
           key={id}
           request={request}
           url={url}

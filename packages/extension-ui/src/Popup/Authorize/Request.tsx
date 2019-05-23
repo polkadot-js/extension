@@ -8,18 +8,19 @@ import { OnActionFromCtx } from '../../components/types';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Box, Button, defaults, withOnAction } from '../../components';
+import { ActionBar, Box, Button, defaults, withOnAction } from '../../components';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 type Props = {
   authId: number,
   className?: string,
+  isFirst: boolean,
   onAction: OnActionFromCtx,
   request: MessageAuthorize,
   url: string
 };
 
-function Request ({ authId, className, onAction, request: { origin }, url }: Props) {
+function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props) {
   const onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
       .then(() => onAction())
@@ -33,15 +34,13 @@ function Request ({ authId, className, onAction, request: { origin }, url }: Pro
   return (
     <Box className={className}>
       <div>The application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div> to the accounts and signing capabilities of this extension. Only approve the request if you trust the application.</div>
-      <Button
+      <ActionBar>
+        <a href='#' onClick={onReject}>Reject</a>
+      </ActionBar>
+      {isFirst && (<Button
         label='Yes, allow this application access'
         onClick={onApprove}
-      />
-      <Button
-        isDanger
-        label='Reject access from this application'
-        onClick={onReject}
-      />
+      />)}
     </Box>
   );
 }

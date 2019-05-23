@@ -79,7 +79,8 @@ function createWebpack ({ alias = {}, context }) {
       new webpack.DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify(ENV),
-          VERSION: JSON.stringify(pkgJson.version)
+          PKG_NAME: JSON.stringify(pkgJson.name),
+          PKG_VERSION: JSON.stringify(pkgJson.version),
         }
       }),
       new CopyWebpackPlugin([{ from: 'public' }])

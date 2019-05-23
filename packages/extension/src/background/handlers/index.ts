@@ -5,12 +5,12 @@
 import { MessageRequest } from '../types';
 
 import Extension from './Extension';
-import SigningRequests from './SigningRequests';
+import State from './State';
 import Tabs from './Tabs';
 
-const signing = new SigningRequests();
-const extension = new Extension(signing);
-const tabs = new Tabs(signing);
+const state = new State();
+const extension = new Extension(state);
+const tabs = new Tabs(state);
 
 export default function handler ({ id, message, request }: MessageRequest, { tab }: chrome.runtime.MessageSender, sendResponse: (response?: any) => void): boolean {
   const source = `${tab ? tab.url : 'extension'}: ${id}: ${message}`;

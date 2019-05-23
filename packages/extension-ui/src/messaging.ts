@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageTypes, MessageExtrinsicSign } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, MessageTypes, SigningRequest } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -34,15 +34,27 @@ export async function getAccounts (): Promise<Array<KeyringJson>> {
   return sendMessage('accounts.list');
 }
 
-export async function getRequests (): Promise<Array<[number, MessageExtrinsicSign, string]>> {
+export async function getAuthRequests (): Promise<Array<AuthorizeRequest>> {
+  return sendMessage('authorize.requests');
+}
+
+export async function rejectAuthRequest (id: number): Promise<boolean> {
+  return sendMessage('authorize.reject', { id });
+}
+
+export async function approveAuthRequest (id: number): Promise<boolean> {
+  return sendMessage('authorize.approve', { id });
+}
+
+export async function getSignRequests (): Promise<Array<SigningRequest>> {
   return sendMessage('signing.requests');
 }
 
-export async function cancelRequest (id: number): Promise<boolean> {
+export async function cancelSignRequest (id: number): Promise<boolean> {
   return sendMessage('signing.cancel', { id });
 }
 
-export async function approveRequest (id: number, password: string): Promise<boolean> {
+export async function approveSignRequest (id: number, password: string): Promise<boolean> {
   return sendMessage('signing.approve', { id, password });
 }
 

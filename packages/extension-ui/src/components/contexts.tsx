@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountsFromCtx, OnActionFromCtx, RequestsFromCtx, SubtractProps } from './types';
+import { AccountsFromCtx, OnActionFromCtx, AuthRequestsFromCtx, SignRequestsFromCtx, SubtractProps } from './types';
 
 import React from 'react';
 
@@ -12,11 +12,13 @@ const noop = (to?: string) => {
 
 const AccountContext = React.createContext([] as AccountsFromCtx);
 const ActionContext = React.createContext(noop as OnActionFromCtx);
-const SigningContext = React.createContext([] as RequestsFromCtx);
+const AuthorizeContext = React.createContext([] as AuthRequestsFromCtx);
+const SigningContext = React.createContext([] as SignRequestsFromCtx);
 
 export {
   AccountContext,
   ActionContext,
+  AuthorizeContext,
   SigningContext
 };
 
@@ -36,7 +38,7 @@ export function withAccounts<P extends { accounts: AccountsFromCtx }> (Component
   };
 }
 
-export function withAction<P extends { onAction: OnActionFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { onAction: OnActionFromCtx }>> {
+export function withOnAction<P extends { onAction: OnActionFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { onAction: OnActionFromCtx }>> {
   return (props: SubtractProps<P, { onAction: OnActionFromCtx }>) => {
     return (
       <ActionContext.Consumer>
@@ -52,8 +54,24 @@ export function withAction<P extends { onAction: OnActionFromCtx }> (Component: 
   };
 }
 
-export function withRequests<P extends { requests: RequestsFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { requests: RequestsFromCtx }>> {
-  return (props: SubtractProps<P, { requests: RequestsFromCtx }>) => {
+export function withAuthRequests<P extends { requests: AuthRequestsFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { requests: AuthRequestsFromCtx }>> {
+  return (props: SubtractProps<P, { requests: AuthRequestsFromCtx }>) => {
+    return (
+      <AuthorizeContext.Consumer>
+        {(requests) => (
+          // @ts-ignore Something here with the props are going wonky
+          <Component
+            {...props}
+            requests={requests}
+          />
+        )}
+      </AuthorizeContext.Consumer>
+    );
+  };
+}
+
+export function withSignRequests<P extends { requests: SignRequestsFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { requests: SignRequestsFromCtx }>> {
+  return (props: SubtractProps<P, { requests: SignRequestsFromCtx }>) => {
     return (
       <SigningContext.Consumer>
         {(requests) => (

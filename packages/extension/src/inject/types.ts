@@ -3,8 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer as SignerInterface } from '@polkadot/api/types';
-
-export type Version = 0;
+import { MessageTypes } from '../background/types';
 
 export interface Account {
   readonly address: string; // ss-58 encoded address
@@ -22,15 +21,18 @@ export interface Signer extends SignerInterface {
 export interface Injected {
   readonly accounts: Accounts;
   readonly signer: Signer;
-  readonly version: Version;
 }
 
 export interface SendRequest {
-  (message: string, request?: any): Promise<any>;
+  (message: MessageTypes, request?: any): Promise<any>;
 }
 
 export type WindowInjected = Window & {
   injectedWeb3: {
-    [index: string]: Injected
+    [index: string]: {
+      name: string,
+      version: string,
+      enable (origin: string): Promise<Injected>
+    }
   }
 };

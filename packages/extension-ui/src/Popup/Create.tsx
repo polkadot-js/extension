@@ -6,7 +6,7 @@ import { OnActionFromCtx } from '../components/types';
 
 import React, { useState, useEffect } from 'react';
 
-import { Address, Button, Header, Loading, TextArea, withAction } from '../components';
+import { Address, Button, Header, Loading, TextArea, withOnAction } from '../components';
 import { createAccount, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
@@ -69,4 +69,4 @@ function Create ({ onAction }: Props) {
   );
 }
 
-export default withAction(Create);
+export default withOnAction(Create);

@@ -2,27 +2,27 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignRequestsFromCtx } from '../../components/types';
+import { AuthRequestsFromCtx } from '../../components/types';
 
 import React from 'react';
 
-import { Header, withSignRequests } from '../../components';
+import { Header, withAuthRequests } from '../../components';
 import Request from './Request';
 
 type Props = {
-  requests: SignRequestsFromCtx
+  requests: AuthRequestsFromCtx
 };
 
-function Signing ({ requests }: Props) {
+function Authorize ({ requests }: Props) {
   return (
     <div>
-      <Header label='transactions' />
+      <Header label='authorize' />
       {requests.map(([id, request, url], index) => (
         <Request
+          authId={id}
           isFirst={index === 0}
           key={id}
           request={request}
-          signId={id}
           url={url}
         />
       ))}
@@ -30,4 +30,4 @@ function Signing ({ requests }: Props) {
   );
 }
 
-export default withSignRequests(Signing);
+export default withAuthRequests(Authorize);

@@ -46,8 +46,8 @@ export default styled(Tip)`
   color: ${(props) =>
     getColor(props).color
   };
-  margin: ${defaults.boxMargin};
-  padding: 1rem 1.25rem;
+  margin: 0.75rem -1rem;
+  padding: 1rem 1.5rem;
 
   h3 {
     color: ${(props) =>

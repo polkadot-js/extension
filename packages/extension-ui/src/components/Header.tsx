@@ -27,7 +27,7 @@ export default styled(Header)`
   color: ${defaults.hdrColor};
   font-family: ${defaults.fontFamily};
   font-weight: normal;
-  margin: 0 -0.75rem;
-  padding: 0.5rem 1rem;
+  margin: 0 -1rem;
+  padding: 0.75rem 1rem;
   text-transform: uppercase;
 `;

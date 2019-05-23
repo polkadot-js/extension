@@ -53,8 +53,7 @@ export default withAccounts(styled(Address)`
   box-sizing: border-box;
   margin: ${defaults.boxMargin};
   padding: ${defaults.boxPadding};
-  padding-left: 1.25rem;
-  padding-top: 0.5rem;
+  padding-left: 1rem;
 
   .details {
     margin: 0;
@@ -84,7 +83,7 @@ export default withAccounts(styled(Address)`
   .icon {
     left: 0.25rem;
     position: absolute;
-    top: 0;
+    top: -0.5rem;
     z-index: 1;
   }
 `);

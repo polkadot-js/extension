@@ -100,7 +100,7 @@ export default class State {
   }
 
   private stripUrl (url: string): string {
-    assert(url && (url.indexOf('http:') === 0 || url.indexOf('http:') === 0), `Invalid url ${url}, expected to start with http: or https:`);
+    assert(url && (url.indexOf('http:') === 0 || url.indexOf('https:') === 0), `Invalid url ${url}, expected to start with http: or https:`);
 
     const parts = url.split('/');
 

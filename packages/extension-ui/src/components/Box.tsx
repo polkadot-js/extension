@@ -20,11 +20,10 @@ function Box ({ children, className }: Props) {
   );
 }
 
-// box-shadow: 0 4px 8px rgba(0, 0, 0, .1);
 export default styled(Box)`
   background: white;
-  border: ${defaults.hdrBorder};
   border-radius: ${defaults.borderRadius};
+  box-shadow: ${defaults.boxShadow};
   color: ${defaults.color};
   font-family: ${defaults.fontFamily};
   font-size: ${defaults.fontSize};

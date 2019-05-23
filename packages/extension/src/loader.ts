@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import extension from 'extensionizer';
+
 import events from './events';
 
 function sendResponse (detail: any): void {
@@ -14,7 +16,7 @@ document.addEventListener(events.request, (event) => {
   const request = (event as CustomEvent).detail;
 
   // pass the detail as-is as a message to the extension
-  chrome.runtime.sendMessage(request, (response) => {
+  extension.runtime.sendMessage(request, (response) => {
     if (!response) {
       // no data, send diconnected/unknown error
       sendResponse({ id: request.id, error: 'Unknown response' });
@@ -28,7 +30,7 @@ document.addEventListener(events.request, (event) => {
 // inject our data injector
 const script = document.createElement('script');
 
-script.src = chrome.extension.getURL('inject.js');
+script.src = extension.extension.getURL('inject.js');
 script.onload = (): void => {
   // remove the injecting tag when loaded
   if (script.parentNode) {

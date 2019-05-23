@@ -1,6 +1,8 @@
-// Copyright 2019 @polkadot/extension-bg authors & contributors
+// Copyright 2019 @polkadot/extension authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+
+import extension from 'extensionizer';
 
 // Runs in the extension background, handling all keyring access
 
@@ -10,8 +12,8 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 import ChromeStore from './ChromeStore';
 import handlers from './handlers';
 
-chrome.browserAction.setBadgeBackgroundColor({ color: '#ff0000' });
-chrome.runtime.onMessage.addListener(handlers);
+extension.browserAction.setBadgeBackgroundColor({ color: '#ff0000' });
+extension.runtime.onMessage.addListener(handlers);
 
 cryptoWaitReady()
   .then(() => {

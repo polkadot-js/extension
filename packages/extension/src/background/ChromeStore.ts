@@ -1,20 +1,22 @@
-// Copyright 2019 @polkadot/extension-bg authors & contributors
+// Copyright 2019 @polkadot/extension authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringStore } from '@polkadot/ui-keyring/types';
 
+import extension from 'extensionizer';
+
 const lastError = (type: string): void => {
-  const error = chrome.runtime.lastError;
+  const error = extension.runtime.lastError;
 
   if (error) {
-    console.error(`ChromeStore.${type}:: chrome.runtime.lastError:`, error);
+    console.error(`ChromeStore.${type}:: runtime.lastError:`, error);
   }
 };
 
 export default class ChromeStore implements KeyringStore {
   all (cb: (key: string, value: any) => void): void {
-    chrome.storage.local.get(null, (result: { [index: string]: any }) => {
+    extension.storage.local.get(null, (result: { [index: string]: any }) => {
       lastError('all');
 
       Object.entries(result).forEach(([key, value]) =>
@@ -24,7 +26,7 @@ export default class ChromeStore implements KeyringStore {
   }
 
   get (key: string, cb: (value: any) => void): void {
-    chrome.storage.local.get([key], (result: { [index: string]: any }) => {
+    extension.storage.local.get([key], (result: { [index: string]: any }) => {
       lastError('get');
 
       cb(result[key]);
@@ -32,7 +34,7 @@ export default class ChromeStore implements KeyringStore {
   }
 
   remove (key: string, cb?: () => void): void {
-    chrome.storage.local.remove(key, () => {
+    extension.storage.local.remove(key, () => {
       lastError('remove');
 
       cb && cb();
@@ -47,7 +49,7 @@ export default class ChromeStore implements KeyringStore {
       return;
     }
 
-    chrome.storage.local.set({ [key]: value }, () => {
+    extension.storage.local.set({ [key]: value }, () => {
       lastError('set');
 
       cb && cb();

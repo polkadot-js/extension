@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.86",
+    "extensionizer": "^1.0.1",
     "extract-loader": "^3.1.0",
     "file-loader": "^3.0.1",
     "html-loader": "^0.5.5"

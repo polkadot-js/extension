@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 
 import { Button, Input } from '../../components';
 
@@ -12,7 +11,7 @@ type Props = {
   onSign: (password: string) => Promise<void>
 };
 
-function Unlock ({ className, onSign }: Props) {
+export default function Unlock ({ className, onSign }: Props) {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
@@ -45,8 +44,3 @@ function Unlock ({ className, onSign }: Props) {
     </div>
   );
 }
-
-export default styled(Unlock)`
-  margin-bottom: -0.75rem;
-  margin-left: -3rem;
-`;

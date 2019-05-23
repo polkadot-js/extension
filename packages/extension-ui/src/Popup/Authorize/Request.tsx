@@ -8,7 +8,7 @@ import { OnActionFromCtx } from '../../components/types';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, Box, Button, Link, defaults, withOnAction } from '../../components';
+import { ActionBar, Box, Button, Link, Tip, defaults, withOnAction } from '../../components';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 type Props = {
@@ -33,10 +33,11 @@ function Request ({ authId, className, isFirst, onAction, request: { origin }, u
 
   return (
     <Box className={className}>
-      <div>The application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div> to the accounts and signing capabilities of this extension. Only approve the request if you trust the application.</div>
+      <div>An application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div>.</div>
       <ActionBar>
         <Link isDanger onClick={onReject}>Reject</Link>
       </ActionBar>
+      <Tip header='access' type='warn'>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</Tip>
       {isFirst && (
         <Button
           label='Yes, allow this application access'

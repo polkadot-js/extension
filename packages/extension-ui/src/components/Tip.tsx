@@ -35,6 +35,7 @@ function Tip ({ children, className, header }: Props) {
   );
 }
 
+// box-shadow: ${defaults.boxShadow};
 export default styled(Tip)`
   background: ${(props) =>
     getColor(props).background
@@ -42,7 +43,6 @@ export default styled(Tip)`
   border-left: 0.25rem solid ${(props) =>
     getColor(props).border
   };
-  box-shadow: ${defaults.boxShadow};
   color: ${(props) =>
     getColor(props).color
   };

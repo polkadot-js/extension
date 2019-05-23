@@ -52,16 +52,15 @@ function Create ({ onAction }: Props) {
           />
           {name && <Password onChange={setPassword} />}
           {name && password && (
-            <>
-              <Address
-                address={account.address}
-                name={name}
-              />
+            <Address
+              address={account.address}
+              name={name}
+            >
               <Button
                 label='Add the account with the generated seed'
                 onClick={onCreate}
               />
-            </>
+            </Address>
           )}
         </>
       )}</Loading>

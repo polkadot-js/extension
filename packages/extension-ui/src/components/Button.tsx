@@ -58,7 +58,11 @@ export default styled(Button)`
   };
 
   button {
-    background: ${defaults.btnBg};
+    background: ${({ isDanger }) =>
+      isDanger
+        ? defaults.btnBgDanger
+        : defaults.btnBg
+    };
     border: ${defaults.btnBorder}${({ isDanger }) =>
       isDanger
         ? defaults.btnColorDanger

@@ -52,16 +52,15 @@ function Import ({ onAction }: Props) {
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}
       {account && name && password && (
-        <>
-          <Address
-            address={account.address}
-            name={name}
-          />
+        <Address
+          address={account.address}
+          name={name}
+        >
           <Button
             label='Add the account with the supplied seed'
             onClick={onCreate}
           />
-        </>
+        </Address>
       )}
     </div>
   );

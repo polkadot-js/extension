@@ -4,6 +4,7 @@
 
 import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response, SigningRequest } from '../types';
 
+import extension from 'extensionizer';
 import { assert } from '@polkadot/util';
 
 type AuthRequest = {
@@ -115,7 +116,7 @@ export default class State {
         : (signCount ? `${signCount}` : '')
     );
 
-    chrome.browserAction.setBadgeText({ text });
+    extension.browserAction.setBadgeText({ text });
   }
 
   async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {

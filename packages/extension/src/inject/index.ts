@@ -5,7 +5,7 @@
 import { MessageTypes } from '../background/types';
 import { WindowInjected } from './types';
 
-import events from '../events';
+import events, { eventTarget } from '../events';
 import Injected from './Injected';
 
 // when sending a message from the injector to the expension, we
@@ -40,7 +40,7 @@ function sendMessage (message: MessageTypes, request: any = null): Promise<any> 
 }
 
 // setup a response listener (events created by the loader for extension responses)
-document.addEventListener(events.response, (event) => {
+eventTarget.addEventListener(events.response, (event) => {
   const response = (event as CustomEvent).detail;
   const promise = callbacks[response.id];
 
@@ -58,11 +58,14 @@ document.addEventListener(events.response, (event) => {
   }
 });
 
+// small helper with the typescript types, just cast window
+const windowInject = window as WindowInjected;
+
 // don't clobber the existing object, we will add it it (or create as needed)
-(window as WindowInjected).injectedWeb3 = (window as WindowInjected).injectedWeb3 || {};
+windowInject.injectedWeb3 = windowInject.injectedWeb3 || {};
 
 // add our enable function
-(window as WindowInjected).injectedWeb3['polkadot-js'] = {
+windowInject.injectedWeb3['polkadot-js'] = {
   name: 'polkadot-js', // process.env.PKG_NAME as string,
   version: process.env.PKG_VERSION as string,
   enable: (origin: string): Promise<Injected> =>

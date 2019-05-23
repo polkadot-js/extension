@@ -24,7 +24,7 @@ function Label ({ children, className, label }: Props) {
 
 export default styled(Label)`
   box-sizing: border-box;
-  color: ${defaults.colorLabel};
+  color: ${defaults.labelColor};
   display: block;
   font-family: ${defaults.fontFamily};
   font-size: ${defaults.fontSize};

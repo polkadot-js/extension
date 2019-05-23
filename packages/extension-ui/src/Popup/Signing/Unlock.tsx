@@ -48,4 +48,5 @@ function Unlock ({ className, onSign }: Props) {
 
 export default styled(Unlock)`
   margin-bottom: -0.75rem;
+  margin-left: -3rem;
 `;

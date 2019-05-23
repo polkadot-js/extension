@@ -26,21 +26,6 @@ export default styled(View)`
   font-size: ${defaults.fontSize};
   line-height: ${defaults.lineHeight};
 
-  a {
-    color: ${defaults.linkColor};
-    opacity: 0.9;
-    text-decoration: none;
-
-    &:hover {
-      color: ${defaults.linkColor};
-      opacity: 1.0;
-    }
-
-    &:visited {
-      color: ${defaults.linkColor};
-    }
-  }
-
   h3 {
     margin: 0 0 0.75rem;
     text-transform: uppercase;

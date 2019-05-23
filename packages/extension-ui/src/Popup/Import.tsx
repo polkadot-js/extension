@@ -6,7 +6,7 @@ import { OnActionFromCtx } from '../components/types';
 
 import React, { useState } from 'react';
 
-import { Address, Button, Header, TextArea, withAction } from '../components';
+import { Address, Button, Header, TextArea, withOnAction } from '../components';
 import { createAccount, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
@@ -67,4 +67,4 @@ function Import ({ onAction }: Props) {
   );
 }
 
-export default withAction(Import);
+export default withOnAction(Import);

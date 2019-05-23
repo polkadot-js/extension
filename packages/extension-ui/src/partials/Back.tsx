@@ -3,10 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { unicode } from '../components';
+import { Link, unicode } from '../components';
 
 type Props = {
   className?: string,

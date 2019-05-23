@@ -7,7 +7,7 @@ import { OnActionFromCtx } from '../components/types';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { Address, Button, Header, Tip, withAction } from '../components';
+import { Address, Button, Header, Tip, withOnAction } from '../components';
 import { forgetAccount } from '../messaging';
 import { Back } from '../partials';
 
@@ -37,4 +37,4 @@ function Forget ({ match: { params: { address } }, onAction }: Props) {
   );
 }
 
-export default withAction(withRouter(Forget));
+export default withOnAction(withRouter(Forget));

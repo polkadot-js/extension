@@ -42,6 +42,7 @@ export default styled(Tip)`
   border-left: 0.25rem solid ${(props) =>
     getColor(props).border
   };
+  box-shadow: ${defaults.boxShadow};
   color: ${(props) =>
     getColor(props).color
   };

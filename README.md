@@ -24,29 +24,45 @@ Once added, you can create an account (via a generated seed) or import via an ex
 The extension injects `injectedWeb3` into the global `window` object, exposing the following:
 
 ```js
-// a version that identifies the actual injection version (future-use)
-type Version = 0;
+window.injectedWeb3 = {
+  // this is the name for this extension, there could be multiples injected,
+  // each with their own keys
+  'polkadot-js': {
+    // same as above, just easier to manage having accessible here
+    name: 'polkadot-js',
+    // semver for the package
+    version: '0.1.0',
 
-// an interface describing an account
-interface Account {
-  readonly address: string; // ss-58 encoded address
-  readonly name?: string; // optional name for display
+    // this is called to enable the injection, and returns an injected
+    // object containing the accounts, signer and provider interfaces
+    // (or it will reject if not authorized)
+    enable (originName: string): Promise<Injected>
+  }
+}
+```
+
+When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The injected interface, when returned via `enable`, contains the following -
+
+```js
+interface Injected {
+  readonly accounts: Accounts;
+  readonly signer: Signer;
+  // not injected as of yet, subscriptable provider for polkadot-js injection
+  // readonly provider: Provider
 }
 
 // exposes accounts
 interface Accounts {
-  get: () => Promise<Array<Account>>;
+  get (): Promise<Array<{
+    readonly address: string; // ss-58 encoded address
+    readonly name?: string; // optional name for display
+  }>>;
 }
 
 // a signer that communicates with the extension via sendMessage
 interface Signer extends SignerInterface {
-  // no specific signer extensions
-}
-
-interface Injected {
-  readonly accounts: Accounts;
-  readonly signer: Signer;
-  readonly version: Version;
+  // no specific signer extensions, exposes the `sign` interface for use by
+  // the polkadot-js API
 }
 ```
 

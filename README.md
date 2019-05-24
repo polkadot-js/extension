@@ -19,6 +19,14 @@ Currently is not packaged since it is under heavy development. As such you need 
 
 Once added, you can create an account (via a generated seed) or import via an existing seed. The UI, when loaded, will show these accounts as `<account name> (extension)`
 
+# Development
+
+The repo is split into a number of packages -
+
+- [extension](packages/extension/) - All the injection and background processing logic (the main entry)
+- [extension-ui](packages/extension-ui/) - The UI components for the extension
+- [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
+
 ## Technical
 
 The extension injects `injectedWeb3` into the global `window` object, exposing the following:

@@ -64,7 +64,11 @@ export default styled(TextArea)`
     display: block;
     font-family: ${defaults.fontFamily};
     font-size: ${defaults.fontSize};
-    padding: ${defaults.inputPadding};
+    padding: ${({ label }) =>
+      label
+        ? defaults.inputPaddingLabel
+        : defaults.inputPadding
+    };
     resize: none;
     width: 100%;
 

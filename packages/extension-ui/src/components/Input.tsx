@@ -26,28 +26,20 @@ function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur
     onChange && onChange(value.trim());
   };
 
-  const element = (
-    <input
-      autoFocus={isFocussed}
-      defaultValue={defaultValue || undefined}
-      readOnly={isReadOnly}
-      onBlur={onBlur}
-      onChange={_onChange}
-      type={type}
-      value={value}
-    />
-  );
-
-  if (!label) {
-    return <div className={className}>{element}</div>;
-  }
-
   return (
     <Label
       className={className}
       label={label}
     >
-      {element}
+      <input
+        autoFocus={isFocussed}
+        defaultValue={defaultValue || undefined}
+        readOnly={isReadOnly}
+        onBlur={onBlur}
+        onChange={_onChange}
+        type={type}
+        value={value}
+      />
     </Label>
   );
 }
@@ -78,7 +70,11 @@ export default styled(Input)`
     display: block;
     font-family: ${defaults.fontFamily};
     font-size: ${defaults.fontSize};
-    padding: ${defaults.inputPadding};
+    padding: ${({ label }) =>
+      label
+        ? defaults.inputPaddingLabel
+        : defaults.inputPadding
+    };
     width: 100%;
 
     &:read-only {

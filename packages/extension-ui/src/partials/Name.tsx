@@ -2,13 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { AccountsFromCtx } from '../components/types';
+
 import React, { useEffect, useState } from 'react';
 
-import { Input } from '../components';
-import { AccountContext } from '../components/contexts';
+import { Input, withAccounts } from '../components';
 
 type Props = {
+  accounts: AccountsFromCtx,
   address?: string,
+  className?: string,
   defaultValue?: string | null,
   isFocussed?: boolean,
   label?: string | null,
@@ -18,38 +21,34 @@ type Props = {
 
 const MIN_LENGTH = 3;
 
-export default function Name ({ address, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props) {
+function Name ({ accounts, address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props) {
   const [name, setName] = useState('');
+  const account = accounts.find((account) => account.address === address);
+  const startValue = (account && account.meta.name) || defaultValue;
+  const isError = !name && startValue
+    ? false
+    : (name.length < MIN_LENGTH);
 
   useEffect(() => {
     onChange(
-      (name.length >= MIN_LENGTH)
+      name && (name.length >= MIN_LENGTH)
         ? name
         : null
     );
   }, [name]);
 
   return (
-    <AccountContext.Consumer>
-      {(accounts) => {
-        const account = accounts.find((account) => account.address === address);
-        const startValue = (account && account.meta.name) || defaultValue;
-        const isError = !name && startValue
-          ? false
-          : (name.length < MIN_LENGTH);
-
-        return (
-          <Input
-            defaultValue={startValue}
-            isError={isError}
-            isFocussed={isFocussed}
-            label={label}
-            onBlur={onBlur}
-            onChange={setName}
-            type='text'
-          />
-        );
-      }}
-    </AccountContext.Consumer>
+    <Input
+      className={className}
+      defaultValue={startValue}
+      isError={isError}
+      isFocussed={isFocussed}
+      label={label}
+      onBlur={onBlur}
+      onChange={setName}
+      type='text'
+    />
   );
 }
+
+export default withAccounts(Name);

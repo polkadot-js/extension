@@ -10,10 +10,10 @@ const noop = (to?: string) => {
   // do nothing
 };
 
-const AccountContext = React.createContext([] as AccountsFromCtx);
-const ActionContext = React.createContext(noop as OnActionFromCtx);
-const AuthorizeContext = React.createContext([] as AuthRequestsFromCtx);
-const SigningContext = React.createContext([] as SignRequestsFromCtx);
+const AccountContext = React.createContext<AccountsFromCtx>([]);
+const ActionContext = React.createContext<OnActionFromCtx>(noop);
+const AuthorizeContext = React.createContext<AuthRequestsFromCtx>([]);
+const SigningContext = React.createContext<SignRequestsFromCtx>([]);
 
 export {
   AccountContext,

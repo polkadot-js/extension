@@ -22,6 +22,8 @@ type Callbacks = {
   }
 };
 
+// small helper with the typescript types, just cast window
+const windowInject = window as InjectedWindow;
 const callbacks: Callbacks = {};
 let idCounter = 0;
 
@@ -33,10 +35,17 @@ function sendMessage (message: MessageTypes, request: any = null): Promise<any> 
 
     callbacks[id] = { resolve, reject };
 
-    document.dispatchEvent(
+    eventTarget.dispatchEvent(
       new CustomEvent(events.request, { detail: { id, message, request } })
     );
   });
+}
+
+// the enable function, called by the dapp to allow access
+async function enable (origin: string): Promise<Injected> {
+  await sendMessage('authorize.tab', { origin });
+
+  return new Injected(sendMessage);
 }
 
 // setup a response listener (events created by the loader for extension responses)
@@ -58,16 +67,11 @@ eventTarget.addEventListener(events.response, (event) => {
   }
 });
 
-// small helper with the typescript types, just cast window
-const windowInject = window as InjectedWindow;
-
 // don't clobber the existing object, we will add it it (or create as needed)
 windowInject.injectedWeb3 = windowInject.injectedWeb3 || {};
 
 // add our enable function
 windowInject.injectedWeb3['polkadot-js'] = {
-  enable: (origin: string): Promise<Injected> =>
-    sendMessage('authorize.tab', { origin }).then(() => new Injected(sendMessage)),
-  name: 'polkadot-js', // process.env.PKG_NAME as string,
+  enable,
   version: process.env.PKG_VERSION as string
-} as any; // FIXME For now, the name attribute is required by old
+};

@@ -7,8 +7,8 @@ import { InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, Inje
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const injectedWeb3 = (window as InjectedWindow).injectedWeb3 || {};
 
-// have we found the window.injectedWeb3
-const isWeb3Injected = !!injectedWeb3 && Object.keys(injectedWeb3).length !== 0;
+// have we found a properly constructed window.injectedWeb3
+const isWeb3Injected = Object.keys(injectedWeb3).length !== 0;
 
 // we keep the last promise created around (for queries)
 let web3EnablePromise: Promise<Array<InjectedExtension>> | null = null;

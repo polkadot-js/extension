@@ -24,12 +24,10 @@ export function web3Enable (originName: string): Promise<Array<InjectedExtension
         .catch(() => [{ name, version }, null] as [InjectedExtensionInfo, null])
     ))
     .then((values) =>
-      values.filter(([, result]) =>
-        result !== null
-      ) as Array<[InjectedExtensionInfo, Injected]>
+      values.filter(([, r]) => r !== null) as Array<[InjectedExtensionInfo, Injected]>
     )
     .then((values) =>
-      values.map(([info, result]) => ({ ...info, ...result } as InjectedExtension))
+      values.map(([info, ext]) => ({ ...info, ...ext } as InjectedExtension))
     )
     .catch(() => [] as Array<InjectedExtension>)
     .then((values) => {

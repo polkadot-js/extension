@@ -21,5 +21,5 @@ function Back ({ className, to = '/' }: Props) {
 }
 
 export default styled(Back)`
-  padding: 0.5rem;
+  padding: 0 0.5rem;
 `;

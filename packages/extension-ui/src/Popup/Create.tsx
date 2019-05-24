@@ -15,9 +15,9 @@ type Props = {
 };
 
 function Create ({ onAction }: Props) {
-  const [account, setAccount] = useState(null as null | { address: string, seed: string });
-  const [name, setName] = useState(null as string | null);
-  const [password, setPassword] = useState(null as string | null);
+  const [account, setAccount] = useState<null | { address: string, seed: string }>(null);
+  const [name, setName] = useState<string | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
 
   useEffect(() => {
     createSeed()

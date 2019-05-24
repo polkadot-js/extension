@@ -21,9 +21,9 @@ import Signing from './Signing';
 type Props = {};
 
 export default function Popup (props: Props) {
-  const [accounts, setAccounts] = useState(null as null | Array<KeyringJson>);
-  const [authRequests, setAuthRequests] = useState(null as null | Array<AuthorizeRequest>);
-  const [signRequests, setSignRequests] = useState(null as null | Array<SigningRequest>);
+  const [accounts, setAccounts] = useState<null | Array<KeyringJson>>(null);
+  const [authRequests, setAuthRequests] = useState<null | Array<AuthorizeRequest>>(null);
+  const [signRequests, setSignRequests] = useState<null | Array<SigningRequest>>(null);
 
   const onAction = (to?: string): void => {
     // loads all accounts & requests (this is passed through to children to trigger changes)

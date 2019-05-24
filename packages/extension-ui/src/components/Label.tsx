@@ -10,13 +10,13 @@ import defaults from './defaults';
 type Props = {
   children: React.ReactNode,
   className?: string,
-  label: string
+  label?: string | null
 };
 
 function Label ({ children, className, label }: Props) {
   return (
     <div className={className}>
-      <label>{label}</label>
+      {label && <label>{label}</label>}
       {children}
     </div>
   );
@@ -30,10 +30,13 @@ export default styled(Label)`
   font-size: ${defaults.fontSize};
   margin: ${defaults.boxMargin};
   padding: ${defaults.boxPadding};
+  position: relative;
 
   label {
     display: block;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    left: 1rem;
+    position: absolute;
+    top: 0.25rem;
   }
 `;

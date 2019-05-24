@@ -32,9 +32,7 @@ function Address ({ accounts, address, children, className, isHidden, name, them
   return (
     <div className={className}>
       <Box className='details'>
-        <div className='name'>
-          <div className='content'>{name || (account && account.meta.name) || '<unknown>'}</div>
-        </div>
+        <div className='name'>{name || (account && account.meta.name) || '<unknown>'}</div>
         <div className='address'>{address || '<unknown>'}</div>
         <div className='children'>{children}</div>
       </Box>
@@ -49,11 +47,11 @@ function Address ({ accounts, address, children, className, isHidden, name, them
 }
 
 export default withAccounts(styled(Address)`
-  position: relative;
   box-sizing: border-box;
   margin: ${defaults.boxMargin};
   padding: ${defaults.boxPadding};
   padding-left: 1rem;
+  position: relative;
 
   .details {
     margin: 0;
@@ -70,13 +68,7 @@ export default withAccounts(styled(Address)`
     }
 
     .name {
-      .content {
-        padding: 0 0 0.5rem 0;
-
-        input {
-          margin: -0.5rem 0;
-        }
-      }
+      padding-bottom: 0.5rem;
     }
   }
 

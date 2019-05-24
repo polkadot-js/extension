@@ -5,6 +5,7 @@
 import { OnActionFromCtx } from '../../components/types';
 
 import React, { useState } from 'react';
+import styled from 'styled-components';
 
 import { ActionBar, Address, Link, withOnAction } from '../../components';
 import { editAccount } from '../../messaging';
@@ -18,7 +19,7 @@ type Props = {
 
 function Account ({ address, className, onAction }: Props) {
   const [isEditing, setEditing] = useState(false);
-  const [editedname, setName] = useState(null as string | null);
+  const [editedname, setName] = useState<string | null>(null);
 
   const toggleEdit = (): void => {
     setEditing(!isEditing);
@@ -37,20 +38,17 @@ function Account ({ address, className, onAction }: Props) {
     <Address
       address={address}
       className={className}
-      name={
-        isEditing
-          ? (
-            <Name
-              address={address}
-              isFocussed
-              label={null}
-              onBlur={saveChanges}
-              onChange={setName}
-            />
-          )
-          : undefined
-      }
     >
+      {isEditing && (
+        <Name
+          address={address}
+          className='edit-name'
+          isFocussed
+          label={null}
+          onBlur={saveChanges}
+          onChange={setName}
+        />
+      )}
       <ActionBar>
         <Link onClick={toggleEdit}>Edit</Link>
         <Link to={`/account/forget/${address}`}>Forget</Link>
@@ -59,4 +57,11 @@ function Account ({ address, className, onAction }: Props) {
   );
 }
 
-export default withOnAction(Account);
+export default withOnAction(styled(Account)`
+  .edit-name {
+    left: 4.75rem;
+    position: absolute;
+    right: 0.75rem;
+    top: -0.5rem;
+  }
+`);

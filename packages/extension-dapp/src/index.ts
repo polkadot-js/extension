@@ -5,7 +5,7 @@
 import { InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow } from './types';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
-const injectedWeb3 = (window as InjectedWindow).injectedWeb3;
+const injectedWeb3 = (window as InjectedWindow).injectedWeb3 || {};
 
 // have we found the window.injectedWeb3
 const isWeb3Injected = !!injectedWeb3 && Object.keys(injectedWeb3).length !== 0;

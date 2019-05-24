@@ -28,8 +28,6 @@ window.injectedWeb3 = {
   // this is the name for this extension, there could be multiples injected,
   // each with their own keys
   'polkadot-js': {
-    // same as above, just easier to manage having accessible here
-    name: 'polkadot-js',
     // semver for the package
     version: '0.1.0',
 

@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { InjectedWindow } from '@polkadot/extension-dapp/types';
 import { MessageTypes } from '../background/types';
-import { WindowInjected } from './types';
 
 import events, { eventTarget } from '../events';
 import Injected from './Injected';
@@ -59,7 +59,7 @@ eventTarget.addEventListener(events.response, (event) => {
 });
 
 // small helper with the typescript types, just cast window
-const windowInject = window as WindowInjected;
+const windowInject = window as InjectedWindow;
 
 // don't clobber the existing object, we will add it it (or create as needed)
 windowInject.injectedWeb3 = windowInject.injectedWeb3 || {};

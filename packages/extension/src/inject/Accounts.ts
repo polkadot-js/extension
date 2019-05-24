@@ -2,16 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Accounts as IAccounts, Account as IAccount, SendRequest } from './types';
+import { InjectedAccounts, InjectedAccount } from '@polkadot/extension-dapp/types';
+import { SendRequest } from './types';
 
 let sendRequest: SendRequest;
 
-export default class Accounts implements IAccounts {
+export default class Accounts implements InjectedAccounts {
   constructor (_sendRequest: SendRequest) {
     sendRequest = _sendRequest;
   }
 
-  get (): Promise<Array<IAccount>> {
+  get (): Promise<Array<InjectedAccount>> {
     return sendRequest('accounts.list');
   }
 }

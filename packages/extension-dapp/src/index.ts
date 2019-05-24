@@ -7,8 +7,10 @@ import { Injected, InjectedAccountWithMeta, InjectedExtension, InjectedExtension
 const objmap = (window as InjectedWindow).injectedWeb3;
 const isWeb3Injected = !!objmap && Object.keys(objmap).length !== 0;
 
+// we keep the last promise created around (for queries)
 let web3EnablePromise: Promise<Array<InjectedExtension>> | null = null;
 
+// enables all the providers found on the injected window interface
 function web3Enable (originName: string): Promise<Array<InjectedExtension>> {
   web3EnablePromise = Promise
     .all(Object.entries(objmap).map(([name, { enable, version }]) =>
@@ -36,6 +38,7 @@ function web3Enable (originName: string): Promise<Array<InjectedExtension>> {
   return web3EnablePromise;
 }
 
+// retrieve all the accounts accross all providers
 async function web3Accounts (): Promise<Array<InjectedAccountWithMeta>> {
   if (!web3EnablePromise) {
     throw new Error(`web3Accounts: web3Enable(originName) needs to be called before web3Accounts`);
@@ -68,6 +71,7 @@ async function web3Accounts (): Promise<Array<InjectedAccountWithMeta>> {
   return accounts;
 }
 
+// find a specific provider based on an address
 async function web3FromAddress (address: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     throw new Error(`web3FromAddress: web3Enable(originName) needs to be called before web3FromAddress`);
@@ -83,6 +87,7 @@ async function web3FromAddress (address: string): Promise<InjectedExtension> {
   return web3FromSource(found.meta.source);
 }
 
+// find a specific provider based on the name
 async function web3FromSource (source: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     throw new Error(`web3FromSource: web3Enable(originName) needs to be called before web3FromSource`);

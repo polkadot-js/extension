@@ -66,8 +66,8 @@ windowInject.injectedWeb3 = windowInject.injectedWeb3 || {};
 
 // add our enable function
 windowInject.injectedWeb3['polkadot-js'] = {
-  name: 'polkadot-js', // process.env.PKG_NAME as string,
-  version: process.env.PKG_VERSION as string,
   enable: (origin: string): Promise<Injected> =>
-    sendMessage('authorize.tab', { origin }).then(() => new Injected(sendMessage))
-};
+    sendMessage('authorize.tab', { origin }).then(() => new Injected(sendMessage)),
+  name: 'polkadot-js', // process.env.PKG_NAME as string,
+  version: process.env.PKG_VERSION as string
+} as any; // FIXME For now, the name attribute is required by old

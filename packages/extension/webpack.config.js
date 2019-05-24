@@ -5,7 +5,11 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const ManifestPlugin = require('webpack-extension-manifest-plugin');
+
+const pkgJson = require('./package.json');
+const manifest = require('./manifest.json');
 
 const packages = [
   'extension',
@@ -13,7 +17,6 @@ const packages = [
 ];
 
 function createWebpack ({ alias = {}, context }) {
-  const pkgJson = require(path.join(context, 'package.json'));
   const ENV = process.env.NODE_ENV || 'development';
   const isProd = ENV === 'production';
 
@@ -83,7 +86,15 @@ function createWebpack ({ alias = {}, context }) {
           PKG_VERSION: JSON.stringify(pkgJson.version),
         }
       }),
-      new CopyWebpackPlugin([{ from: 'public' }])
+      new CopyPlugin([{ from: 'public' }]),
+      new ManifestPlugin({
+        config: {
+          base: manifest,
+          extend: {
+            version: pkgJson.version
+          }
+        }
+      })
     ].filter((entry) => entry),
     watch: !isProd
   };

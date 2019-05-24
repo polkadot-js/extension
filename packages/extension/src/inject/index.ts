@@ -5,7 +5,6 @@
 import { InjectedWindow } from '@polkadot/extension-dapp/types';
 import { MessageTypes } from '../background/types';
 
-import events, { eventTarget } from '../events';
 import Injected from './Injected';
 
 // when sending a message from the injector to the expension, we
@@ -27,17 +26,15 @@ const windowInject = window as InjectedWindow;
 const callbacks: Callbacks = {};
 let idCounter = 0;
 
-// a generic message sender that creates an event, returning a promise that will resolve once
-// the event is resolved (by the response listener just below this)
+// a generic message sender that creates an event, returning a promise that will
+// resolve once the event is resolved (by the response listener just below this)
 function sendMessage (message: MessageTypes, request: any = null): Promise<any> {
   return new Promise((resolve, reject) => {
     const id = ++idCounter;
 
     callbacks[id] = { resolve, reject };
 
-    eventTarget.dispatchEvent(
-      new CustomEvent(events.request, { detail: { id, message, request } })
-    );
+    window.postMessage({ id, message, origin: 'inject', request }, '*');
   });
 }
 
@@ -49,21 +46,25 @@ async function enable (origin: string): Promise<Injected> {
 }
 
 // setup a response listener (events created by the loader for extension responses)
-eventTarget.addEventListener(events.response, (event) => {
-  const response = (event as CustomEvent).detail;
-  const promise = callbacks[response.id];
-
-  if (!promise) {
-    console.error(`Uknown response: ${JSON.stringify(response)}`);
+window.addEventListener('message', ({ data, source }) => {
+  // only allow messages from our window, by the loader
+  if (source !== window || data.origin !== 'loader') {
     return;
   }
 
-  delete callbacks[response.id];
+  const promise = callbacks[data.id];
 
-  if (response.error) {
-    promise.reject(new Error(response.error));
+  if (!promise) {
+    console.error(`Uknown response: ${JSON.stringify(data)}`);
+    return;
+  }
+
+  delete callbacks[data.id];
+
+  if (data.error) {
+    promise.reject(new Error(data.error));
   } else {
-    promise.resolve(response.response);
+    promise.resolve(data.response);
   }
 });
 

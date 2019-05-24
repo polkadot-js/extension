@@ -4,23 +4,22 @@
 
 import extension from 'extensionizer';
 
-import events, { eventTarget } from './events';
-
-function sendResponse (detail: any): void {
-  // create the custom event, this will be handled on the injection script
-  eventTarget.dispatchEvent(new CustomEvent(events.response, { detail }));
+function sendResponse (data: any): void {
+  window.postMessage({ ...data, origin: 'loader' }, '*');
 }
 
-// Handle all custom events, passing messages to the extension
-eventTarget.addEventListener(events.request, (event) => {
-  // get the request as part of the the event detailt
-  const request = (event as CustomEvent).detail;
+// Handle all messages, passing messages to the extension
+window.addEventListener('message', ({ data, source }) => {
+  // only allow messages from our window, by the inject
+  if (source !== window || data.origin !== 'inject') {
+    return;
+  }
 
   // pass the detail as-is as a message to the extension
-  extension.runtime.sendMessage(request, (response) => {
+  extension.runtime.sendMessage(data, (response) => {
     if (!response) {
       // no data, send diconnected/unknown error
-      sendResponse({ id: request.id, error: 'Unknown response' });
+      sendResponse({ id: data.id, error: 'Unknown response' });
     } else {
       // handle the response, passing as a custom event
       sendResponse(response);

@@ -1,13 +1,9 @@
 {
   "name": "@polkadot/extension-dapp",
   "description": "An injector dapps that manages the injected environment",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.1-beta.1",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
   "peerDependencies": {
     "@polkadot/api": "*"
   }

@@ -25,7 +25,7 @@ export function web3Enable (originName: string): Promise<Array<InjectedExtension
     ))
     .then((values) =>
       values
-        .filter(([, r]) => r !== null)
+        .filter(([, ext]) => ext !== null)
         .map(([info, ext]) => ({ ...info, ...ext } as InjectedExtension))
     )
     .catch(() => [] as Array<InjectedExtension>)

@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { InjectedWindow } from '@polkadot/extension-dapp/types';
 import { MessageTypes } from '../background/types';
-import { WindowInjected } from './types';
 
 import events, { eventTarget } from '../events';
 import Injected from './Injected';
@@ -59,15 +59,15 @@ eventTarget.addEventListener(events.response, (event) => {
 });
 
 // small helper with the typescript types, just cast window
-const windowInject = window as WindowInjected;
+const windowInject = window as InjectedWindow;
 
 // don't clobber the existing object, we will add it it (or create as needed)
 windowInject.injectedWeb3 = windowInject.injectedWeb3 || {};
 
 // add our enable function
 windowInject.injectedWeb3['polkadot-js'] = {
-  name: 'polkadot-js', // process.env.PKG_NAME as string,
-  version: process.env.PKG_VERSION as string,
   enable: (origin: string): Promise<Injected> =>
-    sendMessage('authorize.tab', { origin }).then(() => new Injected(sendMessage))
-};
+    sendMessage('authorize.tab', { origin }).then(() => new Injected(sendMessage)),
+  name: 'polkadot-js', // process.env.PKG_NAME as string,
+  version: process.env.PKG_VERSION as string
+} as any; // FIXME For now, the name attribute is required by old

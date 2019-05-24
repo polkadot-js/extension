@@ -9,6 +9,14 @@ export interface InjectedAccount {
   name: string;
 }
 
+export interface InjectedAccountWithMeta {
+  address: string;
+  meta: {
+    name: string,
+    source: string
+  };
+}
+
 export interface InjectedAccounts {
   get: () => Promise<Array<InjectedAccount>>;
 }
@@ -25,8 +33,9 @@ export interface Injected {
   signer: InjectedSigner;
 }
 
-export interface InjectedWindowProvider extends InjectedExtensionInfo {
+export interface InjectedWindowProvider {
   enable: (origin: string) => Promise<Injected>;
+  version: string;
 }
 
 export type InjectedWindow = Window & {

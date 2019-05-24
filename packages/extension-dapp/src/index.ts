@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow } from './types';
+import { InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow } from './types';
 
-// just a helper
-const objmap = (window as InjectedWindow).injectedWeb3;
+// just a helper (otherwise we cast all-over, so shorter and more readable)
+const injectedWeb3 = (window as InjectedWindow).injectedWeb3;
 
 // have we found the window.injectedWeb3
-const isWeb3Injected = !!objmap && Object.keys(objmap).length !== 0;
+const isWeb3Injected = !!injectedWeb3 && Object.keys(injectedWeb3).length !== 0;
 
 // we keep the last promise created around (for queries)
 let web3EnablePromise: Promise<Array<InjectedExtension>> | null = null;
@@ -18,11 +18,15 @@ export { isWeb3Injected, web3EnablePromise };
 // enables all the providers found on the injected window interface
 export function web3Enable (originName: string): Promise<Array<InjectedExtension>> {
   web3EnablePromise = Promise
-    .all(Object.entries(objmap).map(([name, { enable, version }]) =>
-      Promise
-        .all([Promise.resolve({ name, version }), enable(originName)])
-        .catch(() => [{ name, version }, null] as [InjectedExtensionInfo, null])
-    ))
+    .all(
+      Object
+        .entries(injectedWeb3)
+        .map(([name, { enable, version }]) =>
+          Promise
+            .all([Promise.resolve({ name, version }), enable(originName)])
+            .catch(() => [{ name, version }, null] as [InjectedExtensionInfo, null])
+        )
+    )
     .then((values) =>
       values
         .filter(([, ext]) => ext !== null)

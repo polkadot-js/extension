@@ -8,7 +8,7 @@ import { OnActionFromCtx } from '../../components/types';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, Box, Button, Link, Tip, defaults, withOnAction } from '../../components';
+import { ActionBar, Button, Icon, IconBox, Link, Tip, defaults, withOnAction } from '../../components';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 type Props = {
@@ -21,19 +21,27 @@ type Props = {
 };
 
 function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props) {
-  const onApprove = (): Promise<void> =>
+  const onApprove = () =>
     approveAuthRequest(authId)
       .then(() => onAction())
       .catch(console.error);
-  const onReject = (): void => {
+  const onReject = () =>
     rejectAuthRequest(authId)
       .then(() => onAction())
       .catch(console.error);
-  };
 
   return (
-    <Box className={className}>
-      <div>An application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div>.</div>
+    <IconBox
+      className={className}
+      icon={
+        <Icon
+          icon='X'
+          onClick={onReject}
+        />}
+      intro={
+        <div>An application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div>.</div>
+      }
+    >
       <ActionBar>
         <Link isDanger onClick={onReject}>Reject</Link>
       </ActionBar>
@@ -44,11 +52,16 @@ function Request ({ authId, className, isFirst, onAction, request: { origin }, u
           onClick={onApprove}
         />
       )}
-    </Box>
+    </IconBox>
   );
 }
 
 export default withOnAction(styled(Request)`
+  .icon {
+    background: ${defaults.btnBgDanger};
+    color: ${defaults.btnColorDanger};
+  }
+
   .tab-name,
   .tab-url {
     color: ${defaults.linkColor};

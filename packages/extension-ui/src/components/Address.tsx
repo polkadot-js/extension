@@ -8,74 +8,52 @@ import React from 'react';
 import styled from 'styled-components';
 import Identicon from '@polkadot/ui-identicon';
 
-import Box from './Box';
+import IconBox from './IconBox';
 import { withAccounts } from './contexts';
-import defaults from './defaults';
 
 type Props = {
   accounts: AccountsFromCtx,
   address?: string | null,
   children?: React.ReactNode;
   className?: string,
-  isHidden?: boolean,
   name?: React.ReactNode | null,
   theme?: 'polkadot' | 'substrate'
 };
 
-function Address ({ accounts, address, children, className, isHidden, name, theme = 'polkadot' }: Props) {
-  if (isHidden) {
-    return null;
-  }
-
+function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props) {
   const account = accounts.find((account) => account.address === address);
 
   return (
-    <div className={className}>
-      <Box className='details'>
-        <div className='name'>{name || (account && account.meta.name) || '<unknown>'}</div>
-        <div className='address'>{address || '<unknown>'}</div>
-        <div className='children'>{children}</div>
-      </Box>
-      <Identicon
-        className='icon'
-        size={64}
-        theme={theme}
-        value={address}
-      />
-    </div>
+    <IconBox
+      className={className}
+      icon={
+        <Identicon
+          className='icon'
+          size={64}
+          theme={theme}
+          value={address}
+        />
+      }
+      intro={
+        <>
+          <div className='name'>{name || (account && account.meta.name) || '<unknown>'}</div>
+          <div className='address'>{address || '<unknown>'}</div>
+        </>
+      }
+    >
+      {children}
+    </IconBox>
   );
 }
 
 export default withAccounts(styled(Address)`
-  box-sizing: border-box;
-  margin: ${defaults.boxMargin};
-  padding: ${defaults.boxPadding};
-  padding-left: 1rem;
-  position: relative;
-
-  .details {
-    margin: 0;
-
-    .address,
-    .name {
-      padding-left: 3rem;
-    }
-
-    .address {
-      opacity: 0.5;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .name {
-      padding-bottom: 0.5rem;
-    }
+  .address {
+    opacity: 0.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .icon {
-    left: 0.25rem;
-    position: absolute;
-    top: -0.5rem;
-    z-index: 1;
+  .name {
+    padding-bottom: 0.5rem;
   }
 `);

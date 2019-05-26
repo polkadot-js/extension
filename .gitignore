@@ -8,6 +8,7 @@ tmp/
 .env.test.local
 .env.production.local
 .npmrc
+cc-test-reporter
 lerna-debug.log*
 master-build.zip
 npm-debug.log*

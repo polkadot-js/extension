@@ -16,11 +16,10 @@ type Props = RouteComponentProps<{ address: string }> & {
 };
 
 function Forget ({ match: { params: { address } }, onAction }: Props) {
-  const onClick = (): void => {
+  const onClick = () =>
     forgetAccount(address)
       .then(() => onAction('/'))
       .catch(console.error);
-  };
 
   return (
     <div>

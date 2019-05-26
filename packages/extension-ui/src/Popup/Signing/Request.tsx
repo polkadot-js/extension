@@ -21,13 +21,13 @@ type Props = {
 };
 
 function Request ({ isFirst, onAction, request: { address, genesisHash, method, nonce }, signId, url }: Props) {
-  const onCancel = (): void => {
+  const onCancel = () =>
     cancelSignRequest(signId)
       .then(() => onAction())
       .catch(console.error);
-  };
-  const onSign = (password: string): Promise<void> =>
-    approveSignRequest(signId, password).then(() => onAction());
+  const onSign = (password: string) =>
+    approveSignRequest(signId, password)
+      .then(() => onAction());
 
   return (
     <Address address={address}>

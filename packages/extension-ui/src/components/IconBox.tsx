@@ -46,8 +46,7 @@ export default styled(IconBox)`
 
   .outer-icon {
     height: 64px;
-    font-size: 48px;
-    font-weight: bold;
+    font-size: 36px;
     left: 0.25rem;
     line-height: 64px;
     position: absolute;

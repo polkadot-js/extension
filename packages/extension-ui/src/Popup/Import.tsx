@@ -19,18 +19,13 @@ function Import ({ onAction }: Props) {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const onChangeSeed = (seed: string): void => {
+  const onChangeSeed = (seed: string) =>
     validateSeed(seed)
       .then(setAccount)
-      .catch((error) => {
-        console.error(error);
-
-        setAccount(null);
-      });
-  };
+      .catch(() => setAccount(null));
 
   // FIXME Duplicated between here and Create.tsx
-  const onCreate = (): void => {
+  const onCreate = () => {
     // this should always be the case
     if (name && password && account) {
       createAccount(name, password, account.seed)

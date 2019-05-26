@@ -21,20 +21,23 @@ type Props = {
 };
 
 function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props) {
-  const onApprove = (): Promise<void> =>
+  const onApprove = () =>
     approveAuthRequest(authId)
       .then(() => onAction())
       .catch(console.error);
-  const onReject = (): void => {
+  const onReject = () =>
     rejectAuthRequest(authId)
       .then(() => onAction())
       .catch(console.error);
-  };
 
   return (
     <IconBox
       className={className}
-      icon={<Icon icon='?' />}
+      icon={
+        <Icon
+          icon='X'
+          onClick={onReject}
+        />}
       intro={
         <div>An application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div>.</div>
       }
@@ -55,7 +58,7 @@ function Request ({ authId, className, isFirst, onAction, request: { origin }, u
 
 export default withOnAction(styled(Request)`
   .icon {
-    background: #733;
+    background: ${defaults.btnBgDanger};
     color: ${defaults.btnColorDanger};
   }
 

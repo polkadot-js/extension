@@ -21,10 +21,9 @@ function Account ({ address, className, onAction }: Props) {
   const [isEditing, setEditing] = useState(false);
   const [editedname, setName] = useState<string | null>(null);
 
-  const toggleEdit = (): void => {
+  const toggleEdit = () =>
     setEditing(!isEditing);
-  };
-  const saveChanges = (): void => {
+  const saveChanges = () => {
     if (editedname && editedname !== name) {
       editAccount(address, editedname)
         .then(() => onAction())

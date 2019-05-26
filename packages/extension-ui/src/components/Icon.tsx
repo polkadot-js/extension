@@ -7,12 +7,18 @@ import styled from 'styled-components';
 
 type Props = {
   className?: string,
-  icon: string
+  icon: string,
+  onClick?: () => any
 };
 
-function Icon ({ className, icon }: Props) {
+function Icon ({ className, icon, onClick }: Props) {
   return (
-    <div className={`${className} icon`}>{icon}</div>
+    <div
+      className={`${className} icon`}
+      onClick={onClick}
+    >
+      {icon}
+    </div>
   );
 }
 
@@ -20,8 +26,10 @@ export default styled(Icon)`
   background: white;
   border-radius: 50%;
   box-sizing: border-box;
-  display: inline-block;
-  height: inherit;
+  cursor: ${({ onClick }) =>
+    onClick
+      ? 'pointer'
+      : 'inherit'
+  };
   text-align: center;
-  width: inherit;
 `;

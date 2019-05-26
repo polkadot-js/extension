@@ -26,7 +26,7 @@ function Create ({ onAction }: Props) {
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
-  const onCreate = (): void => {
+  const onCreate = () => {
     // this should always be the case
     if (name && password && account) {
       createAccount(name, password, account.seed)

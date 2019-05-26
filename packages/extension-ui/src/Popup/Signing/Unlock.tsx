@@ -15,12 +15,9 @@ export default function Unlock ({ className, onSign }: Props) {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
-  const onClick = (): void => {
-    onSign(password).catch((error) => {
-      console.error(error);
-      setError(error.message);
-    });
-  };
+  const onClick = () =>
+    onSign(password)
+      .catch((error) => setError(error.message));
 
   useEffect(() => {
     if (error) {

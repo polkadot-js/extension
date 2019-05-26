@@ -3,6 +3,7 @@
     "default": {
       "packages": [
         "package.json",
+        "packages/extension-dapp/package.json",
         "packages/extension-ui/package.json",
         "packages/extension/package.json"
       ]

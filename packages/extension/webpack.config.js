@@ -25,9 +25,9 @@ function createWebpack ({ alias = {}, context }) {
     devtool: false,
     entry: {
       background: './src/background/index.ts',
-      inject: './src/inject/index.ts',
-      loader: './src/loader.ts',
-      popup: `./src/views/popup.ts`
+      content: './src/content.ts',
+      page: './src/page/index.ts',
+      popup: `./src/popup.ts`
     },
     mode: ENV,
     output: {

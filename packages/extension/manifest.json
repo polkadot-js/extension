@@ -11,7 +11,7 @@
     "default_popup": "popup.html"
   },
   "content_scripts": [{
-    "js": ["loader.js"],
+    "js": ["content.js"],
     "matches": [
       "https://polkadot.js.org/apps/*",
       "http://localhost:3000/*"
@@ -25,6 +25,6 @@
     "64": "images/icon-64.png",
     "128": "images/icon-128.png"
   },
-  "web_accessible_resources": ["inject.js"],
+  "web_accessible_resources": ["page.js"],
   "content_security_policy": "script-src 'self' 'unsafe-eval' 'wasm-eval'; object-src 'self'"
 }

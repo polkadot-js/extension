@@ -5,13 +5,13 @@
 import extension from 'extensionizer';
 
 function sendResponse (data: any): void {
-  window.postMessage({ ...data, origin: 'loader' }, '*');
+  window.postMessage({ ...data, origin: 'content' }, '*');
 }
 
 // Handle all messages, passing messages to the extension
 window.addEventListener('message', ({ data, source }) => {
   // only allow messages from our window, by the inject
-  if (source !== window || data.origin !== 'inject') {
+  if (source !== window || data.origin !== 'page') {
     return;
   }
 
@@ -30,7 +30,7 @@ window.addEventListener('message', ({ data, source }) => {
 // inject our data injector
 const script = document.createElement('script');
 
-script.src = extension.extension.getURL('inject.js');
+script.src = extension.extension.getURL('page.js');
 script.onload = (): void => {
   // remove the injecting tag when loaded
   if (script.parentNode) {

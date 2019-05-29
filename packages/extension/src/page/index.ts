@@ -34,7 +34,7 @@ function sendMessage (message: MessageTypes, request: any = null): Promise<any> 
 
     callbacks[id] = { resolve, reject };
 
-    window.postMessage({ id, message, origin: 'inject', request }, '*');
+    window.postMessage({ id, message, origin: 'page', request }, '*');
   });
 }
 
@@ -48,7 +48,7 @@ async function enable (origin: string): Promise<Injected> {
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }) => {
   // only allow messages from our window, by the loader
-  if (source !== window || data.origin !== 'loader') {
+  if (source !== window || data.origin !== 'content') {
     return;
   }
 

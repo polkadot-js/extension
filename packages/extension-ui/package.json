@@ -5,7 +5,7 @@
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/ui-identicon": "^0.40.0-beta.1",
+    "@polkadot/ui-identicon": "^0.40.0-beta.2",
     "@types/react-router": "^5.0.0",
     "@types/react-router-dom": "^4.3.3",
     "react-router": "^5.0.0",

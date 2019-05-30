@@ -17,7 +17,7 @@ export default function handler ({ id, message, request }: MessageRequest, port:
   const isPopup = port.name === PORT_POPUP;
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isPopup
-    ? 'extension'
+    ? 'popup'
     : sender.tab
       ? sender.tab.url
       : '<unknown>';

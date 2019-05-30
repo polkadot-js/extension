@@ -4,11 +4,22 @@
 
 import { InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow } from './types';
 
+// our extension adaptor for other kinds of extensions
+import compatInjector from './compat';
+
 // just a helper (otherwise we cast all-over, so shorter and more readable)
-const injectedWeb3 = (window as InjectedWindow).injectedWeb3 || {};
+const win = window as InjectedWindow;
+
+// don't clobber the existing object, but ensure non-undefined
+win.injectedWeb3 = win.injectedWeb3 || {};
+
+// true when anything has been injected and is available
+function web3IsInjected (): boolean {
+  return Object.keys(win.injectedWeb3).length !== 0;
+}
 
 // have we found a properly constructed window.injectedWeb3
-const isWeb3Injected = Object.keys(injectedWeb3).length !== 0;
+let isWeb3Injected = web3IsInjected();
 
 // we keep the last promise created around (for queries)
 let web3EnablePromise: Promise<Array<InjectedExtension>> | null = null;
@@ -17,29 +28,27 @@ export { isWeb3Injected, web3EnablePromise };
 
 // enables all the providers found on the injected window interface
 export function web3Enable (originName: string): Promise<Array<InjectedExtension>> {
-  web3EnablePromise = Promise
-    .all(
-      Object
-        .entries(injectedWeb3)
-        .map(([name, { enable, version }]) =>
-          Promise
-            .all([Promise.resolve({ name, version }), enable(originName)])
-            .catch(() => [{ name, version }, null] as [InjectedExtensionInfo, null])
-        )
+  web3EnablePromise = compatInjector().then(() =>
+    Promise.all(
+      Object.entries(win.injectedWeb3).map(([name, { enable, version }]) =>
+        Promise
+          .all([Promise.resolve({ name, version }), enable(originName)])
+          .catch(() => [{ name, version }, null] as [InjectedExtensionInfo, null])
+      )
     )
     .then((values) =>
-      values
-        .filter(([, ext]) => ext !== null)
-        .map(([info, ext]) => ({ ...info, ...ext } as InjectedExtension))
+      values.filter(([, ext]) => ext).map(([info, ext]) => ({ ...info, ...ext } as InjectedExtension))
     )
     .catch(() => [] as Array<InjectedExtension>)
     .then((values) => {
       const names = values.map(({ name, version }) => `${name}/${version}`);
 
+      isWeb3Injected = web3IsInjected();
       console.log(`web3Enable: Enabled ${values.length} extensions ${names.join(', ')}`);
 
       return values;
-    });
+    })
+  );
 
   return web3EnablePromise;
 }

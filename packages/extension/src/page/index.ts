@@ -14,7 +14,7 @@ import Injected from './Injected';
 //  - this injector, reads listends on the events, maps it to the original
 //  - resolves/rejects the promise with the result
 
-type Callbacks = {
+type Handlers = {
   [index: number]: {
     resolve: (data: any) => void,
     reject: (error: Error) => void
@@ -23,7 +23,7 @@ type Callbacks = {
 
 // small helper with the typescript types, just cast window
 const windowInject = window as InjectedWindow;
-const callbacks: Callbacks = {};
+const handlers: Handlers = {};
 let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
@@ -32,7 +32,7 @@ function sendMessage (message: MessageTypes, request: any = null): Promise<any> 
   return new Promise((resolve, reject) => {
     const id = ++idCounter;
 
-    callbacks[id] = { resolve, reject };
+    handlers[id] = { resolve, reject };
 
     window.postMessage({ id, message, origin: 'page', request }, '*');
   });
@@ -52,19 +52,19 @@ window.addEventListener('message', ({ data, source }) => {
     return;
   }
 
-  const promise = callbacks[data.id];
+  const handler = handlers[data.id];
 
-  if (!promise) {
+  if (!handler) {
     console.error(`Uknown response: ${JSON.stringify(data)}`);
     return;
   }
 
-  delete callbacks[data.id];
+  delete handlers[data.id];
 
   if (data.error) {
-    promise.reject(new Error(data.error));
+    handler.reject(new Error(data.error));
   } else {
-    promise.resolve(data.response);
+    handler.resolve(data.response);
   }
 });
 

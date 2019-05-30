@@ -9,12 +9,28 @@ import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+import { PORT_CONTENT, PORT_POPUP } from '../defaults';
 import ChromeStore from './ChromeStore';
 import handlers from './handlers';
 
+// setup the notification
 extension.browserAction.setBadgeBackgroundColor({ color: '#ff0000' });
-extension.runtime.onMessage.addListener(handlers);
 
+// listen to all messages and handle appropriately
+extension.runtime.onConnect.addListener((port) => {
+  const { name } = port;
+
+  if ([PORT_CONTENT, PORT_POPUP].includes(name)) {
+    port.onMessage.addListener((data) =>
+      handlers(data, port)
+    );
+    port.onDisconnect.addListener(() =>
+      console.log(`Disconnected from ${name}`)
+    );
+  }
+});
+
+// initial setup
 cryptoWaitReady()
   .then(() => {
     console.log('crypto initialized');

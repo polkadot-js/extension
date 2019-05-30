@@ -7,14 +7,27 @@ import extension from 'extensionizer';
 // Runs in the extension background, handling all keyring access
 
 import keyring from '@polkadot/ui-keyring';
+import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+import { PORT_CONTENT, PORT_POPUP } from '../defaults';
 import ChromeStore from './ChromeStore';
 import handlers from './handlers';
 
+// setup the notification
 extension.browserAction.setBadgeBackgroundColor({ color: '#ff0000' });
-extension.runtime.onMessage.addListener(handlers);
 
+// listen to all messages and handle appropriately
+extension.runtime.onConnect.addListener((port) => {
+  // shouldn't happen, however... only listen to what we know about
+  assert([PORT_CONTENT, PORT_POPUP].includes(port.name), `Unknown connection from ${port.name}`);
+
+  // message and disconnect handlers
+  port.onMessage.addListener((data) => handlers(data, port));
+  port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+});
+
+// initial setup
 cryptoWaitReady()
   .then(() => {
     console.log('crypto initialized');

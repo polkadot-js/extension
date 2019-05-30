@@ -6,19 +6,45 @@ import { AuthorizeRequest, MessageTypes, SigningRequest } from '@polkadot/extens
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
+import extension from 'extensionizer';
+import { PORT_POPUP } from '@polkadot/extension/defaults';
+
+type Handlers = {
+  [index: number]: {
+    resolve: (data: any) => void,
+    reject: (error: Error) => void
+  }
+};
+
+const port = extension.runtime.connect({ name: PORT_POPUP });
+const handlers: Handlers = {};
 let idCounter = 0;
+
+// setup a listener for messages, any incoming resolves the promise
+port.onMessage.addListener((data) => {
+  const handler = handlers[data.id];
+
+  if (!handler) {
+    console.error(`Uknown response: ${JSON.stringify(data)}`);
+    return;
+  }
+
+  delete handlers[data.id];
+
+  if (data.error) {
+    handler.reject(new Error(data.error));
+  } else {
+    handler.resolve(data.response);
+  }
+});
 
 function sendMessage (message: MessageTypes, request: any = {}): Promise<any> {
   return new Promise((resolve, reject) => {
     const id = ++idCounter;
 
-    chrome.runtime.sendMessage({ id, message, request }, ({ error, response }) => {
-      if (error) {
-        reject(new Error(error));
-      } else {
-        resolve(response);
-      }
-    });
+    handlers[id] = { resolve, reject };
+
+    port.postMessage({ id, message, request });
   });
 }
 

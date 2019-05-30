@@ -4,6 +4,7 @@
 
 import { MessageRequest } from '../types';
 
+import { PORT_POPUP } from '../../defaults';
 import Extension from './Extension';
 import State from './State';
 import Tabs from './Tabs';
@@ -12,27 +13,34 @@ const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
-export default function handler ({ id, message, request }: MessageRequest, { tab }: chrome.runtime.MessageSender, sendResponse: (response?: any) => void): boolean {
-  const source = `${tab ? tab.url : 'extension'}: ${id}: ${message}`;
+export default function handler ({ id, message, request }: MessageRequest, port: chrome.runtime.Port): boolean {
+  const isPopup = port.name === PORT_POPUP;
+  const sender = port.sender as chrome.runtime.MessageSender;
+  const from = isPopup
+    ? 'popup'
+    : sender.tab
+      ? sender.tab.url
+      : '<unknown>';
+  const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
 
-  const promise = tab
-    ? tabs.handle(message, request, tab.url)
-    : extension.handle(message, request);
+  const promise = isPopup
+    ? extension.handle(message, request)
+    : tabs.handle(message, request, from);
 
   promise
     .then((response) => {
       console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
-      sendResponse({ id, response });
+      port.postMessage({ id, response });
     })
     .catch((error) => {
       console.log(`[err] ${source}:: ${error.message}`);
 
-      sendResponse({ id, error: error.message });
+      port.postMessage({ id, error: error.message });
     });
 
-  // return true to indicate we are sending the respionse async
+  // return true to indicate we are sending the response async
   return true;
 }

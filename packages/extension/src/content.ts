@@ -4,27 +4,24 @@
 
 import extension from 'extensionizer';
 
-function sendResponse (data: any): void {
-  window.postMessage({ ...data, origin: 'content' }, '*');
-}
+import { PORT_CONTENT } from './defaults';
 
-// Handle all messages, passing messages to the extension
+// connect to the extension
+const port = extension.runtime.connect({ name: PORT_CONTENT });
+
+// send any messages from the extension back to the page
+port.onMessage.addListener((data) => {
+  window.postMessage({ ...data, origin: 'content' }, '*');
+});
+
+// all messages from the page, pass them to the extension
 window.addEventListener('message', ({ data, source }) => {
   // only allow messages from our window, by the inject
   if (source !== window || data.origin !== 'page') {
     return;
   }
 
-  // pass the detail as-is as a message to the extension
-  extension.runtime.sendMessage(data, (response) => {
-    if (!response) {
-      // no data, send diconnected/unknown error
-      sendResponse({ id: data.id, error: 'Unknown response' });
-    } else {
-      // handle the response, passing as a custom event
-      sendResponse(response);
-    }
-  });
+  port.postMessage(data);
 });
 
 // inject our data injector

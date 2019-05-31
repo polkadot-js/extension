@@ -4,6 +4,8 @@
 
 import { Signer } from '@polkadot/api/types';
 
+export type Unsubcall = () => void;
+
 export interface InjectedAccount {
   address: string;
   name: string;
@@ -19,6 +21,7 @@ export interface InjectedAccountWithMeta {
 
 export interface InjectedAccounts {
   get: () => Promise<Array<InjectedAccount>>;
+  subscribe: (cb: (accounts: Array<InjectedAccount>) => any) => Unsubcall;
 }
 
 export interface InjectedSigner extends Signer {}

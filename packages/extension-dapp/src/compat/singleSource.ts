@@ -28,7 +28,7 @@ type SingleWindow = Window & InjectedWindow & {
   SingleSource: SingleSource
 };
 
-// transfor the SigneSource accounts into a simple address/name array
+// transfor the SingleSource accounts into a simple address/name array
 function transformAccounts (accounts: Array<SingleSourceAccount>): Array<InjectedAccount> {
   return accounts.map(({ address, name }) => ({
     address,

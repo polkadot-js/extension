@@ -26,7 +26,7 @@ function Details ({ className, genesisHash, method, nonce, url }: Props) {
         </tr>
         <tr>
           <td className='label'>{chain ? 'chain' : 'genesis'}</td>
-          <td className='data'>{chain || genesisHash}</td>
+          <td className='data'>{chain ? chain.name : genesisHash}</td>
         </tr>
         <tr>
           <td className='label'>nonce</td>

@@ -77,7 +77,8 @@ The app can use all or any of these, depending on needs. To instantiate the `@po
 ```js
 import { ApiPromise } from '@polkadot/api';
 
-const pjsx = await window.injectedWeb3.enable('my dapp');
+const pjsx = await window.injectedWeb3['polkadot-js'].enable('my dapp');
+const accounts = await pjsx.accounts.get();
 const api = await Api.create({ signer: pjsx.signer });
 ```
 

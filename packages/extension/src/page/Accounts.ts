@@ -17,13 +17,11 @@ export default class Accounts implements InjectedAccounts {
   }
 
   subscribe (cb: (accounts: Array<InjectedAccount>) => any): Unsubcall {
-    // TODO Make an actual subscription, not just the at-now data
-    sendRequest('accounts.list')
-      .then((accounts: Array<InjectedAccount>) => cb(accounts))
+    sendRequest('accounts.subscribe', null, cb)
       .catch(console.error);
 
     return () => {
-      // noop, we are not really subscribing (yet)
+      // FIXME we need the ability to unsubscribe
     };
   }
 }

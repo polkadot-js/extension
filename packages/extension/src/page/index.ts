@@ -17,7 +17,8 @@ import Injected from './Injected';
 type Handlers = {
   [index: number]: {
     resolve: (data: any) => void,
-    reject: (error: Error) => void
+    reject: (error: Error) => void,
+    subscriber?: (data: any) => void
   }
 };
 
@@ -28,11 +29,11 @@ let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
-function sendMessage (message: MessageTypes, request: any = null): Promise<any> {
+function sendMessage (message: MessageTypes, request: any = null, subscriber?: (data: any) => void): Promise<any> {
   return new Promise((resolve, reject) => {
     const id = ++idCounter;
 
-    handlers[id] = { resolve, reject };
+    handlers[id] = { resolve, reject, subscriber };
 
     window.postMessage({ id, message, origin: 'page', request }, '*');
   });
@@ -59,7 +60,12 @@ window.addEventListener('message', ({ data, source }) => {
     return;
   }
 
-  delete handlers[data.id];
+  if (!handler.subscriber) {
+    delete handlers[data.id];
+  } else if (data.subscription) {
+    handler.subscriber(data.subscription);
+    return;
+  }
 
   if (data.error) {
     handler.reject(new Error(data.error));

@@ -5,9 +5,11 @@
 import { Signer } from '@polkadot/api/types';
 import { InjectedAccount, InjectedWindow } from '../types';
 
-// RxJs interface, only what we need here
+// RxJs interface, only the bare-bones of what we need here
 type Subscriber<T> = {
-  subscribe: (cb: (value: Array<T>) => void) => void
+  subscribe: (cb: (value: T) => void) => {
+    unsubscribe (): any
+  }
 };
 
 type SingleSourceAccount = {
@@ -17,7 +19,7 @@ type SingleSourceAccount = {
 };
 
 type SingleSource = {
-  accounts$: Subscriber<SingleSourceAccount>,
+  accounts$: Subscriber<Array<SingleSourceAccount>>,
   environment$: Subscriber<string>,
   signer: Signer
 };
@@ -26,6 +28,14 @@ type SingleWindow = Window & InjectedWindow & {
   SingleSource: SingleSource
 };
 
+// transfor the SingleSource accounts into a simple address/name array
+function transformAccounts (accounts: Array<SingleSourceAccount>): Array<InjectedAccount> {
+  return accounts.map(({ address, name }) => ({
+    address,
+    name
+  }));
+}
+
 // add a compat interface of SingleSource to window.injectedWeb3
 function injectSingleSource (win: SingleWindow): void {
   let accounts: Array<InjectedAccount> = [];
@@ -33,17 +43,24 @@ function injectSingleSource (win: SingleWindow): void {
   // we don't yet have an accounts subscribe on the interface, simply get the
   // accounts and store them, any get will resolve the last found values
   win.SingleSource.accounts$.subscribe((_accounts) => {
-    accounts = _accounts.map(({ address, name }) => ({
-      address,
-      name
-    }));
+    accounts = transformAccounts(_accounts);
   });
 
   // decorate the compat interface
   win.injectedWeb3['SingleSource'] = {
     enable: async (origin: string) => ({
       accounts: {
-        get: async () => accounts
+        get: async () =>
+          accounts,
+        subscribe: (cb: (accounts: Array<InjectedAccount>) => any) => {
+          const sub = win.SingleSource.accounts$.subscribe((accounts) =>
+            cb(transformAccounts(accounts))
+          );
+
+          return (): void => {
+            sub.unsubscribe();
+          };
+        }
       },
       signer: win.SingleSource.signer
     }),

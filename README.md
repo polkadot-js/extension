@@ -47,7 +47,7 @@ window.injectedWeb3 = {
 }
 ```
 
-When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The injected interface, when returned via `enable`, contains the following -
+When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The `Injected` interface, as returned via `enable`, contains the following -
 
 ```js
 interface Injected {
@@ -57,12 +57,17 @@ interface Injected {
   // readonly provider: Provider
 }
 
+interface Account = {
+  readonly address: string; // ss-58 encoded address
+  readonly name?: string; // optional name for display
+};
+
 // exposes accounts
 interface Accounts {
-  get (): Promise<Array<{
-    readonly address: string; // ss-58 encoded address
-    readonly name?: string; // optional name for display
-  }>>;
+  // retrieves the list of accounts for right now
+  get (): Promise<Array<Account>>;
+  // subscribe to all accounts, updating as they change
+  subscribe (cb: (accounts: Array<Account>) => any): () => void
 }
 
 // a signer that communicates with the extension via sendMessage

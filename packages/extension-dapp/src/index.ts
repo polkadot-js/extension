@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow } from './types';
+import { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from './types';
 
 // our extension adaptor for other kinds of extensions
 import compatInjector from './compat';
@@ -16,6 +16,19 @@ win.injectedWeb3 = win.injectedWeb3 || {};
 // true when anything has been injected and is available
 function web3IsInjected (): boolean {
   return Object.keys(win.injectedWeb3).length !== 0;
+}
+
+// helper to throw a consistent error when not enabled
+function throwError (method: string): never {
+  throw new Error(`${method}: web3Enable(originName) needs to be called before ${method}`);
+}
+
+// internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
+function mapAccounts (source: string, list: Array<InjectedAccount>): Array<InjectedAccountWithMeta> {
+  return list.map(({ address, name }) => ({
+    address,
+    meta: { name, source }
+  }));
 }
 
 // have we found a properly constructed window.injectedWeb3
@@ -56,7 +69,7 @@ export function web3Enable (originName: string): Promise<Array<InjectedExtension
 // retrieve all the accounts accross all providers
 export async function web3Accounts (): Promise<Array<InjectedAccountWithMeta>> {
   if (!web3EnablePromise) {
-    throw new Error(`web3Accounts: web3Enable(originName) needs to be called before web3Accounts`);
+    return throwError('web3Accounts');
   }
 
   const accounts: Array<InjectedAccountWithMeta> = [];
@@ -66,10 +79,7 @@ export async function web3Accounts (): Promise<Array<InjectedAccountWithMeta>> {
       try {
         const list = await accounts.get();
 
-        return list.map(({ address, name }) => ({
-          address,
-          meta: { name, source }
-        }));
+        return mapAccounts(source, list);
       } catch (error) {
         // cannot handle this one
         return [];
@@ -86,10 +96,36 @@ export async function web3Accounts (): Promise<Array<InjectedAccountWithMeta>> {
   return accounts;
 }
 
+export async function web3AccountsSubscribe (cb: (accounts: Array<InjectedAccountWithMeta>) => any): Promise<Unsubcall> {
+  if (!web3EnablePromise) {
+    return throwError('web3AccountsSubscribe');
+  }
+
+  const accounts: { [source: string]: Array<InjectedAccount> } = {};
+  const triggerUpdate = (): void => {
+    cb(Object.entries(accounts).reduce((result, [source, list]) => {
+      result.push(...mapAccounts(source, list));
+
+      return result;
+    }, [] as Array<InjectedAccountWithMeta>));
+  };
+
+  const unsubs = (await web3EnablePromise).map(({ accounts: { subscribe }, name: source }) =>
+    subscribe((result) => {
+      accounts[source] = result;
+      triggerUpdate();
+    })
+  );
+
+  return (): void => {
+    unsubs.forEach((unsub) => unsub());
+  };
+}
+
 // find a specific provider based on an address
 export async function web3FromAddress (address: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
-    throw new Error(`web3FromAddress: web3Enable(originName) needs to be called before web3FromAddress`);
+    return throwError('web3FromAddress');
   }
 
   const accounts = await web3Accounts();
@@ -105,7 +141,7 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
 // find a specific provider based on the name
 export async function web3FromSource (source: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
-    throw new Error(`web3FromSource: web3Enable(originName) needs to be called before web3FromSource`);
+    return throwError('web3FromSource');
   }
 
   const sources = await web3EnablePromise;

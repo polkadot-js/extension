@@ -7,12 +7,12 @@ import { MessageTypes } from '../background/types';
 
 import Injected from './Injected';
 
-// when sending a message from the injector to the expension, we
+// when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
-//  - the loader takes this evend and uses sendMessage to the extension background
-//  - on respoinse, the loader creates a reponse event
-//  - this injector, reads listends on the events, maps it to the original
-//  - resolves/rejects the promise with the result
+//  - the loader takes this event and uses port.postMessage to background
+//  - on resposnse, the loader creates a reponse event
+//  - this injector, listens on the events, maps it to the original
+//  - resolves/rejects the promise with the result (or sub data)
 
 type Handlers = {
   [index: number]: {

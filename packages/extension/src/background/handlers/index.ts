@@ -9,38 +9,54 @@ import Extension from './Extension';
 import State from './State';
 import Tabs from './Tabs';
 
+const FALLBACK_URL = '<unknown>';
+
 const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
-export default function handler ({ id, message, request }: MessageRequest, port: chrome.runtime.Port): boolean {
+function createSubscription (id: number, port: chrome.runtime.Port): (data: any) => void {
+  // FIXME We are not handling actual unsubscribes yet, this is an issue
+  return (subscription: any) => {
+    port.postMessage({ id, subscription });
+  };
+}
+
+export default function handler ({ id, message, request }: MessageRequest, port: chrome.runtime.Port): void {
   const isPopup = port.name === PORT_POPUP;
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isPopup
     ? 'popup'
-    : sender.tab
-      ? sender.tab.url
-      : '<unknown>';
-  const source = `${from}: ${id}: ${message}`;
+    : sender.tab && sender.tab.url;
+  const source = `${from || FALLBACK_URL}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
 
+  // This is not great - basically, based on the name (since there is only 1 atm),
+  // we create a subscription handler. Basically these handlers will continute stream
+  // results as they become available
+  const subscription = message.indexOf('.subscribe') !== -1
+    ? createSubscription(id, port)
+    : undefined;
   const promise = isPopup
     ? extension.handle(message, request)
-    : tabs.handle(message, request, from);
+    : tabs.handle(message, request, from || FALLBACK_URL, subscription);
 
   promise
     .then((response) => {
       console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
-      port.postMessage({ id, response });
+      if (subscription) {
+        // TODO See unsub handling above, here we need to store the
+        // actual unsubscribe and handle appropriately
+        port.postMessage({ id, response: true });
+      } else {
+        port.postMessage({ id, response });
+      }
     })
     .catch((error) => {
       console.log(`[err] ${source}:: ${error.message}`);
 
       port.postMessage({ id, error: error.message });
     });
-
-  // return true to indicate we are sending the response async
-  return true;
 }

@@ -3,11 +3,13 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer } from '@polkadot/api/types';
-import { InjectedAccount, InjectedWindow, Unsubcall } from '../types';
+import { InjectedAccount, InjectedWindow } from '../types';
 
-// RxJs interface, only what we need here
+// RxJs interface, only the bare-bones of what we need here
 type Subscriber<T> = {
-  subscribe: (cb: (value: T) => void) => Unsubcall
+  subscribe: (cb: (value: T) => void) => {
+    unsubscribe (): any
+  }
 };
 
 type SingleSourceAccount = {
@@ -50,10 +52,15 @@ function injectSingleSource (win: SingleWindow): void {
       accounts: {
         get: async () =>
           accounts,
-        subscribe: (cb: (accounts: Array<InjectedAccount>) => any) =>
-          win.SingleSource.accounts$.subscribe((accounts) =>
+        subscribe: (cb: (accounts: Array<InjectedAccount>) => any) => {
+          const sub = win.SingleSource.accounts$.subscribe((accounts) =>
             cb(transformAccounts(accounts))
-          )
+          );
+
+          return (): void => {
+            sub.unsubscribe();
+          };
+        }
       },
       signer: win.SingleSource.signer
     }),

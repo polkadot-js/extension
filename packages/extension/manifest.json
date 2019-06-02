@@ -12,10 +12,7 @@
   },
   "content_scripts": [{
     "js": ["content.js"],
-    "matches": [
-      "https://polkadot.js.org/apps/*",
-      "http://localhost:3000/*"
-    ],
+    "matches": ["http://*/*", "https://*/*"],
     "run_at": "document_start"
   }],
   "icons": {

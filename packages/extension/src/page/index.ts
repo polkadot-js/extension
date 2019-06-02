@@ -82,3 +82,5 @@ windowInject.injectedWeb3['polkadot-js'] = {
   enable,
   version: process.env.PKG_VERSION as string
 };
+
+console.log(windowInject);

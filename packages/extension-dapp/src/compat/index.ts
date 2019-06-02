@@ -4,6 +4,7 @@
 
 import singleSource from './singleSource';
 
+// initialize all the compatibility engines
 export default function initCompat (): Promise<boolean> {
   return Promise.all([
     singleSource()

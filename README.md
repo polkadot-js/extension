@@ -47,7 +47,7 @@ window.injectedWeb3 = {
 }
 ```
 
-When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The injected interface, when returned via `enable`, contains the following -
+When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The `Injected` interface, as returned via `enable`, contains the following -
 
 ```js
 interface Injected {
@@ -57,12 +57,17 @@ interface Injected {
   // readonly provider: Provider
 }
 
+interface Account = {
+  readonly address: string; // ss-58 encoded address
+  readonly name?: string; // optional name for display
+};
+
 // exposes accounts
 interface Accounts {
-  get (): Promise<Array<{
-    readonly address: string; // ss-58 encoded address
-    readonly name?: string; // optional name for display
-  }>>;
+  // retrieves the list of accounts for right now
+  get (): Promise<Array<Account>>;
+  // subscribe to all accounts, updating as they change
+  subscribe (cb: (accounts: Array<Account>) => any): () => void
 }
 
 // a signer that communicates with the extension via sendMessage
@@ -72,11 +77,14 @@ interface Signer extends SignerInterface {
 }
 ```
 
-The app can use all or any of these, depending on needs. To instantiate the `@polkadot/api` with the provider (app does not have it's own) and the signer (allowing the extension to sign messages) can be done via -
+The app can use all or any of these, depending on needs. To instantiate the `@polkadot/api` signer (allowing the extension to sign messages) can be done via (assuming a known, single extension) -
 
 ```js
 import { ApiPromise } from '@polkadot/api';
 
-const { signer } = window.injectedWeb3;
-const api = await Api.create({ signer });
+const pjsx = await window.injectedWeb3['polkadot-js'].enable('my dapp');
+const accounts = await pjsx.accounts.get();
+const api = await Api.create({ signer: pjsx.signer });
 ```
+
+Generally, you would probably want to have access to all extensions available and have a slighly higher-level interface to work with. For these cases, [extension-dapp](packages/extension-dapp/) provides a cleaner interface around the injected object, making it simpler to work with from a dapp perspective.

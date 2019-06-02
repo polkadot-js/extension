@@ -1,11 +1,11 @@
 {
   "name": "@polkadot/extension-ui",
   "description": "A sample signer extension for the @polkadot/api",
-  "version": "0.1.1-beta.11",
+  "version": "0.1.1-beta.13",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/ui-identicon": "^0.40.0-beta.2",
+    "@polkadot/ui-identicon": "^0.40.0-beta.3",
     "@types/react-router": "^5.0.0",
     "@types/react-router-dom": "^4.3.3",
     "react-router": "^5.0.0",

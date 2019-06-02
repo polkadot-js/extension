@@ -5,6 +5,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension/chains';
+import fromMetadata from '@polkadot/extrinsics/fromMetadata';
+import { Metadata, Method } from '@polkadot/types';
 
 type Props = {
   className?: string,
@@ -13,6 +15,29 @@ type Props = {
   nonce: string,
   url: string
 };
+
+function renderMethod (data: string, meta?: Metadata | null) {
+  if (!meta) {
+    return (
+      <tr>
+        <td className='label'>method data</td>
+        <td className='data'>{data}</td>
+      </tr>
+    );
+  }
+
+  Method.injectMethods(fromMetadata(meta));
+
+  const method = new Method(data);
+  const methodfn = Method.findFunction(method.callIndex);
+
+  return (
+    <tr>
+      <td className='label'>{methodfn.section}.{methodfn.method}</td>
+      <td className='data'><pre>{JSON.stringify(method.toJSON().args, null, 2)}</pre></td>
+    </tr>
+  );
+}
 
 function Details ({ className, genesisHash, method, nonce, url }: Props) {
   const chain = findChain(genesisHash);
@@ -32,10 +57,7 @@ function Details ({ className, genesisHash, method, nonce, url }: Props) {
           <td className='label'>nonce</td>
           <td className='data'>{nonce}</td>
         </tr>
-        <tr>
-          <td className='label'>method</td>
-          <td className='data'>{method}</td>
-        </tr>
+        {renderMethod(method, chain ? chain.meta : null)}
       </tbody>
     </table>
   );
@@ -52,11 +74,20 @@ export default styled(Details)`
     overflow: hidden;
     text-align: left;
     text-overflow: ellipsis;
+    vertical-align: top;
     width: 100%;
+
+    pre {
+      font-family: inherit;
+      font-size: 0.75rem;
+      margin: 0;
+    }
   }
 
   td.label {
     opacity: 0.5;
     text-align: right;
+    vertical-align: top;
+    white-space: nowrap;
   }
 `;

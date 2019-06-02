@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from './types';
+import { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedWindow, Unsubcall } from './types';
 
 // our extension adaptor for other kinds of extensions
 import compatInjector from './compat';
@@ -44,9 +44,12 @@ export function web3Enable (originName: string): Promise<Array<InjectedExtension
   web3EnablePromise = compatInjector().then(() =>
     Promise.all(
       Object.entries(win.injectedWeb3).map(([name, { enable, version }]) =>
-        Promise
-          .all([Promise.resolve({ name, version }), enable(originName)])
-          .catch(() => [{ name, version }, null] as [InjectedExtensionInfo, null])
+        Promise.all([
+          Promise.resolve({ name, version }),
+          enable(originName).catch((error: Error) => {
+            console.error(`Error initializing ${name}: ${error.message}`);
+          })
+        ])
       )
     )
     .then((values) =>

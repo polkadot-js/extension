@@ -27,7 +27,7 @@ export default function handler ({ id, message, request }: MessageRequest, port:
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isPopup
     ? 'popup'
-    : sender.tab && sender.tab.url;
+    : (sender.tab && sender.tab.url) || sender.url;
   const source = `${from || FALLBACK_URL}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);

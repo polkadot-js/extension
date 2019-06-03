@@ -36,6 +36,10 @@ type SignRequest = {
 
 let idCounter = 0;
 
+function getId (): string {
+  return `${Date.now()}.${++idCounter}`;
+}
+
 export default class State {
   // at the moment, we are keeping the list in memory - this should be persisted
   private _authUrls: AuthUrls = {};
@@ -129,7 +133,7 @@ export default class State {
     }
 
     return new Promise((resolve, reject) => {
-      const id = `${Date.now()}.${++idCounter}`;
+      const id = getId();
 
       this._authRequests[id] = {
         id,
@@ -162,7 +166,7 @@ export default class State {
   }
 
   signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSign$Response> {
-    const id = `${Date.now()}.${++idCounter}`;
+    const id = getId();
 
     return new Promise((resolve, reject) => {
       this._signRequests[id] = {

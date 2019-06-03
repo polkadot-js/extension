@@ -15,7 +15,7 @@ import Injected from './Injected';
 //  - resolves/rejects the promise with the result (or sub data)
 
 type Handlers = {
-  [index: number]: {
+  [index: string]: {
     resolve: (data: any) => void,
     reject: (error: Error) => void,
     subscriber?: (data: any) => void
@@ -31,7 +31,7 @@ let idCounter = 0;
 // resolve once the event is resolved (by the response listener just below this)
 function sendMessage (message: MessageTypes, request: any = null, subscriber?: (data: any) => void): Promise<any> {
   return new Promise((resolve, reject) => {
-    const id = ++idCounter;
+    const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
 

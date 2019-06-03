@@ -16,7 +16,7 @@ type Props = {
   isFirst: boolean,
   onAction: OnActionFromCtx,
   request: MessageExtrinsicSign,
-  signId: number,
+  signId: string,
   url: string
 };
 

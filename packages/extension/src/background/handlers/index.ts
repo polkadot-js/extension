@@ -15,7 +15,7 @@ const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
-function createSubscription (id: number, port: chrome.runtime.Port): (data: any) => void {
+function createSubscription (id: string, port: chrome.runtime.Port): (data: any) => void {
   // FIXME We are not handling actual unsubscribes yet, this is an issue
   return (subscription: any) => {
     port.postMessage({ id, subscription });

@@ -73,15 +73,15 @@ interface Injected {
 
 interface Account = {
   readonly address: string; // ss-58 encoded address
-  readonly name?: string; // optional name for display
+  readonly name?: string; // (optional) name for display
 };
 
 // exposes accounts
 interface Accounts {
   // retrieves the list of accounts for right now
-  get (): Promise<Array<Account>>;
-  // subscribe to all accounts, updating as they change
-  subscribe (cb: (accounts: Array<Account>) => any): () => void
+  get: () => Promise<Array<Account>>;
+  // (optional) subscribe to all accounts, updating as they change
+  subscribe?: (cb: (accounts: Array<Account>) => any) => () => void
 }
 
 // a signer that communicates with the extension via sendMessage

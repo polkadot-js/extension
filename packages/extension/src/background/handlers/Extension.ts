@@ -98,6 +98,21 @@ export default class Extension {
     return this._state.allAuthRequests;
   }
 
+  // FIXME This looks very much like what we have in accounts
+  private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription(id, port);
+    const subscription = this._state.authSubject.subscribe((requests: Array<AuthorizeRequest>) =>
+      cb(requests)
+    );
+
+    port.onDisconnect.addListener(() => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
+  }
+
   private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreate$Response {
     const seed = mnemonicGenerate(length);
 
@@ -162,6 +177,21 @@ export default class Extension {
     return this._state.allSignRequests;
   }
 
+  // FIXME This looks very much like what we have in authorization
+  private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription(id, port);
+    const subscription = this._state.signSubject.subscribe((requests: Array<SigningRequest>) =>
+      cb(requests)
+    );
+
+    port.onDisconnect.addListener(() => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
+  }
+
   async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
     switch (type) {
       case 'authorize.approve':
@@ -172,6 +202,9 @@ export default class Extension {
 
       case 'authorize.requests':
         return this.authorizeRequests();
+
+      case 'authorize.subscribe':
+        return this.authorizeSubscribe(id, port);
 
       case 'accounts.create':
         return this.accountsCreate(request);
@@ -202,6 +235,9 @@ export default class Extension {
 
       case 'signing.requests':
         return this.signingRequests();
+
+      case 'signing.subscribe':
+        return this.signingSubscribe(id, port);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

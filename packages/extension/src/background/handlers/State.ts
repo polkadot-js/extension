@@ -5,6 +5,7 @@
 import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
+import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
 
 type AuthRequest = {
@@ -45,6 +46,8 @@ export default class State {
   private _authUrls: AuthUrls = {};
   private _authRequests: { [index: string]: AuthRequest } = {};
   private _signRequests: { [index: string]: SignRequest } = {};
+  readonly authSubject: BehaviorSubject<Array<AuthorizeRequest>> = new BehaviorSubject([] as Array<AuthorizeRequest>);
+  readonly signSubject: BehaviorSubject<Array<SigningRequest>> = new BehaviorSubject([] as Array<SigningRequest>);
 
   get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
@@ -88,7 +91,7 @@ export default class State {
       };
 
       delete this._authRequests[id];
-      this.updateIcon();
+      this.updateIconAuth();
 
       fn(result);
     };
@@ -97,7 +100,7 @@ export default class State {
   private signComplete = (id: string, fn: Function) => {
     return (result: MessageExtrinsicSign$Response | Error): void => {
       delete this._signRequests[id];
-      this.updateIcon();
+      this.updateIconSign();
 
       fn(result);
     };
@@ -123,6 +126,16 @@ export default class State {
     extension.browserAction.setBadgeText({ text });
   }
 
+  private updateIconAuth (): void {
+    this.authSubject.next(this.allAuthRequests);
+    this.updateIcon();
+  }
+
+  private updateIconSign (): void {
+    this.signSubject.next(this.allSignRequests);
+    this.updateIcon();
+  }
+
   async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
@@ -144,7 +157,7 @@ export default class State {
         url
       };
 
-      this.updateIcon();
+      this.updateIconAuth();
     });
   }
 
@@ -177,7 +190,7 @@ export default class State {
         url
       };
 
-      this.updateIcon();
+      this.updateIconSign();
     });
   }
 }

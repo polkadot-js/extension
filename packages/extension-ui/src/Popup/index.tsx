@@ -10,7 +10,7 @@ import { Route, Switch } from 'react-router';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeContext, SigningContext } from '../components/contexts';
-import { getAuthRequests, getSignRequests, subscribeAccounts } from '../messaging';
+import { subscribeAccounts, subscribeAuthorize, subscribeSigning } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import Create from './Create';
@@ -30,23 +30,17 @@ export default function Popup (props: Props) {
   const onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
-    // loads all accounts & requests (this is passed through to children to trigger changes)
-    Promise
-      .all([getAuthRequests(), getSignRequests()])
-      .then(([authRequests, signRequests]) => {
-        setAuthRequests(authRequests);
-        setSignRequests(signRequests);
-      })
-      .catch(console.error);
-
     if (to) {
       window.location.hash = to;
     }
   };
 
   useEffect((): void => {
-    subscribeAccounts((accounts) => setAccounts(accounts))
-      .catch(console.error);
+    Promise.all([
+      subscribeAccounts((accounts) => setAccounts(accounts)),
+      subscribeAuthorize((requests) => setAuthRequests(requests)),
+      subscribeSigning((requests) => setSignRequests(requests))
+    ]).catch(console.error);
     onAction();
   }, []);
 

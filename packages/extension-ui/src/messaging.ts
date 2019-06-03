@@ -103,6 +103,14 @@ export async function subscribeAccounts (cb: (accounts: Array<KeyringJson>) => v
   return sendMessage('accounts.subscribe', {}, cb);
 }
 
+export async function subscribeAuthorize (cb: (accounts: Array<AuthorizeRequest>) => void): Promise<boolean> {
+  return sendMessage('authorize.subscribe', {}, cb);
+}
+
+export async function subscribeSigning (cb: (accounts: Array<SigningRequest>) => void): Promise<boolean> {
+  return sendMessage('signing.subscribe', {}, cb);
+}
+
 export async function validateSeed (seed: string, type?: KeypairType): Promise<{ address: string, seed: string }> {
   return sendMessage('seed.validate', { seed, type });
 }

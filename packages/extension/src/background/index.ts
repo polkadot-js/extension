@@ -14,8 +14,8 @@ import { PORT_CONTENT, PORT_POPUP } from '../defaults';
 import ChromeStore from './ChromeStore';
 import handlers from './handlers';
 
-// setup the notification
-extension.browserAction.setBadgeBackgroundColor({ color: '#ff0000' });
+// setup the notification (same a FF default background, white text)
+extension.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
 
 // listen to all messages and handle appropriately
 extension.runtime.onConnect.addListener((port) => {

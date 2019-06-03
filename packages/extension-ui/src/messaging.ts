@@ -9,11 +9,14 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
 
+type Handler = {
+  resolve: (data: any) => void,
+  reject: (error: Error) => void,
+  subscriber?: (data: any) => void
+};
+
 type Handlers = {
-  [index: string]: {
-    resolve: (data: any) => void,
-    reject: (error: Error) => void
-  }
+  [index: string]: Handler
 };
 
 const port = extension.runtime.connect({ name: PORT_POPUP });
@@ -29,20 +32,24 @@ port.onMessage.addListener((data) => {
     return;
   }
 
-  delete handlers[data.id];
+  if (!handler.subscriber) {
+    delete handlers[data.id];
+  }
 
-  if (data.error) {
+  if (data.subscription) {
+    (handler.subscriber as Function)(data.subscription);
+  } else if (data.error) {
     handler.reject(new Error(data.error));
   } else {
     handler.resolve(data.response);
   }
 });
 
-function sendMessage (message: MessageTypes, request: any = {}): Promise<any> {
+function sendMessage (message: MessageTypes, request: any = {}, subscriber?: (data: any) => void): Promise<any> {
   return new Promise((resolve, reject) => {
     const id = `${Date.now()}.${++idCounter}`;
 
-    handlers[id] = { resolve, reject };
+    handlers[id] = { resolve, reject, subscriber };
 
     port.postMessage({ id, message, request });
   });
@@ -90,6 +97,18 @@ export async function createAccount (name: string, password: string, suri: strin
 
 export async function createSeed (length?: number, type?: KeypairType): Promise<{ address: string, seed: string }> {
   return sendMessage('seed.create', { length, type });
+}
+
+export async function subscribeAccounts (cb: (accounts: Array<KeyringJson>) => void): Promise<boolean> {
+  return sendMessage('accounts.subscribe', {}, cb);
+}
+
+export async function subscribeAuthorize (cb: (accounts: Array<AuthorizeRequest>) => void): Promise<boolean> {
+  return sendMessage('authorize.subscribe', {}, cb);
+}
+
+export async function subscribeSigning (cb: (accounts: Array<SigningRequest>) => void): Promise<boolean> {
+  return sendMessage('signing.subscribe', {}, cb);
 }
 
 export async function validateSeed (seed: string, type?: KeypairType): Promise<{ address: string, seed: string }> {

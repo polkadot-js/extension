@@ -14,12 +14,14 @@ import Injected from './Injected';
 //  - this injector, listens on the events, maps it to the original
 //  - resolves/rejects the promise with the result (or sub data)
 
+type Handler = {
+  resolve: (data: any) => void,
+  reject: (error: Error) => void,
+  subscriber?: (data: any) => void
+};
+
 type Handlers = {
-  [index: string]: {
-    resolve: (data: any) => void,
-    reject: (error: Error) => void,
-    subscriber?: (data: any) => void
-  }
+  [index: string]: Handler
 };
 
 // small helper with the typescript types, just cast window
@@ -62,12 +64,11 @@ window.addEventListener('message', ({ data, source }) => {
 
   if (!handler.subscriber) {
     delete handlers[data.id];
-  } else if (data.subscription) {
-    handler.subscriber(data.subscription);
-    return;
   }
 
-  if (data.error) {
+  if (data.subscription) {
+    (handler.subscriber as Function)(data.subscription);
+  } else if (data.error) {
     handler.reject(new Error(data.error));
   } else {
     handler.resolve(data.response);

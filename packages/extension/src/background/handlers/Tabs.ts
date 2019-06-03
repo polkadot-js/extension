@@ -2,15 +2,15 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Unsubcall } from '@polkadot/extension-dapp/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { MessageTypes, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
-import { assert, isFunction } from '@polkadot/util';
+import { assert } from '@polkadot/util';
 
 import State from './State';
+import { createSubscription, unsubscribe } from './subscriptions';
 
 type Accounts = Array<{ address: string, name?: string }>;
 
@@ -35,18 +35,19 @@ export default class Tabs {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 
-  private accountsSubscribe (url: string, cb?: (accounts: Accounts) => void): Unsubcall {
-    if (!isFunction(cb)) {
-      throw new Error('Expected accountsSubscribe to be passed a subscriber');
-    }
-
+  // FIXME This looks very much like what we have in Extension
+  private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo) =>
       cb(transformAccounts(accounts))
     );
 
-    return (): void => {
+    port.onDisconnect.addListener(() => {
+      unsubscribe(id);
       subscription.unsubscribe();
-    };
+    });
+
+    return true;
   }
 
   private extrinsicSign (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSign$Response> {
@@ -58,7 +59,7 @@ export default class Tabs {
     return this._state.signQueue(url, request);
   }
 
-  async handle (type: MessageTypes, request: any, url: string, subscriber?: (data: any) => void): Promise<any> {
+  async handle (id: string, type: MessageTypes, request: any, url: string, port: chrome.runtime.Port): Promise<any> {
     switch (type) {
       case 'authorize.tab':
         return this.authorize(url, request);
@@ -67,7 +68,7 @@ export default class Tabs {
         return this.accountsList(url);
 
       case 'accounts.subscribe':
-        return this.accountsSubscribe(url, subscriber);
+        return this.accountsSubscribe(url, id, port);
 
       case 'extrinsic.sign':
         return this.extrinsicSign(url, request);

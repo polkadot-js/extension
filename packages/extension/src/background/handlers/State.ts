@@ -8,7 +8,7 @@ import extension from 'extensionizer';
 import { assert } from '@polkadot/util';
 
 type AuthRequest = {
-  id: number,
+  id: string,
   idStr: string,
   request: MessageAuthorize,
   resolve: (result: boolean) => void,
@@ -27,7 +27,7 @@ type AuthUrls = {
 };
 
 type SignRequest = {
-  id: number,
+  id: string,
   request: MessageExtrinsicSign,
   resolve: (result: MessageExtrinsicSign$Response) => void,
   reject: (error: Error) => void,
@@ -36,11 +36,15 @@ type SignRequest = {
 
 let idCounter = 0;
 
+function getId (): string {
+  return `${Date.now()}.${++idCounter}`;
+}
+
 export default class State {
   // at the moment, we are keeping the list in memory - this should be persisted
   private _authUrls: AuthUrls = {};
-  private _authRequests: { [index: number]: AuthRequest } = {};
-  private _signRequests: { [index: number]: SignRequest } = {};
+  private _authRequests: { [index: string]: AuthRequest } = {};
+  private _signRequests: { [index: string]: SignRequest } = {};
 
   get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
@@ -70,7 +74,7 @@ export default class State {
       .map(({ id, request, url }) => [id, request, url]);
   }
 
-  private authComplete = (id: number, fn: Function) => {
+  private authComplete = (id: string, fn: Function) => {
     return (result: boolean | Error): void => {
       const isAllowed = result === true;
       const { idStr, request: { origin }, url } = this._authRequests[id];
@@ -90,7 +94,7 @@ export default class State {
     };
   }
 
-  private signComplete = (id: number, fn: Function) => {
+  private signComplete = (id: string, fn: Function) => {
     return (result: MessageExtrinsicSign$Response | Error): void => {
       delete this._signRequests[id];
       this.updateIcon();
@@ -129,7 +133,7 @@ export default class State {
     }
 
     return new Promise((resolve, reject) => {
-      const id = ++idCounter;
+      const id = getId();
 
       this._authRequests[id] = {
         id,
@@ -153,16 +157,16 @@ export default class State {
     return true;
   }
 
-  getAuthRequest (id: number): AuthRequest {
+  getAuthRequest (id: string): AuthRequest {
     return this._authRequests[id];
   }
 
-  getSignRequest (id: number): SignRequest {
+  getSignRequest (id: string): SignRequest {
     return this._signRequests[id];
   }
 
   signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSign$Response> {
-    const id = ++idCounter;
+    const id = getId();
 
     return new Promise((resolve, reject) => {
       this._signRequests[id] = {

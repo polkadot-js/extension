@@ -6,31 +6,31 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.tab' | 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests';
 
-export type AuthorizeRequest = [number, MessageAuthorize, string];
+export type AuthorizeRequest = [string, MessageAuthorize, string];
 
-export type SigningRequest = [number, MessageExtrinsicSign, string];
+export type SigningRequest = [string, MessageExtrinsicSign, string];
 
 export type MessageAuthorize = {
   origin: string
 };
 
 export type MessageAuthorizeApprove = {
-  id: number;
+  id: string;
 };
 
 export type MessageAuthorizeReject = {
-  id: number;
+  id: string;
 };
 
 export type MessageRequest = {
-  id: number,
+  id: string,
   message: MessageTypes,
   request: any
 };
 
 export type MessageResponse = {
   error?: string,
-  id: number,
+  id: string,
   response?: any,
   subscription?: any
 };
@@ -52,12 +52,12 @@ export type MessageAccountForget = {
 };
 
 export type MessageExtrinsicSignApprove = {
-  id: number,
+  id: string,
   password: string
 };
 
 export type MessageExtrinsicSignCancel = {
-  id: number
+  id: string
 };
 
 export type MessageExtrinsicSign = {
@@ -69,7 +69,7 @@ export type MessageExtrinsicSign = {
 };
 
 export type MessageExtrinsicSign$Response = {
-  id: number,
+  id: string,
   signature: string
 };
 

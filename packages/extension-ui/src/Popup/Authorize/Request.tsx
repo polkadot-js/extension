@@ -12,7 +12,7 @@ import { ActionBar, Button, Icon, IconBox, Link, Tip, defaults, withOnAction } f
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 type Props = {
-  authId: number,
+  authId: string,
   className?: string,
   isFirst: boolean,
   onAction: OnActionFromCtx,

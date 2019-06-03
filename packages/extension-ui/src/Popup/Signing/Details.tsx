@@ -11,6 +11,7 @@ import { Metadata, Method } from '@polkadot/types';
 type Props = {
   className?: string,
   genesisHash: string,
+  isDecoded: boolean,
   method: string,
   nonce: string,
   url: string
@@ -39,7 +40,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
   );
 }
 
-function Details ({ className, genesisHash, method, nonce, url }: Props) {
+function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Props) {
   const chain = findChain(genesisHash);
 
   return (
@@ -57,7 +58,7 @@ function Details ({ className, genesisHash, method, nonce, url }: Props) {
           <td className='label'>nonce</td>
           <td className='data'>{nonce}</td>
         </tr>
-        {renderMethod(method, chain ? chain.meta : null)}
+        {renderMethod(method, (chain && isDecoded) ? chain.meta : null)}
       </tbody>
     </table>
   );

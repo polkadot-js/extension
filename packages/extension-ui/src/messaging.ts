@@ -10,7 +10,7 @@ import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
 
 type Handlers = {
-  [index: number]: {
+  [index: string]: {
     resolve: (data: any) => void,
     reject: (error: Error) => void
   }
@@ -40,7 +40,7 @@ port.onMessage.addListener((data) => {
 
 function sendMessage (message: MessageTypes, request: any = {}): Promise<any> {
   return new Promise((resolve, reject) => {
-    const id = ++idCounter;
+    const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject };
 
@@ -64,11 +64,11 @@ export async function getAuthRequests (): Promise<Array<AuthorizeRequest>> {
   return sendMessage('authorize.requests');
 }
 
-export async function rejectAuthRequest (id: number): Promise<boolean> {
+export async function rejectAuthRequest (id: string): Promise<boolean> {
   return sendMessage('authorize.reject', { id });
 }
 
-export async function approveAuthRequest (id: number): Promise<boolean> {
+export async function approveAuthRequest (id: string): Promise<boolean> {
   return sendMessage('authorize.approve', { id });
 }
 
@@ -76,11 +76,11 @@ export async function getSignRequests (): Promise<Array<SigningRequest>> {
   return sendMessage('signing.requests');
 }
 
-export async function cancelSignRequest (id: number): Promise<boolean> {
+export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('signing.cancel', { id });
 }
 
-export async function approveSignRequest (id: number, password: string): Promise<boolean> {
+export async function approveSignRequest (id: string, password: string): Promise<boolean> {
   return sendMessage('signing.approve', { id, password });
 }
 

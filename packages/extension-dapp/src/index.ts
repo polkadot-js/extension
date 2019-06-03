@@ -53,14 +53,29 @@ export function web3Enable (originName: string): Promise<Array<InjectedExtension
       )
     )
     .then((values) =>
-      values.filter(([, ext]) => ext).map(([info, ext]) => ({ ...info, ...ext } as InjectedExtension))
+      values
+        .filter(([, ext]) => ext)
+        .map(([info, ext]) => {
+          // if we don't have an accounts subscriber, add a single-shot version
+          if (ext && !ext.accounts.subscribe) {
+            ext.accounts.subscribe = (cb: (accounts: Array<InjectedAccount>) => any): Unsubcall => {
+              ext.accounts.get().then(cb).catch(console.error);
+
+              return (): void => {
+                // no ubsubscribe needed, this is a single-shot
+              };
+            };
+          }
+
+          return { ...info, ...ext } as InjectedExtension;
+        })
     )
     .catch(() => [] as Array<InjectedExtension>)
     .then((values) => {
       const names = values.map(({ name, version }) => `${name}/${version}`);
 
       isWeb3Injected = web3IsInjected();
-      console.log(`web3Enable: Enabled ${values.length} extensions ${names.join(', ')}`);
+      console.log(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
 
       return values;
     })

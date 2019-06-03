@@ -37,9 +37,9 @@ export default function Popup (props: Props) {
 
   useEffect((): void => {
     Promise.all([
-      subscribeAccounts((accounts) => setAccounts(accounts)),
-      subscribeAuthorize((requests) => setAuthRequests(requests)),
-      subscribeSigning((requests) => setSignRequests(requests))
+      subscribeAccounts(setAccounts),
+      subscribeAuthorize(setAuthRequests),
+      subscribeSigning(setSignRequests)
     ]).catch(console.error);
     onAction();
   }, []);

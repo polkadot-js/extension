@@ -109,7 +109,7 @@ export async function web3Accounts (): Promise<Array<InjectedAccountWithMeta>> {
 
   const addresses = accounts.map(({ address }) => address);
 
-  console.log(`web3Accounts: Found ${accounts.length} addresses ${addresses.join(', ')}`);
+  console.log(`web3Accounts: Found ${accounts.length} address${accounts.length !== 1 ? 'es' : ''}: ${addresses.join(', ')}`);
 
   return accounts;
 }

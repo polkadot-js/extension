@@ -11,10 +11,17 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 Currently is not packaged since it is under heavy development. As such you need to build it yourself. To use -
 
 1. Build via `yarn build` or `yarn watch`
-2. Add the extension under `chrome://extensions/`
-  - ensure you have the Development flag set
-  - "Load unpacked" and point to `packages/extension/build`
-  - if developing, after making changes - refresh the extension
+2. Install the extension
+  - Chrome:
+    - go to `chrome://extensions/`
+    - ensure you have the Development flag set
+    - "Load unpacked" and point to `packages/extension/build`
+    - if developing, after making changes - refresh the extension
+  - Firefox:
+    - go to `about:debugging#addons`
+    - check "Enable add-on debugging"
+    - click on "Load Temporary Add-on" and point to `packages/extension/build/manifest.json`
+    - if developing, after making changes - reload the extension
 3. When visiting `http://localhost:3000` or `https://polkadot.js.org/apps/` it will inject the extension (the manifest currently only lists these 2 endpoints)
 
 Once added, you can create an account (via a generated seed) or import via an existing seed. The UI, when loaded, will show these accounts as `<account name> (extension)`

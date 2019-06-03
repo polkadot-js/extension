@@ -33,6 +33,7 @@ function Request ({ isFirst, onAction, request: { address, genesisHash, method, 
     <Address address={address}>
       <Details
         genesisHash={genesisHash}
+        isDecoded={isFirst}
         method={method}
         nonce={nonce}
         url={url}

@@ -35,7 +35,7 @@ function Welcome ({ onAction }: Props) {
         />
       </Box>
     </div>
-  )
+  );
 }
 
 export default withOnAction(Welcome);

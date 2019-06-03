@@ -17,6 +17,7 @@ import Create from './Create';
 import Forget from './Forget';
 import Import from './Import';
 import Signing from './Signing';
+import Welcome from './Welcome';
 
 type Props = {};
 
@@ -24,8 +25,11 @@ export default function Popup (props: Props) {
   const [accounts, setAccounts] = useState<null | Array<KeyringJson>>(null);
   const [authRequests, setAuthRequests] = useState<null | Array<AuthorizeRequest>>(null);
   const [signRequests, setSignRequests] = useState<null | Array<SigningRequest>>(null);
+  const [isWelcomeDone, setWelcomeDone] = useState(false);
 
   const onAction = (to?: string): void => {
+    setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+
     // loads all accounts & requests (this is passed through to children to trigger changes)
     Promise
       .all([getAccounts(), getAuthRequests(), getSignRequests()])
@@ -46,11 +50,13 @@ export default function Popup (props: Props) {
     onAction();
   }, []);
 
-  const Root = authRequests && authRequests.length
-    ? Authorize
-    : signRequests && signRequests.length
-      ? Signing
-      : Accounts;
+  const Root = isWelcomeDone
+    ? authRequests && authRequests.length
+      ? Authorize
+      : signRequests && signRequests.length
+        ? Signing
+        : Accounts
+    : Welcome;
 
   return (
     <Loading>{accounts && authRequests && signRequests && (

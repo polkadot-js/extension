@@ -37,7 +37,8 @@ function Request ({ authId, className, isFirst, onAction, request: { origin }, u
         <Icon
           icon='X'
           onClick={onReject}
-        />}
+        />
+      }
       intro={
         <div>An application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div>.</div>
       }

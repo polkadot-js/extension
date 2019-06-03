@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget, SigningRequest } from '../types';
 
@@ -12,9 +13,14 @@ import { assert, u8aToHex } from '@polkadot/util';
 
 import RawPayload from '../RawPayload';
 import State from './State';
+import { createSubscription, unsubscribe } from './subscriptions';
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
+
+function transformAccounts (accounts: SubjectInfo): Array<KeyringJson> {
+  return Object.values(accounts).map(({ json }) => json);
+}
 
 export default class Extension {
   private _state: State;
@@ -46,9 +52,22 @@ export default class Extension {
   }
 
   private accountsList (): Array<KeyringJson> {
-    return Object
-      .values(accountsObservable.subject.getValue())
-      .map(({ json }) => json);
+    return transformAccounts(accountsObservable.subject.getValue());
+  }
+
+  // FIXME This looks very much like what we have in Tabs
+  private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription(id, port);
+    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo) =>
+      cb(transformAccounts(accounts))
+    );
+
+    port.onDisconnect.addListener(() => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
   }
 
   private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
@@ -143,7 +162,7 @@ export default class Extension {
     return this._state.allSignRequests;
   }
 
-  async handle (type: MessageTypes, request: any): Promise<any> {
+  async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
     switch (type) {
       case 'authorize.approve':
         return this.authorizeApprove(request);
@@ -165,6 +184,9 @@ export default class Extension {
 
       case 'accounts.list':
         return this.accountsList();
+
+      case 'accounts.subscribe':
+        return this.accountsSubscribe(id, port);
 
       case 'seed.create':
         return this.seedCreate(request);

@@ -10,7 +10,7 @@ import { Route, Switch } from 'react-router';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeContext, SigningContext } from '../components/contexts';
-import { getAccounts, getAuthRequests, getSignRequests } from '../messaging';
+import { getAuthRequests, getSignRequests, subscribeAccounts } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import Create from './Create';
@@ -32,9 +32,8 @@ export default function Popup (props: Props) {
 
     // loads all accounts & requests (this is passed through to children to trigger changes)
     Promise
-      .all([getAccounts(), getAuthRequests(), getSignRequests()])
-      .then(([accounts, authRequests, signRequests]) => {
-        setAccounts(accounts);
+      .all([getAuthRequests(), getSignRequests()])
+      .then(([authRequests, signRequests]) => {
         setAuthRequests(authRequests);
         setSignRequests(signRequests);
       })
@@ -46,7 +45,8 @@ export default function Popup (props: Props) {
   };
 
   useEffect((): void => {
-    // with an empty state, load the accounts & requests
+    subscribeAccounts((accounts) => setAccounts(accounts))
+      .catch(console.error);
     onAction();
   }, []);
 

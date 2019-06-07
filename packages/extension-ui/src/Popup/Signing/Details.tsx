@@ -30,11 +30,10 @@ function renderMethod (data: string, meta?: Metadata | null) {
   Method.injectMethods(fromMetadata(meta));
 
   const method = new Method(data);
-  const methodfn = Method.findFunction(method.callIndex);
 
   return (
     <tr>
-      <td className='label'>{methodfn.section}.{methodfn.method}</td>
+      <td className='label'>{method.sectionName}.{method.methodName}</td>
       <td className='data'><pre>{JSON.stringify(method.toJSON().args, null, 2)}</pre></td>
     </tr>
   );

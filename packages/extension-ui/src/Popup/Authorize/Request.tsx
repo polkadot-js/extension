@@ -40,18 +40,20 @@ function Request ({ authId, className, isFirst, onAction, request: { origin }, u
         />
       }
       intro={
-        <div>An application, identified as <div className='tab-name'>{origin}</div> is requesting access from <div className='tab-url'>{url}</div>.</div>
+        <div className='tab-info'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from <span className='tab-url'>{url}</span>.</div>
       }
     >
       <ActionBar>
         <Link isDanger onClick={onReject}>Reject</Link>
       </ActionBar>
-      <Tip header='access' type='warn'>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</Tip>
       {isFirst && (
-        <Button
-          label='Yes, allow this application access'
-          onClick={onApprove}
-        />
+        <>
+          <Tip header='access' type='warn'>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</Tip>
+          <Button
+            label='Yes, allow this application access'
+            onClick={onApprove}
+          />
+        </>
       )}
     </IconBox>
   );
@@ -63,9 +65,17 @@ export default withOnAction(styled(Request)`
     color: ${defaults.btnColorDanger};
   }
 
+  .tab-info {
+    overflow: hidden;
+  }
+
   .tab-name,
   .tab-url {
     color: ${defaults.linkColor};
     display: inline-block;
+    max-width: 20rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
   }
 `);

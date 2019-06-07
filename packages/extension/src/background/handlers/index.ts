@@ -9,8 +9,6 @@ import Extension from './Extension';
 import State from './State';
 import Tabs from './Tabs';
 
-const FALLBACK_URL = '<unknown>';
-
 const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
@@ -20,14 +18,14 @@ export default function handler ({ id, message, request }: MessageRequest, port:
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isPopup
     ? 'popup'
-    : (sender.tab && sender.tab.url) || sender.url;
-  const source = `${from || FALLBACK_URL}: ${id}: ${message}`;
+    : (sender.tab && sender.tab.url) || sender.url || '<unknown>';
+  const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
 
   const promise = isPopup
     ? extension.handle(id, message, request, port)
-    : tabs.handle(id, message, request, from || FALLBACK_URL, port);
+    : tabs.handle(id, message, request, from, port);
 
   promise
     .then((response) => {

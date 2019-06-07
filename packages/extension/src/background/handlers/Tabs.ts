@@ -21,14 +21,14 @@ function transformAccounts (accounts: SubjectInfo): Accounts {
 }
 
 export default class Tabs {
-  private _state: State;
+  state: State;
 
   constructor (state: State) {
-    this._state = state;
+    this.state = state;
   }
 
   private authorize (url: string, request: MessageAuthorize) {
-    return this._state.authorizeUrl(url, request);
+    return this.state.authorizeUrl(url, request);
   }
 
   private accountsList (url: string): Accounts {
@@ -56,7 +56,7 @@ export default class Tabs {
 
     assert(pair, 'Unable to find keypair');
 
-    return this._state.signQueue(url, request);
+    return this.state.signQueue(url, request);
   }
 
   async handle (id: string, type: MessageTypes, request: any, url: string, port: chrome.runtime.Port): Promise<any> {

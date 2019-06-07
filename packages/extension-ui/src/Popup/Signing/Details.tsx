@@ -30,13 +30,28 @@ function renderMethod (data: string, meta?: Metadata | null) {
   Method.injectMethods(fromMetadata(meta));
 
   const method = new Method(data);
-  const methodfn = Method.findFunction(method.callIndex);
 
   return (
-    <tr>
-      <td className='label'>{methodfn.section}.{methodfn.method}</td>
-      <td className='data'><pre>{JSON.stringify(method.toJSON().args, null, 2)}</pre></td>
-    </tr>
+    <>
+      <tr>
+        <td className='label'>method</td>
+        <td className='data'>{method.sectionName}.{method.methodName}</td>
+      </tr>
+      <tr>
+        <td className='label'>&nbsp;</td>
+        <td className='data'><pre>{JSON.stringify(method.toJSON().args, null, 2)}</pre></td>
+      </tr>
+      {method.meta && (
+        <tr>
+          <td className='label'>info</td>
+          <td className='data'>
+            <details>
+              <summary>{method.meta.documentation.join(' ')}</summary>
+            </details>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -75,7 +90,7 @@ export default styled(Details)`
     overflow: hidden;
     text-align: left;
     text-overflow: ellipsis;
-    vertical-align: top;
+    vertical-align: middle;
     width: 100%;
 
     pre {
@@ -87,8 +102,25 @@ export default styled(Details)`
 
   td.label {
     opacity: 0.5;
+    padding: 0 0.5rem;
     text-align: right;
-    vertical-align: top;
+    vertical-align: middle;
     white-space: nowrap;
+  }
+
+  details {
+    cursor: pointer;
+    max-width: 24rem;
+
+    &[open] summary {
+      white-space: normal;
+    }
+
+    summary {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      outline: 0;
+    }
   }
 `;

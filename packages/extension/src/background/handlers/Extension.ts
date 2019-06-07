@@ -8,10 +8,10 @@ import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdi
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
+import { SignaturePayloadRaw } from '@polkadot/types';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { assert, u8aToHex } from '@polkadot/util';
 
-import RawPayload from '../RawPayload';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -23,10 +23,10 @@ function transformAccounts (accounts: SubjectInfo): Array<KeyringJson> {
 }
 
 export default class Extension {
-  private _state: State;
+  state: State;
 
   constructor (state: State) {
-    this._state = state;
+    this.state = state;
   }
 
   private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
@@ -71,7 +71,7 @@ export default class Extension {
   }
 
   private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
-    const queued = this._state.getAuthRequest(id);
+    const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -83,7 +83,7 @@ export default class Extension {
   }
 
   private authorizeReject ({ id }: MessageAuthorizeReject): boolean {
-    const queued = this._state.getAuthRequest(id);
+    const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -95,13 +95,13 @@ export default class Extension {
   }
 
   private authorizeRequests (): Array<AuthorizeRequest> {
-    return this._state.allAuthRequests;
+    return this.state.allAuthRequests;
   }
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription(id, port);
-    const subscription = this._state.authSubject.subscribe((requests: Array<AuthorizeRequest>) =>
+    const subscription = this.state.authSubject.subscribe((requests: Array<AuthorizeRequest>) =>
       cb(requests)
     );
 
@@ -133,7 +133,7 @@ export default class Extension {
   }
 
   private signingApprove ({ id, password }: MessageExtrinsicSignApprove): boolean {
-    const queued = this._state.getSignRequest(id);
+    const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -148,7 +148,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
 
-    const payload = new RawPayload({ blockHash, method, nonce });
+    const payload = new SignaturePayloadRaw({ blockHash, method, nonce });
     const signature = u8aToHex(payload.sign(pair));
 
     pair.lock();
@@ -162,7 +162,7 @@ export default class Extension {
   }
 
   private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
-    const queued = this._state.getSignRequest(id);
+    const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -174,13 +174,13 @@ export default class Extension {
   }
 
   private signingRequests (): Array<SigningRequest> {
-    return this._state.allSignRequests;
+    return this.state.allSignRequests;
   }
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription(id, port);
-    const subscription = this._state.signSubject.subscribe((requests: Array<SigningRequest>) =>
+    const subscription = this.state.signSubject.subscribe((requests: Array<SigningRequest>) =>
       cb(requests)
     );
 

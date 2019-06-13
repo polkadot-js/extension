@@ -40,7 +40,7 @@ export default class Extension {
 
     assert(pair, 'Unable to find pair');
 
-    keyring.saveAccountMeta(pair, { ...pair.getMeta(), name });
+    keyring.saveAccountMeta(pair, { ...pair.meta, name });
 
     return true;
   }
@@ -117,7 +117,7 @@ export default class Extension {
     const seed = mnemonicGenerate(length);
 
     return {
-      address: keyring.createFromUri(seed, {}, type).address(),
+      address: keyring.createFromUri(seed, {}, type).address,
       seed
     };
   }
@@ -127,7 +127,7 @@ export default class Extension {
     assert(mnemonicValidate(seed), 'Not a valid mnemonic seed');
 
     return {
-      address: keyring.createFromUri(seed, {}, type).address(),
+      address: keyring.createFromUri(seed, {}, type).address,
       seed
     };
   }

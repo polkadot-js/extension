@@ -8,6 +8,10 @@ import findChain from '@polkadot/extension/chains';
 import fromMetadata from '@polkadot/extrinsics/fromMetadata';
 import { Metadata, Method } from '@polkadot/types';
 
+type MethodJson = {
+  args: { [index: string]: any }
+};
+
 type Props = {
   className?: string,
   genesisHash: string,
@@ -30,6 +34,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
   Method.injectMethods(fromMetadata(meta));
 
   const method = new Method(data);
+  const json = method.toJSON() as unknown as MethodJson;
 
   return (
     <>
@@ -39,7 +44,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
       </tr>
       <tr>
         <td className='label'>&nbsp;</td>
-        <td className='data'><pre>{JSON.stringify(method.toJSON().args, null, 2)}</pre></td>
+        <td className='data'><pre>{JSON.stringify(json.args, null, 2)}</pre></td>
       </tr>
       {method.meta && (
         <tr>

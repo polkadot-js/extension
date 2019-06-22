@@ -46,6 +46,7 @@ export default class State {
   private _authUrls: AuthUrls = {};
   private _authRequests: { [index: string]: AuthRequest } = {};
   private _signRequests: { [index: string]: SignRequest } = {};
+  private _windows: Array<number> = [];
   readonly authSubject: BehaviorSubject<Array<AuthorizeRequest>> = new BehaviorSubject([] as Array<AuthorizeRequest>);
   readonly signSubject: BehaviorSubject<Array<SigningRequest>> = new BehaviorSubject([] as Array<SigningRequest>);
 
@@ -77,6 +78,29 @@ export default class State {
       .map(({ id, request, url }) => [id, request, url]);
   }
 
+  private popupClose (): void {
+    this._windows.map((id: number) =>
+      extension.windows.remove(id)
+    );
+    this._windows = [];
+  }
+
+  private popupOpen (): void {
+    extension.windows.create({
+      focused: true,
+      height: 580,
+      left: 150,
+      top: 150,
+      type: 'popup',
+      url: extension.extension.getURL('popup.html'),
+      width: 480
+    }, (window?: chrome.windows.Window) => {
+      if (window) {
+        this._windows.push(window.id);
+      }
+    });
+  }
+
   private authComplete = (id: string, fn: Function) => {
     return (result: boolean | Error): void => {
       const isAllowed = result === true;
@@ -91,7 +115,7 @@ export default class State {
       };
 
       delete this._authRequests[id];
-      this.updateIconAuth();
+      this.updateIconAuth(true);
 
       fn(result);
     };
@@ -100,7 +124,7 @@ export default class State {
   private signComplete = (id: string, fn: Function) => {
     return (result: MessageExtrinsicSign$Response | Error): void => {
       delete this._signRequests[id];
-      this.updateIconSign();
+      this.updateIconSign(true);
 
       fn(result);
     };
@@ -114,7 +138,7 @@ export default class State {
     return parts[2];
   }
 
-  private updateIcon (): void {
+  private updateIcon (shouldClose?: boolean): void {
     const authCount = this.numAuthRequests;
     const signCount = this.numSignRequests;
     const text = (
@@ -124,16 +148,20 @@ export default class State {
     );
 
     extension.browserAction.setBadgeText({ text });
+
+    if (shouldClose && text === '') {
+      this.popupClose();
+    }
   }
 
-  private updateIconAuth (): void {
+  private updateIconAuth (shouldClose?: boolean): void {
     this.authSubject.next(this.allAuthRequests);
-    this.updateIcon();
+    this.updateIcon(shouldClose);
   }
 
-  private updateIconSign (): void {
+  private updateIconSign (shouldClose?: boolean): void {
     this.signSubject.next(this.allSignRequests);
-    this.updateIcon();
+    this.updateIcon(shouldClose);
   }
 
   async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
@@ -158,6 +186,7 @@ export default class State {
       };
 
       this.updateIconAuth();
+      this.popupOpen();
     });
   }
 
@@ -191,6 +220,7 @@ export default class State {
       };
 
       this.updateIconSign();
+      this.popupOpen();
     });
   }
 }

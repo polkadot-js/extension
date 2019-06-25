@@ -5,7 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension/chains';
-import fromMetadata from '@polkadot/extrinsics/fromMetadata';
 import { Metadata, Method } from '@polkadot/types';
 
 type MethodJson = {
@@ -31,9 +30,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
     );
   }
 
-  Method.injectMethods(fromMetadata(meta));
-
-  const method = new Method(data);
+  const method = new Method(data, Method.findMetaByValue(data, meta));
   const json = method.toJSON() as unknown as MethodJson;
 
   return (

@@ -30,7 +30,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
     );
   }
 
-  const method = new Method(data, Method.findByValue(data, meta));
+  const method = new Method(data, { meta });
   const json = method.toJSON() as unknown as MethodJson;
 
   return (

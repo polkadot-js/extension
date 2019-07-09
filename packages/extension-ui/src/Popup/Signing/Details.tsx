@@ -4,8 +4,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension/chains';
-import fromMetadata from '@polkadot/extrinsics/fromMetadata';
 import { Metadata, Method } from '@polkadot/types';
 
 type MethodJson = {

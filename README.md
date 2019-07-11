@@ -61,27 +61,32 @@ window.injectedWeb3 = {
 }
 ```
 
-When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The `Injected` interface, as returned via `enable`, contains the following -
+When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The `Injected` interface, as returned via `enable`, contains the following and is what any compliant extension supplies -
 
 ```js
 interface Injected {
+  // the interface for Accounts, as detailed below
   readonly accounts: Accounts;
+  // the standard Signer interface for the API, as detailed below
   readonly signer: Signer;
-  // not injected as of yet, subscriptable provider for polkadot-js injection
+  // not injected as of yet, subscriptable provider for polkadot-js API injection,
+  // this can be passed to the API itself upon construction in the dapp
   // readonly provider: Provider
 }
 
 interface Account = {
-  readonly address: string; // ss-58 encoded address
-  readonly name?: string; // (optional) name for display
+  // ss-58 encoded address
+  readonly address: string;
+  // (optional) name for display
+  readonly name?: string;
 };
 
 // exposes accounts
 interface Accounts {
   // retrieves the list of accounts for right now
-  get: () => Promise<Array<Account>>;
+  get: () => Promise<Account[]>;
   // (optional) subscribe to all accounts, updating as they change
-  subscribe?: (cb: (accounts: Array<Account>) => any) => () => void
+  subscribe?: (cb: (accounts: Account[]) => any) => () => void
 }
 
 // a signer that communicates with the extension via sendMessage

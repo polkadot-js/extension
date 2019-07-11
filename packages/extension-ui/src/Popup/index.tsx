@@ -19,12 +19,11 @@ import Import from './Import';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Popup (props: {}): React.ReactElement<Props> {
-  const [accounts, setAccounts] = useState<null | Array<KeyringJson>>(null);
-  const [authRequests, setAuthRequests] = useState<null | Array<AuthorizeRequest>>(null);
-  const [signRequests, setSignRequests] = useState<null | Array<SigningRequest>>(null);
+export default function Popup (props: {}): React.ReactElement<{}> {
+  const [accounts, setAccounts] = useState<null | KeyringJson[]>(null);
+  const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
+  const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
 
   const onAction = (to?: string): void => {

@@ -9,10 +9,11 @@ import Accounts from './Accounts';
 import Signer from './Signer';
 
 export default class Injected implements InjectedInjected {
-  readonly accounts: Accounts;
-  readonly signer: Signer;
+  public readonly accounts: Accounts;
 
-  constructor (sendRequest: SendRequest) {
+  public readonly signer: Signer;
+
+  public constructor (sendRequest: SendRequest) {
     this.accounts = new Accounts(sendRequest);
     this.signer = new Signer(sendRequest);
   }

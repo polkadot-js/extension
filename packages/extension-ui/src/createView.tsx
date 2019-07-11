@@ -8,7 +8,7 @@ import { HashRouter } from 'react-router-dom';
 
 import { View } from './components';
 
-export default function createView (Entry: React.ComponentType<any>, rootId: string = 'root'): void {
+export default function createView (Entry: React.ComponentType, rootId: string = 'root'): void {
   const rootElement = document.getElementById(rootId);
 
   if (!rootElement) {

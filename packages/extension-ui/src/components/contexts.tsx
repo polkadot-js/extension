@@ -6,7 +6,8 @@ import { AccountsFromCtx, OnActionFromCtx, AuthRequestsFromCtx, SignRequestsFrom
 
 import React from 'react';
 
-const noop = (to?: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const noop = (to?: string): void => {
   // do nothing
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 // Copyright 2019 @polkadot/extension authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
@@ -68,6 +69,7 @@ function createWebpack ({ alias = {}, context }) {
       ]
     },
     node: {
+      // eslint-disable-next-line @typescript-eslint/camelcase
       child_process: 'empty',
       dgram: 'empty',
       fs: 'empty',
@@ -83,7 +85,7 @@ function createWebpack ({ alias = {}, context }) {
         'process.env': {
           NODE_ENV: JSON.stringify(ENV),
           PKG_NAME: JSON.stringify(pkgJson.name),
-          PKG_VERSION: JSON.stringify(pkgJson.version),
+          PKG_VERSION: JSON.stringify(pkgJson.version)
         }
       }),
       new CopyPlugin([{ from: 'public' }]),

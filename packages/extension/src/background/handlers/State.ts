@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
@@ -28,7 +28,7 @@ type AuthUrls = Record<string, {
 interface SignRequest {
   id: string;
   request: MessageExtrinsicSign;
-  resolve: (result: MessageExtrinsicSign$Response) => void;
+  resolve: (result: MessageExtrinsicSignResponse) => void;
   reject: (error: Error) => void;
   url: string;
 }
@@ -119,8 +119,8 @@ export default class State {
     };
   }
 
-  private signComplete = (id: string, fn: Function): (result: MessageExtrinsicSign$Response | Error) => void => {
-    return (result: MessageExtrinsicSign$Response | Error): void => {
+  private signComplete = (id: string, fn: Function): (result: MessageExtrinsicSignResponse | Error) => void => {
+    return (result: MessageExtrinsicSignResponse | Error): void => {
       delete this._signRequests[id];
       this.updateIconSign(true);
 
@@ -205,7 +205,7 @@ export default class State {
     return this._signRequests[id];
   }
 
-  public signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSign$Response> {
+  public signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSignResponse> {
     const id = getId();
 
     return new Promise((resolve, reject): void => {

@@ -40,35 +40,31 @@ function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }
 
 export default styled(TextArea)`
   textarea {
-    background: ${({ isError, isReadOnly }) =>
+    background: ${({ isError, isReadOnly }): string =>
       isError
         ? defaults.box.error.background
         : isReadOnly
           ? '#eee'
-          : '#fff'
-    };
-    border-color: ${({ isError }) =>
+          : '#fff'};
+    border-color: ${({ isError }): string =>
       isError
         ? defaults.box.error.border
-        : defaults.inputBorder
-    };
+        : defaults.inputBorder};
     border-radius: ${defaults.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError }) =>
+    color: ${({ isError }): string =>
       isError
         ? defaults.box.error.border
-        : defaults.color
-    };
+        : defaults.color};
     display: block;
     font-family: ${defaults.fontFamily};
     font-size: ${defaults.fontSize};
-    padding: ${({ label }) =>
+    padding: ${({ label }): string =>
       label
         ? defaults.inputPaddingLabel
-        : defaults.inputPadding
-    };
+        : defaults.inputPadding};
     resize: none;
     width: 100%;
 

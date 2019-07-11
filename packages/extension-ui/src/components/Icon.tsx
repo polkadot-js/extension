@@ -8,7 +8,7 @@ import styled from 'styled-components';
 interface Props {
   className?: string;
   icon: string;
-  onClick?: () => void | Promise<void>
+  onClick?: () => void | Promise<void>;
 }
 
 function Icon ({ className, icon, onClick }: Props): React.ReactElement<Props> {

@@ -13,11 +13,11 @@ import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 let sendRequest: SendRequest;
 
 export default class Signer implements InjectedSigner {
-  constructor (_sendRequest: SendRequest) {
+  public constructor (_sendRequest: SendRequest) {
     sendRequest = _sendRequest;
   }
 
-  async sign (extrinsic: IExtrinsic, address: string, { blockHash, genesisHash, nonce }: SignerOptions): Promise<number> {
+  public async sign (extrinsic: IExtrinsic, address: string, { blockHash, genesisHash, nonce }: SignerOptions): Promise<number> {
     // Bit of a hack - with this round-about way, we skip any keyring deps
     const { id, signature } = await sendRequest('extrinsic.sign', JSON.parse(JSON.stringify({
       address,
@@ -27,12 +27,13 @@ export default class Signer implements InjectedSigner {
       nonce
     })));
 
-    extrinsic.addSignature(address as any, signature, nonce);
+    extrinsic.addSignature(address, signature, nonce);
 
     return id;
   }
 
-  update (id: number, status: Hash | SubmittableResult): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public update (id: number, status: Hash | SubmittableResult): void {
     // something
   }
 }

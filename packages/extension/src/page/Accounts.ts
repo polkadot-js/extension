@@ -8,19 +8,20 @@ import { SendRequest } from './types';
 let sendRequest: SendRequest;
 
 export default class Accounts implements InjectedAccounts {
-  constructor (_sendRequest: SendRequest) {
+  public constructor (_sendRequest: SendRequest) {
     sendRequest = _sendRequest;
   }
 
-  get (): Promise<Array<InjectedAccount>> {
+  public get (): Promise<InjectedAccount[]> {
     return sendRequest('accounts.list');
   }
 
-  subscribe (cb: (accounts: Array<InjectedAccount>) => any): Unsubcall {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public subscribe (cb: (accounts: InjectedAccount[]) => any): Unsubcall {
     sendRequest('accounts.subscribe', null, cb)
       .catch(console.error);
 
-    return () => {
+    return (): void => {
       // FIXME we need the ability to unsubscribe
     };
   }

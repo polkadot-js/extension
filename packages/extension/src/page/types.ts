@@ -5,5 +5,6 @@
 import { MessageTypes } from '../background/types';
 
 export interface SendRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (message: MessageTypes, request?: any, subscriber?: (data: any) => any): Promise<any>;
 }

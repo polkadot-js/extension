@@ -11,7 +11,7 @@ interface Props {
   onClick?: () => void | Promise<void>
 }
 
-function Icon ({ className, icon, onClick }: Props): JSX.Element {
+function Icon ({ className, icon, onClick }: Props): React.ReactElement<Props> {
   return (
     <div
       className={`${className} icon`}

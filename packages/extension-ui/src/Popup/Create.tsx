@@ -14,7 +14,7 @@ interface Props {
   onAction: OnActionFromCtx;
 }
 
-function Create ({ onAction }: Props): JSX.Element {
+function Create ({ onAction }: Props): React.ReactElement<Props> {
   const [account, setAccount] = useState<null | { address: string, seed: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);

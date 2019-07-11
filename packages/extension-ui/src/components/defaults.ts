@@ -7,7 +7,7 @@ const LABEL_COLOR = '#878786';
 const LINK_COLOR = '#3367d6';
 const TEXT_COLOR = '#4d4e4f';
 
-const defaults: { [index: string]: any } = {
+const defaults = {
   borderRadius: '0.25rem',
   btnBg: TEXT_COLOR, // LINK_COLOR,
   btnBgDanger: DANGER_COLOR,

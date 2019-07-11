@@ -16,7 +16,7 @@ interface Props {
   to?: string;
 }
 
-function Link ({ children, className, onClick, to }: Props): JSX.Element {
+function Link ({ children, className, onClick, to }: Props): React.ReactElement<Props> {
   return (
     to
       ? <RouterLink className={className} onClick={onClick} to={to}>{children}</RouterLink>

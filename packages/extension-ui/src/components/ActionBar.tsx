@@ -10,7 +10,7 @@ interface Props {
   className?: string;
 }
 
-function ActionBar ({ children, className }: Props): JSX.Element {
+function ActionBar ({ children, className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {children}

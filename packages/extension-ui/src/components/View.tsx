@@ -12,7 +12,7 @@ interface Props {
   className?: string;
 }
 
-function View ({ children, className }: Props): JSX.Element {
+function View ({ children, className }: Props): React.ReactElement<Props> {
   return (
     <main className={className}>
       {children}

@@ -21,7 +21,7 @@ import Welcome from './Welcome';
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Popup (props: {}): JSX.Element {
+export default function Popup (props: {}): React.ReactElement<Props> {
   const [accounts, setAccounts] = useState<null | Array<KeyringJson>>(null);
   const [authRequests, setAuthRequests] = useState<null | Array<AuthorizeRequest>>(null);
   const [signRequests, setSignRequests] = useState<null | Array<SigningRequest>>(null);

@@ -12,7 +12,7 @@ interface Props {
   onAction: OnActionFromCtx;
 }
 
-function Welcome ({ onAction }: Props): JSX.Element {
+function Welcome ({ onAction }: Props): React.ReactElement<Props> {
   const onClick = (): void => {
     window.localStorage.setItem('welcome_read', 'ok');
     onAction();

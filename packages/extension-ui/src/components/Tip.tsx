@@ -26,7 +26,7 @@ function getColor ({ type }: Props): Color {
   return defaults.box[type || 'info'] || defaults.box.info;
 }
 
-function Tip ({ children, className, header }: Props): JSX.Element {
+function Tip ({ children, className, header }: Props): React.ReactElement<Props> {
   return (
     <article className={className}>
       {header && <h3>{header}</h3>}

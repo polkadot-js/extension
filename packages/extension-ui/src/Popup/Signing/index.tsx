@@ -13,7 +13,7 @@ interface Props {
   requests: SignRequestsFromCtx;
 }
 
-function Signing ({ requests }: Props): JSX.Element {
+function Signing ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='transactions' />

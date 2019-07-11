@@ -20,7 +20,7 @@ interface Props {
   theme?: 'polkadot' | 'substrate';
 }
 
-function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props): JSX.Element {
+function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const account = accounts.find((account): boolean => account.address === address);
 
   return (

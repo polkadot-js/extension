@@ -13,7 +13,7 @@ interface Props {
   accounts: AccountsFromCtx;
 }
 
-function Accounts ({ accounts }: Props): JSX.Element {
+function Accounts ({ accounts }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='accounts' />

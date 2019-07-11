@@ -10,19 +10,19 @@ import Injected from './Injected';
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
 //  - the loader takes this event and uses port.postMessage to background
-//  - on resposnse, the loader creates a reponse event
+//  - on response, the loader creates a reponse event
 //  - this injector, listens on the events, maps it to the original
 //  - resolves/rejects the promise with the result (or sub data)
 
-type Handler = {
-  resolve: (data: any) => void,
-  reject: (error: Error) => void,
-  subscriber?: (data: any) => void
-};
+interface Handler {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (data: any) => void;
+  reject: (error: Error) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscriber?: (data: any) => void;
+}
 
-type Handlers = {
-  [index: string]: Handler
-};
+type Handlers = Record<string, Handler>;
 
 // small helper with the typescript types, just cast window
 const windowInject = window as InjectedWindow;
@@ -31,8 +31,9 @@ let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sendMessage (message: MessageTypes, request: any = null, subscriber?: (data: any) => void): Promise<any> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
@@ -49,7 +50,7 @@ async function enable (origin: string): Promise<Injected> {
 }
 
 // setup a response listener (events created by the loader for extension responses)
-window.addEventListener('message', ({ data, source }) => {
+window.addEventListener('message', ({ data, source }): void => {
   // only allow messages from our window, by the loader
   if (source !== window || data.origin !== 'content') {
     return;

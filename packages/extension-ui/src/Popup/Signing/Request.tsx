@@ -20,7 +20,7 @@ interface Props {
   url: string;
 }
 
-function Request ({ isFirst, onAction, request: { address, genesisHash, method, nonce }, signId, url }: Props): JSX.Element {
+function Request ({ isFirst, onAction, request: { address, genesisHash, method, nonce }, signId, url }: Props): React.ReactElement<Props> {
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())

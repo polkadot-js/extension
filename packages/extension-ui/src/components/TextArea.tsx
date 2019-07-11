@@ -18,7 +18,7 @@ interface Props {
   value?: string;
 }
 
-function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }: Props): JSX.Element {
+function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
     onChange && onChange(value.trim());
   };

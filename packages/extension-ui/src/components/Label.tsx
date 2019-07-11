@@ -13,7 +13,7 @@ interface Props {
   label?: string | null;
 }
 
-function Label ({ children, className, label }: Props): JSX.Element {
+function Label ({ children, className, label }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {label && <label>{label}</label>}

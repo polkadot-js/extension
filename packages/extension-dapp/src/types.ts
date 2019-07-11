@@ -43,9 +43,7 @@ export interface InjectedWindowProvider {
 }
 
 export interface InjectedWindow extends Window {
-  injectedWeb3: {
-    [index: string]: InjectedWindowProvider;
-  };
+  injectedWeb3: Record<string, InjectedWindowProvider>;
 }
 
 export type InjectedExtension = InjectedExtensionInfo & Injected;

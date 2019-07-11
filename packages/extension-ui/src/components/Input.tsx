@@ -21,7 +21,7 @@ interface Props {
   value?: string;
 }
 
-function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur, onChange, type = 'text', value }: Props): JSX.Element {
+function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur, onChange, type = 'text', value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
     onChange && onChange(value.trim());
   };

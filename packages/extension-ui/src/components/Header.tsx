@@ -13,7 +13,7 @@ interface Props {
   label?: string;
 }
 
-function Header ({ children, className, label }: Props): JSX.Element {
+function Header ({ children, className, label }: Props): React.ReactElement<Props> {
   return (
     <h2 className={className}>
       {label}{children}

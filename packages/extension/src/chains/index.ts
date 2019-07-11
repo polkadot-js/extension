@@ -8,12 +8,12 @@ import { Metadata } from '@polkadot/types';
 // curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "state_getMetadata", "params":[]}' http://localhost:9933
 import alexander from './alexander';
 
-type Chain = {
-  meta?: Metadata,
-  name: string
-};
+interface Chain {
+  meta?: Metadata;
+  name: string;
+}
 
-const chains: { [genesisHash: string]: Chain } = {
+const chains: Record<string, Chain> = {
   '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b': {
     name: 'Alexander',
     meta: new Metadata(alexander.meta)

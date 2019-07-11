@@ -12,25 +12,30 @@ import { assert } from '@polkadot/util';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-type Accounts = Array<{ address: string, name?: string }>;
+interface Account {
+  address: string;
+  name?: string;
+}
+type Accounts = Account[];
 
 function transformAccounts (accounts: SubjectInfo): Accounts {
-  return Object.values(accounts).map(({ json: { address, meta: { name } } }) => ({
+  return Object.values(accounts).map(({ json: { address, meta: { name } } }): Account => ({
     address, name
   }));
 }
 
 export default class Tabs {
-  state: State;
+  private state: State;
 
-  constructor (state: State) {
+  public constructor (state: State) {
     this.state = state;
   }
 
-  private authorize (url: string, request: MessageAuthorize) {
+  private authorize (url: string, request: MessageAuthorize): Promise<boolean> {
     return this.state.authorizeUrl(url, request);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private accountsList (url: string): Accounts {
     return transformAccounts(accountsObservable.subject.getValue());
   }
@@ -38,11 +43,11 @@ export default class Tabs {
   // FIXME This looks very much like what we have in Extension
   private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo) =>
+    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
 
-    port.onDisconnect.addListener(() => {
+    port.onDisconnect.addListener((): void => {
       unsubscribe(id);
       subscription.unsubscribe();
     });
@@ -59,7 +64,8 @@ export default class Tabs {
     return this.state.signQueue(url, request);
   }
 
-  async handle (id: string, type: MessageTypes, request: any, url: string, port: chrome.runtime.Port): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async handle (id: string, type: MessageTypes, request: any, url: string, port: chrome.runtime.Port): Promise<any> {
     switch (type) {
       case 'authorize.tab':
         return this.authorize(url, request);

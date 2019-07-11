@@ -13,7 +13,7 @@ interface Props {
   requests: AuthRequestsFromCtx;
 }
 
-function Authorize ({ requests }: Props): JSX.Element {
+function Authorize ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='authorize' />

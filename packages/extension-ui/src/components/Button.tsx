@@ -20,7 +20,7 @@ interface Props {
 
 const DISABLED_OPACITY = '0.3';
 
-function Button ({ children, className, isDisabled, label, onClick, to }: Props): JSX.Element {
+function Button ({ children, className, isDisabled, label, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
     if (isDisabled) {
       return;

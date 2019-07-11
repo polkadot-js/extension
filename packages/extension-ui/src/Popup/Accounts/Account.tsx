@@ -17,7 +17,7 @@ interface Props {
   onAction: OnActionFromCtx;
 }
 
-function Account ({ address, className, onAction }: Props): JSX.Element {
+function Account ({ address, className, onAction }: Props): React.ReactElement<Props> {
   const [isEditing, setEditing] = useState(false);
   const [editedname, setName] = useState<string | null>(null);
 

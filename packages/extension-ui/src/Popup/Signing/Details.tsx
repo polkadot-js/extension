@@ -61,7 +61,7 @@ function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
   );
 }
 
-function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Props): JSX.Element {
+function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Props): React.ReactElement<Props> {
   const chain = findChain(genesisHash);
 
   return (

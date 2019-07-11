@@ -20,7 +20,7 @@ interface Props {
   url: string;
 }
 
-function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props): JSX.Element {
+function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props): React.ReactElement<Props> {
   const onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
       .then((): void => onAction())

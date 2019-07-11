@@ -17,7 +17,7 @@ interface Props {
   theme?: 'polkadot' | 'substrate';
 }
 
-function IconBox ({ children, className, icon, intro }: Props): JSX.Element {
+function IconBox ({ children, className, icon, intro }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Box className='details'>

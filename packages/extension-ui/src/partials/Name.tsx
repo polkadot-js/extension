@@ -21,7 +21,7 @@ interface Props {
 
 const MIN_LENGTH = 3;
 
-function Name ({ accounts, address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): JSX.Element {
+function Name ({ accounts, address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState('');
   const account = accounts.find((account): boolean => account.address === address);
   const startValue = (account && account.meta.name) || defaultValue;

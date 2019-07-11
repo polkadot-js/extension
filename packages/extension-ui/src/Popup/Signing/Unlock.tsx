@@ -11,7 +11,7 @@ interface Props {
   onSign: (password: string) => Promise<void>;
 }
 
-export default function Unlock ({ className, onSign }: Props): JSX.Element {
+export default function Unlock ({ className, onSign }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 

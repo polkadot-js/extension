@@ -12,7 +12,7 @@ interface Props {
   to?: string;
 }
 
-function Back ({ className, to = '/' }: Props): JSX.Element {
+function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Link to={to}>{unicode.BACK} Back</Link>

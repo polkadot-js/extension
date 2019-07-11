@@ -12,7 +12,7 @@ interface Props {
   className?: string;
 }
 
-function Box ({ children, className }: Props): JSX.Element {
+function Box ({ children, className }: Props): React.ReactElement<Props> {
   return (
     <article className={className}>
       {children}

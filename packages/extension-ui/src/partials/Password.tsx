@@ -13,7 +13,7 @@ interface Props {
 
 const MIN_LENGTH = 6;
 
-export default function Password ({ isFocussed, onChange }: Props): JSX.Element {
+export default function Password ({ isFocussed, onChange }: Props): React.ReactElement<Props> {
   const [pass1, setPass1] = useState('');
   const [pass2, setPass2] = useState('');
 

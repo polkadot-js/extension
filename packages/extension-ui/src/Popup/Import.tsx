@@ -10,26 +10,26 @@ import { Address, Button, Header, TextArea, withOnAction } from '../components';
 import { createAccount, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-type Props = {
-  onAction: OnActionFromCtx
-};
+interface Props {
+  onAction: OnActionFromCtx;
+}
 
-function Import ({ onAction }: Props) {
-  const [account, setAccount] = useState<null | { address: string, seed: string }>(null);
+function Import ({ onAction }: Props): JSX.Element {
+  const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const onChangeSeed = (seed: string) =>
+  const onChangeSeed = (seed: string): Promise<void> =>
     validateSeed(seed)
       .then(setAccount)
-      .catch(() => setAccount(null));
+      .catch((): void => setAccount(null));
 
   // FIXME Duplicated between here and Create.tsx
-  const onCreate = () => {
+  const onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
       createAccount(name, password, account.seed)
-        .then(() => onAction('/'))
+        .then((): void => onAction('/'))
         .catch(console.error);
     }
   };

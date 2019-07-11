@@ -8,5 +8,5 @@ import singleSource from './singleSource';
 export default function initCompat (): Promise<boolean> {
   return Promise.all([
     singleSource()
-  ]).then(() => true);
+  ]).then((): boolean => true);
 }

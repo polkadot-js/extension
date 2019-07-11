@@ -11,17 +11,17 @@ import Identicon from '@polkadot/ui-identicon';
 import IconBox from './IconBox';
 import { withAccounts } from './contexts';
 
-type Props = {
-  accounts: AccountsFromCtx,
-  address?: string | null,
+interface Props {
+  accounts: AccountsFromCtx;
+  address?: string | null;
   children?: React.ReactNode;
-  className?: string,
-  name?: React.ReactNode | null,
-  theme?: 'polkadot' | 'substrate'
-};
+  className?: string;
+  name?: React.ReactNode | null;
+  theme?: 'polkadot' | 'substrate';
+}
 
-function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props) {
-  const account = accounts.find((account) => account.address === address);
+function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props): JSX.Element {
+  const account = accounts.find((account): boolean => account.address === address);
 
   return (
     <IconBox

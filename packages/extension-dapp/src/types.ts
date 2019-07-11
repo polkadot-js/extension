@@ -14,17 +14,18 @@ export interface InjectedAccount {
 export interface InjectedAccountWithMeta {
   address: string;
   meta: {
-    name: string,
-    source: string
+    name: string;
+    source: string;
   };
 }
 
 export interface InjectedAccounts {
-  get: () => Promise<Array<InjectedAccount>>;
-  subscribe: (cb: (accounts: Array<InjectedAccount>) => any) => Unsubcall;
+  get: () => Promise<InjectedAccount[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscribe: (cb: (accounts: InjectedAccount[]) => any) => Unsubcall;
 }
 
-export interface InjectedSigner extends Signer {}
+export type InjectedSigner = Signer;
 
 export interface InjectedExtensionInfo {
   name: string;
@@ -41,10 +42,10 @@ export interface InjectedWindowProvider {
   version: string;
 }
 
-export type InjectedWindow = Window & {
+export interface InjectedWindow extends Window {
   injectedWeb3: {
-    [index: string]: InjectedWindowProvider
-  }
-};
+    [index: string]: InjectedWindowProvider;
+  };
+}
 
 export type InjectedExtension = InjectedExtensionInfo & Injected;

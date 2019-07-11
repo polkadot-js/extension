@@ -11,22 +11,22 @@ import { ActionBar, Address, Link, withOnAction } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
-type Props = {
-  address: string,
-  className?: string,
-  onAction: OnActionFromCtx
-};
+interface Props {
+  address: string;
+  className?: string;
+  onAction: OnActionFromCtx;
+}
 
-function Account ({ address, className, onAction }: Props) {
+function Account ({ address, className, onAction }: Props): JSX.Element {
   const [isEditing, setEditing] = useState(false);
   const [editedname, setName] = useState<string | null>(null);
 
-  const toggleEdit = () =>
+  const toggleEdit = (): void =>
     setEditing(!isEditing);
-  const saveChanges = () => {
+  const saveChanges = (): void => {
     if (editedname && editedname !== name) {
       editAccount(address, editedname)
-        .then(() => onAction())
+        .then((): void => onAction())
         .catch(console.error);
     }
 

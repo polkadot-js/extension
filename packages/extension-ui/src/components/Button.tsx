@@ -7,20 +7,20 @@ import styled from 'styled-components';
 
 import defaults from './defaults';
 
-type Props = {
+interface Props {
   className?: string;
-  children?: React.ReactNode,
-  isDanger?: boolean,
-  isDisabled?: boolean,
-  isSmall?: boolean,
-  label?: string,
-  onClick?: () => any,
-  to?: string
-};
+  children?: React.ReactNode;
+  isDanger?: boolean;
+  isDisabled?: boolean;
+  isSmall?: boolean;
+  label?: string;
+  onClick?: () => void | Promise<void>;
+  to?: string;
+}
 
 const DISABLED_OPACITY = '0.3';
 
-function Button ({ children, className, isDisabled, label, onClick, to }: Props) {
+function Button ({ children, className, isDisabled, label, onClick, to }: Props): JSX.Element {
   const _onClick = (): void => {
     if (isDisabled) {
       return;
@@ -44,54 +44,47 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
 
 export default styled(Button)`
   box-sizing: border-box;
-  display: ${({ isSmall }) =>
+  display: ${({ isSmall }): string =>
     isSmall
       ? 'inline-block'
-      : 'block'
-  };
+      : 'block'};
   margin: ${defaults.boxMargin};
   padding: ${defaults.boxPadding};
-  width: ${({ isSmall }) =>
+  width: ${({ isSmall }): string =>
     isSmall
       ? 'auto'
-      : '100%'
-  };
+      : '100%'};
 
   button {
-    background: ${({ isDanger }) =>
+    background: ${({ isDanger }): string =>
       isDanger
         ? defaults.btnBgDanger
-        : defaults.btnBg
-    };
-    border: ${defaults.btnBorder}${({ isDanger }) =>
+        : defaults.btnBg};
+    border: ${defaults.btnBorder}${({ isDanger }): string =>
       isDanger
         ? defaults.btnColorDanger
-        : defaults.btnColor
-    };
+        : defaults.btnColor};
     border-radius: ${defaults.borderRadius};
-    color: ${({ isDanger }) =>
+    color: ${({ isDanger }): string =>
       isDanger
         ? defaults.btnColorDanger
-        : defaults.btnColor
-    };
+        : defaults.btnColor};
     cursor: pointer;
     display: block;
     font-size: ${defaults.fontSize};
-    opacity: ${({ isDisabled }) =>
+    opacity: ${({ isDisabled }): string =>
       isDisabled
         ? DISABLED_OPACITY
-        : '0.8'
-    };
+        : '0.8'};
     padding: ${defaults.btnPadding};
     text-align: center;
     width: 100%;
 
     &:hover {
-      opacity: ${({ isDisabled }) =>
+      opacity: ${({ isDisabled }): string =>
         isDisabled
           ? DISABLED_OPACITY
-          : '1.0'
-      };
+          : '1.0'};
     }
   }
 `;

@@ -7,12 +7,12 @@ import styled from 'styled-components';
 
 import defaults from './defaults';
 
-type Props = {
+interface Props {
   children: React.ReactNode;
   className?: string;
-};
+}
 
-function View ({ children, className }: Props) {
+function View ({ children, className }: Props): JSX.Element {
   return (
     <main className={className}>
       {children}

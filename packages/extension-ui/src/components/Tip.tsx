@@ -7,26 +7,26 @@ import styled from 'styled-components';
 
 import defaults from './defaults';
 
-type Color = {
-  background: string,
-  border: string,
-  color: string
-};
+interface Color {
+  background: string;
+  border: string;
+  color: string;
+}
 
 type Type = keyof typeof defaults.box;
 
-type Props = {
-  children: React.ReactNode,
-  className?: string,
-  header?: React.ReactNode,
-  type?: Type
-};
+interface Props {
+  children: React.ReactNode;
+  className?: string;
+  header?: React.ReactNode;
+  type?: Type;
+}
 
 function getColor ({ type }: Props): Color {
   return defaults.box[type || 'info'] || defaults.box.info;
 }
 
-function Tip ({ children, className, header }: Props) {
+function Tip ({ children, className, header }: Props): JSX.Element {
   return (
     <article className={className}>
       {header && <h3>{header}</h3>}
@@ -37,22 +37,18 @@ function Tip ({ children, className, header }: Props) {
 
 // box-shadow: ${defaults.boxShadow};
 export default styled(Tip)`
-  background: ${(props) =>
-    getColor(props).background
-  };
-  border-left: 0.25rem solid ${(props) =>
-    getColor(props).border
-  };
-  color: ${(props) =>
-    getColor(props).color
-  };
+  background: ${(props): string =>
+    getColor(props).background};
+  border-left: 0.25rem solid ${(props): string =>
+    getColor(props).border};
+  color: ${(props): string =>
+    getColor(props).color};
   margin: 0.75rem -1rem;
   padding: 1rem 1.5rem;
 
   h3 {
-    color: ${(props) =>
-      getColor(props).border
-    };
+    color: ${(props): string =>
+      getColor(props).border};
     font-weight: normal;
   }
 `;

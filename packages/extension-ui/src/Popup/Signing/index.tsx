@@ -9,15 +9,15 @@ import React from 'react';
 import { Header, withSignRequests } from '../../components';
 import Request from './Request';
 
-type Props = {
-  requests: SignRequestsFromCtx
-};
+interface Props {
+  requests: SignRequestsFromCtx;
+}
 
-function Signing ({ requests }: Props) {
+function Signing ({ requests }: Props): JSX.Element {
   return (
     <div>
       <Header label='transactions' />
-      {requests.map(([id, request, url], index) => (
+      {requests.map(([id, request, url], index): React.ReactNode => (
         <Request
           isFirst={index === 0}
           key={id}

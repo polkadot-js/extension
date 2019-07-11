@@ -8,17 +8,17 @@ import styled from 'styled-components';
 import Label from './Label';
 import defaults from './defaults';
 
-type Props = {
-  className?: string,
-  isError?: boolean,
-  isFocussed?: boolean,
-  isReadOnly?: boolean,
-  label: string,
-  onChange?: (value: string) => void,
-  value?: string
-};
+interface Props {
+  className?: string;
+  isError?: boolean;
+  isFocussed?: boolean;
+  isReadOnly?: boolean;
+  label: string;
+  onChange?: (value: string) => void;
+  value?: string;
+}
 
-function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }: Props) {
+function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }: Props): JSX.Element {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
     onChange && onChange(value.trim());
   };

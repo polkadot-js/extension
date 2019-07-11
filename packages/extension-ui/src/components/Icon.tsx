@@ -5,13 +5,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
-type Props = {
-  className?: string,
-  icon: string,
-  onClick?: () => any
-};
+interface Props {
+  className?: string;
+  icon: string;
+  onClick?: () => void | Promise<void>
+}
 
-function Icon ({ className, icon, onClick }: Props) {
+function Icon ({ className, icon, onClick }: Props): JSX.Element {
   return (
     <div
       className={`${className} icon`}
@@ -26,10 +26,9 @@ export default styled(Icon)`
   background: white;
   border-radius: 50%;
   box-sizing: border-box;
-  cursor: ${({ onClick }) =>
+  cursor: ${({ onClick }): string =>
     onClick
       ? 'pointer'
-      : 'inherit'
-  };
+      : 'inherit'};
   text-align: center;
 `;

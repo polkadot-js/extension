@@ -19,9 +19,9 @@ import Import from './Import';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
-type Props = {};
 
-export default function Popup (props: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function Popup (props: {}): JSX.Element {
   const [accounts, setAccounts] = useState<null | Array<KeyringJson>>(null);
   const [authRequests, setAuthRequests] = useState<null | Array<AuthorizeRequest>>(null);
   const [signRequests, setSignRequests] = useState<null | Array<SigningRequest>>(null);

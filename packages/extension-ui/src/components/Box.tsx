@@ -7,12 +7,12 @@ import styled from 'styled-components';
 
 import defaults from './defaults';
 
-type Props = {
+interface Props {
   children: React.ReactNode;
   className?: string;
-};
+}
 
-function Box ({ children, className }: Props) {
+function Box ({ children, className }: Props): JSX.Element {
   return (
     <article className={className}>
       {children}

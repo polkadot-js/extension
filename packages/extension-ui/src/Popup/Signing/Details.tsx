@@ -8,20 +8,21 @@ import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension/chains';
 import { Metadata, Method } from '@polkadot/types';
 
-type MethodJson = {
-  args: { [index: string]: any }
-};
+interface MethodJson {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: Record<string, any>;
+}
 
-type Props = {
-  className?: string,
-  genesisHash: string,
-  isDecoded: boolean,
-  method: string,
-  nonce: string,
-  url: string
-};
+interface Props {
+  className?: string;
+  genesisHash: string;
+  isDecoded: boolean;
+  method: string;
+  nonce: string;
+  url: string;
+}
 
-function renderMethod (data: string, meta?: Metadata | null) {
+function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
   if (!meta) {
     return (
       <tr>
@@ -60,7 +61,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
   );
 }
 
-function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Props) {
+function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Props): JSX.Element {
   const chain = findChain(genesisHash);
 
   return (

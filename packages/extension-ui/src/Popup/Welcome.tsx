@@ -8,11 +8,11 @@ import React from 'react';
 
 import { Box, Button, Header, withOnAction } from '../components';
 
-type Props = {
-  onAction: OnActionFromCtx
-};
+interface Props {
+  onAction: OnActionFromCtx;
+}
 
-function Welcome ({ onAction }: Props) {
+function Welcome ({ onAction }: Props): JSX.Element {
   const onClick = (): void => {
     window.localStorage.setItem('welcome_read', 'ok');
     onAction();

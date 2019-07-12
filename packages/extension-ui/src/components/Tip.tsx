@@ -37,18 +37,14 @@ function Tip ({ children, className, header }: Props): React.ReactElement<Props>
 
 // box-shadow: ${defaults.boxShadow};
 export default styled(Tip)`
-  background: ${(props): string =>
-    getColor(props).background};
-  border-left: 0.25rem solid ${(props): string =>
-    getColor(props).border};
-  color: ${(props): string =>
-    getColor(props).color};
+  background: ${(p): string => getColor(p).background};
+  border-left: 0.25rem solid ${(p): string => getColor(p).border};
+  color: ${(p): string => getColor(p).color};
   margin: 0.75rem -1rem;
   padding: 1rem 1.5rem;
 
   h3 {
-    color: ${(props): string =>
-      getColor(props).border};
+    color: ${(p): string => getColor(p).border};
     font-weight: normal;
   }
 `;

@@ -46,31 +46,17 @@ function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur
 
 export default styled(Input)`
   input {
-    background: ${({ isError, isReadOnly }): string =>
-      isError
-        ? defaults.box.error.background
-        : isReadOnly
-          ? '#eee'
-          : '#fff'};
-    border-color: ${({ isError }): string =>
-      isError
-        ? defaults.box.error.border
-        : defaults.inputBorder};
+    background: ${({ isError, isReadOnly }): string => isError ? defaults.box.error.background : (isReadOnly ? '#eee' : '#fff')};
+    border-color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.inputBorder};
     border-radius: ${defaults.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError }): string =>
-      isError
-        ? defaults.box.error.border
-        : defaults.color};
+    color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.color};
     display: block;
     font-family: ${defaults.fontFamily};
     font-size: ${defaults.fontSize};
-    padding: ${({ label }): string =>
-      label
-        ? defaults.inputPaddingLabel
-        : defaults.inputPadding};
+    padding: ${({ label }): string => label ? defaults.inputPaddingLabel : defaults.inputPadding};
     width: 100%;
 
     &:read-only {

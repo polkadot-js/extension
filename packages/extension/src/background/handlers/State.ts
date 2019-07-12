@@ -40,13 +40,17 @@ function getId (): string {
 }
 
 export default class State {
-  // at the moment, we are keeping the list in memory - this should be persisted
   private _authUrls: AuthUrls = {};
+
   private _authRequests: Record<string, AuthRequest> = {};
+
   private _signRequests: Record<string, SignRequest> = {};
-  private _windows: Array<number> = [];
-  readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
-  readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
+
+  private _windows: number[] = [];
+
+  public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
+
+  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
 
   public get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;

@@ -25,25 +25,16 @@ function Link ({ children, className, onClick, to }: Props): React.ReactElement<
 }
 
 export default styled(Link)`
-  color: ${({ isDanger }): string =>
-    isDanger
-      ? defaults.linkColorDanger
-      : defaults.linkColor};
+  color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
   opacity: 0.9;
   text-decoration: none;
 
   &:hover {
-    color: ${({ isDanger }): string =>
-      isDanger
-        ? defaults.linkColorDanger
-        : defaults.linkColor};
+    color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${({ isDanger }): string =>
-      isDanger
-        ? defaults.linkColorDanger
-        : defaults.linkColor};
+    color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
   }
 `;

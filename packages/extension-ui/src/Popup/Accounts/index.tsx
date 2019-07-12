@@ -19,7 +19,7 @@ function Accounts ({ accounts }: Props): React.ReactElement<Props> {
       <Header label='accounts' />
       {
         (accounts.length === 0)
-          ? <Tip header='add accounts' type='warn'>You currently don't have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
+          ? <Tip header='add accounts' type='warn'>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
           : accounts.map(({ address }): React.ReactNode => (
             <Account
               address={address}

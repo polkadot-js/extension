@@ -1,4 +1,7 @@
 {
+  "author": "polkadot.{js}",
+  "description": "Manage your Polkadot & Substrate keys independent for the dapps. Injects the accounts into dapps and allows the dapp to request transactions to be signed.",
+  "homepage_url": "https://github.com/polkadot-js/extension",
   "name": "polkadot{.js} extension",
   "manifest_version": 2,
   "permissions": ["activeTab", "storage"],

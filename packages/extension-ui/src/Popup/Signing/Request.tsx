@@ -20,7 +20,7 @@ interface Props {
   url: string;
 }
 
-function Request ({ isFirst, onAction, request: { address, genesisHash, method, nonce }, signId, url }: Props): React.ReactElement<Props> {
+function Request ({ isFirst, onAction, request: { address, blockNumber, era, genesisHash, method, nonce }, signId, url }: Props): React.ReactElement<Props> {
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
@@ -32,6 +32,8 @@ function Request ({ isFirst, onAction, request: { address, genesisHash, method, 
   return (
     <Address address={address}>
       <Details
+        blockNumber={blockNumber}
+        era={era}
         genesisHash={genesisHash}
         isDecoded={isFirst}
         method={method}

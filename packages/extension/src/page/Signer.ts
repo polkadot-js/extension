@@ -17,11 +17,13 @@ export default class Signer implements InjectedSigner {
     sendRequest = _sendRequest;
   }
 
-  public async sign (extrinsic: IExtrinsic, address: string, { blockHash, genesisHash, nonce }: SignerOptions): Promise<number> {
+  public async sign (extrinsic: IExtrinsic, address: string, { blockHash, blockNumber, era, genesisHash, nonce }: SignerOptions): Promise<number> {
     // Bit of a hack - with this round-about way, we skip any keyring deps
     const { id, signature } = await sendRequest('extrinsic.sign', JSON.parse(JSON.stringify({
       address,
       blockHash,
+      blockNumber: blockNumber.toNumber(),
+      era,
       genesisHash,
       method: extrinsic.method.toHex(),
       nonce

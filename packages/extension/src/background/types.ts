@@ -66,6 +66,8 @@ export interface MessageExtrinsicSignCancel {
 export interface MessageExtrinsicSign {
   address: string;
   blockHash: string;
+  blockNumber: number;
+  era?: string;
   genesisHash: string;
   method: string;
   nonce: string;

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1-beta.32",
+  "version": "0.3.0-beta.0",
   "description": "A sample signer extension for the @polkadot/api",
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
-    "buildzip": "(cd packages/extension/build && zip -r -FS ../../../master-build.zip *)",
+    "build:zip": "(cd packages/extension/build && zip -r -FS ../../../master-build.zip *)",
     "check": "yarn lint",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx . && tsc --noEmit --pretty",
     "clean": "polkadot-dev-clean-build",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.5.4",
-    "@polkadot/dev-react": "^0.30.0-beta.20",
-    "@polkadot/ts": "^0.1.61"
+    "@polkadot/dev-react": "^0.30.0-beta.21",
+    "@polkadot/ts": "^0.1.62"
   }
 }

@@ -33,6 +33,7 @@ The repo is split into a number of packages -
 - [extension](packages/extension/) - All the injection and background processing logic (the main entry)
 - [extension-ui](packages/extension-ui/) - The UI components for the extension, do build up the popup
 - [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
+- [extension-inject](packages/extension-inject/) - A convience wrapper that allows extension developers to inject their extension for use by dapp developers
 
 ## Dapp developers
 
@@ -43,23 +44,11 @@ This approach is used to support multiple external signers in for instance [apps
 
 ## Technical
 
-The extension injects `injectedWeb3` into the global `window` object, exposing the following: (This is meant to be generic accross extensions, allowing any dapp to utilize multiple signers, as they are available)
+The extension injection interfaces are generic, i.e. it is designed to allow any extension developer to easily inject extensions (that conforms to a specific interface) and at the same time it allows for any dapp developer to easily enable the interfaces from multiple extensions at the same time. It is not an all-or-nothing approch, but rather it is an ecosystem where the user can choose which extensions fit his style best.
 
-```js
-window.injectedWeb3 = {
-  // this is the name for this extension, there could be multiples injected,
-  // each with their own keys, here `polkadot-js` is for this extension
-  'polkadot-js': {
-    // semver for the package
-    version: '0.1.0',
+From a dapp developer perspective, the only work needed is to include the [@polkadot/extension-dapp](packages/extension-dapp/) package and call the appropriate enabling function to retrieve all the extensions and their associated interfaces.
 
-    // this is called to enable the injection, and returns an injected
-    // object containing the accounts, signer and provider interfaces
-    // (or it will reject if not authorized)
-    enable (originName: string): Promise<Injected>
-  }
-}
-```
+From an extension developer perspective, the only work required is to enable the extension via the razor-thin [@polkadot/extension-inject](packages/extension-inject/) wrapper. Any dapp using the above interfaces will have access.
 
 When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridded. The `Injected` interface, as returned via `enable`, contains the following and is what any compliant extension supplies -
 
@@ -93,6 +82,28 @@ interface Accounts {
 interface Signer extends SignerInterface {
   // no specific signer extensions, exposes the `sign` interface for use by
   // the polkadot-js API, confirming the the Signer interface for this API
+}
+```
+
+# Technical information
+
+This information may change and evolve. It is therefore recommended that all access is done via the `-dapp` and `-inject` packages, which removes the need to work with the lower-level targets.
+
+The extension injects `injectedWeb3` into the global `window` object, exposing the following: (This is meant to be generic accross extensions, allowing any dapp to utilize multiple signers, as they are available)
+
+```js
+window.injectedWeb3 = {
+  // this is the name for this extension, there could be multiples injected,
+  // each with their own keys, here `polkadot-js` is for this extension
+  'polkadot-js': {
+    // semver for the package
+    version: '0.1.0',
+
+    // this is called to enable the injection, and returns an injected
+    // object containing the accounts, signer and provider interfaces
+    // (or it will reject if not authorized)
+    enable (originName: string): Promise<Injected>
+  }
 }
 ```
 

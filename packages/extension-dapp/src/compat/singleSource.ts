@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer } from '@polkadot/api/types';
-import { Injected, InjectedAccount, InjectedWindow } from '../types';
+import { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 
 // RxJs interface, only the bare-bones of what we need here
 interface Subscriber<T> {

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from './types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
 
 // our extension adaptor for other kinds of extensions
 import compatInjector from './compat';

@@ -47,3 +47,5 @@ export interface InjectedWindow extends Window {
 }
 
 export type InjectedExtension = InjectedExtensionInfo & Injected;
+
+export type InjectOptions = InjectedExtensionInfo;

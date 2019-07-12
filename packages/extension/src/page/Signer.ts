@@ -3,12 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SignerOptions } from '@polkadot/api/types';
-import { InjectedSigner } from '@polkadot/extension-dapp/types';
+import { InjectedSigner } from '@polkadot/extension-inject/types';
 import { IExtrinsic } from '@polkadot/types/types';
 import { SendRequest } from './types';
 
-import { Hash } from '@polkadot/types';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
+import { Hash } from '@polkadot/types';
 
 let sendRequest: SendRequest;
 

@@ -9,6 +9,8 @@
       "@polkadot/extension/*": ["packages/extension/src/*"],
       "@polkadot/extension-dapp": ["packages/extension-dapp/src"],
       "@polkadot/extension-dapp/*": ["packages/extension-dapp/src/*"],
+      "@polkadot/extension-inject": ["packages/extension-inject/src"],
+      "@polkadot/extension-inject/*": ["packages/extension-inject/src/*"],
       "@polkadot/extension-ui": ["packages/extension-ui/src"],
       "@polkadot/extension-ui/*": ["packages/extension-ui/src/*"]
     },

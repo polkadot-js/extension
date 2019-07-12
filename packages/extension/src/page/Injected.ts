@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected as InjectedInjected } from '@polkadot/extension-dapp/types';
+import { Injected as InjectedInjected } from '@polkadot/extension-inject/types';
 import { SendRequest } from './types';
 
 import Accounts from './Accounts';

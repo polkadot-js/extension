@@ -14,6 +14,7 @@ const manifest = require('./manifest.json');
 
 const packages = [
   'extension',
+  'extension-inject',
   'extension-ui'
 ];
 

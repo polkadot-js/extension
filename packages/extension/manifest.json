@@ -1,6 +1,6 @@
 {
   "author": "polkadot.{js}",
-  "description": "Manage your Polkadot & Substrate keys independent for the dapps. Injects the accounts into dapps and allows the dapp to request transactions to be signed.",
+  "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
   "homepage_url": "https://github.com/polkadot-js/extension",
   "name": "polkadot{.js} extension",
   "manifest_version": 2,

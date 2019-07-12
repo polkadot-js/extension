@@ -10,55 +10,58 @@ export type AuthorizeRequest = [string, MessageAuthorize, string];
 
 export type SigningRequest = [string, MessageExtrinsicSign, string];
 
-export type MessageAuthorize = {
-  origin: string
-};
+export interface MessageAuthorize {
+  origin: string;
+}
 
-export type MessageAuthorizeApprove = {
+export interface MessageAuthorizeApprove {
   id: string;
-};
+}
 
-export type MessageAuthorizeReject = {
+export interface MessageAuthorizeReject {
   id: string;
-};
+}
 
-export type MessageRequest = {
-  id: string,
-  message: MessageTypes,
-  request: any
-};
+export interface MessageRequest {
+  id: string;
+  message: MessageTypes;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  request: any;
+}
 
-export type MessageResponse = {
-  error?: string,
-  id: string,
-  response?: any,
-  subscription?: any
-};
+export interface MessageResponse {
+  error?: string;
+  id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  response?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscription?: any;
+}
 
-export type MessageAccountCreate = {
-  name: string,
-  password: string,
-  suri: string,
-  type?: KeypairType
-};
+export interface MessageAccountCreate {
+  name: string;
+  password: string;
+  suri: string;
+  type?: KeypairType;
+}
 
-export type MessageAccountEdit= {
-  address: string,
-  name: string
-};
+export interface MessageAccountEdit {
+  address: string;
+  name: string;
+}
 
-export type MessageAccountForget = {
-  address: string
-};
+export interface MessageAccountForget {
+  address: string;
+}
 
-export type MessageExtrinsicSignApprove = {
-  id: string,
-  password: string
-};
+export interface MessageExtrinsicSignApprove {
+  id: string;
+  password: string;
+}
 
-export type MessageExtrinsicSignCancel = {
-  id: string
-};
+export interface MessageExtrinsicSignCancel {
+  id: string;
+}
 
 export interface MessageExtrinsicSign {
   address: string;
@@ -70,27 +73,27 @@ export interface MessageExtrinsicSign {
   nonce: string;
 }
 
-export type MessageExtrinsicSign$Response = {
-  id: string,
-  signature: string
-};
+export interface MessageExtrinsicSignResponse {
+  id: string;
+  signature: string;
+}
 
-export type MessageSeedCreate$Response = {
-  address: string,
-  seed: string
-};
+export interface MessageSeedCreateResponse {
+  address: string;
+  seed: string;
+}
 
-export type MessageSeedCreate = {
-  length?: 12 | 24,
-  type?: KeypairType
-};
+export interface MessageSeedCreate {
+  length?: 12 | 24;
+  type?: KeypairType;
+}
 
-export type MessageSeedValidate = {
-  seed: string,
-  type?: KeypairType
-};
+export interface MessageSeedValidate {
+  seed: string;
+  type?: KeypairType;
+}
 
-export type MessageSeedValidate$Response = {
-  address: string,
-  seed: string
-};
+export interface MessageSeedValidateResponse {
+  address: string;
+  seed: string;
+}

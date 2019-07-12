@@ -8,28 +8,28 @@ import React, { useEffect, useState } from 'react';
 
 import { Input, withAccounts } from '../components';
 
-type Props = {
-  accounts: AccountsFromCtx,
-  address?: string,
-  className?: string,
-  defaultValue?: string | null,
-  isFocussed?: boolean,
-  label?: string | null,
-  onBlur?: () => void,
-  onChange: (name: string | null) => void
-};
+interface Props {
+  accounts: AccountsFromCtx;
+  address?: string;
+  className?: string;
+  defaultValue?: string | null;
+  isFocussed?: boolean;
+  label?: string | null;
+  onBlur?: () => void;
+  onChange: (name: string | null) => void;
+}
 
 const MIN_LENGTH = 3;
 
-function Name ({ accounts, address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props) {
+function Name ({ accounts, address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState('');
-  const account = accounts.find((account) => account.address === address);
+  const account = accounts.find((account): boolean => account.address === address);
   const startValue = (account && account.meta.name) || defaultValue;
   const isError = !name && startValue
     ? false
     : (name.length < MIN_LENGTH);
 
-  useEffect(() => {
+  useEffect((): void => {
     onChange(
       name && (name.length >= MIN_LENGTH)
         ? name

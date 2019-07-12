@@ -8,15 +8,15 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import defaults from './defaults';
 
-type Props = {
-  children?: React.ReactNode,
-  className?: string,
-  isDanger?: boolean,
-  onClick?: () => void,
-  to?: string
-};
+interface Props {
+  children?: React.ReactNode;
+  className?: string;
+  isDanger?: boolean;
+  onClick?: () => void;
+  to?: string;
+}
 
-function Link ({ children, className, onClick, to }: Props) {
+function Link ({ children, className, onClick, to }: Props): React.ReactElement<Props> {
   return (
     to
       ? <RouterLink className={className} onClick={onClick} to={to}>{children}</RouterLink>
@@ -25,28 +25,16 @@ function Link ({ children, className, onClick, to }: Props) {
 }
 
 export default styled(Link)`
-  color: ${({ isDanger }) =>
-    isDanger
-      ? defaults.linkColorDanger
-      : defaults.linkColor
-  };
+  color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
   opacity: 0.9;
   text-decoration: none;
 
   &:hover {
-    color: ${({ isDanger }) =>
-      isDanger
-        ? defaults.linkColorDanger
-        : defaults.linkColor
-    };
+    color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${({ isDanger }) =>
-      isDanger
-        ? defaults.linkColorDanger
-        : defaults.linkColor
-    };
+    color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
   }
 `;

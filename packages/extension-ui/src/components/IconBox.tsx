@@ -8,16 +8,16 @@ import styled from 'styled-components';
 import Box from './Box';
 import defaults from './defaults';
 
-type Props = {
+interface Props {
   children?: React.ReactNode;
-  className?: string,
-  icon: React.ReactNode,
-  intro: React.ReactNode,
-  name?: React.ReactNode | null,
-  theme?: 'polkadot' | 'substrate'
-};
+  className?: string;
+  icon: React.ReactNode;
+  intro: React.ReactNode;
+  name?: React.ReactNode | null;
+  theme?: 'polkadot' | 'substrate';
+}
 
-function IconBox ({ children, className, icon, intro }: Props) {
+function IconBox ({ children, className, icon, intro }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Box className='details'>

@@ -9,15 +9,15 @@ import React from 'react';
 import { Header, withAuthRequests } from '../../components';
 import Request from './Request';
 
-type Props = {
-  requests: AuthRequestsFromCtx
-};
+interface Props {
+  requests: AuthRequestsFromCtx;
+}
 
-function Authorize ({ requests }: Props) {
+function Authorize ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='authorize' />
-      {requests.map(([id, request, url], index) => (
+      {requests.map(([id, request, url], index): React.ReactNode => (
         <Request
           authId={id}
           isFirst={index === 0}

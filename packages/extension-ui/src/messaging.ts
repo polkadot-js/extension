@@ -9,22 +9,22 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
 
-type Handler = {
-  resolve: (data: any) => void,
-  reject: (error: Error) => void,
-  subscriber?: (data: any) => void
-};
+interface Handler {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (data: any) => void;
+  reject: (error: Error) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscriber?: (data: any) => void;
+}
 
-type Handlers = {
-  [index: string]: Handler
-};
+type Handlers = Record<string, Handler>;
 
 const port = extension.runtime.connect({ name: PORT_POPUP });
 const handlers: Handlers = {};
 let idCounter = 0;
 
 // setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data) => {
+port.onMessage.addListener((data): void => {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -45,8 +45,9 @@ port.onMessage.addListener((data) => {
   }
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sendMessage (message: MessageTypes, request: any = {}, subscriber?: (data: any) => void): Promise<any> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
@@ -63,11 +64,11 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('accounts.forget', { address });
 }
 
-export async function getAccounts (): Promise<Array<KeyringJson>> {
+export async function getAccounts (): Promise<KeyringJson[]> {
   return sendMessage('accounts.list');
 }
 
-export async function getAuthRequests (): Promise<Array<AuthorizeRequest>> {
+export async function getAuthRequests (): Promise<AuthorizeRequest[]> {
   return sendMessage('authorize.requests');
 }
 
@@ -79,7 +80,7 @@ export async function approveAuthRequest (id: string): Promise<boolean> {
   return sendMessage('authorize.approve', { id });
 }
 
-export async function getSignRequests (): Promise<Array<SigningRequest>> {
+export async function getSignRequests (): Promise<SigningRequest[]> {
   return sendMessage('signing.requests');
 }
 
@@ -95,22 +96,22 @@ export async function createAccount (name: string, password: string, suri: strin
   return sendMessage('accounts.create', { name, password, suri, type });
 }
 
-export async function createSeed (length?: number, type?: KeypairType): Promise<{ address: string, seed: string }> {
+export async function createSeed (length?: number, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('seed.create', { length, type });
 }
 
-export async function subscribeAccounts (cb: (accounts: Array<KeyringJson>) => void): Promise<boolean> {
+export async function subscribeAccounts (cb: (accounts: KeyringJson[]) => void): Promise<boolean> {
   return sendMessage('accounts.subscribe', {}, cb);
 }
 
-export async function subscribeAuthorize (cb: (accounts: Array<AuthorizeRequest>) => void): Promise<boolean> {
+export async function subscribeAuthorize (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
   return sendMessage('authorize.subscribe', {}, cb);
 }
 
-export async function subscribeSigning (cb: (accounts: Array<SigningRequest>) => void): Promise<boolean> {
+export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
   return sendMessage('signing.subscribe', {}, cb);
 }
 
-export async function validateSeed (seed: string, type?: KeypairType): Promise<{ address: string, seed: string }> {
+export async function validateSeed (seed: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('seed.validate', { seed, type });
 }

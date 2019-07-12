@@ -8,7 +8,7 @@ import { KeyringJson } from '@polkadot/ui-keyring/types';
 export type OmitProps<T, K> = Pick<T, Exclude<keyof T, K>>;
 export type SubtractProps<T, K> = OmitProps<T, keyof K>;
 
-export type AccountsFromCtx = Array<KeyringJson>;
+export type AccountsFromCtx = KeyringJson[];
 export type OnActionFromCtx = (to?: string) => void;
-export type AuthRequestsFromCtx = Array<AuthorizeRequest>;
-export type SignRequestsFromCtx = Array<SigningRequest>;
+export type AuthRequestsFromCtx = AuthorizeRequest[];
+export type SignRequestsFromCtx = SigningRequest[];

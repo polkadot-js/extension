@@ -28,12 +28,12 @@ export default function handler ({ id, message, request }: MessageRequest, port:
     : tabs.handle(id, message, request, from, port);
 
   promise
-    .then((response) => {
+    .then((response): void => {
       console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
       port.postMessage({ id, response });
     })
-    .catch((error) => {
+    .catch((error): void => {
       console.log(`[err] ${source}:: ${error.message}`);
 
       port.postMessage({ id, error: error.message });

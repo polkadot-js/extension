@@ -10,27 +10,27 @@ import { Address, Button, Header, Loading, TextArea, withOnAction } from '../com
 import { createAccount, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-type Props = {
-  onAction: OnActionFromCtx
-};
+interface Props {
+  onAction: OnActionFromCtx;
+}
 
-function Create ({ onAction }: Props) {
-  const [account, setAccount] = useState<null | { address: string, seed: string }>(null);
+function Create ({ onAction }: Props): React.ReactElement<Props> {
+  const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  useEffect(() => {
+  useEffect((): void => {
     createSeed()
       .then(setAccount)
       .catch(console.error);
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
-  const onCreate = () => {
+  const onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
       createAccount(name, password, account.seed)
-        .then(() => onAction('/'))
+        .then((): void => onAction('/'))
         .catch(console.error);
     }
   };

@@ -2,38 +2,36 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSign$Response, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
 
-type AuthRequest = {
-  id: string,
-  idStr: string,
-  request: MessageAuthorize,
-  resolve: (result: boolean) => void,
-  reject: (error: Error) => void,
-  url: string
-};
+interface AuthRequest {
+  id: string;
+  idStr: string;
+  request: MessageAuthorize;
+  resolve: (result: boolean) => void;
+  reject: (error: Error) => void;
+  url: string;
+}
 
-type AuthUrls = {
-  [index: string]: {
-    count: number,
-    id: string,
-    isAllowed: boolean,
-    origin: string,
-    url: string
-  }
-};
+type AuthUrls = Record<string, {
+  count: number;
+  id: string;
+  isAllowed: boolean;
+  origin: string;
+  url: string;
+}>;
 
-type SignRequest = {
-  id: string,
-  request: MessageExtrinsicSign,
-  resolve: (result: MessageExtrinsicSign$Response) => void,
-  reject: (error: Error) => void,
-  url: string
-};
+interface SignRequest {
+  id: string;
+  request: MessageExtrinsicSign;
+  resolve: (result: MessageExtrinsicSignResponse) => void;
+  reject: (error: Error) => void;
+  url: string;
+}
 
 let idCounter = 0;
 
@@ -42,44 +40,48 @@ function getId (): string {
 }
 
 export default class State {
-  // at the moment, we are keeping the list in memory - this should be persisted
   private _authUrls: AuthUrls = {};
-  private _authRequests: { [index: string]: AuthRequest } = {};
-  private _signRequests: { [index: string]: SignRequest } = {};
-  private _windows: Array<number> = [];
-  readonly authSubject: BehaviorSubject<Array<AuthorizeRequest>> = new BehaviorSubject([] as Array<AuthorizeRequest>);
-  readonly signSubject: BehaviorSubject<Array<SigningRequest>> = new BehaviorSubject([] as Array<SigningRequest>);
 
-  get hasAuthRequests (): boolean {
+  private _authRequests: Record<string, AuthRequest> = {};
+
+  private _signRequests: Record<string, SignRequest> = {};
+
+  private _windows: number[] = [];
+
+  public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
+
+  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
+
+  public get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
   }
 
-  get hasSignRequests (): boolean {
+  public get hasSignRequests (): boolean {
     return this.numSignRequests === 0;
   }
 
-  get numAuthRequests (): number {
+  public get numAuthRequests (): number {
     return Object.keys(this._authRequests).length;
   }
 
-  get numSignRequests (): number {
+  public get numSignRequests (): number {
     return Object.keys(this._signRequests).length;
   }
 
-  get allAuthRequests (): Array<AuthorizeRequest> {
+  public get allAuthRequests (): AuthorizeRequest[] {
     return Object
       .values(this._authRequests)
-      .map(({ id, request, url }) => [id, request, url]);
+      .map(({ id, request, url }): AuthorizeRequest => [id, request, url]);
   }
 
-  get allSignRequests (): Array<SigningRequest> {
+  public get allSignRequests (): SigningRequest[] {
     return Object
       .values(this._signRequests)
-      .map(({ id, request, url }) => [id, request, url]);
+      .map(({ id, request, url }): SigningRequest => [id, request, url]);
   }
 
   private popupClose (): void {
-    this._windows.map((id: number) =>
+    this._windows.forEach((id: number): void =>
       extension.windows.remove(id)
     );
     this._windows = [];
@@ -94,14 +96,14 @@ export default class State {
       type: 'popup',
       url: extension.extension.getURL('popup.html'),
       width: 480
-    }, (window?: chrome.windows.Window) => {
+    }, (window?: chrome.windows.Window): void => {
       if (window) {
         this._windows.push(window.id);
       }
     });
   }
 
-  private authComplete = (id: string, fn: Function) => {
+  private authComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
     return (result: boolean | Error): void => {
       const isAllowed = result === true;
       const { idStr, request: { origin }, url } = this._authRequests[id];
@@ -121,8 +123,8 @@ export default class State {
     };
   }
 
-  private signComplete = (id: string, fn: Function) => {
-    return (result: MessageExtrinsicSign$Response | Error): void => {
+  private signComplete = (id: string, fn: Function): (result: MessageExtrinsicSignResponse | Error) => void => {
+    return (result: MessageExtrinsicSignResponse | Error): void => {
       delete this._signRequests[id];
       this.updateIconSign(true);
 
@@ -164,7 +166,7 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
+  public async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
     if (this._authUrls[idStr]) {
@@ -173,7 +175,7 @@ export default class State {
       return true;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
       const id = getId();
 
       this._authRequests[id] = {
@@ -190,7 +192,7 @@ export default class State {
     });
   }
 
-  isUrlAuthorized (url: string): boolean {
+  public isUrlAuthorized (url: string): boolean {
     const entry = this._authUrls[this.stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);
@@ -199,18 +201,18 @@ export default class State {
     return true;
   }
 
-  getAuthRequest (id: string): AuthRequest {
+  public getAuthRequest (id: string): AuthRequest {
     return this._authRequests[id];
   }
 
-  getSignRequest (id: string): SignRequest {
+  public getSignRequest (id: string): SignRequest {
     return this._signRequests[id];
   }
 
-  signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSign$Response> {
+  public signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSignResponse> {
     const id = getId();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject): void => {
       this._signRequests[id] = {
         id,
         request,

@@ -4,7 +4,7 @@
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreate$Response, MessageSeedValidate, MessageSeedValidate$Response, MessageAccountForget, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -18,14 +18,14 @@ import { createSubscription, unsubscribe } from './subscriptions';
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
-function transformAccounts (accounts: SubjectInfo): Array<KeyringJson> {
-  return Object.values(accounts).map(({ json }) => json);
+function transformAccounts (accounts: SubjectInfo): KeyringJson[] {
+  return Object.values(accounts).map(({ json }): KeyringJson => json);
 }
 
 export default class Extension {
-  state: State;
+  private state: State;
 
-  constructor (state: State) {
+  public constructor (state: State) {
     this.state = state;
   }
 
@@ -51,18 +51,18 @@ export default class Extension {
     return true;
   }
 
-  private accountsList (): Array<KeyringJson> {
+  private accountsList (): KeyringJson[] {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo) =>
+    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
 
-    port.onDisconnect.addListener(() => {
+    port.onDisconnect.addListener((): void => {
       unsubscribe(id);
       subscription.unsubscribe();
     });
@@ -94,18 +94,18 @@ export default class Extension {
     return true;
   }
 
-  private authorizeRequests (): Array<AuthorizeRequest> {
+  private authorizeRequests (): AuthorizeRequest[] {
     return this.state.allAuthRequests;
   }
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription(id, port);
-    const subscription = this.state.authSubject.subscribe((requests: Array<AuthorizeRequest>) =>
+    const subscription = this.state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
     );
 
-    port.onDisconnect.addListener(() => {
+    port.onDisconnect.addListener((): void => {
       unsubscribe(id);
       subscription.unsubscribe();
     });
@@ -113,7 +113,7 @@ export default class Extension {
     return true;
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreate$Response {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreateResponse {
     const seed = mnemonicGenerate(length);
 
     return {
@@ -122,7 +122,7 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ seed, type }: MessageSeedValidate): MessageSeedValidate$Response {
+  private seedValidate ({ seed, type }: MessageSeedValidate): MessageSeedValidateResponse {
     assert(SEED_LENGTHS.includes(seed.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
     assert(mnemonicValidate(seed), 'Not a valid mnemonic seed');
 
@@ -175,18 +175,18 @@ export default class Extension {
     return true;
   }
 
-  private signingRequests (): Array<SigningRequest> {
+  private signingRequests (): SigningRequest[] {
     return this.state.allSignRequests;
   }
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription(id, port);
-    const subscription = this.state.signSubject.subscribe((requests: Array<SigningRequest>) =>
+    const subscription = this.state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
 
-    port.onDisconnect.addListener(() => {
+    port.onDisconnect.addListener((): void => {
       unsubscribe(id);
       subscription.unsubscribe();
     });
@@ -194,7 +194,8 @@ export default class Extension {
     return true;
   }
 
-  async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
     switch (type) {
       case 'authorize.approve':
         return this.authorizeApprove(request);

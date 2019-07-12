@@ -11,23 +11,23 @@ import styled from 'styled-components';
 import { ActionBar, Button, Icon, IconBox, Link, Tip, defaults, withOnAction } from '../../components';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
-type Props = {
-  authId: string,
-  className?: string,
-  isFirst: boolean,
-  onAction: OnActionFromCtx,
-  request: MessageAuthorize,
-  url: string
-};
+interface Props {
+  authId: string;
+  className?: string;
+  isFirst: boolean;
+  onAction: OnActionFromCtx;
+  request: MessageAuthorize;
+  url: string;
+}
 
-function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props) {
-  const onApprove = () =>
+function Request ({ authId, className, isFirst, onAction, request: { origin }, url }: Props): React.ReactElement<Props> {
+  const onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
-      .then(() => onAction())
+      .then((): void => onAction())
       .catch(console.error);
-  const onReject = () =>
+  const onReject = (): Promise<void> =>
     rejectAuthRequest(authId)
-      .then(() => onAction())
+      .then((): void => onAction())
       .catch(console.error);
 
   return (

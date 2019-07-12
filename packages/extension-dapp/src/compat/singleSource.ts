@@ -3,34 +3,34 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer } from '@polkadot/api/types';
-import { InjectedAccount, InjectedWindow } from '../types';
+import { Injected, InjectedAccount, InjectedWindow } from '../types';
 
 // RxJs interface, only the bare-bones of what we need here
-type Subscriber<T> = {
+interface Subscriber<T> {
   subscribe: (cb: (value: T) => void) => {
-    unsubscribe (): any
-  }
-};
+    unsubscribe (): void;
+  };
+}
 
-type SingleSourceAccount = {
-  address: string,
-  assets: Array<{ assetId: number }>,
-  name: string
-};
+interface SingleSourceAccount {
+  address: string;
+  assets: { assetId: number }[];
+  name: string;
+}
 
-type SingleSource = {
-  accounts$: Subscriber<Array<SingleSourceAccount>>,
-  environment$: Subscriber<string>,
-  signer: Signer
-};
+interface SingleSource {
+  accounts$: Subscriber<SingleSourceAccount[]>;
+  environment$: string[];
+  signer: Signer;
+}
 
 type SingleWindow = Window & InjectedWindow & {
-  SingleSource: SingleSource
+  SingleSource: SingleSource;
 };
 
 // transfor the SingleSource accounts into a simple address/name array
-function transformAccounts (accounts: Array<SingleSourceAccount>): Array<InjectedAccount> {
-  return accounts.map(({ address, name }) => ({
+function transformAccounts (accounts: SingleSourceAccount[]): InjectedAccount[] {
+  return accounts.map(({ address, name }): InjectedAccount => ({
     address,
     name
   }));
@@ -38,24 +38,25 @@ function transformAccounts (accounts: Array<SingleSourceAccount>): Array<Injecte
 
 // add a compat interface of SingleSource to window.injectedWeb3
 function injectSingleSource (win: SingleWindow): void {
-  let accounts: Array<InjectedAccount> = [];
+  let accounts: InjectedAccount[] = [];
 
   // we don't yet have an accounts subscribe on the interface, simply get the
   // accounts and store them, any get will resolve the last found values
-  win.SingleSource.accounts$.subscribe((_accounts) => {
+  win.SingleSource.accounts$.subscribe((_accounts): void => {
     accounts = transformAccounts(_accounts);
   });
 
   // decorate the compat interface
   win.injectedWeb3['SingleSource'] = {
-    enable: async (origin: string) => ({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    enable: async (origin: string): Promise<Injected> => ({
       accounts: {
-        get: async () =>
+        get: async (): Promise<InjectedAccount[]> =>
           accounts,
-        subscribe: (cb: (accounts: Array<InjectedAccount>) => any) => {
-          const sub = win.SingleSource.accounts$.subscribe((accounts) =>
-            cb(transformAccounts(accounts))
-          );
+        subscribe: (cb: (accounts: InjectedAccount[]) => void): () => void => {
+          const sub = win.SingleSource.accounts$.subscribe((accounts): void => {
+            cb(transformAccounts(accounts));
+          });
 
           return (): void => {
             sub.unsubscribe();
@@ -71,8 +72,8 @@ function injectSingleSource (win: SingleWindow): void {
 // returns the SingleSource instance, as per
 // https://github.com/cennznet/singlesource-extension/blob/f7cb35b54e820bf46339f6b88ffede1b8e140de0/react-example/src/App.js#L19
 export default function initSingleSource (): Promise<boolean> {
-  return new Promise((resolve) => {
-    window.addEventListener('load', () => {
+  return new Promise((resolve): void => {
+    window.addEventListener('load', (): void => {
       const win = window as SingleWindow;
 
       if (win.SingleSource) {

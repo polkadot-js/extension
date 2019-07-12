@@ -11,14 +11,14 @@ import { Address, Button, Header, Tip, withOnAction } from '../components';
 import { forgetAccount } from '../messaging';
 import { Back } from '../partials';
 
-type Props = RouteComponentProps<{ address: string }> & {
-  onAction: OnActionFromCtx
-};
+interface Props extends RouteComponentProps<{ address: string }> {
+  onAction: OnActionFromCtx;
+}
 
-function Forget ({ match: { params: { address } }, onAction }: Props) {
-  const onClick = () =>
+function Forget ({ match: { params: { address } }, onAction }: Props): React.ReactElement<Props> {
+  const onClick = (): Promise<void> =>
     forgetAccount(address)
-      .then(() => onAction('/'))
+      .then((): void => onAction('/'))
       .catch(console.error);
 
   return (

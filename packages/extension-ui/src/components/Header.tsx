@@ -7,13 +7,13 @@ import styled from 'styled-components';
 
 import defaults from './defaults';
 
-type Props = {
-  children?: React.ReactNode,
-  className?: string,
-  label?: string
-};
+interface Props {
+  children?: React.ReactNode;
+  className?: string;
+  label?: string;
+}
 
-function Header ({ children, className, label }: Props) {
+function Header ({ children, className, label }: Props): React.ReactElement<Props> {
   return (
     <h2 className={className}>
       {label}{children}

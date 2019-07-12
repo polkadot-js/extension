@@ -8,11 +8,11 @@ import React from 'react';
 
 import { Box, Button, Header, withOnAction } from '../components';
 
-type Props = {
-  onAction: OnActionFromCtx
-};
+interface Props {
+  onAction: OnActionFromCtx;
+}
 
-function Welcome ({ onAction }: Props) {
+function Welcome ({ onAction }: Props): React.ReactElement<Props> {
   const onClick = (): void => {
     window.localStorage.setItem('welcome_read', 'ok');
     onAction();
@@ -26,7 +26,7 @@ function Welcome ({ onAction }: Props) {
         <ul>
           <li>We do not send any clicks, pageviews or events to a central server</li>
           <li>We do not use any trackers or analytics</li>
-          <li>We don't collect keys, addresses or any information - your information never leaves this machine</li>
+          <li>We don&apos;t collect keys, addresses or any information - your information never leaves this machine</li>
         </ul>
         ... we are not in the information collection business (even anonymized).
         <Button

@@ -9,18 +9,18 @@ import React from 'react';
 import { Button, Header, Tip, withAccounts } from '../../components';
 import Account from './Account';
 
-type Props = {
-  accounts: AccountsFromCtx
-};
+interface Props {
+  accounts: AccountsFromCtx;
+}
 
-function Accounts ({ accounts }: Props) {
+function Accounts ({ accounts }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='accounts' />
       {
         (accounts.length === 0)
-          ? <Tip header='add accounts' type='warn'>You currently don't have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
-          : accounts.map(({ address }) => (
+          ? <Tip header='add accounts' type='warn'>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
+          : accounts.map(({ address }): React.ReactNode => (
             <Account
               address={address}
               key={address}

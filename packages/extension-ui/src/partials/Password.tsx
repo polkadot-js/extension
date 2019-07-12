@@ -6,18 +6,18 @@ import React, { useEffect, useState } from 'react';
 
 import { Input } from '../components';
 
-type Props = {
-  isFocussed?: boolean,
-  onChange: (password: string | null) => void
-};
+interface Props {
+  isFocussed?: boolean;
+  onChange: (password: string | null) => void;
+}
 
 const MIN_LENGTH = 6;
 
-export default function Password ({ isFocussed, onChange }: Props) {
+export default function Password ({ isFocussed, onChange }: Props): React.ReactElement<Props> {
   const [pass1, setPass1] = useState('');
   const [pass2, setPass2] = useState('');
 
-  useEffect(() => {
+  useEffect((): void => {
     onChange(
       (pass1 && pass2 && (pass1.length >= MIN_LENGTH) && (pass1 === pass2))
         ? pass1

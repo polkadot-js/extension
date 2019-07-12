@@ -17,18 +17,18 @@ import handlers from './handlers';
 extension.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
 
 // listen to all messages and handle appropriately
-extension.runtime.onConnect.addListener((port) => {
+extension.runtime.onConnect.addListener((port): void => {
   // shouldn't happen, however... only listen to what we know about
   assert([PORT_CONTENT, PORT_POPUP].includes(port.name), `Unknown connection from ${port.name}`);
 
   // message and disconnect handlers
-  port.onMessage.addListener((data) => handlers(data, port));
-  port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+  port.onMessage.addListener((data): void => handlers(data, port));
+  port.onDisconnect.addListener((): void => console.log(`Disconnected from ${port.name}`));
 });
 
 // initial setup
 cryptoWaitReady()
-  .then(() => {
+  .then((): void => {
     console.log('crypto initialized');
 
     // load all the keyring data
@@ -36,6 +36,6 @@ cryptoWaitReady()
 
     console.log('initialization completed');
   })
-  .catch((error) => {
+  .catch((error): void => {
     console.error('initialization failed', error);
   });

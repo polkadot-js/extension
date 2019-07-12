@@ -7,12 +7,12 @@ import styled from 'styled-components';
 
 import { Link, unicode } from '../components';
 
-type Props = {
-  className?: string,
-  to?: string
-};
+interface Props {
+  className?: string;
+  to?: string;
+}
 
-function Back ({ className, to = '/' }: Props) {
+function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Link to={to}>{unicode.BACK} Back</Link>

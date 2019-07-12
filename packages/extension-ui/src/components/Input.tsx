@@ -8,20 +8,20 @@ import styled from 'styled-components';
 import Label from './Label';
 import defaults from './defaults';
 
-type Props = {
-  className?: string,
-  defaultValue?: string | null,
-  isError?: boolean,
-  isFocussed?: boolean,
-  isReadOnly?: boolean,
-  label?: string | null,
-  onBlur?: () => void,
-  onChange?: (value: string) => void,
-  type?: 'text' | 'password',
-  value?: string
-};
+interface Props {
+  className?: string;
+  defaultValue?: string | null;
+  isError?: boolean;
+  isFocussed?: boolean;
+  isReadOnly?: boolean;
+  label?: string | null;
+  onBlur?: () => void;
+  onChange?: (value: string) => void;
+  type?: 'text' | 'password';
+  value?: string;
+}
 
-function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur, onChange, type = 'text', value }: Props) {
+function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur, onChange, type = 'text', value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -46,35 +46,17 @@ function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur
 
 export default styled(Input)`
   input {
-    background: ${({ isError, isReadOnly }) =>
-      isError
-        ? defaults.box.error.background
-        : isReadOnly
-          ? '#eee'
-          : '#fff'
-    };
-    border-color: ${({ isError }) =>
-      isError
-        ? defaults.box.error.border
-        : defaults.inputBorder
-    };
+    background: ${({ isError, isReadOnly }): string => isError ? defaults.box.error.background : (isReadOnly ? '#eee' : '#fff')};
+    border-color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.inputBorder};
     border-radius: ${defaults.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError }) =>
-      isError
-        ? defaults.box.error.border
-        : defaults.color
-    };
+    color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.color};
     display: block;
     font-family: ${defaults.fontFamily};
     font-size: ${defaults.fontSize};
-    padding: ${({ label }) =>
-      label
-        ? defaults.inputPaddingLabel
-        : defaults.inputPadding
-    };
+    padding: ${({ label }): string => label ? defaults.inputPaddingLabel : defaults.inputPadding};
     width: 100%;
 
     &:read-only {

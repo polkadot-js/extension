@@ -9,9 +9,10 @@ import findChain from '@polkadot/extension/chains';
 import { Metadata, Method, ExtrinsicEra } from '@polkadot/types';
 import { formatNumber } from '@polkadot/util';
 
-type MethodJson = {
-  args: { [index: string]: any }
-};
+interface MethodJson {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: Record<string, any>;
+}
 
 interface Props {
   blockNumber: number;
@@ -24,7 +25,7 @@ interface Props {
   url: string;
 }
 
-function renderMethod (data: string, meta?: Metadata | null) {
+function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
   if (!meta) {
     return (
       <tr>
@@ -73,7 +74,7 @@ function renderMortality (era: ExtrinsicEra, blockNumber: number): string {
   return `mortal (birth #${formatNumber(mortal.birth(blockNumber))}, death #${formatNumber(mortal.death(blockNumber))})`;
 }
 
-function Details ({ blockNumber, className, genesisHash, isDecoded, era, method, nonce, url }: Props) {
+function Details ({ blockNumber, className, genesisHash, isDecoded, era, method, nonce, url }: Props): React.ReactElement<Props> {
   const chain = findChain(genesisHash);
   const eera = new ExtrinsicEra(era);
 

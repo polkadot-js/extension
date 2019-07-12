@@ -34,6 +34,7 @@ export default class Signer implements InjectedSigner {
     return id;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public update (id: number, status: Hash | SubmittableResult): void {
     // something
   }

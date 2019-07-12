@@ -19,7 +19,7 @@
     "build": "NODE_ENV=production polkadot-dev-build-ts",
     "build:zip": "(cd packages/extension/build && zip -r -FS ../../../master-build.zip *)",
     "check": "yarn lint",
-    "lint": "tslint --project . && tsc --noEmit --pretty",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx . && tsc --noEmit --pretty",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
     "test": "echo \"no tests... yet\"",

@@ -7,13 +7,13 @@ import styled from 'styled-components';
 
 import defaults from './defaults';
 
-type Props = {
-  children: React.ReactNode,
-  className?: string,
-  label?: string | null
-};
+interface Props {
+  children: React.ReactNode;
+  className?: string;
+  label?: string | null;
+}
 
-function Label ({ children, className, label }: Props) {
+function Label ({ children, className, label }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {label && <label>{label}</label>}

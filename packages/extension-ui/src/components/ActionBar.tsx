@@ -5,12 +5,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-type Props = {
+interface Props {
   children: React.ReactNode;
   className?: string;
-};
+}
 
-function ActionBar ({ children, className }: Props) {
+function ActionBar ({ children, className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {children}

@@ -12,22 +12,22 @@ import { approveSignRequest, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Unlock from './Unlock';
 
-type Props = {
-  isFirst: boolean,
-  onAction: OnActionFromCtx,
-  request: MessageExtrinsicSign,
-  signId: string,
-  url: string
-};
+interface Props {
+  isFirst: boolean;
+  onAction: OnActionFromCtx;
+  request: MessageExtrinsicSign;
+  signId: string;
+  url: string;
+}
 
-function Request ({ isFirst, onAction, request: { address, blockNumber, era, genesisHash, method, nonce }, signId, url }: Props) {
-  const onCancel = () =>
+function Request ({ isFirst, onAction, request: { address, blockNumber, era, genesisHash, method, nonce }, signId, url }: Props): React.ReactElement<Props> {
+  const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
-      .then(() => onAction())
+      .then((): void => onAction())
       .catch(console.error);
-  const onSign = (password: string) =>
+  const onSign = (password: string): Promise<void> =>
     approveSignRequest(signId, password)
-      .then(() => onAction());
+      .then((): void => onAction());
 
   return (
     <Address address={address}>

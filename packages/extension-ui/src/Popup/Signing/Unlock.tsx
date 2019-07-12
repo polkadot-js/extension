@@ -6,20 +6,20 @@ import React, { useState, useEffect } from 'react';
 
 import { Button, Input } from '../../components';
 
-type Props = {
-  className?: string,
-  onSign: (password: string) => Promise<void>
-};
+interface Props {
+  className?: string;
+  onSign: (password: string) => Promise<void>;
+}
 
-export default function Unlock ({ className, onSign }: Props) {
+export default function Unlock ({ className, onSign }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
-  const onClick = () =>
+  const onClick = (): Promise<void> =>
     onSign(password)
-      .catch((error) => setError(error.message));
+      .catch((error): void => setError(error.message));
 
-  useEffect(() => {
+  useEffect((): void => {
     if (error) {
       setError('');
     }

@@ -6,7 +6,8 @@ import { AccountsFromCtx, OnActionFromCtx, AuthRequestsFromCtx, SignRequestsFrom
 
 import React from 'react';
 
-const noop = (to?: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const noop = (to?: string): void => {
   // do nothing
 };
 
@@ -23,10 +24,11 @@ export {
 };
 
 export function withAccounts<P extends { accounts: AccountsFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { accounts: AccountsFromCtx }>> {
+  // eslint-disable-next-line react/display-name,@typescript-eslint/explicit-function-return-type
   return (props: SubtractProps<P, { accounts: AccountsFromCtx }>) => {
     return (
       <AccountContext.Consumer>
-        {(accounts) => (
+        {(accounts): React.ReactNode => (
           // @ts-ignore Something here with the props are going wonky
           <Component
             {...props}
@@ -39,10 +41,11 @@ export function withAccounts<P extends { accounts: AccountsFromCtx }> (Component
 }
 
 export function withOnAction<P extends { onAction: OnActionFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { onAction: OnActionFromCtx }>> {
+  // eslint-disable-next-line react/display-name,@typescript-eslint/explicit-function-return-type
   return (props: SubtractProps<P, { onAction: OnActionFromCtx }>) => {
     return (
       <ActionContext.Consumer>
-        {(onAction) => (
+        {(onAction): React.ReactNode => (
           // @ts-ignore Something here with the props are going wonky
           <Component
             {...props}
@@ -55,10 +58,11 @@ export function withOnAction<P extends { onAction: OnActionFromCtx }> (Component
 }
 
 export function withAuthRequests<P extends { requests: AuthRequestsFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { requests: AuthRequestsFromCtx }>> {
+  // eslint-disable-next-line react/display-name,@typescript-eslint/explicit-function-return-type
   return (props: SubtractProps<P, { requests: AuthRequestsFromCtx }>) => {
     return (
       <AuthorizeContext.Consumer>
-        {(requests) => (
+        {(requests): React.ReactNode => (
           // @ts-ignore Something here with the props are going wonky
           <Component
             {...props}
@@ -71,10 +75,11 @@ export function withAuthRequests<P extends { requests: AuthRequestsFromCtx }> (C
 }
 
 export function withSignRequests<P extends { requests: SignRequestsFromCtx }> (Component: React.ComponentType<P>): React.ComponentType<SubtractProps<P, { requests: SignRequestsFromCtx }>> {
+  // eslint-disable-next-line react/display-name,@typescript-eslint/explicit-function-return-type
   return (props: SubtractProps<P, { requests: SignRequestsFromCtx }>) => {
     return (
       <SigningContext.Consumer>
-        {(requests) => (
+        {(requests): React.ReactNode => (
           // @ts-ignore Something here with the props are going wonky
           <Component
             {...props}

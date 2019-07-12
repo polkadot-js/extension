@@ -60,13 +60,15 @@ export type MessageExtrinsicSignCancel = {
   id: string
 };
 
-export type MessageExtrinsicSign = {
-  address: string,
-  blockHash: string,
-  genesisHash: string,
-  method: string,
-  nonce: string
-};
+export interface MessageExtrinsicSign {
+  address: string;
+  blockHash: string;
+  blockNumber: number;
+  era?: string;
+  genesisHash: string;
+  method: string;
+  nonce: string;
+}
 
 export type MessageExtrinsicSign$Response = {
   id: string,

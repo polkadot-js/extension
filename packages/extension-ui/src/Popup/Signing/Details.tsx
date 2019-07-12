@@ -6,20 +6,23 @@ import React from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension/chains';
-import { Metadata, Method } from '@polkadot/types';
+import { Metadata, Method, ExtrinsicEra } from '@polkadot/types';
+import { formatNumber } from '@polkadot/util';
 
 type MethodJson = {
   args: { [index: string]: any }
 };
 
-type Props = {
-  className?: string,
-  genesisHash: string,
-  isDecoded: boolean,
-  method: string,
-  nonce: string,
-  url: string
-};
+interface Props {
+  blockNumber: number;
+  className?: string;
+  era?: string;
+  genesisHash: string;
+  isDecoded: boolean;
+  method: string;
+  nonce: string;
+  url: string;
+}
 
 function renderMethod (data: string, meta?: Metadata | null) {
   if (!meta) {
@@ -60,8 +63,19 @@ function renderMethod (data: string, meta?: Metadata | null) {
   );
 }
 
-function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Props) {
+function renderMortality (era: ExtrinsicEra, blockNumber: number): string {
+  if (era.isImmortalEra) {
+    return 'immortal';
+  }
+
+  const mortal = era.asMortalEra;
+
+  return `mortal (birth #${formatNumber(mortal.birth(blockNumber))}, death #${formatNumber(mortal.death(blockNumber))})`;
+}
+
+function Details ({ blockNumber, className, genesisHash, isDecoded, era, method, nonce, url }: Props) {
   const chain = findChain(genesisHash);
+  const eera = new ExtrinsicEra(era);
 
   return (
     <table className={className}>
@@ -79,6 +93,10 @@ function Details ({ className, genesisHash, isDecoded, method, nonce, url }: Pro
           <td className='data'>{nonce}</td>
         </tr>
         {renderMethod(method, (chain && isDecoded) ? chain.meta : null)}
+        <tr>
+          <td className='label'>mortality</td>
+          <td className='data'>{renderMortality(eera, blockNumber)}</td>
+        </tr>
       </tbody>
     </table>
   );

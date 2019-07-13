@@ -42,7 +42,7 @@ having to manage any additional info.
 
 This approach is used to support multiple external signers in for instance [apps](https://github.com/polkadot-js/apps/). You can read more about the conenience wrapper [@polkadot/extension-dapp](packages/extension-dapp/) along with usage samples.
 
-## Technical
+## API interface
 
 The extension injection interfaces are generic, i.e. it is designed to allow any extension developer to easily inject extensions (that conforms to a specific interface) and at the same time it allows for any dapp developer to easily enable the interfaces from multiple extensions at the same time. It is not an all-or-nothing approch, but rather it is an ecosystem where the user can choose which extensions fit his style best.
 
@@ -85,7 +85,7 @@ interface Signer extends SignerInterface {
 }
 ```
 
-# Technical information
+## Injection information
 
 This information may change and evolve. It is therefore recommended that all access is done via the `-dapp` and `-inject` packages, which removes the need to work with the lower-level targets.
 

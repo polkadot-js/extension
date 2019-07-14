@@ -5,13 +5,13 @@
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/api": "^0.82.0-beta.55",
+    "@polkadot/api": "^0.82.0-beta.56",
     "@polkadot/extension-ui": "^0.3.0",
-    "@polkadot/ui-keyring": "^0.42.0-beta.8"
+    "@polkadot/ui-keyring": "^0.42.0-beta.9"
   },
   "devDependencies": {
     "@babel/runtime": "^7.5.4",
-    "@polkadot/keyring": "^0.94.0-beta.10",
+    "@polkadot/keyring": "^0.94.0-beta.11",
     "@types/chrome": "^0.0.86",
     "@types/firefox-webext-browser": "^67.0.1",
     "extensionizer": "^1.0.1",

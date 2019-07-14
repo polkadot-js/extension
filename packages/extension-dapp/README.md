@@ -28,4 +28,11 @@ const injector = await web3FromAddress('5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7
 
 // sets the signer for the address on the @polkadot/api
 api.setSigner(injector.signer);
+
+// sign and send out transaction - notice here that the address of the account (as retrieved injected)
+// is passed through as the param to the `signAndSend`, the API then calls the extension to present
+// to the user and get it signed. Once completex, the api sends the tx + signature via the normal process
+api.tx.balances
+  .transfer('5C5555yEXUcmEJ5kkcCMvdZjUo7NGJiQJMS7vZXEeoMhj3VQ', 123456)
+  .signAndSend('5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE', (status) => { ... });
 ```

@@ -89,7 +89,8 @@ export default class State {
 
   private popupOpen (): void {
     extension.windows.create({
-      focused: true,
+      // This is not allowed on FF, only on Chrome - disable completely
+      // focused: true,
       height: 580,
       left: 150,
       top: 150,

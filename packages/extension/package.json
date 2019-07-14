@@ -7,7 +7,7 @@
   "dependencies": {
     "@polkadot/api": "^0.82.0-beta.53",
     "@polkadot/extension-ui": "^0.3.0-beta.3",
-    "@polkadot/ui-keyring": "^0.42.0-beta.7"
+    "@polkadot/ui-keyring": "^0.42.0-beta.8"
   },
   "devDependencies": {
     "@babel/runtime": "^7.5.4",

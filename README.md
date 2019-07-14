@@ -6,7 +6,20 @@ A very simple scaffolding browser extension that injects a [@polkadot/api](https
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
 
-## Running
+## Installation
+
+- On Firefox, install the extension via [https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/](https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/)
+- Chrome coming soon
+
+<div>
+
+![Create account](docs/create-account-40.png)
+![Create account](docs/authorize-40.png)
+![Create account](docs/sign-tx-40.png)
+
+</div>
+
+## Development version
 
 Currently is not packaged since it is under heavy development. As such you need to build it yourself. To use -
 

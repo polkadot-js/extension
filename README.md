@@ -6,10 +6,12 @@ A very simple scaffolding browser extension that injects a [@polkadot/api](https
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
 
-<div class='images'>
+<div class="images">
+
 ![Create account](docs/create-account.png)
 ![Create account](docs/authorize.png)
 ![Create account](docs/sign-tx.png)
+
 </div>
 
 ## Running
@@ -127,12 +129,15 @@ Generally, you would probably want to have access to all extensions available an
 
 
 <style type="text/css">
+
   .images {
     white-space: nowrap;
   }
+
   .images p {
     display: inline-block !important;
     height: 594px;
     width: 494px;
   }
+
 </style>

@@ -6,11 +6,11 @@ A very simple scaffolding browser extension that injects a [@polkadot/api](https
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
 
-<div class="images">
+<div>
 
-![Create account](docs/create-account.png)
-![Create account](docs/authorize.png)
-![Create account](docs/sign-tx.png)
+![Create account](docs/create-account-40.png)
+![Create account](docs/authorize-40.png)
+![Create account](docs/sign-tx-40.png)
 
 </div>
 
@@ -126,18 +126,3 @@ const api = await Api.create({ signer: pjsx.signer });
 ```
 
 Generally, you would probably want to have access to all extensions available and have a slighly higher-level interface to work with. For these cases, [extension-dapp](packages/extension-dapp/) provides a cleaner interface around the injected object, making it simpler to work with from a dapp perspective.
-
-
-<style type="text/css">
-
-  .images {
-    white-space: nowrap;
-  }
-
-  .images p {
-    display: inline-block !important;
-    height: 594px;
-    width: 494px;
-  }
-
-</style>

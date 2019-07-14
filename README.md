@@ -6,17 +6,9 @@ A very simple scaffolding browser extension that injects a [@polkadot/api](https
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
 
-{:refdef: style="display: inline; width: 494px; height: 594px"}
-![Create account](docs/create-account.png)
-{: refdef}
-
-{:refdef: style="display: inline; width: 494px; height: 594px"}
-![Create account](docs/suthorize.png)
-{: refdef}
-
-{:refdef: style="display: inline; width: 494px; height: 594px"}
-![Create account](docs/sign-tx.png)
-{: refdef}
+![Create account](docs/create-account.png){:height="50%" width="50%"}
+![Create account](docs/authorize.png){:height="50%" width="50%"}
+![Create account](docs/sign-tx.png){:height="50%" width="50%"}
 
 ## Running
 

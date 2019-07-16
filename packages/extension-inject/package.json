@@ -6,6 +6,7 @@
   "license": "Apache-2",
   "peerDependencies": {
     "@babel/runtime": "^7.5.4",
-    "@polkadot/api": "*"
+    "@polkadot/api": "*",
+    "@polkadot/rpc-provider": "*"
   }
 }

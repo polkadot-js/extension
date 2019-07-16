@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer } from '@polkadot/api/types';
+import { ProviderInterface } from '@polkadot/rpc-provider/types';
 
 export type Unsubcall = () => void;
 
@@ -27,6 +28,15 @@ export interface InjectedAccounts {
 
 export type InjectedSigner = Signer;
 
+export type InjectedProvider = ProviderInterface;
+
+export interface InjectedProviderWithMeta {
+  provider: InjectedProvider;
+  meta: {
+    source: string;
+  };
+}
+
 export interface InjectedExtensionInfo {
   name: string;
   version: string;
@@ -35,6 +45,7 @@ export interface InjectedExtensionInfo {
 export interface Injected {
   accounts: InjectedAccounts;
   signer: InjectedSigner;
+  provider?: InjectedProvider;
 }
 
 export interface InjectedWindowProvider {

@@ -1,9 +1,7 @@
 # ![polkadot{.js} extension](docs/logo.jpg)
 [![Greenkeeper badge](https://badges.greenkeeper.io/polkadot-js/extension.svg)](https://greenkeeper.io/)
 
-A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
-
-As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
+A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. A provider is also injected so that dapps can connect to your node. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
 
 ## Installation
 
@@ -61,12 +59,12 @@ When there is more than one extension, each will populate an entry above, so fro
 ```js
 interface Injected {
   // the interface for Accounts, as detailed below
-  read-only accounts: Accounts;
+  readonly accounts: Accounts;
   // the standard Signer interface for the API, as detailed below
-  read-only signer: Signer;
-  // not injected as of yet, subscribable provider for polkadot-js API injection,
+  readonly signer: Signer;
+  // subscribable provider for polkadot-js API injection,
   // this can be passed to the API itself upon construction in the dapp
-  // read-only provider: Provider
+  readonly provider: Provider
 }
 
 interface Account = {
@@ -120,7 +118,7 @@ import { ApiPromise } from '@polkadot/api';
 
 const pjsx = await window.injectedWeb3['polkadot-js'].enable('my dapp');
 const accounts = await pjsx.accounts.get();
-const api = await Api.create({ signer: pjsx.signer });
+const api = await Api.create({ signer: pjsx.signer, provider: pjsx.provider });
 ```
 
 Generally, you would probably want to have access to all extensions available and have a slightly higher-level interface to work with. For these cases, [extension-dapp](packages/extension-dapp/) provides a cleaner interface around the injected object, making it simpler to work with from a dapp perspective.

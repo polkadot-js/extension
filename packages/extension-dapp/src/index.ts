@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall, InjectedProviderWithMeta } from '@polkadot/extension-inject/types';
 
 // our extension adaptor for other kinds of extensions
 import compatInjector from './compat';
@@ -39,7 +39,7 @@ let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
 
 export { isWeb3Injected, web3EnablePromise };
 
-// enables all the providers found on the injected window interface
+// enables all the extensions found on the injected window interface
 export function web3Enable (originName: string): Promise<InjectedExtension[]> {
   web3EnablePromise = compatInjector()
     .then((): Promise<InjectedExtension[]> =>
@@ -65,7 +65,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
                   ext.accounts.get().then(cb).catch(console.error);
 
                   return (): void => {
-                    // no ubsubscribe needed, this is a single-shot
+                    // no unsubscribe needed, this is a single-shot
                   };
                 };
               }
@@ -89,7 +89,31 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
   return web3EnablePromise;
 }
 
-// retrieve all the accounts accross all providers
+// retrieve all the providers accross all extensions
+export async function web3Providers (): Promise<InjectedProviderWithMeta[]> {
+  if (!web3EnablePromise) {
+    return throwError('web3Providers');
+  }
+
+  const injected = await web3EnablePromise;
+  const providers: InjectedProviderWithMeta[] = injected
+    .map(({ provider, name: source }): InjectedProviderWithMeta | null =>
+      provider
+        ? { provider, meta: { source } }
+        : null
+    )
+    .filter((x): x is InjectedProviderWithMeta =>
+      x !== null
+    );
+
+  const sources = providers.map(({ meta: { source } }): string => source);
+
+  console.log(`web3Providers: Found ${providers.length} provider${providers.length !== 1 ? 's' : ''} from extension${sources.length !== 1 ? 's' : ''} ${sources.join(', ')}`);
+
+  return Promise.resolve(providers);
+}
+
+// retrieve all the accounts accross all extensions
 export async function web3Accounts (): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
@@ -150,7 +174,7 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
   };
 }
 
-// find a specific provider based on the name
+// find a specific extension based on the name
 export async function web3FromSource (source: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     return throwError('web3FromSource');
@@ -166,7 +190,7 @@ export async function web3FromSource (source: string): Promise<InjectedExtension
   return found;
 }
 
-// find a specific provider based on an address
+// find a specific extension based on an address
 export async function web3FromAddress (address: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     return throwError('web3FromAddress');

@@ -137,7 +137,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { request: { address, genesisHash, method, nonce }, resolve, reject } = queued;
+    const { request: { address, blockHash, era, method, nonce }, resolve, reject } = queued;
     const pair = keyring.getPair(address);
 
     if (!pair) {
@@ -148,9 +148,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
 
-    // FIXME We should pass the era and blockHash as received here - however... it seems
-    // like something goes wrong along the way. Immortal is ok
-    const payload = new SignaturePayloadRaw({ blockHash: genesisHash, method, nonce });
+    const payload = new SignaturePayloadRaw({ blockHash, era, method, nonce });
     const signature = u8aToHex(payload.sign(pair));
 
     pair.lock();

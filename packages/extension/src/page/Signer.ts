@@ -10,6 +10,8 @@ import { SendRequest } from './types';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 import { Hash } from '@polkadot/types';
 
+const DEFAULT_ERA = new Uint8Array();
+
 let sendRequest: SendRequest;
 
 export default class Signer implements InjectedSigner {
@@ -29,7 +31,7 @@ export default class Signer implements InjectedSigner {
       nonce
     })));
 
-    extrinsic.addSignature(address, signature, nonce);
+    extrinsic.addSignature(address, signature, nonce, era || DEFAULT_ERA);
 
     return id;
   }

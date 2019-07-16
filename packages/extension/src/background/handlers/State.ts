@@ -91,7 +91,7 @@ export default class State {
     extension.windows.create({
       // This is not allowed on FF, only on Chrome - disable completely
       // focused: true,
-      height: 580,
+      height: 581,
       left: 150,
       top: 150,
       type: 'popup',

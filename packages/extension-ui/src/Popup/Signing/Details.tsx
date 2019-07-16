@@ -71,7 +71,7 @@ function renderMortality (era: ExtrinsicEra, blockNumber: number): string {
 
   const mortal = era.asMortalEra;
 
-  return `mortal (birth #${formatNumber(mortal.birth(blockNumber))}, death #${formatNumber(mortal.death(blockNumber))})`;
+  return `mortal, valid from #${formatNumber(mortal.birth(blockNumber))} to #${formatNumber(mortal.death(blockNumber))}`;
 }
 
 function Details ({ blockNumber, className, genesisHash, isDecoded, era, method, nonce, url }: Props): React.ReactElement<Props> {

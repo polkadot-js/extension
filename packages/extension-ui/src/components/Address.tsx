@@ -2,14 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { AccountsFromCtx } from './types';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Identicon from '@polkadot/ui-identicon';
 
 import IconBox from './IconBox';
 import { withAccounts } from './contexts';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 interface Props {
   accounts: AccountsFromCtx;
@@ -21,7 +23,17 @@ interface Props {
 }
 
 function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
-  const account = accounts.find((account): boolean => account.address === address);
+  const [account, setAccount] = useState<KeyringJson | null>(null);
+
+  useEffect((): void => {
+    const addrU8a = decodeAddress(address || '').toString();
+
+    setAccount(
+      accounts.find((account): boolean =>
+        decodeAddress(account.address).toString() === addrU8a
+      ) || null
+    );
+  }, [address]);
 
   return (
     <IconBox

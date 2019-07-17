@@ -6,7 +6,8 @@ import extension from 'extensionizer';
 
 // Runs in the extension background, handling all keyring access
 
-import keyring, { ExtensionStore } from '@polkadot/ui-keyring';
+import keyring from '@polkadot/ui-keyring';
+import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 

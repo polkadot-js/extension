@@ -124,3 +124,8 @@ const api = await Api.create({ signer: pjsx.signer });
 ```
 
 Generally, you would probably want to have access to all extensions available and have a slightly higher-level interface to work with. For these cases, [extension-dapp](packages/extension-dapp/) provides a cleaner interface around the injected object, making it simpler to work with from a dapp perspective.
+
+## FAQ
+
+### Why can't I import an account with a seed
+This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They are checksummed (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding unencrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.

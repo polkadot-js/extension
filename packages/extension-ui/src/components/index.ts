@@ -6,6 +6,7 @@ export { default as ActionBar } from './ActionBar';
 export { default as Address } from './Address';
 export { default as Box } from './Box';
 export { default as Button } from './Button';
+export { default as Dropdown } from './Dropdown';
 export { default as Header } from './Header';
 export { default as Icon } from './Icon';
 export { default as IconBox } from './IconBox';

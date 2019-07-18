@@ -6,7 +6,7 @@ import { AccountsFromCtx } from '../../components/types';
 
 import React from 'react';
 
-import { Button, Header, Tip, withAccounts } from '../../components';
+import { Button, Header, Link, Tip, unicode, withAccounts } from '../../components';
 import Account from './Account';
 
 interface Props {
@@ -16,7 +16,10 @@ interface Props {
 function Accounts ({ accounts }: Props): React.ReactElement<Props> {
   return (
     <div>
-      <Header label='accounts' />
+      <Header
+        label='accounts'
+        labelExtra={<Link to='/settings'>Settings {unicode.FWD}</Link>}
+      />
       {
         (accounts.length === 0)
           ? <Tip header='add accounts' type='warn'>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>

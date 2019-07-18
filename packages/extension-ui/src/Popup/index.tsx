@@ -4,10 +4,12 @@
 
 import { AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
+import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import settings from '@polkadot/ui-settings';
+import { setAddressPrefix } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeContext, SigningContext } from '../components/contexts';
@@ -23,7 +25,10 @@ import Welcome from './Welcome';
 
 // load the ui settings, actually only used for address prefix atm
 // probably overkill (however can replace once we have actual others)
-settings.get();
+const { prefix } = settings.get();
+
+// FIXME Duplicated in Settings, horrible...
+setAddressPrefix((prefix === -1 ? 42 : prefix) as Prefix);
 
 export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | KeyringJson[]>(null);

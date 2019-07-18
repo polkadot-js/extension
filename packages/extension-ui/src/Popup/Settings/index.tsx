@@ -2,8 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Prefix } from '@polkadot/util-crypto/address/types';
+
 import React, { useState } from 'react';
 import settings from '@polkadot/ui-settings';
+import { setAddressPrefix } from '@polkadot/util-crypto';
 
 import { Dropdown, Header } from '../../components';
 import { Back } from '../../partials';
@@ -18,11 +21,14 @@ const options = settings.availablePrefixes.map(({ text, value }): { text: string
 export default function Settings (): React.ReactElement<{}> {
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
 
+  // FIXME check against index, we need a better solution
   const _onChangePrefix = (value: string): void => {
-    const prefix = parseInt(value, 10);
+    const prefix = parseInt(value, 10) as Prefix;
+
+    setPrefix(value);
+    setAddressPrefix((prefix as number) === -1 ? 42 : prefix);
 
     settings.set({ prefix });
-    setPrefix(value);
   };
 
   return (

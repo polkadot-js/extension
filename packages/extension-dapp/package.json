@@ -1,11 +1,11 @@
 {
   "name": "@polkadot/extension-dapp",
   "description": "Provides an interfaces around the injected globals for ease of access by dapp developers.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/extension-inject": "^0.4.0"
+    "@polkadot/extension-inject": "^0.4.1"
   },
   "peerDependencies": {
     "@babel/runtime": "^7.5.4",

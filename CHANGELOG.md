@@ -1,3 +1,10 @@
+# 0.4.1
+
+- Transactions are now signed with expiry information, so each transaction is mortal by default
+- Unneeded scrollbars on Firefox does not apper anymore (when window is popped out)
+- Cater for the setting of multiple network prefixes, e.g. Kusama
+- Project icon has been updated
+
 # 0.3.1
 
 - Signing a transaction now displays the Mortal/Immortal status

@@ -7,6 +7,7 @@ import { KeyringJson } from '@polkadot/ui-keyring/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
+import settings from '@polkadot/ui-settings';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeContext, SigningContext } from '../components/contexts';
@@ -16,11 +17,15 @@ import Authorize from './Authorize';
 import Create from './Create';
 import Forget from './Forget';
 import Import from './Import';
+import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function Popup (props: {}): React.ReactElement<{}> {
+// load the ui settings, actually only used for address prefix atm
+// probably overkill (however can replace once we have actual others)
+settings.get();
+
+export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | KeyringJson[]>(null);
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
@@ -61,6 +66,7 @@ export default function Popup (props: {}): React.ReactElement<{}> {
                 <Route path='/account/create' component={Create} />
                 <Route path='/account/forget/:address' component={Forget} />
                 <Route path='/account/import' component={Import} />
+                <Route path='/settings' component={Settings} />
                 <Route exact path='/' component={Root} />
               </Switch>
             </SigningContext.Provider>

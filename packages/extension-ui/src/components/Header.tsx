@@ -10,13 +10,18 @@ import defaults from './defaults';
 interface Props {
   children?: React.ReactNode;
   className?: string;
-  label?: string;
+  label?: React.ReactNode;
+  labelExtra?: React.ReactNode;
 }
 
-function Header ({ children, className, label }: Props): React.ReactElement<Props> {
+function Header ({ children, className, label, labelExtra }: Props): React.ReactElement<Props> {
   return (
     <h2 className={className}>
-      {label}{children}
+      <div className='label'>{label}</div>
+      {labelExtra && (
+        <div className='labelExtra'>{labelExtra}</div>
+      )}
+      {children}
     </h2>
   );
 }
@@ -24,10 +29,21 @@ function Header ({ children, className, label }: Props): React.ReactElement<Prop
 export default styled(Header)`
   background: ${defaults.hdrBg};
   box-sizing: border-box;
-  color: ${defaults.hdrColor};
-  font-family: ${defaults.fontFamily};
   font-weight: normal;
   margin: 0 -1rem;
   padding: 0.75rem 1rem;
-  text-transform: uppercase;
+  position: relative;
+
+  .label {
+    color: ${defaults.hdrColor};
+    font-family: ${defaults.fontFamily};
+    text-transform: uppercase;
+  }
+
+  .labelExtra {
+    bottom: 0.75rem;
+    font-size: 1rem;
+    position: absolute;
+    right: 1rem;
+  }
 `;

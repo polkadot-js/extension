@@ -13,8 +13,12 @@ export default class Injected implements InjectedInjected {
 
   public readonly signer: Signer;
 
+  public readonly Provider: PostMessageProvider;
+
   public constructor (sendRequest: SendRequest) {
     this.accounts = new Accounts(sendRequest);
     this.signer = new Signer(sendRequest);
+    this.provider = new PostMessageProvider();
+    // so we want to create a PostMessageProvider for proxying?
   }
 }

@@ -5,8 +5,8 @@ A very simple scaffolding browser extension that injects a [@polkadot/api](https
 
 ## Installation
 
-- On Firefox, install the extension via [https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/](https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/)
-- Chrome coming soon
+- On Chrome, install via [Chrome web store](https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd)
+- On Firefox, install via [Firefox add-ons](https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/)
 
 ![interface screenshots](docs/concat-overview.jpg)
 
@@ -35,9 +35,9 @@ Once added, you can create an account (via a generated seed) or import via an ex
 The repo is split into a number of packages -
 
 - [extension](packages/extension/) - All the injection and background processing logic (the main entry)
-- [extension-ui](packages/extension-ui/) - The UI components for the extension, do build up the popup
+- [extension-ui](packages/extension-ui/) - The UI components for the extension, to build up the popup
 - [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
-- [extension-inject](packages/extension-inject/) - A convience wrapper that allows extension developers to inject their extension for use by dapp developers
+- [extension-inject](packages/extension-inject/) - A convience wrapper that allows extension developers to inject their extension for use by any dapp
 
 ## Dapp developers
 
@@ -48,13 +48,13 @@ This approach is used to support multiple external signers in for instance [apps
 
 ## API interface
 
-The extension injection interfaces are generic, i.e. it is designed to allow any extension developer to easily inject extensions (that conforms to a specific interface) and at the same time, it allows for any dapp developer to easily enable the interfaces from multiple extensions at the same time. It is not an all-or-nothing approach, but rather it is an ecosystem where the user can choose which extensions fit his style best.
+The extension injection interfaces are generic, i.e. it is designed to allow any extension developer to easily inject extensions (that conforms to a specific interface) and at the same time, it allows for any dapp developer to easily enable the interfaces from multiple extensions at the same time. It is not an all-or-nothing approach, but rather it is an ecosystem where the user can choose which extensions fit their style best.
 
 From a dapp developer perspective, the only work needed is to include the [@polkadot/extension-dapp](packages/extension-dapp/) package and call the appropriate enabling function to retrieve all the extensions and their associated interfaces.
 
-From an extension developer perspective, the only work required is to enable the extension via the razor-thin [@polkadot/extension-inject](packages/extension-inject/) wrapper. Any dapp using the above interfaces will have access.
+From an extension developer perspective, the only work required is to enable the extension via the razor-thin [@polkadot/extension-inject](packages/extension-inject/) wrapper. Any dapp using the above interfaces will have access to the extension via this interface.
 
-When there is more than one extension, each will populate an entry above, so from an extension implementation perspective, the structure should not be overridden. The `Injected` interface, as returned via `enable`, contains the following and is what any compliant extension supplies -
+When there is more than one extension, each will populate an entry via the injection interface and each will be made available to the dapp. The `Injected` interface, as returned via `enable`, contains the following information for any compliant extension -
 
 ```js
 interface Injected {
@@ -91,9 +91,9 @@ interface Signer extends SignerInterface {
 
 ## Injection information
 
-This information may change and evolve. It is therefore recommended that all access is done via the `-dapp` and `-inject` packages, which removes the need to work with the lower-level targets.
+The information contained in this section may change and evolve. It is therefore recommended that all access is done via the [@polkadot/extension-dapp](packages/extension-dapp/) (for dapps) and [extension-inject](packages/extension-inject/) (for extensions) packages, which removes the need to work with the lower-level targets.
 
-The extension injects `injectedWeb3` into the global `window` object, exposing the following: (This is meant to be generic across extensions, allowing any dapp to utilize multiple signers, as they are available)
+The extension injects `injectedWeb3` into the global `window` object, exposing the following: (This is meant to be generic across extensions, allowing any dapp to utilize multiple signers, and pull accounts from multiples, as they are available)
 
 ```js
 window.injectedWeb3 = {
@@ -111,14 +111,7 @@ window.injectedWeb3 = {
 }
 ```
 
-The app can use all or any of these, depending on needs. To instantiate the `@polkadot/api` signer (allowing the extension to sign messages) can be done via (assuming a known, single extension) -
+## FAQ
 
-```js
-import { ApiPromise } from '@polkadot/api';
-
-const pjsx = await window.injectedWeb3['polkadot-js'].enable('my dapp');
-const accounts = await pjsx.accounts.get();
-const api = await Api.create({ signer: pjsx.signer, provider: pjsx.provider });
-```
-
-Generally, you would probably want to have access to all extensions available and have a slightly higher-level interface to work with. For these cases, [extension-dapp](packages/extension-dapp/) provides a cleaner interface around the injected object, making it simpler to work with from a dapp perspective.
+### Why can't I import an account with a seed
+This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They are checksummed (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding unencrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.

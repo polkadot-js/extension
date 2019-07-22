@@ -193,7 +193,7 @@ export default class State {
     });
   }
 
-  public isUrlAuthorized (url: string): boolean {
+  public ensureUrlAuthorized (url: string): boolean {
     const entry = this._authUrls[this.stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);

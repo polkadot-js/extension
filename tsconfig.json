@@ -1,10 +1,8 @@
 {
   "extends": "./node_modules/@polkadot/dev/config/tsconfig",
-  "compilerOptions":
-  {
+  "compilerOptions": {
     "baseUrl": ".",
-    "paths":
-    {
+    "paths": {
       "@polkadot/extension": ["packages/extension/src"],
       "@polkadot/extension/*": ["packages/extension/src/*"],
       "@polkadot/extension-dapp": ["packages/extension-dapp/src"],
@@ -18,5 +16,8 @@
       "./node_modules/@polkadot/ts",
       "./node_modules/@types"
     ]
-  }
+  },
+  "exclude": [
+    "**/build/*"
+  ]
 }

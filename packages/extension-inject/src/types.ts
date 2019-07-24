@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Signer } from '@polkadot/api/types';
+import { Signer as InjectedSigner } from '@polkadot/api/types';
 
 export type Unsubcall = () => void;
 
@@ -24,8 +24,6 @@ export interface InjectedAccounts {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscribe: (cb: (accounts: InjectedAccount[]) => any) => Unsubcall;
 }
-
-export type InjectedSigner = Signer;
 
 export interface InjectedExtensionInfo {
   name: string;

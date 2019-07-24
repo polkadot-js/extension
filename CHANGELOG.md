@@ -1,3 +1,8 @@
+# 0.5.1
+
+- Always check for site permissions on messages, don't assume that messages originate from the libraries provided
+- Change the injected Signer interface to support the upcoming Kusama transaction format
+
 # 0.4.1
 
 - Transactions are now signed with expiry information, so each transaction is mortal by default

@@ -5,6 +5,7 @@
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
+import { notificationHandler } from './NotificationHandler';
 import { RequestMessage, TransportRequestMessage } from '../background/types';
 
 // when sending a message from the injector to the extension, we
@@ -48,17 +49,12 @@ async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-// setup a response listener (events created by the loader for extension responses)
-window.addEventListener('message', ({ data, source }): void => {
-  // only allow messages from our window, by the loader
-  if (source !== window || data.origin !== 'content') {
-    return;
-  }
-
+// todo put this in next commit
+function handleResponse({data, source}) {
   const handler = handlers[data.id];
 
   if (!handler) {
-    console.error(`Uknown response: ${JSON.stringify(data)}`);
+    console.error(`Unknown response: ${JSON.stringify(data)}`);
     return;
   }
 
@@ -72,6 +68,25 @@ window.addEventListener('message', ({ data, source }): void => {
     handler.reject(new Error(data.error));
   } else {
     handler.resolve(data.response);
+  }
+}
+
+function handleNotification({data, source}) {
+  notificationHandler.emit('message', data);
+}
+
+// setup a response listener (events created by the loader for extension responses)
+window.addEventListener('message', ({ data, source }): void => {
+  // only allow messages from our window, by the loader
+  if (source !== window || data.origin !== 'content') {
+    return;
+  }
+
+  if (data.id) {
+    handleResponse({data, source});
+  }
+  else {
+    handleNotification({data, source})
   }
 });
 

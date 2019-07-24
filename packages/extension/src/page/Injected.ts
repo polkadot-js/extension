@@ -2,19 +2,23 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected as InjectedInjected } from '@polkadot/extension-inject/types';
+import { Injected } from '@polkadot/extension-inject/types';
 import { SendRequest } from './types';
 
 import Accounts from './Accounts';
+import PostMessageProvider from './PostMessageProvider';
 import Signer from './Signer';
 
-export default class Injected implements InjectedInjected {
+export default class implements Injected {
   public readonly accounts: Accounts;
 
   public readonly signer: Signer;
 
+  public readonly provider: PostMessageProvider;
+
   public constructor (sendRequest: SendRequest) {
     this.accounts = new Accounts(sendRequest);
     this.signer = new Signer(sendRequest);
+    this.provider = new PostMessageProvider(sendRequest);
   }
 }

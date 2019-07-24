@@ -15,7 +15,7 @@ import Unlock from './Unlock';
 interface Props {
   isFirst: boolean;
   onAction: OnActionFromCtx;
-  request: MessageExtrinsicSign;
+  request: MessageExtrinsicSign['payload'];
   signId: string;
   url: string;
 }

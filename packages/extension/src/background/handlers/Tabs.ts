@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { MessageTypes, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse } from '../types';
+import { MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, RequestMessage } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -31,7 +31,7 @@ export default class Tabs {
     this.state = state;
   }
 
-  private authorize (url: string, request: MessageAuthorize): Promise<boolean> {
+  private authorize (url: string, request: MessageAuthorize['payload']): Promise<boolean> {
     return this.state.authorizeUrl(url, request);
   }
 
@@ -55,7 +55,7 @@ export default class Tabs {
     return true;
   }
 
-  private extrinsicSign (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSignResponse> {
+  private extrinsicSign (url: string, request: MessageExtrinsicSign['payload']): Promise<MessageExtrinsicSignResponse['payload']> {
     const { address } = request;
     const pair = keyring.getPair(address);
 
@@ -65,14 +65,14 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle (id: string, type: MessageTypes, request: any, url: string, port: chrome.runtime.Port): Promise<any> {
+  public async handle<TRequestMessage extends RequestMessage>(id: string, type: TRequestMessage['message'], request: TRequestMessage['payload'], url: string, port: chrome.runtime.Port): Promise<any> {
     if (type !== 'authorize.tab') {
       this.state.ensureUrlAuthorized(url);
     }
 
     switch (type) {
       case 'authorize.tab':
-        return this.authorize(url, request);
+        return this.authorize(url, request as MessageAuthorize['payload']);
 
       case 'accounts.list':
         return this.accountsList(url);
@@ -81,7 +81,7 @@ export default class Tabs {
         return this.accountsSubscribe(url, id, port);
 
       case 'extrinsic.sign':
-        return this.extrinsicSign(url, request);
+        return this.extrinsicSign(url, request as MessageExtrinsicSign['payload']);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

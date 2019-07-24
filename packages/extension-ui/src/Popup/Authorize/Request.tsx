@@ -16,7 +16,7 @@ interface Props {
   className?: string;
   isFirst: boolean;
   onAction: OnActionFromCtx;
-  request: MessageAuthorize;
+  request: MessageAuthorize['payload'];
   url: string;
 }
 

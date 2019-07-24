@@ -14,6 +14,7 @@ port.onMessage.addListener((data): void => {
   window.postMessage({ ...data, origin: 'content' }, '*');
 });
 
+
 // all messages from the page, pass them to the extension
 window.addEventListener('message', ({ data, source }): void => {
   // only allow messages from our window, by the inject

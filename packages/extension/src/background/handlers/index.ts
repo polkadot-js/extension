@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageRequest } from '../types';
+import { TransportRequestMessage, RequestMessage } from '../types';
 
 import { PORT_POPUP } from '../../defaults';
 import Extension from './Extension';
@@ -13,7 +13,7 @@ const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
-export default function handler ({ id, message, request }: MessageRequest, port: chrome.runtime.Port): void {
+export default function handler<TMessage extends RequestMessage> ({ id, message, request }: TransportRequestMessage<TMessage>, port: chrome.runtime.Port): void {
   const isPopup = port.name === PORT_POPUP;
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isPopup

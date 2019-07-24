@@ -4,32 +4,146 @@
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
-
-export type AuthorizeRequest = [string, MessageAuthorize, string];
+export type AuthorizeRequest = [string, MessageAuthorize['payload'], string];
 
 export type SigningRequest = [string, MessageExtrinsicSign, string];
 
+export type RequestMessage = MessageAuthorize | MessageAuthorizeApprove | MessageAuthorizeReject | MessageAuthorizeRequests | MessageAuthorizeSubscribe | MessageAccountCreate | MessageAccountEdit | MessageAccountForget | MessageAccountList | MessageAccountSubscribe | MessageSeedCreate | MessageSeedValidate | MessageExtrinsicSign | MessageExtrinsicSignApprove | MessageExtrinsicSignCancel | MessageExtrinsicSignRequests | MessageExtrinsicSignSubscribe;
+export type ResponseMessage = MessageExtrinsicSignResponse | MessageSeedCreateResponse | MessageSeedValidateResponse;
+export type Message = RequestMessage | ResponseMessage;
+
+// Requests
+
+export interface TransportRequestMessage<TMessage extends RequestMessage> {
+  id: string,
+  message: TMessage['message'],
+  origin: 'page' | 'popup',
+  request: TMessage['payload']
+}
+
 export interface MessageAuthorize {
-  origin: string;
+  message: 'authorize.tab';
+  payload: {
+    origin: string;
+  }
 }
 
 export interface MessageAuthorizeApprove {
-  id: string;
+  message: 'authorize.approve';
+  payload: {
+    id: string;
+  }
 }
 
 export interface MessageAuthorizeReject {
-  id: string;
+  message: 'authorize.reject';
+  payload: {
+    id: string;
+  }
 }
 
-export interface MessageRequest {
-  id: string;
-  message: MessageTypes;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: any;
+export interface MessageAuthorizeRequests {
+  message: 'authorize.requests';
+  payload: null;
 }
 
-export interface MessageResponse {
+export interface MessageAuthorizeSubscribe {
+  message: 'authorize.subscribe';
+  payload: null;
+}
+
+export interface MessageAccountCreate {
+  message: 'accounts.create';
+  payload: {
+    name: string;
+    password: string;
+    suri: string;
+    type?: KeypairType;
+  }
+}
+
+export interface MessageAccountEdit {
+  message: 'accounts.edit';
+  payload: {
+    address: string;
+    name: string;
+  }
+}
+
+export interface MessageAccountForget {
+  message: 'accounts.forget';
+  payload: {
+    address: string;
+  }
+}
+
+export interface MessageAccountList {
+  message: 'accounts.list';
+  payload: null
+}
+
+export interface MessageAccountSubscribe {
+  message: 'accounts.subscribe';
+  payload: null
+}
+
+export interface MessageSeedCreate {
+  message: 'seed.create',
+  payload: {
+    length?: 12 | 24;
+    type?: KeypairType;
+  }
+}
+
+export interface MessageSeedValidate {
+  message: 'seed.validate',
+  payload: {
+    seed: string;
+    type?: KeypairType;
+  }
+}
+
+export interface MessageExtrinsicSign {
+  message: 'extrinsic.sign';
+  payload: {
+    address: string;
+    blockHash: string;
+    blockNumber: number;
+    era?: string;
+    genesisHash: string;
+    method: string;
+    nonce: string;
+  }
+}
+
+export interface MessageExtrinsicSignApprove {
+  message: 'signing.approve';
+  payload: {
+    id: string;
+    password: string;
+  }
+}
+
+export interface MessageExtrinsicSignCancel {
+  message: 'signing.cancel';
+  payload: {
+    id: string;
+  }
+}
+
+export interface MessageExtrinsicSignRequests {
+  message: 'signing.requests';
+  payload: null
+}
+
+export interface MessageExtrinsicSignSubscribe {
+  message: 'signing.subscribe';
+  payload: null
+}
+
+// Responses
+
+export interface TransportResponseMessage {
   error?: string;
   id: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,62 +152,23 @@ export interface MessageResponse {
   subscription?: any;
 }
 
-export interface MessageAccountCreate {
-  name: string;
-  password: string;
-  suri: string;
-  type?: KeypairType;
-}
-
-export interface MessageAccountEdit {
-  address: string;
-  name: string;
-}
-
-export interface MessageAccountForget {
-  address: string;
-}
-
-export interface MessageExtrinsicSignApprove {
-  id: string;
-  password: string;
-}
-
-export interface MessageExtrinsicSignCancel {
-  id: string;
-}
-
-export interface MessageExtrinsicSign {
-  address: string;
-  blockHash: string;
-  blockNumber: number;
-  era?: string;
-  genesisHash: string;
-  method: string;
-  nonce: string;
-}
-
 export interface MessageExtrinsicSignResponse {
-  id: string;
-  signature: string;
+  payload: {
+    id: string;
+    signature: string;
+  }
 }
 
 export interface MessageSeedCreateResponse {
-  address: string;
-  seed: string;
-}
-
-export interface MessageSeedCreate {
-  length?: 12 | 24;
-  type?: KeypairType;
-}
-
-export interface MessageSeedValidate {
-  seed: string;
-  type?: KeypairType;
+  payload: {
+    address: string;
+    seed: string;
+  }
 }
 
 export interface MessageSeedValidateResponse {
-  address: string;
-  seed: string;
+  payload: {
+    address: string;
+    seed: string;
+  }
 }

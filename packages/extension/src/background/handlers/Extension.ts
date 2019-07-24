@@ -29,13 +29,13 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
+  private accountsCreate ({ name, password, suri, type }: MessageAccountCreate['payload']): boolean {
     keyring.addUri(suri, password, { name }, type);
 
     return true;
   }
 
-  private accountsEdit ({ address, name }: MessageAccountEdit): boolean {
+  private accountsEdit ({ address, name }: MessageAccountEdit['payload']): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -45,7 +45,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsForget ({ address }: MessageAccountForget): boolean {
+  private accountsForget ({ address }: MessageAccountForget['payload']): boolean {
     keyring.forgetAccount(address);
 
     return true;
@@ -70,7 +70,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
+  private authorizeApprove ({ id }: MessageAuthorizeApprove['payload']): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -82,7 +82,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeReject ({ id }: MessageAuthorizeReject): boolean {
+  private authorizeReject ({ id }: MessageAuthorizeReject['payload']): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -113,7 +113,7 @@ export default class Extension {
     return true;
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreateResponse {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate['payload']): MessageSeedCreateResponse['payload'] {
     const seed = mnemonicGenerate(length);
 
     return {
@@ -122,7 +122,7 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ seed, type }: MessageSeedValidate): MessageSeedValidateResponse {
+  private seedValidate ({ seed, type }: MessageSeedValidate['payload']): MessageSeedValidateResponse['payload'] {
     assert(SEED_LENGTHS.includes(seed.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
     assert(mnemonicValidate(seed), 'Not a valid mnemonic seed');
 
@@ -132,7 +132,7 @@ export default class Extension {
     };
   }
 
-  private signingApprove ({ id, password }: MessageExtrinsicSignApprove): boolean {
+  private signingApprove ({ id, password }: MessageExtrinsicSignApprove['payload']): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -161,7 +161,7 @@ export default class Extension {
     return true;
   }
 
-  private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
+  private signingCancel ({ id }: MessageExtrinsicSignCancel['payload']): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');

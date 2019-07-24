@@ -8,9 +8,9 @@ import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdi
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
-import { SignaturePayloadRaw } from '@polkadot/types';
+import { SignaturePayload } from '@polkadot/types';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import { assert, u8aToHex } from '@polkadot/util';
+import { assert } from '@polkadot/util';
 
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
@@ -137,8 +137,8 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { request: { address, blockHash, era, method, nonce }, resolve, reject } = queued;
-    const pair = keyring.getPair(address);
+    const { request, resolve, reject } = queued;
+    const pair = keyring.getPair(request.address);
 
     if (!pair) {
       reject(new Error('Unable to find pair'));
@@ -148,14 +148,14 @@ export default class Extension {
 
     pair.decodePkcs8(password);
 
-    const payload = new SignaturePayloadRaw({ blockHash, era, method, nonce });
-    const signature = u8aToHex(payload.sign(pair));
+    const payload = new SignaturePayload(request, { version: request.version });
+    const result = payload.sign(pair);
 
     pair.lock();
 
     resolve({
       id,
-      signature
+      ...result
     });
 
     return true;

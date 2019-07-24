@@ -2,14 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignerPayload, SignerResult } from '@polkadot/api/types';
-import { InjectedSigner } from '@polkadot/extension-inject/types';
+import { Signer as SignerInterface, SignerPayload, SignerResult } from '@polkadot/api/types';
 import { SendRequest } from './types';
 
 let sendRequest: SendRequest;
 let nextId = 0;
 
-export default class Signer implements InjectedSigner {
+export default class Signer implements SignerInterface {
   public constructor (_sendRequest: SendRequest) {
     sendRequest = _sendRequest;
   }

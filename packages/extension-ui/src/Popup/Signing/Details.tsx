@@ -6,7 +6,7 @@ import React from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension/chains';
-import { Metadata, Method, ExtrinsicEra } from '@polkadot/types';
+import { BlockNumber, ExtrinsicEra, Metadata, Method, SignaturePayload } from '@polkadot/types';
 import { formatNumber } from '@polkadot/util';
 
 interface MethodJson {
@@ -15,13 +15,12 @@ interface MethodJson {
 }
 
 interface Props {
-  blockNumber: number;
+  blockNumber: BlockNumber;
   className?: string;
-  era?: string;
   genesisHash: string;
   isDecoded: boolean;
   method: string;
-  nonce: string;
+  payload: SignaturePayload;
   url: string;
 }
 
@@ -64,7 +63,7 @@ function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
   );
 }
 
-function renderMortality (era: ExtrinsicEra, blockNumber: number): string {
+function renderMortality (era: ExtrinsicEra, blockNumber: BlockNumber): string {
   if (era.isImmortalEra) {
     return 'immortal';
   }
@@ -74,9 +73,8 @@ function renderMortality (era: ExtrinsicEra, blockNumber: number): string {
   return `mortal, valid from #${formatNumber(mortal.birth(blockNumber))} to #${formatNumber(mortal.death(blockNumber))}`;
 }
 
-function Details ({ blockNumber, className, genesisHash, isDecoded, era, method, nonce, url }: Props): React.ReactElement<Props> {
+function Details ({ blockNumber, className, genesisHash, isDecoded, method, payload: { era, nonce, tip }, url }: Props): React.ReactElement<Props> {
   const chain = findChain(genesisHash);
-  const eera = new ExtrinsicEra(era);
 
   return (
     <table className={className}>
@@ -91,12 +89,18 @@ function Details ({ blockNumber, className, genesisHash, isDecoded, era, method,
         </tr>
         <tr>
           <td className='label'>nonce</td>
-          <td className='data'>{nonce}</td>
+          <td className='data'>{formatNumber(nonce)}</td>
         </tr>
+        {!tip.isEmpty && (
+          <tr>
+            <td className='label'>tip</td>
+            <td className='data'>{formatNumber(tip)}</td>
+          </tr>
+        )}
         {renderMethod(method, (chain && isDecoded) ? chain.meta : null)}
         <tr>
-          <td className='label'>mortality</td>
-          <td className='data'>{renderMortality(eera, blockNumber)}</td>
+          <td className='label'>lifetime</td>
+          <td className='data'>{renderMortality(era, blockNumber)}</td>
         </tr>
       </tbody>
     </table>

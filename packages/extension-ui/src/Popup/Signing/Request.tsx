@@ -6,6 +6,7 @@ import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
 import { OnActionFromCtx } from '../../components/types';
 
 import React from 'react';
+import { SignaturePayload, BlockNumber } from '@polkadot/types';
 
 import { ActionBar, Address, Link, withOnAction } from '../../components';
 import { approveSignRequest, cancelSignRequest } from '../../messaging';
@@ -20,7 +21,7 @@ interface Props {
   url: string;
 }
 
-function Request ({ isFirst, onAction, request: { address, blockNumber, era, genesisHash, method, nonce }, signId, url }: Props): React.ReactElement<Props> {
+function Request ({ isFirst, onAction, request, signId, url }: Props): React.ReactElement<Props> {
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
@@ -28,16 +29,17 @@ function Request ({ isFirst, onAction, request: { address, blockNumber, era, gen
   const onSign = (password: string): Promise<void> =>
     approveSignRequest(signId, password)
       .then((): void => onAction());
+  const blockNumber = new BlockNumber(request.blockNumber);
+  const payload = new SignaturePayload(request, { version: request.version });
 
   return (
-    <Address address={address}>
+    <Address address={request.address}>
       <Details
         blockNumber={blockNumber}
-        era={era}
-        genesisHash={genesisHash}
+        genesisHash={request.genesisHash}
         isDecoded={isFirst}
-        method={method}
-        nonce={nonce}
+        method={request.method}
+        payload={payload}
         url={url}
       />
       <ActionBar>

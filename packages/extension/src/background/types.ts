@@ -2,11 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 export type AuthorizeRequest = [string, MessageAuthorize['payload'], string];
 
-export type SigningRequest = [string, MessageExtrinsicSign, string];
+export type SigningRequest = [string, MessageExtrinsicSign['payload'], string];
 
 export type RequestMessage = MessageAuthorize | MessageAuthorizeApprove | MessageAuthorizeReject | MessageAuthorizeRequests | MessageAuthorizeSubscribe | MessageAccountCreate | MessageAccountEdit | MessageAccountForget | MessageAccountList | MessageAccountSubscribe | MessageSeedCreate | MessageSeedValidate | MessageExtrinsicSign | MessageExtrinsicSignApprove | MessageExtrinsicSignCancel | MessageExtrinsicSignRequests | MessageExtrinsicSignSubscribe;
 export type ResponseMessage = MessageExtrinsicSignResponse | MessageSeedCreateResponse | MessageSeedValidateResponse;
@@ -105,15 +106,7 @@ export interface MessageSeedValidate {
 
 export interface MessageExtrinsicSign {
   message: 'extrinsic.sign';
-  payload: {
-    address: string;
-    blockHash: string;
-    blockNumber: number;
-    era?: string;
-    genesisHash: string;
-    method: string;
-    nonce: string;
-  }
+  payload: SignerPayload
 }
 
 export interface MessageExtrinsicSignApprove {

@@ -6,9 +6,6 @@ import { SignerPayload, SignerResult } from '@polkadot/api/types';
 import { InjectedSigner } from '@polkadot/extension-inject/types';
 import { SendRequest } from './types';
 
-import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
-import { Hash } from '@polkadot/types';
-
 let sendRequest: SendRequest;
 let nextId = 0;
 
@@ -30,8 +27,9 @@ export default class Signer implements InjectedSigner {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public update (id: number, status: Hash | SubmittableResult): void {
-    // ignore
-  }
+  // We don't listen to updates at all, if we do we can interpret the result
+  // as provided by the API here
+  // public update (id: number, status: Hash | SubmittableResult): void {
+  //   // ignore
+  // }
 }

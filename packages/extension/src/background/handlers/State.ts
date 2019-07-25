@@ -2,16 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, SigningRequest, MessageRpcSendResponse, TransportSubscriptionNotification } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
+import { WsProvider } from '@polkadot/rpc-provider';
 
 interface AuthRequest {
   id: string;
   idStr: string;
-  request: MessageAuthorize['payload'];
+  request: MessageAuthorize;
   resolve: (result: boolean) => void;
   reject: (error: Error) => void;
   url: string;
@@ -27,8 +28,8 @@ type AuthUrls = Record<string, {
 
 interface SignRequest {
   id: string;
-  request: MessageExtrinsicSign['payload'];
-  resolve: (result: MessageExtrinsicSignResponse['payload']) => void;
+  request: MessageExtrinsicSign;
+  resolve: (result: MessageExtrinsicSignResponse) => void;
   reject: (error: Error) => void;
   url: string;
 }
@@ -51,6 +52,12 @@ export default class State {
   public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
+
+  private _wsProvider: WsProvider;
+
+  public constructor () {
+    this._wsProvider = new WsProvider('ws://127.0.0.1:9944', true);
+  }
 
   public get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
@@ -124,8 +131,8 @@ export default class State {
     };
   }
 
-  private signComplete = (id: string, fn: Function): (result: MessageExtrinsicSignResponse['payload'] | Error) => void => {
-    return (result: MessageExtrinsicSignResponse['payload'] | Error): void => {
+  private signComplete = (id: string, fn: Function): (result: MessageExtrinsicSignResponse | Error) => void => {
+    return (result: MessageExtrinsicSignResponse | Error): void => {
       delete this._signRequests[id];
       this.updateIconSign(true);
 
@@ -167,7 +174,7 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public async authorizeUrl (url: string, request: MessageAuthorize['payload']): Promise<boolean> {
+  public async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
     if (this._authUrls[idStr]) {
@@ -210,7 +217,7 @@ export default class State {
     return this._signRequests[id];
   }
 
-  public signQueue (url: string, request: MessageExtrinsicSign['payload']): Promise<MessageExtrinsicSignResponse['payload']> {
+  public signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSignResponse> {
     const id = getId();
 
     return new Promise((resolve, reject): void => {
@@ -225,5 +232,19 @@ export default class State {
       this.updateIconSign();
       this.popupOpen();
     });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public proxySend (method: string, params: any[]): Promise<MessageRpcSendResponse> {
+    return this._wsProvider.send(method, params);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public proxySubscribe (method: string, params: any[], callback: (error: null, message: TransportSubscriptionNotification) => void): Promise<MessageRpcSendResponse> {
+    const subscriptionId = this._wsProvider.send(method, params, { type: '' /* todo, do we need it? */,
+      callback: async (result): Promise<void> => {
+        callback(null, { subscriptionId: (await subscriptionId), result });
+      } });
+    return subscriptionId;
   }
 }

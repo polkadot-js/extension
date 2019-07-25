@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, RequestMessage } from '../types';
+import { MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, MessageTypes, PayloadTypes, MessageRpcSend, MessageRpcSendResponse, MessageRpcSendSubscribe } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -12,11 +12,11 @@ import { assert } from '@polkadot/util';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-interface Account {
+export interface Account {
   address: string;
   name?: string;
 }
-type Accounts = Account[];
+export type Accounts = Account[];
 
 function transformAccounts (accounts: SubjectInfo): Accounts {
   return Object.values(accounts).map(({ json: { address, meta: { name } } }): Account => ({
@@ -31,7 +31,7 @@ export default class Tabs {
     this.state = state;
   }
 
-  private authorize (url: string, request: MessageAuthorize['payload']): Promise<boolean> {
+  private authorize (url: string, request: MessageAuthorize): Promise<boolean> {
     return this.state.authorizeUrl(url, request);
   }
 
@@ -55,7 +55,7 @@ export default class Tabs {
     return true;
   }
 
-  private extrinsicSign (url: string, request: MessageExtrinsicSign['payload']): Promise<MessageExtrinsicSignResponse['payload']> {
+  private extrinsicSign (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSignResponse> {
     const { address } = request;
     const pair = keyring.getPair(address);
 
@@ -64,15 +64,30 @@ export default class Tabs {
     return this.state.signQueue(url, request);
   }
 
+  private rpcSend (url: string, request: MessageRpcSend): Promise<MessageRpcSendResponse> {
+    const { method, params } = request;
+
+    return this.state.proxySend(method, params || []);
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle<TRequestMessage extends RequestMessage>(id: string, type: TRequestMessage['message'], request: TRequestMessage['payload'], url: string, port: chrome.runtime.Port): Promise<any> {
+  private rpcSendSubscribe (url: string, request: MessageRpcSendSubscribe, sendMessage: (message: any) => void): Promise<MessageRpcSendResponse> {
+    const { method, params } = request;
+
+    return this.state.proxySubscribe(method, params || [], (_, notification): void => {
+      sendMessage(notification);
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], url: string, port: chrome.runtime.Port, sendMessage: (message: any) => void): Promise<any> { // FIXME return value should be Promise<ResponseTypes[TMessageType]>
     if (type !== 'authorize.tab') {
       this.state.ensureUrlAuthorized(url);
     }
 
     switch (type) {
       case 'authorize.tab':
-        return this.authorize(url, request as MessageAuthorize['payload']);
+        return this.authorize(url, request as MessageAuthorize);
 
       case 'accounts.list':
         return this.accountsList(url);
@@ -81,7 +96,13 @@ export default class Tabs {
         return this.accountsSubscribe(url, id, port);
 
       case 'extrinsic.sign':
-        return this.extrinsicSign(url, request as MessageExtrinsicSign['payload']);
+        return this.extrinsicSign(url, request as MessageExtrinsicSign);
+
+      case 'rpc.send':
+        return this.rpcSend(url, request as MessageRpcSend);
+
+      case 'rpc.sendSubscribe':
+        return this.rpcSendSubscribe(url, request as MessageRpcSendSubscribe, sendMessage);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

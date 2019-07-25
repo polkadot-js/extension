@@ -5,8 +5,8 @@
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
-import { notificationHandler } from './NotificationHandler';
-import { RequestMessage, TransportRequestMessage } from '../background/types';
+import { subscriptionNotificationHandler } from './SubscriptionNotificationHandler';
+import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, TransportSubscriptionNotification, ResponseMessage, MessageTypes, PayloadTypes, NullMessageTypes } from '../background/types';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
@@ -30,14 +30,22 @@ let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
+function sendMessage<TMessageType extends NullMessageTypes>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TRequestMessage extends RequestMessage>(message: TRequestMessage['message'], request: TRequestMessage['payload'] = null, subscriber?: (data: any) => void): Promise<any> {
+function sendMessage<TMessageType extends MessageTypes>(message: TMessageType, request: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
 
-    const transportRequestMessage: TransportRequestMessage<TRequestMessage> = { id, message, origin: 'page', request };
+    const transportRequestMessage: TransportRequestMessage<TMessageType> = {
+      id,
+      message,
+      origin: 'page',
+      request: request || null as PayloadTypes[TMessageType]
+    };
     window.postMessage(transportRequestMessage, '*');
   });
 }
@@ -46,11 +54,10 @@ function sendMessage<TRequestMessage extends RequestMessage>(message: TRequestMe
 async function enable (origin: string): Promise<Injected> {
   await sendMessage('authorize.tab', { origin });
 
-  return new Injected(sendMessage);
+  return new Injected(sendMessage, subscriptionNotificationHandler);
 }
 
-// todo put this in next commit
-function handleResponse({data, source}) {
+function handleResponse<TResponseMessage extends ResponseMessage> (data: TransportResponseMessage<TResponseMessage>): void {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -71,8 +78,8 @@ function handleResponse({data, source}) {
   }
 }
 
-function handleNotification({data, source}) {
-  notificationHandler.emit('message', data);
+function handleNotification (data: TransportSubscriptionNotification): void {
+  subscriptionNotificationHandler.emit('message', data);
 }
 
 // setup a response listener (events created by the loader for extension responses)
@@ -83,10 +90,9 @@ window.addEventListener('message', ({ data, source }): void => {
   }
 
   if (data.id) {
-    handleResponse({data, source});
-  }
-  else {
-    handleNotification({data, source})
+    handleResponse(data);
+  } else {
+    handleNotification(data);
   }
 });
 

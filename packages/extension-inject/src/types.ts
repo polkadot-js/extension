@@ -9,13 +9,13 @@ export type Unsubcall = () => void;
 
 export interface InjectedAccount {
   address: string;
-  name: string;
+  name?: string;
 }
 
 export interface InjectedAccountWithMeta {
   address: string;
   meta: {
-    name: string;
+    name?: string;
     source: string;
   };
 }

@@ -4,7 +4,7 @@
 
 import EventEmitter from 'eventemitter3';
 
-class NotificationHandler extends EventEmitter {
+export class SubscriptionNotificationHandler extends EventEmitter {
 }
 
-export const notificationHandler = new NotificationHandler();
+export const subscriptionNotificationHandler = new SubscriptionNotificationHandler();

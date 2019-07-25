@@ -4,7 +4,7 @@
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest, RequestMessage } from '../types';
+import { AuthorizeRequest, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest, MessageTypes, PayloadTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -29,13 +29,13 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ name, password, suri, type }: MessageAccountCreate['payload']): boolean {
+  private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
     keyring.addUri(suri, password, { name }, type);
 
     return true;
   }
 
-  private accountsEdit ({ address, name }: MessageAccountEdit['payload']): boolean {
+  private accountsEdit ({ address, name }: MessageAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -45,7 +45,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsForget ({ address }: MessageAccountForget['payload']): boolean {
+  private accountsForget ({ address }: MessageAccountForget): boolean {
     keyring.forgetAccount(address);
 
     return true;
@@ -70,7 +70,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ id }: MessageAuthorizeApprove['payload']): boolean {
+  private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -82,7 +82,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeReject ({ id }: MessageAuthorizeReject['payload']): boolean {
+  private authorizeReject ({ id }: MessageAuthorizeReject): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -113,7 +113,7 @@ export default class Extension {
     return true;
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate['payload']): MessageSeedCreateResponse['payload'] {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreateResponse {
     const seed = mnemonicGenerate(length);
 
     return {
@@ -122,7 +122,7 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ seed, type }: MessageSeedValidate['payload']): MessageSeedValidateResponse['payload'] {
+  private seedValidate ({ seed, type }: MessageSeedValidate): MessageSeedValidateResponse {
     assert(SEED_LENGTHS.includes(seed.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
     assert(mnemonicValidate(seed), 'Not a valid mnemonic seed');
 
@@ -132,7 +132,7 @@ export default class Extension {
     };
   }
 
-  private signingApprove ({ id, password }: MessageExtrinsicSignApprove['payload']): boolean {
+  private signingApprove ({ id, password }: MessageExtrinsicSignApprove): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -161,7 +161,7 @@ export default class Extension {
     return true;
   }
 
-  private signingCancel ({ id }: MessageExtrinsicSignCancel['payload']): boolean {
+  private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -193,13 +193,13 @@ export default class Extension {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle<TRequestMessage extends RequestMessage>(id: string, type: TRequestMessage['message'], request: TRequestMessage['payload'], port: chrome.runtime.Port): Promise<any> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], port: chrome.runtime.Port): Promise<any> { // FIXME return value should be Promise<ResponseTypes[TMessageType]>
     switch (type) {
       case 'authorize.approve':
-        return this.authorizeApprove(request as MessageAuthorizeApprove['payload']);
+        return this.authorizeApprove(request as MessageAuthorizeApprove);
 
       case 'authorize.reject':
-        return this.authorizeReject(request as MessageAuthorizeApprove['payload']);
+        return this.authorizeReject(request as MessageAuthorizeApprove);
 
       case 'authorize.requests':
         return this.authorizeRequests();
@@ -208,13 +208,13 @@ export default class Extension {
         return this.authorizeSubscribe(id, port);
 
       case 'accounts.create':
-        return this.accountsCreate(request as MessageAccountCreate['payload']);
+        return this.accountsCreate(request as MessageAccountCreate);
 
       case 'accounts.forget':
-        return this.accountsForget(request as MessageAccountForget['payload']);
+        return this.accountsForget(request as MessageAccountForget);
 
       case 'accounts.edit':
-        return this.accountsEdit(request as MessageAccountEdit['payload']);
+        return this.accountsEdit(request as MessageAccountEdit);
 
       case 'accounts.list':
         return this.accountsList();
@@ -223,16 +223,16 @@ export default class Extension {
         return this.accountsSubscribe(id, port);
 
       case 'seed.create':
-        return this.seedCreate(request as MessageSeedCreate['payload']);
+        return this.seedCreate(request as MessageSeedCreate);
 
       case 'seed.validate':
-        return this.seedValidate(request as MessageSeedValidate['payload']);
+        return this.seedValidate(request as MessageSeedValidate);
 
       case 'signing.approve':
-        return this.signingApprove(request as MessageExtrinsicSignApprove['payload']);
+        return this.signingApprove(request as MessageExtrinsicSignApprove);
 
       case 'signing.cancel':
-        return this.signingCancel(request as MessageExtrinsicSignCancel['payload']);
+        return this.signingCancel(request as MessageExtrinsicSignCancel);
 
       case 'signing.requests':
         return this.signingRequests();

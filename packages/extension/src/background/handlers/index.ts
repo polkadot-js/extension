@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { TransportRequestMessage, RequestMessage } from '../types';
+import { TransportRequestMessage, MessageTypes } from '../types';
 
 import { PORT_POPUP } from '../../defaults';
 import Extension from './Extension';
@@ -13,7 +13,7 @@ const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
-export default function handler<TMessage extends RequestMessage> ({ id, message, request }: TransportRequestMessage<TMessage>, port: chrome.runtime.Port): void {
+export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port): void {
   const isPopup = port.name === PORT_POPUP;
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isPopup
@@ -25,7 +25,8 @@ export default function handler<TMessage extends RequestMessage> ({ id, message,
 
   const promise = isPopup
     ? extension.handle(id, message, request, port)
-    : tabs.handle(id, message, request, from, port);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    : tabs.handle(id, message, request, from, port, (message: any): void => { port.postMessage(message); });
 
   promise
     .then((response): void => {

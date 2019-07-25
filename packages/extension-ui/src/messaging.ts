@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, RequestMessage } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest, PayloadTypes, MessageTypes } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -45,13 +45,14 @@ port.onMessage.addListener((data): void => {
   }
 });
 
-function sendMessage<TRequestMessage extends RequestMessage> (message: TRequestMessage['message'], request: TRequestMessage['payload'] = {}, subscriber?: (data: any) => void): Promise<any> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<any> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
 
-    port.postMessage({ id, message, request });
+    port.postMessage({ id, message, request: request || {} });
   });
 }
 
@@ -100,15 +101,15 @@ export async function createSeed (length?: 12 | 24, type?: KeypairType): Promise
 }
 
 export async function subscribeAccounts (cb: (accounts: KeyringJson[]) => void): Promise<boolean> {
-  return sendMessage('accounts.subscribe', {}, cb);
+  return sendMessage('accounts.subscribe', null, cb);
 }
 
 export async function subscribeAuthorize (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('authorize.subscribe', {}, cb);
+  return sendMessage('authorize.subscribe', null, cb);
 }
 
 export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('signing.subscribe', {}, cb);
+  return sendMessage('signing.subscribe', null, cb);
 }
 
 export async function validateSeed (seed: string, type?: KeypairType): Promise<{ address: string; seed: string }> {

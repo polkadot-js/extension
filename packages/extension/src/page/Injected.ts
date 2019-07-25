@@ -8,6 +8,7 @@ import { SendRequest } from './types';
 import Accounts from './Accounts';
 import PostMessageProvider from './PostMessageProvider';
 import Signer from './Signer';
+import { SubscriptionNotificationHandler } from './SubscriptionNotificationHandler';
 
 export default class implements Injected {
   public readonly accounts: Accounts;
@@ -16,9 +17,9 @@ export default class implements Injected {
 
   public readonly provider: PostMessageProvider;
 
-  public constructor (sendRequest: SendRequest) {
+  public constructor (sendRequest: SendRequest, subscriptionNotificationHandler: SubscriptionNotificationHandler) {
     this.accounts = new Accounts(sendRequest);
     this.signer = new Signer(sendRequest);
-    this.provider = new PostMessageProvider(sendRequest);
+    this.provider = new PostMessageProvider(sendRequest, subscriptionNotificationHandler);
   }
 }

@@ -8,7 +8,7 @@ import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdi
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
-import { SignaturePayload } from '@polkadot/types';
+import { createType } from '@polkadot/types';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { assert } from '@polkadot/util';
 
@@ -148,7 +148,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
 
-    const payload = new SignaturePayload(request, { version: request.version });
+    const payload = createType('ExtrinsicPayload', request, { version: request.version });
     const result = payload.sign(pair);
 
     pair.lock();

@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension/chains';
-import { createType, GenericCall, Metadata } from '@polkadot/types';
+import { GenericCall, Metadata } from '@polkadot/types';
 import { formatNumber } from '@polkadot/util';
 
 interface MethodJson {
@@ -38,7 +38,7 @@ function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
 
   GenericCall.injectMethods(fromMetadata(meta));
 
-  const method = createType('Call', data);
+  const method = new GenericCall(data);
   const json = method.toJSON() as unknown as MethodJson;
 
   return (

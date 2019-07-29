@@ -6,7 +6,7 @@ import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
 import { OnActionFromCtx } from '../../components/types';
 
 import React from 'react';
-import { SignaturePayload, BlockNumber } from '@polkadot/types';
+import { createType } from '@polkadot/types';
 
 import { ActionBar, Address, Link, withOnAction } from '../../components';
 import { approveSignRequest, cancelSignRequest } from '../../messaging';
@@ -29,8 +29,8 @@ function Request ({ isFirst, onAction, request, signId, url }: Props): React.Rea
   const onSign = (password: string): Promise<void> =>
     approveSignRequest(signId, password)
       .then((): void => onAction());
-  const blockNumber = new BlockNumber(request.blockNumber);
-  const payload = new SignaturePayload(request, { version: request.version });
+  const blockNumber = createType('BlockNumber', request.blockNumber);
+  const payload = createType('ExtrinsicPayload', request, { version: request.version });
 
   return (
     <Address address={request.address}>

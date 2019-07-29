@@ -2,11 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { BlockNumber, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+
 import React from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension/chains';
-import { BlockNumber, ExtrinsicEra, Metadata, Method, SignaturePayload } from '@polkadot/types';
+import { createType, GenericCall, Metadata } from '@polkadot/types';
 import { formatNumber } from '@polkadot/util';
 
 interface MethodJson {
@@ -20,7 +22,7 @@ interface Props {
   genesisHash: string;
   isDecoded: boolean;
   method: string;
-  payload: SignaturePayload;
+  payload: ExtrinsicPayload;
   url: string;
 }
 
@@ -34,9 +36,9 @@ function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
     );
   }
 
-  Method.injectMethods(fromMetadata(meta));
+  GenericCall.injectMethods(fromMetadata(meta));
 
-  const method = new Method(data);
+  const method = createType('Call', data);
   const json = method.toJSON() as unknown as MethodJson;
 
   return (

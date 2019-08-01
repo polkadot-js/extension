@@ -5,7 +5,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension/chains';
-import { Metadata, Method } from '@polkadot/types';
+import { GenericCall, Metadata } from '@polkadot/types';
 
 type MethodJson = {
   args: { [index: string]: any }
@@ -30,7 +30,7 @@ function renderMethod (data: string, meta?: Metadata | null) {
     );
   }
 
-  const method = new Method(data, { meta });
+  const method = new GenericCall(data, { metadata: meta });
   const json = method.toJSON() as unknown as MethodJson;
 
   return (

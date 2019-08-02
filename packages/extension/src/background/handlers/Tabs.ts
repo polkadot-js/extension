@@ -64,19 +64,19 @@ export default class Tabs {
     return this.state.signQueue(url, request);
   }
 
-  private rpcSend (url: string, request: MessageRpcSend): Promise<MessageRpcSendResponse> {
+  private rpcSend (url: string, request: MessageRpcSend, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
     const { method, params } = request;
 
-    return this.state.proxySend(method, params || []);
+    return this.state.proxySend(method, params || [], port);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private rpcSendSubscribe (url: string, request: MessageRpcSendSubscribe, sendMessage: (message: any) => void): Promise<MessageRpcSendResponse> {
-    const { method, params } = request;
+  private rpcSendSubscribe(url: string, request: MessageRpcSendSubscribe, sendMessage: (message: any) => void, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
+    const { type, method, params } = request;
 
-    return this.state.proxySubscribe(method, params || [], (_, notification): void => {
+    return this.state.proxySubscribe(type, method, params || [], (_, notification): void => {
       sendMessage(notification);
-    });
+    }, port);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,10 +99,10 @@ export default class Tabs {
         return this.extrinsicSign(url, request as MessageExtrinsicSign);
 
       case 'rpc.send':
-        return this.rpcSend(url, request as MessageRpcSend);
+        return this.rpcSend(url, request as MessageRpcSend, port);
 
       case 'rpc.sendSubscribe':
-        return this.rpcSendSubscribe(url, request as MessageRpcSendSubscribe, sendMessage);
+        return this.rpcSendSubscribe(url, request as MessageRpcSendSubscribe, sendMessage, port);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

@@ -4,6 +4,9 @@
 
 import EventEmitter from 'eventemitter3';
 
+// This EventEmitter gets triggered when subscription messages are received
+// from the extension. It then dispatches the event to its subscriber,
+// PostMessageProvider.
 export class SubscriptionNotificationHandler extends EventEmitter {
 }
 

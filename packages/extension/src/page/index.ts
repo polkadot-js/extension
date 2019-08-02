@@ -84,6 +84,7 @@ function handleNotification (data: TransportSubscriptionNotification): void {
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }): void => {
+
   // only allow messages from our window, by the loader
   if (source !== window || data.origin !== 'content') {
     return;
@@ -95,6 +96,8 @@ window.addEventListener('message', ({ data, source }): void => {
     handleNotification(data);
   }
 });
+
+console.error('Injecting extension...')
 
 injectExtension(enable, {
   name: 'polkadot-js',

@@ -14,6 +14,11 @@ type ProviderInterfaceEmitted = 'connected' | 'disconnected' | 'error';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ProviderInterfaceEmitCb = (value?: any) => any;
 
+/**
+ * @name PostMessageProvider
+ *
+ * @description Extension provider to be used by dapps
+ */
 export default class PostMessageProvider implements InjectedProvider {
   private _eventemitter: EventEmitter;
 
@@ -21,7 +26,10 @@ export default class PostMessageProvider implements InjectedProvider {
 
   private _subscriptionNotificationHandler: SubscriptionNotificationHandler;
 
-  private _handlers: Record<string, AnyFunction> = {}; // {[subscriptionId]: callback}
+  // Subscription IDs are (historically) not guaranteed to be globally unique;
+  // only unique for a given subscription method; which is why we identify
+  // the subscriptions based on subscription id + type
+  private _subscriptions: Record<string, AnyFunction> = {}; // {[(type,subscriptionId)]: callback}
 
   /**
    * @param {function}  sendRequest  The function to be called to send requests to the node
@@ -31,19 +39,22 @@ export default class PostMessageProvider implements InjectedProvider {
     this._eventemitter = new EventEmitter();
     this._sendRequest = sendRequest;
     this._subscriptionNotificationHandler = subscriptionNotificationHandler;
-    this._subscriptionNotificationHandler.on('message', this.onSubscriptionNotification);
+    this._subscriptionNotificationHandler.on('message', this.onSubscriptionNotification.bind(this));
 
-    this.emit('connected');
+    // Give subscribers time to subscribe
+    setTimeout(() => {
+      this.emit('connected');
+    });
   }
 
   private onSubscriptionNotification (message: TransportSubscriptionNotification): void {
-    const { subscriptionId, result } = message;
-    if (!this._handlers[subscriptionId]) {
+    const { subscriptionId, result, type } = message;
+    if (!this._subscriptions[`${type}::${subscriptionId}`]) {
       console.error('Received notification for unknown subscription id', message);
       return;
     }
 
-    this._handlers[subscriptionId](result);
+    this._subscriptions[`${type}::${subscriptionId}`](null, result);
   }
 
   /**
@@ -90,10 +101,11 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public send (method: string, params: any[], subscriptionCallback?: AnyFunction): Promise<any> {
-    if (subscriptionCallback) {
-      return this._sendRequest('rpc.sendSubscribe', { method, params }).then(<TSubscriptionId extends string>(subscriptionId: TSubscriptionId): TSubscriptionId => {
-        this._handlers[subscriptionId] = subscriptionCallback;
+  public send (method: string, params: any[], subInfos?: any): Promise<any> {
+    if (subInfos) {
+      const { callback, type } = subInfos;
+      return this._sendRequest('rpc.sendSubscribe', { type, method, params }).then(<TSubscriptionId extends string>(subscriptionId: TSubscriptionId): TSubscriptionId => {
+        this._subscriptions[`${type}::${subscriptionId}`] = callback;
         return subscriptionId;
       });
     } else {
@@ -103,7 +115,7 @@ export default class PostMessageProvider implements InjectedProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async subscribe (type: string, method: string, params: any[], callback: AnyFunction): Promise<number> {
-    const id = await this.send(method, params, callback);
+    const id = await this.send(method, params, {type, callback});
 
     return id as number;
   }
@@ -112,12 +124,12 @@ export default class PostMessageProvider implements InjectedProvider {
    * @summary Allows unsubscribing to subscriptions made with [[subscribe]].
    */
   public async unsubscribe (type: string, method: string, id: number): Promise<boolean> {
-    if (!this._handlers[id]) {
+    if (!this._subscriptions[`${type}::${id}`]) {
       console.error('Tried unsubscribing to unexisting subscription', id);
       return false;
     }
 
-    delete this._handlers[id];
+    delete this._subscriptions[`${type}::${id}`];
 
     const result = await this.send(method, [id]);
 

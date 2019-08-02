@@ -1,6 +1,6 @@
 # @polkadot/extension-inject
 
-This basic extension injector lets extension developers manage the global objects available to dapps, without the need to access the window object manually. By just calling enable on this package from a content script, the global object is setup and managed properly. From that point on, any dapp can access it with the [`@polkadot/extension-dapp`](../extension-dapp) package.
+This basic extension injector lets extension developers inject the extension into the global objects available to dapps, without the need to access the window object manually. By just calling enable on this package from a content script, the global object is setup and managed properly. From that point on, any dapp can access it with the [`@polkadot/extension-dapp`](../extension-dapp) package.
 
 ## Usage
 

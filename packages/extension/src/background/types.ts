@@ -114,6 +114,7 @@ export interface MessageRpcSend {
 }
 
 export interface MessageRpcSendSubscribe {
+  type: string;
   method: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params?: any[];
@@ -136,6 +137,7 @@ export type ResponseTypes = {
 
 export interface TransportSubscriptionNotification {
   subscriptionId: string;
+  type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   result?: any;
 }

@@ -53,11 +53,7 @@ export default class State {
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
 
-  private _wsProvider: WsProvider;
-
-  public constructor () {
-    this._wsProvider = new WsProvider('ws://127.0.0.1:9944', true);
-  }
+  private _wsProviders: Map<chrome.runtime.Port, WsProvider> = new Map();
 
   public get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
@@ -234,17 +230,35 @@ export default class State {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public proxySend (method: string, params: any[]): Promise<MessageRpcSendResponse> {
-    return this._wsProvider.send(method, params);
+  private getProvider(port: chrome.runtime.Port): WsProvider {
+    if (!this._wsProviders.has(port)) {
+      // Instantiate the provider
+      this._wsProviders.set(port, new WsProvider('wss://poc3-rpc.polkadot.io/', true))
+
+      // Close provider connection when page is closed
+      port.onDisconnect.addListener((): void => {
+        const provider = this._wsProviders.get(port);
+        if (provider)
+          provider.disconnect();
+        this._wsProviders.delete(port);
+      });
+    }
+
+    return this._wsProviders.get(port) as WsProvider;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public proxySubscribe (method: string, params: any[], callback: (error: null, message: TransportSubscriptionNotification) => void): Promise<MessageRpcSendResponse> {
-    const subscriptionId = this._wsProvider.send(method, params, { type: '' /* todo, do we need it? */,
-      callback: async (result): Promise<void> => {
-        callback(null, { subscriptionId: (await subscriptionId), result });
+  public proxySend (method: string, params: any[], port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
+    return this.getProvider(port).send(method, params);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public proxySubscribe (type: string, method: string, params: any[], callback: (error: null, message: TransportSubscriptionNotification) => void, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
+    const subscriptionIdPromise = this.getProvider(port).send(method, params, { type,
+      callback: async (error, result): Promise<void> => {
+        callback(null, { subscriptionId: (await subscriptionIdPromise), type, result });
       } });
-    return subscriptionId;
+    subscriptionIdPromise.then(a => { console.log('subscriptionIdPromise resolved', a)});
+    return subscriptionIdPromise;
   }
 }

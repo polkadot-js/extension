@@ -18,6 +18,6 @@
     "extract-loader": "^3.1.0",
     "file-loader": "^4.1.0",
     "html-loader": "^0.5.5",
-    "webpack-extension-manifest-plugin": "^0.4.3"
+    "webpack-extension-manifest-plugin": "^0.5.0"
   }
 }

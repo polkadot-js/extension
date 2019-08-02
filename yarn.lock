@@ -1980,6 +1980,11 @@
     typescript "^3.5.3"
     vuepress "^1.0.2"
 
+"@polkadot/extension-inject@^0.6.0-beta.0":
+  version "0.6.0-beta.0"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.6.0-beta.0.tgz#9dbcaff19cbce8b473b06b55463b5a9b24b005e4"
+  integrity sha512-dWktwUbYyGfme85mjlj5w/75eO8UQ2dI9X5dVITYyrWfrnaDLuhR+hQFAqfFsH/Nh5T1V0kMQJkDNCl6OAjmcA==
+
 "@polkadot/jsonrpc@^0.90.0-beta.1":
   version "0.90.0-beta.1"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-0.90.0-beta.1.tgz#f0ac34c1b8eed2d884f346a0353aae8d911d46b4"
@@ -2182,6 +2187,13 @@
   version "0.0.86"
   resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.86.tgz#1026ef8e76db4fde1859cae858d73236fe670d69"
   integrity sha512-7ehebPf/5IR64SYdD2Vig0q0oUCNbWMQ29kASlNJaHVVtA5/J/DnrxnYVPCID70o7LgHdYsav6I4/XdqAxjTLQ==
+  dependencies:
+    "@types/filesystem" "*"
+
+"@types/chrome@^0.0.87":
+  version "0.0.87"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.87.tgz#8914a18ae7013879d1787ad6c999f7480a705493"
+  integrity sha512-8erepjs1N+bWQTb4ip4M5qxZJHmf0Z7cZ5G0M+fbLvapBHXyA1n91s2zAv+vq2kX02VnsTITvmWazjj7KLdBVw==
   dependencies:
     "@types/filesystem" "*"
 
@@ -13486,7 +13498,12 @@ typedoc@^0.14.2:
     typedoc-default-themes "^0.5.0"
     typescript "3.2.x"
 
-typescript@3.2.x, typescript@^3.5.3:
+typescript@3.2.x:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.2.4.tgz#c585cb952912263d915b462726ce244ba510ef3d"
+  integrity sha512-0RNDbSdEokBeEAkgNbxJ+BLwSManFy9TeXz8uW+48j/xhEXv1ePME60olyzw2XzUqUBNAYFeJadIqAgNqIACwg==
+
+typescript@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
   integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==

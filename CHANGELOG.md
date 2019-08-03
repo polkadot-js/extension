@@ -1,3 +1,7 @@
+# 0.6.0-beta.x
+
+- Support Extrinsics v3 from substrate 2.x, this signs an extrinsic with the genesisHash
+
 # 0.5.1
 
 - Always check for site permissions on messages, don't assume that messages originate from the libraries provided

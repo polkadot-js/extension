@@ -1,4 +1,4 @@
-# 0.6.0-beta.x
+# 0.6.1
 
 - Support Extrinsics v3 from substrate 2.x, this signs an extrinsic with the genesisHash
 

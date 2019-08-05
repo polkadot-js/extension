@@ -2038,6 +2038,13 @@
     typescript "^3.5.3"
     vuepress "^1.0.3"
 
+"@polkadot/extension-inject@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.6.1.tgz#198ee29017f76bc00b463e52c0c26a4d43f3d2fe"
+  integrity sha512-LLTHe+tdMuZjxgnNcqVcPdSpTkhprQNgKLujCa4RW/h0dp4wReh4UTv17mWdPh5HSmYBAOpBtfednDaeQL+IQQ==
+  dependencies:
+    "@babel/runtime" "^7.5.5"
+
 "@polkadot/jsonrpc@^0.90.0-beta.20":
   version "0.90.0-beta.20"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-0.90.0-beta.20.tgz#69c1e67e7385d1ffa2fca6bada9e572cd627f38c"
@@ -2252,10 +2259,10 @@
   dependencies:
     "@types/filesystem" "*"
 
-"@types/chrome@^0.0.87":
-  version "0.0.87"
-  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.87.tgz#8914a18ae7013879d1787ad6c999f7480a705493"
-  integrity sha512-8erepjs1N+bWQTb4ip4M5qxZJHmf0Z7cZ5G0M+fbLvapBHXyA1n91s2zAv+vq2kX02VnsTITvmWazjj7KLdBVw==
+"@types/chrome@^0.0.88":
+  version "0.0.88"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.88.tgz#0041a101d69f78008910927c5b3299a00d8660db"
+  integrity sha512-JBsIrBZ2adJhlXvJ+1j0xLbcfOfwee/WAg7Lp2NE+Wf3m0vXMJFWv/PPjqNk5ZUXDeY/qDxPHe+PUjxnl8HWFg==
   dependencies:
     "@types/filesystem" "*"
 

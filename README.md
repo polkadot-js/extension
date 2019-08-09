@@ -1,5 +1,12 @@
+[![polkadotjs](https://img.shields.io/badge/polkadot-js-orange.svg?style=flat-square)](https://polkadot.js.org)
+![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)
+[![npm](https://img.shields.io/npm/v/@polkadot/extension.svg?style=flat-square)](https://www.npmjs.com/package/@polkadot/extension)
+[![travisci](https://img.shields.io/travis/com/polkadot-js/extension?label=travisci&style=flat-square)](https://travis-ci.com/polkadot-js/extension)
+[![circleci](https://img.shields.io/circleci/build/github/polkadot-js/extension/master?label=circleci&style=flat-square)](https://circleci.com/gh/polkadot-js/extension)
+[![maintainability](https://img.shields.io/codeclimate/maintainability/polkadot-js/extension.svg?style=flat-square)](https://codeclimate.com/github/polkadot-js/extension)
+[![greenkeeper](https://img.shields.io/badge/greenkeeper-enabled-brightgreen.svg?style=flat-square)](https://greenkeeper.io/)
+
 # ![polkadot{.js} extension](docs/logo.jpg)
-[![Greenkeeper badge](https://badges.greenkeeper.io/polkadot-js/extension.svg)](https://greenkeeper.io/)
 
 A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
 

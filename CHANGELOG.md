@@ -1,3 +1,7 @@
+# 0.7.1
+
+- Updated the underlying polkadot-js/api version to support the most-recent signing payload extensions, as will be available on Kusama
+
 # 0.6.1
 
 - Support Extrinsics v3 from substrate 2.x, this signs an extrinsic with the genesisHash

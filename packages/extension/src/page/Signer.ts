@@ -10,6 +10,9 @@ let nextId = 0;
 
 export default class Signer implements SignerInterface {
   public constructor (_sendRequest: SendRequest) {
+    // NOTE We are storing the `sendRequest` as a global to this class, since we don't
+    // have private members in JS, we err on the side of caution and hide it away so it
+    // is only available internally to the class.
     sendRequest = _sendRequest;
   }
 
@@ -26,8 +29,19 @@ export default class Signer implements SignerInterface {
     };
   }
 
-  // We don't listen to updates at all, if we do we can interpret the result
-  // as provided by the API here
+  // TODO To implement signing of arbitrary payloads via signRaw
+  // public async signRaw (payload: SignerPayloadRaw): Promise<SignerResult> {
+  //   const id = ++nextId;
+  //   const result = await sendRequest('bytes.sign', payload);
+
+  //   return {
+  //     ...result,
+  //     id
+  //   };
+  // }
+
+  // NOTE We don't listen to updates at all, if we do we can interpret the
+  // resuklt as provided by the API here
   // public update (id: number, status: Hash | SubmittableResult): void {
   //   // ignore
   // }

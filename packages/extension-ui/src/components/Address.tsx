@@ -8,7 +8,7 @@ import { AccountsFromCtx } from './types';
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import Identicon from '@polkadot/ui-identicon';
+import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 
 import IconBox from './IconBox';

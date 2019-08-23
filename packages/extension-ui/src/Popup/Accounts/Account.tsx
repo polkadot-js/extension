@@ -19,13 +19,13 @@ interface Props {
 
 function Account ({ address, className, onAction }: Props): React.ReactElement<Props> {
   const [isEditing, setEditing] = useState(false);
-  const [editedname, setName] = useState<string | null>(null);
+  const [editedName, setName] = useState<string | null>(null);
 
   const toggleEdit = (): void =>
     setEditing(!isEditing);
   const saveChanges = (): void => {
-    if (editedname && editedname !== name) {
-      editAccount(address, editedname)
+    if (editedName && editedName !== name) {
+      editAccount(address, editedName)
         .then((): void => onAction())
         .catch(console.error);
     }

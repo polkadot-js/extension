@@ -1,3 +1,16 @@
+# 0.7.1
+
+- Updated the underlying polkadot-js/api version to support the most-recent signing payload extensions, as will be available on Kusama
+
+# 0.6.1
+
+- Support Extrinsics v3 from substrate 2.x, this signs an extrinsic with the genesisHash
+
+# 0.5.1
+
+- Always check for site permissions on messages, don't assume that messages originate from the libraries provided
+- Change the injected Signer interface to support the upcoming Kusama transaction format
+
 # 0.4.1
 
 - Transactions are now signed with expiry information, so each transaction is mortal by default

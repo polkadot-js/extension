@@ -4,7 +4,7 @@
 
 import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { Accounts } from './handlers/Tabs';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 export type AuthorizeRequest = [string, MessageAuthorize, string];
 export type SigningRequest = [string, MessageExtrinsicSign, string];
@@ -32,14 +32,14 @@ export interface PayloadTypes {
   'accounts.list': MessageAccountList;
   'accounts.subscribe': MessageAccountSubscribe;
   'extrinsic.sign': MessageExtrinsicSign;
+  'rpc.send': MessageRpcSend;
+  'rpc.sendSubscribe': MessageRpcSendSubscribe;
+  'seed.create': MessageSeedCreate;
+  'seed.validate': MessageSeedValidate;
   'signing.approve': MessageExtrinsicSignApprove;
   'signing.cancel': MessageExtrinsicSignCancel;
   'signing.requests': MessageExtrinsicSignRequests;
   'signing.subscribe': MessageExtrinsicSignSubscribe;
-  'seed.create': MessageSeedCreate;
-  'seed.validate': MessageSeedValidate;
-  'rpc.send': MessageRpcSend;
-  'rpc.sendSubscribe': MessageRpcSendSubscribe;
 }
 
 type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
@@ -123,12 +123,24 @@ export interface MessageRpcSendSubscribe {
 // Responses
 
 interface NonNullResponseTypes {
-  'accounts.list': MessageAccountsListResponse;
+  'accounts.create': boolean;
+  'accounts.edit': boolean;
+  'accounts.forget': boolean;
+  'accounts.list': InjectedAccount[];
+  'accounts.subscribe': boolean;
+  'authorize.approve': boolean;
+  'authorize.reject': boolean;
+  'authorize.requests': AuthorizeRequest[];
+  'authorize.subscribe': boolean;
   'extrinsic.sign': MessageExtrinsicSignResponse;
-  'seed.create': MessageSeedCreateResponse;
-  'seed.validate': MessageSeedValidateResponse;
   'rpc.send': MessageRpcSendResponse;
   'rpc.sendSubscribe': MessageRpcSendResponse;
+  'seed.create': MessageSeedCreateResponse;
+  'seed.validate': MessageSeedValidateResponse;
+  'signing.approve': boolean;
+  'signing.cancel': boolean;
+  'signing.requests': SigningRequest[];
+  'signing.subscribe': boolean;
 }
 
 export type ResponseTypes = {
@@ -151,8 +163,6 @@ export interface TransportResponseMessage<TMessage extends ResponseMessage> {
 }
 
 export type ResponseMessage = MessageExtrinsicSignResponse | MessageSeedCreateResponse | MessageSeedValidateResponse;
-
-export type MessageAccountsListResponse = Accounts;
 
 export interface MessageExtrinsicSignResponse {
   id: string;

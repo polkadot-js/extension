@@ -6,7 +6,7 @@
 
 # ![polkadot{.js} extension](docs/logo.jpg)
 
-A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. A provider is also injected so that dapps can connect to your node. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
+A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. A provider is also injected so that dapps can connect to the node configured in the extension. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
 
 ## Installation
 

@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, MessageTypes, PayloadTypes, MessageRpcSend, MessageRpcSendResponse, MessageRpcSendSubscribe } from '../types';
+import { MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, MessageTypes, PayloadTypes, MessageRpcSend, MessageRpcSendResponse, MessageRpcSendSubscribe, ResponseTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -71,16 +71,18 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private rpcSendSubscribe(url: string, request: MessageRpcSendSubscribe, sendMessage: (message: any) => void, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
+  private rpcSendSubscribe (url: string, request: MessageRpcSendSubscribe, sendMessage: (message: any) => void, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
     const { type, method, params } = request;
 
     return this.state.proxySubscribe(type, method, params || [], (_, notification): void => {
-      sendMessage(notification);
+      if (notification) {
+        sendMessage(notification);
+      }
     }, port);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], url: string, port: chrome.runtime.Port, sendMessage: (message: any) => void): Promise<any> { // FIXME return value should be Promise<ResponseTypes[TMessageType]>
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], url: string, port: chrome.runtime.Port, sendMessage: (message: any) => void): Promise<ResponseTypes[TMessageType]> {
     if (type !== 'authorize.tab') {
       this.state.ensureUrlAuthorized(url);
     }

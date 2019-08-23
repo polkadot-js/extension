@@ -9,7 +9,7 @@ import Extension from './Extension';
 import State from './State';
 import Tabs from './Tabs';
 
-const state = new State();
+const state = new State('wss://poc3-rpc.polkadot.io/');
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 

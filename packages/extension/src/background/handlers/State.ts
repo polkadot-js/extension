@@ -53,7 +53,13 @@ export default class State {
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
 
+  private _wsEndpoint: string;
+
   private _wsProviders: Map<chrome.runtime.Port, WsProvider> = new Map();
+
+  public constructor (wsEndpoint: string) {
+    this._wsEndpoint = wsEndpoint;
+  }
 
   public get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
@@ -230,16 +236,15 @@ export default class State {
     });
   }
 
-  private getProvider(port: chrome.runtime.Port): WsProvider {
+  private getProvider (port: chrome.runtime.Port): WsProvider {
     if (!this._wsProviders.has(port)) {
       // Instantiate the provider
-      this._wsProviders.set(port, new WsProvider('wss://poc3-rpc.polkadot.io/', true))
+      this._wsProviders.set(port, new WsProvider(this._wsEndpoint, true));
 
       // Close provider connection when page is closed
       port.onDisconnect.addListener((): void => {
         const provider = this._wsProviders.get(port);
-        if (provider)
-          provider.disconnect();
+        if (provider) { provider.disconnect(); }
         this._wsProviders.delete(port);
       });
     }
@@ -253,12 +258,16 @@ export default class State {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public proxySubscribe (type: string, method: string, params: any[], callback: (error: null, message: TransportSubscriptionNotification) => void, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
-    const subscriptionIdPromise = this.getProvider(port).send(method, params, { type,
+  public proxySubscribe (type: string, method: string, params: any[], callback: (error: Error | null | undefined, message: TransportSubscriptionNotification | null) => void, port: chrome.runtime.Port): Promise<MessageRpcSendResponse> {
+    const subscriptionIdPromise = this.getProvider(port).send(method, params, {
+      type,
       callback: async (error, result): Promise<void> => {
-        callback(null, { subscriptionId: (await subscriptionIdPromise), type, result });
+        if (error) {
+          callback(error, null);
+        } else {
+          callback(null, { subscriptionId: (await subscriptionIdPromise), type, result });
+        }
       } });
-    subscriptionIdPromise.then(a => { console.log('subscriptionIdPromise resolved', a)});
     return subscriptionIdPromise;
   }
 }

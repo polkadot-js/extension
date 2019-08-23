@@ -42,7 +42,7 @@ export default class PostMessageProvider implements InjectedProvider {
     this._subscriptionNotificationHandler.on('message', this.onSubscriptionNotification.bind(this));
 
     // Give subscribers time to subscribe
-    setTimeout(() => {
+    setTimeout((): void => {
       this.emit('connected');
     });
   }
@@ -62,14 +62,16 @@ export default class PostMessageProvider implements InjectedProvider {
    * @return {boolean} true if connected
    */
   public isConnected (): boolean {
-    return true; // background node is always running
+    return true; // underlying WsProvider connects on first RPC request
   }
 
   /**
    * @description Manually disconnect from the connection, clearing autoconnect logic
    */
   public disconnect (): void {
-    // noop -- we're assuming the node is always running in the background
+    console.error('PostMessageProvider.disconnect() is not implemented.');
+    // noop -- the underlying WsProvider connection will be closed when the page
+    // closes
   }
 
   /**
@@ -115,7 +117,7 @@ export default class PostMessageProvider implements InjectedProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async subscribe (type: string, method: string, params: any[], callback: AnyFunction): Promise<number> {
-    const id = await this.send(method, params, {type, callback});
+    const id = await this.send(method, params, { type, callback });
 
     return id as number;
   }

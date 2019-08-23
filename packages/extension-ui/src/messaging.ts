@@ -2,12 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, PayloadTypes, MessageTypes } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest, PayloadTypes, MessageTypes, ResponseTypes } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,7 +47,7 @@ port.onMessage.addListener((data): void => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<any> {
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
@@ -64,7 +65,7 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('accounts.forget', { address });
 }
 
-export async function getAccounts (): Promise<KeyringJson[]> {
+export async function getAccounts (): Promise<InjectedAccount[]> {
   return sendMessage('accounts.list');
 }
 

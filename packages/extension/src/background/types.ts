@@ -82,11 +82,11 @@ export interface MessageSeedCreate {
 }
 
 export interface MessageSeedValidate {
-  seed: string;
+  suri: string;
   type?: KeypairType;
 }
 
 export interface MessageSeedValidateResponse {
   address: string;
-  seed: string;
+  suri: string;
 }

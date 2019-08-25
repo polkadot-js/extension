@@ -1,4 +1,4 @@
-// Copyright 2019 @polkadot/extension-ui authors & contributors
+// Copyright 2019 @polkadot/extension authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
@@ -7,6 +7,7 @@ import { Metadata } from '@polkadot/types';
 // imports chain details, generally metadata. For the generation of these,
 // curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "state_getMetadata", "params":[]}' http://localhost:9933
 import alexander from './alexander';
+import kusama from './kusama';
 
 interface Chain {
   meta?: Metadata;
@@ -18,11 +19,9 @@ const chains: Record<string, Chain> = {
     name: 'Alexander',
     meta: new Metadata(alexander.meta)
   },
-  '0x10c08714a10c7da78f40a60f6f732cf0dba97acfb5e2035445b032386157d5c3': {
-    name: 'Emberic Elm'
-  },
-  '0xe1aa646d87d3c0ba5cf5f09d2ff6deb9c373b75d9660ba184b4ca953f92565e6': {
-    name: 'Flaming Fir'
+  '0x3fd7b9eb6a00376e5be61f01abb429ffb0b104be05eaff4d458da48fcd425baf': {
+    name: 'Kusama CC1',
+    meta: new Metadata(kusama.meta)
   }
 };
 

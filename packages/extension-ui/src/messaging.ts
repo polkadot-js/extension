@@ -112,6 +112,6 @@ export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void
   return sendMessage('signing.subscribe', {}, cb);
 }
 
-export async function validateSeed (seed: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
-  return sendMessage('seed.validate', { seed, type });
+export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {
+  return sendMessage('seed.validate', { suri, type });
 }

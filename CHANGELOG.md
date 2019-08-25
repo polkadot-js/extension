@@ -1,6 +1,7 @@
 # 0.8.1
 
 - Add basic support for seed derivation as part of the account import. Seeds can be followed by the derivation path, and derivation is applied on creation.
+- Update the polkadot-js/api version to 0.90.1, the first non-beta version with full support for Kusama
 
 # 0.7.1
 

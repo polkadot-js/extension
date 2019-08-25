@@ -1,3 +1,7 @@
+# 0.8.1
+
+- Add basic support for seed derivation as part of the account import. Seeds can be followed by the derivation path, and derivation is applied on creation.
+
 # 0.7.1
 
 - Updated the underlying polkadot-js/api version to support the most-recent signing payload extensions, as will be available on Kusama

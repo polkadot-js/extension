@@ -96,8 +96,6 @@ window.addEventListener('message', ({ data, source }): void => {
   }
 });
 
-console.error('Injecting extension...');
-
 injectExtension(enable, {
   name: 'polkadot-js',
   version: process.env.PKG_VERSION as string

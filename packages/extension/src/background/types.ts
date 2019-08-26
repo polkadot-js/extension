@@ -103,7 +103,7 @@ export interface MessageSeedCreate {
 }
 
 export interface MessageSeedValidate {
-  seed: string;
+  suri: string;
   type?: KeypairType;
 }
 
@@ -176,7 +176,7 @@ export interface MessageSeedCreateResponse {
 
 export interface MessageSeedValidateResponse {
   address: string;
-  seed: string;
+  suri: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

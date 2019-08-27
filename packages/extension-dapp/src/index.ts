@@ -4,9 +4,6 @@
 
 import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
 
-// our extension adaptor for other kinds of extensions
-import compatInjector from './compat';
-
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as InjectedWindow;
 
@@ -41,50 +38,48 @@ export { isWeb3Injected, web3EnablePromise };
 
 // enables all the providers found on the injected window interface
 export function web3Enable (originName: string): Promise<InjectedExtension[]> {
-  web3EnablePromise = compatInjector()
-    .then((): Promise<InjectedExtension[]> =>
-      Promise
-        .all(
-          Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
-            Promise.all([
-              Promise.resolve({ name, version }),
-              enable(originName).catch((error: Error): void => {
-                console.error(`Error initializing ${name}: ${error.message}`);
-              })
-            ])
-          )
-        )
-        .then((values: [InjectedExtensionInfo, Injected | void][]): InjectedExtension[] =>
-          values
-            .filter(([, ext]): boolean => !!ext)
-            .map(([info, ext]): InjectedExtension => {
-              // if we don't have an accounts subscriber, add a single-shot version
-              if (ext && !ext.accounts.subscribe) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => any): Unsubcall => {
-                  ext.accounts.get().then(cb).catch(console.error);
-
-                  return (): void => {
-                    // no ubsubscribe needed, this is a single-shot
-                  };
-                };
-              }
-
-              const injected: Partial<InjectedExtension> = { ...info, ...ext };
-
-              return injected as InjectedExtension;
+  web3EnablePromise =
+    Promise
+      .all(
+        Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> => {
+          return Promise.all([
+            Promise.resolve({ name, version }),
+            enable(originName).catch((error: Error): void => {
+              console.error(`Error initializing ${name}: ${error.message}`);
             })
-        )
-        .catch((): InjectedExtension[] => [] as InjectedExtension[])
-        .then((values): InjectedExtension[] => {
-          const names = values.map(({ name, version }): string => `${name}/${version}`);
-
-          isWeb3Injected = web3IsInjected();
-          console.log(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
-
-          return values;
+          ]);
         })
-    );
+      )
+      .then((values: [InjectedExtensionInfo, Injected | void][]): InjectedExtension[] =>
+        values
+          .filter(([, ext]): boolean => !!ext)
+          .map(([info, ext]): InjectedExtension => {
+            // if we don't have an accounts subscriber, add a single-shot version
+            if (ext && !ext.accounts.subscribe) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => any): Unsubcall => {
+                ext.accounts.get().then(cb).catch(console.error);
+
+                return (): void => {
+                  // no ubsubscribe needed, this is a single-shot
+                };
+              };
+            }
+
+            const injected: Partial<InjectedExtension> = { ...info, ...ext };
+
+            return injected as InjectedExtension;
+          })
+      )
+      .catch((): InjectedExtension[] => [] as InjectedExtension[])
+      .then((values): InjectedExtension[] => {
+        const names = values.map(({ name, version }): string => `${name}/${version}`);
+
+        isWeb3Injected = web3IsInjected();
+        console.log(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
+
+        return values;
+      });
 
   return web3EnablePromise;
 }

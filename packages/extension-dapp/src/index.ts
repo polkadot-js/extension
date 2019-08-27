@@ -47,7 +47,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
             enable(originName).catch((error: Error): void => {
               console.error(`Error initializing ${name}: ${error.message}`);
             })
-          ])
+          ]);
         })
       )
       .then((values: [InjectedExtensionInfo, Injected | void][]): InjectedExtension[] =>

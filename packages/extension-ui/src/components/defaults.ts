@@ -11,7 +11,7 @@ const defaults = {
   borderRadius: '0.25rem',
   btnBg: TEXT_COLOR, // LINK_COLOR,
   btnBgDanger: DANGER_COLOR,
-  btnBorder: `0 solid `,
+  btnBorder: '0 solid ',
   btnColor: '#f5f6f7',
   btnColorDanger: '#f5f6f7',
   btnPadding: '0.75rem 1rem',

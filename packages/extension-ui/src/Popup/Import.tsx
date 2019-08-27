@@ -41,7 +41,7 @@ function Import ({ onAction }: Props): React.ReactElement<Props> {
       <TextArea
         isError={!account}
         isFocussed
-        label={`existing 12 or 24-word mnemonic seed`}
+        label='existing 12 or 24-word mnemonic seed'
         onChange={onChangeSeed}
       />
       {account && <Name onChange={setName} />}

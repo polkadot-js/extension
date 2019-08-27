@@ -1,5 +1,5 @@
 {
-  "version": "0.8.1",
+  "version": "0.9.0-beta.0",
   "description": "A sample signer extension for the @polkadot/api",
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",

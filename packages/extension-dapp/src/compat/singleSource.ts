@@ -47,7 +47,7 @@ function injectSingleSource (win: SingleWindow): void {
   });
 
   // decorate the compat interface
-  win.injectedWeb3['SingleSource'] = {
+  win.injectedWeb3.SingleSource = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     enable: async (origin: string): Promise<Injected> => ({
       accounts: {

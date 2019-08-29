@@ -29,13 +29,13 @@ function createWebpack ({ alias = {}, context }) {
       background: './src/background/index.ts',
       content: './src/content.ts',
       page: './src/page/index.ts',
-      popup: `./src/popup.ts`
+      popup: './src/popup.ts'
     },
     mode: ENV,
     output: {
-      chunkFilename: `[name].js`,
-      filename: `[name].js`,
-      globalObject: `(typeof self !== 'undefined' ? self : this)`,
+      chunkFilename: '[name].js',
+      filename: '[name].js',
+      globalObject: '(typeof self !== \'undefined\' ? self : this)',
       path: path.join(context, 'build')
     },
     resolve: {

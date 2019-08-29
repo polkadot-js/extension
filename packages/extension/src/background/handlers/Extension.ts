@@ -4,7 +4,7 @@
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest, MessageTypes, PayloadTypes, ResponseTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -195,13 +195,13 @@ export default class Extension {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[TMessageType]> {
     switch (type) {
       case 'authorize.approve':
-        return this.authorizeApprove(request);
+        return this.authorizeApprove(request as MessageAuthorizeApprove);
 
       case 'authorize.reject':
-        return this.authorizeReject(request);
+        return this.authorizeReject(request as MessageAuthorizeApprove);
 
       case 'authorize.requests':
         return this.authorizeRequests();
@@ -210,13 +210,13 @@ export default class Extension {
         return this.authorizeSubscribe(id, port);
 
       case 'accounts.create':
-        return this.accountsCreate(request);
+        return this.accountsCreate(request as MessageAccountCreate);
 
       case 'accounts.forget':
-        return this.accountsForget(request);
+        return this.accountsForget(request as MessageAccountForget);
 
       case 'accounts.edit':
-        return this.accountsEdit(request);
+        return this.accountsEdit(request as MessageAccountEdit);
 
       case 'accounts.list':
         return this.accountsList();
@@ -225,16 +225,16 @@ export default class Extension {
         return this.accountsSubscribe(id, port);
 
       case 'seed.create':
-        return this.seedCreate(request);
+        return this.seedCreate(request as MessageSeedCreate);
 
       case 'seed.validate':
-        return this.seedValidate(request);
+        return this.seedValidate(request as MessageSeedValidate);
 
       case 'signing.approve':
-        return this.signingApprove(request);
+        return this.signingApprove(request as MessageExtrinsicSignApprove);
 
       case 'signing.cancel':
-        return this.signingCancel(request);
+        return this.signingCancel(request as MessageExtrinsicSignCancel);
 
       case 'signing.requests':
         return this.signingRequests();

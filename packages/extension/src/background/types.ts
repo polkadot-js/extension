@@ -4,12 +4,45 @@
 
 import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-
-export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 export type AuthorizeRequest = [string, MessageAuthorize, string];
-
 export type SigningRequest = [string, MessageExtrinsicSign, string];
+
+// Requests
+
+export type MessageTypes = keyof PayloadTypes;
+
+export interface TransportRequestMessage<TMessageType extends MessageTypes> {
+  id: string;
+  message: TMessageType;
+  origin: 'page' | 'popup';
+  request: PayloadTypes[TMessageType];
+}
+
+export interface PayloadTypes {
+  'authorize.tab': MessageAuthorize;
+  'authorize.approve': MessageAuthorizeApprove;
+  'authorize.reject': MessageAuthorizeReject;
+  'authorize.requests': MessageAuthorizeRequests;
+  'authorize.subscribe': MessageAuthorizeSubscribe;
+  'accounts.create': MessageAccountCreate;
+  'accounts.edit': MessageAccountEdit;
+  'accounts.forget': MessageAccountForget;
+  'accounts.list': MessageAccountList;
+  'accounts.subscribe': MessageAccountSubscribe;
+  'extrinsic.sign': MessageExtrinsicSign;
+  'seed.create': MessageSeedCreate;
+  'seed.validate': MessageSeedValidate;
+  'signing.approve': MessageExtrinsicSignApprove;
+  'signing.cancel': MessageExtrinsicSignCancel;
+  'signing.requests': MessageExtrinsicSignRequests;
+  'signing.subscribe': MessageExtrinsicSignSubscribe;
+}
+
+type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
+type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
+export type NullMessageTypes = NullKeys<PayloadTypes>
 
 export interface MessageAuthorize {
   origin: string;
@@ -23,21 +56,9 @@ export interface MessageAuthorizeReject {
   id: string;
 }
 
-export interface MessageRequest {
-  id: string;
-  message: MessageTypes;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: any;
-}
+export type MessageAuthorizeRequests = null;
 
-export interface MessageResponse {
-  error?: string;
-  id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  response?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscription?: any;
-}
+export type MessageAuthorizeSubscribe = null;
 
 export interface MessageAccountCreate {
   name: string;
@@ -55,6 +76,12 @@ export interface MessageAccountForget {
   address: string;
 }
 
+export type MessageAccountList = null;
+
+export type MessageAccountSubscribe = null;
+
+export type MessageExtrinsicSign = SignerPayload;
+
 export interface MessageExtrinsicSignApprove {
   id: string;
   password: string;
@@ -64,17 +91,9 @@ export interface MessageExtrinsicSignCancel {
   id: string;
 }
 
-export type MessageExtrinsicSign = SignerPayload;
+export type MessageExtrinsicSignRequests = null;
 
-export interface MessageExtrinsicSignResponse {
-  id: string;
-  signature: string;
-}
-
-export interface MessageSeedCreateResponse {
-  address: string;
-  seed: string;
-}
+export type MessageExtrinsicSignSubscribe = null;
 
 export interface MessageSeedCreate {
   length?: 12 | 24;
@@ -84,6 +103,51 @@ export interface MessageSeedCreate {
 export interface MessageSeedValidate {
   suri: string;
   type?: KeypairType;
+}
+
+// Responses
+
+interface NonNullResponseTypes {
+  'accounts.create': boolean;
+  'accounts.edit': boolean;
+  'accounts.forget': boolean;
+  'accounts.list': InjectedAccount[];
+  'accounts.subscribe': boolean;
+  'authorize.approve': boolean;
+  'authorize.reject': boolean;
+  'authorize.requests': AuthorizeRequest[];
+  'authorize.subscribe': boolean;
+  'extrinsic.sign': MessageExtrinsicSignResponse;
+  'seed.create': MessageSeedCreateResponse;
+  'seed.validate': MessageSeedValidateResponse;
+  'signing.approve': boolean;
+  'signing.cancel': boolean;
+  'signing.requests': SigningRequest[];
+  'signing.subscribe': boolean;
+}
+
+export type ResponseTypes = {
+  [K in Exclude<MessageTypes, keyof NonNullResponseTypes>]: null;
+} & NonNullResponseTypes;
+
+export interface TransportResponseMessage<TMessage extends ResponseMessage> {
+  error?: string;
+  id: string;
+  response?: TMessage;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscription?: any;
+}
+
+export type ResponseMessage = MessageExtrinsicSignResponse | MessageSeedCreateResponse | MessageSeedValidateResponse;
+
+export interface MessageExtrinsicSignResponse {
+  id: string;
+  signature: string;
+}
+
+export interface MessageSeedCreateResponse {
+  address: string;
+  seed: string;
 }
 
 export interface MessageSeedValidateResponse {

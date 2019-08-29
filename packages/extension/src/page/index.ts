@@ -2,11 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageTypes } from '../background/types';
-
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
+import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, ResponseMessage, MessageTypes, PayloadTypes, NullMessageTypes } from '../background/types';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
@@ -30,14 +29,23 @@ let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
+function sendMessage<TMessageType extends NullMessageTypes>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage (message: MessageTypes, request: any = null, subscriber?: (data: any) => void): Promise<any> {
+function sendMessage<TMessageType extends MessageTypes>(message: TMessageType, request: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
 
-    window.postMessage({ id, message, origin: 'page', request }, '*');
+    const transportRequestMessage: TransportRequestMessage<TMessageType> = {
+      id,
+      message,
+      origin: 'page',
+      request: request || null as PayloadTypes[TMessageType]
+    };
+    window.postMessage(transportRequestMessage, '*');
   });
 }
 
@@ -48,17 +56,11 @@ async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-// setup a response listener (events created by the loader for extension responses)
-window.addEventListener('message', ({ data, source }): void => {
-  // only allow messages from our window, by the loader
-  if (source !== window || data.origin !== 'content') {
-    return;
-  }
-
+function handleResponse<TResponseMessage extends ResponseMessage> (data: TransportResponseMessage<TResponseMessage>): void {
   const handler = handlers[data.id];
 
   if (!handler) {
-    console.error(`Uknown response: ${JSON.stringify(data)}`);
+    console.error(`Unknown response: ${JSON.stringify(data)}`);
     return;
   }
 
@@ -72,6 +74,20 @@ window.addEventListener('message', ({ data, source }): void => {
     handler.reject(new Error(data.error));
   } else {
     handler.resolve(data.response);
+  }
+}
+
+// setup a response listener (events created by the loader for extension responses)
+window.addEventListener('message', ({ data, source }): void => {
+  // only allow messages from our window, by the loader
+  if (source !== window || data.origin !== 'content') {
+    return;
+  }
+
+  if (data.id) {
+    handleResponse(data);
+  } else {
+    console.error('Missing id for response.')
   }
 });
 

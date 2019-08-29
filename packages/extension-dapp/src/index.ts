@@ -5,7 +5,7 @@
 import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
-const win = window as InjectedWindow;
+const win = window as Window & InjectedWindow;
 
 // don't clobber the existing object, but ensure non-undefined
 win.injectedWeb3 = win.injectedWeb3 || {};

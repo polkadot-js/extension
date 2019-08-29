@@ -24,9 +24,9 @@ interface SingleSource {
   signer: Signer;
 }
 
-type SingleWindow = Window & InjectedWindow & {
+interface SingleWindow extends InjectedWindow {
   SingleSource: SingleSource;
-};
+}
 
 // transfor the SingleSource accounts into a simple address/name array
 function transformAccounts (accounts: SingleSourceAccount[]): InjectedAccount[] {
@@ -74,7 +74,7 @@ function injectSingleSource (win: SingleWindow): void {
 export default function initSingleSource (): Promise<boolean> {
   return new Promise((resolve): void => {
     window.addEventListener('load', (): void => {
-      const win = window as SingleWindow;
+      const win = window as Window & SingleWindow;
 
       if (win.SingleSource) {
         injectSingleSource(win);

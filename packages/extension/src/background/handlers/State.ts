@@ -267,7 +267,8 @@ export default class State {
         } else {
           callback(null, { subscriptionId: (await subscriptionIdPromise), type, result });
         }
-      } });
+      }
+    });
     return subscriptionIdPromise;
   }
 }

@@ -4,6 +4,9 @@
 
 import { Signer as InjectedSigner } from '@polkadot/api/types';
 
+// eslint-disable-next-line no-undef
+type This = typeof globalThis;
+
 export type Unsubcall = () => void;
 
 export interface InjectedAccount {
@@ -39,7 +42,7 @@ export interface InjectedWindowProvider {
   version: string;
 }
 
-export interface InjectedWindow extends Window {
+export interface InjectedWindow extends This {
   injectedWeb3: Record<string, InjectedWindowProvider>;
 }
 

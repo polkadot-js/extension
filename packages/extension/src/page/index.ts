@@ -87,7 +87,7 @@ window.addEventListener('message', ({ data, source }): void => {
   if (data.id) {
     handleResponse(data);
   } else {
-    console.error('Missing id for response.')
+    console.error('Missing id for response.');
   }
 });
 

@@ -65,7 +65,7 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle<TMessageType extends MessageTypes>(id: string, type: TMessageType, request: PayloadTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[TMessageType]> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[TMessageType]> {
     if (type !== 'authorize.tab') {
       this.state.ensureUrlAuthorized(url);
     }

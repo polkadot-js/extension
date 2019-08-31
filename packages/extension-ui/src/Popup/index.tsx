@@ -49,7 +49,7 @@ export default function Popup (): React.ReactElement<{}> {
       subscribeAccounts(setAccounts),
       subscribeAuthorize(setAuthRequests),
       subscribeSigning(setSignRequests)
-    ]).catch(console.error);
+    ]).catch((error: Error) => console.error(error));
     onAction();
   }, []);
 

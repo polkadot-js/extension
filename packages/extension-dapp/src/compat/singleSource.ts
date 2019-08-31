@@ -48,9 +48,10 @@ function injectSingleSource (win: SingleWindow): void {
 
   // decorate the compat interface
   win.injectedWeb3.SingleSource = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/require-await
     enable: async (origin: string): Promise<Injected> => ({
       accounts: {
+        // eslint-disable-next-line @typescript-eslint/require-await
         get: async (): Promise<InjectedAccount[]> =>
           accounts,
         subscribe: (cb: (accounts: InjectedAccount[]) => void): () => void => {

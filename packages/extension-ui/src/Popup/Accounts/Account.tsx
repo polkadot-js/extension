@@ -27,7 +27,7 @@ function Account ({ address, className, onAction }: Props): React.ReactElement<P
     if (editedName && editedName !== name) {
       editAccount(address, editedName)
         .then((): void => onAction())
-        .catch(console.error);
+        .catch((error: Error) => console.error(error));
     }
 
     toggleEdit();

@@ -29,9 +29,9 @@ export function withAccounts<P extends { accounts: AccountsFromCtx }> (Component
     return (
       <AccountContext.Consumer>
         {(accounts): React.ReactNode => (
-          // @ts-ignore Something here with the props are going wonky
           <Component
-            {...props}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...props as any}
             accounts={accounts}
           />
         )}
@@ -46,9 +46,9 @@ export function withOnAction<P extends { onAction: OnActionFromCtx }> (Component
     return (
       <ActionContext.Consumer>
         {(onAction): React.ReactNode => (
-          // @ts-ignore Something here with the props are going wonky
           <Component
-            {...props}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...props as any}
             onAction={onAction}
           />
         )}
@@ -63,9 +63,9 @@ export function withAuthRequests<P extends { requests: AuthRequestsFromCtx }> (C
     return (
       <AuthorizeContext.Consumer>
         {(requests): React.ReactNode => (
-          // @ts-ignore Something here with the props are going wonky
           <Component
-            {...props}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...props as any}
             requests={requests}
           />
         )}
@@ -80,9 +80,9 @@ export function withSignRequests<P extends { requests: SignRequestsFromCtx }> (C
     return (
       <SigningContext.Consumer>
         {(requests): React.ReactNode => (
-          // @ts-ignore Something here with the props are going wonky
           <Component
-            {...props}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...props as any}
             requests={requests}
           />
         )}

@@ -66,9 +66,9 @@ When there is more than one extension, each will populate an entry via the injec
 ```js
 interface Injected {
   // the interface for Accounts, as detailed below
-  read-only accounts: Accounts;
+  readonly accounts: Accounts;
   // the standard Signer interface for the API, as detailed below
-  read-only signer: Signer;
+  readonly signer: Signer;
   // not injected as of yet, subscribable provider for polkadot-js API injection,
   // this can be passed to the API itself upon construction in the dapp
   // read-only provider: Provider
@@ -77,6 +77,8 @@ interface Injected {
 interface Account = {
   // ss-58 encoded address
   readonly address: string;
+  // the genesisHash for this account (empty if applicable to all)
+  readonly genesisHash?: string;
   // (optional) name for display
   readonly name?: string;
 };

@@ -48,6 +48,7 @@ export interface MessageAccountCreateInt {
 
 export interface MessageAccountCreateExt {
   address: string;
+  genesisHash: string;
   name: string;
 }
 

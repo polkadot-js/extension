@@ -16,13 +16,16 @@ interface Props {
 }
 
 function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
-  const [address, setAddress] = useState<null | string>(null);
+  const [account, setAccount] = useState<null | { address: string; genesisHash: string }>(null);
   const [name, setName] = useState<string | null>(null);
+  const onScan = (address: string, genesisHash: string): void => {
+    setAccount({ address, genesisHash });
+  };
 
   // FIXME Duplicated between here and Create.tsx
   const onCreate = (): void => {
-    if (address && name) {
-      createAccountExt(name, address)
+    if (account && name) {
+      createAccountExt(name, account.address, account.genesisHash)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }
@@ -32,15 +35,15 @@ function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
     <div>
       <Header label='import external' />
       <Back />
-      {!address && <QrScanAddress onScan={setAddress} />}
-      {address && (
+      {!account && <QrScanAddress onScan={onScan} />}
+      {account && (
         <>
           <Name
             isFocussed
             onChange={setName}
           />
           <Address
-            address={address}
+            address={account.address}
             name={name}
           >
             {name && (

@@ -9,7 +9,7 @@ import { AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccount
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { createType } from '@polkadot/types';
-import { decodeAddress, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { assert } from '@polkadot/util';
 
 import State from './State';
@@ -35,10 +35,8 @@ export default class Extension {
     return true;
   }
 
-  private accountsCreateExt ({ address, name }: MessageAccountCreateExt): boolean {
-    const publicKey = decodeAddress(address);
-
-    keyring.addExternal(publicKey, { name });
+  private accountsCreateExt ({ address, genesisHash, name }: MessageAccountCreateExt): boolean {
+    keyring.addExternal(address, { name, genesisHash });
 
     return true;
   }

@@ -22,6 +22,9 @@ const chains: Record<string, Chain> = {
   '0x3fd7b9eb6a00376e5be61f01abb429ffb0b104be05eaff4d458da48fcd425baf': {
     name: 'Kusama CC1',
     meta: new Metadata(kusama.meta)
+  },
+  '0xe4e7807c233645b910c8db58e99ed53dc71fbfff5bbe8a5534fb7e83db449210': {
+    name: 'Polkadot Dev (0.5.1)'
   }
 };
 

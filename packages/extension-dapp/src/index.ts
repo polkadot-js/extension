@@ -22,9 +22,9 @@ function throwError (method: string): never {
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
 function mapAccounts (source: string, list: InjectedAccount[]): InjectedAccountWithMeta[] {
-  return list.map(({ address, name }): InjectedAccountWithMeta => ({
+  return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => ({
     address,
-    meta: { name, source }
+    meta: { name, genesisHash, source }
   }));
 }
 

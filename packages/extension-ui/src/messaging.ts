@@ -92,8 +92,8 @@ export async function approveSignRequest (id: string, password: string): Promise
   return sendMessage('signing.approve', { id, password });
 }
 
-export async function createAccountExt (name: string, address: string): Promise<boolean> {
-  return sendMessage('accounts.create.ext', { address, name });
+export async function createAccountExt (name: string, address: string, genesisHash: string): Promise<boolean> {
+  return sendMessage('accounts.create.ext', { address, genesisHash, name });
 }
 
 export async function createAccountInt (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {

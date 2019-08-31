@@ -7,11 +7,11 @@
   "dependencies": {
     "@polkadot/api": "^0.91.0-beta.10",
     "@polkadot/extension-ui": "^0.10.0-beta.0",
-    "@polkadot/ui-keyring": "^0.43.0-beta.4"
+    "@polkadot/ui-keyring": "^0.43.0-beta.5"
   },
   "devDependencies": {
     "@babel/runtime": "^7.5.5",
-    "@polkadot/keyring": "^1.2.0-beta.3",
+    "@polkadot/keyring": "^1.2.0-beta.5",
     "@types/chrome": "^0.0.88",
     "@types/firefox-webext-browser": "^67.0.1",
     "extensionizer": "^1.0.1",

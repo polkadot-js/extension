@@ -1,3 +1,7 @@
+# 0.9.1
+
+- Fix an initialization error in extension-dapp
+
 # 0.8.1
 
 - Add basic support for seed derivation as part of the account import. Seeds can be followed by the derivation path, and derivation is applied on creation.

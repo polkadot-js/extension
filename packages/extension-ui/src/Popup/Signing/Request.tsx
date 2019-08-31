@@ -25,7 +25,7 @@ function Request ({ isFirst, onAction, request, signId, url }: Props): React.Rea
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
   const onSign = (password: string): Promise<void> =>
     approveSignRequest(signId, password)
       .then((): void => onAction());

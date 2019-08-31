@@ -22,7 +22,7 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
   useEffect((): void => {
     createSeed()
       .then(setAccount)
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
@@ -31,7 +31,7 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
     if (name && password && account) {
       createAccount(name, password, account.seed)
         .then((): void => onAction('/'))
-        .catch(console.error);
+        .catch((error: Error) => console.error(error));
     }
   };
 

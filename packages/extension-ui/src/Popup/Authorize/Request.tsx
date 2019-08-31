@@ -24,11 +24,11 @@ function Request ({ authId, className, isFirst, onAction, request: { origin }, u
   const onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
       .then((): void => onAction())
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
   const onReject = (): Promise<void> =>
     rejectAuthRequest(authId)
       .then((): void => onAction())
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
 
   return (
     <IconBox

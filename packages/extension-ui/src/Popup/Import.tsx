@@ -30,7 +30,7 @@ function Import ({ onAction }: Props): React.ReactElement<Props> {
     if (name && password && account) {
       createAccount(name, password, account.suri)
         .then((): void => onAction('/'))
-        .catch(console.error);
+        .catch((error: Error) => console.error(error));
     }
   };
 

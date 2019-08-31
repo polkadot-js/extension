@@ -19,7 +19,7 @@ function Forget ({ match: { params: { address } }, onAction }: Props): React.Rea
   const onClick = (): Promise<void> =>
     forgetAccount(address)
       .then((): void => onAction('/'))
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
 
   return (
     <div>

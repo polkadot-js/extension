@@ -194,7 +194,7 @@ export default class Extension {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/require-await
   public async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
     switch (type) {
       case 'authorize.approve':

@@ -19,7 +19,7 @@ export default class Accounts implements InjectedAccounts {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public subscribe (cb: (accounts: InjectedAccount[]) => any): Unsubcall {
     sendRequest('accounts.subscribe', null, cb)
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
 
     return (): void => {
       // FIXME we need the ability to unsubscribe

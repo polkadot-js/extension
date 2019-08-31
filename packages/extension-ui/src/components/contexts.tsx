@@ -14,12 +14,14 @@ const noop = (to?: string): void => {
 const AccountContext = React.createContext<AccountsFromCtx>([]);
 const ActionContext = React.createContext<OnActionFromCtx>(noop);
 const AuthorizeContext = React.createContext<AuthRequestsFromCtx>([]);
+const MediaContext = React.createContext<boolean>(false);
 const SigningContext = React.createContext<SignRequestsFromCtx>([]);
 
 export {
   AccountContext,
   ActionContext,
   AuthorizeContext,
+  MediaContext,
   SigningContext
 };
 

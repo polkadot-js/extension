@@ -5,7 +5,7 @@
 import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
+export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
 
 export type AuthorizeRequest = [string, MessageAuthorize, string];
 
@@ -39,11 +39,16 @@ export interface MessageResponse {
   subscription?: any;
 }
 
-export interface MessageAccountCreate {
+export interface MessageAccountCreateInt {
   name: string;
   password: string;
   suri: string;
   type?: KeypairType;
+}
+
+export interface MessageAccountCreateExt {
+  address: string;
+  name: string;
 }
 
 export interface MessageAccountEdit {

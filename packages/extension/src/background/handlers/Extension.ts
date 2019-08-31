@@ -4,12 +4,12 @@
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageTypes, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
+import { AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccountCreateExt, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { createType } from '@polkadot/types';
-import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { decodeAddress, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { assert } from '@polkadot/util';
 
 import State from './State';
@@ -29,8 +29,16 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
+  private accountsCreateInt ({ name, password, suri, type }: MessageAccountCreateInt): boolean {
     keyring.addUri(suri, password, { name }, type);
+
+    return true;
+  }
+
+  private accountsCreateExt ({ address, name }: MessageAccountCreateExt): boolean {
+    const publicKey = decodeAddress(address);
+
+    keyring.addExternal(publicKey, { name });
 
     return true;
   }
@@ -209,8 +217,11 @@ export default class Extension {
       case 'authorize.subscribe':
         return this.authorizeSubscribe(id, port);
 
-      case 'accounts.create':
-        return this.accountsCreate(request);
+      case 'accounts.create.ext':
+        return this.accountsCreateExt(request);
+
+      case 'accounts.create.int':
+        return this.accountsCreateInt(request);
 
       case 'accounts.forget':
         return this.accountsForget(request);

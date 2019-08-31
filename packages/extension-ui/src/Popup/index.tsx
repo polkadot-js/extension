@@ -12,16 +12,30 @@ import settings from '@polkadot/ui-settings';
 import { setAddressPrefix } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeContext, SigningContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeContext, MediaContext, SigningContext } from '../components/contexts';
 import { subscribeAccounts, subscribeAuthorize, subscribeSigning } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import Create from './Create';
 import Forget from './Forget';
-import Import from './Import';
+import ImportQr from './ImportQr';
+import ImportSeed from './ImportSeed';
 import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
+
+// Request permission for video, based on access we can hide/show import
+async function requestMediaAccess (): Promise<boolean> {
+  try {
+    await navigator.mediaDevices.getUserMedia({ video: true });
+
+    return true;
+  } catch (error) {
+    console.error('Permission for video declined', error.message);
+  }
+
+  return false;
+}
 
 // load the ui settings, actually only used for address prefix atm
 // probably overkill (however can replace once we have actual others)
@@ -33,6 +47,7 @@ setAddressPrefix((prefix === -1 ? 42 : prefix) as Prefix);
 export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | KeyringJson[]>(null);
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
+  const [mediaAllowed, setMediaAllowed] = useState(false);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
 
@@ -46,6 +61,7 @@ export default function Popup (): React.ReactElement<{}> {
 
   useEffect((): void => {
     Promise.all([
+      requestMediaAccess().then(setMediaAllowed),
       subscribeAccounts(setAccounts),
       subscribeAuthorize(setAuthRequests),
       subscribeSigning(setSignRequests)
@@ -66,15 +82,18 @@ export default function Popup (): React.ReactElement<{}> {
       <ActionContext.Provider value={onAction}>
         <AccountContext.Provider value={accounts}>
           <AuthorizeContext.Provider value={authRequests}>
-            <SigningContext.Provider value={signRequests}>
-              <Switch>
-                <Route path='/account/create' component={Create} />
-                <Route path='/account/forget/:address' component={Forget} />
-                <Route path='/account/import' component={Import} />
-                <Route path='/settings' component={Settings} />
-                <Route exact path='/' component={Root} />
-              </Switch>
-            </SigningContext.Provider>
+            <MediaContext.Provider value={mediaAllowed}>
+              <SigningContext.Provider value={signRequests}>
+                <Switch>
+                  <Route path='/account/create' component={Create} />
+                  <Route path='/account/forget/:address' component={Forget} />
+                  <Route path='/account/import-qr' component={ImportQr} />
+                  <Route path='/account/import-seed' component={ImportSeed} />
+                  <Route path='/settings' component={Settings} />
+                  <Route exact path='/' component={Root} />
+                </Switch>
+              </SigningContext.Provider>
+            </MediaContext.Provider>
           </AuthorizeContext.Provider>
         </AccountContext.Provider>
       </ActionContext.Provider>

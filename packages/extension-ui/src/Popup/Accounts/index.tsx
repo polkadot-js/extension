@@ -4,9 +4,10 @@
 
 import { AccountsFromCtx } from '../../components/types';
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 import { Button, Header, Link, Tip, unicode, withAccounts } from '../../components';
+import { MediaContext } from '../../components/contexts';
 import Account from './Account';
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
 }
 
 function Accounts ({ accounts }: Props): React.ReactElement<Props> {
+  const mediaAllowed = useContext(MediaContext);
+
   return (
     <div>
       <Header
@@ -36,7 +39,12 @@ function Accounts ({ accounts }: Props): React.ReactElement<Props> {
       />
       <Button
         label='I have a pre-existing seed, import the account'
-        to='/account/import'
+        to='/account/import-seed'
+      />
+      <Button
+        isDisabled={!mediaAllowed}
+        label='I have an external account, add it via QR'
+        to='/account/import-qr'
       />
     </div>
   );

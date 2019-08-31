@@ -7,14 +7,14 @@ import { OnActionFromCtx } from '../components/types';
 import React, { useState } from 'react';
 
 import { Address, Button, Header, TextArea, withOnAction } from '../components';
-import { createAccount, validateSeed } from '../messaging';
+import { createAccountInt, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
 interface Props {
   onAction: OnActionFromCtx;
 }
 
-function Import ({ onAction }: Props): React.ReactElement<Props> {
+function ImportSeed ({ onAction }: Props): React.ReactElement<Props> {
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -28,7 +28,7 @@ function Import ({ onAction }: Props): React.ReactElement<Props> {
   const onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
-      createAccount(name, password, account.suri)
+      createAccountInt(name, password, account.suri)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }
@@ -61,4 +61,4 @@ function Import ({ onAction }: Props): React.ReactElement<Props> {
   );
 }
 
-export default withOnAction(Import);
+export default withOnAction(ImportSeed);

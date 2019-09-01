@@ -5,34 +5,37 @@
 import { SignerPayload } from '@polkadot/api/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
-import { u8aToHex } from '@polkadot/util';
 
 import { Button, Box } from '../../components';
 
 interface Props {
   children?: React.ReactNode;
   className?: string;
-  onSignature: (signature: string) => void;
+  onSignature: ({ signature }: { signature: string }) => void;
   payload: ExtrinsicPayload;
   request: SignerPayload;
 }
 
+const CMD_EXTRINSIC = 2;
+
 export default function Qr ({ children, className, onSignature, payload, request }: Props): React.ReactElement<Props> {
   const [showScan, setShowScan] = useState(false);
+  const [data, setData] = useState(new Uint8Array());
   const onShowQr = (): void => setShowScan(true);
-  const onScan = (signature: Uint8Array): void => onSignature(u8aToHex(signature));
+
+  useEffect((): void => setData(payload.toU8a()), [payload]);
 
   return (
     <Box className={className}>
       {children}
       {showScan
-        ? <QrScanSignature onScan={onScan} />
+        ? <QrScanSignature onScan={onSignature} />
         : <QrDisplayPayload
           address={request.address}
-          cmd={3}
-          payload={payload.toU8a()}
+          cmd={CMD_EXTRINSIC}
+          payload={data}
         />
       }
       {!showScan && (

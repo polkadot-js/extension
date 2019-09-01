@@ -36,7 +36,7 @@ function Request ({ isExternal, isFirst, onAction, request, signId, url }: Props
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
   const onShowQr = (): void => setShowQr(true);
-  const onSignature = (signature: string): void => {
+  const onSignature = ({ signature }: { signature: string }): void => {
     console.error(signature);
   };
   const action = (

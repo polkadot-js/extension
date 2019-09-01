@@ -2049,14 +2049,14 @@
     "@polkadot/util" "^1.2.0-beta.5"
     "@polkadot/util-crypto" "^1.2.0-beta.5"
 
-"@polkadot/react-identicon@^0.43.0-beta.6":
-  version "0.43.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.43.0-beta.6.tgz#a5fbf7d435e32d5708e15ff85d8afc5a8e98bfff"
-  integrity sha512-OfOPMy7lPW3TEUuYzWxRGSiRzLGvVQZBriydFzSeRUnNmdU+qFSaanBSxC71BNm5aBaqa22wMmffETmycRaRjw==
+"@polkadot/react-identicon@^0.43.0-beta.7":
+  version "0.43.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.43.0-beta.7.tgz#db2a44ccd4a912468219b2d56f43473aadd01c3d"
+  integrity sha512-Q0d1rtxn31ihfFhmQxnu9rlpcH9JBFZRmgQ2fb9LKDvdITf/+ChHG6htWvVRgfJKM/m+zxRyZq9bugXOoavXKg==
   dependencies:
     "@babel/runtime" "^7.5.5"
-    "@polkadot/ui-settings" "^0.43.0-beta.6"
-    "@polkadot/ui-shared" "^0.43.0-beta.6"
+    "@polkadot/ui-settings" "^0.43.0-beta.7"
+    "@polkadot/ui-shared" "^0.43.0-beta.7"
     "@types/color" "^3.0.0"
     "@types/react-copy-to-clipboard" "^4.2.6"
     color "^3.1.2"
@@ -2064,10 +2064,10 @@
     react-copy-to-clipboard "^5.0.1"
     styled-components "^4.3.1"
 
-"@polkadot/react-qr@^0.43.0-beta.6":
-  version "0.43.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@polkadot/react-qr/-/react-qr-0.43.0-beta.6.tgz#6f239c6e183812f001a5f184897f23d7596c3d97"
-  integrity sha512-rWlTTDdR+BrXqaH7SpYH0eDYnSBVEJbjdVwKMLTELegDy5islJcpd7Jbo7ZVAleBRf8f8NaU1P3oxQ+LWpNBuA==
+"@polkadot/react-qr@^0.43.0-beta.7":
+  version "0.43.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polkadot/react-qr/-/react-qr-0.43.0-beta.7.tgz#9437c52d696b4b67c875b057211e2a3e864a4b19"
+  integrity sha512-3AKTVhCZNnMr+aR1mrGN7cPqlXDcmmVY8/Y2aIVXHFWYBnoDhugXjS5Ttw7qdFdLMmJiDReOzcDIeeaUbdfADg==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/react-qr-reader" "^2.1.1"
@@ -2118,10 +2118,10 @@
     "@types/memoizee" "^0.4.2"
     memoizee "^0.4.14"
 
-"@polkadot/ui-keyring@^0.43.0-beta.6":
-  version "0.43.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-keyring/-/ui-keyring-0.43.0-beta.6.tgz#43183881ae345cf8d442d2657c4afe8fc2c2370a"
-  integrity sha512-mk5AeBEoefCpAU7binBm0vZNe2S8hXUD9xGNjUEpFtnVNvGFfM72slthIgLLjA5XPtgNh+wf22DQ0uBC3RjP1Q==
+"@polkadot/ui-keyring@^0.43.0-beta.7":
+  version "0.43.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-keyring/-/ui-keyring-0.43.0-beta.7.tgz#e730f125768bcc22bb473384eaa43c8899e8110f"
+  integrity sha512-nmthulfTCzYZVBvqPpSXKvjb1qCVQ9H238bycmJT9+5Fq3t699Ox6g0c3n4+f79Qm46Qaqkd2QSnMR0nl9H/7g==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/mkdirp" "^0.5.2"
@@ -2131,19 +2131,19 @@
     store "^2.0.12"
     styled-components "^4.3.1"
 
-"@polkadot/ui-settings@^0.43.0-beta.6":
-  version "0.43.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.43.0-beta.6.tgz#8d093016dd6ad0e69e7d35333e9b4e2f012535cb"
-  integrity sha512-+5UsADNiQNIRfp7LEMU4LIi7Nnu3fIEgT+SlqWVs8PELZRSJi1ZCqQbAPPfysKu0h+UQ8dWVoiUxRE2glcT8ZQ==
+"@polkadot/ui-settings@^0.43.0-beta.7":
+  version "0.43.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.43.0-beta.7.tgz#b10bdf84592d859d5c60a24bbdf591dbb76321c2"
+  integrity sha512-BmqEfvKQsJ0MOJsM0Qt9ehXI+uewqaufcBIM3tyHyC42U0TV+F2VN0IJ6EPg3MUEbaUMxbYuMcR4ICBKmNPORw==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/store" "^2.0.2"
     store "^2.0.12"
 
-"@polkadot/ui-shared@^0.43.0-beta.6":
-  version "0.43.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-shared/-/ui-shared-0.43.0-beta.6.tgz#7e1555bfbbdf03fe4cf0fffd57de00340f28c48d"
-  integrity sha512-+z6XsKJMOXUHurblwM6rXykeY0kV+sUWPXaKbxNZ6OXxR/DhHKgs1rCpXUoWGNGw07okk7wPmUTmcp7YwSNRXQ==
+"@polkadot/ui-shared@^0.43.0-beta.7":
+  version "0.43.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-shared/-/ui-shared-0.43.0-beta.7.tgz#4eebc6d3bf7c23a550064843439f15cbbcefaf7e"
+  integrity sha512-WNO7HF6gxTxogsg+Cst8UMWrN+CQAEfx4zLq//bNx/gHYn263aI13AAh94Hl6m8dc5XhmiPZpMHfKv5Xa1ThHw==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/color" "^3.0.0"

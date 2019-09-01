@@ -1,3 +1,7 @@
+# 0.10.0-beta.x
+
+- Support for external accounts, as presented by mobile signers, e.g. the Parity Signer
+
 # 0.9.1
 
 - Fix an initialization error in extension-dapp

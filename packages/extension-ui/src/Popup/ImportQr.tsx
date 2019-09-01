@@ -18,9 +18,6 @@ interface Props {
 function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
   const [account, setAccount] = useState<null | { address: string; genesisHash: string }>(null);
   const [name, setName] = useState<string | null>(null);
-  const onScan = (address: string, genesisHash: string): void => {
-    setAccount({ address, genesisHash });
-  };
 
   // FIXME Duplicated between here and Create.tsx
   const onCreate = (): void => {
@@ -35,7 +32,7 @@ function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
     <div>
       <Header label='import external' />
       <Back />
-      {!account && <QrScanAddress onScan={onScan} />}
+      {!account && <QrScanAddress onScan={setAccount} />}
       {account && (
         <>
           <Name
@@ -43,8 +40,7 @@ function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
             onChange={setName}
           />
           <Address
-            address={account.address}
-            genesisHash={account.genesisHash}
+            {...account}
             name={name}
           >
             {name && (

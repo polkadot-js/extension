@@ -11,7 +11,7 @@ export type Unsubcall = () => void;
 
 export interface InjectedAccount {
   address: string;
-  genesisHash: string;
+  genesisHash?: string;
   name: string;
 }
 

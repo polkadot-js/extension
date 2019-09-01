@@ -7,7 +7,7 @@ import { OnActionFromCtx } from '../components/types';
 import React, { useState, useEffect } from 'react';
 
 import { Address, Button, Header, Loading, TextArea, withOnAction } from '../components';
-import { createAccount, createSeed } from '../messaging';
+import { createAccountInt, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
 interface Props {
@@ -29,7 +29,7 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
   const onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
-      createAccount(name, password, account.seed)
+      createAccountInt(name, password, account.seed)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }

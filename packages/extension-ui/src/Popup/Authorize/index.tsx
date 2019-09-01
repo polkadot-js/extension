@@ -17,7 +17,7 @@ function Authorize ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='authorize' />
-      {requests.map(([id, request, url], index): React.ReactNode => (
+      {requests.map(({ id, request, url }, index): React.ReactNode => (
         <Request
           authId={id}
           isFirst={index === 0}

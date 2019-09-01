@@ -17,8 +17,9 @@ function Signing ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='transactions' />
-      {requests.map(([id, request, url], index): React.ReactNode => (
+      {requests.map(({ id, isExternal, request, url }, index): React.ReactNode => (
         <Request
+          isExternal={isExternal}
           isFirst={index === 0}
           key={id}
           request={request}

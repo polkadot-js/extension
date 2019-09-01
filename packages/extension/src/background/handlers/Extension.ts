@@ -3,8 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccountCreateExt, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccountCreateExt, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -18,8 +17,8 @@ import { createSubscription, unsubscribe } from './subscriptions';
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
-function transformAccounts (accounts: SubjectInfo): KeyringJson[] {
-  return Object.values(accounts).map(({ json }): KeyringJson => json);
+function transformAccounts (accounts: SubjectInfo): AccountJson[] {
+  return Object.values(accounts).map(({ json }): AccountJson => json);
 }
 
 export default class Extension {
@@ -57,7 +56,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsList (): KeyringJson[] {
+  private accountsList (): AccountJson[] {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 

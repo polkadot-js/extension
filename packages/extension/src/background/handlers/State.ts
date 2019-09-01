@@ -27,6 +27,7 @@ type AuthUrls = Record<string, {
 
 interface SignRequest {
   id: string;
+  isExternal: boolean;
   request: MessageExtrinsicSign;
   resolve: (result: MessageExtrinsicSignResponse) => void;
   reject: (error: Error) => void;
@@ -71,13 +72,13 @@ export default class State {
   public get allAuthRequests (): AuthorizeRequest[] {
     return Object
       .values(this._authRequests)
-      .map(({ id, request, url }): AuthorizeRequest => [id, request, url]);
+      .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
   }
 
   public get allSignRequests (): SigningRequest[] {
     return Object
       .values(this._signRequests)
-      .map(({ id, request, url }): SigningRequest => [id, request, url]);
+      .map(({ id, isExternal, request, url }): SigningRequest => ({ id, isExternal, request, url }));
   }
 
   private popupClose (): void {
@@ -91,7 +92,7 @@ export default class State {
     extension.windows.create({
       // This is not allowed on FF, only on Chrome - disable completely
       // focused: true,
-      height: 581,
+      height: 621,
       left: 150,
       top: 150,
       type: 'popup',
@@ -210,12 +211,13 @@ export default class State {
     return this._signRequests[id];
   }
 
-  public signQueue (url: string, request: MessageExtrinsicSign): Promise<MessageExtrinsicSignResponse> {
+  public signQueue (url: string, request: MessageExtrinsicSign, isExternal = false): Promise<MessageExtrinsicSignResponse> {
     const id = getId();
 
     return new Promise((resolve, reject): void => {
       this._signRequests[id] = {
         id,
+        isExternal,
         request,
         resolve: this.signComplete(id, resolve),
         reject: this.signComplete(id, reject),

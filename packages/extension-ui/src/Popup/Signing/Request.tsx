@@ -5,15 +5,17 @@
 import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
 import { OnActionFromCtx } from '../../components/types';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { createType } from '@polkadot/types';
 
-import { ActionBar, Address, Link, withOnAction } from '../../components';
+import { ActionBar, Address, Button, Link, withOnAction } from '../../components';
 import { approveSignRequest, cancelSignRequest } from '../../messaging';
 import Details from './Details';
+import Qr from './Qr';
 import Unlock from './Unlock';
 
 interface Props {
+  isExternal: boolean;
   isFirst: boolean;
   onAction: OnActionFromCtx;
   request: MessageExtrinsicSign;
@@ -21,32 +23,54 @@ interface Props {
   url: string;
 }
 
-function Request ({ isFirst, onAction, request, signId, url }: Props): React.ReactElement<Props> {
+function Request ({ isExternal, isFirst, onAction, request, signId, url }: Props): React.ReactElement<Props> {
+  const [showQr, setShowQr] = useState(false);
+  const payload = createType('ExtrinsicPayload', request, { version: request.version });
+
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
   const onSign = (password: string): Promise<void> =>
     approveSignRequest(signId, password)
-      .then((): void => onAction());
-  const blockNumber = createType('BlockNumber', request.blockNumber);
-  const payload = createType('ExtrinsicPayload', request, { version: request.version });
+      .then((): void => onAction())
+      .catch((error: Error) => console.error(error));
+  const onShowQr = (): void => setShowQr(true);
+  const onSignature = (signature: string): void => {
+    console.error(signature);
+  };
+  const action = (
+    <ActionBar>
+      <Link isDanger onClick={onCancel}>Cancel</Link>
+    </ActionBar>
+  );
 
   return (
-    <Address address={request.address}>
-      <Details
-        blockNumber={blockNumber}
-        genesisHash={request.genesisHash}
-        isDecoded={isFirst}
-        method={request.method}
+    showQr
+      ? <Qr
         payload={payload}
-        url={url}
-      />
-      <ActionBar>
-        <Link isDanger onClick={onCancel}>Cancel</Link>
-      </ActionBar>
-      {isFirst && <Unlock onSign={onSign} />}
-    </Address>
+        request={request}
+        onSignature={onSignature}
+      >
+        {action}
+      </Qr>
+      : <Address address={request.address}>
+        <Details
+          isDecoded={isFirst}
+          payload={payload}
+          request={request}
+          url={url}
+        />
+        {action}
+        {isFirst && (
+          isExternal
+            ? <Button
+              label='Display QR to external signer'
+              onClick={onShowQr}
+            />
+            : <Unlock onSign={onSign} />
+        )}
+      </Address>
   );
 }
 

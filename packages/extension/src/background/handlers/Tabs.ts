@@ -61,7 +61,7 @@ export default class Tabs {
 
     assert(pair, 'Unable to find keypair');
 
-    return this.state.signQueue(url, request);
+    return this.state.signQueue(url, request, pair.meta.isExternal);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

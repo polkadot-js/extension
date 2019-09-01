@@ -7,9 +7,25 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
 
-export type AuthorizeRequest = [string, MessageAuthorize, string];
+export interface AccountJson {
+  address: string;
+  genesisHash?: string;
+  isExternal?: boolean;
+  name?: string;
+}
 
-export type SigningRequest = [string, MessageExtrinsicSign, string];
+export interface AuthorizeRequest {
+  id: string;
+  request: MessageAuthorize;
+  url: string;
+}
+
+export interface SigningRequest {
+  id: string;
+  isExternal: boolean;
+  request: MessageExtrinsicSign;
+  url: string;
+}
 
 export interface MessageAuthorize {
   origin: string;

@@ -2,18 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthRequestsFromCtx } from '../../components/types';
+import React, { useContext } from 'react';
 
-import React from 'react';
-
-import { Header, withAuthRequests } from '../../components';
+import { AuthorizeContext, Header } from '../../components';
 import Request from './Request';
 
-interface Props {
-  requests: AuthRequestsFromCtx;
-}
+export default function Authorize (): React.ReactElement<{}> {
+  const requests = useContext(AuthorizeContext);
 
-function Authorize ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='authorize' />
@@ -29,5 +25,3 @@ function Authorize ({ requests }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withAuthRequests(Authorize);

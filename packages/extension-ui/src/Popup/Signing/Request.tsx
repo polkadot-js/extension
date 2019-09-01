@@ -3,12 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
-import { OnActionFromCtx } from '../../components/types';
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { createType } from '@polkadot/types';
 
-import { ActionBar, Address, Button, Link, withOnAction } from '../../components';
+import { ActionBar, ActionContext, Button, Address, Link } from '../../components';
 import { approveSignRequest, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Qr from './Qr';
@@ -17,16 +16,15 @@ import Unlock from './Unlock';
 interface Props {
   isExternal: boolean;
   isFirst: boolean;
-  onAction: OnActionFromCtx;
   request: MessageExtrinsicSign;
   signId: string;
   url: string;
 }
 
-function Request ({ isExternal, isFirst, onAction, request, signId, url }: Props): React.ReactElement<Props> {
+export default function Request ({ isExternal, isFirst, request, signId, url }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
   const [showQr, setShowQr] = useState(false);
   const payload = createType('ExtrinsicPayload', request, { version: request.version });
-
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
@@ -73,5 +71,3 @@ function Request ({ isExternal, isFirst, onAction, request, signId, url }: Props
       </Address>
   );
 }
-
-export default withOnAction(Request);

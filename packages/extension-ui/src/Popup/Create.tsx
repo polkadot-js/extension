@@ -2,19 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { OnActionFromCtx } from '../components/types';
+import React, { useContext, useEffect, useState } from 'react';
 
-import React, { useState, useEffect } from 'react';
-
-import { Address, Button, Header, Loading, TextArea, withOnAction } from '../components';
+import { ActionContext, Address, Button, Header, Loading, TextArea } from '../components';
 import { createAccountInt, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-interface Props {
-  onAction: OnActionFromCtx;
-}
+type Props = {};
 
-function Create ({ onAction }: Props): React.ReactElement<Props> {
+export default function Create (): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -67,5 +64,3 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withOnAction(Create);

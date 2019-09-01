@@ -2,20 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { OnActionFromCtx } from '../components/types';
-
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { Address, Button, Header, withOnAction } from '../components';
+import { ActionContext, Address, Button, Header } from '../components';
 import { createAccountExt } from '../messaging';
 import { Back, Name } from '../partials';
 
-interface Props {
-  onAction: OnActionFromCtx;
-}
+type Props = {};
 
-function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
+export default function ImportQr (): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; genesisHash: string }>(null);
   const [name, setName] = useState<string | null>(null);
 
@@ -55,5 +52,3 @@ function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withOnAction(ImportQr);

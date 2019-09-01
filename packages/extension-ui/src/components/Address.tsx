@@ -4,20 +4,18 @@
 
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
-import { AccountsFromCtx } from './types';
 
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension/chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 
 import IconBox from './IconBox';
-import { withAccounts } from './contexts';
+import { AccountContext } from './contexts';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 interface Props {
-  accounts: AccountsFromCtx;
   address?: string | null;
   children?: React.ReactNode;
   className?: string;
@@ -26,7 +24,8 @@ interface Props {
   theme?: 'polkadot' | 'substrate';
 }
 
-function Address ({ accounts, address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
+function Address ({ address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
+  const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<KeyringJson | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
@@ -71,7 +70,7 @@ function Address ({ accounts, address, children, className, genesisHash, name, t
   );
 }
 
-export default withAccounts(styled(Address)`
+export default styled(Address)`
   .address {
     opacity: 0.5;
     overflow: hidden;
@@ -81,4 +80,4 @@ export default withAccounts(styled(Address)`
   .name {
     padding-bottom: 0.5rem;
   }
-`);
+`;

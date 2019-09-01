@@ -2,20 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { OnActionFromCtx } from '../components/types';
-
-import React from 'react';
+import React, { useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { Address, Button, Header, Tip, withOnAction } from '../components';
+import { ActionContext, Address, Button, Header, Tip } from '../components';
 import { forgetAccount } from '../messaging';
 import { Back } from '../partials';
 
-interface Props extends RouteComponentProps<{ address: string }> {
-  onAction: OnActionFromCtx;
-}
+type Props = RouteComponentProps<{ address: string }>;
 
-function Forget ({ match: { params: { address } }, onAction }: Props): React.ReactElement<Props> {
+function Forget ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
   const onClick = (): Promise<void> =>
     forgetAccount(address)
       .then((): void => onAction('/'))
@@ -37,4 +34,4 @@ function Forget ({ match: { params: { address } }, onAction }: Props): React.Rea
   );
 }
 
-export default withOnAction(withRouter(Forget));
+export default withRouter(Forget);

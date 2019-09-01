@@ -2,18 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignRequestsFromCtx } from '../../components/types';
+import React, { useContext } from 'react';
 
-import React from 'react';
-
-import { Header, withSignRequests } from '../../components';
+import { Header, SigningContext } from '../../components';
 import Request from './Request';
 
-interface Props {
-  requests: SignRequestsFromCtx;
-}
+export default function Signing (): React.ReactElement<{}> {
+  const requests = useContext(SigningContext);
 
-function Signing ({ requests }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header label='transactions' />
@@ -30,5 +26,3 @@ function Signing ({ requests }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withSignRequests(Signing);

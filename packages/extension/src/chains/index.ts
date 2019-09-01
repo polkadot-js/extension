@@ -12,19 +12,23 @@ import kusama from './kusama';
 interface Chain {
   meta?: Metadata;
   name: string;
+  prefix: number;
 }
 
 const chains: Record<string, Chain> = {
   '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b': {
     name: 'Alexander',
-    meta: new Metadata(alexander.meta)
+    meta: new Metadata(alexander.meta),
+    prefix: 42
   },
   '0x3fd7b9eb6a00376e5be61f01abb429ffb0b104be05eaff4d458da48fcd425baf': {
     name: 'Kusama CC1',
-    meta: new Metadata(kusama.meta)
+    meta: new Metadata(kusama.meta),
+    prefix: 2
   },
   '0xe4e7807c233645b910c8db58e99ed53dc71fbfff5bbe8a5534fb7e83db449210': {
-    name: 'Polkadot Dev (0.5.1)'
+    name: 'Polkadot Dev (0.5.1)',
+    prefix: 42
   }
 };
 

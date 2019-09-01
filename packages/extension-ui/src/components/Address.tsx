@@ -8,6 +8,7 @@ import { AccountsFromCtx } from './types';
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import findChain from '@polkadot/extension/chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 
@@ -21,10 +22,11 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   name?: React.ReactNode | null;
+  genesisHash?: string;
   theme?: 'polkadot' | 'substrate';
 }
 
-function Address ({ accounts, address, children, className, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
+function Address ({ accounts, address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const [account, setAccount] = useState<KeyringJson | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
@@ -35,15 +37,15 @@ function Address ({ accounts, address, children, className, name, theme = 'polka
 
     const addrU8a = decodeAddress(address);
     const addrU8aStr = addrU8a.toString();
+    const account = accounts.find((account): boolean =>
+      decodeAddress(account.address).toString() === addrU8aStr
+    ) || null;
+    const chain = findChain((account && account.meta.genesisHash) || genesisHash || '') || {
+      prefix: (settings.prefix === -1 ? 42 : settings.prefix)
+    };
 
-    setFormatted(
-      encodeAddress(addrU8a, (settings.prefix === -1 ? 42 : settings.prefix) as Prefix)
-    );
-    setAccount(
-      accounts.find((account): boolean =>
-        decodeAddress(account.address).toString() === addrU8aStr
-      ) || null
-    );
+    setFormatted(encodeAddress(addrU8a, chain.prefix as Prefix));
+    setAccount(account);
   }, [address]);
 
   return (

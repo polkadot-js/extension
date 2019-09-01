@@ -44,6 +44,7 @@ function ImportQr ({ onAction }: Props): React.ReactElement<Props> {
           />
           <Address
             address={account.address}
+            genesisHash={account.genesisHash}
             name={name}
           >
             {name && (

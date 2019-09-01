@@ -2,14 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountsFromCtx } from '../components/types';
+import React, { useContext, useEffect, useState } from 'react';
 
-import React, { useEffect, useState } from 'react';
-
-import { Input, withAccounts } from '../components';
+import { AccountContext, Input } from '../components';
 
 interface Props {
-  accounts: AccountsFromCtx;
   address?: string;
   className?: string;
   defaultValue?: string | null;
@@ -21,7 +18,8 @@ interface Props {
 
 const MIN_LENGTH = 3;
 
-function Name ({ accounts, address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): React.ReactElement<Props> {
+export default function Name ({ address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): React.ReactElement<Props> {
+  const accounts = useContext(AccountContext);
   const [name, setName] = useState('');
   const account = accounts.find((account): boolean => account.address === address);
   const startValue = (account && account.meta.name) || defaultValue;
@@ -50,5 +48,3 @@ function Name ({ accounts, address, className, defaultValue, isFocussed, label =
     />
   );
 }
-
-export default withAccounts(Name);

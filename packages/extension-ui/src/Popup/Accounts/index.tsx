@@ -2,18 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountsFromCtx } from '../../components/types';
+import React, { useContext } from 'react';
 
-import React from 'react';
-
-import { Button, Header, Link, Tip, unicode, withAccounts } from '../../components';
+import { AccountContext, Button, Header, Link, Tip, unicode } from '../../components';
 import Account from './Account';
 
-interface Props {
-  accounts: AccountsFromCtx;
-}
+export default function Accounts (): React.ReactElement<{}> {
+  const accounts = useContext(AccountContext);
 
-function Accounts ({ accounts }: Props): React.ReactElement<Props> {
   return (
     <div>
       <Header
@@ -41,5 +37,3 @@ function Accounts ({ accounts }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withAccounts(Accounts);

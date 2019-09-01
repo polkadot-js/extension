@@ -3,25 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
-import { OnActionFromCtx } from '../../components/types';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { createType } from '@polkadot/types';
 
-import { ActionBar, Address, Link, withOnAction } from '../../components';
+import { ActionBar, ActionContext, Address, Link } from '../../components';
 import { approveSignRequest, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Unlock from './Unlock';
 
 interface Props {
   isFirst: boolean;
-  onAction: OnActionFromCtx;
   request: MessageExtrinsicSign;
   signId: string;
   url: string;
 }
 
-function Request ({ isFirst, onAction, request, signId, url }: Props): React.ReactElement<Props> {
+export default function Request ({ isFirst, request, signId, url }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
   const onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
@@ -49,5 +48,3 @@ function Request ({ isFirst, onAction, request, signId, url }: Props): React.Rea
     </Address>
   );
 }
-
-export default withOnAction(Request);

@@ -5,7 +5,7 @@
     "packages/*/build"
   ],
   "include": [
-    "packages/*/*.d.ts",
+    "packages/**/*.d.ts",
     "packages/**/*.ts",
     "packages/**/*.tsx",
     "packages/**/*.js",

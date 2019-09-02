@@ -1,3 +1,9 @@
+// Copyright 2019 @polkadot/extension-chains authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
+
+// Generates via (in api) `yarn chain:info wss://kusama-rpc.polkadot.io`
+
 export default {
   chain: 'Kusama CC1',
   genesisHash: '0x3fd7b9eb6a00376e5be61f01abb429ffb0b104be05eaff4d458da48fcd425baf',

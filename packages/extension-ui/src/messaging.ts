@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, PayloadTypes, MessageTypes, ResponseTypes } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -47,7 +47,7 @@ port.onMessage.addListener((data): void => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 

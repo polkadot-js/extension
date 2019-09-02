@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageAuthorize } from '@polkadot/extension/background/types';
+import { RequestAuthorizeTab } from '@polkadot/extension/background/types';
 import { OnActionFromCtx } from '../../components/types';
 
 import React from 'react';
@@ -16,7 +16,7 @@ interface Props {
   className?: string;
   isFirst: boolean;
   onAction: OnActionFromCtx;
-  request: MessageAuthorize;
+  request: RequestAuthorizeTab;
   url: string;
 }
 

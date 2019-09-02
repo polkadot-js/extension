@@ -4,7 +4,7 @@
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest, PayloadTypes, ResponseTypes } from '../types';
+import { AuthorizeRequest, RequestAccountCreate, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprove, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -29,13 +29,13 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ name, password, suri, type }: MessageAccountCreate): boolean {
+  private accountsCreate ({ name, password, suri, type }: RequestAccountCreate): boolean {
     keyring.addUri(suri, password, { name }, type);
 
     return true;
   }
 
-  private accountsEdit ({ address, name }: MessageAccountEdit): boolean {
+  private accountsEdit ({ address, name }: RequestAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -45,7 +45,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsForget ({ address }: MessageAccountForget): boolean {
+  private accountsForget ({ address }: RequestAccountForget): boolean {
     keyring.forgetAccount(address);
 
     return true;
@@ -70,7 +70,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
+  private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -82,7 +82,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeReject ({ id }: MessageAuthorizeReject): boolean {
+  private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -113,7 +113,7 @@ export default class Extension {
     return true;
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreateResponse {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
     const seed = mnemonicGenerate(length);
 
     return {
@@ -122,7 +122,7 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ suri, type }: MessageSeedValidate): MessageSeedValidateResponse {
+  private seedValidate ({ suri, type }: RequestSeedValidate): ResponseSeedValidate {
     const { phrase } = keyExtractSuri(suri);
 
     assert(SEED_LENGTHS.includes(phrase.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
@@ -134,7 +134,7 @@ export default class Extension {
     };
   }
 
-  private signingApprove ({ id, password }: MessageExtrinsicSignApprove): boolean {
+  private signingApprove ({ id, password }: RequestSigningApprove): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -163,7 +163,7 @@ export default class Extension {
     return true;
   }
 
-  private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
+  private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -195,13 +195,13 @@ export default class Extension {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle (id: string, type: keyof ResponseTypes, request: PayloadTypes[typeof type], port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
+  public async handle (id: string, type: keyof ResponseTypes, request: RequestTypes[typeof type], port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
     switch (type) {
       case 'authorize.approve':
-        return this.authorizeApprove(request as MessageAuthorizeApprove);
+        return this.authorizeApprove(request as RequestAuthorizeApprove);
 
       case 'authorize.reject':
-        return this.authorizeReject(request as MessageAuthorizeApprove);
+        return this.authorizeReject(request as RequestAuthorizeApprove);
 
       case 'authorize.requests':
         return this.authorizeRequests();
@@ -210,13 +210,13 @@ export default class Extension {
         return this.authorizeSubscribe(id, port);
 
       case 'accounts.create':
-        return this.accountsCreate(request as MessageAccountCreate);
+        return this.accountsCreate(request as RequestAccountCreate);
 
       case 'accounts.forget':
-        return this.accountsForget(request as MessageAccountForget);
+        return this.accountsForget(request as RequestAccountForget);
 
       case 'accounts.edit':
-        return this.accountsEdit(request as MessageAccountEdit);
+        return this.accountsEdit(request as RequestAccountEdit);
 
       case 'accounts.list':
         return this.accountsList();
@@ -225,16 +225,16 @@ export default class Extension {
         return this.accountsSubscribe(id, port);
 
       case 'seed.create':
-        return this.seedCreate(request as MessageSeedCreate);
+        return this.seedCreate(request as RequestSeedCreate);
 
       case 'seed.validate':
-        return this.seedValidate(request as MessageSeedValidate);
+        return this.seedValidate(request as RequestSeedValidate);
 
       case 'signing.approve':
-        return this.signingApprove(request as MessageExtrinsicSignApprove);
+        return this.signingApprove(request as RequestSigningApprove);
 
       case 'signing.cancel':
-        return this.signingCancel(request as MessageExtrinsicSignCancel);
+        return this.signingCancel(request as RequestSigningCancel);
 
       case 'signing.requests':
         return this.signingRequests();

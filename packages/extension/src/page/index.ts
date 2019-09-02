@@ -5,7 +5,7 @@
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
-import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, ResponseMessage, MessageTypes, PayloadTypes, NullMessageTypes } from '../background/types';
+import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest } from '../background/types';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
@@ -29,11 +29,11 @@ let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
-function sendMessage<TMessageType extends NullMessageTypes>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TMessageType extends MessageTypes>(message: TMessageType, request: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypes>(message: TMessageType, request: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: PayloadTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
@@ -43,7 +43,7 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
       id,
       message,
       origin: 'page',
-      request: request || null as PayloadTypes[TMessageType]
+      request: request || null as RequestTypes[TMessageType]
     };
     window.postMessage(transportRequestMessage, '*');
   });
@@ -56,7 +56,7 @@ async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-function handleResponse<TResponseMessage extends ResponseMessage> (data: TransportResponseMessage<TResponseMessage>): void {
+function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType>): void {
   const handler = handlers[data.id];
 
   if (!handler) {

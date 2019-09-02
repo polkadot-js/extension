@@ -4,7 +4,7 @@
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
-import { AuthorizeRequest, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest, MessageTypes, PayloadTypes, ResponseTypes } from '../types';
+import { AuthorizeRequest, MessageAccountCreate, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest, PayloadTypes, ResponseTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -195,7 +195,7 @@ export default class Extension {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: PayloadTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[TMessageType]> {
+  public async handle (id: string, type: keyof ResponseTypes, request: PayloadTypes[typeof type], port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
     switch (type) {
       case 'authorize.approve':
         return this.authorizeApprove(request as MessageAuthorizeApprove);

@@ -9,7 +9,7 @@ export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize
 
 export interface AccountJson {
   address: string;
-  genesisHash?: string;
+  genesisHash?: string | null;
   isExternal?: boolean;
   name?: string;
 }

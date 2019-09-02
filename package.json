@@ -27,6 +27,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx . && tsc --noEmit --pretty",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
+    "start": "yarn watch",
     "test": "echo \"no tests... yet\"",
     "watch": "cd packages/extension && webpack --config webpack.config.js --watch"
   },

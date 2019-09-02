@@ -21,7 +21,7 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   name?: React.ReactNode | null;
-  genesisHash?: string;
+  genesisHash?: string | null;
   theme?: 'polkadot' | 'substrate';
 }
 
@@ -35,7 +35,7 @@ function findAccount (accounts: KeyringJson[], publicKey: Uint8Array): KeyringJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: string): [string, KeyringJson | null, Chain] {
+function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: string | null): [string, KeyringJson | null, Chain] {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -54,6 +54,7 @@ function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: 
 function Address ({ address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<KeyringJson | null>(null);
+  const [chain, setChain] = useState<Chain | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect((): void => {
@@ -61,14 +62,16 @@ function Address ({ address, children, className, genesisHash, name, theme = 'po
       return;
     }
 
-    const [formatted, account] = recodeAddress(address, accounts, genesisHash);
+    const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
 
     setFormatted(formatted);
+    setChain(chain);
     setAccount(account);
   }, [address]);
 
   return (
     <IconBox
+      banner={chain && chain.genesisHash && chain.name}
       className={className}
       icon={
         <Identicon

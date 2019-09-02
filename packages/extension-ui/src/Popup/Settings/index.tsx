@@ -13,7 +13,7 @@ import { Back } from '../../partials';
 
 const options = settings.availablePrefixes.map(({ text, value }): { text: string; value: string } => ({
   text: value === -1
-    ? 'Substrate (default)'
+    ? 'Default'
     : text,
   value: `${value}`
 }));

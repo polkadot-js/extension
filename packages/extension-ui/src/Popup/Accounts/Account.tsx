@@ -58,7 +58,7 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
 
 export default styled(Account)`
   .edit-name {
-    left: 4.75rem;
+    left: 3rem;
     position: absolute;
     right: 0.75rem;
     top: -0.5rem;

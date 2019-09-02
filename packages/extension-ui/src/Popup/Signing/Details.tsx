@@ -8,7 +8,7 @@ import { BlockNumber, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/int
 import React from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
-import findChain from '@polkadot/extension/chains';
+import findChain from '@polkadot/extension-chains';
 import { createType, GenericCall, Metadata } from '@polkadot/types';
 import { formatNumber } from '@polkadot/util';
 

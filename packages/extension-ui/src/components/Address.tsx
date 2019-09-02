@@ -2,12 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Chain } from '@polkadot/extension-chains/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import findChain, { Chain } from '@polkadot/extension/chains';
+import findChain, { UNKNOWN_CHAIN } from '@polkadot/extension-chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 
@@ -34,14 +35,11 @@ function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: 
   const account = accounts.find((account): boolean =>
     decodeAddress(account.address).toString() === addrU8aStr
   ) || null;
-  const chain = findChain((account && account.meta.genesisHash) || genesisHash || '') || {
-    name: 'Any',
-    prefix: 42
-  };
+  const chain = findChain((account && account.meta.genesisHash) || genesisHash) || UNKNOWN_CHAIN;
 
   return [
     // always allow the actual settings to override the display
-    encodeAddress(addrU8a, (settings.prefix === -1 ? chain.prefix : settings.prefix) as Prefix),
+    encodeAddress(addrU8a, (settings.prefix === -1 ? chain.ss58Format : settings.prefix) as Prefix),
     account,
     chain
   ];

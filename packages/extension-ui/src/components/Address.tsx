@@ -8,7 +8,7 @@ import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import findChain, { UNKNOWN_CHAIN } from '@polkadot/extension-chains';
+import findChain from '@polkadot/extension-chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 
@@ -25,21 +25,27 @@ interface Props {
   theme?: 'polkadot' | 'substrate';
 }
 
+// find an account in our list
+function findAccount (accounts: KeyringJson[], publicKey: Uint8Array): KeyringJson | null {
+  const pkStr = publicKey.toString();
+
+  return accounts.find(({ address }): boolean =>
+    decodeAddress(address).toString() === pkStr
+  ) || null;
+}
+
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
 function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: string): [string, KeyringJson | null, Chain] {
   // decode and create a shortcut for the encoded address
-  const addrU8a = decodeAddress(address);
-  const addrU8aStr = addrU8a.toString();
+  const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
-  const account = accounts.find((account): boolean =>
-    decodeAddress(account.address).toString() === addrU8aStr
-  ) || null;
-  const chain = findChain((account && account.meta.genesisHash) || genesisHash) || UNKNOWN_CHAIN;
+  const account = findAccount(accounts, publicKey);
+  const chain = findChain((account && account.meta.genesisHash) || genesisHash);
 
   return [
     // always allow the actual settings to override the display
-    encodeAddress(addrU8a, (settings.prefix === -1 ? chain.ss58Format : settings.prefix) as Prefix),
+    encodeAddress(publicKey, (settings.prefix === -1 ? chain.ss58Format : settings.prefix) as Prefix),
     account,
     chain
   ];

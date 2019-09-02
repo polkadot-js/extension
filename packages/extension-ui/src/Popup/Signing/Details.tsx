@@ -101,7 +101,7 @@ function Details ({ className, isDecoded, payload, request, url }: Props): React
             <td className='data'>{formatNumber(tip)}</td>
           </tr>
         )}
-        {renderMethod(method, (chain && isDecoded) ? chain.meta : null)}
+        {renderMethod(method, isDecoded ? chain.meta : null)}
         <tr>
           <td className='label'>lifetime</td>
           <td className='data'>{renderMortality(era, blockNumber)}</td>

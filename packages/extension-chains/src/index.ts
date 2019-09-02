@@ -36,8 +36,6 @@ const UNKNOWN_CHAIN: Chain = {
   tokenSymbol: 'UNIT'
 };
 
-export { UNKNOWN_CHAIN };
-
-export default function findChain (genesisHash = ''): Chain | null {
-  return chains.get(genesisHash) || null;
+export default function findChain (genesisHash = ''): Chain {
+  return chains.get(genesisHash) || UNKNOWN_CHAIN;
 }

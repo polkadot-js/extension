@@ -21,16 +21,16 @@ export interface TransportRequestMessage<TMessageType extends MessageTypes> {
 }
 
 export interface PayloadTypes {
-  'authorize.tab': MessageAuthorize;
-  'authorize.approve': MessageAuthorizeApprove;
-  'authorize.reject': MessageAuthorizeReject;
-  'authorize.requests': MessageAuthorizeRequests;
-  'authorize.subscribe': MessageAuthorizeSubscribe;
   'accounts.create': MessageAccountCreate;
   'accounts.edit': MessageAccountEdit;
   'accounts.forget': MessageAccountForget;
   'accounts.list': MessageAccountList;
   'accounts.subscribe': MessageAccountSubscribe;
+  'authorize.tab': MessageAuthorize;
+  'authorize.approve': MessageAuthorizeApprove;
+  'authorize.reject': MessageAuthorizeReject;
+  'authorize.requests': MessageAuthorizeRequests;
+  'authorize.subscribe': MessageAuthorizeSubscribe;
   'extrinsic.sign': MessageExtrinsicSign;
   'seed.create': MessageSeedCreate;
   'seed.validate': MessageSeedValidate;
@@ -107,12 +107,13 @@ export interface MessageSeedValidate {
 
 // Responses
 
-interface NonNullResponseTypes {
+export interface ResponseTypes {
   'accounts.create': boolean;
   'accounts.edit': boolean;
   'accounts.forget': boolean;
   'accounts.list': InjectedAccount[];
   'accounts.subscribe': boolean;
+  'authorize.tab': null;
   'authorize.approve': boolean;
   'authorize.reject': boolean;
   'authorize.requests': AuthorizeRequest[];
@@ -125,10 +126,6 @@ interface NonNullResponseTypes {
   'signing.requests': SigningRequest[];
   'signing.subscribe': boolean;
 }
-
-export type ResponseTypes = {
-  [K in Exclude<MessageTypes, keyof NonNullResponseTypes>]: null;
-} & NonNullResponseTypes;
 
 export interface TransportResponseMessage<TMessage extends ResponseMessage> {
   error?: string;

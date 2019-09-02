@@ -9,7 +9,7 @@ import { Metadata } from '@polkadot/types';
 import alexander from './alexander';
 import kusama from './kusama';
 
-interface Chain {
+export interface Chain {
   meta?: Metadata;
   name: string;
   prefix: number;

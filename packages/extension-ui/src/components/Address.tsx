@@ -7,7 +7,7 @@ import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import findChain from '@polkadot/extension/chains';
+import findChain, { Chain } from '@polkadot/extension/chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 
@@ -24,6 +24,29 @@ interface Props {
   theme?: 'polkadot' | 'substrate';
 }
 
+// recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
+function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: string): [string, KeyringJson | null, Chain] {
+  // decode and create a shortcut for the encoded address
+  const addrU8a = decodeAddress(address);
+  const addrU8aStr = addrU8a.toString();
+
+  // find our account using the actual publicKey, and then find the associated chain
+  const account = accounts.find((account): boolean =>
+    decodeAddress(account.address).toString() === addrU8aStr
+  ) || null;
+  const chain = findChain((account && account.meta.genesisHash) || genesisHash || '') || {
+    name: 'Any',
+    prefix: 42
+  };
+
+  return [
+    // always allow the actual settings to override the display
+    encodeAddress(addrU8a, (settings.prefix === -1 ? chain.prefix : settings.prefix) as Prefix),
+    account,
+    chain
+  ];
+}
+
 function Address ({ address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<KeyringJson | null>(null);
@@ -34,16 +57,9 @@ function Address ({ address, children, className, genesisHash, name, theme = 'po
       return;
     }
 
-    const addrU8a = decodeAddress(address);
-    const addrU8aStr = addrU8a.toString();
-    const account = accounts.find((account): boolean =>
-      decodeAddress(account.address).toString() === addrU8aStr
-    ) || null;
-    const chain = findChain((account && account.meta.genesisHash) || genesisHash || '') || {
-      prefix: (settings.prefix === -1 ? 42 : settings.prefix)
-    };
+    const [formatted, account] = recodeAddress(address, accounts, genesisHash);
 
-    setFormatted(encodeAddress(addrU8a, chain.prefix as Prefix));
+    setFormatted(formatted);
     setAccount(account);
   }, [address]);
 

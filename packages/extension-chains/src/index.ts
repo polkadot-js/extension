@@ -7,12 +7,11 @@ import { Chain } from './types';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info [--ws <url>]`
-import devPolka051 from './dev/polkadot-051';
 import alexander from './alexander';
 import kusama from './kusama';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, devPolka051, kusama].map(
+  [alexander, kusama].map(
     ({ chain, genesisHash, metaCalls, ss58Format, tokenDecimals, tokenSymbol }): [string, Chain] => [
       genesisHash,
       {

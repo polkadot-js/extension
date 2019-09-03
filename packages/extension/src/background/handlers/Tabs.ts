@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes } from '../types';
+import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -65,7 +65,7 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle (id: string, type: keyof ResponseTypes, request: RequestTypes[typeof type], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type !== 'authorize.tab') {
       this.state.ensureUrlAuthorized(url);
     }

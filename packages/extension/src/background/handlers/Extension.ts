@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccountCreateExt, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccountCreateExt, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignSignature, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -168,6 +168,18 @@ export default class Extension {
     return true;
   }
 
+  private signingAddSignature ({ id, signature }: MessageExtrinsicSignSignature): boolean {
+    const queued = this.state.getSignRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { resolve } = queued;
+
+    resolve({ id, signature });
+
+    return true;
+  }
+
   private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
     const queued = this.state.getSignRequest(id);
 
@@ -240,6 +252,9 @@ export default class Extension {
 
       case 'signing.approve':
         return this.signingApprove(request);
+
+      case 'signing.signature':
+        return this.signingAddSignature(request);
 
       case 'signing.cancel':
         return this.signingCancel(request);

@@ -21,16 +21,15 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
 
-  const toggleEdit = (): void =>
-    setEditing(!isEditing);
-  const saveChanges = (): void => {
+  const _toggleEdit = (): void => setEditing(!isEditing);
+  const _saveChanges = (): void => {
     if (editedName && editedName !== name) {
       editAccount(address, editedName)
         .then((): void => onAction())
         .catch((error: Error) => console.error(error));
     }
 
-    toggleEdit();
+    _toggleEdit();
   };
 
   return (
@@ -44,12 +43,12 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
           className='edit-name'
           isFocussed
           label={null}
-          onBlur={saveChanges}
+          onBlur={_saveChanges}
           onChange={setName}
         />
       )}
       <ActionBar>
-        <Link onClick={toggleEdit}>Edit</Link>
+        <Link onClick={_toggleEdit}>Edit</Link>
         <Link to={`/account/forget/${address}`}>Forget</Link>
       </ActionBar>
     </Address>

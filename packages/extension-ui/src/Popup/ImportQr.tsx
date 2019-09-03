@@ -17,7 +17,7 @@ export default function ImportQr (): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
 
   // FIXME Duplicated between here and Create.tsx
-  const onCreate = (): void => {
+  const _onCreate = (): void => {
     if (account && name) {
       createAccountExt(name, account.address, account.genesisHash)
         .then((): void => onAction('/'))
@@ -43,7 +43,7 @@ export default function ImportQr (): React.ReactElement<Props> {
             {name && (
               <Button
                 label='Add the account with identified address'
-                onClick={onCreate}
+                onClick={_onCreate}
               />
             )}
           </Address>

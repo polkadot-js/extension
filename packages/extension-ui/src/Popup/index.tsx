@@ -51,7 +51,7 @@ export default function Popup (): React.ReactElement<{}> {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
 
-  const onAction = (to?: string): void => {
+  const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
     if (to) {
@@ -66,7 +66,7 @@ export default function Popup (): React.ReactElement<{}> {
       subscribeAuthorize(setAuthRequests),
       subscribeSigning(setSignRequests)
     ]).catch((error: Error) => console.error(error));
-    onAction();
+    _onAction();
   }, []);
 
   const Root = isWelcomeDone
@@ -79,7 +79,7 @@ export default function Popup (): React.ReactElement<{}> {
 
   return (
     <Loading>{accounts && authRequests && signRequests && (
-      <ActionContext.Provider value={onAction}>
+      <ActionContext.Provider value={_onAction}>
         <AccountContext.Provider value={accounts}>
           <AuthorizeContext.Provider value={authRequests}>
             <MediaContext.Provider value={mediaAllowed}>

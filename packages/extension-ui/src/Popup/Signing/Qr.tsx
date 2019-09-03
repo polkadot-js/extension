@@ -18,14 +18,15 @@ interface Props {
   request: SignerPayload;
 }
 
-const CMD_EXTRINSIC = 2;
+const CMD_MORTAL = 2;
 
 export default function Qr ({ children, className, onSignature, payload, request }: Props): React.ReactElement<Props> {
   const [showScan, setShowScan] = useState(false);
   const [data, setData] = useState(new Uint8Array());
-  const onShowQr = (): void => setShowScan(true);
 
   useEffect((): void => setData(payload.toU8a()), [payload]);
+
+  const _onShowQr = (): void => setShowScan(true);
 
   return (
     <Box className={className}>
@@ -34,14 +35,14 @@ export default function Qr ({ children, className, onSignature, payload, request
         ? <QrScanSignature onScan={onSignature} />
         : <QrDisplayPayload
           address={request.address}
-          cmd={CMD_EXTRINSIC}
+          cmd={CMD_MORTAL}
           payload={data}
         />
       }
       {!showScan && (
         <Button
           label='Scan signature via camera'
-          onClick={onShowQr}
+          onClick={_onShowQr}
         />
       )}
     </Box>

@@ -2,9 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Button, Address, Link } from '../../components';
@@ -21,25 +22,34 @@ interface Props {
   url: string;
 }
 
-export default function Request ({ isExternal, isFirst, request, signId, url }: Props): React.ReactElement<Props> {
+export default function Request ({ isExternal, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
+  const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
   const [showQr, setShowQr] = useState(false);
-  const payload = createType('ExtrinsicPayload', request, { version: request.version });
-  const onCancel = (): Promise<void> =>
+
+  useEffect((): void => {
+    setPayload(createType('ExtrinsicPayload', request, { version: request.version }));
+  }, [request]);
+
+  if (!payload) {
+    return null;
+  }
+
+  const _onShowQr = (): void => setShowQr(true);
+  const _onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  const onSign = (password: string): Promise<void> =>
+  const _onSign = (password: string): Promise<void> =>
     approveSignRequest(signId, password)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  const onShowQr = (): void => setShowQr(true);
-  const onSignature = ({ signature }: { signature: string }): void => {
+  const _onSignature = ({ signature }: { signature: string }): void => {
     console.error(signature);
   };
   const action = (
     <ActionBar>
-      <Link isDanger onClick={onCancel}>Cancel</Link>
+      <Link isDanger onClick={_onCancel}>Cancel</Link>
     </ActionBar>
   );
 
@@ -48,7 +58,7 @@ export default function Request ({ isExternal, isFirst, request, signId, url }: 
       ? <Qr
         payload={payload}
         request={request}
-        onSignature={onSignature}
+        onSignature={_onSignature}
       >
         {action}
       </Qr>
@@ -64,9 +74,9 @@ export default function Request ({ isExternal, isFirst, request, signId, url }: 
           isExternal
             ? <Button
               label='Display QR to external signer'
-              onClick={onShowQr}
+              onClick={_onShowQr}
             />
-            : <Unlock onSign={onSign} />
+            : <Unlock onSign={_onSign} />
         )}
       </Address>
   );

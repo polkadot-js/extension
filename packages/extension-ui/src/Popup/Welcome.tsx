@@ -10,7 +10,8 @@ type Props = {};
 
 export default function Welcome (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const onClick = (): void => {
+
+  const _onClick = (): void => {
     window.localStorage.setItem('welcome_read', 'ok');
     onAction();
   };
@@ -28,7 +29,7 @@ export default function Welcome (): React.ReactElement<Props> {
         ... we are not in the information collection business (even anonymized).
         <Button
           label='Understood, let me continue'
-          onClick={onClick}
+          onClick={_onClick}
         />
       </Box>
     </div>

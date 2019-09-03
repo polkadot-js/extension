@@ -16,13 +16,13 @@ export default function Import (): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const onChangeSeed = (suri: string): Promise<void> =>
+  const _onChangeSeed = (suri: string): Promise<void> =>
     validateSeed(suri)
       .then(setAccount)
       .catch((): void => setAccount(null));
 
   // FIXME Duplicated between here and Create.tsx
-  const onCreate = (): void => {
+  const _onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
       createAccountInt(name, password, account.suri)
@@ -39,7 +39,7 @@ export default function Import (): React.ReactElement<Props> {
         isError={!account}
         isFocussed
         label='existing 12 or 24-word mnemonic seed'
-        onChange={onChangeSeed}
+        onChange={_onChangeSeed}
       />
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}
@@ -50,7 +50,7 @@ export default function Import (): React.ReactElement<Props> {
         >
           <Button
             label='Add the account with the supplied seed'
-            onClick={onCreate}
+            onClick={_onCreate}
           />
         </Address>
       )}

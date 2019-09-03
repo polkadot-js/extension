@@ -196,54 +196,56 @@ export default class Extension {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public handle (id: string, type: keyof ResponseTypes, request: RequestTypes[typeof type], port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
-    switch (type) {
-      case 'authorize.approve':
-        return Promise.resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
+    return new Promise((resolve, reject): void => {
+      switch (type) {
+        case 'authorize.approve':
+          return resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
 
-      case 'authorize.reject':
-        return Promise.resolve(this.authorizeReject(request as RequestAuthorizeApprove));
+        case 'authorize.reject':
+          return resolve(this.authorizeReject(request as RequestAuthorizeApprove));
 
-      case 'authorize.requests':
-        return Promise.resolve(this.authorizeRequests());
+        case 'authorize.requests':
+          return resolve(this.authorizeRequests());
 
-      case 'authorize.subscribe':
-        return Promise.resolve(this.authorizeSubscribe(id, port));
+        case 'authorize.subscribe':
+          return resolve(this.authorizeSubscribe(id, port));
 
-      case 'accounts.create':
-        return Promise.resolve(this.accountsCreate(request as RequestAccountCreate));
+        case 'accounts.create':
+          return resolve(this.accountsCreate(request as RequestAccountCreate));
 
-      case 'accounts.forget':
-        return Promise.resolve(this.accountsForget(request as RequestAccountForget));
+        case 'accounts.forget':
+          return resolve(this.accountsForget(request as RequestAccountForget));
 
-      case 'accounts.edit':
-        return Promise.resolve(this.accountsEdit(request as RequestAccountEdit));
+        case 'accounts.edit':
+          return resolve(this.accountsEdit(request as RequestAccountEdit));
 
-      case 'accounts.list':
-        return Promise.resolve(this.accountsList());
+        case 'accounts.list':
+          return resolve(this.accountsList());
 
-      case 'accounts.subscribe':
-        return Promise.resolve(this.accountsSubscribe(id, port));
+        case 'accounts.subscribe':
+          return resolve(this.accountsSubscribe(id, port));
 
-      case 'seed.create':
-        return Promise.resolve(this.seedCreate(request as RequestSeedCreate));
+        case 'seed.create':
+          return resolve(this.seedCreate(request as RequestSeedCreate));
 
-      case 'seed.validate':
-        return Promise.resolve(this.seedValidate(request as RequestSeedValidate));
+        case 'seed.validate':
+          return resolve(this.seedValidate(request as RequestSeedValidate));
 
-      case 'signing.approve':
-        return Promise.resolve(this.signingApprove(request as RequestSigningApprove));
+        case 'signing.approve':
+          return resolve(this.signingApprove(request as RequestSigningApprove));
 
-      case 'signing.cancel':
-        return Promise.resolve(this.signingCancel(request as RequestSigningCancel));
+        case 'signing.cancel':
+          return resolve(this.signingCancel(request as RequestSigningCancel));
 
-      case 'signing.requests':
-        return Promise.resolve(this.signingRequests());
+        case 'signing.requests':
+          return resolve(this.signingRequests());
 
-      case 'signing.subscribe':
-        return Promise.resolve(this.signingSubscribe(id, port));
+        case 'signing.subscribe':
+          return resolve(this.signingSubscribe(id, port));
 
-      default:
-        throw new Error(`Unable to handle message of type ${type}`);
-    }
+        default:
+          return reject(new Error(`Unable to handle message of type ${type}`));
+      }
+    });
   }
 }

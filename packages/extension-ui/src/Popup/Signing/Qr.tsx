@@ -6,9 +6,10 @@ import { SignerPayload } from '@polkadot/api/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
-import { Button, Box } from '../../components';
+import { Button } from '../../components';
 
 interface Props {
   children?: React.ReactNode;
@@ -20,7 +21,7 @@ interface Props {
 
 const CMD_MORTAL = 2;
 
-export default function Qr ({ children, className, onSignature, payload, request }: Props): React.ReactElement<Props> {
+function Qr ({ className, onSignature, payload, request }: Props): React.ReactElement<Props> {
   const [showScan, setShowScan] = useState(false);
   const [payloadU8a, setPayloadU8a] = useState(new Uint8Array());
 
@@ -29,8 +30,7 @@ export default function Qr ({ children, className, onSignature, payload, request
   const _onShowQr = (): void => setShowScan(true);
 
   return (
-    <Box className={className}>
-      {children}
+    <div className={className}>
       {showScan
         ? <QrScanSignature onScan={onSignature} />
         : <QrDisplayPayload
@@ -45,6 +45,10 @@ export default function Qr ({ children, className, onSignature, payload, request
           onClick={_onShowQr}
         />
       )}
-    </Box>
+    </div>
   );
 }
+
+export default styled(Qr)`
+  padding: 0.75rem 1.5rem 0 1.5rem;
+`;

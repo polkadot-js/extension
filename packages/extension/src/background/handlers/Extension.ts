@@ -139,7 +139,7 @@ export default class Extension {
     };
   }
 
-  private signingApprove ({ id, password }: MessageExtrinsicSignApprove): boolean {
+  private signingApprovePassword ({ id, password }: MessageExtrinsicSignApprove): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -168,7 +168,7 @@ export default class Extension {
     return true;
   }
 
-  private signingAddSignature ({ id, signature }: MessageExtrinsicSignSignature): boolean {
+  private signingApproveSignature ({ id, signature }: MessageExtrinsicSignSignature): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -250,11 +250,11 @@ export default class Extension {
       case 'seed.validate':
         return this.seedValidate(request);
 
-      case 'signing.approve':
-        return this.signingApprove(request);
+      case 'signing.approve.password':
+        return this.signingApprovePassword(request);
 
-      case 'signing.signature':
-        return this.signingAddSignature(request);
+      case 'signing.approve.signature':
+        return this.signingApproveSignature(request);
 
       case 'signing.cancel':
         return this.signingCancel(request);

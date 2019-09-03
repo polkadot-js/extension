@@ -8,8 +8,8 @@ import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
 import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
 
-import { ActionBar, ActionContext, Button, Address, Link } from '../../components';
-import { approveSignRequest, cancelSignRequest } from '../../messaging';
+import { ActionBar, ActionContext, Address, Link } from '../../components';
+import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Qr from './Qr';
 import Unlock from './Unlock';
@@ -25,7 +25,6 @@ interface Props {
 export default function Request ({ isExternal, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
-  const [showQr, setShowQr] = useState(false);
 
   useEffect((): void => {
     setPayload(createType('ExtrinsicPayload', request, { version: request.version }));
@@ -35,18 +34,18 @@ export default function Request ({ isExternal, isFirst, request, signId, url }: 
     return null;
   }
 
-  const _onShowQr = (): void => setShowQr(true);
   const _onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
   const _onSign = (password: string): Promise<void> =>
-    approveSignRequest(signId, password)
+    approveSignPassword(signId, password)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  const _onSignature = ({ signature }: { signature: string }): void => {
-    console.error(signature);
-  };
+  const _onSignature = ({ signature }: { signature: string }): Promise<void> =>
+    approveSignSignature(signId, signature)
+      .then((): void => onAction())
+      .catch((error: Error) => console.error(error));
   const action = (
     <ActionBar>
       <Link isDanger onClick={_onCancel}>Cancel</Link>
@@ -54,30 +53,22 @@ export default function Request ({ isExternal, isFirst, request, signId, url }: 
   );
 
   return (
-    showQr
-      ? <Qr
-        payload={payload}
-        request={request}
-        onSignature={_onSignature}
-      >
-        {action}
-      </Qr>
-      : <Address address={request.address}>
-        <Details
+    <Address address={request.address}>
+      {isExternal && isFirst
+        ? <Qr
+          payload={payload}
+          request={request}
+          onSignature={_onSignature}
+        />
+        : <Details
           isDecoded={isFirst}
           payload={payload}
           request={request}
           url={url}
         />
-        {action}
-        {isFirst && (
-          isExternal
-            ? <Button
-              label='Display QR to external signer'
-              onClick={_onShowQr}
-            />
-            : <Unlock onSign={_onSign} />
-        )}
-      </Address>
+      }
+      {isFirst && !isExternal && <Unlock onSign={_onSign} />}
+      {action}
+    </Address>
   );
 }

@@ -5,7 +5,7 @@
 import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.signature' | 'signing.subscribe';
+export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve.password' | 'signing.approve.signature' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
 
 export interface AccountJson {
   address: string;

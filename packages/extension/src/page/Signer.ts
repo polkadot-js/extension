@@ -20,6 +20,8 @@ export default class Signer implements SignerInterface {
     const id = ++nextId;
     const result = await sendRequest('extrinsic.sign', payload);
 
+    console.error('result', result);
+
     // we add an internal id (number) - should have a mapping from the
     // extension id (string) -> internal id (number) if we wish to provide
     // updated via the update functionality (noop at this point)

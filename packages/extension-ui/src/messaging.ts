@@ -88,8 +88,12 @@ export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('signing.cancel', { id });
 }
 
-export async function approveSignRequest (id: string, password: string): Promise<boolean> {
-  return sendMessage('signing.approve', { id, password });
+export async function approveSignPassword (id: string, password: string): Promise<boolean> {
+  return sendMessage('signing.approve.password', { id, password });
+}
+
+export async function approveSignSignature (id: string, signature: string): Promise<boolean> {
+  return sendMessage('signing.approve.signature', { id, signature });
 }
 
 export async function createAccountExt (name: string, address: string, genesisHash: string): Promise<boolean> {

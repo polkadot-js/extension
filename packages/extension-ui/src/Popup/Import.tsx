@@ -2,19 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { OnActionFromCtx } from '../components/types';
+import React, { useContext, useState } from 'react';
 
-import React, { useState } from 'react';
-
-import { Address, Button, Header, TextArea, withOnAction } from '../components';
+import { ActionContext, Address, Button, Header, TextArea } from '../components';
 import { createAccount, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-interface Props {
-  onAction: OnActionFromCtx;
-}
-
-function Import ({ onAction }: Props): React.ReactElement<Props> {
+export default function Import (): React.ReactElement<{}> {
+  const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -30,7 +25,7 @@ function Import ({ onAction }: Props): React.ReactElement<Props> {
     if (name && password && account) {
       createAccount(name, password, account.suri)
         .then((): void => onAction('/'))
-        .catch(console.error);
+        .catch((error: Error) => console.error(error));
     }
   };
 
@@ -60,5 +55,3 @@ function Import ({ onAction }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withOnAction(Import);

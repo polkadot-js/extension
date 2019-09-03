@@ -195,52 +195,52 @@ export default class Extension {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async handle (id: string, type: keyof ResponseTypes, request: RequestTypes[typeof type], port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
+  public handle (id: string, type: keyof ResponseTypes, request: RequestTypes[typeof type], port: chrome.runtime.Port): Promise<ResponseTypes[typeof type]> {
     switch (type) {
       case 'authorize.approve':
-        return this.authorizeApprove(request as RequestAuthorizeApprove);
+        return Promise.resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
 
       case 'authorize.reject':
-        return this.authorizeReject(request as RequestAuthorizeApprove);
+        return Promise.resolve(this.authorizeReject(request as RequestAuthorizeApprove));
 
       case 'authorize.requests':
-        return this.authorizeRequests();
+        return Promise.resolve(this.authorizeRequests());
 
       case 'authorize.subscribe':
-        return this.authorizeSubscribe(id, port);
+        return Promise.resolve(this.authorizeSubscribe(id, port));
 
       case 'accounts.create':
-        return this.accountsCreate(request as RequestAccountCreate);
+        return Promise.resolve(this.accountsCreate(request as RequestAccountCreate));
 
       case 'accounts.forget':
-        return this.accountsForget(request as RequestAccountForget);
+        return Promise.resolve(this.accountsForget(request as RequestAccountForget));
 
       case 'accounts.edit':
-        return this.accountsEdit(request as RequestAccountEdit);
+        return Promise.resolve(this.accountsEdit(request as RequestAccountEdit));
 
       case 'accounts.list':
-        return this.accountsList();
+        return Promise.resolve(this.accountsList());
 
       case 'accounts.subscribe':
-        return this.accountsSubscribe(id, port);
+        return Promise.resolve(this.accountsSubscribe(id, port));
 
       case 'seed.create':
-        return this.seedCreate(request as RequestSeedCreate);
+        return Promise.resolve(this.seedCreate(request as RequestSeedCreate));
 
       case 'seed.validate':
-        return this.seedValidate(request as RequestSeedValidate);
+        return Promise.resolve(this.seedValidate(request as RequestSeedValidate));
 
       case 'signing.approve':
-        return this.signingApprove(request as RequestSigningApprove);
+        return Promise.resolve(this.signingApprove(request as RequestSigningApprove));
 
       case 'signing.cancel':
-        return this.signingCancel(request as RequestSigningCancel);
+        return Promise.resolve(this.signingCancel(request as RequestSigningCancel));
 
       case 'signing.requests':
-        return this.signingRequests();
+        return Promise.resolve(this.signingRequests());
 
       case 'signing.subscribe':
-        return this.signingSubscribe(id, port);
+        return Promise.resolve(this.signingSubscribe(id, port));
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

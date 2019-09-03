@@ -2,19 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { OnActionFromCtx } from '../components/types';
+import React, { useContext, useEffect, useState } from 'react';
 
-import React, { useState, useEffect } from 'react';
-
-import { Address, Button, Header, Loading, TextArea, withOnAction } from '../components';
+import { ActionContext, Address, Button, Header, Loading, TextArea } from '../components';
 import { createAccount, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-interface Props {
-  onAction: OnActionFromCtx;
-}
-
-function Create ({ onAction }: Props): React.ReactElement<Props> {
+export default function Create (): React.ReactElement<{}> {
+  const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -22,7 +17,7 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
   useEffect((): void => {
     createSeed()
       .then(setAccount)
-      .catch(console.error);
+      .catch((error: Error) => console.error(error));
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
@@ -31,7 +26,7 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
     if (name && password && account) {
       createAccount(name, password, account.seed)
         .then((): void => onAction('/'))
-        .catch(console.error);
+        .catch((error: Error) => console.error(error));
     }
   };
 
@@ -67,5 +62,3 @@ function Create ({ onAction }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withOnAction(Create);

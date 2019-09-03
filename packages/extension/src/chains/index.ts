@@ -5,25 +5,36 @@
 import { Metadata } from '@polkadot/types';
 
 // imports chain details, generally metadata. For the generation of these,
-// curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "state_getMetadata", "params":[]}' http://localhost:9933
+// inside the api, run `yarn chain:info [--ws <url>]`
 import alexander from './alexander';
+import devPolka051 from './dev-polkadot-051';
 import kusama from './kusama';
 
 interface Chain {
-  meta?: Metadata;
   name: string;
+  genesisHash: string;
+  meta?: Metadata;
+  ss58Format: number;
+  tokenDecimals: number;
+  tokenSymbol: string;
 }
 
-const chains: Record<string, Chain> = {
-  '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b': {
-    name: 'Alexander',
-    meta: new Metadata(alexander.meta)
-  },
-  '0x3fd7b9eb6a00376e5be61f01abb429ffb0b104be05eaff4d458da48fcd425baf': {
-    name: 'Kusama CC1',
-    meta: new Metadata(kusama.meta)
-  }
-};
+type Chains = Record<string, Chain>;
+
+const chains: Chains = [alexander, devPolka051, kusama].reduce((chains: Chains, { chain, genesisHash, metaCalls, ss58Format, tokenDecimals, tokenSymbol }): Chains => {
+  chains[genesisHash] = {
+    genesisHash,
+    meta: metaCalls
+      ? new Metadata(Buffer.from(metaCalls, 'base64'))
+      : undefined,
+    name: chain,
+    ss58Format,
+    tokenDecimals,
+    tokenSymbol
+  };
+
+  return chains;
+}, {});
 
 export default function findChain (genesisHash: string): Chain | null {
   return chains[genesisHash] || null;

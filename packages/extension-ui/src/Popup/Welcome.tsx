@@ -2,17 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { OnActionFromCtx } from '../components/types';
+import React, { useContext } from 'react';
 
-import React from 'react';
+import { ActionContext, Box, Button, Header } from '../components';
 
-import { Box, Button, Header, withOnAction } from '../components';
-
-interface Props {
-  onAction: OnActionFromCtx;
-}
-
-function Welcome ({ onAction }: Props): React.ReactElement<Props> {
+export default function Welcome (): React.ReactElement<{}> {
+  const onAction = useContext(ActionContext);
   const onClick = (): void => {
     window.localStorage.setItem('welcome_read', 'ok');
     onAction();
@@ -37,5 +32,3 @@ function Welcome ({ onAction }: Props): React.ReactElement<Props> {
     </div>
   );
 }
-
-export default withOnAction(Welcome);

@@ -58,7 +58,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
             if (ext && !ext.accounts.subscribe) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => any): Unsubcall => {
-                ext.accounts.get().then(cb).catch(console.error);
+                ext.accounts.get().then(cb).catch((error: Error) => console.error(error));
 
                 return (): void => {
                   // no ubsubscribe needed, this is a single-shot

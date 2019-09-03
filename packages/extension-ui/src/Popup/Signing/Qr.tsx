@@ -22,9 +22,9 @@ const CMD_MORTAL = 2;
 
 export default function Qr ({ children, className, onSignature, payload, request }: Props): React.ReactElement<Props> {
   const [showScan, setShowScan] = useState(false);
-  const [data, setData] = useState(new Uint8Array());
+  const [payloadU8a, setPayloadU8a] = useState(new Uint8Array());
 
-  useEffect((): void => setData(payload.toU8a()), [payload]);
+  useEffect((): void => setPayloadU8a(payload.toU8a()), [payload]);
 
   const _onShowQr = (): void => setShowScan(true);
 
@@ -36,7 +36,7 @@ export default function Qr ({ children, className, onSignature, payload, request
         : <QrDisplayPayload
           address={request.address}
           cmd={CMD_MORTAL}
-          payload={data}
+          payload={payloadU8a}
         />
       }
       {!showScan && (

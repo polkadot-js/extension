@@ -46,11 +46,6 @@ export default function Request ({ isExternal, isFirst, request, signId, url }: 
     approveSignSignature(signId, signature)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  const action = (
-    <ActionBar>
-      <Link isDanger onClick={_onCancel}>Cancel</Link>
-    </ActionBar>
-  );
 
   return (
     <Address address={request.address}>
@@ -68,7 +63,9 @@ export default function Request ({ isExternal, isFirst, request, signId, url }: 
         />
       }
       {isFirst && !isExternal && <Unlock onSign={_onSign} />}
-      {action}
+      <ActionBar>
+        <Link isDanger onClick={_onCancel}>Cancel</Link>
+      </ActionBar>
     </Address>
   );
 }

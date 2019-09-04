@@ -8,7 +8,6 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
-import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,69 +59,69 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 }
 
 export async function editAccount (address: string, name: string): Promise<boolean> {
-  return sendMessage('accounts.edit', { address, name });
+  return sendMessage('pri(accounts.edit)', { address, name });
 }
 
 export async function forgetAccount (address: string): Promise<boolean> {
-  return sendMessage('accounts.forget', { address });
+  return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function getAccounts (): Promise<InjectedAccount[]> {
-  return sendMessage('accounts.list');
+export async function getAccounts (): Promise<KeyringJson[]> {
+  return sendMessage('pri(accounts.list)');
 }
 
 export async function getAuthRequests (): Promise<AuthorizeRequest[]> {
-  return sendMessage('authorize.requests');
+  return sendMessage('pri(authorize.requests)');
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {
-  return sendMessage('authorize.reject', { id });
+  return sendMessage('pri(authorize.reject)', { id });
 }
 
 export async function approveAuthRequest (id: string): Promise<boolean> {
-  return sendMessage('authorize.approve', { id });
+  return sendMessage('pri(authorize.approve)', { id });
 }
 
 export async function getSignRequests (): Promise<SigningRequest[]> {
-  return sendMessage('signing.requests');
+  return sendMessage('pri(signing.requests)');
 }
 
 export async function cancelSignRequest (id: string): Promise<boolean> {
-  return sendMessage('signing.cancel', { id });
+  return sendMessage('pri(signing.cancel)', { id });
 }
 
 export async function approveSignPassword (id: string, password: string): Promise<boolean> {
-  return sendMessage('signing.approve.password', { id, password });
+  return sendMessage('pri(signing.approve.password)', { id, password });
 }
 
 export async function approveSignSignature (id: string, signature: string): Promise<boolean> {
-  return sendMessage('signing.approve.signature', { id, signature });
+  return sendMessage('pri(signing.approve.signature)', { id, signature });
 }
 
 export async function createAccountExternal (name: string, address: string, genesisHash: string): Promise<boolean> {
-  return sendMessage('accounts.create.external', { address, genesisHash, name });
+  return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
 }
 
 export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {
-  return sendMessage('accounts.create.suri', { name, password, suri, type });
+  return sendMessage('pri(accounts.create.suri)', { name, password, suri, type });
 }
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
-  return sendMessage('seed.create', { length, type });
+  return sendMessage('pri(seed.create)', { length, type });
 }
 
 export async function subscribeAccounts (cb: (accounts: KeyringJson[]) => void): Promise<boolean> {
-  return sendMessage('accounts.subscribe', null, cb);
+  return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 
 export async function subscribeAuthorize (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('authorize.subscribe', null, cb);
+  return sendMessage('pri(authorize.subscribe)', null, cb);
 }
 
 export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('signing.subscribe', null, cb);
+  return sendMessage('pri(signing.subscribe)', null, cb);
 }
 
 export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {
-  return sendMessage('seed.validate', { suri, type });
+  return sendMessage('pri(seed.validate)', { suri, type });
 }

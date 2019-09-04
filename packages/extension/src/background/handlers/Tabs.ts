@@ -66,21 +66,21 @@ export default class Tabs {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
-    if (type !== 'authorize.tab') {
+    if (type !== 'pub(authorize.tab)') {
       this.state.ensureUrlAuthorized(url);
     }
 
     switch (type) {
-      case 'authorize.tab':
+      case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 
-      case 'accounts.list':
+      case 'pub(accounts.list)':
         return this.accountsList(url);
 
-      case 'accounts.subscribe':
+      case 'pub(accounts.subscribe)':
         return this.accountsSubscribe(url, id, port);
 
-      case 'extrinsic.sign':
+      case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as RequestExtrinsicSign);
 
       default:

@@ -38,25 +38,29 @@ export interface AccountJson {
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures {
-  'accounts.create.external': [RequestAccountCreateExternal, boolean];
-  'accounts.create.suri': [RequestAccountCreateSuri, boolean];
-  'accounts.edit': [RequestAccountEdit, boolean];
-  'accounts.forget': [RequestAccountForget, boolean];
-  'accounts.list': [RequestAccountList, InjectedAccount[]];
-  'accounts.subscribe': [RequestAccountSubscribe, boolean, KeyringJson[]];
-  'authorize.tab': [RequestAuthorizeTab, null];
-  'authorize.approve': [RequestAuthorizeApprove, boolean];
-  'authorize.reject': [RequestAuthorizeReject, boolean];
-  'authorize.requests': [RequestAuthorizeRequests, AuthorizeRequest[]];
-  'authorize.subscribe': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
-  'extrinsic.sign': [RequestExtrinsicSign, ResponseExtrinsicSign];
-  'seed.create': [RequestSeedCreate, ResponseSeedCreate];
-  'seed.validate': [RequestSeedValidate, ResponseSeedValidate];
-  'signing.approve.password': [RequestSigningApprovePassword, boolean];
-  'signing.approve.signature': [RequestSigningApproveSignature, boolean];
-  'signing.cancel': [RequestSigningCancel, boolean];
-  'signing.requests': [RequestSigningRequests, SigningRequest[]];
-  'signing.subscribe': [RequestSigningSubscribe, boolean, SigningRequest[]];
+  // private/internal requests, i.e. from a popup
+  'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
+  'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
+  'pri(accounts.edit)': [RequestAccountEdit, boolean];
+  'pri(accounts.forget)': [RequestAccountForget, boolean];
+  'pri(accounts.list)': [RequestAccountList, KeyringJson[]];
+  'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, KeyringJson[]];
+  'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
+  'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
+  'pri(authorize.requests)': [RequestAuthorizeRequests, AuthorizeRequest[]];
+  'pri(authorize.subscribe)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
+  'pri(seed.validate)': [RequestSeedValidate, ResponseSeedValidate];
+  'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];
+  'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
+  'pri(signing.cancel)': [RequestSigningCancel, boolean];
+  'pri(signing.requests)': [RequestSigningRequests, SigningRequest[]];
+  'pri(signing.subscribe)': [RequestSigningSubscribe, boolean, SigningRequest[]];
+  // public/external requests, i.e. from a page
+  'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
+  'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+  'pub(authorize.tab)': [RequestAuthorizeTab, null];
+  'pub(extrinsic.sign)': [RequestExtrinsicSign, ResponseExtrinsicSign];
 }
 
 export type MessageTypes = keyof RequestSignatures;

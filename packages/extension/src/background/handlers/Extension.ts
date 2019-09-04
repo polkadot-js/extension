@@ -215,55 +215,55 @@ export default class Extension {
   public handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     return new Promise((resolve, reject): void => {
       switch (type) {
-        case 'authorize.approve':
+        case 'pri(authorize.approve)':
           return resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
 
-        case 'authorize.reject':
+        case 'pri(authorize.reject)':
           return resolve(this.authorizeReject(request as RequestAuthorizeApprove));
 
-        case 'authorize.requests':
+        case 'pri(authorize.requests)':
           return resolve(this.authorizeRequests());
 
-        case 'authorize.subscribe':
+        case 'pri(authorize.subscribe)':
           return resolve(this.authorizeSubscribe(id, port));
 
-        case 'accounts.create.external':
+        case 'pri(accounts.create.external)':
           return resolve(this.accountsCreateExternal(request as RequestAccountCreateExternal));
 
-        case 'accounts.create.suri':
+        case 'pri(accounts.create.suri)':
           return resolve(this.accountsCreateSuri(request as RequestAccountCreateSuri));
 
-        case 'accounts.forget':
+        case 'pri(accounts.forget)':
           return resolve(this.accountsForget(request as RequestAccountForget));
 
-        case 'accounts.edit':
+        case 'pri(accounts.edit)':
           return resolve(this.accountsEdit(request as RequestAccountEdit));
 
-        case 'accounts.list':
+        case 'pri(accounts.list)':
           return resolve(this.accountsList());
 
-        case 'accounts.subscribe':
+        case 'pri(accounts.subscribe)':
           return resolve(this.accountsSubscribe(id, port));
 
-        case 'seed.create':
+        case 'pri(seed.create)':
           return resolve(this.seedCreate(request as RequestSeedCreate));
 
-        case 'seed.validate':
+        case 'pri(seed.validate)':
           return resolve(this.seedValidate(request as RequestSeedValidate));
 
-        case 'signing.approve.password':
+        case 'pri(signing.approve.password)':
           return resolve(this.signingApprovePassword(request as RequestSigningApprovePassword));
 
-        case 'signing.approve.signature':
+        case 'pri(signing.approve.signature)':
           return resolve(this.signingApproveSignature(request as RequestSigningApproveSignature));
 
-        case 'signing.cancel':
+        case 'pri(signing.cancel)':
           return resolve(this.signingCancel(request as RequestSigningCancel));
 
-        case 'signing.requests':
+        case 'pri(signing.requests)':
           return resolve(this.signingRequests());
 
-        case 'signing.subscribe':
+        case 'pri(signing.subscribe)':
           return resolve(this.signingSubscribe(id, port));
 
         default:

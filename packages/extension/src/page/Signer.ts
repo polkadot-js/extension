@@ -19,7 +19,7 @@ export default class Signer implements SignerInterface {
 
   public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
     const id = ++nextId;
-    const result = await sendRequest('extrinsic.sign', payload);
+    const result = await sendRequest('pub(extrinsic.sign)', payload);
 
     console.error('result', result);
 

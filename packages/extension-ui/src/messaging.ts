@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -46,6 +46,9 @@ port.onMessage.addListener((data): void => {
   }
 });
 
+function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends Exclude<MessageTypes, MessageTypesWithNoSubscriptions>>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;

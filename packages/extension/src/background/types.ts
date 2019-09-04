@@ -7,6 +7,13 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 
+type KeysWithDefinedValues<T> = {
+  [P in keyof T]: undefined extends T[P] ? P : never
+}[keyof T];
+
+type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
+type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
+
 export type SeedLengths = 12 | 24;
 
 export type AuthorizeRequest = [string, RequestAuthorizeTab, string];
@@ -41,8 +48,6 @@ export type RequestTypes = {
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][0]
 };
 
-type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
-type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
 export type MessageTypesWithNullRequest = NullKeys<RequestTypes>
 
 export interface TransportRequestMessage<TMessageType extends MessageTypes> {
@@ -146,3 +151,5 @@ export interface ResponseSeedValidate {
 export type SubscriptionMessageTypes = {
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][2]
 };
+
+export type MessageTypesWithNoSubscriptions = KeysWithDefinedValues<SubscriptionMessageTypes>;

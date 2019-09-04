@@ -5,7 +5,7 @@
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
-import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes } from '../background/types';
+import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions } from '../background/types';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
@@ -30,7 +30,8 @@ let idCounter = 0;
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypes>(message: TMessageType, request: RequestTypes[TMessageType], subscriber?: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends Exclude<MessageTypes, MessageTypesWithNoSubscriptions>> (message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;

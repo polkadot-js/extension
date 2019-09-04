@@ -5,7 +5,7 @@
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
-import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions } from '../background/types';
+import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
@@ -31,8 +31,9 @@ let idCounter = 0;
 // resolve once the event is resolved (by the response listener just below this)
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends Exclude<MessageTypes, MessageTypesWithNoSubscriptions>> (message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]> {
+function sendMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
@@ -56,7 +57,8 @@ async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType>): void {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & {subscription?: any}): void {
   const handler = handlers[data.id];
 
   if (!handler) {

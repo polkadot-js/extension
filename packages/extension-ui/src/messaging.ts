@@ -2,8 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions } from '@polkadot/extension/background/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
+import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '@polkadot/extension/background/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
@@ -48,8 +47,9 @@ port.onMessage.addListener((data): void => {
 
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends Exclude<MessageTypes, MessageTypesWithNoSubscriptions>>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]> {
+function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
@@ -103,7 +103,7 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('seed.create', { length, type });
 }
 
-export async function subscribeAccounts (cb: (accounts: KeyringJson[]) => void): Promise<boolean> {
+export async function subscribeAccounts (cb: (accounts: InjectedAccount[]) => void): Promise<boolean> {
   return sendMessage('accounts.subscribe', null, cb);
 }
 

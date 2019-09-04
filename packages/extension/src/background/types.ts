@@ -5,11 +5,14 @@
 import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
 
 type KeysWithDefinedValues<T> = {
-  [P in keyof T]: undefined extends T[P] ? P : never
+  [K in keyof T]: T[K] extends undefined ? never : K
 }[keyof T];
+
+type NoUndefinedValues<T> = {
+  [K in KeysWithDefinedValues<T>]: T[K]
+};
 
 type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
 type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
@@ -25,7 +28,7 @@ export interface RequestSignatures {
   'accounts.edit': [RequestAccountEdit, boolean];
   'accounts.forget': [RequestAccountForget, boolean];
   'accounts.list': [RequestAccountList, InjectedAccount[]];
-  'accounts.subscribe': [RequestAccountSubscribe, boolean, KeyringJson[]];
+  'accounts.subscribe': [RequestAccountSubscribe, boolean, InjectedAccount[]];
   'authorize.tab': [RequestAuthorizeTab, null];
   'authorize.approve': [RequestAuthorizeApprove, boolean];
   'authorize.reject': [RequestAuthorizeReject, boolean];
@@ -124,12 +127,25 @@ export type ResponseTypes = {
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][1]
 };
 
-export interface TransportResponseMessage<TMessageType extends MessageTypes> {
+interface TransportResponseMessageSub<TMessageType extends MessageTypesWithSubscriptions> {
   error?: string;
   id: string;
   response?: ResponseTypes[TMessageType];
   subscription?: SubscriptionMessageTypes[TMessageType];
 }
+
+interface TransportResponseMessageNoSub<TMessageType extends MessageTypesWithNoSubscriptions> {
+  error?: string;
+  id: string;
+  response?: ResponseTypes[TMessageType];
+}
+
+export type TransportResponseMessage<TMessageType extends MessageTypes> =
+  TMessageType extends MessageTypesWithNoSubscriptions
+    ? TransportResponseMessageNoSub<TMessageType>
+    : TMessageType extends MessageTypesWithSubscriptions
+      ? TransportResponseMessageSub<TMessageType>
+      : never;
 
 export interface ResponseExtrinsicSign {
   id: string;
@@ -148,8 +164,9 @@ export interface ResponseSeedValidate {
 
 // Subscriptions
 
-export type SubscriptionMessageTypes = {
+export type SubscriptionMessageTypes = NoUndefinedValues<{
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][2]
-};
+}>;
 
-export type MessageTypesWithNoSubscriptions = KeysWithDefinedValues<SubscriptionMessageTypes>;
+export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
+export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>

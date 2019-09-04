@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { AuthorizeRequest, RequestAccountCreate, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprove, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -18,8 +18,8 @@ import { createSubscription, unsubscribe } from './subscriptions';
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
-function transformAccounts (accounts: SubjectInfo): KeyringJson[] {
-  return Object.values(accounts).map(({ json }): KeyringJson => json);
+function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
+  return Object.values(accounts).map(({ json }): InjectedAccount => ({ ...json, name: json.meta && json.meta.name }));
 }
 
 export default class Extension {
@@ -51,13 +51,13 @@ export default class Extension {
     return true;
   }
 
-  private accountsList (): KeyringJson[] {
+  private accountsList (): InjectedAccount[] {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'accounts.subscribe'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
@@ -100,7 +100,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'authorize.subscribe'>(id, port);
     const subscription = this.state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
     );
@@ -181,7 +181,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'signing.subscribe'>(id, port);
     const subscription = this.state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
@@ -194,7 +194,6 @@ export default class Extension {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     return new Promise((resolve, reject): void => {
       switch (type) {

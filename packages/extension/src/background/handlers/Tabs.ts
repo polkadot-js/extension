@@ -2,8 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes, MessageTypes } from '../types';
+import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -12,14 +13,8 @@ import { assert } from '@polkadot/util';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-export interface Account {
-  address: string;
-  name?: string;
-}
-export type Accounts = Account[];
-
-function transformAccounts (accounts: SubjectInfo): Accounts {
-  return Object.values(accounts).map(({ json: { address, meta: { name } } }): Account => ({
+function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
+  return Object.values(accounts).map(({ json: { address, meta: { name } } }): InjectedAccount => ({
     address, name
   }));
 }
@@ -36,13 +31,13 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string): Accounts {
+  private accountsList (url: string): InjectedAccount[] {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 
   // FIXME This looks very much like what we have in Extension
   private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'accounts.subscribe'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
@@ -64,7 +59,6 @@ export default class Tabs {
     return this.state.signQueue(url, request);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type !== 'authorize.tab') {
       this.state.ensureUrlAuthorized(url);

@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignerPayload } from '@polkadot/api/types';
 import { BlockNumber, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React from 'react';
 import styled from 'styled-components';
@@ -21,7 +21,7 @@ interface Props {
   className?: string;
   isDecoded: boolean;
   payload: ExtrinsicPayload;
-  request: SignerPayload;
+  request: SignerPayloadJSON;
   url: string;
 }
 

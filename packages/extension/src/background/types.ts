@@ -2,10 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
-export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve.password' | 'signing.approve.signature' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
+type MessageTypesAcc = 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'seed.create' | 'seed.validate';
+
+type MessageTypesAuth = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab';
+
+type MessageTypesSign = 'extrinsic.sign' | 'signing.approve.password' | 'signing.approve.signature' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';;
+
+export type MessageTypes = MessageTypesAcc| MessageTypesAuth | MessageTypesSign;
 
 export interface AccountJson {
   address: string;
@@ -86,7 +92,7 @@ export interface MessageExtrinsicSignCancel {
   id: string;
 }
 
-export type MessageExtrinsicSign = SignerPayload;
+export type MessageExtrinsicSign = SignerPayloadJSON;
 
 export interface MessageExtrinsicSignSignature {
   id: string;

@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignerPayload } from '@polkadot/api/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
@@ -16,22 +16,22 @@ interface Props {
   className?: string;
   onSignature: ({ signature }: { signature: string }) => void;
   payload: ExtrinsicPayload;
-  request: SignerPayload;
+  request: SignerPayloadJSON;
 }
 
 const CMD_MORTAL = 2;
 
 function Qr ({ className, onSignature, payload, request }: Props): React.ReactElement<Props> {
-  const [showScan, setShowScan] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [payloadU8a, setPayloadU8a] = useState(new Uint8Array());
 
   useEffect((): void => setPayloadU8a(payload.toU8a()), [payload]);
 
-  const _onShowQr = (): void => setShowScan(true);
+  const _onShowQr = (): void => setIsScanning(true);
 
   return (
     <div className={className}>
-      {showScan
+      {isScanning
         ? <QrScanSignature onScan={onSignature} />
         : <QrDisplayPayload
           address={request.address}
@@ -39,7 +39,7 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
           payload={payloadU8a}
         />
       }
-      {!showScan && (
+      {!isScanning && (
         <Button
           label='Scan signature via camera'
           onClick={_onShowQr}

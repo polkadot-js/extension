@@ -29,6 +29,7 @@ export interface InjectedAccounts {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscribe: (cb: (accounts: InjectedAccount[]) => any) => Unsubcall;
 }
+
 export interface InjectedExtensionInfo {
   name: string;
   version: string;

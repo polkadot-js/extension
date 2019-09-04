@@ -52,7 +52,8 @@ export interface RequestSignatures {
   'extrinsic.sign': [RequestExtrinsicSign, ResponseExtrinsicSign];
   'seed.create': [RequestSeedCreate, ResponseSeedCreate];
   'seed.validate': [RequestSeedValidate, ResponseSeedValidate];
-  'signing.approve': [RequestSigningApprove, boolean];
+  'signing.approve.password': [RequestSigningApprovePassword, boolean];
+  'signing.approve.signature': [RequestSigningApproveSignature, boolean];
   'signing.cancel': [RequestSigningCancel, boolean];
   'signing.requests': [RequestSigningRequests, SigningRequest[]];
   'signing.subscribe': [RequestSigningSubscribe, boolean, SigningRequest[]];

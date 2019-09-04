@@ -99,12 +99,12 @@ export async function approveSignSignature (id: string, signature: string): Prom
   return sendMessage('signing.approve.signature', { id, signature });
 }
 
-export async function createAccountExt (name: string, address: string, genesisHash: string): Promise<boolean> {
-  return sendMessage('accounts.create.ext', { address, genesisHash, name });
+export async function createAccountExternal (name: string, address: string, genesisHash: string): Promise<boolean> {
+  return sendMessage('accounts.create.external', { address, genesisHash, name });
 }
 
-export async function createAccountInt (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {
-  return sendMessage('accounts.create.int', { name, password, suri, type });
+export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {
+  return sendMessage('accounts.create.suri', { name, password, suri, type });
 }
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {

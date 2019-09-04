@@ -6,7 +6,7 @@ import React, { useContext, useState } from 'react';
 import { QrScanAddress } from '@polkadot/react-qr';
 
 import { ActionContext, Address, Button, Header } from '../components';
-import { createAccountExt } from '../messaging';
+import { createAccountExternal } from '../messaging';
 import { Back, Name } from '../partials';
 
 type Props = {};
@@ -19,7 +19,7 @@ export default function ImportQr (): React.ReactElement<Props> {
   // FIXME Duplicated between here and Create.tsx
   const _onCreate = (): void => {
     if (account && name) {
-      createAccountExt(name, account.address, account.genesisHash)
+      createAccountExternal(name, account.address, account.genesisHash)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }

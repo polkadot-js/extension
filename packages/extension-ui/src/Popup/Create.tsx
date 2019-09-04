@@ -8,7 +8,7 @@ import { ActionContext, Address, Button, Header, Loading, TextArea } from '../co
 import { createAccountInt, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-type Props = {};
+type Props = {}
 
 export default function Create (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);

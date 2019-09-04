@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
+import { RequestExtrinsicSign } from '@polkadot/extension/background/types';
 
 import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
@@ -17,7 +17,7 @@ import Unlock from './Unlock';
 interface Props {
   isExternal: boolean;
   isFirst: boolean;
-  request: MessageExtrinsicSign;
+  request: RequestExtrinsicSign;
   signId: string;
   url: string;
 }

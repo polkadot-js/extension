@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, MessageAuthorize, MessageExtrinsicSign, MessageExtrinsicSignResponse, SigningRequest } from '../types';
+import { AuthorizeRequest, RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
@@ -11,7 +11,7 @@ import { assert } from '@polkadot/util';
 interface AuthRequest {
   id: string;
   idStr: string;
-  request: MessageAuthorize;
+  request: RequestAuthorizeTab;
   resolve: (result: boolean) => void;
   reject: (error: Error) => void;
   url: string;
@@ -28,8 +28,8 @@ type AuthUrls = Record<string, {
 interface SignRequest {
   id: string;
   isExternal: boolean;
-  request: MessageExtrinsicSign;
-  resolve: (result: MessageExtrinsicSignResponse) => void;
+  request: RequestExtrinsicSign;
+  resolve: (result: ResponseExtrinsicSign) => void;
   reject: (error: Error) => void;
   url: string;
 }
@@ -125,8 +125,8 @@ export default class State {
     };
   }
 
-  private signComplete = (id: string, fn: Function): (result: MessageExtrinsicSignResponse | Error) => void => {
-    return (result: MessageExtrinsicSignResponse | Error): void => {
+  private signComplete = (id: string, fn: Function): (result: ResponseExtrinsicSign | Error) => void => {
+    return (result: ResponseExtrinsicSign | Error): void => {
       delete this._signRequests[id];
       this.updateIconSign(true);
 
@@ -168,7 +168,7 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public async authorizeUrl (url: string, request: MessageAuthorize): Promise<boolean> {
+  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
     if (this._authUrls[idStr]) {
@@ -211,7 +211,7 @@ export default class State {
     return this._signRequests[id];
   }
 
-  public signQueue (url: string, request: MessageExtrinsicSign, isExternal = false): Promise<MessageExtrinsicSignResponse> {
+  public signQueue (url: string, request: RequestExtrinsicSign, isExternal = false): Promise<ResponseExtrinsicSign> {
     const id = getId();
 
     return new Promise((resolve, reject): void => {

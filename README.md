@@ -71,7 +71,7 @@ interface Injected {
   readonly signer: Signer;
   // not injected as of yet, subscribable provider for polkadot-js API injection,
   // this can be passed to the API itself upon construction in the dapp
-  // read-only provider: Provider
+  // readonly provider?: Provider
 }
 
 interface Account = {

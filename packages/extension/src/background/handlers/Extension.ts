@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MessageAccountCreateInt, MessageAccountCreateExt, MessageAccountEdit, MessageAuthorizeApprove, MessageAuthorizeReject, MessageExtrinsicSignApprove, MessageExtrinsicSignSignature, MessageExtrinsicSignCancel, MessageSeedCreate, MessageSeedCreateResponse, MessageSeedValidate, MessageSeedValidateResponse, MessageAccountForget, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -28,19 +28,19 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreateInt ({ name, password, suri, type }: MessageAccountCreateInt): boolean {
-    keyring.addUri(suri, password, { name }, type);
-
-    return true;
-  }
-
-  private accountsCreateExt ({ address, genesisHash, name }: MessageAccountCreateExt): boolean {
+  private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
     keyring.addExternal(address, { name, genesisHash });
 
     return true;
   }
 
-  private accountsEdit ({ address, name }: MessageAccountEdit): boolean {
+  private accountsCreateSuri ({ name, password, suri, type }: RequestAccountCreateSuri): boolean {
+    keyring.addUri(suri, password, { name }, type);
+
+    return true;
+  }
+
+  private accountsEdit ({ address, name }: RequestAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -50,7 +50,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsForget ({ address }: MessageAccountForget): boolean {
+  private accountsForget ({ address }: RequestAccountForget): boolean {
     keyring.forgetAccount(address);
 
     return true;
@@ -75,7 +75,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ id }: MessageAuthorizeApprove): boolean {
+  private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -87,7 +87,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeReject ({ id }: MessageAuthorizeReject): boolean {
+  private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
     const queued = this.state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -118,7 +118,7 @@ export default class Extension {
     return true;
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: MessageSeedCreate): MessageSeedCreateResponse {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
     const seed = mnemonicGenerate(length);
 
     return {
@@ -127,7 +127,7 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ suri, type }: MessageSeedValidate): MessageSeedValidateResponse {
+  private seedValidate ({ suri, type }: RequestSeedValidate): ResponseSeedValidate {
     const { phrase } = keyExtractSuri(suri);
 
     assert(SEED_LENGTHS.includes(phrase.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
@@ -139,7 +139,7 @@ export default class Extension {
     };
   }
 
-  private signingApprovePassword ({ id, password }: MessageExtrinsicSignApprove): boolean {
+  private signingApprovePassword ({ id, password }: RequestSigningApprovePassword): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -168,7 +168,7 @@ export default class Extension {
     return true;
   }
 
-  private signingApproveSignature ({ id, signature }: MessageExtrinsicSignSignature): boolean {
+  private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -180,7 +180,7 @@ export default class Extension {
     return true;
   }
 
-  private signingCancel ({ id }: MessageExtrinsicSignCancel): boolean {
+  private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -211,62 +211,64 @@ export default class Extension {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/require-await
-  public async handle (id: string, type: MessageTypes, request: any, port: chrome.runtime.Port): Promise<any> {
-    switch (type) {
-      case 'authorize.approve':
-        return this.authorizeApprove(request);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+    return new Promise((resolve, reject): void => {
+      switch (type) {
+        case 'authorize.approve':
+          return resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
 
-      case 'authorize.reject':
-        return this.authorizeReject(request);
+        case 'authorize.reject':
+          return resolve(this.authorizeReject(request as RequestAuthorizeApprove));
 
-      case 'authorize.requests':
-        return this.authorizeRequests();
+        case 'authorize.requests':
+          return resolve(this.authorizeRequests());
 
-      case 'authorize.subscribe':
-        return this.authorizeSubscribe(id, port);
+        case 'authorize.subscribe':
+          return resolve(this.authorizeSubscribe(id, port));
 
-      case 'accounts.create.ext':
-        return this.accountsCreateExt(request);
+        case 'accounts.create.external':
+          return resolve(this.accountsCreateExternal(request as RequestAccountCreateExternal));
 
-      case 'accounts.create.int':
-        return this.accountsCreateInt(request);
+        case 'accounts.create.suri':
+          return resolve(this.accountsCreateSuri(request as RequestAccountCreateSuri));
 
-      case 'accounts.forget':
-        return this.accountsForget(request);
+        case 'accounts.forget':
+          return resolve(this.accountsForget(request as RequestAccountForget));
 
-      case 'accounts.edit':
-        return this.accountsEdit(request);
+        case 'accounts.edit':
+          return resolve(this.accountsEdit(request as RequestAccountEdit));
 
-      case 'accounts.list':
-        return this.accountsList();
+        case 'accounts.list':
+          return resolve(this.accountsList());
 
-      case 'accounts.subscribe':
-        return this.accountsSubscribe(id, port);
+        case 'accounts.subscribe':
+          return resolve(this.accountsSubscribe(id, port));
 
-      case 'seed.create':
-        return this.seedCreate(request);
+        case 'seed.create':
+          return resolve(this.seedCreate(request as RequestSeedCreate));
 
-      case 'seed.validate':
-        return this.seedValidate(request);
+        case 'seed.validate':
+          return resolve(this.seedValidate(request as RequestSeedValidate));
 
-      case 'signing.approve.password':
-        return this.signingApprovePassword(request);
+        case 'signing.approve.password':
+          return resolve(this.signingApprovePassword(request as RequestSigningApprovePassword));
 
-      case 'signing.approve.signature':
-        return this.signingApproveSignature(request);
+        case 'signing.approve.signature':
+          return resolve(this.signingApproveSignature(request as RequestSigningApproveSignature));
 
-      case 'signing.cancel':
-        return this.signingCancel(request);
+        case 'signing.cancel':
+          return resolve(this.signingCancel(request as RequestSigningCancel));
 
-      case 'signing.requests':
-        return this.signingRequests();
+        case 'signing.requests':
+          return resolve(this.signingRequests());
 
-      case 'signing.subscribe':
-        return this.signingSubscribe(id, port);
+        case 'signing.subscribe':
+          return resolve(this.signingSubscribe(id, port));
 
-      default:
-        throw new Error(`Unable to handle message of type ${type}`);
-    }
+        default:
+          return reject(new Error(`Unable to handle message of type ${type}`));
+      }
+    });
   }
 }

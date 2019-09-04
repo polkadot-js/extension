@@ -4,14 +4,30 @@
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { KeyringJson } from '@polkadot/ui-keyring/types';
 
-type MessageTypesAcc = 'accounts.create.ext' | 'accounts.create.int' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'seed.create' | 'seed.validate';
+type KeysWithDefinedValues<T> = {
+  [P in keyof T]: undefined extends T[P] ? P : never
+}[keyof T];
 
-type MessageTypesAuth = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab';
+type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
+type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
 
-type MessageTypesSign = 'extrinsic.sign' | 'signing.approve.password' | 'signing.approve.signature' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
+export type SeedLengths = 12 | 24;
 
-export type MessageTypes = MessageTypesAcc | MessageTypesAuth | MessageTypesSign;
+export interface AuthorizeRequest {
+  id: string;
+  request: RequestAuthorizeTab;
+  url: string;
+}
+
+export interface SigningRequest {
+  id: string;
+  isExternal: boolean;
+  request: RequestExtrinsicSign;
+  url: string;
+}
 
 export interface AccountJson {
   address: string;
@@ -20,106 +36,149 @@ export interface AccountJson {
   name?: string;
 }
 
-export interface AuthorizeRequest {
-  id: string;
-  request: MessageAuthorize;
-  url: string;
+// [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
+export interface RequestSignatures {
+  'accounts.create.external': [RequestAccountCreateExternal, boolean];
+  'accounts.create.suri': [RequestAccountCreateSuri, boolean];
+  'accounts.edit': [RequestAccountEdit, boolean];
+  'accounts.forget': [RequestAccountForget, boolean];
+  'accounts.list': [RequestAccountList, InjectedAccount[]];
+  'accounts.subscribe': [RequestAccountSubscribe, boolean, KeyringJson[]];
+  'authorize.tab': [RequestAuthorizeTab, null];
+  'authorize.approve': [RequestAuthorizeApprove, boolean];
+  'authorize.reject': [RequestAuthorizeReject, boolean];
+  'authorize.requests': [RequestAuthorizeRequests, AuthorizeRequest[]];
+  'authorize.subscribe': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'extrinsic.sign': [RequestExtrinsicSign, ResponseExtrinsicSign];
+  'seed.create': [RequestSeedCreate, ResponseSeedCreate];
+  'seed.validate': [RequestSeedValidate, ResponseSeedValidate];
+  'signing.approve': [RequestSigningApprove, boolean];
+  'signing.cancel': [RequestSigningCancel, boolean];
+  'signing.requests': [RequestSigningRequests, SigningRequest[]];
+  'signing.subscribe': [RequestSigningSubscribe, boolean, SigningRequest[]];
 }
 
-export interface SigningRequest {
+export type MessageTypes = keyof RequestSignatures;
+
+// Requests
+
+export type RequestTypes = {
+  [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][0]
+};
+
+export type MessageTypesWithNullRequest = NullKeys<RequestTypes>
+
+export interface TransportRequestMessage<TMessageType extends MessageTypes> {
   id: string;
-  isExternal: boolean;
-  request: MessageExtrinsicSign;
-  url: string;
+  message: TMessageType;
+  origin: 'page' | 'popup';
+  request: RequestTypes[TMessageType];
 }
 
-export interface MessageAuthorize {
+export interface RequestAuthorizeTab {
   origin: string;
 }
 
-export interface MessageAuthorizeApprove {
+export interface RequestAuthorizeApprove {
   id: string;
 }
 
-export interface MessageAuthorizeReject {
+export interface RequestAuthorizeReject {
   id: string;
 }
 
-export interface MessageRequest {
-  id: string;
-  message: MessageTypes;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: any;
-}
+export type RequestAuthorizeRequests = null;
 
-export interface MessageResponse {
-  error?: string;
-  id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  response?: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscription?: any;
-}
+export type RequestAuthorizeSubscribe = null;
 
-export interface MessageAccountCreateInt {
+export interface RequestAccountCreateSuri {
   name: string;
   password: string;
   suri: string;
   type?: KeypairType;
 }
 
-export interface MessageAccountCreateExt {
+export interface RequestAccountCreateExternal {
   address: string;
   genesisHash: string;
   name: string;
 }
 
-export interface MessageAccountEdit {
+export interface RequestAccountEdit {
   address: string;
   name: string;
 }
 
-export interface MessageAccountForget {
+export interface RequestAccountForget {
   address: string;
 }
 
-export interface MessageExtrinsicSignApprove {
+export type RequestAccountList = null;
+
+export type RequestAccountSubscribe = null;
+
+export type RequestExtrinsicSign = SignerPayloadJSON;
+
+export interface RequestSigningApprovePassword {
   id: string;
   password: string;
 }
 
-export interface MessageExtrinsicSignCancel {
-  id: string;
-}
-
-export type MessageExtrinsicSign = SignerPayloadJSON;
-
-export interface MessageExtrinsicSignSignature {
+export interface RequestSigningApproveSignature {
   id: string;
   signature: string;
 }
 
-export interface MessageExtrinsicSignResponse {
+export interface RequestSigningCancel {
+  id: string;
+}
+
+export type RequestSigningRequests = null;
+
+export type RequestSigningSubscribe = null;
+
+export interface RequestSeedCreate {
+  length?: SeedLengths;
+  type?: KeypairType;
+}
+
+export interface RequestSeedValidate {
+  suri: string;
+  type?: KeypairType;
+}
+
+// Responses
+
+export type ResponseTypes = {
+  [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][1]
+};
+
+export interface TransportResponseMessage<TMessageType extends MessageTypes> {
+  error?: string;
+  id: string;
+  response?: ResponseTypes[TMessageType];
+  subscription?: SubscriptionMessageTypes[TMessageType];
+}
+
+export interface ResponseExtrinsicSign {
   id: string;
   signature: string;
 }
 
-export interface MessageSeedCreateResponse {
+export interface ResponseSeedCreate {
   address: string;
   seed: string;
 }
 
-export interface MessageSeedCreate {
-  length?: 12 | 24;
-  type?: KeypairType;
-}
-
-export interface MessageSeedValidate {
-  suri: string;
-  type?: KeypairType;
-}
-
-export interface MessageSeedValidateResponse {
+export interface ResponseSeedValidate {
   address: string;
   suri: string;
 }
+
+// Subscriptions
+
+export type SubscriptionMessageTypes = {
+  [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][2]
+};
+
+export type MessageTypesWithNoSubscriptions = KeysWithDefinedValues<SubscriptionMessageTypes>;

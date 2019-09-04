@@ -2,12 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, MessageTypes, SigningRequest } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,14 +46,16 @@ port.onMessage.addListener((data): void => {
   }
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage (message: MessageTypes, request: any = {}, subscriber?: (data: any) => void): Promise<any> {
+function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends Exclude<MessageTypes, MessageTypesWithNoSubscriptions>>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
     handlers[id] = { resolve, reject, subscriber };
 
-    port.postMessage({ id, message, request });
+    port.postMessage({ id, message, request: request || {} });
   });
 }
 
@@ -64,7 +67,7 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('accounts.forget', { address });
 }
 
-export async function getAccounts (): Promise<KeyringJson[]> {
+export async function getAccounts (): Promise<InjectedAccount[]> {
   return sendMessage('accounts.list');
 }
 
@@ -104,20 +107,20 @@ export async function createAccountInt (name: string, password: string, suri: st
   return sendMessage('accounts.create.int', { name, password, suri, type });
 }
 
-export async function createSeed (length?: number, type?: KeypairType): Promise<{ address: string; seed: string }> {
+export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('seed.create', { length, type });
 }
 
 export async function subscribeAccounts (cb: (accounts: KeyringJson[]) => void): Promise<boolean> {
-  return sendMessage('accounts.subscribe', {}, cb);
+  return sendMessage('accounts.subscribe', null, cb);
 }
 
 export async function subscribeAuthorize (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('authorize.subscribe', {}, cb);
+  return sendMessage('authorize.subscribe', null, cb);
 }
 
 export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('signing.subscribe', {}, cb);
+  return sendMessage('signing.subscribe', null, cb);
 }
 
 export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {

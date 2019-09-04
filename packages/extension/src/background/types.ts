@@ -6,6 +6,8 @@ import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
 
+export type SeedLengths = 12 | 24;
+
 export type AuthorizeRequest = [string, RequestAuthorizeTab, string];
 export type SigningRequest = [string, RequestExtrinsicSign, string];
 
@@ -101,7 +103,7 @@ export type RequestSigningRequests = null;
 export type RequestSigningSubscribe = null;
 
 export interface RequestSeedCreate {
-  length?: 12 | 24;
+  length?: SeedLengths;
   type?: KeypairType;
 }
 

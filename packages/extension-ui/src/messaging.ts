@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes } from '@polkadot/extension/background/types';
+import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes } from '@polkadot/extension/background/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -97,7 +97,7 @@ export async function createAccount (name: string, password: string, suri: strin
   return sendMessage('accounts.create', { name, password, suri, type });
 }
 
-export async function createSeed (length?: 12 | 24, type?: KeypairType): Promise<{ address: string; seed: string }> {
+export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('seed.create', { length, type });
 }
 

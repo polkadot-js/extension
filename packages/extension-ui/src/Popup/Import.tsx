@@ -8,7 +8,9 @@ import { ActionContext, Address, Button, Header, TextArea } from '../components'
 import { createAccount, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-export default function Import (): React.ReactElement<{}> {
+type Props = {};
+
+export default function Import (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);

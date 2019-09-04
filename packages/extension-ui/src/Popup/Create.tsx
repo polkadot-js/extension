@@ -8,7 +8,9 @@ import { ActionContext, Address, Button, Header, Loading, TextArea } from '../co
 import { createAccount, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
-export default function Create (): React.ReactElement<{}> {
+type Props = {}
+
+export default function Create (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const [name, setName] = useState<string | null>(null);

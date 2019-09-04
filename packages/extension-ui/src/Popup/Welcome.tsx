@@ -6,7 +6,9 @@ import React, { useContext } from 'react';
 
 import { ActionContext, Box, Button, Header } from '../components';
 
-export default function Welcome (): React.ReactElement<{}> {
+type Props = {};
+
+export default function Welcome (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const onClick = (): void => {
     window.localStorage.setItem('welcome_read', 'ok');

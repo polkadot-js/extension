@@ -5,31 +5,32 @@
 import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { KeyringJson } from '@polkadot/ui-keyring/types';
 
 export type SeedLengths = 12 | 24;
 
 export type AuthorizeRequest = [string, RequestAuthorizeTab, string];
 export type SigningRequest = [string, RequestExtrinsicSign, string];
 
-// [MessageType]: [RequestType, ResponseType]
+// [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures {
   'accounts.create': [RequestAccountCreate, boolean];
   'accounts.edit': [RequestAccountEdit, boolean];
   'accounts.forget': [RequestAccountForget, boolean];
   'accounts.list': [RequestAccountList, InjectedAccount[]];
-  'accounts.subscribe': [RequestAccountSubscribe, boolean];
+  'accounts.subscribe': [RequestAccountSubscribe, boolean, KeyringJson[]];
   'authorize.tab': [RequestAuthorizeTab, null];
   'authorize.approve': [RequestAuthorizeApprove, boolean];
   'authorize.reject': [RequestAuthorizeReject, boolean];
   'authorize.requests': [RequestAuthorizeRequests, AuthorizeRequest[]];
-  'authorize.subscribe': [RequestAuthorizeSubscribe, boolean];
+  'authorize.subscribe': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'extrinsic.sign': [RequestExtrinsicSign, ResponseExtrinsicSign];
   'seed.create': [RequestSeedCreate, ResponseSeedCreate];
   'seed.validate': [RequestSeedValidate, ResponseSeedValidate];
   'signing.approve': [RequestSigningApprove, boolean];
   'signing.cancel': [RequestSigningCancel, boolean];
   'signing.requests': [RequestSigningRequests, SigningRequest[]];
-  'signing.subscribe': [RequestSigningSubscribe, boolean];
+  'signing.subscribe': [RequestSigningSubscribe, boolean, SigningRequest[]];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -122,8 +123,7 @@ export interface TransportResponseMessage<TMessageType extends MessageTypes> {
   error?: string;
   id: string;
   response?: ResponseTypes[TMessageType];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscription?: any;
+  subscription?: SubscriptionMessageTypes[TMessageType];
 }
 
 export interface ResponseExtrinsicSign {
@@ -140,3 +140,9 @@ export interface ResponseSeedValidate {
   address: string;
   suri: string;
 }
+
+// Subscriptions
+
+export type SubscriptionMessageTypes = {
+  [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][2]
+};

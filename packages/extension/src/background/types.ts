@@ -9,9 +9,9 @@ type MessageTypesAcc = 'accounts.create.ext' | 'accounts.create.int' | 'accounts
 
 type MessageTypesAuth = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab';
 
-type MessageTypesSign = 'extrinsic.sign' | 'signing.approve.password' | 'signing.approve.signature' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';;
+type MessageTypesSign = 'extrinsic.sign' | 'signing.approve.password' | 'signing.approve.signature' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
 
-export type MessageTypes = MessageTypesAcc| MessageTypesAuth | MessageTypesSign;
+export type MessageTypes = MessageTypesAcc | MessageTypesAuth | MessageTypesSign;
 
 export interface AccountJson {
   address: string;

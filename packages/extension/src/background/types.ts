@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignerPayload } from '@polkadot/api/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
 export type MessageTypes = 'authorize.approve' | 'authorize.reject' | 'authorize.requests' | 'authorize.subscribe' | 'authorize.tab' | 'accounts.create' | 'accounts.edit' | 'accounts.forget' | 'accounts.list' | 'accounts.subscribe' | 'extrinsic.sign' | 'seed.create' | 'seed.validate' | 'signing.approve' | 'signing.cancel' | 'signing.requests' | 'signing.subscribe';
 
@@ -64,7 +64,7 @@ export interface MessageExtrinsicSignCancel {
   id: string;
 }
 
-export type MessageExtrinsicSign = SignerPayload;
+export type MessageExtrinsicSign = SignerPayloadJSON;
 
 export interface MessageExtrinsicSignResponse {
   id: string;

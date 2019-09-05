@@ -36,6 +36,7 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
     <Address
       address={address}
       className={className}
+      name={editedName}
     >
       {isEditing && (
         <Name

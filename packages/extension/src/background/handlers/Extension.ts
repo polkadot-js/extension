@@ -211,64 +211,63 @@ export default class Extension {
     return true;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
-    return new Promise((resolve, reject): void => {
-      switch (type) {
-        case 'pri(authorize.approve)':
-          return resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
+  // This is actually weird... the disable is not needed in Tabs.ts
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+    switch (type) {
+      case 'pri(authorize.approve)':
+        return this.authorizeApprove(request as RequestAuthorizeApprove);
 
-        case 'pri(authorize.reject)':
-          return resolve(this.authorizeReject(request as RequestAuthorizeApprove));
+      case 'pri(authorize.reject)':
+        return this.authorizeReject(request as RequestAuthorizeApprove);
 
-        case 'pri(authorize.requests)':
-          return resolve(this.authorizeRequests());
+      case 'pri(authorize.requests)':
+        return this.authorizeRequests();
 
-        case 'pri(authorize.subscribe)':
-          return resolve(this.authorizeSubscribe(id, port));
+      case 'pri(authorize.subscribe)':
+        return this.authorizeSubscribe(id, port);
 
-        case 'pri(accounts.create.external)':
-          return resolve(this.accountsCreateExternal(request as RequestAccountCreateExternal));
+      case 'pri(accounts.create.external)':
+        return this.accountsCreateExternal(request as RequestAccountCreateExternal);
 
-        case 'pri(accounts.create.suri)':
-          return resolve(this.accountsCreateSuri(request as RequestAccountCreateSuri));
+      case 'pri(accounts.create.suri)':
+        return this.accountsCreateSuri(request as RequestAccountCreateSuri);
 
-        case 'pri(accounts.forget)':
-          return resolve(this.accountsForget(request as RequestAccountForget));
+      case 'pri(accounts.forget)':
+        return this.accountsForget(request as RequestAccountForget);
 
-        case 'pri(accounts.edit)':
-          return resolve(this.accountsEdit(request as RequestAccountEdit));
+      case 'pri(accounts.edit)':
+        return this.accountsEdit(request as RequestAccountEdit);
 
-        case 'pri(accounts.list)':
-          return resolve(this.accountsList());
+      case 'pri(accounts.list)':
+        return this.accountsList();
 
-        case 'pri(accounts.subscribe)':
-          return resolve(this.accountsSubscribe(id, port));
+      case 'pri(accounts.subscribe)':
+        return this.accountsSubscribe(id, port);
 
-        case 'pri(seed.create)':
-          return resolve(this.seedCreate(request as RequestSeedCreate));
+      case 'pri(seed.create)':
+        return this.seedCreate(request as RequestSeedCreate);
 
-        case 'pri(seed.validate)':
-          return resolve(this.seedValidate(request as RequestSeedValidate));
+      case 'pri(seed.validate)':
+        return this.seedValidate(request as RequestSeedValidate);
 
-        case 'pri(signing.approve.password)':
-          return resolve(this.signingApprovePassword(request as RequestSigningApprovePassword));
+      case 'pri(signing.approve.password)':
+        return this.signingApprovePassword(request as RequestSigningApprovePassword);
 
-        case 'pri(signing.approve.signature)':
-          return resolve(this.signingApproveSignature(request as RequestSigningApproveSignature));
+      case 'pri(signing.approve.signature)':
+        return this.signingApproveSignature(request as RequestSigningApproveSignature);
 
-        case 'pri(signing.cancel)':
-          return resolve(this.signingCancel(request as RequestSigningCancel));
+      case 'pri(signing.cancel)':
+        return this.signingCancel(request as RequestSigningCancel);
 
-        case 'pri(signing.requests)':
-          return resolve(this.signingRequests());
+      case 'pri(signing.requests)':
+        return this.signingRequests();
 
-        case 'pri(signing.subscribe)':
-          return resolve(this.signingSubscribe(id, port));
+      case 'pri(signing.subscribe)':
+        return this.signingSubscribe(id, port);
 
-        default:
-          return reject(new Error(`Unable to handle message of type ${type}`));
-      }
-    });
+      default:
+        throw new Error(`Unable to handle message of type ${type}`);
+    }
   }
 }

@@ -64,7 +64,6 @@ export default class Tabs {
     return this.state.signQueue(url, request, pair.meta.isExternal);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type !== 'pub(authorize.tab)') {
       this.state.ensureUrlAuthorized(url);

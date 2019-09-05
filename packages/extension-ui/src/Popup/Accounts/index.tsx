@@ -37,11 +37,12 @@ export default function Accounts (): React.ReactElement<Props> {
         label='I have a pre-existing seed, import the account'
         to='/account/import-seed'
       />
-      <Button
-        isDisabled={!mediaAllowed}
-        label='I have an external account, add it via QR'
-        to='/account/import-qr'
-      />
+      {mediaAllowed && (
+        <Button
+          label='I have an external account, add it via QR'
+          to='/account/import-qr'
+        />
+      )}
     </div>
   );
 }

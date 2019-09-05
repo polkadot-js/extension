@@ -3,9 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { SignerPayloadJSON } from '@polkadot/types/types';
 
 type KeysWithDefinedValues<T> = {
   [P in keyof T]: undefined extends T[P] ? P : never

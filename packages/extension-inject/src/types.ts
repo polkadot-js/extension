@@ -11,13 +11,13 @@ export type Unsubcall = () => void;
 
 export interface InjectedAccount {
   address: string;
-  name: string;
+  name?: string;
 }
 
 export interface InjectedAccountWithMeta {
   address: string;
   meta: {
-    name: string;
+    name?: string;
     source: string;
   };
 }
@@ -27,7 +27,6 @@ export interface InjectedAccounts {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscribe: (cb: (accounts: InjectedAccount[]) => any) => Unsubcall;
 }
-
 export interface InjectedExtensionInfo {
   name: string;
   version: string;

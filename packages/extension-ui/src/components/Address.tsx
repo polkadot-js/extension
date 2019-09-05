@@ -2,17 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { KeyringJson } from '@polkadot/ui-keyring/types';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import IconBox from './IconBox';
 import { AccountContext } from './contexts';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 interface Props {
   address?: string | null;
@@ -24,7 +24,7 @@ interface Props {
 
 function Address ({ address, children, className, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
-  const [account, setAccount] = useState<KeyringJson | null>(null);
+  const [account, setAccount] = useState<InjectedAccount | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect((): void => {
@@ -58,7 +58,7 @@ function Address ({ address, children, className, name, theme = 'polkadot' }: Pr
       }
       intro={
         <>
-          <div className='name'>{name || (account && account.meta.name) || '<unknown>'}</div>
+          <div className='name'>{name || (account && account.name) || '<unknown>'}</div>
           <div className='address'>{formatted || '<unknown>'}</div>
         </>
       }

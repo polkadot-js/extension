@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { MessageExtrinsicSign } from '@polkadot/extension/background/types';
+import { RequestExtrinsicSign } from '@polkadot/extension/background/types';
 
 import React, { useContext } from 'react';
 import { createType } from '@polkadot/types';
@@ -14,7 +14,7 @@ import Unlock from './Unlock';
 
 interface Props {
   isFirst: boolean;
-  request: MessageExtrinsicSign;
+  request: RequestExtrinsicSign;
   signId: string;
   url: string;
 }

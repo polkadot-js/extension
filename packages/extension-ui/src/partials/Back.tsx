@@ -5,7 +5,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Link, unicode } from '../components';
+import { Link } from '../components';
 
 interface Props {
   className?: string;
@@ -15,7 +15,7 @@ interface Props {
 function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <Link to={to}>{unicode.BACK} Back</Link>
+      <Link to={to}>Back</Link>
     </div>
   );
 }

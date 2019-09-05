@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { SignerPayload } from '@polkadot/api/types';
-import { KeypairType } from '@polkadot/util-crypto/types';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -96,7 +96,7 @@ export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;
 
-export type RequestExtrinsicSign = SignerPayload;
+export type RequestExtrinsicSign = SignerPayloadJSON;
 
 export interface RequestSigningApprove {
   id: string;

@@ -52,7 +52,7 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
 // the enable function, called by the dapp to allow access
 async function enable (origin: string): Promise<Injected> {
-  await sendMessage('authorize.tab', { origin });
+  await sendMessage('pub(authorize.tab)', { origin });
 
   return new Injected(sendMessage);
 }

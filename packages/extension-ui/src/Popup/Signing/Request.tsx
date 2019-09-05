@@ -8,7 +8,7 @@ import React, { useContext } from 'react';
 import { createType } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Link } from '../../components';
-import { approveSignRequest, cancelSignRequest } from '../../messaging';
+import { approveSignPassword, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Unlock from './Unlock';
 
@@ -26,7 +26,7 @@ export default function Request ({ isFirst, request, signId, url }: Props): Reac
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
   const onSign = (password: string): Promise<void> =>
-    approveSignRequest(signId, password)
+    approveSignPassword(signId, password)
       .then((): void => onAction());
   const blockNumber = createType('BlockNumber', request.blockNumber);
   const payload = createType('ExtrinsicPayload', request, { version: request.version });

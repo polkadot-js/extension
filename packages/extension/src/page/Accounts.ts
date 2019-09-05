@@ -13,12 +13,12 @@ export default class Accounts implements InjectedAccounts {
   }
 
   public get (): Promise<InjectedAccount[]> {
-    return sendRequest('accounts.list');
+    return sendRequest('pub(accounts.list)');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public subscribe (cb: (accounts: InjectedAccount[]) => any): Unsubcall {
-    sendRequest('accounts.subscribe', null, cb)
+    sendRequest('pub(accounts.subscribe)', null, cb)
       .catch((error: Error) => console.error(error));
 
     return (): void => {

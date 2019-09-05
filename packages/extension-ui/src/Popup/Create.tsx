@@ -5,7 +5,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { ActionContext, Address, Button, Header, Loading, TextArea } from '../components';
-import { createAccount, createSeed } from '../messaging';
+import { createAccountSuri, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
 type Props = {}
@@ -26,7 +26,7 @@ export default function Create (): React.ReactElement<Props> {
   const onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
-      createAccount(name, password, account.seed)
+      createAccountSuri(name, password, account.seed)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }

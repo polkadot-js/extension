@@ -4,7 +4,7 @@
 
 import React, { useContext } from 'react';
 
-import { AccountContext, Button, Header, Link, Tip, unicode } from '../../components';
+import { AccountContext, Button, Header, Link, Tip } from '../../components';
 import Account from './Account';
 
 export default function Accounts (): React.ReactElement<{}> {
@@ -14,7 +14,7 @@ export default function Accounts (): React.ReactElement<{}> {
     <div>
       <Header
         label='accounts'
-        labelExtra={<Link to='/settings'>Settings {unicode.FWD}</Link>}
+        labelExtra={<Link to='/settings'>Settings</Link>}
       />
       {
         (accounts.length === 0)

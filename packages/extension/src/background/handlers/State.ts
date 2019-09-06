@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, SigningRequest, AccountJson } from '../types';
+import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';

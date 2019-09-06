@@ -14,8 +14,9 @@ type NoUndefinedValues<T> = {
   [K in KeysWithDefinedValues<T>]: T[K]
 };
 
-type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never
-type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
+type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never;
+
+type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T];
 
 export type SeedLengths = 12 | 24;
 

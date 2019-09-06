@@ -58,7 +58,7 @@ async function enable (origin: string): Promise<Injected> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & {subscription?: any}): void {
+function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: any }): void {
   const handler = handlers[data.id];
 
   if (!handler) {

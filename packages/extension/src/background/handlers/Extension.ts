@@ -3,8 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AuthorizeRequest, RequestAccountCreate, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprove, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { AccountJson, AuthorizeRequest, RequestAccountCreateSuri, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -18,8 +17,8 @@ import { createSubscription, unsubscribe } from './subscriptions';
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
-function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
-  return Object.values(accounts).map(({ json }): InjectedAccount => ({ ...json, name: json.meta && json.meta.name }));
+function transformAccounts (accounts: SubjectInfo): AccountJson[] {
+  return Object.values(accounts).map(({ json }): AccountJson => json);
 }
 
 export default class Extension {
@@ -29,8 +28,8 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ name, password, suri, type }: RequestAccountCreate): boolean {
-    keyring.addUri(suri, password, { name }, type);
+  private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
+    keyring.addUri(suri, password, { genesisHash, name }, type);
 
     return true;
   }
@@ -51,13 +50,13 @@ export default class Extension {
     return true;
   }
 
-  private accountsList (): InjectedAccount[] {
+  private accountsList (): AccountJson[] {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'accounts.subscribe'>(id, port);
+    const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
@@ -100,7 +99,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'authorize.subscribe'>(id, port);
+    const cb = createSubscription<'pri(authorize.subscribe)'>(id, port);
     const subscription = this.state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
     );
@@ -134,7 +133,7 @@ export default class Extension {
     };
   }
 
-  private signingApprove ({ id, password }: RequestSigningApprove): boolean {
+  private signingApprovePassword ({ id, password }: RequestSigningApprovePassword): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -181,7 +180,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'signing.subscribe'>(id, port);
+    const cb = createSubscription<'pri(signing.subscribe)'>(id, port);
     const subscription = this.state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
@@ -194,57 +193,57 @@ export default class Extension {
     return true;
   }
 
-  public handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
-    return new Promise((resolve, reject): void => {
-      switch (type) {
-        case 'authorize.approve':
-          return resolve(this.authorizeApprove(request as RequestAuthorizeApprove));
+  // Weird thought, the eslint override is not needed in Tabs
+  // eslint-disable-next-line @typescript-eslint/require-await
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+    switch (type) {
+      case 'pri(authorize.approve)':
+        return this.authorizeApprove(request as RequestAuthorizeApprove);
 
-        case 'authorize.reject':
-          return resolve(this.authorizeReject(request as RequestAuthorizeApprove));
+      case 'pri(authorize.reject)':
+        return this.authorizeReject(request as RequestAuthorizeApprove);
 
-        case 'authorize.requests':
-          return resolve(this.authorizeRequests());
+      case 'pri(authorize.requests)':
+        return this.authorizeRequests();
 
-        case 'authorize.subscribe':
-          return resolve(this.authorizeSubscribe(id, port));
+      case 'pri(authorize.subscribe)':
+        return this.authorizeSubscribe(id, port);
 
-        case 'accounts.create':
-          return resolve(this.accountsCreate(request as RequestAccountCreate));
+      case 'pri(accounts.create.suri)':
+        return this.accountsCreateSuri(request as RequestAccountCreateSuri);
 
-        case 'accounts.forget':
-          return resolve(this.accountsForget(request as RequestAccountForget));
+      case 'pri(accounts.forget)':
+        return this.accountsForget(request as RequestAccountForget);
 
-        case 'accounts.edit':
-          return resolve(this.accountsEdit(request as RequestAccountEdit));
+      case 'pri(accounts.edit)':
+        return this.accountsEdit(request as RequestAccountEdit);
 
-        case 'accounts.list':
-          return resolve(this.accountsList());
+      case 'pri(accounts.list)':
+        return this.accountsList();
 
-        case 'accounts.subscribe':
-          return resolve(this.accountsSubscribe(id, port));
+      case 'pri(accounts.subscribe)':
+        return this.accountsSubscribe(id, port);
 
-        case 'seed.create':
-          return resolve(this.seedCreate(request as RequestSeedCreate));
+      case 'pri(seed.create)':
+        return this.seedCreate(request as RequestSeedCreate);
 
-        case 'seed.validate':
-          return resolve(this.seedValidate(request as RequestSeedValidate));
+      case 'pri(seed.validate)':
+        return this.seedValidate(request as RequestSeedValidate);
 
-        case 'signing.approve':
-          return resolve(this.signingApprove(request as RequestSigningApprove));
+      case 'pri(signing.approve.password)':
+        return this.signingApprovePassword(request as RequestSigningApprovePassword);
 
-        case 'signing.cancel':
-          return resolve(this.signingCancel(request as RequestSigningCancel));
+      case 'pri(signing.cancel)':
+        return this.signingCancel(request as RequestSigningCancel);
 
-        case 'signing.requests':
-          return resolve(this.signingRequests());
+      case 'pri(signing.requests)':
+        return this.signingRequests();
 
-        case 'signing.subscribe':
-          return resolve(this.signingSubscribe(id, port));
+      case 'pri(signing.subscribe)':
+        return this.signingSubscribe(id, port);
 
-        default:
-          return reject(new Error(`Unable to handle message of type ${type}`));
-      }
-    });
+      default:
+        throw new Error(`Unable to handle message of type ${type}`);
+    }
   }
 }

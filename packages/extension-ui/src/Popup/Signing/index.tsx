@@ -13,7 +13,7 @@ export default function Signing (): React.ReactElement<{}> {
   return (
     <div>
       <Header label='transactions' />
-      {requests.map(([id, request, url], index): React.ReactNode => (
+      {requests.map(({ id, request, url }, index): React.ReactNode => (
         <Request
           isFirst={index === 0}
           key={id}

@@ -52,13 +52,13 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
 // the enable function, called by the dapp to allow access
 async function enable (origin: string): Promise<Injected> {
-  await sendMessage('authorize.tab', { origin });
+  await sendMessage('pub(authorize.tab)', { origin });
 
   return new Injected(sendMessage);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & {subscription?: any}): void {
+function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: any }): void {
   const handler = handlers[data.id];
 
   if (!handler) {

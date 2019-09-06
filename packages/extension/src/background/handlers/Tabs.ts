@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
-import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -14,8 +14,8 @@ import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
-  return Object.values(accounts).map(({ json: { address, meta: { name } } }): InjectedAccount => ({
-    address, name
+  return Object.values(accounts).map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
+    address, genesisHash, name
   }));
 }
 
@@ -37,7 +37,7 @@ export default class Tabs {
 
   // FIXME This looks very much like what we have in Extension
   private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'accounts.subscribe'>(id, port);
+    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
@@ -56,25 +56,25 @@ export default class Tabs {
 
     assert(pair, 'Unable to find keypair');
 
-    return this.state.signQueue(url, request);
+    return this.state.signQueue(url, request, { address, ...pair.meta });
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
-    if (type !== 'authorize.tab') {
+    if (type !== 'pub(authorize.tab)') {
       this.state.ensureUrlAuthorized(url);
     }
 
     switch (type) {
-      case 'authorize.tab':
+      case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 
-      case 'accounts.list':
+      case 'pub(accounts.list)':
         return this.accountsList(url);
 
-      case 'accounts.subscribe':
+      case 'pub(accounts.subscribe)':
         return this.accountsSubscribe(url, id, port);
 
-      case 'extrinsic.sign':
+      case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as RequestExtrinsicSign);
 
       default:

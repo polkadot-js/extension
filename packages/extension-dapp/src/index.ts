@@ -24,7 +24,7 @@ function throwError (method: string): never {
 function mapAccounts (source: string, list: InjectedAccount[]): InjectedAccountWithMeta[] {
   return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => ({
     address,
-    meta: { name, genesisHash, source }
+    meta: { genesisHash, name, source }
   }));
 }
 

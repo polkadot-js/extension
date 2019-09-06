@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
@@ -12,15 +13,9 @@ import { assert } from '@polkadot/util';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-export interface Account {
-  address: string;
-  name?: string;
-}
-export type Accounts = Account[];
-
-function transformAccounts (accounts: SubjectInfo): Accounts {
-  return Object.values(accounts).map(({ json: { address, meta: { name } } }): Account => ({
-    address, name
+function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
+  return Object.values(accounts).map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
+    address, genesisHash, name
   }));
 }
 
@@ -36,7 +31,7 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string): Accounts {
+  private accountsList (url: string): InjectedAccount[] {
     return transformAccounts(accountsObservable.subject.getValue());
   }
 

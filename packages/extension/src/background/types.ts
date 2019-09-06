@@ -4,7 +4,6 @@
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 type KeysWithDefinedValues<T> = {
@@ -43,8 +42,8 @@ export interface RequestSignatures {
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
-  'pri(accounts.list)': [RequestAccountList, KeyringJson[]];
-  'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, KeyringJson[]];
+  'pri(accounts.list)': [RequestAccountList, AccountJson[]];
+  'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeRequests, AuthorizeRequest[]];

@@ -18,7 +18,7 @@ const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json: { address, meta} }): AccountJson => ({
+  return Object.values(accounts).map(({ json: { address, meta } }): AccountJson => ({
     address,
     ...meta
   }));
@@ -59,10 +59,6 @@ export default class Extension {
     return true;
   }
 
-  private accountsList (): AccountJson[] {
-    return transformAccounts(accountsObservable.subject.getValue());
-  }
-
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
@@ -100,10 +96,6 @@ export default class Extension {
     reject(new Error('Rejected'));
 
     return true;
-  }
-
-  private authorizeRequests (): AuthorizeRequest[] {
-    return this.state.allAuthRequests;
   }
 
   // FIXME This looks very much like what we have in accounts
@@ -195,10 +187,6 @@ export default class Extension {
     return true;
   }
 
-  private signingRequests (): SigningRequest[] {
-    return this.state.allSignRequests;
-  }
-
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(signing.subscribe)'>(id, port);
@@ -224,9 +212,6 @@ export default class Extension {
       case 'pri(authorize.reject)':
         return this.authorizeReject(request as RequestAuthorizeApprove);
 
-      case 'pri(authorize.requests)':
-        return this.authorizeRequests();
-
       case 'pri(authorize.subscribe)':
         return this.authorizeSubscribe(id, port);
 
@@ -241,9 +226,6 @@ export default class Extension {
 
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);
-
-      case 'pri(accounts.list)':
-        return this.accountsList();
 
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
@@ -262,9 +244,6 @@ export default class Extension {
 
       case 'pri(signing.cancel)':
         return this.signingCancel(request as RequestSigningCancel);
-
-      case 'pri(signing.requests)':
-        return this.signingRequests();
 
       case 'pri(signing.subscribe)':
         return this.signingSubscribe(id, port);

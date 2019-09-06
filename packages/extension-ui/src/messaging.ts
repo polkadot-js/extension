@@ -66,24 +66,12 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function getAccounts (): Promise<AccountJson[]> {
-  return sendMessage('pri(accounts.list)');
-}
-
-export async function getAuthRequests (): Promise<AuthorizeRequest[]> {
-  return sendMessage('pri(authorize.requests)');
-}
-
 export async function rejectAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.reject)', { id });
 }
 
 export async function approveAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.approve)', { id });
-}
-
-export async function getSignRequests (): Promise<SigningRequest[]> {
-  return sendMessage('pri(signing.requests)');
 }
 
 export async function cancelSignRequest (id: string): Promise<boolean> {

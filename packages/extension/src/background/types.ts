@@ -47,18 +47,15 @@ export interface RequestSignatures {
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
-  'pri(accounts.list)': [RequestAccountList, AccountJson[]];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
-  'pri(authorize.requests)': [RequestAuthorizeRequests, AuthorizeRequest[]];
   'pri(authorize.subscribe)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
   'pri(seed.validate)': [RequestSeedValidate, ResponseSeedValidate];
   'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
-  'pri(signing.requests)': [RequestSigningRequests, SigningRequest[]];
   'pri(signing.subscribe)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
@@ -95,8 +92,6 @@ export interface RequestAuthorizeApprove {
 export interface RequestAuthorizeReject {
   id: string;
 }
-
-export type RequestAuthorizeRequests = null;
 
 export type RequestAuthorizeSubscribe = null;
 
@@ -143,8 +138,6 @@ export interface RequestSigningApproveSignature {
 export interface RequestSigningCancel {
   id: string;
 }
-
-export type RequestSigningRequests = null;
 
 export type RequestSigningSubscribe = null;
 

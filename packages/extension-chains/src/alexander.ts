@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-// Generated via (in api) `yarn chain:info wss://poc3-rpc.polkadot.io`
+// Generated via (in api) `yarn chain:info --ws wss://poc3-rpc.polkadot.io`
 
 export default {
   chain: 'Alexander',

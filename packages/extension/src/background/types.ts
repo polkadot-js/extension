@@ -7,8 +7,12 @@ import { SignerPayloadJSON } from '@polkadot/types/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 type KeysWithDefinedValues<T> = {
-  [K in keyof T]: undefined extends T[K] ? K : never
+  [K in keyof T]: T[K] extends undefined ? never : K
 }[keyof T];
+
+type NoUndefinedValues<T> = {
+  [K in KeysWithDefinedValues<T>]: T[K]
+};
 
 type IsNull<T, K extends keyof T> = { [K1 in Exclude<keyof T, K>]: T[K1] } & T[K] extends null ? K : never;
 
@@ -160,12 +164,25 @@ export type ResponseTypes = {
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][1]
 };
 
-export interface TransportResponseMessage<TMessageType extends MessageTypes> {
+interface TransportResponseMessageSub<TMessageType extends MessageTypesWithSubscriptions> {
   error?: string;
   id: string;
   response?: ResponseTypes[TMessageType];
   subscription?: SubscriptionMessageTypes[TMessageType];
 }
+
+interface TransportResponseMessageNoSub<TMessageType extends MessageTypesWithNoSubscriptions> {
+  error?: string;
+  id: string;
+  response?: ResponseTypes[TMessageType];
+}
+
+export type TransportResponseMessage<TMessageType extends MessageTypes> =
+  TMessageType extends MessageTypesWithNoSubscriptions
+    ? TransportResponseMessageNoSub<TMessageType>
+    : TMessageType extends MessageTypesWithSubscriptions
+      ? TransportResponseMessageSub<TMessageType>
+      : never;
 
 export interface ResponseExtrinsicSign {
   id: string;
@@ -184,8 +201,10 @@ export interface ResponseSeedValidate {
 
 // Subscriptions
 
-export type SubscriptionMessageTypes = {
+export type SubscriptionMessageTypes = NoUndefinedValues<{
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][2]
-};
+}>;
 
-export type MessageTypesWithNoSubscriptions = KeysWithDefinedValues<SubscriptionMessageTypes>;
+export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
+
+export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>;

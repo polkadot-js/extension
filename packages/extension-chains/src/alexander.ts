@@ -1,3 +1,9 @@
+// Copyright 2019 @polkadot/extension-chains authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
+
+// Generated via (in api) `yarn chain:info --ws wss://poc3-rpc.polkadot.io`
+
 export default {
   chain: 'Alexander',
   genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',

@@ -15,15 +15,15 @@ export default function Unlock ({ className, onSign }: Props): React.ReactElemen
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
-  const onClick = (): Promise<void> =>
-    onSign(password)
-      .catch((error): void => setError(error.message));
-
   useEffect((): void => {
     if (error) {
       setError('');
     }
   }, [password]);
+
+  const _onClick = (): Promise<void> =>
+    onSign(password)
+      .catch((error): void => setError(error.message));
 
   return (
     <div className={className}>
@@ -36,7 +36,7 @@ export default function Unlock ({ className, onSign }: Props): React.ReactElemen
       />
       <Button
         label='Sign the transaction'
-        onClick={onClick}
+        onClick={_onClick}
       />
     </div>
   );

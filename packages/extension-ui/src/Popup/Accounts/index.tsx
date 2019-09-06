@@ -4,11 +4,14 @@
 
 import React, { useContext } from 'react';
 
-import { AccountContext, Button, Header, Link, Tip } from '../../components';
+import { AccountContext, Button, Header, Link, MediaContext, Tip } from '../../components';
 import Account from './Account';
 
-export default function Accounts (): React.ReactElement<{}> {
+type Props = {};
+
+export default function Accounts (): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
+  const mediaAllowed = useContext(MediaContext);
 
   return (
     <div>
@@ -19,10 +22,10 @@ export default function Accounts (): React.ReactElement<{}> {
       {
         (accounts.length === 0)
           ? <Tip header='add accounts' type='warn'>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
-          : accounts.map(({ address }): React.ReactNode => (
+          : accounts.map((json, index): React.ReactNode => (
             <Account
-              address={address}
-              key={address}
+              {...json}
+              key={`${index}:${json.address}`}
             />
           ))
       }
@@ -32,8 +35,14 @@ export default function Accounts (): React.ReactElement<{}> {
       />
       <Button
         label='I have a pre-existing seed, import the account'
-        to='/account/import'
+        to='/account/import-seed'
       />
+      {mediaAllowed && (
+        <Button
+          label='I have an external account, add it via QR'
+          to='/account/import-qr'
+        />
+      )}
     </div>
   );
 }

@@ -5,6 +5,8 @@
     "paths": {
       "@polkadot/extension": ["packages/extension/src"],
       "@polkadot/extension/*": ["packages/extension/src/*"],
+      "@polkadot/extension-chains": ["packages/extension-chains/src"],
+      "@polkadot/extension-chains/*": ["packages/extension-chains/src/*"],
       "@polkadot/extension-dapp": ["packages/extension-dapp/src"],
       "@polkadot/extension-dapp/*": ["packages/extension-dapp/src/*"],
       "@polkadot/extension-inject": ["packages/extension-inject/src"],

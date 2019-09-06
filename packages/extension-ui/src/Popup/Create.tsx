@@ -23,7 +23,7 @@ export default function Create (): React.ReactElement<Props> {
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
-  const onCreate = (): void => {
+  const _onCreate = (): void => {
     // this should always be the case
     if (name && password && account) {
       createAccountSuri(name, password, account.seed)
@@ -55,7 +55,7 @@ export default function Create (): React.ReactElement<Props> {
             >
               <Button
                 label='Add the account with the generated seed'
-                onClick={onCreate}
+                onClick={_onCreate}
               />
             </Address>
           )}

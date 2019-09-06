@@ -3,10 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountJson } from '@polkadot/extension/background/types';
+import { Chain } from '@polkadot/extension-chains/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import findChain from '@polkadot/extension-chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -19,12 +21,40 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   name?: React.ReactNode | null;
+  genesisHash?: string | null;
   theme?: 'polkadot' | 'substrate';
 }
 
-function Address ({ address, children, className, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
+// find an account in our list
+function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
+  const pkStr = publicKey.toString();
+
+  return accounts.find(({ address }): boolean =>
+    decodeAddress(address).toString() === pkStr
+  ) || null;
+}
+
+// recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
+function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: string | null): [string, AccountJson | null, Chain] {
+  // decode and create a shortcut for the encoded address
+  const publicKey = decodeAddress(address);
+
+  // find our account using the actual publicKey, and then find the associated chain
+  const account = findAccount(accounts, publicKey);
+  const chain = findChain((account && account.genesisHash) || genesisHash);
+
+  return [
+    // always allow the actual settings to override the display
+    encodeAddress(publicKey, (settings.prefix === -1 ? chain.ss58Format : settings.prefix) as Prefix),
+    account,
+    chain
+  ];
+}
+
+function Address ({ address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<AccountJson | null>(null);
+  const [chain, setChain] = useState<Chain | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect((): void => {
@@ -32,21 +62,16 @@ function Address ({ address, children, className, name, theme = 'polkadot' }: Pr
       return;
     }
 
-    const addrU8a = decodeAddress(address);
-    const addrU8aStr = addrU8a.toString();
+    const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
 
-    setFormatted(
-      encodeAddress(addrU8a, (settings.prefix === -1 ? 42 : settings.prefix) as Prefix)
-    );
-    setAccount(
-      accounts.find((account): boolean =>
-        decodeAddress(account.address).toString() === addrU8aStr
-      ) || null
-    );
+    setFormatted(formatted);
+    setChain(chain);
+    setAccount(account);
   }, [address]);
 
   return (
     <IconBox
+      banner={chain && chain.genesisHash && chain.name}
       className={className}
       icon={
         <Identicon

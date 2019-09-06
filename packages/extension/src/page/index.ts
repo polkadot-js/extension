@@ -2,10 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
+
 import { injectExtension } from '@polkadot/extension-inject';
 
 import Injected from './Injected';
-import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader

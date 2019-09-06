@@ -20,11 +20,11 @@ interface Props {
 
 function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const onApprove = (): Promise<void> =>
+  const _onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  const onReject = (): Promise<void> =>
+  const _onReject = (): Promise<void> =>
     rejectAuthRequest(authId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
@@ -35,7 +35,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
       icon={
         <Icon
           icon='X'
-          onClick={onReject}
+          onClick={_onReject}
         />
       }
       intro={
@@ -43,14 +43,14 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
       }
     >
       <ActionBar>
-        <Link isDanger onClick={onReject}>Reject</Link>
+        <Link isDanger onClick={_onReject}>Reject</Link>
       </ActionBar>
       {isFirst && (
         <>
           <Tip header='access' type='warn'>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</Tip>
           <Button
             label='Yes, allow this application access'
-            onClick={onApprove}
+            onClick={_onApprove}
           />
         </>
       )}

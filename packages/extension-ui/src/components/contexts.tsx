@@ -12,11 +12,13 @@ const noop = (to?: string): void => {};
 const AccountContext = React.createContext<AccountJson[]>([]);
 const ActionContext = React.createContext<(to?: string) => void>(noop);
 const AuthorizeContext = React.createContext<AuthorizeRequest[]>([]);
+const MediaContext = React.createContext<boolean>(false);
 const SigningContext = React.createContext<SigningRequest[]>([]);
 
 export {
   AccountContext,
   ActionContext,
   AuthorizeContext,
+  MediaContext,
   SigningContext
 };

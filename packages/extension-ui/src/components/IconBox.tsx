@@ -9,6 +9,7 @@ import Box from './Box';
 import defaults from './defaults';
 
 interface Props {
+  banner?: React.ReactNode;
   children?: React.ReactNode;
   className?: string;
   icon: React.ReactNode;
@@ -17,10 +18,13 @@ interface Props {
   theme?: 'polkadot' | 'substrate';
 }
 
-function IconBox ({ children, className, icon, intro }: Props): React.ReactElement<Props> {
+function IconBox ({ banner, children, className, icon, intro }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <Box className='details'>
+      <Box
+        banner={banner}
+        className='details'
+      >
         <div className='intro'>{intro}</div>
         <div className='children'>{children}</div>
       </Box>

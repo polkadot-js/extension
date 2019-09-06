@@ -2,49 +2,70 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { RequestExtrinsicSign } from '@polkadot/extension/background/types';
+import { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { AccountJson, RequestExtrinsicSign } from '@polkadot/extension/background/types';
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Link } from '../../components';
-import { approveSignPassword, cancelSignRequest } from '../../messaging';
+import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
 import Details from './Details';
+import Qr from './Qr';
 import Unlock from './Unlock';
 
 interface Props {
+  account: AccountJson;
   isFirst: boolean;
   request: RequestExtrinsicSign;
   signId: string;
   url: string;
 }
 
-export default function Request ({ isFirst, request, signId, url }: Props): React.ReactElement<Props> {
+export default function Request ({ account: { isExternal }, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
-  const onCancel = (): Promise<void> =>
+  const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
+
+  useEffect((): void => {
+    setPayload(createType('ExtrinsicPayload', request, { version: request.version }));
+  }, [request]);
+
+  if (!payload) {
+    return null;
+  }
+
+  const _onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  const onSign = (password: string): Promise<void> =>
+  const _onSign = (password: string): Promise<void> =>
     approveSignPassword(signId, password)
-      .then((): void => onAction());
-  const blockNumber = createType('BlockNumber', request.blockNumber);
-  const payload = createType('ExtrinsicPayload', request, { version: request.version });
+      .then((): void => onAction())
+      .catch((error: Error) => console.error(error));
+  const _onSignature = ({ signature }: { signature: string }): Promise<void> =>
+    approveSignSignature(signId, signature)
+      .then((): void => onAction())
+      .catch((error: Error) => console.error(error));
 
   return (
     <Address address={request.address}>
-      <Details
-        blockNumber={blockNumber}
-        genesisHash={request.genesisHash}
-        isDecoded={isFirst}
-        method={request.method}
-        payload={payload}
-        url={url}
-      />
+      {isExternal && isFirst
+        ? <Qr
+          payload={payload}
+          request={request}
+          onSignature={_onSignature}
+        />
+        : <Details
+          isDecoded={isFirst}
+          payload={payload}
+          request={request}
+          url={url}
+        />
+      }
+      {isFirst && !isExternal && <Unlock onSign={_onSign} />}
       <ActionBar>
-        <Link isDanger onClick={onCancel}>Cancel</Link>
+        <Link isDanger onClick={_onCancel}>Cancel</Link>
       </ActionBar>
-      {isFirst && <Unlock onSign={onSign} />}
     </Address>
   );
 }

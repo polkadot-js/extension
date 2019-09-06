@@ -3,12 +3,13 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { BlockNumber, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
-import findChain from '@polkadot/extension/chains';
-import { GenericCall, Metadata } from '@polkadot/types';
+import findChain from '@polkadot/extension-chains';
+import { createType, GenericCall, Metadata } from '@polkadot/types';
 import { formatNumber } from '@polkadot/util';
 
 interface MethodJson {
@@ -17,12 +18,10 @@ interface MethodJson {
 }
 
 interface Props {
-  blockNumber: BlockNumber;
   className?: string;
-  genesisHash: string;
   isDecoded: boolean;
-  method: string;
   payload: ExtrinsicPayload;
+  request: SignerPayloadJSON;
   url: string;
 }
 
@@ -75,7 +74,10 @@ function renderMortality (era: ExtrinsicEra, blockNumber: BlockNumber): string {
   return `mortal, valid from #${formatNumber(mortal.birth(blockNumber))} to #${formatNumber(mortal.death(blockNumber))}`;
 }
 
-function Details ({ blockNumber, className, genesisHash, isDecoded, method, payload: { era, nonce, tip }, url }: Props): React.ReactElement<Props> {
+function Details ({ className, isDecoded, payload, request, url }: Props): React.ReactElement<Props> {
+  const blockNumber = createType('BlockNumber', request.blockNumber);
+  const { genesisHash, method } = request;
+  const { era, nonce, tip } = payload;
   const chain = findChain(genesisHash);
 
   return (
@@ -99,7 +101,7 @@ function Details ({ blockNumber, className, genesisHash, isDecoded, method, payl
             <td className='data'>{formatNumber(tip)}</td>
           </tr>
         )}
-        {renderMethod(method, (chain && isDecoded) ? chain.meta : null)}
+        {renderMethod(method, isDecoded ? chain.meta : null)}
         <tr>
           <td className='label'>lifetime</td>
           <td className='data'>{renderMortality(era, blockNumber)}</td>

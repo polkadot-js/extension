@@ -77,6 +77,8 @@ interface Injected {
 interface Account = {
   // ss-58 encoded address
   readonly address: string;
+  // the genesisHash for this account (empty if applicable to all)
+  readonly genesisHash?: string;
   // (optional) name for display
   readonly name?: string;
 };

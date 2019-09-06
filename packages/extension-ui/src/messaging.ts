@@ -66,14 +66,6 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function getAccounts (): Promise<AccountJson[]> {
-  return sendMessage('pri(accounts.list)');
-}
-
-export async function getAuthRequests (): Promise<AuthorizeRequest[]> {
-  return sendMessage('pri(authorize.requests)');
-}
-
 export async function rejectAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.reject)', { id });
 }
@@ -82,16 +74,20 @@ export async function approveAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.approve)', { id });
 }
 
-export async function getSignRequests (): Promise<SigningRequest[]> {
-  return sendMessage('pri(signing.requests)');
-}
-
 export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
 }
 
 export async function approveSignPassword (id: string, password: string): Promise<boolean> {
   return sendMessage('pri(signing.approve.password)', { id, password });
+}
+
+export async function approveSignSignature (id: string, signature: string): Promise<boolean> {
+  return sendMessage('pri(signing.approve.signature)', { id, signature });
+}
+
+export async function createAccountExternal (name: string, address: string, genesisHash: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
 }
 
 export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {

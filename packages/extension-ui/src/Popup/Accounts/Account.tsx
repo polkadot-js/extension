@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { AccountJson } from '@polkadot/extension/background/types';
+
 import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
@@ -9,7 +11,7 @@ import { ActionBar, ActionContext, Address, Link } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
-interface Props {
+interface Props extends AccountJson {
   address: string;
   className?: string;
 }
@@ -19,22 +21,22 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
 
-  const toggleEdit = (): void =>
-    setEditing(!isEditing);
-  const saveChanges = (): void => {
+  const _toggleEdit = (): void => setEditing(!isEditing);
+  const _saveChanges = (): void => {
     if (editedName && editedName !== name) {
       editAccount(address, editedName)
         .then((): void => onAction())
         .catch((error: Error) => console.error(error));
     }
 
-    toggleEdit();
+    _toggleEdit();
   };
 
   return (
     <Address
       address={address}
       className={className}
+      name={editedName}
     >
       {isEditing && (
         <Name
@@ -42,12 +44,12 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
           className='edit-name'
           isFocussed
           label={null}
-          onBlur={saveChanges}
+          onBlur={_saveChanges}
           onChange={setName}
         />
       )}
       <ActionBar>
-        <Link onClick={toggleEdit}>Edit</Link>
+        <Link onClick={_toggleEdit}>Edit</Link>
         <Link to={`/account/forget/${address}`}>Forget</Link>
       </ActionBar>
     </Address>
@@ -56,7 +58,7 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
 
 export default styled(Account)`
   .edit-name {
-    left: 4.75rem;
+    left: 3rem;
     position: absolute;
     right: 0.75rem;
     top: -0.5rem;

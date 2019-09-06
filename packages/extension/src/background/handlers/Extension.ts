@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, RequestAccountCreateSuri, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
+import { AccountJson, AuthorizeRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -18,7 +18,10 @@ const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json }): AccountJson => json);
+  return Object.values(accounts).map(({ json: { address, meta } }): AccountJson => ({
+    address,
+    ...meta
+  }));
 }
 
 export default class Extension {
@@ -26,6 +29,12 @@ export default class Extension {
 
   public constructor (state: State) {
     this.state = state;
+  }
+
+  private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
+    keyring.addExternal(address, { name, genesisHash });
+
+    return true;
   }
 
   private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
@@ -48,10 +57,6 @@ export default class Extension {
     keyring.forgetAccount(address);
 
     return true;
-  }
-
-  private accountsList (): AccountJson[] {
-    return transformAccounts(accountsObservable.subject.getValue());
   }
 
   // FIXME This looks very much like what we have in Tabs
@@ -91,10 +96,6 @@ export default class Extension {
     reject(new Error('Rejected'));
 
     return true;
-  }
-
-  private authorizeRequests (): AuthorizeRequest[] {
-    return this.state.allAuthRequests;
   }
 
   // FIXME This looks very much like what we have in accounts
@@ -162,6 +163,18 @@ export default class Extension {
     return true;
   }
 
+  private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
+    const queued = this.state.getSignRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { resolve } = queued;
+
+    resolve({ id, signature });
+
+    return true;
+  }
+
   private signingCancel ({ id }: RequestSigningCancel): boolean {
     const queued = this.state.getSignRequest(id);
 
@@ -172,10 +185,6 @@ export default class Extension {
     reject(new Error('Cancelled'));
 
     return true;
-  }
-
-  private signingRequests (): SigningRequest[] {
-    return this.state.allSignRequests;
   }
 
   // FIXME This looks very much like what we have in authorization
@@ -203,11 +212,11 @@ export default class Extension {
       case 'pri(authorize.reject)':
         return this.authorizeReject(request as RequestAuthorizeApprove);
 
-      case 'pri(authorize.requests)':
-        return this.authorizeRequests();
-
       case 'pri(authorize.subscribe)':
         return this.authorizeSubscribe(id, port);
+
+      case 'pri(accounts.create.external)':
+        return this.accountsCreateExternal(request as RequestAccountCreateExternal);
 
       case 'pri(accounts.create.suri)':
         return this.accountsCreateSuri(request as RequestAccountCreateSuri);
@@ -217,9 +226,6 @@ export default class Extension {
 
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);
-
-      case 'pri(accounts.list)':
-        return this.accountsList();
 
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
@@ -233,11 +239,11 @@ export default class Extension {
       case 'pri(signing.approve.password)':
         return this.signingApprovePassword(request as RequestSigningApprovePassword);
 
+      case 'pri(signing.approve.signature)':
+        return this.signingApproveSignature(request as RequestSigningApproveSignature);
+
       case 'pri(signing.cancel)':
         return this.signingCancel(request as RequestSigningCancel);
-
-      case 'pri(signing.requests)':
-        return this.signingRequests();
 
       case 'pri(signing.subscribe)':
         return this.signingSubscribe(id, port);

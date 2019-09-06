@@ -14,8 +14,8 @@ import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
-  return Object.values(accounts).map(({ json: { address, meta: { name } } }): InjectedAccount => ({
-    address, name
+  return Object.values(accounts).map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
+    address, genesisHash, name
   }));
 }
 
@@ -56,7 +56,7 @@ export default class Tabs {
 
     assert(pair, 'Unable to find keypair');
 
-    return this.state.signQueue(url, request);
+    return this.state.signQueue(url, request, { address, ...pair.meta });
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {

@@ -18,7 +18,10 @@ const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json }): AccountJson => json);
+  return Object.values(accounts).map(({ json: { address, meta} }): AccountJson => ({
+    address,
+    ...meta
+  }));
 }
 
 export default class Extension {

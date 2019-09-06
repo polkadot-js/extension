@@ -28,7 +28,7 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
+  private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
     keyring.addUri(suri, password, { genesisHash, name }, type);
 
     return true;
@@ -133,7 +133,7 @@ export default class Extension {
     };
   }
 
-  private signingApprove ({ id, password }: RequestSigningApprovePassword): boolean {
+  private signingApprovePassword ({ id, password }: RequestSigningApprovePassword): boolean {
     const queued = this.state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -210,7 +210,7 @@ export default class Extension {
         return this.authorizeSubscribe(id, port);
 
       case 'pri(accounts.create.suri)':
-        return this.accountsCreate(request as RequestAccountCreateSuri);
+        return this.accountsCreateSuri(request as RequestAccountCreateSuri);
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
@@ -231,7 +231,7 @@ export default class Extension {
         return this.seedValidate(request as RequestSeedValidate);
 
       case 'pri(signing.approve.password)':
-        return this.signingApprove(request as RequestSigningApprovePassword);
+        return this.signingApprovePassword(request as RequestSigningApprovePassword);
 
       case 'pri(signing.cancel)':
         return this.signingCancel(request as RequestSigningCancel);

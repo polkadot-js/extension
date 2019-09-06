@@ -71,13 +71,13 @@ export default class State {
   public get allAuthRequests (): AuthorizeRequest[] {
     return Object
       .values(this._authRequests)
-      .map(({ id, request, url }): AuthorizeRequest => [id, request, url]);
+      .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
   }
 
   public get allSignRequests (): SigningRequest[] {
     return Object
       .values(this._signRequests)
-      .map(({ id, request, url }): SigningRequest => [id, request, url]);
+      .map(({ id, request, url }): SigningRequest => ({ id, request, url }));
   }
 
   private popupClose (): void {

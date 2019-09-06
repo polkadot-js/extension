@@ -19,9 +19,17 @@ type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
 
 export type SeedLengths = 12 | 24;
 
-export type AuthorizeRequest = [string, RequestAuthorizeTab, string];
+export interface AuthorizeRequest {
+  id: string;
+  request: RequestAuthorizeTab;
+  url: string;
+}
 
-export type SigningRequest = [string, RequestExtrinsicSign, string];
+export interface SigningRequest {
+  id: string;
+  request: RequestExtrinsicSign;
+  url: string;
+}
 
 export interface AccountJson {
   address: string;

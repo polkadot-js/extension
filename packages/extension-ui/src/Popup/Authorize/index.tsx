@@ -13,7 +13,7 @@ export default function Authorize (): React.ReactElement<{}> {
   return (
     <div>
       <Header label='authorize' />
-      {requests.map(([id, request, url], index): React.ReactNode => (
+      {requests.map(({ id, request, url }, index): React.ReactNode => (
         <Request
           authId={id}
           isFirst={index === 0}

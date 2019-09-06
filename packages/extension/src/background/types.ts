@@ -96,21 +96,23 @@ export type RequestAuthorizeRequests = null;
 
 export type RequestAuthorizeSubscribe = null;
 
+export interface RequestAccountCreateExternal {
+  address: string;
+  genesisHash?: string | null;
+  name: string;
+}
+
 export interface RequestAccountCreateSuri {
   name: string;
+  genesisHash?: string | null;
   password: string;
   suri: string;
   type?: KeypairType;
 }
 
-export interface RequestAccountCreateExternal {
-  address: string;
-  genesisHash: string;
-  name: string;
-}
-
 export interface RequestAccountEdit {
   address: string;
+  genesisHash?: string | null;
   name: string;
 }
 

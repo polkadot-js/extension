@@ -34,8 +34,8 @@ export default class Extension {
     return true;
   }
 
-  private accountsCreateSuri ({ name, password, suri, type }: RequestAccountCreateSuri): boolean {
-    keyring.addUri(suri, password, { name }, type);
+  private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
+    keyring.addUri(suri, password, { genesisHash, name }, type);
 
     return true;
   }

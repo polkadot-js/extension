@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountsFromCtx, OnActionFromCtx, AuthRequestsFromCtx, SignRequestsFromCtx } from './types';
+import { AccountJson, AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
 
 import React from 'react';
 
@@ -11,11 +11,11 @@ const noop = (to?: string): void => {
   // do nothing
 };
 
-const AccountContext = React.createContext<AccountsFromCtx>([]);
-const ActionContext = React.createContext<OnActionFromCtx>(noop);
-const AuthorizeContext = React.createContext<AuthRequestsFromCtx>([]);
+const AccountContext = React.createContext<AccountJson[]>([]);
+const ActionContext = React.createContext<(to?: string) => void>(noop);
+const AuthorizeContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
-const SigningContext = React.createContext<SignRequestsFromCtx>([]);
+const SigningContext = React.createContext<SigningRequest[]>([]);
 
 export {
   AccountContext,

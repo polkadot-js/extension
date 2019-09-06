@@ -22,7 +22,7 @@ export default function Name ({ address, className, defaultValue, isFocussed, la
   const accounts = useContext(AccountContext);
   const [name, setName] = useState('');
   const account = accounts.find((account): boolean => account.address === address);
-  const startValue = (account && account.meta.name) || defaultValue;
+  const startValue = (account && account.name) || defaultValue;
   const isError = !name && startValue
     ? false
     : (name.length < MIN_LENGTH);

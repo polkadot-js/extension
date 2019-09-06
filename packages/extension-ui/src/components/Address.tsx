@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { AccountJson } from '@polkadot/extension/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
@@ -26,7 +26,7 @@ interface Props {
 }
 
 // find an account in our list
-function findAccount (accounts: KeyringJson[], publicKey: Uint8Array): KeyringJson | null {
+function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
   return accounts.find(({ address }): boolean =>
@@ -35,13 +35,13 @@ function findAccount (accounts: KeyringJson[], publicKey: Uint8Array): KeyringJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: string | null): [string, KeyringJson | null, Chain] {
+function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: string | null): [string, AccountJson | null, Chain] {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
   const account = findAccount(accounts, publicKey);
-  const chain = findChain((account && account.meta.genesisHash) || genesisHash);
+  const chain = findChain((account && account.genesisHash) || genesisHash);
 
   return [
     // always allow the actual settings to override the display
@@ -53,7 +53,7 @@ function recodeAddress (address: string, accounts: KeyringJson[], genesisHash?: 
 
 function Address ({ address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
-  const [account, setAccount] = useState<KeyringJson | null>(null);
+  const [account, setAccount] = useState<AccountJson | null>(null);
   const [chain, setChain] = useState<Chain | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
@@ -83,7 +83,7 @@ function Address ({ address, children, className, genesisHash, name, theme = 'po
       }
       intro={
         <>
-          <div className='name'>{name || (account && account.meta.name) || '<unknown>'}</div>
+          <div className='name'>{name || (account && account.name) || '<unknown>'}</div>
           <div className='address'>{formatted || '<unknown>'}</div>
         </>
       }

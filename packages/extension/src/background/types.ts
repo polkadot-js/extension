@@ -15,6 +15,13 @@ type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T]
 
 export type SeedLengths = 12 | 24;
 
+export interface AccountJson {
+  address: string;
+  genesisHash?: string | null;
+  isExternal?: boolean;
+  name?: string;
+}
+
 export interface AuthorizeRequest {
   id: string;
   request: RequestAuthorizeTab;
@@ -22,17 +29,10 @@ export interface AuthorizeRequest {
 }
 
 export interface SigningRequest {
+  account: AccountJson;
   id: string;
-  isExternal: boolean;
   request: RequestExtrinsicSign;
   url: string;
-}
-
-export interface AccountJson {
-  address: string;
-  genesisHash?: string | null;
-  isExternal?: boolean;
-  name?: string;
 }
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]

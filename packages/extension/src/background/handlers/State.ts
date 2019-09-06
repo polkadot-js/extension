@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
@@ -26,8 +26,8 @@ type AuthUrls = Record<string, {
 }>;
 
 interface SignRequest {
+  account: AccountJson;
   id: string;
-  isExternal: boolean;
   request: RequestExtrinsicSign;
   resolve: (result: ResponseExtrinsicSign) => void;
   reject: (error: Error) => void;
@@ -78,7 +78,7 @@ export default class State {
   public get allSignRequests (): SigningRequest[] {
     return Object
       .values(this._signRequests)
-      .map(({ id, isExternal, request, url }): SigningRequest => ({ id, isExternal, request, url }));
+      .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
   }
 
   private popupClose (): void {
@@ -211,13 +211,13 @@ export default class State {
     return this._signRequests[id];
   }
 
-  public signQueue (url: string, request: RequestExtrinsicSign, isExternal = false): Promise<ResponseExtrinsicSign> {
+  public signQueue (url: string, request: RequestExtrinsicSign, account: AccountJson): Promise<ResponseExtrinsicSign> {
     const id = getId();
 
     return new Promise((resolve, reject): void => {
       this._signRequests[id] = {
+        account,
         id,
-        isExternal,
         request,
         resolve: this.signComplete(id, resolve),
         reject: this.signComplete(id, reject),

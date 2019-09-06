@@ -2,8 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
+import { AccountJson, AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useEffect, useState } from 'react';
@@ -45,7 +44,7 @@ const { prefix } = settings.get();
 setAddressPrefix((prefix === -1 ? 42 : prefix) as Prefix);
 
 export default function Popup (): React.ReactElement<{}> {
-  const [accounts, setAccounts] = useState<null | KeyringJson[]>(null);
+  const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
   const [mediaAllowed, setMediaAllowed] = useState(false);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);

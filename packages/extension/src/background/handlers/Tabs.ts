@@ -61,7 +61,7 @@ export default class Tabs {
 
     assert(pair, 'Unable to find keypair');
 
-    return this.state.signQueue(url, request, pair.meta.isExternal);
+    return this.state.signQueue(url, request, { address, ...pair.meta });
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {

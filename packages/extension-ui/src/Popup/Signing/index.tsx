@@ -13,9 +13,9 @@ export default function Signing (): React.ReactElement<{}> {
   return (
     <div>
       <Header label='transactions' />
-      {requests.map(({ id, isExternal, request, url }, index): React.ReactNode => (
+      {requests.map(({ account, id, request, url }, index): React.ReactNode => (
         <Request
-          isExternal={isExternal}
+          account={account}
           isFirst={index === 0}
           key={id}
           request={request}

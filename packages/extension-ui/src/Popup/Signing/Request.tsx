@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { RequestExtrinsicSign } from '@polkadot/extension/background/types';
+import { AccountJson, RequestExtrinsicSign } from '@polkadot/extension/background/types';
 
 import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
@@ -15,14 +15,14 @@ import Qr from './Qr';
 import Unlock from './Unlock';
 
 interface Props {
-  isExternal: boolean;
+  account: AccountJson;
   isFirst: boolean;
   request: RequestExtrinsicSign;
   signId: string;
   url: string;
 }
 
-export default function Request ({ isExternal, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
 

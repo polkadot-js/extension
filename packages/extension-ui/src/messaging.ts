@@ -2,8 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions } from '@polkadot/extension/background/types';
-import { KeyringJson } from '@polkadot/ui-keyring/types';
+import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions } from '@polkadot/extension/background/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
@@ -66,7 +65,7 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function getAccounts (): Promise<KeyringJson[]> {
+export async function getAccounts (): Promise<AccountJson[]> {
   return sendMessage('pri(accounts.list)');
 }
 
@@ -110,7 +109,7 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-export async function subscribeAccounts (cb: (accounts: KeyringJson[]) => void): Promise<boolean> {
+export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 

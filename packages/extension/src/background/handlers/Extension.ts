@@ -62,7 +62,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );
@@ -105,7 +105,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'pri(authorize.subscribe)'>(id, port);
     const subscription = this.state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
     );
@@ -198,7 +198,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'pri(signing.subscribe)'>(id, port);
     const subscription = this.state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
@@ -211,7 +211,7 @@ export default class Extension {
     return true;
   }
 
-  // This is actually weird... the disable is not needed in Tabs.ts
+  // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     switch (type) {

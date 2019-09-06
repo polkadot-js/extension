@@ -11,10 +11,10 @@ import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
 import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import IconBox from './IconBox';
 import { AccountContext } from './contexts';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 interface Props {
   address?: string | null;

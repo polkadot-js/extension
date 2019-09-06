@@ -4,7 +4,7 @@
 
 import React, { useContext } from 'react';
 
-import { AccountContext, Button, Header, Link, MediaContext, Tip, unicode } from '../../components';
+import { AccountContext, Button, Header, Link, MediaContext, Tip } from '../../components';
 import Account from './Account';
 
 type Props = {};
@@ -17,7 +17,7 @@ export default function Accounts (): React.ReactElement<Props> {
     <div>
       <Header
         label='accounts'
-        labelExtra={<Link to='/settings'>Settings {unicode.FWD}</Link>}
+        labelExtra={<Link to='/settings'>Settings</Link>}
       />
       {
         (accounts.length === 0)

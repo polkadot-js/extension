@@ -206,5 +206,4 @@ export type SubscriptionMessageTypes = NoUndefinedValues<{
 }>;
 
 export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
-
-export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>;
+export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>

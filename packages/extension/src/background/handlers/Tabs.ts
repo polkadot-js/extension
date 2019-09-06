@@ -37,7 +37,7 @@ export default class Tabs {
 
   // FIXME This looks very much like what we have in Extension
   private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription(id, port);
+    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(transformAccounts(accounts))
     );

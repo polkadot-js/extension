@@ -28,6 +28,7 @@ export default styled(Link)`
   color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
   opacity: 0.9;
   text-decoration: none;
+  vertical-align: middle;
 
   &:hover {
     color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};

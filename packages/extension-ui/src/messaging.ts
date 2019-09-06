@@ -2,12 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '@polkadot/extension/background/types';
+import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '@polkadot/extension/background/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
 import { PORT_POPUP } from '@polkadot/extension/defaults';
-import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +66,7 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function getAccounts (): Promise<InjectedAccount[]> {
+export async function getAccounts (): Promise<AccountJson[]> {
   return sendMessage('pri(accounts.list)');
 }
 
@@ -103,7 +102,7 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-export async function subscribeAccounts (cb: (accounts: InjectedAccount[]) => void): Promise<boolean> {
+export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 

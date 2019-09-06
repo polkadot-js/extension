@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { AccountJson } from '@polkadot/extension/background/types';
 import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
@@ -24,7 +24,7 @@ interface Props {
 
 function Address ({ address, children, className, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
-  const [account, setAccount] = useState<InjectedAccount | null>(null);
+  const [account, setAccount] = useState<AccountJson | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
 
   useEffect((): void => {

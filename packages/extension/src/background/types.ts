@@ -90,6 +90,7 @@ export type RequestAuthorizeSubscribe = null;
 
 export interface RequestAccountCreateSuri {
   name: string;
+  genesisHash?: string | null;
   password: string;
   suri: string;
   type?: KeypairType;
@@ -97,6 +98,7 @@ export interface RequestAccountCreateSuri {
 
 export interface RequestAccountEdit {
   address: string;
+  genesisHash?: string | null;
   name: string;
 }
 

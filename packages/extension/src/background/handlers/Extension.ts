@@ -28,8 +28,8 @@ export default class Extension {
     this.state = state;
   }
 
-  private accountsCreate ({ name, password, suri, type }: RequestAccountCreateSuri): boolean {
-    keyring.addUri(suri, password, { name }, type);
+  private accountsCreate ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
+    keyring.addUri(suri, password, { genesisHash, name }, type);
 
     return true;
   }

@@ -96,7 +96,7 @@ export default class State {
       left: 150,
       top: 150,
       type: 'popup',
-      url: extension.extension.getURL('popup.html'),
+      url: extension.extension.getURL('index.html'),
       width: 480
     }, (window?: chrome.windows.Window): void => {
       if (window) {

@@ -12,7 +12,7 @@
   },
   "browser_action": {
     "default_title": "polkadot{.js}",
-    "default_popup": "popup.html"
+    "default_popup": "index.html"
   },
   "content_scripts": [{
     "js": ["content.js"],

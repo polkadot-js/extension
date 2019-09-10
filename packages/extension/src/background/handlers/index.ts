@@ -4,7 +4,7 @@
 
 import { TransportRequestMessage, MessageTypes } from '../types';
 
-import { PORT_POPUP } from '../../defaults';
+import { PORT_EXTENSION } from '../../defaults';
 import Extension from './Extension';
 import State from './State';
 import Tabs from './Tabs';
@@ -14,16 +14,16 @@ const extension = new Extension(state);
 const tabs = new Tabs(state);
 
 export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port): void {
-  const isPopup = port.name === PORT_POPUP;
+  const isExtension = port.name === PORT_EXTENSION;
   const sender = port.sender as chrome.runtime.MessageSender;
-  const from = isPopup
-    ? 'popup'
+  const from = isExtension
+    ? 'extension'
     : (sender.tab && sender.tab.url) || sender.url || '<unknown>';
   const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
 
-  const promise = isPopup
+  const promise = isExtension
     ? extension.handle(id, message, request, port)
     : tabs.handle(id, message, request, from, port);
 

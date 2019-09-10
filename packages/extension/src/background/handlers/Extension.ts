@@ -5,6 +5,7 @@
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { AccountJson, AuthorizeRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
+import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { createType } from '@polkadot/types';
@@ -202,6 +203,14 @@ export default class Extension {
     return true;
   }
 
+  private windowOpen (): boolean {
+    extension.tabs.create({
+      url: extension.extension.getURL('index.html')
+    });
+
+    return true;
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
@@ -247,6 +256,9 @@ export default class Extension {
 
       case 'pri(signing.subscribe)':
         return this.signingSubscribe(id, port);
+
+      case 'pri(window.open)':
+        return this.windowOpen();
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

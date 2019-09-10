@@ -17,7 +17,7 @@ export default function Accounts (): React.ReactElement<Props> {
     <div>
       <Header
         label='accounts'
-        labelExtra={<Link to='/settings'>Settings</Link>}
+        labelExtra={<Link to='/settings'>Options</Link>}
       />
       {
         (accounts.length === 0)

@@ -57,6 +57,7 @@ export interface RequestSignatures {
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.subscribe)': [RequestSigningSubscribe, boolean, SigningRequest[]];
+  'pri(window.open)': [null, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -77,7 +78,7 @@ export type MessageTypesWithNullRequest = NullKeys<RequestTypes>
 export interface TransportRequestMessage<TMessageType extends MessageTypes> {
   id: string;
   message: TMessageType;
-  origin: 'page' | 'popup';
+  origin: 'page' | 'extension';
   request: RequestTypes[TMessageType];
 }
 

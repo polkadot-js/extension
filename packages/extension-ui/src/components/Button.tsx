@@ -14,7 +14,7 @@ interface Props {
   isDisabled?: boolean;
   isSmall?: boolean;
   label?: string;
-  onClick?: () => void | Promise<void>;
+  onClick?: () => void | Promise<void | boolean>;
   to?: string;
 }
 

@@ -2046,14 +2046,14 @@
     "@polkadot/util" "^1.2.1"
     "@polkadot/util-crypto" "^1.2.1"
 
-"@polkadot/react-identicon@^0.43.0-beta.11":
-  version "0.43.0-beta.11"
-  resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.43.0-beta.11.tgz#cbbe5b6a1acad78637485a8a53732fd53b18ab70"
-  integrity sha512-YYN9z6ibMFkU8wiMt63F39NhjhEc1kv3jKczZnhFHSBMruKOW+9zKjWuYSZmd+vmCqNED77QuVs5tw/FZLuLlA==
+"@polkadot/react-identicon@^0.43.1":
+  version "0.43.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.43.1.tgz#32cedf7c5a9aa7b578ba87431536c47c82b46126"
+  integrity sha512-5xbeQSxORLEdnl6rMq9k4xc8rlucLH7R+ZWNWuhtq17kjovFbNbkDSF3xHgsRrJHarRZsvg564HMqJfdrYxzrQ==
   dependencies:
     "@babel/runtime" "^7.5.5"
-    "@polkadot/ui-settings" "^0.43.0-beta.11"
-    "@polkadot/ui-shared" "^0.43.0-beta.11"
+    "@polkadot/ui-settings" "^0.43.1"
+    "@polkadot/ui-shared" "^0.43.1"
     "@types/color" "^3.0.0"
     "@types/react-copy-to-clipboard" "^4.2.6"
     color "^3.1.2"
@@ -2061,10 +2061,10 @@
     react-copy-to-clipboard "^5.0.1"
     styled-components "^4.3.1"
 
-"@polkadot/react-qr@^0.43.0-beta.11":
-  version "0.43.0-beta.11"
-  resolved "https://registry.yarnpkg.com/@polkadot/react-qr/-/react-qr-0.43.0-beta.11.tgz#38b0d9c5d763560dd09a7595521a51e362b63c3a"
-  integrity sha512-VYBSopaTedYWUhl1Fhyefe0vKjYIsMIV2jzr6XCYL9hc1RptGOIf0lpm6peQaSPLxNQEAxSAvrItKKXtAhwV5A==
+"@polkadot/react-qr@^0.43.1":
+  version "0.43.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/react-qr/-/react-qr-0.43.1.tgz#a4bade0299a9428027ca9f23dafaa5640f5aa082"
+  integrity sha512-KL5/VWSUjNZCvd4mpLitgxcUKO0Sss1bjRNyADwr7ILwvaapPS/pJIyKQ3zzvq4VhUrZNmv3WaRUj6H5NEBN5w==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/react-qr-reader" "^2.1.1"
@@ -2115,10 +2115,10 @@
     "@types/memoizee" "^0.4.2"
     memoizee "^0.4.14"
 
-"@polkadot/ui-keyring@^0.43.0-beta.11":
-  version "0.43.0-beta.11"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-keyring/-/ui-keyring-0.43.0-beta.11.tgz#c2a61acb7a4e03ce27e14a962a68fe7e590719ae"
-  integrity sha512-/Kz3zYPL0axlMbpJwQNDaeGe6NXdNKldm/bY6likP6ncDgFNf3/xUdjX4CDB+qP5hFy5nzfZHPT13wb8Q7xejg==
+"@polkadot/ui-keyring@^0.43.1":
+  version "0.43.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-keyring/-/ui-keyring-0.43.1.tgz#652623afc52466ea9e3cd18e4a5f7245ac681438"
+  integrity sha512-6XEEsu+Hf+Anqz6b23XwK4RKAxamxx/ROkULb0mYTAQk+9NM2PbIZa12cxsB5Efm6YcTuwJRirCy+vusDMfS6A==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/mkdirp" "^0.5.2"
@@ -2128,19 +2128,19 @@
     store "^2.0.12"
     styled-components "^4.3.1"
 
-"@polkadot/ui-settings@^0.43.0-beta.11":
-  version "0.43.0-beta.11"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.43.0-beta.11.tgz#1c4350386df4ccb7ae0996fd4db197efbe6d63f6"
-  integrity sha512-4dSv+c9G0BoUpI+ig0Fq+3pLeF19ZllsbjtRw1J1ib6qCBhZVWOOxF7N5ch9LOrRYfBG/g+Hjoe7H7IVsn0Dew==
+"@polkadot/ui-settings@^0.43.1":
+  version "0.43.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.43.1.tgz#47ecdaa6e3a043b7812864ed6b2662a102e3545e"
+  integrity sha512-FqGh54WFVUbMN/ByP6bP1BLoBHG/DdLtpFmqvae8HTyh9vw1Ouaqdl8PlCyCeQbINEX7794VwQnGXjnDwZac+w==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/store" "^2.0.2"
     store "^2.0.12"
 
-"@polkadot/ui-shared@^0.43.0-beta.11":
-  version "0.43.0-beta.11"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-shared/-/ui-shared-0.43.0-beta.11.tgz#f680f67b62305f14ed940ef55fe8e82d7c5cc932"
-  integrity sha512-fZtpUQsAzUA0JTWfw1Wgoi1dI3x/gbjHrK+aJqGEMSNREoWNmLpcHJZJ/w9RvWueoizni3563wSAfZLfyhOy1w==
+"@polkadot/ui-shared@^0.43.1":
+  version "0.43.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/ui-shared/-/ui-shared-0.43.1.tgz#6fd873d5cf1de1698c367b99c7d46f7bb485d4e7"
+  integrity sha512-d4oqvefVPrhYxar3BsgXIxecXoUP0+2rTcFz5p1uGLenYiU3ejpje34Nn8H7Pwlyyg0e7m6Vv9VcD2ZzqJrZmQ==
   dependencies:
     "@babel/runtime" "^7.5.5"
     "@types/color" "^3.0.0"

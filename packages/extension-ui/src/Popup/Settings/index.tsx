@@ -8,9 +8,12 @@ import React, { useState } from 'react';
 import settings from '@polkadot/ui-settings';
 import { setAddressPrefix } from '@polkadot/util-crypto';
 
-import { Dropdown, Header } from '../../components';
+import { Button, Dropdown, Header } from '../../components';
+import { windowOpen } from '../../messaging';
 import { Back } from '../../partials';
 
+// There are probably better ways, but since we set the popup size, use that
+const isPopup = window.innerWidth <= 480;
 const options = settings.availablePrefixes.map(({ text, value }): { text: string; value: string } => ({
   text: value === -1
     ? 'Default (Substrate or as specified)'
@@ -41,6 +44,12 @@ export default function Settings (): React.ReactElement<{}> {
         options={options}
         value={`${prefix}`}
       />
+      {isPopup && (
+        <Button
+          label='Open extension in new window'
+          onClick={windowOpen}
+        />
+      )}
     </div>
   );
 }

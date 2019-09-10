@@ -3,9 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 const PORT_CONTENT = 'content';
-const PORT_POPUP = 'popup';
+const PORT_EXTENSION = 'extension';
 
 export {
   PORT_CONTENT,
-  PORT_POPUP
+  PORT_EXTENSION
 };

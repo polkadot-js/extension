@@ -6,7 +6,7 @@ import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTyp
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
-import { PORT_POPUP } from '@polkadot/extension/defaults';
+import { PORT_EXTENSION } from '@polkadot/extension/defaults';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,7 +18,7 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const port = extension.runtime.connect({ name: PORT_POPUP });
+const port = extension.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
 
@@ -112,4 +112,8 @@ export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void
 
 export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {
   return sendMessage('pri(seed.validate)', { suri, type });
+}
+
+export async function windowOpen (): Promise<boolean> {
+  return sendMessage('pri(window.open)', null);
 }

@@ -11,7 +11,7 @@ import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-import { PORT_CONTENT, PORT_POPUP } from '../defaults';
+import { PORT_CONTENT, PORT_EXTENSION } from '../defaults';
 import handlers from './handlers';
 
 // setup the notification (same a FF default background, white text)
@@ -20,7 +20,7 @@ extension.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
 // listen to all messages and handle appropriately
 extension.runtime.onConnect.addListener((port): void => {
   // shouldn't happen, however... only listen to what we know about
-  assert([PORT_CONTENT, PORT_POPUP].includes(port.name), `Unknown connection from ${port.name}`);
+  assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
   // message and disconnect handlers
   port.onMessage.addListener((data): void => handlers(data, port));

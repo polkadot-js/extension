@@ -1,6 +1,9 @@
-# 0.10.0-beta.x
+# 0.10.1
 
-- Support for external accounts, as presented by mobile signers, e.g. the Parity Signer
+- Support for external accounts as presented by mobile signers, e.g. the Parity Signer
+- Allow the extension UI to be opened in a new tab
+- Adjust embedded chain metadata to only contain actual calls (for decoding)
+- Minor code maintainability enchancements
 
 # 0.9.1
 

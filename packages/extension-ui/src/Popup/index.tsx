@@ -8,7 +8,7 @@ import { Prefix } from '@polkadot/util-crypto/address/types';
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import settings from '@polkadot/ui-settings';
-import { setAddressPrefix } from '@polkadot/util-crypto';
+import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeContext, MediaContext, SigningContext } from '../components/contexts';
@@ -41,7 +41,7 @@ async function requestMediaAccess (): Promise<boolean> {
 const { prefix } = settings.get();
 
 // FIXME Duplicated in Settings, horrible...
-setAddressPrefix((prefix === -1 ? 42 : prefix) as Prefix);
+setSS58Format((prefix === -1 ? 42 : prefix) as Prefix);
 
 export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);

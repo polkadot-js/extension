@@ -16,6 +16,7 @@ import Accounts from './Accounts';
 import Authorize from './Authorize';
 import Create from './Create';
 import Forget from './Forget';
+import Export from './Export';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Settings from './Settings';
@@ -85,6 +86,7 @@ export default function Popup (): React.ReactElement<{}> {
                 <Switch>
                   <Route path='/account/create' component={Create} />
                   <Route path='/account/forget/:address' component={Forget} />
+                  <Route path='/account/export/:address' component={Export} />
                   <Route path='/account/import-qr' component={ImportQr} />
                   <Route path='/account/import-seed' component={ImportSeed} />
                   <Route path='/settings' component={Settings} />

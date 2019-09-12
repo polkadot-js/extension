@@ -50,6 +50,7 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
       )}
       <ActionBar>
         <Link onClick={_toggleEdit}>Edit</Link>
+        <Link to={`/account/export/${address}`}>Export</Link>
         <Link to={`/account/forget/${address}`}>Forget</Link>
       </ActionBar>
     </Address>

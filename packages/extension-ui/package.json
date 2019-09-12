@@ -12,5 +12,10 @@
     "@types/react-router-dom": "^5.1.0",
     "react-router": "^5.1.0",
     "react-router-dom": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/enzyme": "^3.10.3",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
+    "sinon-chrome": "^3.0.1"
   }
 }

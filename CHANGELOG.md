@@ -1,3 +1,8 @@
+# 0.11.0-beta.x
+
+- Integrate polkadot-js/common 1.4.1 & polkadot-js/ui 0.44.1
+- Updated to babe 7.6 (build and runtime improvememnts)
+
 # 0.10.1
 
 - Support for external accounts as presented by mobile signers, e.g. the Parity Signer

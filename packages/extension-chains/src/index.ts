@@ -8,11 +8,11 @@ import { Chain } from './types';
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info [--ws <url>]`
 import alexander from './alexander';
-import kusama from './kusama';
+import kusamaCC1 from './kusama-cc1';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, kusama].map(
-    ({ chain, genesisHash, metaCalls, ss58Format, tokenDecimals, tokenSymbol }): [string, Chain] => [
+  [alexander, kusamaCC1].map(
+    ({ chain, genesisHash, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
       genesisHash,
       {
         genesisHash,
@@ -20,9 +20,11 @@ const chains: Map<string, Chain> = new Map(
           ? new Metadata(Buffer.from(metaCalls, 'base64'))
           : undefined,
         name: chain,
+        specVersion,
         ss58Format,
         tokenDecimals,
-        tokenSymbol
+        tokenSymbol,
+        types: types || {}
       }
     ]
   )
@@ -30,9 +32,11 @@ const chains: Map<string, Chain> = new Map(
 
 const UNKNOWN_CHAIN: Chain = {
   name: 'Any',
+  specVersion: 0,
   ss58Format: 42,
   tokenDecimals: 0,
-  tokenSymbol: 'UNIT'
+  tokenSymbol: 'UNIT',
+  types: {}
 };
 
 export default function findChain (genesisHash?: string | null): Chain {

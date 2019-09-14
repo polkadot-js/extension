@@ -3,19 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Chain } from '@polkadot/extension-chains/types';
-import { BlockNumber, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 
-import React from 'react';
+import BN from 'bn.js';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension-chains';
-import { createType, GenericCall, getTypeRegistry } from '@polkadot/types';
-import { formatNumber } from '@polkadot/util';
+import { GenericCall, getTypeRegistry } from '@polkadot/types';
+import { formatNumber, bnToBn } from '@polkadot/util';
+
+interface Decoded {
+  json: MethodJson | null;
+  method: GenericCall | null;
+}
 
 interface MethodJson {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  args: Record<string, any>;
+  args: Record<string, string>;
 }
 
 interface Props {
@@ -26,29 +31,34 @@ interface Props {
   url: string;
 }
 
-function renderMethod (data: string, isDecoded: boolean, chain?: Chain): React.ReactNode {
-  const base = (
-    <tr>
-      <td className='label'>method data</td>
-      <td className='data'>{data}</td>
-    </tr>
-  );
-
-  if (!isDecoded || !chain || !chain.meta) {
-    return base;
-  }
-
-  let json: MethodJson;
-  let method: GenericCall;
+function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersion: BN): Decoded {
+  let json: MethodJson | null = null;
+  let method: GenericCall | null = null;
 
   try {
-    getTypeRegistry().register(chain.types);
-    GenericCall.injectMethods(fromMetadata(chain.meta));
+    if (isDecoded && chain.meta && specVersion.eqn(chain.specVersion)) {
+      getTypeRegistry().register(chain.types);
+      GenericCall.injectMethods(fromMetadata(chain.meta));
 
-    method = new GenericCall(data);
-    json = method.toJSON() as unknown as MethodJson;
+      method = new GenericCall(data);
+      json = method.toJSON() as unknown as MethodJson;
+    }
   } catch (error) {
-    return base;
+    json = null;
+    method = null;
+  }
+
+  return { json, method };
+}
+
+function renderMethod (data: string, { json, method }: Decoded): React.ReactNode {
+  if (!json || !method) {
+    return (
+      <tr>
+        <td className='label'>method data</td>
+        <td className='data'>{data}</td>
+      </tr>
+    );
   }
 
   return (
@@ -75,21 +85,25 @@ function renderMethod (data: string, isDecoded: boolean, chain?: Chain): React.R
   );
 }
 
-function renderMortality (era: ExtrinsicEra, blockNumber: BlockNumber): string {
+function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string): string {
   if (era.isImmortalEra) {
     return 'immortal';
   }
 
+  const blockNumber = bnToBn(hexBlockNumber);
   const mortal = era.asMortalEra;
 
   return `mortal, valid from #${formatNumber(mortal.birth(blockNumber))} to #${formatNumber(mortal.death(blockNumber))}`;
 }
 
-function Details ({ className, isDecoded, payload, request, url }: Props): React.ReactElement<Props> {
-  const blockNumber = createType('BlockNumber', request.blockNumber);
-  const { genesisHash, method } = request;
-  const { era, nonce, tip } = payload;
-  const chain = findChain(genesisHash);
+function Details ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
+  const chain = useRef(findChain(genesisHash)).current;
+  const specVersion = useRef(bnToBn(hexSpec)).current;
+  const [decoded, setDecoded] = useState<Decoded>({ json: null, method: null });
+
+  useEffect((): void => {
+    setDecoded(decodeMethod(method, isDecoded, chain, specVersion));
+  }, [isDecoded]);
 
   return (
     <table className={className}>
@@ -99,8 +113,12 @@ function Details ({ className, isDecoded, payload, request, url }: Props): React
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>{chain ? 'chain' : 'genesis'}</td>
-          <td className='data'>{chain ? chain.name : genesisHash}</td>
+          <td className='label'>{chain.isUnknown ? 'genesis' : 'chain'}</td>
+          <td className='data'>{chain.isUnknown ? genesisHash : chain.name}</td>
+        </tr>
+        <tr>
+          <td className='label'>version</td>
+          <td className='data'>{specVersion.toNumber()}</td>
         </tr>
         <tr>
           <td className='label'>nonce</td>
@@ -112,10 +130,10 @@ function Details ({ className, isDecoded, payload, request, url }: Props): React
             <td className='data'>{formatNumber(tip)}</td>
           </tr>
         )}
-        {renderMethod(method, isDecoded, chain)}
+        {renderMethod(method, decoded)}
         <tr>
           <td className='label'>lifetime</td>
-          <td className='data'>{renderMortality(era, blockNumber)}</td>
+          <td className='data'>{mortalityAsString(era, blockNumber)}</td>
         </tr>
       </tbody>
     </table>

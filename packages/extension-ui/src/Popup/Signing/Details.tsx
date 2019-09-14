@@ -26,19 +26,28 @@ interface Props {
 }
 
 function renderMethod (data: string, meta?: Metadata | null): React.ReactNode {
+  let json: MethodJson;
+  let method: GenericCall;
+
+  const base = (
+    <tr>
+      <td className='label'>method data</td>
+      <td className='data'>{data}</td>
+    </tr>
+  );
+
   if (!meta) {
-    return (
-      <tr>
-        <td className='label'>method data</td>
-        <td className='data'>{data}</td>
-      </tr>
-    );
+    return base;
   }
 
-  GenericCall.injectMethods(fromMetadata(meta));
+  try {
+    GenericCall.injectMethods(fromMetadata(meta));
 
-  const method = new GenericCall(data);
-  const json = method.toJSON() as unknown as MethodJson;
+    method = new GenericCall(data);
+    json = method.toJSON() as unknown as MethodJson;
+  } catch (error) {
+    return base;
+  }
 
   return (
     <>

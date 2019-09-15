@@ -31,12 +31,15 @@ const chains: Map<string, Chain> = new Map(
 );
 
 const UNKNOWN_CHAIN: Chain = {
-  name: 'Any',
+  isUnknown: true,
+  name: 'Unknown chain',
   specVersion: 0,
   ss58Format: 42,
   tokenDecimals: 0,
   tokenSymbol: 'UNIT',
-  types: {}
+  types: {
+    Keys: 'SessionKeysSubstrate'
+  }
 };
 
 export default function findChain (genesisHash?: string | null): Chain {

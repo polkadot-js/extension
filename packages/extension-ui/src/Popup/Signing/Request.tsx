@@ -48,7 +48,10 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
       .catch((error: Error) => console.error(error));
 
   return (
-    <Address address={request.address}>
+    <Address
+      address={request.address}
+      genesisHash={request.genesisHash}
+    >
       {isExternal && isFirst
         ? <Qr
           payload={payload}

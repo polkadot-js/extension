@@ -5,9 +5,10 @@
 import { Metadata } from '@polkadot/types';
 
 export interface Chain {
-  name: string;
+  isUnknown?: boolean;
   genesisHash?: string;
   meta?: Metadata;
+  name: string;
   specVersion: number;
   ss58Format: number;
   tokenDecimals: number;

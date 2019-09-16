@@ -8,10 +8,11 @@ import { Chain } from './types';
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info [--ws <url>]`
 import alexander from './alexander';
+import edgeware from './edgeware';
 import kusamaCC1 from './kusama-cc1';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, kusamaCC1].map(
+  [alexander, edgeware, kusamaCC1].map(
     ({ chain, genesisHash, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
       genesisHash,
       {

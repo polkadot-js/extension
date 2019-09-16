@@ -24,7 +24,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       <Header label='export account' />
       <Back />
       <Address address={address}>
-        <Tip header='danger' type='error'>You are about to export the account. Keep it safe and don't share it with anyone.</Tip>
+        <Tip header='danger' type='error'>You are about to export the account. Keep it safe and don&apost share it with anyone.</Tip>
         <Button
           isDanger
           label='I want to export this account'

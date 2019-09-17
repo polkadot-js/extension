@@ -7,6 +7,7 @@
 export default {
   chain: 'Kusama CC1',
   genesisHash: '0x3fd7b9eb6a00376e5be61f01abb429ffb0b104be05eaff4d458da48fcd425baf',
+  icon: 'polkadot',
   specVersion: 1001,
   ss58Format: 2,
   tokenDecimals: 12,

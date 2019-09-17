@@ -7,6 +7,7 @@
 export default {
   chain: 'Alexander',
   genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
+  icon: 'polkadot',
   specVersion: 112,
   ss58Format: 42,
   tokenDecimals: 15,

@@ -22,7 +22,6 @@ interface Props {
   className?: string;
   name?: React.ReactNode | null;
   genesisHash?: string | null;
-  theme?: 'polkadot' | 'substrate';
 }
 
 // find an account in our list
@@ -51,7 +50,7 @@ function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: 
   ];
 }
 
-function Address ({ address, children, className, genesisHash, name, theme = 'polkadot' }: Props): React.ReactElement<Props> {
+function Address ({ address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<AccountJson | null>(null);
   const [chain, setChain] = useState<Chain | null>(null);
@@ -68,6 +67,8 @@ function Address ({ address, children, className, genesisHash, name, theme = 'po
     setChain(chain);
     setAccount(account);
   }, [address]);
+
+  const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
 
   return (
     <IconBox

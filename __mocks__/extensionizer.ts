@@ -20,6 +20,8 @@ class MessagingFake {
     this.listeners.forEach((cb: any) => cb.call(this, data));
   }
 }
-chrome.runtime.connect.returns(new MessagingFake());
+
+const messagingFake = new MessagingFake();
+chrome.runtime.connect.returns(messagingFake);
 
 export default chrome;

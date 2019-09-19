@@ -13,10 +13,11 @@ import kusamaCC1 from './kusama-cc1';
 
 const chains: Map<string, Chain> = new Map(
   [alexander, edgeware, kusamaCC1].map(
-    ({ chain, genesisHash, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
+    ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
       genesisHash,
       {
         genesisHash,
+        icon,
         meta: metaCalls
           ? new Metadata(Buffer.from(metaCalls, 'base64'))
           : undefined,
@@ -32,6 +33,7 @@ const chains: Map<string, Chain> = new Map(
 );
 
 const UNKNOWN_CHAIN: Chain = {
+  icon: 'polkadot',
   isUnknown: true,
   name: 'Unknown chain',
   specVersion: 0,

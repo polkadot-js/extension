@@ -12,6 +12,7 @@ import { VotingTypes } from 'edgeware-node-types/dist/voting';
 export default {
   chain: 'Edgeware',
   genesisHash: '0xda60008770287b5eb4f9b5241317ac4c7e42c3c3d8e85fbbfa2a88705394d75e',
+  icon: 'substrate',
   specVersion: 20,
   ss58Format: 42,
   tokenDecimals: 18,

@@ -1,10 +1,10 @@
-# 0.11.0-beta.x
+# 0.11.1
 
 - Cleanup metadata handling, when outdated for a node, transparently handle parsing errors
-- Added Edgeware mainnet metadata information
-- Display addresses correctly formatted by on the ss58 chain identifiers
-- Display identity icons based on chain typed (only for known chains)
-- Integrate latest polkadot-js/common 1.4.1 & polkadot-js/ui 0.44.1 dependencies
+- Added Edgeware chain & metadata information
+- Display addresses correctly formatted based on the ss58 chain identifiers
+- Display identity icons based on chain types for known chains
+- Integrate latest @polkadot/util, @polkadot-js/ui & @polkadot/api dependencies
 - Updated to babe 7.6 (build and runtime improvememnts)
 
 # 0.10.1

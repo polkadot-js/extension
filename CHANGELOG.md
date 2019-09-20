@@ -2,7 +2,7 @@
 
 - Cleanup metadata handling, when outdated for a node, transparently handle parsing errors
 - Added Edgeware chain & metadata information
-- Display addresses correctly formatted by on the specified ss58 chain identifiers
+- Display addresses correctly formatted based on the ss58 chain identifiers
 - Display identity icons based on chain types for known chains
 - Integrate latest @polkadot/util, @polkadot-js/ui & @polkadot/api dependencies
 - Updated to babe 7.6 (build and runtime improvememnts)

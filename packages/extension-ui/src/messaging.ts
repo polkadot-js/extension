@@ -66,8 +66,8 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function exportAccount (address: string): Promise<boolean> {
-  return sendMessage('pri(accounts.export)', { address }); // change forget to export
+export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
+  return sendMessage('pri(accounts.export)', { address, password }); // change forget to export
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

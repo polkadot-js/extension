@@ -5,7 +5,6 @@
 import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -201,7 +200,7 @@ export interface ResponseSeedValidate {
 }
 
 export interface ResponseAccountExport {
-  json: KeyringPair$Json;
+  exportedJson: string;
 }
 
 // Subscriptions

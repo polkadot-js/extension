@@ -15,11 +15,11 @@ test('Export component', () => {
     <Route path='/account/export/:address' component={ Export }/>
   </MemoryRouter>);
 
-  const reactWrapper = wrapper.find('button');
-  reactWrapper.simulate('click');
+  wrapper.find('input').simulate('change', { target: { value: 'passw0rd' } });
+  wrapper.find('button').simulate('click');
 
   expect(callback).toHaveBeenCalledWith(expect.objectContaining({
     message: 'pri(accounts.export)',
-    request: { address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5' }
+    request: { address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', password: 'passw0rd' }
   }));
 });

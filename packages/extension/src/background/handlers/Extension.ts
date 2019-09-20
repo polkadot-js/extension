@@ -81,8 +81,8 @@ export default class Extension {
     return true;
   }
 
-  private accountsExport ({ address , password}: RequestAccountExport): ResponseAccountExport {
-    return { json: keyring.backupAccount(keyring.getPair(address), password) };
+  private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
+    return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password), null, 2) };
   }
 
   // FIXME This looks very much like what we have in Tabs

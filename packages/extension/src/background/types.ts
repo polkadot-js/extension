@@ -5,6 +5,7 @@
 import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { KeyringPair$Json } from "@polkadot/keyring/types";
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -47,7 +48,7 @@ export interface RequestSignatures {
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
-  'pri(accounts.export)': [RequestAccountExport, boolean];
+  'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
@@ -123,6 +124,7 @@ export interface RequestAccountForget {
 
 export interface RequestAccountExport {
   address: string;
+  password: string;
 }
 
 export type RequestAccountList = null;
@@ -196,6 +198,10 @@ export interface ResponseSeedCreate {
 export interface ResponseSeedValidate {
   address: string;
   suri: string;
+}
+
+export interface ResponseAccountExport {
+  json: KeyringPair$Json;
 }
 
 // Subscriptions

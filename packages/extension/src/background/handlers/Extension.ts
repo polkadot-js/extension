@@ -3,7 +3,28 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, RequestAccountForget, SigningRequest, RequestTypes, ResponseTypes, MessageTypes } from '../types';
+import {
+  AccountJson,
+  AuthorizeRequest,
+  RequestAccountCreateExternal,
+  RequestAccountCreateSuri,
+  RequestAccountEdit,
+  RequestAuthorizeApprove,
+  RequestAuthorizeReject,
+  RequestSigningApprovePassword,
+  RequestSigningApproveSignature,
+  RequestSigningCancel,
+  RequestSeedCreate,
+  ResponseSeedCreate,
+  RequestSeedValidate,
+  ResponseSeedValidate,
+  RequestAccountForget,
+  SigningRequest,
+  RequestTypes,
+  ResponseTypes,
+  MessageTypes,
+  RequestAccountExport, ResponseAccountExport
+} from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
@@ -58,6 +79,10 @@ export default class Extension {
     keyring.forgetAccount(address);
 
     return true;
+  }
+
+  private accountsExport ({ address , password}: RequestAccountExport): ResponseAccountExport {
+    return { json: keyring.backupAccount(keyring.getPair(address), password) };
   }
 
   // FIXME This looks very much like what we have in Tabs
@@ -232,6 +257,9 @@ export default class Extension {
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
+
+      case 'pri(accounts.export)':
+        return this.accountsExport(request as RequestAccountExport);
 
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);

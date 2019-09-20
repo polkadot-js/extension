@@ -14,8 +14,10 @@ test('Export component', () => {
     initialEntries={ ['/account/export/HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'] }>
     <Route path='/account/export/:address' component={ Export }/>
   </MemoryRouter>);
+
   const reactWrapper = wrapper.find('button');
   reactWrapper.simulate('click');
+
   expect(callback).toHaveBeenCalledWith(expect.objectContaining({
     message: 'pri(accounts.export)',
     request: { address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5' }

@@ -33,17 +33,20 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           label='password for this account'
           onChange={setPass}
           type='password'
+          data-export-password
         />
         <Button
           isDanger
           label='I want to export this account'
           onClick={_onClick}
           className='export-button'
+          data-export-button
         />
         <TextArea
           isReadOnly
           label='exported account in json format'
           value={exportedJson}
+          data-exported-account
         />
       </Address>
     </div>

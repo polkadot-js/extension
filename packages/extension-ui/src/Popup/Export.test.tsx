@@ -19,8 +19,8 @@ describe('Export component', () => {
       <Route path='/account/export/:address' component={ Export }/>
     </MemoryRouter>);
 
-    wrapper.find('input').simulate('change', { target: { value: 'passw0rd' } });
-    wrapper.find('button').simulate('click');
+    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
+    wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
     expect(exportAccount).toHaveBeenCalledWith('HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', 'passw0rd');
   });
@@ -32,9 +32,9 @@ describe('Export component', () => {
       <Route path='/account/export/:address' component={ Export }/>
     </MemoryRouter>);
 
-    wrapper.find('input').simulate('change', { target: { value: 'passw0rd' } });
-    wrapper.find('button').simulate('click');
+    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
+    wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
-    expect(wrapper.find('TextArea textarea').text()).toContain('json repr');
+    expect(wrapper.find('[data-exported-account] textarea').text()).toContain('json repr');
   });
 });

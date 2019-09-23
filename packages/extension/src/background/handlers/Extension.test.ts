@@ -17,7 +17,6 @@ describe('Extension', () => {
     const { pair: { address } } = keyring.addUri(
       'seed sock milk update focus rotate barely fade car face mechanic mercy', 'passw0rd'
     );
-    keyring.getPair(address);
     const result = await extension.handle('id', 'pri(accounts.export)', {
       address,
       password: 'passw0rd'

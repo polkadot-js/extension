@@ -2,24 +2,39 @@ import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount } from 'enzyme';
+import { exportAccount } from '../messaging';
 import Export from './Export';
-import extensionizer from 'extensionizer';
+import { act } from 'react-dom/test-utils';
 
 configure({ adapter: new Adapter() });
+jest.mock('../messaging');
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const flushAllPromises = (): Promise<void> => new Promise(resolve => setImmediate(resolve));
 
-test('Export component', () => {
-  const callback = jest.fn();
-  extensionizer.runtime.connect().onMessage.addListener(callback);
-  const wrapper = mount(<MemoryRouter
-    initialEntries={ ['/account/export/HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'] }>
-    <Route path='/account/export/:address' component={ Export }/>
-  </MemoryRouter>);
+describe('Export component', () => {
+  test('creates export message on button press', async () => {
+    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: 'json repr' });
+    const wrapper = mount(<MemoryRouter
+      initialEntries={ ['/account/export/HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'] }>
+      <Route path='/account/export/:address' component={ Export }/>
+    </MemoryRouter>);
 
-  wrapper.find('input').simulate('change', { target: { value: 'passw0rd' } });
-  wrapper.find('button').simulate('click');
+    wrapper.find('input').simulate('change', { target: { value: 'passw0rd' } });
+    wrapper.find('button').simulate('click');
+    await act(flushAllPromises);
+    expect(exportAccount).toHaveBeenCalledWith('HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', 'passw0rd');
+  });
 
-  expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-    message: 'pri(accounts.export)',
-    request: { address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', password: 'passw0rd' }
-  }));
+  test('shows text area with export json', async () => {
+    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: 'json repr' });
+    const wrapper = mount(<MemoryRouter
+      initialEntries={ ['/account/export/HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'] }>
+      <Route path='/account/export/:address' component={ Export }/>
+    </MemoryRouter>);
+
+    wrapper.find('input').simulate('change', { target: { value: 'passw0rd' } });
+    wrapper.find('button').simulate('click');
+    await act(flushAllPromises);
+    expect(wrapper.find('TextArea textarea').text()).toContain('json repr');
+  });
 });

@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountJson, AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
-import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
@@ -41,7 +40,7 @@ async function requestMediaAccess (): Promise<boolean> {
 const { prefix } = settings.get();
 
 // FIXME Duplicated in Settings, horrible...
-setSS58Format((prefix === -1 ? 42 : prefix) as Prefix);
+setSS58Format(prefix === -1 ? 42 : prefix);
 
 export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);

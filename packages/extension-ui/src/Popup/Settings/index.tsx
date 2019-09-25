@@ -2,8 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Prefix } from '@polkadot/util-crypto/address/types';
-
 import React, { useState } from 'react';
 import settings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
@@ -26,10 +24,10 @@ export default function Settings (): React.ReactElement<{}> {
 
   // FIXME check against index, we need a better solution
   const _onChangePrefix = (value: string): void => {
-    const prefix = parseInt(value, 10) as Prefix;
+    const prefix = parseInt(value, 10);
 
     setPrefix(value);
-    setSS58Format((prefix as number) === -1 ? 42 : prefix);
+    setSS58Format(prefix === -1 ? 42 : prefix);
 
     settings.set({ prefix });
   };

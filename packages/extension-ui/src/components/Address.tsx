@@ -4,7 +4,6 @@
 
 import { AccountJson } from '@polkadot/extension/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import { Prefix } from '@polkadot/util-crypto/address/types';
 
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -44,7 +43,7 @@ function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: 
 
   return [
     // always allow the actual settings to override the display
-    encodeAddress(publicKey, (settings.prefix === -1 ? chain.ss58Format : settings.prefix) as Prefix),
+    encodeAddress(publicKey, settings.prefix === -1 ? chain.ss58Format : settings.prefix),
     account,
     chain
   ];

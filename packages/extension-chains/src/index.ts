@@ -6,13 +6,14 @@ import { Metadata } from '@polkadot/types';
 import { Chain } from './types';
 
 // imports chain details, generally metadata. For the generation of these,
-// inside the api, run `yarn chain:info [--ws <url>]`
+// inside the api, run `yarn chain:info --ws <url>`
 import alexander from './alexander';
 import edgeware from './edgeware';
 import kusamaCC1 from './kusama-cc1';
+import kusamaCC2 from './kusama-cc2';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, edgeware, kusamaCC1].map(
+  [alexander, edgeware, kusamaCC1, kusamaCC2].map(
     ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
       genesisHash,
       {

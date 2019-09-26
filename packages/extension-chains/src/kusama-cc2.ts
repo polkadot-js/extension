@@ -2,11 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-// Generated via (in api) `yarn chain:info wss://serinus-5.kusama.network/`
+// Generated via 'yarn run chain:info wss://serinus-5.kusama.network/'
 
 export default {
   chain: 'Kusama CC2',
-  genesisHash: '0x2c9249c6ade20d0969db0db0b4b8aeff752c43191cfe3a374d99309e5b3b26d5',
+  genesisHash: '0xe3777fa922cafbff200cadeaea1a76bd7898ad5b89f7848999058b50e715f636',
   icon: 'polkadot',
   specVersion: 1003,
   ss58Format: 2,

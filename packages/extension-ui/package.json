@@ -6,8 +6,8 @@
   "license": "Apache-2",
   "dependencies": {
     "@babel/runtime": "^7.6.2",
-    "@polkadot/react-identicon": "^0.45.0-beta.13",
-    "@polkadot/react-qr": "^0.45.0-beta.13",
+    "@polkadot/react-identicon": "^0.45.0-beta.14",
+    "@polkadot/react-qr": "^0.45.0-beta.14",
     "@types/react-router": "^5.1.0",
     "@types/react-router-dom": "^5.1.0",
     "react-router": "^5.1.0",

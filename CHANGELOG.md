@@ -1,3 +1,8 @@
+# 0.12.0-beta.x
+
+- Support for Kusama CC2
+- Update to latest stable dependencies
+
 # 0.11.1
 
 - Cleanup metadata handling, when outdated for a node, transparently handle parsing errors
@@ -5,7 +10,7 @@
 - Display addresses correctly formatted based on the ss58 chain identifiers
 - Display identity icons based on chain types for known chains
 - Integrate latest @polkadot/util, @polkadot-js/ui & @polkadot/api dependencies
-- Updated to babe 7.6 (build and runtime improvememnts)
+- Updated to Babel 7.6 (build and runtime improvements)
 
 # 0.10.1
 

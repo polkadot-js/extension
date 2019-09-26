@@ -2118,7 +2118,7 @@
     "@polkadot/util" "^1.5.1"
     "@polkadot/util-crypto" "^1.5.1"
 
-"@polkadot/react-identicon@^0.45.0-beta.13":
+"@polkadot/react-identicon@^0.45.0-beta.14":
   version "0.45.0-beta.14"
   resolved "https://registry.yarnpkg.com/@polkadot/react-identicon/-/react-identicon-0.45.0-beta.14.tgz#e33cb3622c38feda200cdb773373af0561ed3859"
   integrity sha512-2ziJUmW/79dqlc9aVIEiF7Kp4gkZQXXxE+3lsYlcdrziguFX3km/zn8N44cLb6Br00iy6P9RjR+FYYJqNES1GQ==
@@ -2133,7 +2133,7 @@
     react-copy-to-clipboard "^5.0.1"
     styled-components "^4.4.0"
 
-"@polkadot/react-qr@^0.45.0-beta.13":
+"@polkadot/react-qr@^0.45.0-beta.14":
   version "0.45.0-beta.14"
   resolved "https://registry.yarnpkg.com/@polkadot/react-qr/-/react-qr-0.45.0-beta.14.tgz#12c876001778ebff57376b6840d150dea3c1c318"
   integrity sha512-IoaCx8riqwVLdsZs3ZsB97dtBdx83kwd0y5I4qdFtxWNx7mtovbY744ydDCtJSXPCLnNZ4zO98fuSM1zc8qlDQ==

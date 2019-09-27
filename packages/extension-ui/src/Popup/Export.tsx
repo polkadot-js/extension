@@ -16,10 +16,12 @@ type Props = RouteComponentProps<{ address: string }>;
 function Export ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
   const [pass, setPass] = useState('');
   const [exportedJson, setExportedJson] = useState('');
+  const [passwordEntered, setPasswordEntered] = useState(false);
 
   const _onClick = (): Promise<void> =>
     exportAccount(address, pass)
       .then(({ exportedJson }) => setExportedJson(exportedJson))
+      .then(() => setPasswordEntered(true))
       .catch((error: Error) => console.error(error));
 
   return (
@@ -28,26 +30,27 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       <Back />
       <Address address={address}>
         <Tip header='danger' type='error'>You are about to export the account. Keep it safe and don&apos;t share it with anyone.</Tip>
-        <Input
+        {!passwordEntered && <Input
           isError={pass.length < MIN_LENGTH}
           label='password for this account'
           onChange={setPass}
           type='password'
           data-export-password
-        />
-        <Button
+        />}
+        {!passwordEntered && <Button
+          isDisabled={pass.length == 0}
           isDanger
           label='I want to export this account'
           onClick={_onClick}
           className='export-button'
           data-export-button
-        />
-        <TextArea
+        />}
+        {passwordEntered && <TextArea
           isReadOnly
-          label='exported account in json format'
+          label=''
           value={exportedJson}
           data-exported-account
-        />
+        />}
       </Address>
     </div>
   );

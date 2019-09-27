@@ -13,12 +13,13 @@ interface Props {
   isError?: boolean;
   isFocussed?: boolean;
   isReadOnly?: boolean;
+  rowsCount?: number;
   label: string;
   onChange?: (value: string) => void;
   value?: string;
 }
 
-function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }: Props): React.ReactElement<Props> {
+function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value, rowsCount }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -33,6 +34,7 @@ function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value }
         onChange={_onChange}
         readOnly={isReadOnly}
         value={value}
+        rows={rowsCount || 2}
       />
     </Label>
   );

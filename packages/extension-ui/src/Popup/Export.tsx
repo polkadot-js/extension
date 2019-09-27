@@ -50,6 +50,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           label=''
           value={exportedJson}
           data-exported-account
+          rowsCount={13}
         />}
       </Address>
     </div>

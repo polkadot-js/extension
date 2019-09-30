@@ -16,10 +16,11 @@ interface Props {
   rowsCount?: number;
   label: string;
   onChange?: (value: string) => void;
+  onClick?: React.MouseEventHandler<HTMLTextAreaElement>;
   value?: string;
 }
 
-function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value, rowsCount }: Props): React.ReactElement<Props> {
+function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value, rowsCount, onClick }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -35,6 +36,7 @@ function TextArea ({ className, isFocussed, isReadOnly, label, onChange, value, 
         readOnly={isReadOnly}
         value={value}
         rows={rowsCount || 2}
+        onClick={onClick}
       />
     </Label>
   );

@@ -24,12 +24,17 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       .then(() => setPasswordEntered(true))
       .catch((error: Error) => console.error(error));
 
+  const copyToClipboard = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+    e.currentTarget.select();
+    document.execCommand('copy');
+  }
+
   return (
     <div>
       <Header label='export account' />
       <Back />
       <Address address={address}>
-        <Tip header='danger' type='error'>You are about to export the account. Keep it safe and don&apos;t share it with anyone.</Tip>
+        <Tip header='danger' type='error'>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Tip>
         {!passwordEntered && <Input
           isError={pass.length < MIN_LENGTH}
           label='password for this account'
@@ -45,12 +50,14 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           className='export-button'
           data-export-button
         />}
+        {passwordEntered && <Tip type='info'>Click below to copy exported JSON to clipboard</Tip>}
         {passwordEntered && <TextArea
           isReadOnly
+          onClick={copyToClipboard}
           label=''
           value={exportedJson}
           data-exported-account
-          rowsCount={13}
+          rowsCount={11}
         />}
       </Address>
     </div>

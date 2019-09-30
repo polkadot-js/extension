@@ -38,7 +38,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           data-export-password
         />}
         {!passwordEntered && <Button
-          isDisabled={pass.length == 0}
+          isDisabled={pass.length === 0}
           isDanger
           label='I want to export this account'
           onClick={_onClick}

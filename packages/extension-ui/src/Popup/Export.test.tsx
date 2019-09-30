@@ -35,6 +35,7 @@ describe('Export component', () => {
     wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
     wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
+    wrapper.update();
     expect(wrapper.find('[data-exported-account] textarea').text()).toContain('json repr');
   });
 });

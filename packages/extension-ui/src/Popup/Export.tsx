@@ -24,10 +24,10 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       .then(() => setPasswordEntered(true))
       .catch((error: Error) => console.error(error));
 
-  const copyToClipboard = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+  const copyToClipboard = (e: React.MouseEvent<HTMLTextAreaElement>): void => {
     e.currentTarget.select();
     document.execCommand('copy');
-  }
+  };
 
   return (
     <div>

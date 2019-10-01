@@ -14,22 +14,27 @@ const flushAllPromises = (): Promise<void> => new Promise(resolve => setImmediat
 
 describe('Export component', () => {
   let wrapper: ReactWrapper;
+  const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
+
+  const enterPassword = (password = 'any password'): void => {
+    wrapper.find('[data-export-password] input').simulate('change', { target: { value: password } });
+  };
 
   beforeEach(() => {
-    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: 'json repr' });
+    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: '' });
 
     wrapper = mount(<MemoryRouter
-      initialEntries={ ['/account/export/HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'] }>
+      initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
       <Route path='/account/export/:address' component={ Export }/>
     </MemoryRouter>);
   });
 
   it('creates export message on button press', async () => {
-    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
+    enterPassword('passw0rd');
     wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
 
-    expect(exportAccount).toHaveBeenCalledWith('HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', 'passw0rd');
+    expect(exportAccount).toHaveBeenCalledWith(VALID_ADDRESS, 'passw0rd');
   });
 
   it('button is disabled before any password is typed', () => {
@@ -37,7 +42,7 @@ describe('Export component', () => {
   });
 
   it('button is enabled after password is typed', async () => {
-    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
+    enterPassword();
     await act(flushAllPromises);
 
     expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
@@ -47,8 +52,8 @@ describe('Export component', () => {
     expect(wrapper.find('[data-exported-account] textarea').exists()).toBe(false);
   });
 
-  it('input field and button are removed after entering the password', async () => {
-    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
+  it('input field and button are removed after pressing the button', async () => {
+    enterPassword();
     wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
     wrapper.update();
@@ -57,21 +62,14 @@ describe('Export component', () => {
     expect(wrapper.find('[data-export-button] button').exists()).toBe(false);
   });
 
-  it('textarea is displayed after entering the password', async () => {
-    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
+  it('shows text area with exported json', async () => {
+    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: 'json representation' });
+
+    enterPassword();
     wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
     wrapper.update();
 
-    expect(wrapper.find('[data-exported-account] textarea').exists()).toBe(true);
-  });
-
-  it('shows text area with export json', async () => {
-    wrapper.find('[data-export-password] input').simulate('change', { target: { value: 'passw0rd' } });
-    wrapper.find('[data-export-button] button').simulate('click');
-    await act(flushAllPromises);
-    wrapper.update();
-
-    expect(wrapper.find('[data-exported-account] textarea').text()).toContain('json repr');
+    expect(wrapper.find('[data-exported-account] textarea').text()).toContain('json representation');
   });
 });

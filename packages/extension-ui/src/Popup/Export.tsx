@@ -18,13 +18,13 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
   const [exportedJson, setExportedJson] = useState('');
   const [passwordEntered, setPasswordEntered] = useState(false);
 
-  const _onClick = (): Promise<void> =>
+  const _onExportButtonClick = (): Promise<void> =>
     exportAccount(address, pass)
       .then(({ exportedJson }) => setExportedJson(exportedJson))
       .then(() => setPasswordEntered(true))
       .catch((error: Error) => console.error(error));
 
-  const copyToClipboard = (e: React.MouseEvent<HTMLTextAreaElement>): void => {
+  const _onTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>): void => {
     e.currentTarget.select();
     document.execCommand('copy');
   };
@@ -46,14 +46,14 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           isDisabled={pass.length === 0}
           isDanger
           label='I want to export this account'
-          onClick={_onClick}
+          onClick={_onExportButtonClick}
           className='export-button'
           data-export-button
         />}
         {passwordEntered && <Tip type='info'>Click below to copy exported JSON to clipboard</Tip>}
         {passwordEntered && <TextArea
           isReadOnly
-          onClick={copyToClipboard}
+          onClick={_onTextareaClick}
           label=''
           value={exportedJson}
           data-exported-account

@@ -10,6 +10,7 @@
     "@polkadot/react-qr": "^0.45.0-beta.14",
     "@types/react-router": "^5.1.0",
     "@types/react-router-dom": "^5.1.0",
+    "@types/sinon-chrome": "^2.2.6",
     "react-router": "^5.1.0",
     "react-router-dom": "^5.1.0"
   },

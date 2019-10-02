@@ -1,4 +1,4 @@
-# 0.12.0
+# 0.12.1
 
 - Support for Kusama CC2
 - Update to to latest stable dependencies

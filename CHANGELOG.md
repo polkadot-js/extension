@@ -1,7 +1,7 @@
-# 0.12.0-beta.x
+# 0.12.0
 
 - Support for Kusama CC2
-- Update to latest stable dependencies
+- Update to to latest stable dependencies
 
 # 0.11.1
 
@@ -17,7 +17,7 @@
 - Support for external accounts as presented by mobile signers, e.g. the Parity Signer
 - Allow the extension UI to be opened in a new tab
 - Adjust embedded chain metadata to only contain actual calls (for decoding)
-- Minor code maintainability enchancements
+- Minor code maintainability enhancements
 
 # 0.9.1
 
@@ -44,7 +44,7 @@
 # 0.4.1
 
 - Transactions are now signed with expiry information, so each transaction is mortal by default
-- Unneeded scrollbars on Firefox does not apper anymore (when window is popped out)
+- Unneeded scrollbars on Firefox does not appear anymore (when window is popped out)
 - Cater for the setting of multiple network prefixes, e.g. Kusama
 - Project icon has been updated
 

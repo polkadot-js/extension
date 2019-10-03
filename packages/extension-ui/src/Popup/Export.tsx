@@ -31,9 +31,11 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
         setTimeout(() => setWrongPasswordHighlight(false), 100);
       });
 
-  const _onTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>): void => {
-    e.currentTarget.select();
-    document.execCommand('copy');
+  const _onTextareaClick = (): void => {
+    const element = document.createElement('a');
+    element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
+    element.download = `${JSON.parse(exportedJson).meta.name}_exported_account_${Date.now()}.json`;
+    element.click();
   };
 
   return (
@@ -57,10 +59,9 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           className='export-button'
           data-export-button
         />}
-        {passwordEntered && <Tip type='info'>Click below to copy exported JSON to clipboard</Tip>}
+        {passwordEntered && <Tip type='info' onClick={_onTextareaClick} data-download-bar>Click here to download exported JSON</Tip>}
         {passwordEntered && <TextArea
           isReadOnly
-          onClick={_onTextareaClick}
           label=''
           value={exportedJson}
           data-exported-account

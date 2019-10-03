@@ -20,15 +20,16 @@ interface Props {
   className?: string;
   header?: React.ReactNode;
   type?: Type;
+  onClick?: React.MouseEventHandler<HTMLTextAreaElement>;
 }
 
 function getColor ({ type }: Props): Color {
   return defaults.box[type || 'info'] || defaults.box.info;
 }
 
-function Tip ({ children, className, header }: Props): React.ReactElement<Props> {
+function Tip ({ children, className, header, onClick }: Props): React.ReactElement<Props> {
   return (
-    <article className={className}>
+    <article className={className} onClick={onClick}>
       {header && <h3>{header}</h3>}
       <div>{children}</div>
     </article>

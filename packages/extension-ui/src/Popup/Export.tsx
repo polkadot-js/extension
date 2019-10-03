@@ -17,12 +17,19 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
   const [pass, setPass] = useState('');
   const [exportedJson, setExportedJson] = useState('');
   const [passwordEntered, setPasswordEntered] = useState(false);
+  const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
 
   const _onExportButtonClick = (): Promise<void> =>
     exportAccount(address, pass)
-      .then(({ exportedJson }) => setExportedJson(exportedJson))
-      .then(() => setPasswordEntered(true))
-      .catch((error: Error) => console.error(error));
+      .then(({ exportedJson }) => {
+        setExportedJson(exportedJson);
+        setPasswordEntered(true);
+      })
+      .catch((error: Error) => {
+        console.error(error);
+        setWrongPasswordHighlight(true);
+        setTimeout(() => setWrongPasswordHighlight(false), 100);
+      });
 
   const _onTextareaClick = (e: React.MouseEvent<HTMLTextAreaElement>): void => {
     e.currentTarget.select();
@@ -36,7 +43,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       <Address address={address}>
         <Tip header='danger' type='error'>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Tip>
         {!passwordEntered && <Input
-          isError={pass.length < MIN_LENGTH}
+          isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
           label='password for this account'
           onChange={setPass}
           type='password'

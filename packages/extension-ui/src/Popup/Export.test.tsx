@@ -52,29 +52,4 @@ describe('Export component', () => {
 
     expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
   });
-
-  it('does not show textarea before entering the password', () => {
-    expect(wrapper.find('[data-exported-account] textarea').exists()).toBe(false);
-  });
-
-  it('input field and button are removed after pressing the button', async () => {
-    enterPassword();
-    wrapper.find('[data-export-button] button').simulate('click');
-    await act(flushAllPromises);
-    wrapper.update();
-
-    expect(wrapper.find('[data-export-password] input').exists()).toBe(false);
-    expect(wrapper.find('[data-export-button] button').exists()).toBe(false);
-  });
-
-  it('shows text area with exported json', async () => {
-    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: 'json representation' });
-
-    enterPassword();
-    wrapper.find('[data-export-button] button').simulate('click');
-    await act(flushAllPromises);
-    wrapper.update();
-
-    expect(wrapper.find('[data-exported-account] textarea').text()).toContain('json representation');
-  });
 });

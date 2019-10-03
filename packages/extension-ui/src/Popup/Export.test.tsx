@@ -1,11 +1,16 @@
-import React from 'react';
-import { MemoryRouter, Route } from 'react-router';
+// Copyright 2019 @polkadot/extension-ui authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
+
+import { act } from 'react-dom/test-utils';
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { exportAccount } from '../messaging';
-import Export from './Export';
-import { act } from 'react-dom/test-utils';
+import { MemoryRouter, Route } from 'react-router';
+import React from 'react';
+
 import { Button } from '../components';
+import Export from './Export';
+import { exportAccount } from '../messaging';
 
 configure({ adapter: new Adapter() });
 jest.mock('../messaging');

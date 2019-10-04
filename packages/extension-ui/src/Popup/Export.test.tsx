@@ -26,7 +26,7 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: '' });
+    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
 
     wrapper = mount(<MemoryRouter
       initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>

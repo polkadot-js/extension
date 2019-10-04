@@ -2,6 +2,7 @@
 const config = require('@polkadot/dev/config/jest');
 
 module.exports = Object.assign({}, config, {
+  browser: true,
   moduleNameMapper: {
     '@polkadot/extension-(chains|dapp|inject|ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
     '@polkadot/extension(.*)$': '<rootDir>/packages/extension/src/$1',

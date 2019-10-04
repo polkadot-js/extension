@@ -1,3 +1,7 @@
+# 0.13.0-beta.x
+
+- Account export functionality (Thanks to https://github.com/Anze1m)
+
 # 0.12.1
 
 - Support for Kusama CC2

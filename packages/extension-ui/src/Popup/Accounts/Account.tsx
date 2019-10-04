@@ -16,7 +16,7 @@ interface Props extends AccountJson {
   className?: string;
 }
 
-function Account ({ address, className }: Props): React.ReactElement<Props> {
+function Account ({ address, className, isExternal }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
@@ -50,6 +50,7 @@ function Account ({ address, className }: Props): React.ReactElement<Props> {
       )}
       <ActionBar>
         <Link onClick={_toggleEdit}>Edit</Link>
+        {!isExternal && <Link to={`/account/export/${address}`}>Export</Link>}
         <Link to={`/account/forget/${address}`}>Forget</Link>
       </ActionBar>
     </Address>

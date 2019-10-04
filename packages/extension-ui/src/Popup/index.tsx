@@ -15,6 +15,7 @@ import { subscribeAccounts, subscribeAuthorize, subscribeSigning } from '../mess
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import Create from './Create';
+import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
@@ -85,6 +86,7 @@ export default function Popup (): React.ReactElement<{}> {
                 <Switch>
                   <Route path='/account/create' component={Create} />
                   <Route path='/account/forget/:address' component={Forget} />
+                  <Route path='/account/export/:address' component={Export} />
                   <Route path='/account/import-qr' component={ImportQr} />
                   <Route path='/account/import-seed' component={ImportSeed} />
                   <Route path='/settings' component={Settings} />

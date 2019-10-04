@@ -2,10 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { Address, Button, Header, Input, Tip } from '../components';
+import { ActionContext, Address, Button, Header, Input, Tip } from '../components';
 import { exportAccount } from '../messaging';
 import { Back } from '../partials';
 
@@ -14,6 +14,8 @@ const MIN_LENGTH = 6;
 type Props = RouteComponentProps<{ address: string }>;
 
 function Export ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
+
   const [pass, setPass] = useState('');
   const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
 
@@ -24,6 +26,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
         element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
         element.download = `${JSON.parse(exportedJson).meta.name}_exported_account_${Date.now()}.json`;
         element.click();
+        onAction('/');
       })
       .catch((error: Error) => {
         console.error(error);

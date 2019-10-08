@@ -2085,6 +2085,13 @@
     typescript "^3.6.3"
     vuepress "^1.1.0"
 
+"@polkadot/extension-inject@^0.13.0-beta.7":
+  version "0.13.0-beta.7"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.13.0-beta.7.tgz#4288743b7c74cc2dff5077562f439c19971f7308"
+  integrity sha512-pZOZpPufDQ4x6+7i5F5uU/pqmWIIowlXYKCahAmZPx5ZsPd35sSB1Iat0nshKM6Ja9zwkrzwFI7MNDFJDL2Miw==
+  dependencies:
+    "@babel/runtime" "^7.6.2"
+
 "@polkadot/jsonrpc@^0.95.0-beta.1":
   version "0.95.0-beta.1"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-0.95.0-beta.1.tgz#0154696dd6f7889b39f399a97e96657921b81e1e"
@@ -2407,10 +2414,10 @@
   resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.28.tgz#c054e8af4d9dd75db4e63abc76f885168714d4b3"
   integrity sha1-wFTor02d11205jq8dviFFocU1LM=
 
-"@types/firefox-webext-browser@^67.0.1":
-  version "67.0.2"
-  resolved "https://registry.yarnpkg.com/@types/firefox-webext-browser/-/firefox-webext-browser-67.0.2.tgz#04625d3294fbca54bccf42dae43f636c5b6452a2"
-  integrity sha512-tXR5THtH5Fqwfmi4y/2dTxCTebqHsKCH2bif/VdE5CPcB/S5x5fu+N+wBuMENzN41agovHMU/LQbtWNV+Aux+w==
+"@types/firefox-webext-browser@^70.0.0":
+  version "70.0.0"
+  resolved "https://registry.yarnpkg.com/@types/firefox-webext-browser/-/firefox-webext-browser-70.0.0.tgz#8770a84099471b5b725b169d36a3ad6150e348dd"
+  integrity sha512-Aau3Ri0pGqNBaIy26rbRuJxtmU5H5g4JEfN0NnFo8HyHVjtRDgYavRoysIH/OnpTlLP5Ob4cwz/2Hz3aNugNdg==
 
 "@types/glob@^7.1.1":
   version "7.1.1"
@@ -5613,11 +5620,6 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
-
-edgeware-node-types@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/edgeware-node-types/-/edgeware-node-types-1.0.10.tgz#eb40ef4308f84d64975edc99d12ac5da891ee6a3"
-  integrity sha512-iGMjkxtaT0FE5TR8DTucF+63IbtGHiieNxNkPTlsGYGt1JaPc6aP0ApnSQKYu2NiQaVcg1RB+BDMmGfFk1bnhw==
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -13607,7 +13609,12 @@ typedoc@^0.15.0:
     typedoc-default-themes "^0.6.0"
     typescript "3.5.x"
 
-typescript@3.5.x, typescript@^3.6.3:
+typescript@3.5.x:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
+  integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
+
+typescript@^3.6.3:
   version "3.6.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.3.tgz#fea942fabb20f7e1ca7164ff626f1a9f3f70b4da"
   integrity sha512-N7bceJL1CtRQ2RiG0AQME13ksR7DiuQh/QehubYcghzv20tnh+MQnQIuJddTmsbqYj+dztchykemz0zFzlvdQw==

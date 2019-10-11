@@ -9,7 +9,6 @@ import { SignerPayloadJSON } from '@polkadot/types/types';
 import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import fromMetadata from '@polkadot/api-metadata/extrinsics/fromMetadata';
 import findChain from '@polkadot/extension-chains';
 import { GenericCall, getTypeRegistry } from '@polkadot/types';
 import { formatNumber, bnToBn } from '@polkadot/util';
@@ -38,7 +37,7 @@ function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersi
   try {
     if (isDecoded && chain.meta && specVersion.eqn(chain.specVersion)) {
       getTypeRegistry().register(chain.types);
-      GenericCall.injectMethods(fromMetadata(chain.meta));
+      GenericCall.injectMetadata(chain.meta);
 
       method = new GenericCall(data);
       json = method.toJSON() as unknown as MethodJson;

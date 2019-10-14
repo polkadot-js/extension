@@ -12,7 +12,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.6.3",
     "@polkadot/keyring": "^1.5.1",
-    "@types/chrome": "^0.0.89",
+    "@types/chrome": "^0.0.90",
     "@types/firefox-webext-browser": "^70.0.1",
     "extensionizer": "^1.0.1",
     "extract-loader": "^3.1.0",

@@ -2086,6 +2086,13 @@
     typescript "^3.6.4"
     vuepress "^1.2.0"
 
+"@polkadot/extension-inject@^0.13.0-beta.10":
+  version "0.13.0-beta.10"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.13.0-beta.10.tgz#f173dda5638c642e46655c190da0c17b47b5d715"
+  integrity sha512-2iaS+bMx9uxkkUySMglyWN55fWsmoGtleX+X0wMpmfyx34Dwa9vc8gUm0oVK8Ajh9KyHmg6mZf3gSw06K2InGA==
+  dependencies:
+    "@babel/runtime" "^7.6.3"
+
 "@polkadot/jsonrpc@^0.95.0-beta.16":
   version "0.95.0-beta.16"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-0.95.0-beta.16.tgz#fbeaf4e2b786d703ae216d10aa2fd6d4b6acfb67"
@@ -2349,6 +2356,13 @@
   version "0.0.89"
   resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.89.tgz#0d5baef543aaa0715b345b57b86cba6ca708b524"
   integrity sha512-nWgL4U38SnIuMpG2rKMCGDknfZb193KFY15imqHUVFF4IJAVXvdEJOOgtcX9v2XsAaZiz2UUOInvWk5x1DhENQ==
+  dependencies:
+    "@types/filesystem" "*"
+
+"@types/chrome@^0.0.90":
+  version "0.0.90"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.90.tgz#687f8738925be23619f4bf1d66fdf7f66f2d7cbc"
+  integrity sha512-GrfPqHjNucBqWM3vLrJhQw684SGJMl3UBu+7EzYyo4I34HMBY3ImHNitCSdzsI1o8x8U0nRRe3M3FXeYgY/bYw==
   dependencies:
     "@types/filesystem" "*"
 
@@ -5631,11 +5645,6 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
-
-edgeware-node-types@^1.0.10:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/edgeware-node-types/-/edgeware-node-types-1.0.10.tgz#eb40ef4308f84d64975edc99d12ac5da891ee6a3"
-  integrity sha512-iGMjkxtaT0FE5TR8DTucF+63IbtGHiieNxNkPTlsGYGt1JaPc6aP0ApnSQKYu2NiQaVcg1RB+BDMmGfFk1bnhw==
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -13719,7 +13728,12 @@ typedoc@^0.15.0:
     typedoc-default-themes "^0.6.0"
     typescript "3.5.x"
 
-typescript@3.5.x, typescript@^3.6.4:
+typescript@3.5.x:
+  version "3.5.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
+  integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
+
+typescript@^3.6.4:
   version "3.6.4"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.4.tgz#b18752bb3792bc1a0281335f7f6ebf1bbfc5b91d"
   integrity sha512-unoCll1+l+YK4i4F8f22TaNVPRHcD9PA3yCuZ8g5e0qGqlVlJ/8FSateOLLSagn+Yg5+ZwuPkL8LFUc0Jcvksg==

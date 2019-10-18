@@ -44,7 +44,7 @@ The repo is split into a number of packages -
 - [extension](packages/extension/) - All the injection and background processing logic (the main entry)
 - [extension-ui](packages/extension-ui/) - The UI components for the extension, to build up the popup
 - [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
-- [extension-inject](packages/extension-inject/) - A convience wrapper that allows extension developers to inject their extension for use by any dapp
+- [extension-inject](packages/extension-inject/) - A convenience wrapper that allows extension developers to inject their extension for use by any dapp
 
 ## Dapp developers
 
@@ -123,4 +123,7 @@ window.injectedWeb3 = {
 ## FAQ
 
 ### Why can't I import an account with a seed
-This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They are checksummed (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding unencrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
+This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They are checksummed (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
+
+### I want to send funds directly from the extension
+The extension is not meant to be a full wallet replacement. It tries to focus on account management and making it as smooth as possible - and then makes these accounts to any dapp that can perform transfers, allow you to vote on democracy proposals and/or participate in any feature available on Polkadot and Substrate. We really aim to keep this singular account-only focus, leaving the hard-work of understanding chains and their intricacies over to over to wallets such as [polkadot-js/apps](https://polkadot.js.org/apps/).

@@ -25,14 +25,14 @@ import Welcome from './Welcome';
 
 // load the ui settings, actually only used for address prefix atm
 // probably overkill (however can replace once we have actual others)
-const { camera, prefix } = settings.get();
+const { prefix } = settings.get();
 
 // FIXME Duplicated in Settings, horrible...
 setSS58Format(prefix === -1 ? 42 : prefix);
 
 // Request permission for video, based on access we can hide/show import
-async function requestMediaAccess (): Promise<boolean> {
-  if (camera === 'off') {
+async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
+  if (!cameraOn) {
     return false;
   }
 
@@ -50,6 +50,7 @@ async function requestMediaAccess (): Promise<boolean> {
 export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
+  const [cameraOn, setCameraOn] = useState(settings.get().camera === 'on');
   const [mediaAllowed, setMediaAllowed] = useState(false);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
@@ -64,13 +65,19 @@ export default function Popup (): React.ReactElement<{}> {
 
   useEffect((): void => {
     Promise.all([
-      requestMediaAccess().then(setMediaAllowed),
       subscribeAccounts(setAccounts),
       subscribeAuthorize(setAuthRequests),
       subscribeSigning(setSignRequests)
     ]).catch((error: Error) => console.error(error));
+
+    settings.on('change', ({ camera }): void => setCameraOn(camera === 'on'));
+
     _onAction();
   }, []);
+
+  useEffect((): void => {
+    requestMediaAccess(cameraOn).then(setMediaAllowed);
+  }, [cameraOn]);
 
   const Root = isWelcomeDone
     ? authRequests && authRequests.length
@@ -85,7 +92,7 @@ export default function Popup (): React.ReactElement<{}> {
       <ActionContext.Provider value={_onAction}>
         <AccountContext.Provider value={accounts}>
           <AuthorizeContext.Provider value={authRequests}>
-            <MediaContext.Provider value={mediaAllowed}>
+            <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <SigningContext.Provider value={signRequests}>
                 <Switch>
                   <Route path='/account/create' component={Create} />

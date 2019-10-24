@@ -27,16 +27,16 @@ describe('Account component', () => {
     wrapper = mountAccountComponent({ isExternal: false });
 
     expect(wrapper.find(Link).length).toBe(3);
-    expect(wrapper.find(Link).at(0).text()).toContain('Edit');
+    expect(wrapper.find(Link).at(0).text()).toContain('Forget');
     expect(wrapper.find(Link).at(1).text()).toContain('Export');
-    expect(wrapper.find(Link).at(2).text()).toContain('Forget');
+    expect(wrapper.find(Link).at(2).text()).toContain('Edit');
   });
 
   it('does not show Export option if account is external', () => {
     wrapper = mountAccountComponent({ isExternal: true });
 
     expect(wrapper.find(Link).length).toBe(2);
-    expect(wrapper.find(Link).at(0).text()).toContain('Edit');
-    expect(wrapper.find(Link).at(1).text()).toContain('Forget');
+    expect(wrapper.find(Link).at(0).text()).toContain('Forget');
+    expect(wrapper.find(Link).at(1).text()).toContain('Edit');
   });
 });

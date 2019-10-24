@@ -67,6 +67,7 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
       }
       {isFirst && !isExternal && <Unlock onSign={_onSign} />}
       <ActionBar>
+        <div />
         <Link isDanger onClick={_onCancel}>Cancel</Link>
       </ActionBar>
     </Address>

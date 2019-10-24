@@ -43,6 +43,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
       }
     >
       <ActionBar>
+        <div />
         <Link isDanger onClick={_onReject}>Reject</Link>
       </ActionBar>
       {isFirst && (

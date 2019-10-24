@@ -49,9 +49,11 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
         />
       )}
       <ActionBar>
+        <div>
+          <Link isDanger to={`/account/forget/${address}`}>Forget</Link>
+          {!isExternal && <Link to={`/account/export/${address}`}>Export</Link>}
+        </div>
         <Link onClick={_toggleEdit}>Edit</Link>
-        {!isExternal && <Link to={`/account/export/${address}`}>Export</Link>}
-        <Link to={`/account/forget/${address}`}>Forget</Link>
       </ActionBar>
     </Address>
   );

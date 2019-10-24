@@ -12,7 +12,7 @@ import { Back } from '../../partials';
 
 // There are probably better ways, but since we set the popup size, use that
 const isPopup = window.innerWidth <= 480;
-const options = settings.availablePrefixes.map(({ text, value }): { text: string; value: string } => ({
+const prefixOptions = settings.availablePrefixes.map(({ text, value }): { text: string; value: string } => ({
   text: value === -1
     ? 'Default (Substrate or as specified)'
     : text,
@@ -20,14 +20,21 @@ const options = settings.availablePrefixes.map(({ text, value }): { text: string
 }));
 
 export default function Settings (): React.ReactElement<{}> {
+  const [camera, setCamera] = useState(settings.camera);
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
+
+  const _onChangeCamera = (camera: string): void => {
+    setCamera(camera);
+
+    settings.set({ camera });
+  };
 
   // FIXME check against index, we need a better solution
   const _onChangePrefix = (value: string): void => {
     const prefix = parseInt(value, 10);
 
-    setPrefix(value);
     setSS58Format(prefix === -1 ? 42 : prefix);
+    setPrefix(value);
 
     settings.set({ prefix });
   };
@@ -39,8 +46,14 @@ export default function Settings (): React.ReactElement<{}> {
       <Dropdown
         label='display addresses formatted for'
         onChange={_onChangePrefix}
-        options={options}
+        options={prefixOptions}
         value={`${prefix}`}
+      />
+      <Dropdown
+        label='external QR accounts and access'
+        onChange={_onChangeCamera}
+        options={settings.availableCamera}
+        value={camera}
       />
       {isPopup && (
         <Button

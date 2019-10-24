@@ -23,8 +23,19 @@ import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
+// load the ui settings, actually only used for address prefix atm
+// probably overkill (however can replace once we have actual others)
+const { camera, prefix } = settings.get();
+
+// FIXME Duplicated in Settings, horrible...
+setSS58Format(prefix === -1 ? 42 : prefix);
+
 // Request permission for video, based on access we can hide/show import
 async function requestMediaAccess (): Promise<boolean> {
+  if (camera === 'off') {
+    return false;
+  }
+
   try {
     await navigator.mediaDevices.getUserMedia({ video: true });
 
@@ -35,13 +46,6 @@ async function requestMediaAccess (): Promise<boolean> {
 
   return false;
 }
-
-// load the ui settings, actually only used for address prefix atm
-// probably overkill (however can replace once we have actual others)
-const { prefix } = settings.get();
-
-// FIXME Duplicated in Settings, horrible...
-setSS58Format(prefix === -1 ? 42 : prefix);
 
 export default function Popup (): React.ReactElement<{}> {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);

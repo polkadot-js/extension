@@ -10,9 +10,15 @@ import { Button, Dropdown, Header } from '../../components';
 import { windowOpen } from '../../messaging';
 import { Back } from '../../partials';
 
+interface Option {
+  text: string;
+  value: string;
+}
+
 // There are probably better ways, but since we set the popup size, use that
 const isPopup = window.innerWidth <= 480;
-const prefixOptions = settings.availablePrefixes.map(({ text, value }): { text: string; value: string } => ({
+const cameraOptions = settings.availableCamera.map(({ text, value }): Option => ({ text, value: `${value}` }));
+const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option => ({
   text: value === -1
     ? 'Default (Substrate or as specified)'
     : text,
@@ -52,7 +58,7 @@ export default function Settings (): React.ReactElement<{}> {
       <Dropdown
         label='external QR accounts and access'
         onChange={_onChangeCamera}
-        options={settings.availableCamera}
+        options={cameraOptions}
         value={camera}
       />
       {isPopup && (

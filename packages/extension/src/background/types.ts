@@ -46,8 +46,8 @@ export interface RequestSignatures {
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
-  'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
+  'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];

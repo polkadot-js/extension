@@ -9,11 +9,10 @@ import { Chain } from './types';
 // inside the api, run `yarn chain:info --ws <url>`
 import alexander from './alexander';
 import edgeware from './edgeware';
-import kusamaCC1 from './kusama-cc1';
 import kusamaCC2 from './kusama-cc2';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, edgeware, kusamaCC1, kusamaCC2].map(
+  [alexander, edgeware, kusamaCC2].map(
     ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
       genesisHash,
       {

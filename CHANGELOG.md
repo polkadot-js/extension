@@ -1,6 +1,9 @@
-# 0.13.0-beta.x
+# 0.13.1
 
 - Account export functionality (Thanks to https://github.com/Anze1m)
+- Add a setting to switch off camera access
+- Support for latest Polkadot/Substrate clients with v8 metadata & v4 transactions
+- Remove support for non-operational Kusama CC1 network
 
 # 0.12.1
 

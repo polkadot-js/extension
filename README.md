@@ -17,6 +17,17 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 
 ![interface screenshots](docs/concat-overview.jpg)
 
+## FAQ
+
+### Why can't I import an account with a seed
+This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They have a checksum (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
+
+### I want to send funds directly from the extension
+The extension is not meant to be a full wallet replacement. It tries to focus on account management and making it as smooth as possible - and then makes these accounts to any dapp that can perform transfers, allow you to vote on democracy proposals and/or participate in any feature available on Polkadot and Substrate. We really aim to keep this singular account-only focus, leaving the hard-work of understanding chains and their intricacies over to over to wallets such as [polkadot-js/apps](https://polkadot.js.org/apps/).
+
+### My addresses display differently on the extension vs a dapp
+Unlike a dapp, the extension itself does not connect to a network. The addresses are formatted with a network-specific prefix, which on a dapp, is retrieved upon connection from the chain properties. Underlying the public keys can be the same, but based on the address formatting the display could be different. This does not affect operation at all. You can choose which format to display the addresses in your extension via the "Options" screen.
+
 ## Development version
 
 Steps to build the extension and view your changes in a browser:
@@ -119,11 +130,3 @@ window.injectedWeb3 = {
   }
 }
 ```
-
-## FAQ
-
-### Why can't I import an account with a seed
-This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They are checksummed (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
-
-### I want to send funds directly from the extension
-The extension is not meant to be a full wallet replacement. It tries to focus on account management and making it as smooth as possible - and then makes these accounts to any dapp that can perform transfers, allow you to vote on democracy proposals and/or participate in any feature available on Polkadot and Substrate. We really aim to keep this singular account-only focus, leaving the hard-work of understanding chains and their intricacies over to over to wallets such as [polkadot-js/apps](https://polkadot.js.org/apps/).

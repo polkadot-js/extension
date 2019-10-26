@@ -3,28 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import {
-  AccountJson,
-  AuthorizeRequest,
-  RequestAccountCreateExternal,
-  RequestAccountCreateSuri,
-  RequestAccountEdit,
-  RequestAuthorizeApprove,
-  RequestAuthorizeReject,
-  RequestSigningApprovePassword,
-  RequestSigningApproveSignature,
-  RequestSigningCancel,
-  RequestSeedCreate,
-  ResponseSeedCreate,
-  RequestSeedValidate,
-  ResponseSeedValidate,
-  RequestAccountForget,
-  SigningRequest,
-  RequestTypes,
-  ResponseTypes,
-  MessageTypes,
-  RequestAccountExport, ResponseAccountExport
-} from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, ResponseTypes, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
@@ -75,14 +54,14 @@ export default class Extension {
     return true;
   }
 
+  private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
+    return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password)) };
+  }
+
   private accountsForget ({ address }: RequestAccountForget): boolean {
     keyring.forgetAccount(address);
 
     return true;
-  }
-
-  private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
-    return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password), null, 2) };
   }
 
   // FIXME This looks very much like what we have in Tabs
@@ -154,7 +133,8 @@ export default class Extension {
     if (isHex(phrase)) {
       assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
     } else {
-      assert(SEED_LENGTHS.includes(phrase.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
+      // sadly isHex detects as string, so we need a cast here
+      assert(SEED_LENGTHS.includes((phrase as string).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
       assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
     }
 
@@ -259,14 +239,14 @@ export default class Extension {
       case 'pri(accounts.create.suri)':
         return this.accountsCreateSuri(request as RequestAccountCreateSuri);
 
-      case 'pri(accounts.forget)':
-        return this.accountsForget(request as RequestAccountForget);
+      case 'pri(accounts.edit)':
+        return this.accountsEdit(request as RequestAccountEdit);
 
       case 'pri(accounts.export)':
         return this.accountsExport(request as RequestAccountExport);
 
-      case 'pri(accounts.edit)':
-        return this.accountsEdit(request as RequestAccountEdit);
+      case 'pri(accounts.forget)':
+        return this.accountsForget(request as RequestAccountForget);
 
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);

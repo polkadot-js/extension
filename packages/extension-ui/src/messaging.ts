@@ -62,12 +62,12 @@ export async function editAccount (address: string, name: string): Promise<boole
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
-export async function forgetAccount (address: string): Promise<boolean> {
-  return sendMessage('pri(accounts.forget)', { address });
-}
-
 export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
   return sendMessage('pri(accounts.export)', { address, password });
+}
+
+export async function forgetAccount (address: string): Promise<boolean> {
+  return sendMessage('pri(accounts.forget)', { address });
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

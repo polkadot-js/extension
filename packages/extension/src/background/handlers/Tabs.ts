@@ -22,7 +22,7 @@ function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
 export default class Tabs {
   private state: State;
 
-  public constructor (state: State) {
+  constructor (state: State) {
     this.state = state;
   }
 

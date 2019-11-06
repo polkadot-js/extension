@@ -28,7 +28,7 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
 export default class Extension {
   private state: State;
 
-  public constructor (state: State) {
+  constructor (state: State) {
     this.state = state;
   }
 

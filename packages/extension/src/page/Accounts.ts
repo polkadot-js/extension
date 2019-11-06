@@ -8,7 +8,7 @@ import { SendRequest } from './types';
 let sendRequest: SendRequest;
 
 export default class Accounts implements InjectedAccounts {
-  public constructor (_sendRequest: SendRequest) {
+  constructor (_sendRequest: SendRequest) {
     sendRequest = _sendRequest;
   }
 

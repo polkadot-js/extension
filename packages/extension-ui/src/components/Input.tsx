@@ -6,7 +6,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import Label from './Label';
-import defaults from './defaults';
 
 interface Props {
   className?: string;
@@ -46,17 +45,17 @@ function Input ({ className, defaultValue, label, isFocussed, isReadOnly, onBlur
 
 export default styled(Input)`
   input {
-    background: ${({ isError, isReadOnly }): string => isError ? defaults.box.error.background : (isReadOnly ? '#eee' : '#fff')};
-    border-color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.inputBorder};
-    border-radius: ${defaults.borderRadius};
+    background: ${({ isError, isReadOnly, theme }): string => isError ? theme.box.error.background : (isReadOnly ? '#eee' : '#fff')};
+    border-color: ${({ isError, theme }): string => isError ? theme.box.error.border : theme.inputBorder};
+    border-radius: ${({ theme }): string => theme.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.color};
+    color: ${({ isError, theme }): string => isError ? theme.box.error.border : theme.color};
     display: block;
-    font-family: ${defaults.fontFamily};
-    font-size: ${defaults.fontSize};
-    padding: ${({ label }): string => label ? defaults.inputPaddingLabel : defaults.inputPadding};
+    font-family: ${({ theme }): string => theme.fontFamily};
+    font-size: ${({ theme }): string => theme.fontSize};
+    padding: ${({ label, theme }): string => label ? theme.inputPaddingLabel : theme.inputPadding};
     width: 100%;
 
     &:read-only {

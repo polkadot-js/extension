@@ -5,8 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   children: React.ReactNode;
   className?: string;
@@ -21,10 +19,10 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(View)`
-  color: ${defaults.color};
-  font-family: ${defaults.fontFamily};
-  font-size: ${defaults.fontSize};
-  line-height: ${defaults.lineHeight};
+  color: ${({ theme }): string => theme.color};
+  font-family: ${({ theme }): string => theme.fontFamily};
+  font-size: ${({ theme }): string => theme.fontSize};
+  line-height: ${({ theme }): string => theme.lineHeight};
 
   h3 {
     margin: 0 0 0.75rem;

@@ -5,8 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   children: React.ReactNode;
   className?: string;
@@ -24,12 +22,12 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
 
 export default styled(Label)`
   box-sizing: border-box;
-  color: ${defaults.labelColor};
+  color: ${({ theme }): string => theme.labelColor};
   display: block;
-  font-family: ${defaults.fontFamily};
-  font-size: ${defaults.fontSize};
-  margin: ${defaults.boxMargin};
-  padding: ${defaults.boxPadding};
+  font-family: ${({ theme }): string => theme.fontFamily};
+  font-size: ${({ theme }): string => theme.fontSize};
+  margin: ${({ theme }): string => theme.boxMargin};
+  padding: ${({ theme }): string => theme.boxPadding};
   position: relative;
 
   label {

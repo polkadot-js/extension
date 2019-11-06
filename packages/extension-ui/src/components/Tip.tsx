@@ -3,9 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React from 'react';
-import styled from 'styled-components';
-
-import defaults from './defaults';
+import styled, { ThemedStyledProps } from 'styled-components';
+import { Theme } from './themes';
 
 interface Color {
   background: string;
@@ -13,17 +12,15 @@ interface Color {
   color: string;
 }
 
-type Type = keyof typeof defaults.box;
-
 interface Props {
   children: React.ReactNode;
   className?: string;
   header?: React.ReactNode;
-  type?: Type;
+  type?: keyof Theme['box'];
 }
 
-function getColor ({ type }: Props): Color {
-  return defaults.box[type || 'info'] || defaults.box.info;
+function getColor ({ type, theme }: ThemedStyledProps<Props, Theme>): Color {
+  return theme.box[type || 'info'] || theme.box.info;
 }
 
 function Tip ({ children, className, header }: Props): React.ReactElement<Props> {
@@ -35,7 +32,7 @@ function Tip ({ children, className, header }: Props): React.ReactElement<Props>
   );
 }
 
-// box-shadow: ${defaults.boxShadow};
+// box-shadow: ${({theme}) => theme.boxShadow};
 export default styled(Tip)`
   background: ${(p): string => getColor(p).background};
   border-left: 0.25rem solid ${(p): string => getColor(p).border};

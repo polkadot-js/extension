@@ -7,7 +7,7 @@ import { RequestAuthorizeTab } from '@polkadot/extension/background/types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Button, Icon, IconBox, Link, Tip, defaults } from '../../components';
+import { ActionBar, ActionContext, Button, Icon, IconBox, Link, Tip } from '../../components';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 interface Props {
@@ -61,8 +61,8 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
 export default styled(Request)`
   .icon {
-    background: ${defaults.btnBgDanger};
-    color: ${defaults.btnColorDanger};
+    background: ${({ theme }): string => theme.btnBgDanger};
+    color: ${({ theme }): string => theme.btnColorDanger};
   }
 
   .tab-info {
@@ -71,7 +71,7 @@ export default styled(Request)`
 
   .tab-name,
   .tab-url {
-    color: ${defaults.linkColor};
+    color: ${({ theme }): string => theme.linkColor};
     display: inline-block;
     max-width: 20rem;
     overflow: hidden;

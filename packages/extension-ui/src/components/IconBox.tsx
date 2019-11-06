@@ -6,7 +6,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import Box from './Box';
-import defaults from './defaults';
 
 interface Props {
   banner?: React.ReactNode;
@@ -35,8 +34,8 @@ function IconBox ({ banner, children, className, icon, intro }: Props): React.Re
 
 export default styled(IconBox)`
   box-sizing: border-box;
-  margin: ${defaults.boxMargin};
-  padding: ${defaults.boxPadding};
+  margin: ${({ theme }): string => theme.boxMargin};
+  padding: ${({ theme }): string => theme.boxPadding};
   padding-left: 1rem;
   position: relative;
 

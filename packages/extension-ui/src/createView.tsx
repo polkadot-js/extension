@@ -5,8 +5,8 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
-
-import { View } from './components';
+import { ThemeProvider } from 'styled-components';
+import { View, defaultTheme } from './components';
 
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
   const rootElement = document.getElementById(rootId);
@@ -17,11 +17,13 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   ReactDOM.render(
     <Suspense fallback='...'>
-      <View>
-        <HashRouter>
-          <Entry />
-        </HashRouter>
-      </View>
+      <ThemeProvider theme={defaultTheme}>
+        <View>
+          <HashRouter>
+            <Entry/>
+          </HashRouter>
+        </View>
+      </ThemeProvider>
     </Suspense>,
     rootElement
   );

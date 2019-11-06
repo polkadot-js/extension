@@ -5,8 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   className?: string;
   children?: React.ReactNode;
@@ -45,20 +43,20 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
 export default styled(Button)`
   box-sizing: border-box;
   display: ${({ isSmall }): string => isSmall ? 'inline-block' : 'block'};
-  margin: ${defaults.boxMargin};
-  padding: ${defaults.boxPadding};
+  margin: ${({ theme }): string => theme.boxMargin};
+  padding: ${({ theme }): string => theme.boxPadding};
   width: ${({ isSmall }): string => isSmall ? 'auto' : '100%'};
 
   button {
-    background: ${({ isDanger }): string => isDanger ? defaults.btnBgDanger : defaults.btnBg};
-    border: ${defaults.btnBorder}${({ isDanger }): string => isDanger ? defaults.btnColorDanger : defaults.btnColor};
-    border-radius: ${defaults.borderRadius};
-    color: ${({ isDanger }): string => isDanger ? defaults.btnColorDanger : defaults.btnColor};
+    background: ${({ isDanger, theme }): string => isDanger ? theme.btnBgDanger : theme.btnBg};
+    border: ${({ theme }): string => theme.btnBorder}${({ isDanger, theme }): string => isDanger ? theme.btnColorDanger : theme.btnColor};
+    border-radius: ${({ theme }): string => theme.borderRadius};
+    color: ${({ isDanger, theme }): string => isDanger ? theme.btnColorDanger : theme.btnColor};
     cursor: pointer;
     display: block;
-    font-size: ${defaults.fontSize};
+    font-size: ${({ theme }): string => theme.fontSize};
     opacity: ${({ isDisabled }): string => isDisabled ? DISABLED_OPACITY : '0.8'};
-    padding: ${defaults.btnPadding};
+    padding: ${({ theme }): string => theme.btnPadding};
     text-align: center;
     width: 100%;
 

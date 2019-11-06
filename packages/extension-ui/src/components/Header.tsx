@@ -5,8 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   children?: React.ReactNode;
   className?: string;
@@ -27,7 +25,7 @@ function Header ({ children, className, label, labelExtra }: Props): React.React
 }
 
 export default styled(Header)`
-  background: ${defaults.hdrBg};
+  background: ${({ theme }): string => theme.hdrBg};
   box-sizing: border-box;
   font-weight: normal;
   margin: 0 -1rem;
@@ -35,8 +33,8 @@ export default styled(Header)`
   position: relative;
 
   .label {
-    color: ${defaults.hdrColor};
-    font-family: ${defaults.fontFamily};
+    color: ${({ theme }): string => theme.hdrColor};
+    font-family: ${({ theme }): string => theme.fontFamily};
     text-transform: uppercase;
   }
 

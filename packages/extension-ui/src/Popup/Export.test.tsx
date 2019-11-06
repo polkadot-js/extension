@@ -8,9 +8,10 @@ import { configure, mount, ReactWrapper } from 'enzyme';
 import { MemoryRouter, Route } from 'react-router';
 import React from 'react';
 
-import { Button } from '../components';
+import { Button, defaultTheme } from '../components';
 import Export from './Export';
 import { exportAccount } from '../messaging';
+import { ThemeProvider } from 'styled-components';
 
 configure({ adapter: new Adapter() });
 jest.mock('../messaging');
@@ -30,7 +31,9 @@ describe('Export component', () => {
 
     wrapper = mount(<MemoryRouter
       initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
-      <Route path='/account/export/:address' component={ Export }/>
+      <ThemeProvider theme={defaultTheme}>
+        <Route path='/account/export/:address' component={ Export }/>
+      </ThemeProvider>
     </MemoryRouter>);
   });
 

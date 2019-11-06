@@ -18,4 +18,4 @@ export { default as Tip } from './Tip';
 export { default as View } from './View';
 
 export * from './contexts';
-export { default as defaults } from './defaults';
+export * from './themes';

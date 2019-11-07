@@ -17,6 +17,7 @@ export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Tip } from './Tip';
 export { default as View } from './View';
 export { Input, TextArea } from './TextInputs';
+export { default as AddAccount } from './AddAccount';
 
 export * from './contexts';
 export * from './themes';

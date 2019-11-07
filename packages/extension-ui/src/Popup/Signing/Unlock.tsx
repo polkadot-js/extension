@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { Button, Input } from '../../components';
+import { Button, InputWithLabel } from '../../components';
 
 interface Props {
   className?: string;
@@ -27,9 +27,9 @@ export default function Unlock ({ className, onSign }: Props): React.ReactElemen
 
   return (
     <div className={className}>
-      <Input
+      <InputWithLabel
         isError={!password || !!error}
-        isFocussed
+        isFocused
         label='password for this account'
         onChange={setPassword}
         type='password'

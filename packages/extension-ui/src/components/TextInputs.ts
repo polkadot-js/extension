@@ -1,5 +1,9 @@
 import styled, { css } from 'styled-components';
 
+interface Props {
+  withError?: boolean;
+}
+
 const DefaultTextInputColors = css`
   background: ${({ theme }): string => theme.inputBackground};
   border-color: ${({ theme }): string => theme.inputBorder};
@@ -12,7 +16,7 @@ const ErroredTextInputColors = css`
   color: ${({ theme }): string => theme.box.error.border};
 `;
 
-const TextInput = css<{ withError?: boolean }>`
+const TextInput = css<Props>`
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   border-radius: ${({ theme }): string => theme.borderRadius};
   border-style: solid;
@@ -32,5 +36,5 @@ const TextInput = css<{ withError?: boolean }>`
   }
 `;
 
-export const TextArea = styled.textarea`${TextInput}`;
-export const Input = styled.input`${TextInput}`;
+export const TextArea = styled.textarea<Props>`${TextInput}`;
+export const Input = styled.input<Props>`${TextInput}`;

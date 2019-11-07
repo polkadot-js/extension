@@ -10,12 +10,13 @@ export { default as Dropdown } from './Dropdown';
 export { default as Header } from './Header';
 export { default as Icon } from './Icon';
 export { default as IconBox } from './IconBox';
-export { default as Input } from './Input';
+export { default as InputWithLabel } from './InputWithLabel';
 export { default as Link } from './Link';
 export { default as Loading } from './Loading';
-export { default as TextArea } from './TextArea';
+export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Tip } from './Tip';
 export { default as View } from './View';
+export { Input, TextArea } from './TextInputs';
 
 export * from './contexts';
 export * from './themes';

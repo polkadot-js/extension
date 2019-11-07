@@ -4,7 +4,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { AccountContext, Input } from '../components';
+import { AccountContext, InputWithLabel } from '../components';
 
 interface Props {
   address?: string;
@@ -36,11 +36,11 @@ export default function Name ({ address, className, defaultValue, isFocussed, la
   }, [name]);
 
   return (
-    <Input
+    <InputWithLabel
       className={className}
       defaultValue={startValue}
       isError={isError}
-      isFocussed={isFocussed}
+      isFocused={isFocussed}
       label={label}
       onBlur={onBlur}
       onChange={setName}

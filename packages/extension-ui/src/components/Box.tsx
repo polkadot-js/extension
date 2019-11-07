@@ -21,7 +21,7 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
 }
 
 export default styled(Box)`
-  background: white;
+  background: ${({ theme }): string => theme.background};
   border: ${({ theme }): string => theme.boxBorder};
   border-radius: ${({ theme }): string => theme.borderRadius};
   box-shadow: ${({ theme }): string => theme.boxShadow};

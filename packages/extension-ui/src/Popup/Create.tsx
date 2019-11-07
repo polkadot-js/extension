@@ -4,7 +4,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { ActionContext, Address, Button, Header, Loading, TextArea } from '../components';
+import { ActionContext, Address, Button, Header, Loading, TextAreaWithLabel } from '../components';
 import { createAccountSuri, createSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
@@ -38,7 +38,7 @@ export default function Create (): React.ReactElement<Props> {
       <Back />
       <Loading>{account && (
         <>
-          <TextArea
+          <TextAreaWithLabel
             isReadOnly
             label='generated 12-word mnemonic seed'
             value={account.seed}

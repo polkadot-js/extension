@@ -4,7 +4,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import { ActionContext, Address, Button, Header, TextArea } from '../components';
+import { ActionContext, Address, Button, Header, TextAreaWithLabel } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Back, Name, Password } from '../partials';
 
@@ -35,9 +35,9 @@ export default function Import (): React.ReactElement<Props> {
     <div>
       <Header label='import account' />
       <Back />
-      <TextArea
+      <TextAreaWithLabel
         isError={!account}
-        isFocussed
+        isFocused
         label='existing 12 or 24-word mnemonic seed'
         onChange={_onChangeSeed}
       />

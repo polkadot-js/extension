@@ -4,7 +4,7 @@
 
 import React, { useContext } from 'react';
 
-import { AccountContext, Button, Header, Link, MediaContext, Tip } from '../../components';
+import { AccountContext, Button, Header, Link, MediaContext, AddAccount } from '../../components';
 import Account from './Account';
 
 type Props = {};
@@ -21,7 +21,14 @@ export default function Accounts (): React.ReactElement<Props> {
       />
       {
         (accounts.length === 0)
-          ? <Tip header='add accounts' type='warn'>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
+          ? <AddAccount
+            header='add accounts'
+            type='warn'
+            to='/account/create'
+            imageVisible
+          >
+            You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.
+          </AddAccount>
           : accounts.map((json, index): React.ReactNode => (
             <Account
               {...json}

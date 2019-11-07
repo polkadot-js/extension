@@ -39,7 +39,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       <Header label='export account' />
       <Back />
       <Address address={address}>
-        <Tip header='danger' type='error'>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Tip>
+        <Tip warning type='error'>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Tip>
         <InputWithLabel
           isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
           label='password for this account'

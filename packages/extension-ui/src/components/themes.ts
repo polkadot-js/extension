@@ -22,7 +22,7 @@ export const defaultTheme = {
   boxPadding: '0 0.25rem',
   boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
   color: TEXT_COLOR,
-  fontFamily: '-apple-system, Nunito, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+  fontFamily: 'Nunito, sans-serif',
   fontSize: '16px',
   hdrBg: 'transparent', // '#f5f6f7',
   hdrColor: LABEL_COLOR,

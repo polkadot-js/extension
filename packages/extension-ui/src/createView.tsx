@@ -6,7 +6,7 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { View, defaultTheme } from './components';
+import { View, defaultTheme, Fonts } from './components';
 
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
   const rootElement = document.getElementById(rootId);
@@ -17,6 +17,7 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   ReactDOM.render(
     <Suspense fallback='...'>
+      <Fonts/>
       <ThemeProvider theme={defaultTheme}>
         <View>
           <HashRouter>

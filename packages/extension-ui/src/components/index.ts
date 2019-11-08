@@ -16,6 +16,7 @@ export { default as Loading } from './Loading';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Tip } from './Tip';
 export { default as View } from './View';
+export { default as Fonts } from './Fonts';
 export { Input, TextArea } from './TextInputs';
 export { default as AddAccount } from './AddAccount';
 

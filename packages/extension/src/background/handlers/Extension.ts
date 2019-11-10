@@ -9,7 +9,7 @@ import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { createType } from '@polkadot/types';
-import { assert } from '@polkadot/util';
+import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import State from './State';
@@ -130,8 +130,13 @@ export default class Extension {
   private seedValidate ({ suri, type }: RequestSeedValidate): ResponseSeedValidate {
     const { phrase } = keyExtractSuri(suri);
 
-    assert(SEED_LENGTHS.includes(phrase.split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-    assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+    if (isHex(phrase)) {
+      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+    } else {
+      // sadly isHex detects as string, so we need a cast here
+      assert(SEED_LENGTHS.includes((phrase as string).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
+      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+    }
 
     return {
       address: keyring.createFromUri(suri, {}, type).address,

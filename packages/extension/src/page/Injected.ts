@@ -13,7 +13,7 @@ export default class implements Injected {
 
   public readonly signer: Signer;
 
-  public constructor (sendRequest: SendRequest) {
+  constructor (sendRequest: SendRequest) {
     this.accounts = new Accounts(sendRequest);
     this.signer = new Signer(sendRequest);
   }

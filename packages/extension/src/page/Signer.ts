@@ -10,7 +10,7 @@ let sendRequest: SendRequest;
 let nextId = 0;
 
 export default class Signer implements SignerInterface {
-  public constructor (_sendRequest: SendRequest) {
+  constructor (_sendRequest: SendRequest) {
     // NOTE We are storing the `sendRequest` as a global to this class, since we don't
     // have private members in JS, we err on the side of caution and hide it away so it
     // is only available internally to the class.

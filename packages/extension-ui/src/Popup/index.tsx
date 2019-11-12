@@ -14,7 +14,7 @@ import { AccountContext, ActionContext, AuthorizeContext, MediaContext, SigningC
 import { subscribeAccounts, subscribeAuthorize, subscribeSigning } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
-import Create from './Create';
+import CreateAccount from './CreateAccount';
 import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';
@@ -95,7 +95,7 @@ export default function Popup (): React.ReactElement<{}> {
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <SigningContext.Provider value={signRequests}>
                 <Switch>
-                  <Route path='/account/create' component={Create} />
+                  <Route path='/account/create' component={CreateAccount} />
                   <Route path='/account/forget/:address' component={Forget} />
                   <Route path='/account/export/:address' component={Export} />
                   <Route path='/account/import-qr' component={ImportQr} />

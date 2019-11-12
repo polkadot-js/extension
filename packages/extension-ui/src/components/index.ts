@@ -3,22 +3,29 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 export { default as ActionBar } from './ActionBar';
+export { default as ActionText } from './ActionText';
+export { default as AddAccount } from './AddAccount';
 export { default as Address } from './Address';
 export { default as Box } from './Box';
 export { default as Button } from './Button';
+export { default as ButtonArea } from './ButtonArea';
+export { default as Checkbox } from './Checkbox';
 export { default as Dropdown } from './Dropdown';
+export { default as Fonts } from './Fonts';
 export { default as Header } from './Header';
 export { default as Icon } from './Icon';
 export { default as IconBox } from './IconBox';
 export { default as InputWithLabel } from './InputWithLabel';
 export { default as Link } from './Link';
 export { default as Loading } from './Loading';
+export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Tip } from './Tip';
+export { default as VerticalSpace } from './VerticalSpace';
 export { default as View } from './View';
-export { default as Fonts } from './Fonts';
+export { default as Warning } from './Warning';
+
 export { Input, TextArea } from './TextInputs';
-export { default as AddAccount } from './AddAccount';
 
 export * from './contexts';
 export * from './themes';

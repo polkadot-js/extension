@@ -5,7 +5,7 @@
 import React from 'react';
 import styled, { ThemedStyledProps } from 'styled-components';
 import { Theme } from './themes';
-import warningImage from '../assets/warning.png';
+import warningImage from '../assets/warning.svg';
 
 interface Color {
   background: string;
@@ -41,10 +41,9 @@ const Image = styled.img`
 `;
 
 const TipText = styled.p<{warning: boolean}>`
-  font-size: 16px;
-  line-height: 26px;
-  font-weight: normal;
-  color: #fff;
+  font-size: ${({ theme }): string => theme.fontSize};
+  line-height: ${({ theme }): string => theme.lineHeight};
+  color: ${({ theme }): string => theme.color};
   margin: ${({ warning }): string => warning ? '0 0 0 24px' : '-28px 0 0 24px'};
 `;
 

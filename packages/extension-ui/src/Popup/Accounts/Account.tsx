@@ -43,7 +43,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           address={address}
           className='edit-name'
           isFocussed
-          label={null}
+          label={' '}
           onBlur={_saveChanges}
           onChange={setName}
         />

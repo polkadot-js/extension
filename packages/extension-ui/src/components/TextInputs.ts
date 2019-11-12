@@ -19,8 +19,7 @@ const ErroredTextInputColors = css`
 const TextInput = css<Props>`
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   border-radius: ${({ theme }): string => theme.borderRadius};
-  border-style: solid;
-  border-width: 1px;
+  border: ${({ theme }): string => `1px solid ${theme.inputBorder}`};
   box-sizing: border-box;
   display: block;
   font-family: ${({ theme }): string => theme.fontFamily};

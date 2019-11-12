@@ -6,7 +6,6 @@ import React from 'react';
 
 import Label from './Label';
 import { TextArea } from '@polkadot/extension-ui/components/TextInputs';
-import styled from 'styled-components';
 
 interface Props {
   className?: string;
@@ -41,6 +40,4 @@ function TextAreaWithLabel ({ className, isFocused, isReadOnly, label, onChange,
   );
 }
 
-export default styled(TextAreaWithLabel)`
-  padding: ${({ label, theme }): string => label ? theme.inputPaddingLabel : theme.inputPadding};
-`;
+export default TextAreaWithLabel;

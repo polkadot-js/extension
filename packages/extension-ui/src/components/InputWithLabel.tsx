@@ -14,7 +14,7 @@ interface Props {
   isError?: boolean;
   isFocused?: boolean;
   isReadOnly?: boolean;
-  label?: string | null;
+  label: string;
   onBlur?: () => void;
   onChange?: (value: string) => void;
   type?: 'text' | 'password';

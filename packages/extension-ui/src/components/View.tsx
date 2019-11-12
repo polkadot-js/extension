@@ -19,13 +19,20 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(View)`
+  display: flex;
+  flex-direction: column;
   background: ${({ theme }): string => theme.background};
   color: ${({ theme }): string => theme.color};
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
   height: 100%;
-  padding: 0 1rem;
+  //padding: 0 1rem;
+  
+  > div {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
   
   h3 {
     margin: 0 0 0.75rem;

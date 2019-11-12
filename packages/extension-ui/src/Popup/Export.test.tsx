@@ -12,11 +12,10 @@ import { Button, defaultTheme } from '../components';
 import Export from './Export';
 import { exportAccount } from '../messaging';
 import { ThemeProvider } from 'styled-components';
+import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
 
 configure({ adapter: new Adapter() });
 jest.mock('../messaging');
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const flushAllPromises = (): Promise<void> => new Promise(resolve => setImmediate(resolve));
 
 describe('Export component', () => {
   let wrapper: ReactWrapper;

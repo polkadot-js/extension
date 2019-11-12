@@ -18,7 +18,7 @@ interface Props {
   isError?: boolean;
   isFocussed?: boolean;
   isReadOnly?: boolean;
-  label?: string | null;
+  label: string;
   onBlur?: () => void;
   onChange?: (value: string) => void;
   options: DrodownOption[];

@@ -4,7 +4,16 @@
 
 import React, { useContext } from 'react';
 
-import { AccountContext, Button, Header, Link, MediaContext, AddAccount } from '../../components';
+import {
+  AccountContext,
+  Button,
+  Header,
+  Link,
+  MediaContext,
+  AddAccount,
+  ButtonArea,
+  VerticalSpace
+} from '../../components';
 import Account from './Account';
 
 type Props = {};
@@ -14,7 +23,7 @@ export default function Accounts (): React.ReactElement<Props> {
   const mediaAllowed = useContext(MediaContext);
 
   return (
-    <div>
+    <>
       <Header
         label='accounts'
         labelExtra={<Link to='/settings'>Options</Link>}
@@ -36,20 +45,23 @@ export default function Accounts (): React.ReactElement<Props> {
             />
           ))
       }
-      <Button
-        label='I want to create a new account with a new seed'
-        to='/account/create'
-      />
-      <Button
-        label='I have a pre-existing seed, import the account'
-        to='/account/import-seed'
-      />
-      {mediaAllowed && (
+      <VerticalSpace/>
+      <ButtonArea>
         <Button
-          label='I have an external account, add it via QR'
-          to='/account/import-qr'
+          label='I want to create a new account with a new seed'
+          to='/account/create'
         />
-      )}
-    </div>
+        <Button
+          label='I have a pre-existing seed, import the account'
+          to='/account/import-seed'
+        />
+        {mediaAllowed && (
+          <Button
+            label='I have an external account, add it via QR'
+            to='/account/import-qr'
+          />
+        )}
+      </ButtonArea>
+    </>
   );
 }

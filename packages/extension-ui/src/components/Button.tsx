@@ -16,8 +16,6 @@ interface Props {
   to?: string;
 }
 
-const DISABLED_OPACITY = '0.3';
-
 function Button ({ children, className, isDisabled, label, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
     if (isDisabled) {
@@ -33,7 +31,7 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
 
   return (
     <div className={className}>
-      <button onClick={_onClick}>
+      <button onClick={_onClick} disabled={isDisabled}>
         {label}{children}
       </button>
     </div>
@@ -43,8 +41,6 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
 export default styled(Button)`
   box-sizing: border-box;
   display: ${({ isSmall }): string => isSmall ? 'inline-block' : 'block'};
-  margin: ${({ theme }): string => theme.boxMargin};
-  padding: ${({ theme }): string => theme.boxPadding};
   width: ${({ isSmall }): string => isSmall ? 'auto' : '100%'};
 
   button {
@@ -55,13 +51,19 @@ export default styled(Button)`
     cursor: pointer;
     display: block;
     font-size: ${({ theme }): string => theme.fontSize};
-    opacity: ${({ isDisabled }): string => isDisabled ? DISABLED_OPACITY : '0.8'};
+    font-weight: 600;
+    height: 48px;
     padding: ${({ theme }): string => theme.btnPadding};
     text-align: center;
     width: 100%;
-
-    &:hover {
-      opacity: ${({ isDisabled }): string => isDisabled ? DISABLED_OPACITY : '1.0'};
+    
+    &:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    
+    &:not(:disabled):hover {
+      background: ${({ theme }): string => theme.primaryColor};
     }
   }
 `;

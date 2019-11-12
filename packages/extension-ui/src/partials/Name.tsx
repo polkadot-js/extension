@@ -11,7 +11,7 @@ interface Props {
   className?: string;
   defaultValue?: string | null;
   isFocussed?: boolean;
-  label?: string | null;
+  label?: string;
   onBlur?: () => void;
   onChange: (name: string | null) => void;
 }

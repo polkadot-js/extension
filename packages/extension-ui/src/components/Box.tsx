@@ -21,7 +21,7 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
 }
 
 export default styled(Box)`
-  background: ${({ theme }): string => theme.background};
+  background: ${({ theme }): string => theme.readonlyInputBackground};
   border: ${({ theme }): string => theme.boxBorder};
   border-radius: ${({ theme }): string => theme.borderRadius};
   box-shadow: ${({ theme }): string => theme.boxShadow};
@@ -29,7 +29,7 @@ export default styled(Box)`
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   margin: ${({ theme }): string => theme.boxMargin};
-  padding: 0.75rem 1rem;
+  padding: ${({ theme }): string => theme.boxPadding};
   position: relative;
 
   .banner {

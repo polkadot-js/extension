@@ -18,6 +18,7 @@ export { default as IconBox } from './IconBox';
 export { default as Identicon } from './Identicon';
 export { default as InputWithLabel } from './InputWithLabel';
 export { default as Link } from './Link';
+export { default as List } from './List';
 export { default as Loading } from './Loading';
 export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';

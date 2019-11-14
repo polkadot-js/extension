@@ -29,7 +29,7 @@ export default styled(View)`
   height: 100%;
   //padding: 0 1rem;
   
-  > div {
+  > * {
     margin-left: 1rem;
     margin-right: 1rem;
   }

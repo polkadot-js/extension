@@ -41,7 +41,7 @@ export const defaultTheme = {
   lineHeight: '26px',
   linkColor: LINK_COLOR,
   linkColorDanger: DANGER_COLOR,
-  primaryColor: '#FF8301',
+  primaryColor: '#FF7D01',
   box: {
     error: {
       background: '#ffe6e6',

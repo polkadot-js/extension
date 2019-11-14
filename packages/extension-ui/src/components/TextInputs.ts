@@ -26,10 +26,10 @@ const TextInput = css<Props>`
   font-size: ${({ theme }): string => theme.fontSize};
   resize: none;
   width: 100%;
-  ${({ withError }): typeof ErroredTextInputColors => (withError ? ErroredTextInputColors : DefaultTextInputColors)}
+  ${({ withError }): typeof ErroredTextInputColors => (withError ? ErroredTextInputColors : DefaultTextInputColors)};
   
   &:read-only {
-    background: ${({ theme }): string => theme.readonlyInputBackground}
+    background: ${({ theme }): string => theme.readonlyInputBackground};
     box-shadow: none;
     outline: none;
   }

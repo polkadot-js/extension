@@ -50,9 +50,10 @@ export default styled(Button)`
     color: ${({ isDanger, theme }): string => isDanger ? theme.btnColorDanger : theme.btnColor};
     cursor: pointer;
     display: block;
-    font-size: ${({ theme }): string => theme.fontSize};
+    font-size: 15px;
     font-weight: 600;
     height: 48px;
+    line-height: 20px;
     padding: ${({ theme }): string => theme.btnPadding};
     text-align: center;
     width: 100%;

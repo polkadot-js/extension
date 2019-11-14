@@ -8,12 +8,12 @@ import { Chain } from '@polkadot/extension-chains/types';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
-import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import IconBox from './IconBox';
 import { AccountContext } from './contexts';
+import { Identicon } from '@polkadot/extension-ui/components';
 
 interface Props {
   address?: string | null;
@@ -75,9 +75,7 @@ function Address ({ address, children, className, genesisHash, name }: Props): R
       className={className}
       icon={
         <Identicon
-          className='icon'
-          size={64}
-          theme={theme}
+          iconTheme={theme}
           value={address}
         />
       }

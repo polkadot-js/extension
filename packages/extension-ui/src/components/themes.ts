@@ -31,6 +31,7 @@ export const defaultTheme = {
   readonlyInputBackground: '#000000',
   iconWarningColor: '#FF7D01',
   iconDangerColor: '#FF5858',
+  identiconBackground: '#373737',
   inputBorder: '#303030',
   inputPadding: '0.5rem 0.75rem',
   inputPaddingLabel: '1.25rem 0.75rem 0.5rem',

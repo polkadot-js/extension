@@ -4,11 +4,12 @@
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { Link } from '@polkadot/extension-ui/components';
+import { Link, defaultTheme, Theme } from '@polkadot/extension-ui/components';
 import { MemoryRouter } from 'react-router';
 import React from 'react';
 
 import Account from './Account';
+import { ThemeProvider } from 'styled-components';
 
 configure({ adapter: new Adapter() });
 
@@ -16,11 +17,13 @@ describe('Account component', () => {
   let wrapper: ReactWrapper;
   const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mountAccountComponent = (additionalAccountProperties: any): ReactWrapper => mount(
+  const mountAccountComponent = (additionalAccountProperties: any, theme: Theme = defaultTheme): ReactWrapper => mount(
     <MemoryRouter>
-      <Account
-        {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}>
-      </Account>
+      <ThemeProvider theme={theme}>
+        <Account
+          {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}>
+        </Account>
+      </ThemeProvider>
     </MemoryRouter>);
 
   it('shows Export option if account is not external', () => {

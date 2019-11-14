@@ -12,8 +12,7 @@ import {
   Link,
   MediaContext,
   AddAccount,
-  ButtonArea,
-  VerticalSpace
+  ButtonArea
 } from '../../components';
 import Account from './Account';
 import styled from 'styled-components';
@@ -52,6 +51,11 @@ const QrButton = styled(Button)`
   }
 `;
 
+const AccountsArea = styled.div`
+  height: 100%;
+  overflow: scroll;
+`;
+
 type Props = {};
 
 export default function Accounts (): React.ReactElement<Props> {
@@ -74,14 +78,16 @@ export default function Accounts (): React.ReactElement<Props> {
           >
             You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.
           </AddAccount>
-          : accounts.map((json, index): React.ReactNode => (
-            <Account
-              {...json}
-              key={`${index}:${json.address}`}
-            />
-          ))
+          : <AccountsArea>
+            {
+              accounts.map((json, index): React.ReactNode => (
+                <Account
+                  {...json}
+                  key={`${index}:${json.address}`}
+                />))
+            }
+          </AccountsArea>
       }
-      <VerticalSpace/>
       <ButtonArea>
         <ButtonWithSubtitle to='/account/create'>
           <h4>Create New Account</h4>

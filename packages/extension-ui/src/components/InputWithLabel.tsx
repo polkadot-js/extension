@@ -46,5 +46,5 @@ function InputWithLabel ({ className, defaultValue, label, isFocused, isReadOnly
 }
 
 export default styled(InputWithLabel)`
-  padding: ${({ label, theme }): string => label ? theme.inputPaddingLabel : theme.inputPadding};
+  margin-bottom: 16px;
 `;

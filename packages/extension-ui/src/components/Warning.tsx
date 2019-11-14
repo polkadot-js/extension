@@ -34,7 +34,7 @@ function Warning ({ children, className, danger }: Props): React.ReactElement<Pr
 export default styled(Warning)`
   display: flex;
   flex-direction: row;
-  padding-left: ${({ danger }): string => danger ? '16px' : '0'};
+  padding-left: ${({ danger }): string => danger ? '16px' : ''};
   border-left: ${({ danger, theme }): string => danger ? `0.25rem solid ${theme.linkColorDanger}` : ''};
   
   > div {

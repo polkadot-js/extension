@@ -14,9 +14,9 @@ const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
   isReadOnly: true
 }))`  
   textarea {
-    font-weight: 600;
     font-size: ${({ theme }): string => theme.fontSize};
     line-height: ${({ theme }): string => theme.lineHeight};
+    height: unset;
     letter-spacing: -0.01em;
     padding: 14px;
     color: ${({ theme }): string => theme.primaryColor};

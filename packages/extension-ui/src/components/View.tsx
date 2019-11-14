@@ -27,11 +27,10 @@ export default styled(View)`
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
   height: 100%;
-  //padding: 0 1rem;
   
   > * {
-    margin-left: 1rem;
-    margin-right: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
   
   h3 {

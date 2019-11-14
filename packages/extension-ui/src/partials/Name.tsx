@@ -18,7 +18,7 @@ interface Props {
 
 const MIN_LENGTH = 3;
 
-export default function Name ({ address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): React.ReactElement<Props> {
+export default function Name ({ address, className, defaultValue, isFocussed, label = 'A descriptive name for your account', onBlur, onChange }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [name, setName] = useState('');
   const account = accounts.find((account): boolean => account.address === address);
@@ -37,6 +37,7 @@ export default function Name ({ address, className, defaultValue, isFocussed, la
 
   return (
     <InputWithLabel
+      data-input-name
       className={className}
       defaultValue={startValue}
       isError={isError}

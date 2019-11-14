@@ -8,12 +8,9 @@ import { ActionContext, Header, Loading } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
 import Mnemonic from '@polkadot/extension-ui/Popup/CreateAccount/Mnemonic';
 import CreationStep from '@polkadot/extension-ui/Popup/CreateAccount/CreationStep';
-import { RouterProps } from 'react-router';
 import AccountName from '@polkadot/extension-ui/Popup/CreateAccount/AccountName';
 
-type Props = {}
-
-export default function CreateAccount ({ history }: RouterProps): React.ReactElement<Props> {
+export default function CreateAccount (): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
@@ -40,7 +37,7 @@ export default function CreateAccount ({ history }: RouterProps): React.ReactEle
     if (step === 2) {
       setStep(step - 1);
     } else {
-      history.push('/');
+      onAction('/');
     }
   };
 

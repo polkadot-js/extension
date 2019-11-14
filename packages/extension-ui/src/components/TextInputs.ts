@@ -17,13 +17,16 @@ const ErroredTextInputColors = css`
 `;
 
 const TextInput = css<Props>`
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   border-radius: ${({ theme }): string => theme.borderRadius};
   border: ${({ theme }): string => `1px solid ${theme.inputBorder}`};
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   box-sizing: border-box;
   display: block;
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
+  font-weight: 600;
+  height: ${({ theme }): string => theme.inputHeight};
+  padding: ${({ theme }): string => theme.inputPadding};
   resize: none;
   width: 100%;
   ${({ withError }): typeof ErroredTextInputColors => (withError ? ErroredTextInputColors : DefaultTextInputColors)};

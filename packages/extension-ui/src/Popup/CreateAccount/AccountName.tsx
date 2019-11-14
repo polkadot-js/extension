@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useState } from 'react';
-import { Address, Button } from '@polkadot/extension-ui/components';
+import { Address, Button, ButtonArea, VerticalSpace } from '@polkadot/extension-ui/components';
 import { Name, Password } from '@polkadot/extension-ui/partials';
 
 interface Props {
@@ -22,15 +22,19 @@ function AccountName ({ onCreate, address }: Props): React.ReactElement<Props> {
     />
     {name && <Password onChange={setPassword} />}
     {name && password && (
-      <Address
-        address={address}
-        name={name}
-      >
-        <Button
-          label='Add the account with the generated seed'
-          onClick={(): void | Promise<void | boolean> => onCreate(name, password)}
+      <>
+        <Address
+          address={address}
+          name={name}
         />
-      </Address>
+        <VerticalSpace/>
+        <ButtonArea>
+          <Button
+            label='Add the account with the generated seed'
+            onClick={(): void | Promise<void | boolean> => onCreate(name, password)}
+          />
+        </ButtonArea>
+      </>
     )}
   </>;
 }

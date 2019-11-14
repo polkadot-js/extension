@@ -26,13 +26,15 @@ const Title = styled.span`
 const CurrentStep = styled.span`
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.primaryColor}
+  color: ${({ theme }): string => theme.primaryColor};
+  font-weight: 600;
 `;
 
 const TotalSteps = styled.span`
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.color}
+  color: ${({ theme }): string => theme.color};
+  font-weight: 600;
 `;
 
 function CreationStep ({ step, onClick, className }: Props): React.ReactElement<Props> {

@@ -6,6 +6,7 @@ import React from 'react';
 import styled, { ThemedStyledProps } from 'styled-components';
 import { Theme } from './themes';
 import warningImage from '../assets/warning.svg';
+import {Svg} from '.';
 
 interface Color {
   background: string;
@@ -19,6 +20,7 @@ interface Props {
   header?: React.ReactNode;
   type?: keyof Theme['box'];
   warning?: boolean;
+  error?: boolean;
 }
 
 function getColor ({ type, theme }: ThemedStyledProps<Props, Theme>): Color {
@@ -29,33 +31,34 @@ function Tip ({ children, className, header, warning }: Props): React.ReactEleme
   return (
     <article className={className}>
       {header && <h3>{header}</h3>}
-      {warning && <Image src={warningImage} alt="Warning"/>}
+      {warning && <Svg src={warningImage}/>}
       <div><TipText warning={!warning}>{children}</TipText></div>
     </article>
   );
 }
 
-const Image = styled.img`
-  width: 16px;
-  height: 14px;
-`;
 
 const TipText = styled.p<{warning: boolean}>`
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
   color: ${({ theme }): string => theme.color};
-  margin: ${({ warning }): string => warning ? '0 0 0 24px' : '-28px 0 0 24px'};
+  margin: ${({ warning }): string => warning ? '0 0 0 24px' : '-20px 0 0 24px'};
 `;
 
 export default styled(Tip)`
   background: ${({ theme }): string => theme.background};
   border-left: 0.25rem solid ${(p): string => getColor(p).border};
   color: ${(p): string => getColor(p).color};
-  margin: 0 -1rem;
   padding: 1rem 1.5rem;
 
   h3 {
     color: ${({ theme }): string => theme.color};
     font-weight: normal;
+  }
+
+  ${Svg} {
+  width: 16px;
+  height: 14px;
+  background: ${({ theme, type }): string => type !== 'warn' ? theme.btnBgDanger : theme.iconWarningColor }
   }
 `;

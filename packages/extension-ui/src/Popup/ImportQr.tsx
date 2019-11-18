@@ -27,7 +27,7 @@ export default function ImportQr (): React.ReactElement<Props> {
 
   return (
     <div>
-      <Header label='import external' />
+      <Header/>
       <Back />
       {!account && <QrScanAddress onScan={setAccount} />}
       {account && (

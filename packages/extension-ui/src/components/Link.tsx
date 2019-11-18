@@ -23,6 +23,8 @@ function Link ({ children, className, onClick, to }: Props): React.ReactElement<
 }
 
 export default styled(Link)`
+  display: flex;
+  align-items: center;
   color: ${({ isDanger, theme }): string => isDanger ? theme.linkColorDanger : theme.linkColor};
   opacity: 0.9;
   text-decoration: none;

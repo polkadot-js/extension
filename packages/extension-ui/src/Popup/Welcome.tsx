@@ -32,7 +32,7 @@ export default function Welcome (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header label='welcome' />
+      <Header/>
       <WelcomeLabel/>
       <Note>Before we start, just a couple of notes regarding use:</Note>
       <Box>

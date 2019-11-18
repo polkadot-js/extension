@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import settings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
 
-import { Button, Dropdown, Header } from '../../components';
+import { Button, Dropdown } from '../../components';
 import { windowOpen } from '../../messaging';
 import { Back } from '../../partials';
 
@@ -47,7 +47,6 @@ export default function Settings (): React.ReactElement<{}> {
 
   return (
     <div>
-      <Header label='settings' />
       <Back />
       <Dropdown
         label='display addresses formatted for'

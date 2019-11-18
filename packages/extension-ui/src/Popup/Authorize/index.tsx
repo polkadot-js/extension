@@ -12,7 +12,7 @@ export default function Authorize (): React.ReactElement<{}> {
 
   return (
     <div>
-      <Header label='authorize' />
+      <Header />
       {requests.map(({ id, request, url }, index): React.ReactNode => (
         <Request
           authId={id}

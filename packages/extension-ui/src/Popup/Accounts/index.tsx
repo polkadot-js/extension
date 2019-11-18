@@ -9,7 +9,6 @@ import {
   AccountContext,
   Button,
   Header,
-  Link,
   MediaContext,
   AddAccount,
   ButtonArea
@@ -18,8 +17,7 @@ import Account from './Account';
 import styled from 'styled-components';
 
 const ButtonWithSubtitle = styled(Button)`
-  margin-right: 8px;
-  
+
   button {
     padding-top: 0;
     padding-bottom: 0;
@@ -40,14 +38,14 @@ const ButtonWithSubtitle = styled(Button)`
 
 const QrButton = styled(Button)`
   width: 60px;
-  
+
   span {
     width: 20px;
     height: 20px;
     display: block;
     mask: url(${QrImage});
     mask-size: cover;
-    background: ${({ theme }): string => theme.color}; 
+    background: ${({ theme }): string => theme.color};
   }
 `;
 
@@ -64,10 +62,7 @@ export default function Accounts (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header
-        label='accounts'
-        labelExtra={<Link to='/settings'>Options</Link>}
-      />
+      <Header showSettings/>
       {
         (accounts.length === 0)
           ? <AddAccount

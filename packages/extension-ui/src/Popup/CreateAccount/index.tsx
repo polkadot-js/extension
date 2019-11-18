@@ -43,7 +43,7 @@ export default function CreateAccount (): React.ReactElement {
 
   return (
     <>
-      <Header label='create account' />
+      <Header/>
       <CreationStep step={step} onClick={_onCancel}/>
       <Loading>{account && (step === 1 ? (
         <Mnemonic seed={account.seed} onNextStep={_onNextStep}/>

@@ -4,25 +4,73 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import logo from '../assets/pjs.svg';
+import gear from '../assets/gear.svg';
+import { Link } from '.';
 
 interface Props {
   children?: React.ReactNode;
   className?: string;
-  label?: React.ReactNode;
-  labelExtra?: React.ReactNode;
+  showSettings?: boolean;
 }
 
-function Header ({ children, className, label, labelExtra }: Props): React.ReactElement<Props> {
+function Header ({ children, className, showSettings }: Props): React.ReactElement<Props> {
   return (
     <h2 className={className}>
-      <div className='label'>{label}</div>
-      {labelExtra && (
-        <div className='labelExtra'>{labelExtra}</div>
-      )}
-      {children}
+      <Container>
+        {showSettings && <Space/>}
+        <Branding>
+          <Logo src={logo} />
+          <LogoText>polkadot</LogoText>
+        </Branding>
+        {showSettings && <Link to='/settings'>
+          <Gear src={gear} />
+        </Link>}
+        {children}
+      </Container>
     </h2>
   );
 }
+
+const Container = styled.div`
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    border-bottom: 1px solid ${({ theme }): string => theme.inputBorder};
+`;
+
+const Branding = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: ${({ theme }): string => theme.hdrColor};
+  font-family: ${({ theme }): string => theme.fontFamily};
+  text-align: center;
+  width: 100%;
+`;
+
+const Space = styled.div`
+  width: 21px;
+  margin-left: 1rem;
+`;
+
+const Logo = styled.img`
+  height: 28px;
+  width: 28px;
+  margin: 12px;
+`;
+
+const Gear = styled.img`
+  height: 18px;
+  width: 18px;
+  margin-right: 1rem;
+  align-self: center;
+`;
+
+const LogoText = styled.span`
+  color: ${({ theme }): string => theme.color};
+  font-family: ${({ theme }): string => theme.fontFamily};
+`;
 
 export default styled(Header)`
   background: ${({ theme }): string => theme.hdrBg};
@@ -31,17 +79,4 @@ export default styled(Header)`
   margin: 0 -1rem;
   padding: 0.75rem 1rem;
   position: relative;
-
-  .label {
-    color: ${({ theme }): string => theme.hdrColor};
-    font-family: ${({ theme }): string => theme.fontFamily};
-    text-transform: uppercase;
-  }
-
-  .labelExtra {
-    bottom: 0.75rem;
-    font-size: 1rem;
-    position: absolute;
-    right: 1rem;
-  }
 `;

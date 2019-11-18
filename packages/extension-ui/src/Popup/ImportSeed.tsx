@@ -33,7 +33,7 @@ export default function Import (): React.ReactElement<Props> {
 
   return (
     <div>
-      <Header label='import account' />
+      <Header/>
       <Back />
       <TextAreaWithLabel
         isError={!account}

@@ -27,9 +27,9 @@ function AddAccount ({ children, className, header, to, onClick, imageVisible }:
   };
 
   return (
-    <div>
+    <div className={className}>
       {imageVisible && <Image src={addAccountImage} alt="add account" onClick={_onClick}/>}
-      <article className={className}>
+      <article>
         {header && <h3>{header}</h3>}
         <TipText>{children}</TipText>
       </article>
@@ -54,6 +54,7 @@ const Image = styled.img`
 
 export default styled(AddAccount)`
   color: ${({ theme }): string => theme.color};
+  height: 100%;
 
   h3 {
     color: ${({ theme }): string => theme.color};

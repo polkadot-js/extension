@@ -12,7 +12,7 @@ export default function Signing (): React.ReactElement<{}> {
 
   return (
     <div>
-      <Header label='transactions' />
+      <Header/>
       {requests.map(({ account, id, request, url }, index): React.ReactNode => (
         <Request
           account={account}

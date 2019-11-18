@@ -11,7 +11,8 @@ import {
   Header,
   MediaContext,
   AddAccount,
-  ButtonArea
+  ButtonArea,
+  Svg
 } from '../../components';
 import Account from './Account';
 import styled from 'styled-components';
@@ -39,13 +40,9 @@ const ButtonWithSubtitle = styled(Button)`
 const QrButton = styled(Button)`
   width: 60px;
 
-  span {
+  ${Svg} {
     width: 20px;
     height: 20px;
-    display: block;
-    mask: url(${QrImage});
-    mask-size: cover;
-    background: ${({ theme }): string => theme.color};
   }
 `;
 
@@ -94,7 +91,7 @@ export default function Accounts (): React.ReactElement<Props> {
         </ButtonWithSubtitle>
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>
-            <span/>
+            <Svg src={QrImage}/>
           </QrButton>
         )}
       </ButtonArea>

@@ -20,6 +20,7 @@ interface Props {
 function IconBox ({ banner, children, className, icon, intro }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
+      <div className='outer-icon'>{icon}</div>
       <Box
         banner={banner}
         className='details'
@@ -27,7 +28,6 @@ function IconBox ({ banner, children, className, icon, intro }: Props): React.Re
         <div className='intro'>{intro}</div>
         <div className='children'>{children}</div>
       </Box>
-      <div className='outer-icon'>{icon}</div>
     </div>
   );
 }
@@ -36,26 +36,17 @@ export default styled(IconBox)`
   box-sizing: border-box;
   margin: ${({ theme }): string => theme.boxMargin};
   padding: ${({ theme }): string => theme.boxPadding};
-  padding-left: 1rem;
-  position: relative;
 
   .details {
     margin: 0;
-
-    .intro {
-      padding-left: 3rem;
-    }
   }
 
   .outer-icon {
     height: 64px;
-    font-size: 36px;
-    left: 0.25rem;
-    line-height: 64px;
-    position: absolute;
-    top: -0.5rem;
-    vertical-align: middle;
     width: 64px;
+    font-size: 36px;
+    line-height: 64px;
+    vertical-align: middle;
     z-index: 1;
   }
 `;

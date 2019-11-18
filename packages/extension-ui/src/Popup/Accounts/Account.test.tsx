@@ -4,7 +4,7 @@
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { Link, defaultTheme, Theme } from '@polkadot/extension-ui/components';
+import { defaultTheme, Theme } from '@polkadot/extension-ui/components';
 import { MemoryRouter } from 'react-router';
 import React from 'react';
 
@@ -28,18 +28,20 @@ describe('Account component', () => {
 
   it('shows Export option if account is not external', () => {
     wrapper = mountAccountComponent({ isExternal: false });
+    wrapper.find('Details').simulate('click');
 
-    expect(wrapper.find(Link).length).toBe(3);
-    expect(wrapper.find(Link).at(0).text()).toContain('Forget');
-    expect(wrapper.find(Link).at(1).text()).toContain('Export');
-    expect(wrapper.find(Link).at(2).text()).toContain('Edit');
+    expect(wrapper.find('MenuItem').length).toBe(3);
+    expect(wrapper.find('MenuItem').at(0).text()).toBe('Rename');
+    expect(wrapper.find('MenuItem').at(1).text()).toBe('Export Account');
+    expect(wrapper.find('MenuItem').at(2).text()).toBe('Forget Account');
   });
 
   it('does not show Export option if account is external', () => {
     wrapper = mountAccountComponent({ isExternal: true });
+    wrapper.find('Details').simulate('click');
 
-    expect(wrapper.find(Link).length).toBe(2);
-    expect(wrapper.find(Link).at(0).text()).toContain('Forget');
-    expect(wrapper.find(Link).at(1).text()).toContain('Edit');
+    expect(wrapper.find('MenuItem').length).toBe(2);
+    expect(wrapper.find('MenuItem').at(0).text()).toBe('Rename');
+    expect(wrapper.find('MenuItem').at(1).text()).toBe('Forget Account');
   });
 });

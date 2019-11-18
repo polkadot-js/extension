@@ -5,6 +5,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import WarningImageSrc from '../assets/warning.svg';
+import Svg from '@polkadot/extension-ui/components/Svg';
 
 interface Props {
   children: React.ReactNode;
@@ -12,24 +13,21 @@ interface Props {
   className?: string;
 }
 
-const WarningImage = styled.span<Pick<Props, 'danger'>>`
-  display: inline-block;
-  width: 25px;
-  height: 14px;
-  margin: 5px 16px 5px 0;
-  mask: url(${WarningImageSrc});
-  mask-size: cover;
-  background: ${({ danger, theme }): string => danger ? theme.iconDangerColor : theme.iconWarningColor};  
-`;
-
 function Warning ({ children, className, danger }: Props): React.ReactElement<Props> {
   return <div className={className}>
-    <WarningImage danger={danger}/>
+    <WarningImage danger={danger} src={WarningImageSrc}/>
     <div>
       {children}
     </div>
   </div>;
 }
+
+const WarningImage = styled(Svg)<Pick<Props, 'danger'>>`
+  width: 25px;
+  height: 14px;
+  margin: 5px 16px 5px 0;
+  background: ${({ danger, theme }): string => danger ? theme.iconDangerColor : theme.iconWarningColor};  
+`;
 
 export default styled(Warning)`
   display: flex;

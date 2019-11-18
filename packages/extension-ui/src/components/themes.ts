@@ -2,9 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-const DANGER_COLOR = '#D92A2A';
+const BUTTON_DANGER_COLOR = '#D92A2A';
+const TEXT_DANGER_COLOR = '#FF5858';
 const LABEL_COLOR = '#9F9E99';
-const LINK_COLOR = '#9F9E99';
 const TEXT_COLOR = '#FFFFFF';
 const BG_COLOR = 'rgba(13, 14, 19, 0.9)';
 
@@ -13,7 +13,7 @@ export const defaultTheme = {
   borderRadius: '4px',
   btnAreaBackground: 'rgba(13, 14, 19, 0.7)',
   btnBg: 'linear-gradient(95.52deg, #FF8A00 0.14%, #FF7A00 100.14%)',
-  btnBgDanger: DANGER_COLOR,
+  btnBgDanger: BUTTON_DANGER_COLOR,
   btnBorder: '0 solid ',
   btnColor: TEXT_COLOR,
   btnColorDanger: TEXT_COLOR,
@@ -30,7 +30,8 @@ export const defaultTheme = {
   inputBackground: 'rgba(13, 14, 19, 0.9)',
   readonlyInputBackground: '#000000',
   iconWarningColor: '#FF7D01',
-  iconDangerColor: '#FF5858',
+  iconDangerColor: TEXT_DANGER_COLOR,
+  iconLabelColor: '#8E8E8E',
   identiconBackground: '#373737',
   inputBorder: '#303030',
   inputHeight: '40px',
@@ -39,13 +40,13 @@ export const defaultTheme = {
   labelFontSize: '13px',
   labelLineHeight: '18px',
   lineHeight: '26px',
-  linkColor: LINK_COLOR,
-  linkColorDanger: DANGER_COLOR,
+  linkColor: TEXT_COLOR,
+  linkColorDanger: TEXT_DANGER_COLOR,
   primaryColor: '#FF7D01',
   box: {
     error: {
       background: '#ffe6e6',
-      border: DANGER_COLOR,
+      border: BUTTON_DANGER_COLOR,
       color: '#4d0000'
     },
     info: {

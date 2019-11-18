@@ -24,6 +24,9 @@ function Identicon ({ iconTheme, className, value }: Props): React.ReactElement<
 }
 
 export default styled(Identicon)`
+  display: flex;
+  justify-content: center;
+    
   .container:before {
     box-shadow: none;
     background: ${({ theme }): string => theme.identiconBackground};

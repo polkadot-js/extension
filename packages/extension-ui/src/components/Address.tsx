@@ -5,22 +5,26 @@
 import { AccountJson } from '@polkadot/extension/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import IconBox from './IconBox';
 import { AccountContext } from './contexts';
-import { Identicon } from '@polkadot/extension-ui/components';
+import Identicon from '@polkadot/extension-ui/components/Identicon';
+import Svg from '@polkadot/extension-ui/components/Svg';
+import Menu from '@polkadot/extension-ui/components/Menu';
+import DetailsImg from '../assets/details.svg';
+import { useOutsideClick } from '@polkadot/extension-ui/hooks';
 
 interface Props {
   address?: string | null;
-  children?: React.ReactNode;
   className?: string;
   name?: React.ReactNode | null;
+  children?: React.ReactNode;
   genesisHash?: string | null;
+  actions?: React.ReactNode;
 }
 
 // find an account in our list
@@ -49,17 +53,19 @@ function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: 
   ];
 }
 
-function Address ({ address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
+function Address ({ address, className, children, genesisHash, name, actions }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<AccountJson | null>(null);
   const [chain, setChain] = useState<Chain | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsRef = useRef(null);
+  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
     if (!address) {
       return;
     }
-
     const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
 
     setFormatted(formatted);
@@ -69,36 +75,111 @@ function Address ({ address, children, className, genesisHash, name }: Props): R
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
 
-  return (
-    <IconBox
-      banner={chain && chain.genesisHash && chain.name}
-      className={className}
-      icon={
-        <Identicon
-          iconTheme={theme}
-          value={address}
-        />
-      }
-      intro={
-        <>
-          <div className='name'>{name || (account && account.name) || '<unknown>'}</div>
-          <div className='address'>{formatted || '<unknown>'}</div>
-        </>
-      }
-    >
-      {children}
-    </IconBox>
-  );
+  return <div className={className}>
+    <AccountInfoRow>
+      <Identicon
+        iconTheme={theme}
+        value={address}
+      />
+      <Info>
+        <Name>{name || (account && account.name) || '<unknown>'}</Name>
+        <FullAddress>{formatted || '<unknown>'}</FullAddress>
+      </Info>
+      {actions &&
+      <>
+        <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)} ref={actionsRef}>
+          {showActionsMenu ? <ActiveActionsIcon/> : <ActionsIcon/>}
+        </Settings>
+        {showActionsMenu && <Menu>{actions}</Menu>}
+      </>}
+    </AccountInfoRow>
+    {children}
+  </div>;
 }
 
-export default styled(Address)`
-  .address {
-    opacity: 0.5;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+const AccountInfoRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  height: 72px;
+  margin-bottom: 8px;
+  background: ${({ theme }): string => theme.btnAreaBackground};
+`;
 
-  .name {
-    padding-bottom: 0.5rem;
+const Info = styled.div`
+  width: 100%;
+`;
+
+const Name = styled.div`
+  margin: 2px 0;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 22px;
+`;
+
+const FullAddress = styled.div`
+  width: 214px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: ${({ theme }): string => theme.labelColor};
+  font-size: 12px;
+  line-height: 16px;
+`;
+
+const Settings = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 40px;
+  
+  & ${Svg} {
+    width: 3px;
+    height: 19px;
+  }
+  
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 1px;
+    background: ${({ theme }): string => theme.inputBorder};
+  }
+  
+  &:hover {
+    cursor: pointer;
+    background: ${({ theme }): string => theme.readonlyInputBackground};
+  }
+`;
+
+Settings.displayName = 'Details';
+
+const ActionsIcon = styled(Svg).attrs(() => ({
+  src: DetailsImg
+}))`
+  background: ${({ theme }): string => theme.iconLabelColor};
+`;
+
+const ActiveActionsIcon = styled(Svg).attrs(() => ({
+  src: DetailsImg
+}))`
+  background: ${({ theme }): string => theme.primaryColor};
+`;
+
+export default styled(Address)`
+  position: relative;
+
+  & ${Identicon} {
+    margin-left: 25px;
+    margin-right: 10px;
+
+    & svg {
+      width: 50px;
+      height: 50px;
+    }
   }
 `;

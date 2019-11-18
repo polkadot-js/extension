@@ -7,7 +7,7 @@ import { AccountJson } from '@polkadot/extension/background/types';
 import React, { useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Address, Link } from '../../components';
+import { ActionContext, Address, Link } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
@@ -32,11 +32,19 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
     _toggleEdit();
   };
 
-  return (
+  return <div className={className}>
     <Address
       address={address}
-      className={className}
       name={editedName}
+      actions={
+        <>
+          <MenuGroup>
+            <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
+          </MenuGroup>
+          {!isExternal && <MenuItem isDanger to={`/account/export/${address}`}>Export Account</MenuItem>}
+          <MenuItem isDanger to={`/account/forget/${address}`}>Forget Account</MenuItem>
+        </>
+      }
     >
       {isEditing && (
         <Name
@@ -48,22 +56,31 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           onChange={setName}
         />
       )}
-      <ActionBar>
-        <div>
-          <Link isDanger to={`/account/forget/${address}`}>Forget</Link>
-          {!isExternal && <Link to={`/account/export/${address}`}>Export</Link>}
-        </div>
-        <Link onClick={_toggleEdit}>Edit</Link>
-      </ActionBar>
     </Address>
-  );
+  </div>;
 }
+
+const MenuGroup = styled.div`
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #222222;
+`;
+
+const MenuItem = styled(Link)`
+  padding: 4px 16px;
+  display: block;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+`;
+
+MenuItem.displayName = 'MenuItem';
 
 export default styled(Account)`
   .edit-name {
-    left: 3rem;
     position: absolute;
-    right: 0.75rem;
-    top: -0.5rem;
+    left: 73px;
+    top: 8px;
   }
 `;

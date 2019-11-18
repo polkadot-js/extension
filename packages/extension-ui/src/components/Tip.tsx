@@ -6,7 +6,7 @@ import React from 'react';
 import styled, { ThemedStyledProps } from 'styled-components';
 import { Theme } from './themes';
 import warningImage from '../assets/warning.svg';
-import {Svg} from '.';
+import { Svg } from '.';
 
 interface Color {
   background: string;
@@ -37,7 +37,6 @@ function Tip ({ children, className, header, warning }: Props): React.ReactEleme
   );
 }
 
-
 const TipText = styled.p<{warning: boolean}>`
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
@@ -59,6 +58,6 @@ export default styled(Tip)`
   ${Svg} {
   width: 16px;
   height: 14px;
-  background: ${({ theme, type }): string => type !== 'warn' ? theme.btnBgDanger : theme.iconWarningColor }
+  background: ${({ theme, type }): string => type !== 'warn' ? theme.btnBgDanger : theme.iconWarningColor}
   }
 `;

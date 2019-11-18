@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import {RequestAuthorizeTab} from '@polkadot/extension/background/types';
+import { RequestAuthorizeTab } from '@polkadot/extension/background/types';
 
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import {ActionBar, ActionContext, Button, Icon, Link, Tip} from '../../components';
-import {approveAuthRequest, rejectAuthRequest} from '../../messaging';
+import { ActionBar, ActionContext, Button, Icon, Link, Tip } from '../../components';
+import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 interface Props {
   authId: string;
@@ -18,7 +18,7 @@ interface Props {
   url: string;
 }
 
-function Request({authId, className, isFirst, request: {origin}, url}: Props): React.ReactElement<Props> {
+function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const _onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
@@ -34,7 +34,7 @@ function Request({authId, className, isFirst, request: {origin}, url}: Props): R
       <RequestInfo>
         <Info>
           <Icon icon='X' onClick={_onReject} />
-          <div className='tab-info'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from <a href={url}><span className='tab-url'>{url}</span></a>.</div>
+          <div className='tab-info'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from <a href={url} target="_blank" rel="noopener noreferrer"><span className='tab-url'>{url}</span></a>.</div>
         </Info>
         {isFirst && (
           <>
@@ -58,7 +58,7 @@ const RequestInfo = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 8px;
-  background: ${({theme}): string => theme.btnAreaBackground};
+  background: ${({ theme }): string => theme.btnAreaBackground};
 `;
 
 const Info = styled.div`
@@ -72,15 +72,19 @@ const AcceptButton = styled(Button)`
   margin: auto;
 `;
 
+AcceptButton.displayName = 'AcceptButton';
+
 const RejectButton = styled(ActionBar)`
   margin: 8px 0 15px 0;
   text-decoration: underline;
 `;
 
 export default styled(Request)`
+height: 100%;
+
   .icon {
-    background: ${({theme}): string => theme.btnBgDanger};
-    color: ${({theme}): string => theme.btnColorDanger};
+    background: ${({ theme }): string => theme.btnBgDanger};
+    color: ${({ theme }): string => theme.btnColorDanger};
     min-width: 18px;
     width: 18px;
     height: 18px;
@@ -96,7 +100,7 @@ export default styled(Request)`
 
   .tab-name,
   .tab-url {
-    color: ${({theme}): string => theme.linkColor};
+    color: ${({ theme }): string => theme.linkColor};
     display: inline-block;
     max-width: 20rem;
     overflow: hidden;

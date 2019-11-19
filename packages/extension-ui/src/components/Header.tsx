@@ -77,6 +77,6 @@ export default styled(Header)`
   box-sizing: border-box;
   font-weight: normal;
   margin: 0 -1rem;
-  padding: 0.75rem 1rem;
+  padding: 0 1rem 0.75rem 1rem;
   position: relative;
 `;

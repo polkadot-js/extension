@@ -4,7 +4,7 @@
 
 import React, { useContext } from 'react';
 
-import { AuthorizeContext, Header } from '../../components';
+import { AuthorizeContext, Header, VerticalSpace } from '../../components';
 import Request from './Request';
 
 export default function Authorize (): React.ReactElement<{}> {
@@ -22,6 +22,7 @@ export default function Authorize (): React.ReactElement<{}> {
           url={url}
         />
       ))}
+      <VerticalSpace/>
     </div>
   );
 }

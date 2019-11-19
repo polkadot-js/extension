@@ -25,6 +25,7 @@ export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as Svg } from './Svg';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Tip } from './Tip';
+export { default as Title } from './Title';
 export { default as VerticalSpace } from './VerticalSpace';
 export { default as View } from './View';
 export { default as Warning } from './Warning';

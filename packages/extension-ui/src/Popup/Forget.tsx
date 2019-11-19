@@ -5,7 +5,7 @@
 import React, { useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionContext, Address, Button, Tip } from '../components';
+import { ActionContext, Address, Button, Tip, Title } from '../components';
 import { forgetAccount } from '../messaging';
 import { Back } from '../partials';
 
@@ -22,6 +22,7 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
   return (
     <div>
       <Back />
+      <Title>Forget account</Title>
       <Address address={address}>
         <Tip warning type='error'>You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.</Tip>
         <Button

@@ -12,54 +12,21 @@ import {
   MediaContext,
   AddAccount,
   ButtonArea,
-  Svg
+  Svg,
+  Title
 } from '../../components';
 import Account from './Account';
 import styled from 'styled-components';
-
-const ButtonWithSubtitle = styled(Button)`
-
-  button {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  h4 {
-    margin: 0;
-    font-weight: 600;
-    font-size: 15px;
-    line-height: 20px;
-  }
-  p {
-    margin: 0;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 16px;
-  }
-`;
-
-const QrButton = styled(Button)`
-  width: 60px;
-
-  ${Svg} {
-    width: 20px;
-    height: 20px;
-  }
-`;
-
-const AccountsArea = styled.div`
-  height: 100%;
-  overflow: scroll;
-`;
 
 type Props = {};
 
 export default function Accounts (): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
-
   return (
     <>
       <Header showSettings/>
+      <Title>Accounts</Title>
       {
         (accounts.length === 0)
           ? <AddAccount
@@ -98,3 +65,36 @@ export default function Accounts (): React.ReactElement<Props> {
     </>
   );
 }
+
+const ButtonWithSubtitle = styled(Button)`
+  button {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  h4 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+  }
+  p {
+    margin: 0;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+  }
+`;
+
+const QrButton = styled(Button)`
+  width: 60px;
+
+  ${Svg} {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const AccountsArea = styled.div`
+  height: 100%;
+  overflow: scroll;
+`;

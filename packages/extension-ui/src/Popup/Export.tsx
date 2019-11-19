@@ -5,7 +5,7 @@
 import React, { useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionContext, Address, Button, InputWithLabel, Warning } from '../components';
+import { ActionContext, Address, Button, InputWithLabel, Title, Warning } from '../components';
 import { exportAccount } from '../messaging';
 import { Back } from '../partials';
 
@@ -37,6 +37,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
   return (
     <div>
       <Back />
+      <Title>Export account</Title>
       <Address address={address}>
         <Warning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Warning>
         <InputWithLabel

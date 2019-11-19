@@ -57,7 +57,7 @@ export default styled(Checkbox)`
         left: 3px;
         top: -4px;
         position: absolute;
-        color: ${({ theme }): string => theme.color};
+        color: ${({ theme }): string => theme.textColor};
         font-size: 14px;
       }
     }

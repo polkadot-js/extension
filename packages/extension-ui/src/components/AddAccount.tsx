@@ -4,14 +4,12 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Theme } from './themes';
 import addAccountImage from '../assets/addAccount.png';
 
 interface Props {
   children: React.ReactNode;
   className?: string;
   header?: React.ReactNode;
-  type?: keyof Theme['box'];
   to?: string;
   onClick?: () => void;
   imageVisible?: boolean;
@@ -53,11 +51,11 @@ const Image = styled.img`
 `;
 
 export default styled(AddAccount)`
-  color: ${({ theme }): string => theme.color};
+  color: ${({ theme }): string => theme.textColor};
   height: 100%;
 
   h3 {
-    color: ${({ theme }): string => theme.color};
+    color: ${({ theme }): string => theme.textColor};
     font-weight: normal;
     text-align: center;
   }

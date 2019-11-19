@@ -21,7 +21,7 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
 }
 
 export default styled(Label)`
-  color: ${({ theme }): string => theme.color};
+  color: ${({ theme }): string => theme.textColor};
 
   label {
     font-size: ${({ theme }): string => theme.labelFontSize};

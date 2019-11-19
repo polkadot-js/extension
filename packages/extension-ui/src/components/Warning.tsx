@@ -15,7 +15,9 @@ interface Props {
 
 function Warning ({ children, className, danger }: Props): React.ReactElement<Props> {
   return <div className={className}>
-    <WarningImage danger={danger} src={WarningImageSrc}/>
+    <div>
+      <WarningImage danger={danger} src={WarningImageSrc}/>
+    </div>
     <div>
       {children}
     </div>
@@ -23,7 +25,7 @@ function Warning ({ children, className, danger }: Props): React.ReactElement<Pr
 }
 
 const WarningImage = styled(Svg)<Pick<Props, 'danger'>>`
-  width: 25px;
+  width: 16px;
   height: 14px;
   margin: 5px 16px 5px 0;
   background: ${({ danger, theme }): string => danger ? theme.iconDangerColor : theme.iconWarningColor};  
@@ -33,9 +35,5 @@ export default styled(Warning)`
   display: flex;
   flex-direction: row;
   padding-left: ${({ danger }): string => danger ? '16px' : ''};
-  border-left: ${({ danger, theme }): string => danger ? `0.25rem solid ${theme.linkColorDanger}` : ''};
-  
-  > div {
-    padding-right: 10px;
-  }
+  border-left: ${({ danger, theme }): string => danger ? `0.25rem solid ${theme.textColorDanger}` : ''};
 `;

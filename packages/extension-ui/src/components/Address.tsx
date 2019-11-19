@@ -104,7 +104,7 @@ const AccountInfoRow = styled.div`
   align-items: center;
   height: 72px;
   margin-bottom: 8px;
-  background: ${({ theme }): string => theme.btnAreaBackground};
+  background: ${({ theme }): string => theme.highlightedAreaBackground};
 `;
 
 const Info = styled.div`
@@ -147,7 +147,7 @@ const Settings = styled.div`
     top: 25%;
     bottom: 25%;
     width: 1px;
-    background: ${({ theme }): string => theme.inputBorder};
+    background: ${({ theme }): string => theme.inputBorderColor};
   }
   
   &:hover {
@@ -161,7 +161,7 @@ Settings.displayName = 'Details';
 const ActionsIcon = styled(Svg).attrs(() => ({
   src: DetailsImg
 }))`
-  background: ${({ theme }): string => theme.iconLabelColor};
+  background: ${({ theme }): string => theme.iconNeutralColor};
 `;
 
 const ActiveActionsIcon = styled(Svg).attrs(() => ({

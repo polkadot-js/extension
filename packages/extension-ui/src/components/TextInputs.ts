@@ -6,27 +6,28 @@ interface Props {
 
 const DefaultTextInputColors = css`
   background: ${({ theme }): string => theme.inputBackground};
-  border-color: ${({ theme }): string => theme.inputBorder};
-  color: ${({ theme }): string => theme.color};
+  border-color: ${({ theme }): string => theme.inputBorderColor};
+  color: ${({ theme }): string => theme.textColor};
 `;
 
 const ErroredTextInputColors = css`
-  background: ${({ theme }): string => theme.box.error.background};
-  border-color: ${({ theme }): string => theme.box.error.border};
-  color: ${({ theme }): string => theme.box.error.border};
+  background: ${({ theme }): string => theme.inputBackground};
+  border-color: ${({ theme }): string => theme.errorBorderColor};
+  color: ${({ theme }): string => theme.errorColor};
 `;
 
 const TextInput = css<Props>`
   border-radius: ${({ theme }): string => theme.borderRadius};
-  border: ${({ theme }): string => `1px solid ${theme.inputBorder}`};
+  border: ${({ theme }): string => `1px solid ${theme.inputBorderColor}`};
+  outline: none;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   box-sizing: border-box;
   display: block;
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   font-weight: 600;
-  height: ${({ theme }): string => theme.inputHeight};
-  padding: ${({ theme }): string => theme.inputPadding};
+  height: 40px;
+  padding: 0.5rem 0.75rem;
   resize: none;
   width: 100%;
   ${({ withError }): typeof ErroredTextInputColors => (withError ? ErroredTextInputColors : DefaultTextInputColors)};

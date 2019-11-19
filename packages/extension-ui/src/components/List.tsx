@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export default styled.ul`
   list-style: none;
   padding-inline-start: 10px;
+  padding-inline-end: 10px;
   text-indent: -22px;
   margin-left: 21px;  
   

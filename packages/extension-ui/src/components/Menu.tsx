@@ -21,7 +21,7 @@ export default styled(Menu)`
   right: 0;
   margin-top: 90px;
   padding: 16px 0;
-  background: ${({ theme }): string => theme.btnAreaBackground};
+  background: ${({ theme }): string => theme.highlightedAreaBackground};
   border-radius: 4px;
   border: 1px solid #222222;
   box-sizing: border-box;

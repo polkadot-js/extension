@@ -33,7 +33,7 @@ export default styled(ActionText)`
   }
   
   ${Svg} {
-    background: ${({ theme }): string => theme.iconLabelColor};
+    background: ${({ theme }): string => theme.iconNeutralColor};
     display: inline-block;
     position: relative;
     top: 2px;

@@ -22,7 +22,7 @@ export default styled(View)`
   display: flex;
   flex-direction: column;
   background: ${({ theme }): string => theme.background};
-  color: ${({ theme }): string => theme.color};
+  color: ${({ theme }): string => theme.textColor};
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};

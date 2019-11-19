@@ -8,7 +8,7 @@ import Button from './Button';
 export default styled.div`
   display: flex;
   flex-direction: row;
-  background: ${({ theme }): string => theme.btnAreaBackground};
+  background: ${({ theme }): string => theme.highlightedAreaBackground};
   padding: 12px 1rem;
 
   &&& {

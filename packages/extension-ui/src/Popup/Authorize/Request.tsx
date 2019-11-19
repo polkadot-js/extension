@@ -7,7 +7,7 @@ import { RequestAuthorizeTab } from '@polkadot/extension/background/types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Button, Icon, Link, Warning, Svg } from '../../components';
+import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 interface Props {
@@ -58,7 +58,7 @@ const RequestInfo = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 8px;
-  background: ${({ theme }): string => theme.btnAreaBackground};
+  background: ${({ theme }): string => theme.highlightedAreaBackground};
 `;
 
 const Info = styled.div`
@@ -73,11 +73,7 @@ const AcceptButton = styled(Button)`
 `;
 
 const RequestWarning = styled(Warning)`
-  ${Svg} {
-    width: 36px;
-    height: 14px;
-    margin: 5px 11px 5px 28px;
-  }
+  margin: 1rem 1rem 0 1.45rem;
 `;
 
 AcceptButton.displayName = 'AcceptButton';
@@ -91,14 +87,14 @@ export default styled(Request)`
   height: 100%;
 
   .icon {
-    background: ${({ theme }): string => theme.btnBgDanger};
-    color: ${({ theme }): string => theme.btnColorDanger};
+    background: ${({ theme }): string => theme.buttonBackgroundDanger};
+    color: ${({ theme }): string => theme.textColor};
     min-width: 18px;
     width: 18px;
     height: 18px;
     font-size: 14px;
     line-height: 20px;
-    margin: 1rem 10px 0 1.75rem;
+    margin: 1rem 15px 0 1.35rem;
   }
 
   .tab-info {
@@ -108,7 +104,7 @@ export default styled(Request)`
 
   .tab-name,
   .tab-url {
-    color: ${({ theme }): string => theme.linkColor};
+    color: ${({ theme }): string => theme.textColor};
     display: inline-block;
     max-width: 20rem;
     overflow: hidden;

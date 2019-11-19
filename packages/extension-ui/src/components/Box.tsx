@@ -22,10 +22,9 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
 
 export default styled(Box)`
   background: ${({ theme }): string => theme.readonlyInputBackground};
-  border: ${({ theme }): string => theme.boxBorder};
+  border: none;
   border-radius: ${({ theme }): string => theme.borderRadius};
-  box-shadow: ${({ theme }): string => theme.boxShadow};
-  color: ${({ theme }): string => theme.color};
+  color: ${({ theme }): string => theme.textColor};
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   margin: ${({ theme }): string => theme.boxMargin};

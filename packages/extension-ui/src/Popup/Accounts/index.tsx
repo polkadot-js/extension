@@ -31,7 +31,6 @@ export default function Accounts (): React.ReactElement<Props> {
         (accounts.length === 0)
           ? <AddAccount
             header='add accounts'
-            type='warn'
             to='/account/create'
             imageVisible
           >

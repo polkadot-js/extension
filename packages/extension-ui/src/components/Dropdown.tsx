@@ -62,17 +62,17 @@ export default styled(Dropdown)`
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${({ isError, isReadOnly, theme }): string => isError ? theme.box.error.background : (isReadOnly ? '#eee' : '#fff')};
-    border-color: ${({ isError, theme }): string => isError ? theme.box.error.border : theme.inputBorder};
+    background: ${({ isError, isReadOnly, theme }): string => isError ? theme.inputBackground : (isReadOnly ? '#eee' : '#fff')};
+    border-color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
     border-radius: ${({ theme }): string => theme.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError, theme }): string => isError ? theme.box.error.border : theme.color};
+    color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.textColor};
     display: block;
     font-family: ${({ theme }): string => theme.fontFamily};
     font-size: ${({ theme }): string => theme.fontSize};
-    padding: ${({ label, theme }): string => label ? theme.inputPaddingLabel : theme.inputPadding};
+    padding: 0.5rem 0.75rem;
     width: 100%;
 
     &:read-only {

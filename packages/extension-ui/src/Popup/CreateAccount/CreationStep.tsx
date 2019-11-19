@@ -20,7 +20,7 @@ const Title = styled.span`
   letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.65;
-  color: ${({ theme }): string => theme.color}
+  color: ${({ theme }): string => theme.textColor}
 `;
 
 const CurrentStep = styled.span`
@@ -33,7 +33,7 @@ const CurrentStep = styled.span`
 const TotalSteps = styled.span`
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.color};
+  color: ${({ theme }): string => theme.textColor};
   font-weight: 600;
 `;
 

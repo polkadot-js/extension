@@ -12,5 +12,5 @@ export default styled.span<Props>`
     display: block;
     mask: ${({ src }): string => `url(${src})`};
     mask-size: cover;
-    background: ${({ theme }): string => theme.color}; 
+    background: ${({ theme }): string => theme.textColor}; 
 `;

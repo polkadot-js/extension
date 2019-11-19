@@ -44,17 +44,17 @@ export default styled(Button)`
   width: ${({ isSmall }): string => isSmall ? 'auto' : '100%'};
 
   button {
-    background: ${({ isDanger, theme }): string => isDanger ? theme.btnBgDanger : theme.btnBg};
-    border: ${({ theme }): string => theme.btnBorder}${({ isDanger, theme }): string => isDanger ? theme.btnColorDanger : theme.btnColor};
+    background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+    border: none;
     border-radius: ${({ theme }): string => theme.borderRadius};
-    color: ${({ isDanger, theme }): string => isDanger ? theme.btnColorDanger : theme.btnColor};
+    color: ${({ theme }): string => theme.textColor};
     cursor: pointer;
     display: block;
     font-size: 15px;
     font-weight: 600;
     height: 48px;
     line-height: 20px;
-    padding: ${({ theme }): string => theme.btnPadding};
+    padding: 0.75rem 1rem;
     text-align: center;
     width: 100%;
     

@@ -36,14 +36,14 @@ const Container = styled.div`
     display: flex;
     justify-content: space-between;
     width: 100%;
-    border-bottom: 1px solid ${({ theme }): string => theme.inputBorder};
+    border-bottom: 1px solid ${({ theme }): string => theme.inputBorderColor};
 `;
 
 const Branding = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: ${({ theme }): string => theme.hdrColor};
+  color: ${({ theme }): string => theme.labelColor};
   font-family: ${({ theme }): string => theme.fontFamily};
   text-align: center;
   width: 100%;
@@ -68,12 +68,11 @@ const Gear = styled.img`
 `;
 
 const LogoText = styled.span`
-  color: ${({ theme }): string => theme.color};
+  color: ${({ theme }): string => theme.textColor};
   font-family: ${({ theme }): string => theme.fontFamily};
 `;
 
 export default styled(Header)`
-  background: ${({ theme }): string => theme.hdrBg};
   box-sizing: border-box;
   font-weight: normal;
   margin: 0 -1rem;

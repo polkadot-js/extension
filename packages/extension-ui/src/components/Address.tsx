@@ -134,12 +134,12 @@ const Settings = styled.div`
   align-items: center;
   height: 100%;
   width: 40px;
-  
+
   & ${Svg} {
     width: 3px;
     height: 19px;
   }
-  
+
   &:before {
     content: "";
     position: absolute;
@@ -149,7 +149,7 @@ const Settings = styled.div`
     width: 1px;
     background: ${({ theme }): string => theme.inputBorderColor};
   }
-  
+
   &:hover {
     cursor: pointer;
     background: ${({ theme }): string => theme.readonlyInputBackground};

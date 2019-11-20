@@ -4,8 +4,10 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import arrow from '../assets/arrow-down.svg'
 
 import Label from './Label';
+import Svg from './Svg';
 
 interface DrodownOption {
   text: string;
@@ -30,7 +32,7 @@ function Dropdown ({ className, defaultValue, label, isFocussed, onBlur, onChang
     onChange && onChange(value.trim());
   };
 
-  console.error(value);
+  console.log(value);
 
   return (
     <Label
@@ -52,6 +54,7 @@ function Dropdown ({ className, defaultValue, label, isFocussed, onBlur, onChang
             {text}
           </option>
         ))}
+      <Svg src={arrow} />
       </select>
     </Label>
   );
@@ -62,7 +65,7 @@ export default styled(Dropdown)`
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${({ isError, isReadOnly, theme }): string => isError ? theme.inputBackground : (isReadOnly ? '#eee' : '#fff')};
+    background: ${({ isError, isReadOnly, theme }): string => isError ? theme.inputBackground : (isReadOnly ? theme.identicoinBackground : theme.inputBorderColor)};
     border-color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
     border-radius: ${({ theme }): string => theme.borderRadius};
     border-style: solid;

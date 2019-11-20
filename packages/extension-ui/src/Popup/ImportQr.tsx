@@ -42,9 +42,10 @@ export default function ImportQr (): React.ReactElement<Props> {
           >
             {name && (
               <Button
-                label='Add the account with identified address'
                 onClick={_onCreate}
-              />
+              >
+                Add the account with identified address
+              </Button>
             )}
           </Address>
         </>

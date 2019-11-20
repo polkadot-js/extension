@@ -33,8 +33,8 @@ function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   return <>
     <Warning>
-      <div>Please write down your wallet’s mnemonic seed and keep it in a safe place.</div>
-      <div>Mnemonic seed is used to restore your wallet. Keep it carefully in case you lose your assets.</div>
+      Please write down your wallet’s mnemonic seed and keep it in a safe place. <br/>
+      Mnemonic seed is used to restore your wallet. Keep it carefully in case you lose your assets.
     </Warning>
     <MnemonicSeed seed={seed} onCopy={onCopy} onPrint={onPrint(seed)}/>
     <VerticalSpace/>

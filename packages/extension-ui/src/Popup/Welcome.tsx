@@ -32,10 +32,7 @@ export default function Welcome (): React.ReactElement<Props> {
       <Note>... we are not in the information collection business (even anonymized).</Note>
       <VerticalSpace/>
       <ButtonArea>
-        <Button
-          label='Understood, let me continue'
-          onClick={_onClick}
-        />
+        <Button onClick={_onClick}>Understood, let me continue</Button>
       </ButtonArea>
     </>
   );

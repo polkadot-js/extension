@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React from 'react';
-import styled from 'styled-components';
+import styled, {css, FlattenSimpleInterpolation} from 'styled-components';
 
 interface Props {
   className?: string;
@@ -11,12 +11,11 @@ interface Props {
   isDanger?: boolean;
   isDisabled?: boolean;
   isSmall?: boolean;
-  label?: string;
   onClick?: () => void | Promise<void | boolean>;
   to?: string;
 }
 
-function Button ({ children, className, isDisabled, label, onClick, to }: Props): React.ReactElement<Props> {
+function Button ({ children, className, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
     if (isDisabled) {
       return;
@@ -30,41 +29,43 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
   };
 
   return (
-    <div className={className}>
-      <button onClick={_onClick} disabled={isDisabled}>
-        {label}{children}
-      </button>
-    </div>
+    <button className={className} onClick={_onClick} disabled={isDisabled}>
+      {children}
+    </button>
   );
 }
 
-export default styled(Button)`
-  box-sizing: border-box;
-  display: ${({ isSmall }): string => isSmall ? 'inline-block' : 'block'};
-  width: ${({ isSmall }): string => isSmall ? 'auto' : '100%'};
+const smallButtonStyles = css`
+  display: inline-block;
+  width: auto;
+`;
 
-  button {
-    background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
-    border: none;
-    border-radius: ${({ theme }): string => theme.borderRadius};
-    color: ${({ theme }): string => theme.textColor};
-    cursor: pointer;
-    display: block;
-    font-size: 15px;
-    font-weight: 600;
-    height: 48px;
-    line-height: 20px;
-    padding: 0.75rem 1rem;
-    text-align: center;
-    width: 100%;
-    
-    &:disabled {
-      opacity: 0.3;
-      cursor: default;
-    }
-    
-    &:not(:disabled):hover {
-      background: ${({ theme }): string => theme.primaryColor};
-    }
+const bigButtonStyles = css`
+  display: block;
+  width: 100%;
+`;
+
+export default styled(Button)`
+  ${({ isSmall }): FlattenSimpleInterpolation => isSmall ? smallButtonStyles : bigButtonStyles};
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 1rem;
+  background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+  border: none;
+  border-radius: ${({ theme }): string => theme.borderRadius};
+  color: ${({ theme }): string => theme.textColor};
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  &:not(:disabled):hover {
+    background: ${({ theme }): string => theme.primaryColor};
   }
 `;

@@ -39,10 +39,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
         {isFirst && (
           <>
             <RequestWarning>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</RequestWarning>
-            <AcceptButton
-              label='Yes, allow this application access'
-              onClick={_onApprove}
-            />
+            <AcceptButton onClick={_onApprove}>Yes, allow this application access</AcceptButton>
           </>
         )}
         <RejectButton>

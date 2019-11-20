@@ -48,10 +48,7 @@ export default function Import (): React.ReactElement<Props> {
           address={account.address}
           name={name}
         >
-          <Button
-            label='Add the account with the supplied seed'
-            onClick={_onCreate}
-          />
+          <Button onClick={_onCreate}>Add the account with the supplied seed</Button>
         </Address>
       )}
     </div>

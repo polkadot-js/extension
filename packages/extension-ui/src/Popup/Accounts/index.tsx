@@ -13,7 +13,8 @@ import {
   AddAccount,
   ButtonArea,
   Svg,
-  Title
+  Title,
+  ButtonWithSubtitle
 } from '../../components';
 import Account from './Account';
 import styled from 'styled-components';
@@ -29,13 +30,7 @@ export default function Accounts (): React.ReactElement<Props> {
       <Title>Accounts</Title>
       {
         (accounts.length === 0)
-          ? <AddAccount
-            header='add accounts'
-            to='/account/create'
-            imageVisible
-          >
-            You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.
-          </AddAccount>
+          ? <AddAccount/>
           : <AccountsArea>
             {
               accounts.map((json, index): React.ReactNode => (
@@ -47,14 +42,8 @@ export default function Accounts (): React.ReactElement<Props> {
           </AccountsArea>
       }
       <ButtonArea>
-        <ButtonWithSubtitle to='/account/create'>
-          <h4>Create New Account</h4>
-          <p>With new seed</p>
-        </ButtonWithSubtitle>
-        <ButtonWithSubtitle to='/account/import-seed'>
-          <h4>Import an Account</h4>
-          <p>I have a pre-existing seed</p>
-        </ButtonWithSubtitle>
+        <ButtonWithSubtitle to='/account/create' title='Create New Accoun' subTitle='With new seed'/>
+        <ButtonWithSubtitle to='/account/import-seed' title='Import an Account' subTitle='I have a pre-existing seed'/>
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>
             <Svg src={QrImage}/>
@@ -64,25 +53,6 @@ export default function Accounts (): React.ReactElement<Props> {
     </>
   );
 }
-
-const ButtonWithSubtitle = styled(Button)`
-  button {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  h4 {
-    margin: 0;
-    font-weight: 600;
-    font-size: 15px;
-    line-height: 20px;
-  }
-  p {
-    margin: 0;
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 16px;
-  }
-`;
 
 const QrButton = styled(Button)`
   width: 60px;

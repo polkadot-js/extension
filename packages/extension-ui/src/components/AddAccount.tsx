@@ -7,30 +7,17 @@ import styled from 'styled-components';
 import addAccountImage from '../assets/addAccount.png';
 
 interface Props {
-  children: React.ReactNode;
   className?: string;
-  header?: React.ReactNode;
-  to?: string;
-  onClick?: () => void;
-  imageVisible?: boolean;
 }
 
-function AddAccount ({ children, className, header, to, onClick, imageVisible }: Props): React.ReactElement<Props> {
-  const _onClick = (): void => {
-    onClick && onClick();
-
-    if (to) {
-      window.location.hash = to;
-    }
-  };
-
+function AddAccount ({ className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      {imageVisible && <Image src={addAccountImage} alt="add account" onClick={_onClick}/>}
-      <article>
-        {header && <h3>{header}</h3>}
-        <TipText>{children}</TipText>
-      </article>
+      <Image src={addAccountImage} alt="add account" onClick={(): void => { window.location.hash = '/account/create'; }}/>
+      <div>
+        <h3>add accounts</h3>
+        <TipText>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</TipText>
+      </div>
     </div>
   );
 }

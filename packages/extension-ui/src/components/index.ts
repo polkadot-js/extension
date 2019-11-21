@@ -28,6 +28,7 @@ export { default as Title } from './Title';
 export { default as VerticalSpace } from './VerticalSpace';
 export { default as View } from './View';
 export { default as Warning } from './Warning';
+export { default as ButtonWithSubtitle } from './ButtonWithSubtitle';
 
 export { Input, TextArea } from './TextInputs';
 

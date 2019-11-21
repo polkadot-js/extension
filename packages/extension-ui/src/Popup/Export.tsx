@@ -8,6 +8,7 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import { ActionContext, Address, Button, InputWithLabel, Title, Warning } from '../components';
 import { exportAccount } from '../messaging';
 import { Back } from '../partials';
+import styled from 'styled-components';
 
 const MIN_LENGTH = 6;
 
@@ -35,29 +36,37 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       });
 
   return (
-    <div>
+    <>
       <Back />
       <Title>Export account</Title>
-      <Address address={address}>
-        <Warning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Warning>
-        <InputWithLabel
-          isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
-          label='password for this account'
-          onChange={setPass}
-          type='password'
-          data-export-password
-        />
-        <Button
-          isDisabled={pass.length === 0}
-          isDanger
-          label='I want to export this account'
-          onClick={_onExportButtonClick}
-          className='export-button'
-          data-export-button
-        />
-      </Address>
-    </div>
+      <div>
+        <Address address={address}>
+          <Warning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Warning>
+          <ActionArea>
+            <InputWithLabel
+              isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
+              label='password for this account'
+              onChange={setPass}
+              type='password'
+              data-export-password
+            />
+            <Button
+              isDisabled={pass.length === 0}
+              isDanger
+              label='I want to export this account'
+              onClick={_onExportButtonClick}
+              className='export-button'
+              data-export-button
+            />
+          </ActionArea>
+        </Address>
+      </div>
+    </>
   );
 }
+
+const ActionArea = styled.div`
+  padding: 25px 24px;
+`;
 
 export default withRouter(Export);

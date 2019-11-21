@@ -73,7 +73,7 @@ const AcceptButton = styled(Button)`
 `;
 
 const RequestWarning = styled(Warning)`
-  margin: 1rem 1rem 0 1.45rem;
+  margin: 24px 24px 0 1.45rem;
 `;
 
 AcceptButton.displayName = 'AcceptButton';
@@ -94,7 +94,7 @@ export default styled(Request)`
     height: 18px;
     font-size: 14px;
     line-height: 20px;
-    margin: 1rem 15px 0 1.35rem;
+    margin: 24px 15px 0 1.35rem;
   }
 
   .tab-info {

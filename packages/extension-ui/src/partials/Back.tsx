@@ -4,8 +4,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
-
-import { Link } from '../components';
+import ArrowLeftImage from '../assets/arrowLeft.svg';
+import { Link, Svg } from '../components';
 
 interface Props {
   className?: string;
@@ -15,11 +15,36 @@ interface Props {
 function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <Link to={to}>Back</Link>
+      <BackLink to={to}>
+        <ArrowLeft/>
+        Back
+      </BackLink>
     </div>
   );
 }
 
+const ArrowLeft = styled(Svg).attrs(() => ({
+  src: ArrowLeftImage
+}))`
+  width: 12px;
+  height: 12px;
+  margin-right: 13px;
+  background: ${({ theme }): string => theme.labelColor};
+`;
+
+const BackLink = styled(Link)`
+  width: min-content;
+  text-decoration: underline;
+  color: ${({ theme }): string => theme.labelColor};
+  
+  &:visited {
+    color: ${({ theme }): string => theme.labelColor};
+  }
+`;
+
 export default styled(Back)`
-  padding: 0 0.5rem;
+  margin: 0;
+  line-height: 52px;
+  border-bottom: 1px solid ${({ theme }): string => theme.inputBorderColor};
+  font-size: ${({ theme }): string => theme.labelFontSize};
 `;

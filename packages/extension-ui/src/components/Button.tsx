@@ -52,9 +52,9 @@ export default styled(Button)`
     display: block;
     font-size: 15px;
     font-weight: 600;
-    height: 48px;
+    height: ${({ isDanger }): string => isDanger ? '40px' : '48px'};
     line-height: 20px;
-    padding: 0.75rem 1rem;
+    padding: 0 1rem;
     text-align: center;
     width: 100%;
     

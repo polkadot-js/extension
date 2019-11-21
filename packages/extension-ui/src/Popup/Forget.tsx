@@ -8,6 +8,7 @@ import { ActionContext, Address, Button, Warning, Title } from '../components';
 
 import { forgetAccount } from '../messaging';
 import { Back } from '../partials';
+import styled from 'styled-components';
 
 type Props = RouteComponentProps<{ address: string }>;
 
@@ -20,19 +21,25 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
       .catch((error: Error) => console.error(error));
 
   return (
-    <div>
+    <>
       <Back />
       <Title>Forget account</Title>
-      <Address address={address}>
-        <Warning danger>You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.</Warning>
-        <Button
-          isDanger
-          label='I want to forget this account'
-          onClick={_onClick}
-        />
-      </Address>
-    </div>
+      <div>
+        <Address address={address}>
+          <Warning danger>You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.</Warning>
+          <ForgetButton
+            isDanger
+            label='I want to forget this account'
+            onClick={_onClick}
+          />
+        </Address>
+      </div>
+    </>
   );
 }
+
+const ForgetButton = styled(Button)`
+  padding: 25px 24px;
+`;
 
 export default withRouter(Forget);

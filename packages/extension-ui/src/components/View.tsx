@@ -29,12 +29,7 @@ export default styled(View)`
   height: 100%;
   
   > * {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  h3 {
-    margin: 0 0 0.75rem;
-    text-transform: uppercase;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 `;

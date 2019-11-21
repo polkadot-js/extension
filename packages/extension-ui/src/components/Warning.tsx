@@ -27,13 +27,14 @@ function Warning ({ children, className, danger }: Props): React.ReactElement<Pr
 const WarningImage = styled(Svg)<Pick<Props, 'danger'>>`
   width: 16px;
   height: 14px;
-  margin: 5px 16px 5px 0;
+  margin: 5px 10px 5px 0;
   background: ${({ danger, theme }): string => danger ? theme.iconDangerColor : theme.iconWarningColor};  
 `;
 
 export default styled(Warning)`
   display: flex;
   flex-direction: row;
-  padding-left: ${({ danger }): string => danger ? '16px' : ''};
-  border-left: ${({ danger, theme }): string => danger ? `0.25rem solid ${theme.textColorDanger}` : ''};
+  padding-left: ${({ danger }): string => danger ? '18px' : ''};
+  margin-right: 20px;
+  border-left: ${({ danger, theme }): string => danger ? `0.25rem solid ${theme.buttonBackgroundDanger}` : ''};
 `;

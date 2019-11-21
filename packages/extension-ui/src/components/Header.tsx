@@ -6,7 +6,8 @@ import React from 'react';
 import styled from 'styled-components';
 import logo from '../assets/pjs.svg';
 import gear from '../assets/gear.svg';
-import { Link } from '.';
+import Link from './Link';
+import Svg from './Svg';
 
 interface Props {
   children?: React.ReactNode;
@@ -16,7 +17,7 @@ interface Props {
 
 function Header ({ children, className, showSettings }: Props): React.ReactElement<Props> {
   return (
-    <h2 className={className}>
+    <div className={className}>
       <Container>
         {showSettings && <Space/>}
         <Branding>
@@ -28,7 +29,7 @@ function Header ({ children, className, showSettings }: Props): React.ReactEleme
         </Link>}
         {children}
       </Container>
-    </h2>
+    </div>
   );
 }
 
@@ -50,8 +51,8 @@ const Branding = styled.div`
 `;
 
 const Space = styled.div`
-  width: 21px;
-  margin-left: 1rem;
+  width: 22px;
+  margin-left: 24px;
 `;
 
 const Logo = styled.img`
@@ -60,22 +61,24 @@ const Logo = styled.img`
   margin: 12px;
 `;
 
-const Gear = styled.img`
+const Gear = styled(Svg)`
   height: 18px;
   width: 18px;
-  margin-right: 1rem;
+  margin-right: 24px;
   align-self: center;
 `;
 
 const LogoText = styled.span`
   color: ${({ theme }): string => theme.textColor};
   font-family: ${({ theme }): string => theme.fontFamily};
+  font-size: 20px;
+  line-height: 27px;
 `;
 
 export default styled(Header)`
   box-sizing: border-box;
   font-weight: normal;
-  margin: 0 -1rem;
-  padding: 0 1rem 0.75rem 1rem;
+  margin: 0 -24px;
+  padding: 0 24px 0.75rem 24px;
   position: relative;
 `;

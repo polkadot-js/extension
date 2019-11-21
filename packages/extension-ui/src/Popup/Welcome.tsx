@@ -55,6 +55,6 @@ const Note = styled.p`
 `;
 
 const TextBox = styled(Box)`
-  margin: 0.75rem 1rem;
+  margin: 0.75rem 24px;
   border: 1px solid ${({ theme }): string => theme.inputBorderColor};
 `;

@@ -9,7 +9,7 @@ export default styled.div`
   display: flex;
   flex-direction: row;
   background: ${({ theme }): string => theme.highlightedAreaBackground};
-  padding: 12px 1rem;
+  padding: 12px 24px;
 
   &&& {
     margin-left: 0;

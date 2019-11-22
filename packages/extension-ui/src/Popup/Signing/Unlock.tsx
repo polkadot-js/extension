@@ -30,7 +30,7 @@ export default function Unlock ({ className, onSign }: Props): React.ReactElemen
       <InputWithLabel
         isError={!password || !!error}
         isFocused
-        label='password for this account'
+        label='Password for this account'
         onChange={setPassword}
         type='password'
       />

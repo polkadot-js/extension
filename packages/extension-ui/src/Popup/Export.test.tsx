@@ -7,6 +7,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { MemoryRouter, Route } from 'react-router';
 import React from 'react';
+import * as messaging from '@polkadot/extension-ui/messaging';
 
 import { Button, defaultTheme } from '../components';
 import Export from './Export';
@@ -15,7 +16,6 @@ import { ThemeProvider } from 'styled-components';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
 
 configure({ adapter: new Adapter() });
-jest.mock('../messaging');
 
 describe('Export component', () => {
   let wrapper: ReactWrapper;
@@ -26,7 +26,7 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
+    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
 
     wrapper = mount(<MemoryRouter
       initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>

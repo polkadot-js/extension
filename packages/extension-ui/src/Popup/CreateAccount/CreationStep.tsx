@@ -4,7 +4,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { ActionText } from '@polkadot/extension-ui/components';
+import { ActionText, Title } from '@polkadot/extension-ui/components';
 
 interface Props {
   step: number;
@@ -12,15 +12,22 @@ interface Props {
   className?: string;
 }
 
-const Title = styled.span`
+function CreationStep ({ step, onClick, className }: Props): React.ReactElement<Props> {
+  return <div className={className}>
+    <div>
+      <CreateAnAccount/>
+      <CurrentStep>{step}</CurrentStep>
+      <TotalSteps>/2</TotalSteps>
+    </div>
+    <ActionText text='Cancel' onClick={onClick}/>
+  </div>;
+}
+
+const CreateAnAccount = styled(Title).attrs(() => ({
+  children: 'Create an account:'
+}))`
+  display: inline;
   margin-right: 10px;
-  font-weight: 800;
-  font-size: 10px;
-  line-height: 14px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.65;
-  color: ${({ theme }): string => theme.textColor}
 `;
 
 const CurrentStep = styled.span`
@@ -36,17 +43,6 @@ const TotalSteps = styled.span`
   color: ${({ theme }): string => theme.textColor};
   font-weight: 600;
 `;
-
-function CreationStep ({ step, onClick, className }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    <div>
-      <Title>Create an account:</Title>
-      <CurrentStep>{step}</CurrentStep>
-      <TotalSteps>/2</TotalSteps>
-    </div>
-    <ActionText text='Cancel' onClick={onClick}/>
-  </div>;
-}
 
 export default styled(CreationStep)`
   display: flex;

@@ -8,21 +8,21 @@ import { AccountJson, RequestExtrinsicSign } from '@polkadot/extension/backgroun
 import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
 
-import { ActionBar, ActionContext, Address, Link } from '../../components';
+import { ActionBar, ActionContext, Address, ButtonArea, Link } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
 import Details from './Details';
 import Qr from './Qr';
 import Unlock from './Unlock';
+import styled from 'styled-components';
 
 interface Props {
   account: AccountJson;
-  isFirst: boolean;
   request: RequestExtrinsicSign;
   signId: string;
   url: string;
 }
 
-export default function Request ({ account: { isExternal }, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
 
@@ -48,28 +48,46 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
       .catch((error: Error) => console.error(error));
 
   return (
-    <Address
-      address={request.address}
-      genesisHash={request.genesisHash}
-    >
-      {isExternal && isFirst
+    <>
+      <Address
+        address={request.address}
+        genesisHash={request.genesisHash}
+      />
+      {isExternal
         ? <Qr
           payload={payload}
           request={request}
           onSignature={_onSignature}
         />
         : <Details
-          isDecoded={isFirst}
+          isDecoded={true}
           payload={payload}
           request={request}
           url={url}
         />
       }
-      {isFirst && !isExternal && <Unlock onSign={_onSign} />}
-      <ActionBar>
-        <div />
-        <Link isDanger onClick={_onCancel}>Cancel</Link>
-      </ActionBar>
-    </Address>
+      <SignArea>
+        {!isExternal && <Unlock onSign={_onSign} />}
+        <CancelButton>
+          <Link isDanger onClick={_onCancel}>Cancel</Link>
+        </CancelButton>
+      </SignArea>
+    </>
   );
 }
+
+const SignArea = styled(ButtonArea)`
+  flex-direction: column;
+  padding: 6px 1rem;
+`;
+
+const CancelButton = styled(ActionBar)`
+  margin-top: 4px;
+  margin-bottom: 4px;
+  text-decoration: underline;
+  
+  a {
+    margin: auto;
+  }
+`;
+CancelButton.displayName = 'CancelButton';

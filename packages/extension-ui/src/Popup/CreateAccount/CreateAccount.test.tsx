@@ -7,7 +7,6 @@ import Adapter from 'enzyme-adapter-react-16';
 
 import CreateAccount from '.';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { MemoryRouter } from 'react-router';
 import * as messaging from '@polkadot/extension-ui/messaging';
 import { act } from 'react-dom/test-utils';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
@@ -31,13 +30,13 @@ describe('Create Account', () => {
     seed: 'horse battery staple correct',
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'
   };
-  const mountComponent = (): ReactWrapper => mount(<MemoryRouter initialEntries={['/account/create']} initialIndex={0}>
+  const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>
       <ThemeProvider theme={defaultTheme}>
         <CreateAccount/>
       </ThemeProvider>
     </ActionContext.Provider>
-  </MemoryRouter>);
+  );
 
   const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
 

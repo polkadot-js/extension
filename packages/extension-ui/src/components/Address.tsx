@@ -76,24 +76,26 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
 
   return <div className={className}>
-    <AccountInfoRow>
-      <Identicon
-        iconTheme={theme}
-        value={address}
-      />
-      <Info>
-        <Name>{name || (account && account.name) || '<unknown>'}</Name>
-        <FullAddress>{formatted || '<unknown>'}</FullAddress>
-      </Info>
-      {actions &&
+    <div>
+      <AccountInfoRow>
+        <Identicon
+          iconTheme={theme}
+          value={address}
+        />
+        <Info>
+          <Name>{name || (account && account.name) || '<unknown>'}</Name>
+          <FullAddress>{formatted || '<unknown>'}</FullAddress>
+        </Info>
+        {actions &&
       <>
         <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)} ref={actionsRef}>
           {showActionsMenu ? <ActiveActionsIcon/> : <ActionsIcon/>}
         </Settings>
         {showActionsMenu && <Menu>{actions}</Menu>}
       </>}
-    </AccountInfoRow>
-    {children}
+      </AccountInfoRow>
+      {children}
+    </div>
   </div>;
 }
 
@@ -171,7 +173,10 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
 
 export default styled(Address)`
   position: relative;
-  background: ${({ theme }): string => theme.highlightedAreaBackground};
+  
+  & > div {
+    background: ${({ theme }): string => theme.highlightedAreaBackground};
+  }
 
   & ${Identicon} {
     margin-left: 25px;

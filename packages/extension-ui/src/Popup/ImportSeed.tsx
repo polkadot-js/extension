@@ -4,9 +4,19 @@
 
 import React, { useContext, useState } from 'react';
 
-import { ActionContext, Address, Button, Header, TextAreaWithLabel } from '../components';
+import {
+  ActionContext,
+  ActionText,
+  Address,
+  Button,
+  ButtonArea,
+  Header,
+  TextAreaWithLabel,
+  VerticalSpace
+} from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
-import { Back, Name, Password } from '../partials';
+import { TitleWithAction, Name, Password } from '../partials';
+import styled from 'styled-components';
 
 type Props = {};
 
@@ -32,10 +42,13 @@ export default function Import (): React.ReactElement<Props> {
   };
 
   return (
-    <div>
+    <>
       <Header/>
-      <Back />
-      <TextAreaWithLabel
+      <TitleWithAction title='Import account'>
+        <ActionText text='Cancel' onClick={(): void => onAction('/')}/>
+      </TitleWithAction>
+      <SeedInput
+        rowsCount={2}
         isError={!account}
         isFocused
         label='existing 12 or 24-word mnemonic seed'
@@ -44,16 +57,28 @@ export default function Import (): React.ReactElement<Props> {
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}
       {account && name && password && (
-        <Address
-          address={account.address}
-          name={name}
-        >
-          <Button
-            label='Add the account with the supplied seed'
-            onClick={_onCreate}
+        <>
+          <Address
+            address={account.address}
+            name={name}
           />
-        </Address>
+          <VerticalSpace/>
+          <ButtonArea>
+            <Button
+              label='Add the account with the supplied seed'
+              onClick={_onCreate}
+            />
+          </ButtonArea>
+        </>
       )}
-    </div>
+    </>
   );
 }
+
+const SeedInput = styled(TextAreaWithLabel)`
+  margin-bottom: 16px;
+  
+  textarea {
+    height: unset;  
+  }
+`;

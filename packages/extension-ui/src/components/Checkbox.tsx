@@ -33,7 +33,7 @@ export default styled(Checkbox)`
     color: ${({ theme }): string => theme.labelColor};
     font-size: ${({ theme }): string => theme.fontSize};
     line-height: ${({ theme }): string => theme.lineHeight};
-    
+
     & input {
       position: absolute;
       opacity: 0;
@@ -41,7 +41,7 @@ export default styled(Checkbox)`
       height: 0;
       width: 0;
     }
-    
+
     & span {
       position: absolute;
       top: 4px;
@@ -50,7 +50,8 @@ export default styled(Checkbox)`
       width: 16px;
       border-radius: ${({ theme }): string => theme.borderRadius};
       background-color: ${({ theme }): string => theme.inputBackground};
-      
+      border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+
       &:after {
         content: "✓";
         display: none;
@@ -61,7 +62,7 @@ export default styled(Checkbox)`
         font-size: 14px;
       }
     }
-    
+
     &:hover input ~ span {
       background-color: ${({ theme }): string => theme.labelColor};
     }
@@ -69,7 +70,7 @@ export default styled(Checkbox)`
     input:checked ~ span {
       background-color: ${({ theme }): string => theme.primaryColor};
     }
-    
+
     input:checked ~ span:after {
       display: block;
     }

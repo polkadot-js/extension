@@ -2,12 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 import logo from '../assets/pjs.svg';
 import gear from '../assets/gear.svg';
-import Link from './Link';
-import Svg from './Svg';
+import { useOutsideClick } from '../hooks';
+
+import Svg from '@polkadot/extension-ui/components/Svg';
+import Settings from './Settings';
 
 interface Props {
   children?: React.ReactNode;
@@ -16,17 +18,27 @@ interface Props {
 }
 
 function Header ({ children, className, showSettings }: Props): React.ReactElement<Props> {
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsRef = useRef(null);
+  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+
   return (
     <div className={className}>
       <Container>
-        {showSettings && <Space/>}
+        {showSettings && <Space />}
         <Branding>
           <Logo src={logo} />
           <LogoText>polkadot</LogoText>
         </Branding>
-        {showSettings && <Link to='/settings'>
-          <Gear src={gear} />
-        </Link>}
+        {showSettings &&
+          <SettingsToggle onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
+            <Gear isSelected={showActionsMenu}/>
+          </SettingsToggle>
+        }
+        {showActionsMenu &&
+        <div ref={actionsRef}>
+          <Settings/>
+        </div>}
         {children}
       </Container>
     </div>
@@ -61,12 +73,21 @@ const Logo = styled.img`
   margin: 12px;
 `;
 
-const Gear = styled(Svg)`
+interface GearProps {
+  isSelected: boolean;
+}
+
+const Gear = styled(Svg).attrs(() => ({
+  src: gear
+}))<GearProps>`
   height: 18px;
   width: 18px;
   margin-right: 24px;
   align-self: center;
+  background: ${({ theme, isSelected }): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
 `;
+
+Gear.displayName = 'Gear';
 
 const LogoText = styled.span`
   color: ${({ theme }): string => theme.textColor};
@@ -74,6 +95,15 @@ const LogoText = styled.span`
   font-size: 20px;
   line-height: 27px;
 `;
+
+const SettingsToggle = styled.div`
+  align-self: center;
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
+SettingsToggle.displayName = 'SettingsToggle';
 
 export default styled(Header)`
   box-sizing: border-box;

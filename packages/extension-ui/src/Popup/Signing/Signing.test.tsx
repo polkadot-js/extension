@@ -46,7 +46,7 @@ describe('Signing requests', () => {
   }];
 
   const emitter = new EventEmitter();
-  function MockRequestsProvider () {
+  function MockRequestsProvider (): React.ReactElement {
     const [requests, setRequests] = useState(signRequests);
 
     emitter.on('request', setRequests);

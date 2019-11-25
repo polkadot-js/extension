@@ -28,7 +28,11 @@ function Button ({ children, className, isDisabled, onClick, to }: Props): React
   };
 
   return (
-    <button className={className} onClick={_onClick} disabled={isDisabled}>
+    <button
+      className={className}
+      onClick={_onClick}
+      disabled={isDisabled}
+    >
       {children}
     </button>
   );

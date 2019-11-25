@@ -13,14 +13,16 @@ interface Props {
 }
 
 function CreationStep ({ step, onClick, className }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    <div>
-      <CreateAnAccount/>
-      <CurrentStep>{step}</CurrentStep>
-      <TotalSteps>/2</TotalSteps>
+  return (
+    <div className={className}>
+      <div>
+        <CreateAnAccount />
+        <CurrentStep>{step}</CurrentStep>
+        <TotalSteps>/2</TotalSteps>
+      </div>
+      <ActionText text='Cancel' onClick={onClick} />
     </div>
-    <ActionText text='Cancel' onClick={onClick}/>
-  </div>;
+  );
 }
 
 const CreateAnAccount = styled(Title).attrs(() => ({

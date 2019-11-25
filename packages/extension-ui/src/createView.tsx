@@ -1,4 +1,4 @@
-// Copyright 2019 @polkadot/extension authors & contributors
+// Copyright 2019 @polkadot/extension-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
@@ -17,11 +17,11 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   ReactDOM.render(
     <Suspense fallback='...'>
-      <Fonts/>
+      <Fonts />
       <ThemeProvider theme={defaultTheme}>
         <View>
           <HashRouter>
-            <Entry/>
+            <Entry />
           </HashRouter>
         </View>
       </ThemeProvider>

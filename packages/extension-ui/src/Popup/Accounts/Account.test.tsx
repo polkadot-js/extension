@@ -21,7 +21,8 @@ describe('Account component', () => {
     <MemoryRouter>
       <ThemeProvider theme={theme}>
         <Account
-          {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}>
+          {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}
+        >
         </Account>
       </ThemeProvider>
     </MemoryRouter>);

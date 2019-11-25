@@ -16,9 +16,23 @@ interface Props {
 
 function Link ({ children, className, onClick, to }: Props): React.ReactElement<Props> {
   return (
-    to
-      ? <RouterLink className={className} onClick={onClick} to={to}>{children}</RouterLink>
-      : <a href='#' className={className} onClick={onClick}>{children}</a>
+    to ? (
+      <RouterLink
+        className={className}
+        onClick={onClick}
+        to={to}
+      >
+        {children}
+      </RouterLink>
+    ) : (
+      <a
+        href='#'
+        className={className}
+        onClick={onClick}
+      >
+        {children}
+      </a>
+    )
   );
 }
 

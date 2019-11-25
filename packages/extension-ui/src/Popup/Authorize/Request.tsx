@@ -34,7 +34,16 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
       <RequestInfo>
         <Info>
           <Icon icon='X' onClick={_onReject} />
-          <div className='tab-info'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from <a href={url} target="_blank" rel="noopener noreferrer"><span className='tab-url'>{url}</span></a>.</div>
+          <div className='tab-info'>
+            An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className='tab-url'>{url}</span>
+            </a>.
+          </div>
         </Info>
         {isFirst && (
           <>

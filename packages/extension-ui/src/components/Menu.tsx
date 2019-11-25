@@ -11,9 +11,11 @@ interface Props {
 }
 
 function Menu ({ children, className }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    {children}
-  </div>;
+  return (
+    <div className={className}>
+      {children}
+    </div>
+  );
 }
 
 export default styled(Menu)`

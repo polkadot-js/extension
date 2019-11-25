@@ -54,17 +54,21 @@ export default function Request ({ account: { isExternal }, request, signId, url
         genesisHash={request.genesisHash}
       />
       {isExternal
-        ? <Qr
-          payload={payload}
-          request={request}
-          onSignature={_onSignature}
-        />
-        : <Details
-          isDecoded={true}
-          payload={payload}
-          request={request}
-          url={url}
-        />
+        ? (
+          <Qr
+            payload={payload}
+            request={request}
+            onSignature={_onSignature}
+          />
+        )
+        : (
+          <Details
+            isDecoded={true}
+            payload={payload}
+            request={request}
+            url={url}
+          />
+        )
       }
       <SignArea>
         {!isExternal && <Unlock onSign={_onSign} />}

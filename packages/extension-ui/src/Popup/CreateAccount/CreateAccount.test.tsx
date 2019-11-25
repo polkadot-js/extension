@@ -33,7 +33,7 @@ describe('Create Account', () => {
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>
       <ThemeProvider theme={defaultTheme}>
-        <CreateAccount/>
+        <CreateAccount />
       </ThemeProvider>
     </ActionContext.Provider>
   );

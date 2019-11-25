@@ -18,7 +18,7 @@ describe('Authorize', () => {
   const mountAuthorize = (authorizeRequests: AuthorizeRequest[] = []): ReactWrapper => mount(
     <AuthorizeContext.Provider value={authorizeRequests}>
       <ThemeProvider theme={defaultTheme}>
-        <Authorize/>
+        <Authorize />
       </ThemeProvider>
     </AuthorizeContext.Provider>);
 

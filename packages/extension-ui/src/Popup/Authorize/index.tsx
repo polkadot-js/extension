@@ -22,7 +22,7 @@ export default function Authorize (): React.ReactElement<{}> {
           url={url}
         />
       ))}
-      <VerticalSpace/>
+      <VerticalSpace />
     </div>
   );
 }

@@ -30,15 +30,16 @@ function Header ({ children, className, showSettings }: Props): React.ReactEleme
           <Logo src={logo} />
           <LogoText>polkadot</LogoText>
         </Branding>
-        {showSettings &&
+        {showSettings && (
           <SettingsToggle onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
-            <Gear isSelected={showActionsMenu}/>
+            <Gear isSelected={showActionsMenu} />
           </SettingsToggle>
-        }
-        {showActionsMenu &&
-        <div ref={actionsRef}>
-          <Settings/>
-        </div>}
+        )}
+        {showActionsMenu && (
+          <div ref={actionsRef}>
+            <Settings />
+          </div>
+        )}
         {children}
       </Container>
     </div>

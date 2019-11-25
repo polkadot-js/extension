@@ -9,6 +9,35 @@ import ActionText from '@polkadot/extension-ui/components/ActionText';
 import copy from '../assets/copy.svg';
 import print from '../assets/print.svg';
 
+interface Props {
+  seed: string;
+  onCopy: MouseEventHandler<HTMLDivElement>;
+  onPrint: MouseEventHandler<HTMLDivElement>;
+  className?: string;
+}
+
+function MnemonicSeed ({ seed, onCopy, onPrint, className }: Props): React.ReactElement<Props> {
+  return (
+    <div className={className}>
+      <MnemonicText value={seed} />
+      <ButtonsRow>
+        <ActionText
+          data-seed-action='copy'
+          icon={copy}
+          text='Copy to clipboard'
+          onClick={onCopy}
+        />
+        <ActionText
+          data-seed-action='print'
+          icon={print}
+          text='Print seed phrase'
+          onClick={onPrint}
+        />
+      </ButtonsRow>
+    </div>
+  );
+}
+
 const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
   label: 'Generated 12-word mnemonic seed:',
   isReadOnly: true
@@ -23,13 +52,6 @@ const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
   }
 `;
 
-interface Props {
-  seed: string;
-  onCopy: MouseEventHandler<HTMLDivElement>;
-  onPrint: MouseEventHandler<HTMLDivElement>;
-  className?: string;
-}
-
 const ButtonsRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -38,16 +60,6 @@ const ButtonsRow = styled.div`
     margin-right: 32px;
   }
 `;
-
-function MnemonicSeed ({ seed, onCopy, onPrint, className }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    <MnemonicText value={seed}/>
-    <ButtonsRow>
-      <ActionText data-seed-action='copy' icon={copy} text='Copy to clipboard' onClick={onCopy}/>
-      <ActionText data-seed-action='print' icon={print} text='Print seed phrase' onClick={onPrint}/>
-    </ButtonsRow>
-  </div>;
-}
 
 export default styled(MnemonicSeed)`
   margin-top: 21px;

@@ -31,18 +31,28 @@ const onPrint = (seed: string) => (): void => {
 
 function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
-  return <>
-    <Warning>
-      Please write down your wallet’s mnemonic seed and keep it in a safe place. <br/>
+  return (
+    <>
+      <Warning>
+      Please write down your wallet’s mnemonic seed and keep it in a safe place. <br />
       Mnemonic seed is used to restore your wallet. Keep it carefully in case you lose your assets.
-    </Warning>
-    <MnemonicSeed seed={seed} onCopy={onCopy} onPrint={onPrint(seed)}/>
-    <VerticalSpace/>
-    <Checkbox checked={isMnemonicSaved} onChange={setIsMnemonicSaved} label='I have saved my mnemonic seed safely.'/>
-    <ButtonArea>
-      <Button isDisabled={!isMnemonicSaved} onClick={onNextStep}>Next step</Button>
-    </ButtonArea>
-  </>;
+      </Warning>
+      <MnemonicSeed
+        seed={seed}
+        onCopy={onCopy}
+        onPrint={onPrint(seed)}
+      />
+      <VerticalSpace />
+      <Checkbox
+        checked={isMnemonicSaved}
+        onChange={setIsMnemonicSaved}
+        label='I have saved my mnemonic seed safely.'
+      />
+      <ButtonArea>
+        <Button isDisabled={!isMnemonicSaved} onClick={onNextStep}>Next step</Button>
+      </ButtonArea>
+    </>
+  );
 }
 
 export default Mnemonic;

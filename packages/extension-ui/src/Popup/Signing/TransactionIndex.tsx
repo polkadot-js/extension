@@ -19,17 +19,19 @@ function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick, cl
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 
-  return <div className={className}>
-    <div>
-      <Transaction/>
-      <CurrentIndex>{index + 1}</CurrentIndex>
-      <TotalItems>/{totalItems}</TotalItems>
+  return (
+    <div className={className}>
+      <div>
+        <Transaction />
+        <CurrentIndex>{index + 1}</CurrentIndex>
+        <TotalItems>/{totalItems}</TotalItems>
+      </div>
+      <div>
+        <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
+        <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
+      </div>
     </div>
-    <div>
-      <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive}/>
-      <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive}/>
-    </div>
-  </div>;
+  );
 }
 
 const Transaction = styled(Title).attrs(() => ({

@@ -28,12 +28,13 @@ describe('Export component', () => {
   beforeEach(() => {
     jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
 
-    wrapper = mount(<MemoryRouter
-      initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
-      <ThemeProvider theme={defaultTheme}>
-        <Route path='/account/export/:address' component={ Export }/>
-      </ThemeProvider>
-    </MemoryRouter>);
+    wrapper = mount(
+      <MemoryRouter initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
+        <ThemeProvider theme={defaultTheme}>
+          <Route path='/account/export/:address' component={ Export } />
+        </ThemeProvider>
+      </MemoryRouter>
+    );
   });
 
   it('creates export message on button press', async () => {

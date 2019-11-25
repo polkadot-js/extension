@@ -33,32 +33,34 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
     _toggleEdit();
   };
 
-  return <div className={className}>
-    <Address
-      address={address}
-      name={editedName}
-      actions={
-        <>
-          <MenuGroup>
-            <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
-          </MenuGroup>
-          {!isExternal && <MenuItem isDanger to={`/account/export/${address}`}>Export Account</MenuItem>}
-          <MenuItem isDanger to={`/account/forget/${address}`}>Forget Account</MenuItem>
-        </>
-      }
-    >
-      {isEditing && (
-        <Name
-          address={address}
-          className='edit-name'
-          isFocussed
-          label={' '}
-          onBlur={_saveChanges}
-          onChange={setName}
-        />
-      )}
-    </Address>
-  </div>;
+  return (
+    <div className={className}>
+      <Address
+        address={address}
+        name={editedName}
+        actions={(
+          <>
+            <MenuGroup>
+              <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
+            </MenuGroup>
+            {!isExternal && <MenuItem isDanger to={`/account/export/${address}`}>Export Account</MenuItem>}
+            <MenuItem isDanger to={`/account/forget/${address}`}>Forget Account</MenuItem>
+          </>
+        )}
+      >
+        {isEditing && (
+          <Name
+            address={address}
+            className='edit-name'
+            isFocussed
+            label={' '}
+            onBlur={_saveChanges}
+            onChange={setName}
+          />
+        )}
+      </Address>
+    </div>
+  );
 }
 
 const MenuGroup = styled.div`

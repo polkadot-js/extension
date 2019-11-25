@@ -43,12 +43,12 @@ export default function CreateAccount (): React.ReactElement {
 
   return (
     <>
-      <Header/>
-      <CreationStep step={step} onClick={_onCancel}/>
+      <Header />
+      <CreationStep step={step} onClick={_onCancel} />
       <Loading>{account && (step === 1 ? (
-        <Mnemonic seed={account.seed} onNextStep={_onNextStep}/>
+        <Mnemonic seed={account.seed} onNextStep={_onNextStep} />
       ) : (
-        <AccountName address={account.address} onCreate={_onCreate}/>
+        <AccountName address={account.address} onCreate={_onCreate} />
       ))}</Loading>
     </>
   );

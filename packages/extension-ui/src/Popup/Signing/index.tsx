@@ -19,7 +19,7 @@ export default function Signing (): React.ReactElement<{}> {
 
   return requests[requestIndex] ? (
     <>
-      <Header/>
+      <Header />
       <TransactionIndex
         index={requestIndex}
         totalItems={requests.length}
@@ -33,5 +33,5 @@ export default function Signing (): React.ReactElement<{}> {
         url={requests[requestIndex].url}
       />
     </>
-  ) : <Loading/>;
+  ) : <Loading />;
 }

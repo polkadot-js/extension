@@ -14,13 +14,19 @@ interface Props {
 }
 
 function Checkbox ({ onChange, label, className, checked }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    <label>
-      {label}
-      <input type="checkbox" checked={checked} onChange={((event): void => onChange(event.target.checked))}/>
-      <span/>
-    </label>
-  </div>;
+  return (
+    <div className={className}>
+      <label>
+        {label}
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={((event): void => onChange(event.target.checked))}
+        />
+        <span />
+      </label>
+    </div>
+  );
 }
 
 export default styled(Checkbox)`

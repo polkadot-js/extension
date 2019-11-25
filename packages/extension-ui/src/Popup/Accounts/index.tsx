@@ -26,10 +26,10 @@ export default function Accounts (): React.ReactElement<Props> {
   const mediaAllowed = useContext(MediaContext);
   return (
     <>
-      <Header showSettings/>
+      <Header showSettings />
       {
         (accounts.length === 0)
-          ? <AddAccount/>
+          ? <AddAccount />
           : (
             <AccountsArea>
               <>
@@ -39,18 +39,27 @@ export default function Accounts (): React.ReactElement<Props> {
                     <Account
                       {...json}
                       key={`${index}:${json.address}`}
-                    />))
+                    />
+                  ))
                 }
               </>
             </AccountsArea>
           )
       }
       <ButtonArea>
-        <ButtonWithSubtitle to='/account/create' title='Create New Account' subTitle='With new seed'/>
-        <ButtonWithSubtitle to='/account/import-seed' title='Import an Account' subTitle='I have a pre-existing seed'/>
+        <ButtonWithSubtitle
+          to='/account/create'
+          title='Create New Account'
+          subTitle='With new seed'
+        />
+        <ButtonWithSubtitle
+          to='/account/import-seed'
+          title='Import an Account'
+          subTitle='I have a pre-existing seed'
+        />
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>
-            <Svg src={QrImage}/>
+            <Svg src={QrImage} />
           </QrButton>
         )}
       </ButtonArea>

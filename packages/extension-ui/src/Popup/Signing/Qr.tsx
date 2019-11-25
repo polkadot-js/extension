@@ -33,11 +33,13 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
     <div className={className}>
       {isScanning
         ? <QrScanSignature onScan={onSignature} />
-        : <QrDisplayPayload
-          address={request.address}
-          cmd={CMD_MORTAL}
-          payload={payloadU8a}
-        />
+        : (
+          <QrDisplayPayload
+            address={request.address}
+            cmd={CMD_MORTAL}
+            payload={payloadU8a}
+          />
+        )
       }
       {!isScanning && (
         <Button onClick={_onShowQr}>Scan signature via camera</Button>

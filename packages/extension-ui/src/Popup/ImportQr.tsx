@@ -27,9 +27,9 @@ export default function ImportQr (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header/>
+      <Header />
       <TitleWithAction title='Import account from QR code'>
-        <ActionText text='Cancel' onClick={(): void => onAction('/')}/>
+        <ActionText text='Cancel' onClick={(): void => onAction('/')} />
       </TitleWithAction>
       {!account && (
         <div>
@@ -46,7 +46,7 @@ export default function ImportQr (): React.ReactElement<Props> {
             {...account}
             name={name}
           />
-          <VerticalSpace/>
+          <VerticalSpace />
           {name && (
             <ButtonArea>
               <Button onClick={_onCreate}>

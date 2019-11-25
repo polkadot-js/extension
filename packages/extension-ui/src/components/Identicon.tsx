@@ -13,14 +13,16 @@ interface Props {
 }
 
 function Identicon ({ iconTheme, className, value }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    <Icon
-      className='icon'
-      size={64}
-      theme={iconTheme}
-      value={value}
-    />
-  </div>;
+  return (
+    <div className={className}>
+      <Icon
+        className='icon'
+        size={64}
+        theme={iconTheme}
+        value={value}
+      />
+    </div>
+  );
 }
 
 export default styled(Identicon)`

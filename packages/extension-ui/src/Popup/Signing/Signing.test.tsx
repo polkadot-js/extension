@@ -53,7 +53,7 @@ describe('Signing requests', () => {
 
     return (
       <SigningContext.Provider value={requests}>
-        <Signing/>
+        <Signing />
       </SigningContext.Provider>
     );
   }
@@ -62,7 +62,7 @@ describe('Signing requests', () => {
       <ActionContext.Provider value={onActionStub}>
         <AccountContext.Provider value={accounts}>
           <ThemeProvider theme={defaultTheme}>
-            <MockRequestsProvider/>
+            <MockRequestsProvider />
           </ThemeProvider>
         </AccountContext.Provider>
       </ActionContext.Provider>

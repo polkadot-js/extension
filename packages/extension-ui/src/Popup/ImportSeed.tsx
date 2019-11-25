@@ -43,9 +43,9 @@ export default function Import (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header/>
+      <Header />
       <TitleWithAction title='Import account'>
-        <ActionText text='Cancel' onClick={(): void => onAction('/')}/>
+        <ActionText text='Cancel' onClick={(): void => onAction('/')} />
       </TitleWithAction>
       <SeedInput
         rowsCount={2}
@@ -62,7 +62,7 @@ export default function Import (): React.ReactElement<Props> {
             address={account.address}
             name={name}
           />
-          <VerticalSpace/>
+          <VerticalSpace />
           <ButtonArea>
             <Button onClick={_onCreate}>Add the account with the supplied seed</Button>
           </ButtonArea>

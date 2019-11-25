@@ -19,8 +19,8 @@ export default function Welcome (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header/>
-      <WelcomeLabel/>
+      <Header />
+      <WelcomeLabel />
       <Note>Before we start, just a couple of notes regarding use:</Note>
       <TextBox>
         <List>
@@ -30,7 +30,7 @@ export default function Welcome (): React.ReactElement<Props> {
         </List>
       </TextBox>
       <Note>... we are not in the information collection business (even anonymized).</Note>
-      <VerticalSpace/>
+      <VerticalSpace />
       <ButtonArea>
         <Button onClick={_onClick}>Understood, let me continue</Button>
       </ButtonArea>

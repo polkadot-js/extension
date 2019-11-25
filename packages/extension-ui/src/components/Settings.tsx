@@ -55,7 +55,11 @@ export default function Settings (): React.ReactElement {
     <SettingsMenu>
       <Setting>
         <SettingTitle>External QR accounts and Access</SettingTitle>
-        <CheckboxSetting checked={camera} onChange={setCamera} label='Allow Camera Access' />
+        <CheckboxSetting
+          checked={camera}
+          onChange={setCamera}
+          label='Allow Camera Access'
+        />
       </Setting>
       <Setting>
         <SettingTitle>Display address format For:</SettingTitle>

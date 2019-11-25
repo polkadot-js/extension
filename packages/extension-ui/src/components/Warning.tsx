@@ -14,14 +14,16 @@ interface Props {
 }
 
 function Warning ({ children, className, danger }: Props): React.ReactElement<Props> {
-  return <div className={className}>
-    <div>
-      <WarningImage danger={danger} src={WarningImageSrc}/>
+  return (
+    <div className={className}>
+      <div>
+        <WarningImage danger={danger} src={WarningImageSrc} />
+      </div>
+      <div>
+        {children}
+      </div>
     </div>
-    <div>
-      {children}
-    </div>
-  </div>;
+  );
 }
 
 const WarningImage = styled(Svg)<Pick<Props, 'danger'>>`

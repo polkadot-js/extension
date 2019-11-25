@@ -15,29 +15,31 @@ function AccountName ({ onCreate, address }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  return <>
-    <Name
-      isFocussed
-      onChange={setName}
-    />
-    {name && <Password onChange={setPassword} />}
-    {name && password && (
-      <>
-        <Address
-          address={address}
-          name={name}
-        />
-        <VerticalSpace/>
-        <ButtonArea>
-          <Button
-            onClick={(): void | Promise<void | boolean> => onCreate(name, password)}
-          >
+  return (
+    <>
+      <Name
+        isFocussed
+        onChange={setName}
+      />
+      {name && <Password onChange={setPassword} />}
+      {name && password && (
+        <>
+          <Address
+            address={address}
+            name={name}
+          />
+          <VerticalSpace />
+          <ButtonArea>
+            <Button
+              onClick={(): void | Promise<void | boolean> => onCreate(name, password)}
+            >
             Add the account with the generated seed
-          </Button>
-        </ButtonArea>
-      </>
-    )}
-  </>;
+            </Button>
+          </ButtonArea>
+        </>
+      )}
+    </>
+  );
 }
 
 export default AccountName;

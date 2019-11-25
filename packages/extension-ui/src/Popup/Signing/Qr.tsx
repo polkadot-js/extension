@@ -40,10 +40,7 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
         />
       }
       {!isScanning && (
-        <Button
-          label='Scan signature via camera'
-          onClick={_onShowQr}
-        />
+        <Button onClick={_onShowQr}>Scan signature via camera</Button>
       )}
     </div>
   );

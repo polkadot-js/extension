@@ -53,11 +53,12 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
             <Button
               isDisabled={pass.length === 0}
               isDanger
-              label='I want to export this account'
               onClick={_onExportButtonClick}
               className='export-button'
               data-export-button
-            />
+            >
+              I want to export this account
+            </Button>
           </ActionArea>
         </Address>
       </div>

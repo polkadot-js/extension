@@ -64,10 +64,7 @@ export default function Import (): React.ReactElement<Props> {
           />
           <VerticalSpace/>
           <ButtonArea>
-            <Button
-              label='Add the account with the supplied seed'
-              onClick={_onCreate}
-            />
+            <Button onClick={_onCreate}>Add the account with the supplied seed</Button>
           </ButtonArea>
         </>
       )}
@@ -77,8 +74,8 @@ export default function Import (): React.ReactElement<Props> {
 
 const SeedInput = styled(TextAreaWithLabel)`
   margin-bottom: 16px;
-  
+
   textarea {
-    height: unset;  
+    height: unset;
   }
 `;

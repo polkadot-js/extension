@@ -61,10 +61,7 @@ export default function Settings (): React.ReactElement<{}> {
         value={camera}
       />
       {isPopup && (
-        <Button
-          label='Open extension in new window'
-          onClick={windowOpen}
-        />
+        <Button onClick={windowOpen}>Open extension in new window</Button>
       )}
     </div>
   );

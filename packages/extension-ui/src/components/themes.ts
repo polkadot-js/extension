@@ -7,6 +7,7 @@ export const defaultTheme = {
   highlightedAreaBackground: 'rgba(13, 14, 19, 0.7)',
   buttonBackground: 'linear-gradient(95.52deg, #FF8A00 0.14%, #FF7A00 100.14%)',
   buttonBackgroundDanger: '#D92A2A',
+  buttonBackgroundDangerHover: '#D93B3B',
   textColor: '#FFFFFF',
   textColorDanger: '#FF5858',
   errorBorderColor: '#7E3530',

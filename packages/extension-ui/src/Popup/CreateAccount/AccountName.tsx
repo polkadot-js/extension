@@ -30,9 +30,10 @@ function AccountName ({ onCreate, address }: Props): React.ReactElement<Props> {
         <VerticalSpace/>
         <ButtonArea>
           <Button
-            label='Add the account with the generated seed'
             onClick={(): void | Promise<void | boolean> => onCreate(name, password)}
-          />
+          >
+            Add the account with the generated seed
+          </Button>
         </ButtonArea>
       </>
     )}

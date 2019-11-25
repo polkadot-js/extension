@@ -39,10 +39,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
         {isFirst && (
           <>
             <RequestWarning>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</RequestWarning>
-            <AcceptButton
-              label='Yes, allow this application access'
-              onClick={_onApprove}
-            />
+            <AcceptButton onClick={_onApprove}>Yes, allow this application access</AcceptButton>
           </>
         )}
         <RejectButton>
@@ -67,9 +64,8 @@ const Info = styled.div`
 `;
 
 const AcceptButton = styled(Button)`
-  padding-top: 25px;
   width: 90%;
-  margin: auto;
+  margin: 25px auto 0;
 `;
 
 const RequestWarning = styled(Warning)`

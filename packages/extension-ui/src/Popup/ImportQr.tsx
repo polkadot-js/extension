@@ -49,10 +49,9 @@ export default function ImportQr (): React.ReactElement<Props> {
           <VerticalSpace/>
           {name && (
             <ButtonArea>
-              <Button
-                label='Add the account with identified address'
-                onClick={_onCreate}
-              />
+              <Button onClick={_onCreate}>
+                Add the account with identified address
+              </Button>
             </ButtonArea>
           )}
         </>

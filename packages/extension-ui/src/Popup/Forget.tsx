@@ -27,18 +27,21 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
       <div>
         <Address address={address}>
           <Warning danger>You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.</Warning>
-          <ForgetButton
-            isDanger
-            label='I want to forget this account'
-            onClick={_onClick}
-          />
+          <ActionArea>
+            <Button
+              isDanger
+              onClick={_onClick}
+            >
+              I want to forget this account
+            </Button>
+          </ActionArea>
         </Address>
       </div>
     </>
   );
 }
 
-const ForgetButton = styled(Button)`
+const ActionArea = styled.div`
   padding: 25px 24px;
 `;
 

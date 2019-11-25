@@ -4,6 +4,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import Checkmark from '../assets/checkmark.svg';
 
 interface Props {
   checked: boolean;
@@ -49,26 +50,25 @@ export default styled(Checkbox)`
       height: 16px;
       width: 16px;
       border-radius: ${({ theme }): string => theme.borderRadius};
-      background-color: ${({ theme }): string => theme.inputBackground};
+      background-color: ${({ theme }): string => theme.readonlyInputBackground};
       border: 1px solid ${({ theme }): string => theme.inputBorderColor};
-
+      border: 1px solid ${({ theme }): string => theme.inputBorderColor};
       &:after {
-        content: "✓";
+        content: "";
         display: none;
-        left: 3px;
-        top: -4px;
+        width: 13px;
+        height: 10px;
         position: absolute;
-        color: ${({ theme }): string => theme.textColor};
-        font-size: 14px;
+        left: 1px;
+        top: 2px;
+        mask: url(${Checkmark});
+        mask-size: cover;
+        background: ${({ theme }): string => theme.primaryColor};
       }
     }
 
     &:hover input ~ span {
-      background-color: ${({ theme }): string => theme.labelColor};
-    }
-
-    input:checked ~ span {
-      background-color: ${({ theme }): string => theme.primaryColor};
+      background-color: ${({ theme }): string => theme.inputBackground};
     }
 
     input:checked ~ span:after {

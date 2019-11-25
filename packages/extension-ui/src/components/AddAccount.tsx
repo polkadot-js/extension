@@ -2,20 +2,23 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import addAccountImage from '../assets/addAccount.png';
+import { ActionContext } from '@polkadot/extension-ui/components/contexts';
 
 interface Props {
   className?: string;
 }
 
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
+
   return (
     <div className={className}>
-      <Image src={addAccountImage} alt="add account" onClick={(): void => { window.location.hash = '/account/create'; }}/>
+      <Image src={addAccountImage} alt="add account" onClick={(): void => onAction('/account/create')}/>
       <div>
-        <h3>add accounts</h3>
+        <h3>Add Account</h3>
         <TipText>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</TipText>
       </div>
     </div>

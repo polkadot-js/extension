@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 export const defaultTheme = {
-  background: 'rgba(13, 14, 19, 0.9)',
-  highlightedAreaBackground: 'rgba(13, 14, 19, 0.7)',
+  background: '#14151A',
+  highlightedAreaBackground: '#0B0C10',
   buttonBackground: 'linear-gradient(95.52deg, #FF8A00 0.14%, #FF7A00 100.14%)',
   buttonBackgroundDanger: '#D92A2A',
   buttonBackgroundDangerHover: '#D93B3B',
@@ -13,9 +13,10 @@ export const defaultTheme = {
   errorBorderColor: '#7E3530',
   errorColor: '#E42F2F',
   primaryColor: '#FF7D01',
-  inputBackground: 'rgba(13, 14, 19, 0.9)',
+  inputBackground: '#0B0C10',
   inputBorderColor: '#303030',
   readonlyInputBackground: '#000000',
+  boxBorderColor: '#222222',
   iconWarningColor: '#FF7D01',
   iconDangerColor: '#FF5858',
   iconNeutralColor: '#8E8E8E',

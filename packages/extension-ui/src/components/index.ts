@@ -9,6 +9,7 @@ export { default as Address } from './Address';
 export { default as Box } from './Box';
 export { default as Button } from './Button';
 export { default as ButtonArea } from './ButtonArea';
+export { default as ButtonWithSubtitle } from './ButtonWithSubtitle';
 export { default as Checkbox } from './Checkbox';
 export { default as Dropdown } from './Dropdown';
 export { default as Fonts } from './Fonts';
@@ -29,7 +30,6 @@ export { default as Title } from './Title';
 export { default as VerticalSpace } from './VerticalSpace';
 export { default as View } from './View';
 export { default as Warning } from './Warning';
-export { default as ButtonWithSubtitle } from './ButtonWithSubtitle';
 
 export { Input, TextArea } from './TextInputs';
 

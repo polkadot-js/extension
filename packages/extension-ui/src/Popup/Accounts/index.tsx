@@ -27,22 +27,26 @@ export default function Accounts (): React.ReactElement<Props> {
   return (
     <>
       <Header showSettings/>
-      <Title>Accounts</Title>
       {
         (accounts.length === 0)
           ? <AddAccount/>
-          : <AccountsArea>
-            {
-              accounts.map((json, index): React.ReactNode => (
-                <Account
-                  {...json}
-                  key={`${index}:${json.address}`}
-                />))
-            }
-          </AccountsArea>
+          : (
+            <AccountsArea>
+              <>
+                <Title>Accounts</Title>
+                {
+                  accounts.map((json, index): React.ReactNode => (
+                    <Account
+                      {...json}
+                      key={`${index}:${json.address}`}
+                    />))
+                }
+              </>
+            </AccountsArea>
+          )
       }
       <ButtonArea>
-        <ButtonWithSubtitle to='/account/create' title='Create New Accoun' subTitle='With new seed'/>
+        <ButtonWithSubtitle to='/account/create' title='Create New Account' subTitle='With new seed'/>
         <ButtonWithSubtitle to='/account/import-seed' title='Import an Account' subTitle='I have a pre-existing seed'/>
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>

@@ -99,7 +99,7 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   </div>;
 }
 
-const AccountInfoRow = styled.div`
+export const AccountInfoRow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -148,7 +148,7 @@ const Settings = styled.div`
     top: 25%;
     bottom: 25%;
     width: 1px;
-    background: ${({ theme }): string => theme.inputBorderColor};
+    background: ${({ theme }): string => theme.boxBorderColor};
   }
 
   &:hover {

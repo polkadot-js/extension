@@ -21,13 +21,14 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 export default styled(View)`
   display: flex;
   flex-direction: column;
+  height: 100%;
   background: ${({ theme }): string => theme.background};
   color: ${({ theme }): string => theme.textColor};
   font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
-  height: 100%;
-  
+  border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+
   > * {
     padding-left: 24px;
     padding-right: 24px;

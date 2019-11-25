@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { ActionContext, Address, Link } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
+import { AccountInfoRow } from '../../components/Address';
 
 interface Props extends AccountJson {
   address: string;
@@ -63,7 +64,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
 const MenuGroup = styled.div`
   padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid #222222;
+  border-bottom: 1px solid ${({ theme }): string => theme.boxBorderColor};
 `;
 
 const MenuItem = styled(Link)`
@@ -78,6 +79,12 @@ const MenuItem = styled(Link)`
 MenuItem.displayName = 'MenuItem';
 
 export default styled(Account)`
+  ${AccountInfoRow} {
+    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
+    box-sizing: border-box;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+  }
+  
   .edit-name {
     position: absolute;
     left: 73px;

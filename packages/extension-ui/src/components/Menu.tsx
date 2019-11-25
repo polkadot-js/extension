@@ -23,9 +23,8 @@ export default styled(Menu)`
   padding: 16px 0;
   background: ${({ theme }): string => theme.highlightedAreaBackground};
   border-radius: 4px;
-  border: 1px solid #222222;
+  border: 1px solid ${({ theme }): string => theme.boxBorderColor};
   box-sizing: border-box;
   box-shadow: 0 0 32px rgba(0, 0, 0, 0.86);
-  backdrop-filter: blur(10px);
   z-index: 1;
 `;

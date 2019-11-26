@@ -13,46 +13,40 @@ import edgeware from './edgeware';
 import kusamaCC2 from './kusama-cc2';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, edgeware, kusamaCC2].map(
-    ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
-      let metadata: Metadata | undefined;
-      const registry = new TypeRegistry();
+  [alexander, edgeware, kusamaCC2].map(({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
+    let metadata: Metadata | undefined;
+    const registry = new TypeRegistry();
 
-      registry.register(types || {});
+    registry.register(types || {});
 
-      if (metaCalls) {
-        metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
-      }
+    if (metaCalls) {
+      metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
+    }
 
-      return [
-        genesisHash,
-        {
-          genesisHash,
-          hasMetadata: !!metadata,
-          icon,
-          name: chain,
-          registry,
-          specVersion,
-          ss58Format,
-          tokenDecimals,
-          tokenSymbol
-        }
-      ];
-    })
-  )
+    return [genesisHash, {
+      genesisHash,
+      hasMetadata: !!metadata,
+      icon,
+      name: chain,
+      registry,
+      specVersion,
+      ss58Format,
+      tokenDecimals,
+      tokenSymbol
+    }];
+  })
 );
 
 const UNKNOWN_CHAIN: Chain = {
+  hasMetadata: false,
   icon: 'polkadot',
   isUnknown: true,
   name: 'Unknown chain',
+  registry: new TypeRegistry(),
   specVersion: 0,
   ss58Format: 42,
   tokenDecimals: 0,
-  tokenSymbol: 'UNIT',
-  types: {
-    Keys: 'SessionKeysSubstrate'
-  }
+  tokenSymbol: 'UNIT'
 };
 
 export default function findChain (genesisHash?: string | null): Chain {

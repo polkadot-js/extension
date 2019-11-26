@@ -7,6 +7,7 @@ import { AccountJson, RequestExtrinsicSign } from '@polkadot/extension/backgroun
 
 import React, { useContext, useState, useEffect } from 'react';
 import { createType } from '@polkadot/types';
+import registry from '@polkadot/extension/registry';
 
 import { ActionBar, ActionContext, Address, Link } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
@@ -27,7 +28,7 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
   const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
 
   useEffect((): void => {
-    setPayload(createType('ExtrinsicPayload', request, { version: request.version }));
+    setPayload(createType(registry, 'ExtrinsicPayload', request, { version: request.version }));
   }, [request]);
 
   if (!payload) {

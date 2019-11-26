@@ -2,7 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Metadata } from '@polkadot/types';
 import { Chain } from './types';
 
 // imports chain details, generally metadata. For the generation of these,
@@ -18,8 +17,8 @@ const chains: Map<string, Chain> = new Map(
       {
         genesisHash,
         icon,
-        meta: metaCalls
-          ? new Metadata(Buffer.from(metaCalls, 'base64'))
+        metaRaw: metaCalls
+          ? Buffer.from(metaCalls, 'base64')
           : undefined,
         name: chain,
         specVersion,

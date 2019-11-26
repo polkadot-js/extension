@@ -12,6 +12,7 @@ import { createType } from '@polkadot/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import registry from '../../registry';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -160,7 +161,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
 
-    const payload = createType('ExtrinsicPayload', request, { version: request.version });
+    const payload = createType(registry, 'ExtrinsicPayload', request, { version: request.version });
     const result = payload.sign(pair);
 
     pair.lock();

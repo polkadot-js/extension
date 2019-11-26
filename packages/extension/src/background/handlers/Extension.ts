@@ -8,16 +8,18 @@ import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateExtern
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
-import { createType } from '@polkadot/types';
+import { TypeRegistry, createType } from '@polkadot/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import registry from '../../registry';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
+
+// a global registry to use internally
+const registry = new TypeRegistry();
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
   return Object.values(accounts).map(({ json: { address, meta } }): AccountJson => ({

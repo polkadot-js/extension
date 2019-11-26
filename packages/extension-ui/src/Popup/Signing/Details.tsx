@@ -10,7 +10,7 @@ import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
-import { GenericCall, getTypeRegistry } from '@polkadot/types';
+import { GenericCall } from '@polkadot/types';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
 interface Decoded {
@@ -35,11 +35,8 @@ function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersi
   let method: GenericCall | null = null;
 
   try {
-    if (isDecoded && chain.meta && specVersion.eqn(chain.specVersion)) {
-      getTypeRegistry().register(chain.types);
-      GenericCall.injectMetadata(chain.meta);
-
-      method = new GenericCall(data);
+    if (isDecoded && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
+      method = new GenericCall(chain.registry, data);
       json = method.toJSON() as unknown as MethodJson;
     }
   } catch (error) {

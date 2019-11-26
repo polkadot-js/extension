@@ -9,14 +9,12 @@ import { SignerPayloadJSON } from '@polkadot/types/types';
 import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import registry from '@polkadot/extension/registry';
 import findChain from '@polkadot/extension-chains';
-import { GenericCall, Metadata } from '@polkadot/types';
+import { GenericCall } from '@polkadot/types';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
 interface Decoded {
   json: MethodJson | null;
-  metadata: Metadata | null;
   method: GenericCall | null;
 }
 
@@ -34,28 +32,19 @@ interface Props {
 
 function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersion: BN): Decoded {
   let json: MethodJson | null = null;
-  let metadata: Metadata | null = null;
   let method: GenericCall | null = null;
 
   try {
-    if (isDecoded && chain.metaRaw && specVersion.eqn(chain.specVersion)) {
-      // register the types for this chain
-      registry.register(chain.types);
-
-      // inject the metadata, this needs to be before the Call
-      metadata = new Metadata(registry, chain.metaRaw);
-
-      // get the method and the actual JSON data for it
-      method = new GenericCall(registry, data);
+    if (isDecoded && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
+      method = new GenericCall(chain.registry, data);
       json = method.toJSON() as unknown as MethodJson;
     }
   } catch (error) {
     json = null;
-    metadata = null;
     method = null;
   }
 
-  return { json, metadata, method };
+  return { json, method };
 }
 
 function renderMethod (data: string, { json, method }: Decoded): React.ReactNode {
@@ -106,7 +95,7 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string): string {
 function Details ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const chain = useRef(findChain(genesisHash)).current;
   const specVersion = useRef(bnToBn(hexSpec)).current;
-  const [decoded, setDecoded] = useState<Decoded>({ json: null, metadata: null, method: null });
+  const [decoded, setDecoded] = useState<Decoded>({ json: null, method: null });
 
   useEffect((): void => {
     setDecoded(decodeMethod(method, isDecoded, chain, specVersion));

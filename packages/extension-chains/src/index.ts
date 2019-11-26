@@ -4,6 +4,8 @@
 
 import { Chain } from './types';
 
+import { Metadata, TypeRegistry } from '@polkadot/types';
+
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
 import alexander from './alexander';
@@ -12,22 +14,31 @@ import kusamaCC2 from './kusama-cc2';
 
 const chains: Map<string, Chain> = new Map(
   [alexander, edgeware, kusamaCC2].map(
-    ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => [
-      genesisHash,
-      {
-        genesisHash,
-        icon,
-        metaRaw: metaCalls
-          ? Buffer.from(metaCalls, 'base64')
-          : undefined,
-        name: chain,
-        specVersion,
-        ss58Format,
-        tokenDecimals,
-        tokenSymbol,
-        types: types || {}
+    ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
+      let metadata: Metadata | undefined;
+      const registry = new TypeRegistry();
+
+      registry.register(types || {});
+
+      if (metaCalls) {
+        metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
       }
-    ]
+
+      return [
+        genesisHash,
+        {
+          genesisHash,
+          hasMetadata: !!metadata,
+          icon,
+          name: chain,
+          registry,
+          specVersion,
+          ss58Format,
+          tokenDecimals,
+          tokenSymbol
+        }
+      ];
+    })
   )
 );
 

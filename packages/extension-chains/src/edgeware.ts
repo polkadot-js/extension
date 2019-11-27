@@ -18,7 +18,7 @@ export default {
   tokenDecimals: 18,
   tokenSymbol: 'EDG',
   types: {
-    Keys: 'SessionKeysSubstrate',
+    Keys: 'SessionKeys3',
     ...IdentityTypes,
     ...SignalingTypes,
     ...TreasuryRewardTypes,

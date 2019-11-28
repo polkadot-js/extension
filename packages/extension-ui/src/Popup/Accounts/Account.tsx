@@ -84,7 +84,6 @@ export default styled(Account)`
   ${AccountInfoRow} {
     border: 1px solid ${({ theme }): string => theme.boxBorderColor};
     box-sizing: border-box;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
   }
   
   .edit-name {

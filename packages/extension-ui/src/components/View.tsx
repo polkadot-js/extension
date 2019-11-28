@@ -36,10 +36,13 @@ const Main = styled.main`
   height: 100%;
   background: ${({ theme }): string => theme.background};
   color: ${({ theme }): string => theme.textColor};
-  font-family: ${({ theme }): string => theme.fontFamily};
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
   border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+  
+  * {
+    font-family: ${({ theme }): string => theme.fontFamily};
+  }
 
   > * {
     padding-left: 24px;

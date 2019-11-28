@@ -25,7 +25,7 @@ describe('Authorize', () => {
   it('render component', () => {
     const wrapper = mountAuthorize();
 
-    expect(wrapper.find(Header).text()).toBe('polkadot');
+    expect(wrapper.find(Header).text()).toBe('polkadot{.js}');
     expect(wrapper.find(Request).length).toBe(0);
   });
 

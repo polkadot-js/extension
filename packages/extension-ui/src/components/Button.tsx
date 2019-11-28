@@ -47,7 +47,7 @@ export default styled(Button)`
   border-radius: ${({ theme }): string => theme.borderRadius};
   color: ${({ theme }): string => theme.buttonTextColor};
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 800;
   line-height: 20px;
   padding: 0 1rem;
   text-align: center;
@@ -60,6 +60,6 @@ export default styled(Button)`
   }
 
   &:not(:disabled):hover {
-    background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDangerHover : theme.primaryColor};
+    background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
   }
 `;

@@ -124,7 +124,7 @@ const Name = styled.div`
 `;
 
 const FullAddress = styled.div`
-  width: 214px;
+  width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }): string => theme.labelColor};
@@ -143,6 +143,7 @@ const Settings = styled.div`
   & ${Svg} {
     width: 3px;
     height: 19px;
+    background: ${({ theme }): string => theme.accountDotsIconColor};
   }
 
   &:before {

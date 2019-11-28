@@ -24,7 +24,7 @@ const TextInput = css<Props>`
   border-radius: ${({ theme }): string => theme.borderRadius};
   border: ${({ theme }): string => `1px solid ${theme.inputBorderColor}`};
   outline: none;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 40px ${({ theme }): string => theme.boxShadow};
   box-sizing: border-box;
   display: block;
   font-family: ${({ theme }): string => theme.fontFamily};

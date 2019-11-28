@@ -74,6 +74,7 @@ export default styled(Dropdown)`
     display: block;
     font-family: ${({ theme }): string => theme.fontFamily};
     font-size: ${({ theme }): string => theme.fontSize};
+    font-weight: 600;
     padding: 0.5rem 0.75rem;
     width: 100%;
     cursor: pointer;

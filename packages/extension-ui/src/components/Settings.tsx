@@ -100,6 +100,7 @@ export default function Settings (): React.ReactElement {
 const SettingsMenu = styled(Menu)`
   margin-top: 56px;
   right: 30px;
+  user-select: none;
 `;
 
 const CheckboxSetting = styled(Checkbox)`

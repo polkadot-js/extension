@@ -31,5 +31,12 @@ export default styled(Identicon)`
     
   .container:before {
     box-shadow: none;
+    background: ${({ theme }): string => theme.identiconBackground};
   }
+  
+  svg {
+    circle:first-of-type {
+      display: none;
+    }
+  } 
 `;

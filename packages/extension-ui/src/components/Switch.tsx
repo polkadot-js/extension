@@ -70,4 +70,8 @@ export default styled(Switch)`
     height: 24px;
     margin: 8px;
   }
+  
+  span {
+    font-weight: 600;
+  }
 `;

@@ -28,7 +28,7 @@ function Header ({ children, className, showSettings }: Props): React.ReactEleme
         {showSettings && <Space />}
         <Branding>
           <Logo src={logo} />
-          <LogoText>polkadot</LogoText>
+          <LogoText>{'polkadot{.js}'}</LogoText>
         </Branding>
         {showSettings && (
           <SettingsToggle onClick={(): void => setShowActionsMenu(!showActionsMenu)}>

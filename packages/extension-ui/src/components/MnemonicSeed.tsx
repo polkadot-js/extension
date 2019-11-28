@@ -48,6 +48,7 @@ const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
     height: unset;
     letter-spacing: -0.01em;
     padding: 14px;
+    margin-bottom: 10px;
     color: ${({ theme }): string => theme.primaryColor};
   }
 `;

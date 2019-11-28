@@ -9,6 +9,7 @@ export default styled.div`
   display: flex;
   flex-direction: row;
   background: ${({ theme }): string => theme.highlightedAreaBackground};
+  border-top: 1px solid ${({ theme }): string => theme.inputBorderColor};
   padding: 12px 24px;
 
   &&& {

@@ -45,7 +45,7 @@ export default styled(Button)`
   box-sizing: border-box;
   border: none;
   border-radius: ${({ theme }): string => theme.borderRadius};
-  color: ${({ theme }): string => theme.textColor};
+  color: ${({ theme }): string => theme.buttonTextColor};
   font-size: 15px;
   font-weight: 600;
   line-height: 20px;

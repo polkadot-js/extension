@@ -13,7 +13,7 @@ import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
 import {
   AccountContext,
   ActionContext,
-  defaultTheme,
+  themes,
   SigningContext,
   Address,
   Input,
@@ -61,7 +61,7 @@ describe('Signing requests', () => {
     wrapper = mount(
       <ActionContext.Provider value={onActionStub}>
         <AccountContext.Provider value={accounts}>
-          <ThemeProvider theme={defaultTheme}>
+          <ThemeProvider theme={themes.dark}>
             <MockRequestsProvider />
           </ThemeProvider>
         </AccountContext.Provider>

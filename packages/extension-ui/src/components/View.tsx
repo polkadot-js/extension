@@ -2,8 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
+import styled, { ThemeProvider } from 'styled-components';
+import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -11,14 +12,25 @@ interface Props {
 }
 
 function View ({ children, className }: Props): React.ReactElement<Props> {
+  const [theme, setTheme] = useState(chooseTheme());
+
+  const switchTheme = (theme: AvailableThemes): void => {
+    localStorage.setItem('theme', theme);
+    setTheme(theme);
+  };
+
   return (
-    <main className={className}>
-      {children}
-    </main>
+    <ThemeSwitchContext.Provider value={switchTheme}>
+      <ThemeProvider theme={themes[theme]}>
+        <Main className={className}>
+          {children}
+        </Main>
+      </ThemeProvider>
+    </ThemeSwitchContext.Provider>
   );
 }
 
-export default styled(View)`
+const Main = styled.main`
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -34,3 +46,5 @@ export default styled(View)`
     padding-right: 24px;
   }
 `;
+
+export default View;

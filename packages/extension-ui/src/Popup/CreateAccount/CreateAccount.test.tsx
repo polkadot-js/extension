@@ -14,7 +14,7 @@ import {
   ActionContext,
   ActionText,
   Button,
-  defaultTheme,
+  themes,
   Input,
   InputWithLabel
 } from '@polkadot/extension-ui/components';
@@ -32,7 +32,7 @@ describe('Create Account', () => {
   };
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider theme={themes.dark}>
         <CreateAccount />
       </ThemeProvider>
     </ActionContext.Provider>

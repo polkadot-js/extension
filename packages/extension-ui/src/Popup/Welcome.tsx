@@ -49,9 +49,11 @@ const WelcomeLabel = styled.div.attrs(() => ({
 const Note = styled.p`
   margin-bottom: 6px;
   margin-top: 0;
+  color: ${({ theme }): string => theme.subTextColor};
 `;
 
 const TextBox = styled(Box)`
   margin: 0.75rem 24px;
   border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+  color: ${({ theme }): string => theme.subTextColor};
 `;

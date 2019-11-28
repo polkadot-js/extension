@@ -93,13 +93,15 @@ export default styled(Request)`
 
   .icon {
     background: ${({ theme }): string => theme.buttonBackgroundDanger};
-    color: ${({ theme }): string => theme.textColor};
+    color: white;
     min-width: 18px;
-    width: 18px;
+    width: 14px;
     height: 18px;
-    font-size: 14px;
+    font-size: 10px;
     line-height: 20px;
-    margin: 24px 15px 0 1.35rem;
+    margin: 16px 15px 0 1.35rem;
+    font-weight: 800;
+    padding-left: 0.5px;
   }
 
   .tab-info {

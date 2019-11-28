@@ -2,15 +2,18 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Menu from './Menu';
 import Title from './Title';
 import Checkbox from './Checkbox';
 import ActionText from './ActionText';
 import Svg from './Svg';
+import Switch from './Switch';
+import { themes } from './themes';
+import { ThemeSwitchContext } from './contexts';
 import { setSS58Format } from '@polkadot/util-crypto';
 import settings from '@polkadot/ui-settings';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 import Dropdown from './Dropdown';
 import { windowOpen } from '../messaging';
 import FullScreenIcon from '../assets/fullscreen.svg';
@@ -31,6 +34,8 @@ const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option =
 export default function Settings (): React.ReactElement {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
+  const themeContext = useContext(ThemeContext);
+  const setTheme = useContext(ThemeSwitchContext);
 
   useEffect(() => {
     if (camera) {
@@ -53,6 +58,15 @@ export default function Settings (): React.ReactElement {
 
   return (
     <SettingsMenu>
+      <Setting>
+        <SettingTitle>Theme</SettingTitle>
+        <Switch
+          checked={themeContext.id === themes.dark.id}
+          uncheckedLabel='Light'
+          checkedLabel='Dark'
+          onChange={(checked): void => setTheme(checked ? 'dark' : 'light')}
+        />
+      </Setting>
       <Setting>
         <SettingTitle>External QR accounts and Access</SettingTitle>
         <CheckboxSetting

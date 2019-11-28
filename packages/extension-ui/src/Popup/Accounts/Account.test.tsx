@@ -4,7 +4,7 @@
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { defaultTheme, Theme } from '@polkadot/extension-ui/components';
+import { themes, Theme } from '@polkadot/extension-ui/components';
 import { MemoryRouter } from 'react-router';
 import React from 'react';
 
@@ -17,7 +17,7 @@ describe('Account component', () => {
   let wrapper: ReactWrapper;
   const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mountAccountComponent = (additionalAccountProperties: any, theme: Theme = defaultTheme): ReactWrapper => mount(
+  const mountAccountComponent = (additionalAccountProperties: any, theme: Theme = themes.dark): ReactWrapper => mount(
     <MemoryRouter>
       <ThemeProvider theme={theme}>
         <Account

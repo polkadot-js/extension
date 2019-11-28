@@ -6,7 +6,7 @@ import React from 'react';
 import Adapter from 'enzyme-adapter-react-16';
 
 import { ThemeProvider } from 'styled-components';
-import { AuthorizeContext, defaultTheme, Header, Icon } from '@polkadot/extension-ui/components';
+import { AuthorizeContext, themes, Header, Icon } from '@polkadot/extension-ui/components';
 import Authorize from '.';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { AuthorizeRequest } from '@polkadot/extension/background/types';
@@ -17,7 +17,7 @@ configure({ adapter: new Adapter() });
 describe('Authorize', () => {
   const mountAuthorize = (authorizeRequests: AuthorizeRequest[] = []): ReactWrapper => mount(
     <AuthorizeContext.Provider value={authorizeRequests}>
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider theme={themes.dark}>
         <Authorize />
       </ThemeProvider>
     </AuthorizeContext.Provider>);

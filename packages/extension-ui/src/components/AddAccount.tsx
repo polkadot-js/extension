@@ -4,8 +4,8 @@
 
 import React, { useContext } from 'react';
 import styled from 'styled-components';
-import addAccountImage from '../assets/addAccount.png';
-import { ActionContext } from '@polkadot/extension-ui/components/contexts';
+import { ActionContext } from './contexts';
+import AddAccountImage from './AddAccountImage';
 
 interface Props {
   className?: string;
@@ -16,14 +16,13 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <div className={className}>
-      <Image
-        src={addAccountImage}
-        alt="add account"
-        onClick={(): void => onAction('/account/create')}
-      />
+      <Image>
+        <AddAccountImage onClick={(): void => onAction('/account/create')}/>
+      </Image>
       <div>
         <h3>Add Account</h3>
-        <TipText>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</TipText>
+        <TipText>You currently don&apos;t have any accounts. Either create a new account or if you have an existing
+          account you wish to use, import it with the seed phrase.</TipText>
       </div>
     </div>
   );
@@ -34,14 +33,12 @@ const TipText = styled.p`
   font-size: 16px;
   line-height: 26px;
   margin: 0 30px;
+  color: ${({ theme }): string => theme.subTextColor};
 `;
 
-const Image = styled.img`
+const Image = styled.div`
   display: flex;
   justify-content: center;
-  width: 185px;
-  height: 185px;
-  margin: 30px auto;
 `;
 
 export default styled(AddAccount)`
@@ -50,7 +47,10 @@ export default styled(AddAccount)`
 
   h3 {
     color: ${({ theme }): string => theme.textColor};
+    margin-top: 0;
     font-weight: normal;
+    font-size: 24px;
+    line-height: 33px;
     text-align: center;
   }
 `;

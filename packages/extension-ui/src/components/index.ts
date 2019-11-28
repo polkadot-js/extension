@@ -15,7 +15,6 @@ export { default as Dropdown } from './Dropdown';
 export { default as Fonts } from './Fonts';
 export { default as Header } from './Header';
 export { default as Icon } from './Icon';
-export { default as IconBox } from './IconBox';
 export { default as Identicon } from './Identicon';
 export { default as InputWithLabel } from './InputWithLabel';
 export { default as Link } from './Link';

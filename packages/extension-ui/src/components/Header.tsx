@@ -71,7 +71,7 @@ const Space = styled.div`
 const Logo = styled.img`
   height: 28px;
   width: 28px;
-  margin: 12px;
+  margin: 12px 12px 12px 0;
 `;
 
 interface GearProps {

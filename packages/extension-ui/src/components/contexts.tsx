@@ -5,20 +5,23 @@
 import { AccountJson, AuthorizeRequest, SigningRequest } from '@polkadot/extension/background/types';
 
 import React from 'react';
+import { AvailableThemes } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const noop = (to?: string): void => {};
+const noop = (): void => {};
 
 const AccountContext = React.createContext<AccountJson[]>([]);
 const ActionContext = React.createContext<(to?: string) => void>(noop);
 const AuthorizeContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
 const SigningContext = React.createContext<SigningRequest[]>([]);
+const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 
 export {
   AccountContext,
   ActionContext,
   AuthorizeContext,
   MediaContext,
-  SigningContext
+  SigningContext,
+  ThemeSwitchContext
 };

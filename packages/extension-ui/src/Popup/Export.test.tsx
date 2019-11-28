@@ -9,7 +9,7 @@ import { MemoryRouter, Route } from 'react-router';
 import React from 'react';
 import * as messaging from '@polkadot/extension-ui/messaging';
 
-import { Button, defaultTheme } from '../components';
+import { Button, themes } from '../components';
 import Export from './Export';
 import { exportAccount } from '../messaging';
 import { ThemeProvider } from 'styled-components';
@@ -30,7 +30,7 @@ describe('Export component', () => {
 
     wrapper = mount(
       <MemoryRouter initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
-        <ThemeProvider theme={defaultTheme}>
+        <ThemeProvider theme={themes.dark}>
           <Route path='/account/export/:address' component={ Export } />
         </ThemeProvider>
       </MemoryRouter>

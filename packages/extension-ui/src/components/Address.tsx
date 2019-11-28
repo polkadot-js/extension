@@ -109,6 +109,7 @@ export const AccountInfoRow = styled.div`
   align-items: center;
   height: 72px;
   margin-bottom: 8px;
+  border-radius: 4px;
 `;
 
 const Info = styled.div`
@@ -176,9 +177,10 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
 
 export default styled(Address)`
   position: relative;
-  
+
   & > div {
-    background: ${({ theme }): string => theme.highlightedAreaBackground};
+    background: ${({ theme }): string => theme.accountBackground};
+    border-radius: 4px;
   }
 
   & ${Identicon} {

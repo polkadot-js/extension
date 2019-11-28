@@ -37,6 +37,7 @@ export default styled(Warning)`
   display: flex;
   flex-direction: row;
   padding-left: ${({ danger }): string => danger ? '18px' : ''};
+  color: ${({ theme }): string => theme.subTextColor};
   margin-right: 20px;
   border-left: ${({ danger, theme }): string => danger ? `0.25rem solid ${theme.buttonBackgroundDanger}` : ''};
 `;

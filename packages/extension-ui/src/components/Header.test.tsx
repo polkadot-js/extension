@@ -4,7 +4,7 @@
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { defaultTheme, Header, Settings } from '@polkadot/extension-ui/components';
+import { themes, Header, Settings } from '@polkadot/extension-ui/components';
 import { MemoryRouter } from 'react-router';
 import React from 'react';
 
@@ -16,7 +16,7 @@ describe('Header component', () => {
   let wrapper: ReactWrapper;
   const mountHeader = (props: React.ComponentProps<typeof Header> = {}): ReactWrapper => mount(
     <MemoryRouter>
-      <ThemeProvider theme={defaultTheme}>
+      <ThemeProvider theme={themes.dark}>
         <Header {...props}>
         </Header>
       </ThemeProvider>

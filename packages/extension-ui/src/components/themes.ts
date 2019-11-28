@@ -2,13 +2,18 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-export const defaultTheme = {
+const darkTheme = {
+  id: 'dark',
   background: '#14151A',
   highlightedAreaBackground: '#0B0C10',
+  popupBackground: '#0B0C10',
+  accountBackground: '#0B0C10',
   buttonBackground: 'linear-gradient(95.52deg, #FF8A00 0.14%, #FF7A00 100.14%)',
   buttonBackgroundDanger: '#D92A2A',
   buttonBackgroundDangerHover: '#D93B3B',
+  buttonTextColor: '#FFFFFF',
   textColor: '#FFFFFF',
+  subTextColor: '#FFFFFF',
   textColorDanger: '#FF5858',
   errorBorderColor: '#7E3530',
   errorColor: '#E42F2F',
@@ -20,8 +25,8 @@ export const defaultTheme = {
   iconWarningColor: '#FF7D01',
   iconDangerColor: '#FF5858',
   iconNeutralColor: '#8E8E8E',
-  identiconBackground: '#373737',
   labelColor: '#9F9E99',
+  boxShadow: 'rgba(0, 0, 0, 0.86)',
   fontFamily: 'Nunito, sans-serif',
   fontSize: '16px',
   lineHeight: '26px',
@@ -32,4 +37,39 @@ export const defaultTheme = {
   boxPadding: '0 0.25rem'
 };
 
-export declare type Theme = typeof defaultTheme;
+const lightTheme: Theme = {
+  ...darkTheme,
+  id: 'light',
+  background: '#FFFFFF',
+  highlightedAreaBackground: '#F4F5F7',
+  accountBackground: '#FFFFFF',
+  popupBackground: '#FFFFFF',
+  textColor: '#242529',
+  subTextColor: '#747882',
+  errorBorderColor: '#E42F2F',
+  inputBackground: '#F4F5F8',
+  inputBorderColor: '#DDE1EB',
+  readonlyInputBackground: '#F4F5F8',
+  boxBorderColor: '#DADFEA',
+  iconNeutralColor: '#939CB1',
+  labelColor: '#747882',
+  boxShadow: 'rgba(0, 0, 0, 0.06)'
+};
+
+export function chooseTheme (): AvailableThemes {
+  const preferredTheme = localStorage.getItem('theme');
+  if (preferredTheme) {
+    return preferredTheme === 'dark' ? 'dark' : 'light';
+  }
+  const isDarkColorSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return isDarkColorSchemePreferred ? 'dark' : 'light';
+}
+
+export declare type Theme = typeof darkTheme;
+
+export const themes = {
+  dark: darkTheme,
+  light: lightTheme
+};
+
+export declare type AvailableThemes = keyof typeof themes;

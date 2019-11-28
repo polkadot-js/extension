@@ -73,6 +73,7 @@ const QrButton = styled(Button)`
   ${Svg} {
     width: 20px;
     height: 20px;
+    background: ${({ theme }): string => theme.buttonTextColor};
   }
 `;
 

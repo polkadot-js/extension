@@ -6,7 +6,7 @@ import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { AccountJson, RequestExtrinsicSign } from '@polkadot/extension/background/types';
 
 import React, { useContext, useState, useEffect } from 'react';
-import { createType } from '@polkadot/types';
+import { TypeRegistry, createType } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, ButtonArea, Link } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
@@ -22,12 +22,15 @@ interface Props {
   url: string;
 }
 
+// keep it global, we can and will re-use this across requests
+const registry = new TypeRegistry();
+
 export default function Request ({ account: { isExternal }, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
 
   useEffect((): void => {
-    setPayload(createType('ExtrinsicPayload', request, { version: request.version }));
+    setPayload(createType(registry, 'ExtrinsicPayload', request, { version: request.version }));
   }, [request]);
 
   if (!payload) {

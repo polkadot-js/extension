@@ -145,7 +145,6 @@ const Settings = styled.div`
   & ${Svg} {
     width: 3px;
     height: 19px;
-    background: ${({ theme }): string => theme.accountDotsIconColor};
   }
 
   &:before {
@@ -169,7 +168,7 @@ Settings.displayName = 'Details';
 const ActionsIcon = styled(Svg).attrs(() => ({
   src: DetailsImg
 }))`
-  background: ${({ theme }): string => theme.iconNeutralColor};
+  background: ${({ theme }): string => theme.accountDotsIconColor};
 `;
 
 const ActiveActionsIcon = styled(Svg).attrs(() => ({

@@ -4,7 +4,7 @@
 
 const darkTheme = {
   id: 'dark',
-  background: '#14151A',
+  background: '#181A23',
   highlightedAreaBackground: '#0B0C10',
   popupBackground: '#0B0C10',
   accountBackground: '#0B0C10',

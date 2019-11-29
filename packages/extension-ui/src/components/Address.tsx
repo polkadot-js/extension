@@ -102,14 +102,16 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   );
 }
 
-export const AccountInfoRow = styled.div`
+const AccountInfoRow = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
   height: 72px;
-  margin-bottom: 8px;
   border-radius: 4px;
+  &:not(:last-child) {
+    margin-bottom: 8px;
+  }
 `;
 
 const Info = styled.div`
@@ -181,6 +183,8 @@ export default styled(Address)`
 
   & > div {
     background: ${({ theme }): string => theme.accountBackground};
+    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
+    box-sizing: border-box;
     border-radius: 4px;
   }
 

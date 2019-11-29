@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { ActionContext, Address, Link } from '../../components';
 import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
-import { AccountInfoRow } from '../../components/Address';
 
 interface Props extends AccountJson {
   address: string;
@@ -81,9 +80,8 @@ const MenuItem = styled(Link)`
 MenuItem.displayName = 'MenuItem';
 
 export default styled(Account)`
-  ${AccountInfoRow} {
-    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
-    box-sizing: border-box;
+  ${Address} {
+    margin-bottom: 8px;
   }
   
   .edit-name {

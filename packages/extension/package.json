@@ -5,9 +5,9 @@
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/api": "^0.97.0-beta.40",
+    "@polkadot/api": "^0.97.1",
     "@polkadot/extension-ui": "^0.14.0-beta.6",
-    "@polkadot/ui-keyring": "^0.47.0-beta.11"
+    "@polkadot/ui-keyring": "^0.47.0-beta.12"
   },
   "devDependencies": {
     "@babel/runtime": "^7.7.4",

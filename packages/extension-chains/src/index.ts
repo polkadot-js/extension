@@ -10,10 +10,10 @@ import { Metadata, TypeRegistry } from '@polkadot/types';
 // inside the api, run `yarn chain:info --ws <url>`
 import alexander from './alexander';
 import edgeware from './edgeware';
-import kusamaCC2 from './kusama-cc2';
+import kusamaCC3 from './kusama-cc3';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, edgeware, kusamaCC2].map(({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
+  [alexander, edgeware, kusamaCC3].map(({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
     let metadata: Metadata | undefined;
     const registry = new TypeRegistry();
 

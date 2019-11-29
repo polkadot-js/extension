@@ -11,7 +11,7 @@ export default function Authorize (): React.ReactElement<{}> {
   const requests = useContext(AuthorizeContext);
 
   return (
-    <div>
+    <>
       <Header />
       {requests.map(({ id, request, url }, index): React.ReactNode => (
         <Request
@@ -23,6 +23,6 @@ export default function Authorize (): React.ReactElement<{}> {
         />
       ))}
       <VerticalSpace />
-    </div>
+    </>
   );
 }

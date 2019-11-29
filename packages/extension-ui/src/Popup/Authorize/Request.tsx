@@ -106,7 +106,7 @@ export default styled(Request)`
 
   .tab-info {
     overflow: hidden;
-    margin: 0.75rem 0 0 0;
+    margin: 0.75rem 20px 0 0;
   }
 
   .tab-name,

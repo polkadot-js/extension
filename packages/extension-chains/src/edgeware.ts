@@ -19,6 +19,7 @@ export default {
   tokenSymbol: 'EDG',
   types: {
     Keys: 'SessionKeys3',
+    ValidatorPrefs: 'ValidatorPrefsTo196',
     ...IdentityTypes,
     ...SignalingTypes,
     ...TreasuryRewardTypes,

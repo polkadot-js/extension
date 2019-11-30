@@ -3,8 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
-import { SignerPayloadJSON } from '@polkadot/types/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import { TypeRegistry } from '@polkadot/types';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -36,7 +38,7 @@ export interface AuthorizeRequest {
 export interface SigningRequest {
   account: AccountJson;
   id: string;
-  request: RequestExtrinsicSign;
+  request: RequestSign;
   url: string;
 }
 
@@ -63,7 +65,8 @@ export interface RequestSignatures {
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
-  'pub(extrinsic.sign)': [RequestExtrinsicSign, ResponseExtrinsicSign];
+  'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
+  'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -130,8 +133,6 @@ export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;
 
-export type RequestExtrinsicSign = SignerPayloadJSON;
-
 export interface RequestSigningApprovePassword {
   id: string;
   password: string;
@@ -184,7 +185,7 @@ export type TransportResponseMessage<TMessageType extends MessageTypes> =
       ? TransportResponseMessageSub<TMessageType>
       : never;
 
-export interface ResponseExtrinsicSign {
+export interface ResponseSigning {
   id: string;
   signature: string;
 }
@@ -211,3 +212,8 @@ export type SubscriptionMessageTypes = NoUndefinedValues<{
 
 export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
 export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>
+
+export interface RequestSign {
+  inner: SignerPayloadJSON | SignerPayloadRaw;
+  sign(registry: TypeRegistry, pair: KeyringPair): { signature: string };
+}

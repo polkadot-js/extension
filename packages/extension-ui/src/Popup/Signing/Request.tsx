@@ -3,21 +3,23 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { AccountJson, RequestExtrinsicSign } from '@polkadot/extension/background/types';
+import { AccountJson, RequestSign } from '@polkadot/extension/background/types';
+import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useContext, useState, useEffect } from 'react';
 import { TypeRegistry, createType } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Link } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
-import Details from './Details';
+import Bytes from './Bytes';
+import Extrinsic from './Extrinsic';
 import Qr from './Qr';
 import Unlock from './Unlock';
 
 interface Props {
   account: AccountJson;
   isFirst: boolean;
-  request: RequestExtrinsicSign;
+  request: RequestSign;
   signId: string;
   url: string;
 }
@@ -27,15 +29,17 @@ const registry = new TypeRegistry();
 
 export default function Request ({ account: { isExternal }, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
-  const [payload, setPayload] = useState<ExtrinsicPayload | null>(null);
+  const [hexBytes, setHexBytes] = useState<string | null>(null);
+  const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);
 
   useEffect((): void => {
-    setPayload(createType(registry, 'ExtrinsicPayload', request, { version: request.version }));
+    const inner = request.inner;
+    if ((inner as SignerPayloadRaw).data) {
+      setHexBytes((inner as SignerPayloadRaw).data);
+    } else {
+      setExtrinsic(createType(registry, 'ExtrinsicPayload', inner, { version: (inner as SignerPayloadJSON).version }));
+    }
   }, [request]);
-
-  if (!payload) {
-    return null;
-  }
 
   const _onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
@@ -49,30 +53,46 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
     approveSignSignature(signId, signature)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-
-  return (
-    <Address
-      address={request.address}
-      genesisHash={request.genesisHash}
-    >
-      {isExternal && isFirst
-        ? <Qr
-          payload={payload}
-          request={request}
-          onSignature={_onSignature}
-        />
-        : <Details
-          isDecoded={isFirst}
-          payload={payload}
-          request={request}
-          url={url}
-        />
-      }
-      {isFirst && !isExternal && <Unlock onSign={_onSign} />}
-      <ActionBar>
-        <div />
-        <Link isDanger onClick={_onCancel}>Cancel</Link>
-      </ActionBar>
-    </Address>
-  );
+  if (extrinsic !== null) {
+    const payload = request.inner as SignerPayloadJSON;
+    return (
+      <Address
+        address={payload.address}
+        genesisHash={payload.genesisHash}
+      >
+        {isExternal && isFirst
+          ? <Qr
+            payload={extrinsic}
+            request={payload}
+            onSignature={_onSignature}
+          />
+          : <Extrinsic
+            isDecoded={isFirst}
+            payload={extrinsic}
+            request={payload}
+            url={url}
+          />
+        }
+        {isFirst && !isExternal && <Unlock onSign={_onSign} />}
+        <ActionBar>
+          <div />
+          <Link isDanger onClick={_onCancel}>Cancel</Link>
+        </ActionBar>
+      </Address>
+    );
+  } else if (hexBytes !== null) {
+    const payload = request.inner as SignerPayloadRaw;
+    return (
+      <Address address={payload.address}>
+        <Bytes bytes={payload.data} url={url} />
+        {isFirst && !isExternal && <Unlock onSign={_onSign} />}
+        <ActionBar>
+          <div />
+          <Link isDanger onClick={_onCancel}>Cancel</Link>
+        </ActionBar>
+      </Address>
+    );
+  } else {
+    return null;
+  }
 }

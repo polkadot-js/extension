@@ -16,7 +16,9 @@ import Identicon from '@polkadot/extension-ui/components/Identicon';
 import Svg from '@polkadot/extension-ui/components/Svg';
 import Menu from '@polkadot/extension-ui/components/Menu';
 import DetailsImg from '../assets/details.svg';
+import copyButton from '../assets/copy.svg';
 import { useOutsideClick } from '@polkadot/extension-ui/hooks';
+import CopyToClipboard from 'react-copy-to-clipboard'
 
 interface Props {
   address?: string | null;
@@ -101,8 +103,12 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           />
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
-            <FullAddress>{formatted || '<unknown>'}</FullAddress>
-            {chain?.genesisHash && <Banner>{chain.name}</Banner>}
+            <CopyAddress>
+              <FullAddress>{formatted || '<unknown>'}</FullAddress>
+              <CopyToClipboard text={formatted && formatted || ''}>
+                <Svg src={copyButton}/>
+              </CopyToClipboard>
+            </CopyAddress>
           </Info>
           {actions && (
             <>
@@ -125,6 +131,21 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
     </div>
   );
 }
+
+const CopyAddress = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  & ${Svg} {
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+    background: ${({ theme }): string => theme.accountDotsIconColor};
+    &:hover {
+      background: ${({ theme }): string => theme.labelColor};
+    }
+  }
+`;
 
 const AccountInfoRow = styled.div`
   display: flex;
@@ -185,7 +206,7 @@ const Settings = styled.div`
 
   &:hover {
     cursor: pointer;
-    background: ${({ theme }): string => theme.readonlyInputBackground};
+    background: ${({ theme }): string => theme.inputBackground};
   }
 `;
 

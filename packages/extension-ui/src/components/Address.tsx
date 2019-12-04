@@ -89,10 +89,10 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           </Info>
           {actions && (
             <>
-              <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)} ref={actionsRef}>
+              <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
                 {showActionsMenu ? <ActiveActionsIcon /> : <ActionsIcon />}
               </Settings>
-              {showActionsMenu && <Menu>{actions}</Menu>}
+              {showActionsMenu && <Menu reference={actionsRef}>{actions}</Menu>}
             </>
           )}
         </AccountInfoRow>

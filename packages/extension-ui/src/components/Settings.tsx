@@ -31,7 +31,7 @@ const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option =
   value: `${value}`
 }));
 
-export default function Settings (): React.ReactElement {
+export default function Settings ({ reference }: { reference: React.MutableRefObject<null> }): React.ReactElement {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
   const themeContext = useContext(ThemeContext);
@@ -57,7 +57,7 @@ export default function Settings (): React.ReactElement {
   };
 
   return (
-    <SettingsMenu>
+    <SettingsMenu reference={reference}>
       <Setting>
         <SettingTitle>Theme</SettingTitle>
         <Switch

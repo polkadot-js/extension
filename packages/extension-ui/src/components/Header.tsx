@@ -36,9 +36,7 @@ function Header ({ children, className, showSettings }: Props): React.ReactEleme
           </SettingsToggle>
         )}
         {showActionsMenu && (
-          <div ref={actionsRef}>
-            <Settings />
-          </div>
+          <Settings reference={actionsRef}/>
         )}
         {children}
       </Container>

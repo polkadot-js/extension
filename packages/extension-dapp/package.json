@@ -9,6 +9,6 @@
     "@polkadot/extension-inject": "^0.14.0-beta.6"
   },
   "peerDependencies": {
-    "@polkadot/api": "*"
+    "@polkadot/api": ">=0.98.1"
   }
 }

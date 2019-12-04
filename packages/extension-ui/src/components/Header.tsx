@@ -105,9 +105,13 @@ const SettingsToggle = styled.div`
 SettingsToggle.displayName = 'SettingsToggle';
 
 export default styled(Header)`
+  max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
-  margin: 0 -24px;
-  padding: 0 24px 0.75rem 24px;
+  margin: 0;
   position: relative;
+
+  && {
+    padding: 0 0 0.75rem;
+  }
 `;

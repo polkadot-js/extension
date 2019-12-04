@@ -89,7 +89,6 @@ const RejectButton = styled(ActionBar)`
 `;
 
 export default styled(Request)`
-  height: 100%;
 
   .icon {
     background: ${({ theme }): string => theme.buttonBackgroundDanger};

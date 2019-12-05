@@ -128,9 +128,26 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
         </AccountInfoRow>
         {children}
       </div>
+      {/* <Copied>Copied</Copied> */}
     </div>
   );
 }
+
+// const Copied = styled.div`
+//   position: fixed;
+//   display: block;
+//   width: 80px;
+//   height: 35px;
+//   text-align: center;
+//   padding-top: 5px;
+//   bottom: 0;
+
+//   && {
+//     margin: auto;
+//     border-radius: 25px;
+//     background: #ff00ff;
+//   }
+// `;
 
 const CopyAddress = styled.div`
   display: flex;

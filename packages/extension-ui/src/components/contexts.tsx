@@ -16,6 +16,7 @@ const AuthorizeContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
 const SigningContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
+const ToastContext = React.createContext<({show: (message: string) => void})>({ show: noop });
 
 export {
   AccountContext,
@@ -23,5 +24,6 @@ export {
   AuthorizeContext,
   MediaContext,
   SigningContext,
-  ThemeSwitchContext
+  ThemeSwitchContext,
+  ToastContext
 };

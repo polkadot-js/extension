@@ -22,6 +22,7 @@ import ImportSeed from './ImportSeed';
 import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import ToastProvider from '../components/Toast/ToastProvider';
 
 // load the ui settings, actually only used for address prefix atm
 // probably overkill (however can replace once we have actual others)
@@ -94,15 +95,17 @@ export default function Popup (): React.ReactElement<{}> {
           <AuthorizeContext.Provider value={authRequests}>
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <SigningContext.Provider value={signRequests}>
-                <Switch>
-                  <Route path='/account/create' component={CreateAccount} />
-                  <Route path='/account/forget/:address' component={Forget} />
-                  <Route path='/account/export/:address' component={Export} />
-                  <Route path='/account/import-qr' component={ImportQr} />
-                  <Route path='/account/import-seed' component={ImportSeed} />
-                  <Route path='/settings' component={Settings} />
-                  <Route exact path='/' component={Root} />
-                </Switch>
+                <ToastProvider>
+                  <Switch>
+                    <Route path='/account/create' component={CreateAccount} />
+                    <Route path='/account/forget/:address' component={Forget} />
+                    <Route path='/account/export/:address' component={Export} />
+                    <Route path='/account/import-qr' component={ImportQr} />
+                    <Route path='/account/import-seed' component={ImportSeed} />
+                    <Route path='/settings' component={Settings} />
+                    <Route exact path='/' component={Root} />
+                  </Switch>
+                </ToastProvider>
               </SigningContext.Provider>
             </MediaContext.Provider>
           </AuthorizeContext.Provider>

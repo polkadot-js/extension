@@ -7,7 +7,7 @@ import { AccountJson, AuthorizeRequest, SigningRequest } from '@polkadot/extensi
 import React from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const noop = (to?: string): void => {};
+const noop = (to?: string): void => undefined;
 
 const AccountContext = React.createContext<AccountJson[]>([]);
 const ActionContext = React.createContext<(to?: string) => void>(noop);

@@ -12,13 +12,13 @@
     "yarn": "^1.10.1"
   },
   "resolutions": {
-    "@polkadot/api": "^0.97.1",
+    "@polkadot/api": "^0.99.0-beta.1",
     "@polkadot/keyring": "^1.7.1",
-    "@polkadot/types": "^0.97.1",
+    "@polkadot/types": "^0.99.0-beta.1",
     "@polkadot/util": "^1.7.1",
     "@polkadot/util-crypto": "^1.7.1",
     "babel-core": "^7.0.0-bridge.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.3"
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
-    "@polkadot/dev-react": "^0.32.0-beta.15",
-    "@polkadot/ts": "^0.1.86"
+    "@polkadot/dev-react": "^0.32.0-beta.16",
+    "@polkadot/ts": "^0.1.87"
   }
 }

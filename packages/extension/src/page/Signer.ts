@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer as SignerInterface, SignerResult } from '@polkadot/api/types';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SendRequest } from './types';
 
 let sendRequest: SendRequest;
@@ -30,16 +30,15 @@ export default class Signer implements SignerInterface {
     };
   }
 
-  // TODO To implement signing of arbitrary payloads via signRaw
-  // public async signRaw (payload: SignerPayloadRaw): Promise<SignerResult> {
-  //   const id = ++nextId;
-  //   const result = await sendRequest('bytes.sign', payload);
+  public async signRaw (payload: SignerPayloadRaw): Promise<SignerResult> {
+    const id = ++nextId;
+    const result = await sendRequest('pub(bytes.sign)', payload);
 
-  //   return {
-  //     ...result,
-  //     id
-  //   };
-  // }
+    return {
+      ...result,
+      id
+    };
+  }
 
   // NOTE We don't listen to updates at all, if we do we can interpret the
   // resuklt as provided by the API here

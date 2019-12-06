@@ -83,10 +83,12 @@ export default styled(Account)`
   ${Address} {
     margin-bottom: 8px;
   }
-  
+
   .edit-name {
     position: absolute;
-    left: 73px;
-    top: 8px;
+    flex: 1;
+    left: 80px;
+    top: 6px;
+    width: 315px;
   }
 `;

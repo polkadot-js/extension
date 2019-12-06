@@ -173,7 +173,7 @@ const Name = styled.div`
 `;
 
 const FullAddress = styled.div`
-  width: 300px;
+  width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }): string => theme.labelColor};

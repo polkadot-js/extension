@@ -23,7 +23,7 @@ import { ThemeProvider } from 'styled-components';
 import Signing from '.';
 import TransactionIndex from './TransactionIndex';
 import Request from './Request';
-import Details from './Details';
+import Extrinsic from './Extrinsic';
 import Qr from './Qr';
 import { EventEmitter } from 'events';
 
@@ -82,16 +82,19 @@ describe('Signing requests', () => {
       url: 'polkadot.js',
       id: '1574174715509.78',
       request: {
-        address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-        blockHash: '0xc288fbc472dab27d13ce58212eeb1243f460c5b0f9a65e9de97cbbf9bc761cb0',
-        blockNumber: '0x00000000003d8c4a',
-        era: '0xa500',
-        genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-        method: '0x0300ff2c27fb3518d84bfad60f39b2cb5502947746ca5921fd66dccc861bad5c9a65220ba0aa2397921c',
-        nonce: '0x0000000000000000',
-        specVersion: '0x00000070',
-        tip: '0x00000000000000000000000000000000',
-        version: 1
+        sign: jest.fn(),
+        inner: {
+          address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
+          blockHash: '0xc288fbc472dab27d13ce58212eeb1243f460c5b0f9a65e9de97cbbf9bc761cb0',
+          blockNumber: '0x00000000003d8c4a',
+          era: '0xa500',
+          genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
+          method: '0x0300ff2c27fb3518d84bfad60f39b2cb5502947746ca5921fd66dccc861bad5c9a65220ba0aa2397921c',
+          nonce: '0x0000000000000000',
+          specVersion: '0x00000070',
+          tip: '0x00000000000000000000000000000000',
+          version: 1
+        }
       }
     }, { // 10000000000 nDOT -> 5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj
       account: {
@@ -101,16 +104,19 @@ describe('Signing requests', () => {
       url: 'polkadot.js',
       id: '1574174306604.76',
       request: {
-        address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-        blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
-        blockNumber: '0x00000000003d8e9d',
-        era: '0xd501',
-        genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-        method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
-        nonce: '0x0000000000000000',
-        specVersion: '0x00000070',
-        tip: '0x00000000000000000000000000000000',
-        version: 1
+        sign: jest.fn(),
+        inner: {
+          address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
+          blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
+          blockNumber: '0x00000000003d8e9d',
+          era: '0xd501',
+          genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
+          method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
+          nonce: '0x0000000000000000',
+          specVersion: '0x00000070',
+          tip: '0x00000000000000000000000000000000',
+          version: 1
+        }
       }
     }];
     onActionStub = jest.fn();
@@ -162,20 +168,23 @@ describe('Signing requests', () => {
         url: 'polkadot.js',
         id: '1574174306604.76',
         request: {
-          address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
-          blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
-          blockNumber: '0x00000000003d8e9d',
-          era: '0xd501',
-          genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-          method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
-          nonce: '0x0000000000000000',
-          specVersion: '0x00000070',
-          tip: '0x00000000000000000000000000000000',
-          version: 1
+          sign: jest.fn(),
+          inner: {
+            address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
+            blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
+            blockNumber: '0x00000000003d8e9d',
+            era: '0xd501',
+            genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
+            method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
+            nonce: '0x0000000000000000',
+            specVersion: '0x00000070',
+            tip: '0x00000000000000000000000000000000',
+            version: 1
+          }
         }
       }];
       await mountComponent();
-      expect(wrapper.find(Details)).toHaveLength(0);
+      expect(wrapper.find(Extrinsic)).toHaveLength(0);
       expect(wrapper.find(Qr)).toHaveLength(1);
     });
   });
@@ -183,7 +192,7 @@ describe('Signing requests', () => {
   describe('Request rendering', () => {
     it('correctly displays request 1', () => {
       expect(wrapper.find(Address).text()).toBe('acc15D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5');
-      expect(wrapper.find(Details).find('td.data').map((el): string => el.text())).toEqual([
+      expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'polkadot.js',
         'Alexander',
         '112',
@@ -201,7 +210,7 @@ describe('Signing requests', () => {
     it('correctly displays request 2', () => {
       wrapper.find('ArrowRight').simulate('click');
       expect(wrapper.find(Address).text()).toBe('acc25E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
-      expect(wrapper.find(Details).find('td.data').at(5).text()).toBe(`{
+      expect(wrapper.find(Extrinsic).find('td.data').at(5).text()).toBe(`{
   "dest": "5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj",
   "value": 10000000000
 }`);

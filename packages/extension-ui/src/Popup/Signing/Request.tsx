@@ -22,12 +22,13 @@ interface Props {
   request: RequestSign;
   signId: string;
   url: string;
+  isFirst?: boolean;
 }
 
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-export default function Request ({ account: { isExternal }, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, request, signId, url, isFirst }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [hexBytes, setHexBytes] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);
@@ -53,38 +54,39 @@ export default function Request ({ account: { isExternal }, request, signId, url
     approveSignSignature(signId, signature)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
+
   if (extrinsic !== null) {
     const payload = request.inner as SignerPayloadJSON;
     return (
       <>
-      <Address
-        address={payload.address}
-        genesisHash={payload.genesisHash}
-      />
-      {isExternal
-        ? (
-          <Qr
-            payload={extrinsic}
-            request={payload}
-            onSignature={_onSignature}
-          />
-        )
-        : (
-          <Extrinsic
-            isDecoded={true}
-            payload={extrinsic}
-            request={payload}
-            url={url}
-          />
-        )
+        <Address
+          address={payload.address}
+          genesisHash={payload.genesisHash}
+        />
+        {isExternal
+          ? (
+            <Qr
+              payload={extrinsic}
+              request={payload}
+              onSignature={_onSignature}
+            />
+          )
+          : (
+            <Extrinsic
+              isDecoded={true}
+              payload={extrinsic}
+              request={payload}
+              url={url}
+            />
+          )
         }
-      <SignArea>
-        {!isExternal && <Unlock onSign={_onSign} />}
-        <CancelButton>
-          <Link isDanger onClick={_onCancel}>Cancel</Link>
-        </CancelButton>
-      </SignArea>
-    </>
+        <SignArea>
+          {isFirst && !isExternal && <Unlock onSign={_onSign} />}
+          <CancelButton>
+            <Link isDanger onClick={_onCancel}>Cancel</Link>
+          </CancelButton>
+        </SignArea>
+      </>
     );
   } else if (hexBytes !== null) {
     const payload = request.inner as SignerPayloadRaw;

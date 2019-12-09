@@ -27,6 +27,7 @@ export default function Signing (): React.ReactElement<{}> {
         onPreviousClick={(): void => setRequestIndex(requestIndex - 1)}
       />
       <Request
+        isFirst={requestIndex === 0}
         account={requests[requestIndex].account}
         request={requests[requestIndex].request}
         signId={requests[requestIndex].id}

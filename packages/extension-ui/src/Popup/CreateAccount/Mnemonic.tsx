@@ -19,16 +19,6 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-const onPrint = (seed: string) => (): void => {
-  const tab = window.open('about:blank', 'blank', 'width=800,height=600');
-  if (!tab) {
-    return;
-  }
-  tab.document.write(seed);
-  tab.print();
-  tab.close();
-};
-
 function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   return (
@@ -40,7 +30,6 @@ function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
       <MnemonicSeed
         seed={seed}
         onCopy={onCopy}
-        onPrint={onPrint(seed)}
       />
       <VerticalSpace />
       <Checkbox

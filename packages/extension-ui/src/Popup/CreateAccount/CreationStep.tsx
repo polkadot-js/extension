@@ -20,7 +20,7 @@ function CreationStep ({ step, onClick, className }: Props): React.ReactElement<
         <CurrentStep>{step}</CurrentStep>
         <TotalSteps>/2</TotalSteps>
       </div>
-      <ActionText text='Cancel' onClick={onClick} />
+      <ActionText text='Back' onClick={onClick} />
     </div>
   );
 }

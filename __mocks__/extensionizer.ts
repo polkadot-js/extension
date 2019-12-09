@@ -16,7 +16,7 @@ class MessagingFake {
 
   get onDisconnect (): any {
     return {
-      addListener: (): any => {}
+      addListener: (): any => undefined
     };
   }
 

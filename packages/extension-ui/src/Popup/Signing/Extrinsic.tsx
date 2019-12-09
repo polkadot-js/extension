@@ -92,7 +92,7 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string): string {
   return `mortal, valid from #${formatNumber(mortal.birth(blockNumber))} to #${formatNumber(mortal.death(blockNumber))}`;
 }
 
-function Details ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
+function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const chain = useRef(findChain(genesisHash)).current;
   const specVersion = useRef(bnToBn(hexSpec)).current;
   const [decoded, setDecoded] = useState<Decoded>({ json: null, method: null });
@@ -136,7 +136,7 @@ function Details ({ className, isDecoded, payload: { era, nonce, tip }, request:
   );
 }
 
-export default styled(Details)`
+export default styled(Extrinsic)`
   height: 100%;
   overflow: scroll;
   display: block;

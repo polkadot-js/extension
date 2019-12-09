@@ -8,7 +8,7 @@ import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateExtern
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
-import { TypeRegistry, createType } from '@polkadot/types';
+import { TypeRegistry } from '@polkadot/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
@@ -153,7 +153,7 @@ export default class Extension {
     assert(queued, 'Unable to find request');
 
     const { request, resolve, reject } = queued;
-    const pair = keyring.getPair(request.address);
+    const pair = keyring.getPair(request.inner.address);
 
     if (!pair) {
       reject(new Error('Unable to find pair'));
@@ -162,10 +162,7 @@ export default class Extension {
     }
 
     pair.decodePkcs8(password);
-
-    const payload = createType(registry, 'ExtrinsicPayload', request, { version: request.version });
-    const result = payload.sign(pair);
-
+    const result = request.sign(registry, pair);
     pair.lock();
 
     resolve({

@@ -1,5 +1,5 @@
 {
-  "version": "0.14.0-beta.7",
+  "version": "0.14.0-beta.9",
   "description": "A sample signer extension for the @polkadot/api",
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
@@ -12,13 +12,13 @@
     "yarn": "^1.10.1"
   },
   "resolutions": {
-    "@polkadot/api": "^0.97.0-beta.33",
-    "@polkadot/keyring": "^1.7.0-beta.8",
-    "@polkadot/types": "^0.97.0-beta.33",
-    "@polkadot/util": "^1.7.0-beta.8",
-    "@polkadot/util-crypto": "^1.7.0-beta.8",
+    "@polkadot/api": "^0.99.0-beta.4",
+    "@polkadot/keyring": "^1.7.1",
+    "@polkadot/types": "^0.99.0-beta.4",
+    "@polkadot/util": "^1.7.1",
+    "@polkadot/util-crypto": "^1.7.1",
     "babel-core": "^7.0.0-bridge.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.3"
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
@@ -31,8 +31,8 @@
     "watch": "cd packages/extension && webpack --config webpack.config.js --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.4",
-    "@polkadot/dev-react": "^0.32.0-beta.15",
-    "@polkadot/ts": "^0.1.86"
+    "@babel/core": "^7.7.5",
+    "@polkadot/dev-react": "^0.32.0-beta.17",
+    "@polkadot/ts": "^0.1.88"
   }
 }

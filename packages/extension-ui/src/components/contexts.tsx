@@ -8,7 +8,7 @@ import React from 'react';
 import { AvailableThemes } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const noop = (): void => {};
+const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountJson[]>([]);
 const ActionContext = React.createContext<(to?: string) => void>(noop);

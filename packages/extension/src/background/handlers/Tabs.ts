@@ -3,12 +3,16 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes } from '../types';
+import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, RequestExtrinsicSign, ResponseExtrinsicSign, RequestTypes, ResponseTypes, MessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
+import RequestBytesSign from '../RequestBytesSign';
+import RequestExtrinsicSign from '../RequestExtrinsicSign';
 
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
@@ -50,13 +54,22 @@ export default class Tabs {
     return true;
   }
 
-  private extrinsicSign (url: string, request: RequestExtrinsicSign): Promise<ResponseExtrinsicSign> {
-    const { address } = request;
+  private getSigningPair (address: string): KeyringPair {
     const pair = keyring.getPair(address);
-
     assert(pair, 'Unable to find keypair');
+    return pair;
+  }
 
-    return this.state.signQueue(url, request, { address, ...pair.meta });
+  private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
+    const address = request.address;
+    const pair = this.getSigningPair(address);
+    return this.state.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
+  }
+
+  private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
+    const address = request.address;
+    const pair = this.getSigningPair(address);
+    return this.state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
@@ -74,8 +87,11 @@ export default class Tabs {
       case 'pub(accounts.subscribe)':
         return this.accountsSubscribe(url, id, port);
 
+      case 'pub(bytes.sign)':
+        return this.bytesSign(url, request as SignerPayloadRaw);
+
       case 'pub(extrinsic.sign)':
-        return this.extrinsicSign(url, request as RequestExtrinsicSign);
+        return this.extrinsicSign(url, request as SignerPayloadJSON);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

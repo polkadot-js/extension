@@ -1,3 +1,9 @@
+# 0.14.1
+
+- Support for Kusama CC3
+- Implement ability to sign raw messages (Thanks to https://github.com/c410-f3r)
+- Allow the use of hex seeds as part of account creation
+
 # 0.13.1
 
 - Account export functionality (Thanks to https://github.com/Anze1m)

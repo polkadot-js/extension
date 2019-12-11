@@ -7,16 +7,14 @@ import React, { MouseEventHandler } from 'react';
 import TextAreaWithLabel from './TextAreaWithLabel';
 import ActionText from '@polkadot/extension-ui/components/ActionText';
 import copy from '../assets/copy.svg';
-import print from '../assets/print.svg';
 
 interface Props {
   seed: string;
   onCopy: MouseEventHandler<HTMLDivElement>;
-  onPrint: MouseEventHandler<HTMLDivElement>;
   className?: string;
 }
 
-function MnemonicSeed ({ seed, onCopy, onPrint, className }: Props): React.ReactElement<Props> {
+function MnemonicSeed ({ seed, onCopy, className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <MnemonicText value={seed} />
@@ -27,12 +25,6 @@ function MnemonicSeed ({ seed, onCopy, onPrint, className }: Props): React.React
           text='Copy to clipboard'
           onClick={onCopy}
         />
-        <ActionText
-          data-seed-action='print'
-          icon={print}
-          text='Print seed phrase'
-          onClick={onPrint}
-        />
       </ButtonsRow>
     </div>
   );
@@ -41,7 +33,7 @@ function MnemonicSeed ({ seed, onCopy, onPrint, className }: Props): React.React
 const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
   label: 'Generated 12-word mnemonic seed:',
   isReadOnly: true
-}))`  
+}))`
   textarea {
     font-size: ${({ theme }): string => theme.fontSize};
     line-height: ${({ theme }): string => theme.lineHeight};
@@ -56,7 +48,7 @@ const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
 const ButtonsRow = styled.div`
   display: flex;
   flex-direction: row;
-  
+
   ${ActionText} {
     margin-right: 32px;
   }

@@ -235,7 +235,7 @@ describe('Signing requests', () => {
         emitter.emit('request', [signRequests[0]]);
       });
       wrapper.update();
-      expect(wrapper.find(TransactionIndex).text()).toBe('Transaction:1/1');
+      expect(wrapper.find(TransactionIndex).text()).toBe('');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
   });

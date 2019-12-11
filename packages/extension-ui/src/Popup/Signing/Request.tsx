@@ -96,7 +96,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
         {isFirst && !isExternal && <Unlock onSign={_onSign} />}
         <ActionBar>
           <div />
-          <Link isDanger onClick={_onCancel}>Cancel</Link>
+          <Link isDanger onClick={_onCancel}>Reject</Link>
         </ActionBar>
       </Address>
     );
@@ -114,7 +114,7 @@ const CancelButton = styled(ActionBar)`
   margin-top: 4px;
   margin-bottom: 4px;
   text-decoration: underline;
-  
+
   a {
     margin: auto;
   }

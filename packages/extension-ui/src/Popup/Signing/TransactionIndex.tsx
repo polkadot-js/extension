@@ -21,15 +21,18 @@ function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick, cl
 
   return (
     <div className={className}>
-      <div>
-        <Transaction />
-        <CurrentIndex>{index + 1}</CurrentIndex>
-        <TotalItems>/{totalItems}</TotalItems>
-      </div>
-      <div>
-        <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
-        <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
-      </div>
+      {totalItems > 1 && (
+        <>
+          <div>
+            <Transaction />
+            <CurrentIndex>{index + 1}</CurrentIndex>
+            <TotalItems>/{totalItems}</TotalItems>
+          </div>
+          <div>
+            <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
+            <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
+          </div>
+        </>)}
     </div>
   );
 }

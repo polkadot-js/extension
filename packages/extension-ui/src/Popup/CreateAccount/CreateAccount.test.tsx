@@ -70,7 +70,7 @@ describe('Create Account', () => {
     it('clicking on Next activates phase 2', () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
-      expect(wrapper.find(CreationStep).text()).toBe('Create an account:2/2Cancel');
+      expect(wrapper.find(CreationStep).text()).toBe('Create an account:2/2Back');
     });
   });
 

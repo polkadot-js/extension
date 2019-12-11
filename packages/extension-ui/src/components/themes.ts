@@ -5,6 +5,7 @@
 const darkTheme = {
   id: 'dark',
   background: '#181A23',
+  bodyColor: '#20222A',
   highlightedAreaBackground: '#0B0C10',
   popupBackground: '#0B0C10',
   accountBackground: '#0B0C10',
@@ -44,6 +45,7 @@ const lightTheme: Theme = {
   ...darkTheme,
   id: 'light',
   background: '#FFFFFF',
+  bodyColor: '#FFFFFF',
   highlightedAreaBackground: '#F4F5F7',
   accountBackground: '#FFFFFF',
   popupBackground: '#FFFFFF',

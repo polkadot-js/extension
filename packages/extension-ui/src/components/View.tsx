@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useState } from 'react';
-import styled, { ThemeProvider } from 'styled-components';
-import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext } from '.';
+import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
+import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext, Theme } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -22,6 +22,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
   return (
     <ThemeSwitchContext.Provider value={switchTheme}>
       <ThemeProvider theme={themes[theme]}>
+        <BodyTheme theme={themes[theme]} />
         <Main className={className}>
           {children}
         </Main>
@@ -29,6 +30,12 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
     </ThemeSwitchContext.Provider>
   );
 }
+
+const BodyTheme = createGlobalStyle<{ theme: Theme }>`
+  body {
+    background-color: ${({ theme }): string => theme.bodyColor};
+  }
+`;
 
 const Main = styled.main`
   display: flex;
@@ -39,7 +46,7 @@ const Main = styled.main`
   font-size: ${({ theme }): string => theme.fontSize};
   line-height: ${({ theme }): string => theme.lineHeight};
   border: 1px solid ${({ theme }): string => theme.inputBorderColor};
-  
+
   * {
     font-family: ${({ theme }): string => theme.fontFamily};
   }

@@ -9,7 +9,7 @@ import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import React, { useContext, useState, useEffect } from 'react';
 import { TypeRegistry, createType } from '@polkadot/types';
 
-import { ActionBar, ActionContext, Address, ButtonArea, Link } from '../../components';
+import { ActionBar, ActionContext, Address, ButtonArea, Link, VerticalSpace } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
@@ -91,14 +91,17 @@ export default function Request ({ account: { isExternal }, request, signId, url
   } else if (hexBytes !== null) {
     const payload = request.inner as SignerPayloadRaw;
     return (
-      <Address address={payload.address}>
+      <>
+        <Address address={payload.address} />
         <Bytes bytes={payload.data} url={url} />
-        {isFirst && !isExternal && <Unlock onSign={_onSign} />}
-        <ActionBar>
-          <div />
-          <Link isDanger onClick={_onCancel}>Reject</Link>
-        </ActionBar>
-      </Address>
+        <VerticalSpace />
+        <SignArea>
+          {!isExternal && <Unlock onSign={_onSign} />}
+          <CancelButton>
+            <Link isDanger onClick={_onCancel}>Reject</Link>
+          </CancelButton>
+        </SignArea>
+      </>
     );
   } else {
     return null;
@@ -107,7 +110,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
 
 const SignArea = styled(ButtonArea)`
   flex-direction: column;
-  padding: 6px 1rem;
+  padding: 6px 24px;
 `;
 
 const CancelButton = styled(ActionBar)`

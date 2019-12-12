@@ -96,8 +96,8 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
             </>
           )}
         </AccountInfoRow>
+        {children}
       </div>
-      {children}
     </div>
   );
 }
@@ -109,9 +109,6 @@ const AccountInfoRow = styled.div`
   align-items: center;
   height: 72px;
   border-radius: 4px;
-  &:not(:last-child) {
-    margin-bottom: 8px;
-  }
 `;
 
 const Info = styled.div`
@@ -182,6 +179,7 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
 
 export default styled(Address)`
   position: relative;
+  margin-bottom: 8px;
 
   & > div {
     background: ${({ theme }): string => theme.accountBackground};

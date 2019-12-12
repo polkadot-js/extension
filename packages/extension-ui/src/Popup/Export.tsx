@@ -41,7 +41,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       <Title>Export account</Title>
       <div>
         <Address address={address}>
-          <Warning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</Warning>
+          <MovedWarning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</MovedWarning>
           <ActionArea>
             <InputWithLabel
               isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
@@ -65,6 +65,10 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
     </>
   );
 }
+
+const MovedWarning = styled(Warning)`
+  margin-top: 8px;
+`;
 
 const ActionArea = styled.div`
   padding: 25px 24px;

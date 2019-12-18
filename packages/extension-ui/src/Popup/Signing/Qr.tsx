@@ -57,7 +57,10 @@ const ScanButton = styled(Button)`
 const QrArea = styled.div`
   width: 65%;
   margin: 5px auto 10px auto;
-  border: white solid 1px;
+
+  img {
+    border: white solid 1px;
+  }
 `;
 
 export default styled(Qr)`

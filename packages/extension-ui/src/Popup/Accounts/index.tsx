@@ -80,6 +80,8 @@ const QrButton = styled(Button)`
 const AccountsArea = styled.div`
   height: 100%;
   overflow-y: scroll;
+  margin-top: -25px;
+  padding-top: 25px;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {

@@ -37,7 +37,7 @@ export default styled(Checkbox)`
     user-select: none;
     margin: ${({ theme }): string => theme.boxMargin};
     padding-left: 24px;
-    color: ${({ theme }): string => theme.labelColor};
+    color: ${({ theme }): string => theme.subTextColor};
     font-size: ${({ theme }): string => theme.fontSize};
     line-height: ${({ theme }): string => theme.lineHeight};
 

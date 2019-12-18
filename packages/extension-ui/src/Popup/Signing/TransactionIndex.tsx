@@ -4,7 +4,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Svg, Title } from '../../components';
+import { Svg } from '../../components';
 import ArrowLeftImage from '../../assets/arrowLeft.svg';
 
 interface Props {
@@ -15,43 +15,41 @@ interface Props {
   className?: string;
 }
 
-function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick, className }: Props): React.ReactElement<Props> {
+function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick }: Props): React.ReactElement<Props> {
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 
   return (
-    <div className={className}>
-      {totalItems > 1 && (
-        <>
-          <div>
-            <Transaction />
-            <CurrentIndex>{index + 1}</CurrentIndex>
-            <TotalItems>/{totalItems}</TotalItems>
-          </div>
-          <div>
-            <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
-            <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
-          </div>
-        </>)}
-    </div>
+    <CreationSteps>
+      <div>
+        <CurrentStep>{index + 1}</CurrentStep>
+        <TotalSteps>/{totalItems}</TotalSteps>
+      </div>
+      <div>
+        <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
+        <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
+      </div>
+    </CreationSteps>
   );
 }
 
-const Transaction = styled(Title).attrs(() => ({
-  children: 'Transaction:'
-}))`
-  display: inline;
-  margin-right: 10px;
+const CreationSteps = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+  padding-right: 24px;
 `;
 
-const CurrentIndex = styled.span`
+const CurrentStep = styled.span`
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
   color: ${({ theme }): string => theme.primaryColor};
   font-weight: 600;
+  margin-left: 10px;
 `;
 
-const TotalItems = styled.span`
+const TotalSteps = styled.span`
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
   color: ${({ theme }): string => theme.textColor};
@@ -79,9 +77,4 @@ const ArrowRight = styled(ArrowLeft)`
 `;
 ArrowRight.displayName = 'ArrowRight';
 
-export default styled(TransactionIndex)`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: 8px;
-`;
+export default TransactionIndex;

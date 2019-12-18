@@ -125,7 +125,7 @@ describe('Signing requests', () => {
 
   describe('Switching between requests', () => {
     it('initially first request should be shown', () => {
-      expect(wrapper.find(TransactionIndex).text()).toBe('Transaction:1/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
 
@@ -133,12 +133,12 @@ describe('Signing requests', () => {
       expect(wrapper.find('ArrowLeft').prop('isActive')).toBe(false);
       expect(wrapper.find('ArrowRight').prop('isActive')).toBe(true);
       wrapper.find('ArrowLeft').simulate('click');
-      expect(wrapper.find(TransactionIndex).text()).toBe('Transaction:1/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
     });
 
     it('should display second request after clicking right arrow', () => {
       wrapper.find('ArrowRight').simulate('click');
-      expect(wrapper.find(TransactionIndex).text()).toBe('Transaction:2/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[1].id);
     });
 
@@ -146,13 +146,13 @@ describe('Signing requests', () => {
       wrapper.find('ArrowRight').simulate('click');
       expect(wrapper.find('ArrowLeft').prop('isActive')).toBe(true);
       expect(wrapper.find('ArrowRight').prop('isActive')).toBe(false);
-      expect(wrapper.find(TransactionIndex).text()).toBe('Transaction:2/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
     });
 
     it('should display previous request after ArrowLeft has been clicked', () => {
       wrapper.find('ArrowRight').simulate('click');
       wrapper.find('ArrowLeft').simulate('click');
-      expect(wrapper.find(TransactionIndex).text()).toBe('Transaction:1/2');
+      expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
   });
@@ -191,7 +191,7 @@ describe('Signing requests', () => {
 
   describe('Request rendering', () => {
     it('correctly displays request 1', () => {
-      expect(wrapper.find(Address).text()).toBe('acc15D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5');
+      expect(wrapper.find(Address).find('FullAddress').text()).toBe('5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5');
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'polkadot.js',
         'Alexander',
@@ -209,7 +209,7 @@ describe('Signing requests', () => {
 
     it('correctly displays request 2', () => {
       wrapper.find('ArrowRight').simulate('click');
-      expect(wrapper.find(Address).text()).toBe('acc25E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
+      expect(wrapper.find(Address).find('FullAddress').text()).toBe('5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
       expect(wrapper.find(Extrinsic).find('td.data').at(5).text()).toBe(`{
   "dest": "5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj",
   "value": 10000000000
@@ -235,7 +235,7 @@ describe('Signing requests', () => {
         emitter.emit('request', [signRequests[0]]);
       });
       wrapper.update();
-      expect(wrapper.find(TransactionIndex).text()).toBe('');
+      expect(wrapper.find(TransactionIndex)).toHaveLength(0);
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
   });

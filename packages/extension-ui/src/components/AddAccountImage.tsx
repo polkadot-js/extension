@@ -17,7 +17,7 @@ function AddAccountImage ({ onClick, className }: Props): React.ReactElement<Pro
         <circle cx="132.5" cy="132.5" r="92" fill="white" fillOpacity="0.9" stroke="#E3E7ED" />
       </mask>
       <g mask="url(#mask0)">
-        <circle cx="132.5" cy="132.5" r="92" fill="transparent" strokeWidth="1px" stroke="#E3E7ED"
+        <circle cx="132.5" cy="132.5" r="92" strokeWidth="1px" fill="#1A1B20" stroke="#E3E7ED"
           onClick={onClick} />
         <g filter="url(#filter0_f)">
           <circle cx="132.5" cy="73.1154" r="12.1154" fill="#FEE05F" />
@@ -52,9 +52,9 @@ function AddAccountImage ({ onClick, className }: Props): React.ReactElement<Pro
       <defs>
         <filter id="filter0_f" x="-3" y="-7" width="271" height="284.846" filterUnits="userSpaceOnUse"
           colorInterpolationFilters="sRGB">
-          <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feGaussianBlur stdDeviation="34" result="effect1_foregroundBlur" />
+          <feFlood floodOpacity="0" result="BackgroundImageFix"/>
+          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+          <feGaussianBlur stdDeviation="10" result="effect1_foregroundBlur"/>
         </filter>
       </defs>
     </svg>
@@ -65,12 +65,13 @@ export default styled(AddAccountImage)`
   circle, path {
     cursor: pointer;
   }
-  
+
   path {
     fill: ${({ theme }): string => theme.textColor};
   }
-  
+
   & > g > circle {
     stroke: ${({ theme }): string => theme.inputBorderColor};
+    fill: ${({ theme }): string => theme.addAccountImageBackground};
   }
 `;

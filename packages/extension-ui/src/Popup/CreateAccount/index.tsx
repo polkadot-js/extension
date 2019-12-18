@@ -3,11 +3,10 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext, useEffect, useState } from 'react';
-
-import { ActionContext, Header, Loading } from '../../components';
+import styled from 'styled-components';
+import { ActionContext, Header, Loading, ActionText } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
 import Mnemonic from '@polkadot/extension-ui/Popup/CreateAccount/Mnemonic';
-import CreationStep from '@polkadot/extension-ui/Popup/CreateAccount/CreationStep';
 import AccountName from '@polkadot/extension-ui/Popup/CreateAccount/AccountName';
 
 export default function CreateAccount (): React.ReactElement {
@@ -43,8 +42,15 @@ export default function CreateAccount (): React.ReactElement {
 
   return (
     <>
-      <Header />
-      <CreationStep step={step} onClick={_onCancel} />
+      <Header text={'Create an account '}>
+        <CreationSteps>
+          <div>
+            <CurrentStep>{step}</CurrentStep>
+            <TotalSteps>/2</TotalSteps>
+          </div>
+          <ActionText text={step === 1 ? 'Cancel' : 'Back'} onClick={_onCancel} />
+        </CreationSteps>
+      </Header>
       <Loading>{account && (step === 1 ? (
         <Mnemonic seed={account.seed} onNextStep={_onNextStep} />
       ) : (
@@ -53,3 +59,27 @@ export default function CreateAccount (): React.ReactElement {
     </>
   );
 }
+
+const CreationSteps = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+  padding-right: 24px;
+  margin-top: 3px;
+`;
+
+const CurrentStep = styled.span`
+  font-size: ${({ theme }): string => theme.labelFontSize};
+  line-height: ${({ theme }): string => theme.labelLineHeight};
+  color: ${({ theme }): string => theme.primaryColor};
+  font-weight: 800;
+  margin-left: 10px;
+`;
+
+const TotalSteps = styled.span`
+  font-size: ${({ theme }): string => theme.labelFontSize};
+  line-height: ${({ theme }): string => theme.labelLineHeight};
+  color: ${({ theme }): string => theme.textColor};
+  font-weight: 800;
+`;

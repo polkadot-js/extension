@@ -10,14 +10,18 @@ import { useOutsideClick } from '../hooks';
 
 import Svg from '@polkadot/extension-ui/components/Svg';
 import Settings from './Settings';
+import ArrowLeftImage from '../assets/arrowLeft.svg';
+import Link from './Link';
 
 interface Props {
   children?: React.ReactNode;
   className?: string;
   showSettings?: boolean;
+  text?: string;
+  showBackArrow?: boolean;
 }
 
-function Header ({ children, className, showSettings }: Props): React.ReactElement<Props> {
+function Header ({ children, className, showSettings, text, showBackArrow }: Props): React.ReactElement<Props> {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsRef = useRef(null);
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
@@ -25,10 +29,14 @@ function Header ({ children, className, showSettings }: Props): React.ReactEleme
   return (
     <div className={className}>
       <Container>
-        {showSettings && <Space />}
         <Branding>
-          <Logo src={logo} />
-          <LogoText>{'polkadot{.js}'}</LogoText>
+          {showBackArrow ? (
+            <BackLink to={'/'}>
+              <ArrowLeft/>
+            </BackLink>
+          ) : <Logo src={logo}/>
+          }
+          <LogoText>{text || 'polkadot{.js}'}</LogoText>
         </Branding>
         {showSettings && (
           <SettingsToggle onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
@@ -44,11 +52,32 @@ function Header ({ children, className, showSettings }: Props): React.ReactEleme
   );
 }
 
+const BackLink = styled(Link)`
+  width: min-content;
+  text-decoration: underline;
+  color: ${({ theme }): string => theme.labelColor};
+  min-height: 52px;
+
+  &:visited {
+    color: ${({ theme }): string => theme.labelColor};
+  }
+`;
+
+const ArrowLeft = styled(Svg).attrs(() => ({
+  src: ArrowLeftImage
+}))`
+  width: 12px;
+  height: 12px;
+  margin-right: 13px;
+  background: ${({ theme }): string => theme.labelColor};
+`;
+
 const Container = styled.div`
     display: flex;
     justify-content: space-between;
     width: 100%;
     border-bottom: 1px solid ${({ theme }): string => theme.inputBorderColor};
+    min-height: 70px;
 `;
 
 const Branding = styled.div`
@@ -58,18 +87,13 @@ const Branding = styled.div`
   color: ${({ theme }): string => theme.labelColor};
   font-family: ${({ theme }): string => theme.fontFamily};
   text-align: center;
-  width: 100%;
-`;
-
-const Space = styled.div`
-  width: 22px;
   margin-left: 24px;
 `;
 
 const Logo = styled.img`
   height: 28px;
   width: 28px;
-  margin: 12px 12px 12px 0;
+  margin: 8px 12px 12px 0;
 `;
 
 interface GearProps {
@@ -110,8 +134,9 @@ export default styled(Header)`
   font-weight: normal;
   margin: 0;
   position: relative;
+  margin-bottom: 25px;
 
   && {
-    padding: 0 0 0.75rem;
+    padding: 0 0 0;
   }
 `;

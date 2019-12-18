@@ -6,7 +6,6 @@ import React, { useContext, useState } from 'react';
 
 import {
   ActionContext,
-  ActionText,
   Address,
   Button,
   ButtonArea,
@@ -15,7 +14,7 @@ import {
   VerticalSpace
 } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
-import { TitleWithAction, Name, Password } from '../partials';
+import { Name, Password } from '../partials';
 import styled from 'styled-components';
 
 type Props = {};
@@ -43,10 +42,7 @@ export default function Import (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header />
-      <TitleWithAction title='Import account'>
-        <ActionText text='Cancel' onClick={(): void => onAction('/')} />
-      </TitleWithAction>
+      <HeaderWithSmallerMargin text='Import account' showBackArrow />
       <SeedInput
         rowsCount={2}
         isError={!account}
@@ -71,6 +67,10 @@ export default function Import (): React.ReactElement<Props> {
     </>
   );
 }
+
+const HeaderWithSmallerMargin = styled(Header)`
+  margin-bottom: 15px;
+`;
 
 const SeedInput = styled(TextAreaWithLabel)`
   margin-bottom: 16px;

@@ -4,10 +4,9 @@
 
 import React, { useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { ActionContext, Address, Button, Warning, Title } from '../components';
+import { ActionContext, Address, Button, Warning, Header, ActionBar, ActionText } from '../components';
 
 import { forgetAccount } from '../messaging';
-import { Back } from '../partials';
 import styled from 'styled-components';
 
 type Props = RouteComponentProps<{ address: string }>;
@@ -22,8 +21,7 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
 
   return (
     <>
-      <Back />
-      <Title>Forget account</Title>
+      <Header text='Forget account' showBackArrow/>
       <div>
         <Address address={address}>
           <MovedWarning danger>
@@ -36,6 +34,9 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
             >
               I want to forget this account
             </Button>
+            <CancelButton>
+              <ActionText text='Cancel' onClick={(): void => onAction('/')} />
+            </CancelButton>
           </ActionArea>
         </Address>
       </div>
@@ -48,7 +49,15 @@ const MovedWarning = styled(Warning)`
 `;
 
 const ActionArea = styled.div`
-  padding: 25px 24px;
+  padding: 10px 24px;
+`;
+
+const CancelButton = styled(ActionBar)`
+  margin-top: 4px;
+
+  ${ActionText} {
+    margin: auto;
+  }
 `;
 
 export default withRouter(Forget);

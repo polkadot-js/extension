@@ -24,8 +24,12 @@ export default styled(Label)`
   color: ${({ theme }): string => theme.textColor};
 
   label {
-    font-size: ${({ theme }): string => theme.labelFontSize};
-    line-height: ${({ theme }): string => theme.labelLineHeight};
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: 0.04em;
+    font-weight: 800;
+    opacity: 0.65;
     margin-bottom: 12px;
+    text-transform: uppercase;
   }
 `;

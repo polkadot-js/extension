@@ -8,7 +8,7 @@ import styled from 'styled-components';
 interface Props {
   children: React.ReactNode;
   className?: string;
-  reference: React.MutableRefObject<null>;
+  reference: React.RefObject<HTMLDivElement>;
 }
 
 function Menu ({ children, className, reference }: Props): React.ReactElement<Props> {

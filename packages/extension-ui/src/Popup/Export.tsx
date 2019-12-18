@@ -5,9 +5,17 @@
 import React, { useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionContext, Address, Button, InputWithLabel, Title, Warning } from '../components';
+import {
+  ActionContext,
+  Address,
+  Button,
+  InputWithLabel,
+  Warning,
+  Header,
+  ActionText,
+  ActionBar
+} from '../components';
 import { exportAccount } from '../messaging';
-import { Back } from '../partials';
 import styled from 'styled-components';
 
 const MIN_LENGTH = 6;
@@ -37,8 +45,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
 
   return (
     <>
-      <Back />
-      <Title>Export account</Title>
+      <Header text='Export account' showBackArrow/>
       <div>
         <Address address={address}>
           <MovedWarning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</MovedWarning>
@@ -59,6 +66,9 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
             >
               I want to export this account
             </Button>
+            <CancelButton>
+              <ActionText text='Cancel' onClick={(): void => onAction('/')} />
+            </CancelButton>
           </ActionArea>
         </Address>
       </div>
@@ -71,7 +81,16 @@ const MovedWarning = styled(Warning)`
 `;
 
 const ActionArea = styled.div`
-  padding: 25px 24px;
+  padding: 10px 24px;
+`;
+
+const CancelButton = styled(ActionBar)`
+  margin-top: 4px;
+  text-decoration: underline;
+
+  ${ActionText} {
+    margin: auto;
+  }
 `;
 
 export default withRouter(Export);

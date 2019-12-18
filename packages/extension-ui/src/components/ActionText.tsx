@@ -24,14 +24,14 @@ function ActionText ({ icon, className, text, onClick }: Props): React.ReactElem
 
 export default styled(ActionText)`
   cursor: pointer;
-    
+
   span {
     font-size: ${({ theme }): string => theme.labelFontSize};
     line-height: ${({ theme }): string => theme.labelLineHeight};
     text-decoration-line: underline;
     color: ${({ theme }): string => theme.labelColor}
   }
-  
+
   ${Svg} {
     background: ${({ theme }): string => theme.iconNeutralColor};
     display: inline-block;

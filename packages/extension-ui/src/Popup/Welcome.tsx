@@ -19,8 +19,7 @@ export default function Welcome (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header />
-      <WelcomeLabel />
+      <Header text='Welcome'/>
       <Note>Before we start, just a couple of notes regarding use:</Note>
       <TextBox>
         <List>
@@ -37,14 +36,6 @@ export default function Welcome (): React.ReactElement<Props> {
     </>
   );
 }
-
-const WelcomeLabel = styled.div.attrs(() => ({
-  children: 'Welcome'
-}))`
-  margin: 30px auto 40px auto;
-  font-size: 24px;
-  line-height: 33px;
-`;
 
 const Note = styled.p`
   margin-bottom: 6px;

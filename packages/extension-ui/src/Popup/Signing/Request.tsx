@@ -70,8 +70,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
               request={payload}
               onSignature={_onSignature}
             />
-          )
-          : (
+          ) : (
             <Extrinsic
               isDecoded={true}
               payload={extrinsic}

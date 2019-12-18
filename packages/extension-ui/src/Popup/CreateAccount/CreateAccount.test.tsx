@@ -16,9 +16,9 @@ import {
   Button,
   themes,
   Input,
-  InputWithLabel
+  InputWithLabel,
+  Header
 } from '@polkadot/extension-ui/components';
-import CreationStep from '@polkadot/extension-ui/Popup/CreateAccount/CreationStep';
 import { ThemeProvider } from 'styled-components';
 
 configure({ adapter: new Adapter() });
@@ -59,18 +59,18 @@ describe('Create Account', () => {
     });
 
     it('action text is "Cancel"', () => {
-      expect(wrapper.find(CreationStep).find(ActionText).text()).toBe('Cancel');
+      expect(wrapper.find(Header).find(ActionText).text()).toBe('Cancel');
     });
 
     it('clicking "Cancel" redirects to main screen', () => {
-      wrapper.find(CreationStep).find(ActionText).simulate('click');
+      wrapper.find(Header).find(ActionText).simulate('click');
       expect(onActionStub).toBeCalledWith('/');
     });
 
     it('clicking on Next activates phase 2', () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
-      expect(wrapper.find(CreationStep).text()).toBe('Create an account:2/2Back');
+      expect(wrapper.find(Header).text()).toBe('Create an account 2/2Back');
     });
   });
 

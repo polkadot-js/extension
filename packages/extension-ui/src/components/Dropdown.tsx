@@ -64,7 +64,7 @@ export default styled(Dropdown)`
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${({ theme }): string => theme.inputBackground};
+    background: ${({ theme }): string => theme.readonlyInputBackground};
     border-color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
     border-radius: ${({ theme }): string => theme.borderRadius};
     border-style: solid;
@@ -84,7 +84,7 @@ export default styled(Dropdown)`
       outline: none;
     }
   }
-  
+
   label::after {
     content: '';
     position: absolute;

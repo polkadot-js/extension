@@ -13,7 +13,6 @@ import {
   AddAccount,
   ButtonArea,
   Svg,
-  Title,
   ButtonWithSubtitle
 } from '../../components';
 import Account from './Account';
@@ -26,24 +25,25 @@ export default function Accounts (): React.ReactElement<Props> {
   const mediaAllowed = useContext(MediaContext);
   return (
     <>
-      <Header showSettings />
       {
         (accounts.length === 0)
           ? <AddAccount />
           : (
-            <AccountsArea>
-              <>
-                <Title>Accounts</Title>
-                {
-                  accounts.map((json, index): React.ReactNode => (
-                    <Account
-                      {...json}
-                      key={`${index}:${json.address}`}
-                    />
-                  ))
-                }
-              </>
-            </AccountsArea>
+            <>
+              <Header showSettings text={'Accounts'} />
+              <AccountsArea>
+                <>
+                  {
+                    accounts.map((json, index): React.ReactNode => (
+                      <Account
+                        {...json}
+                        key={`${index}:${json.address}`}
+                      />
+                    ))
+                  }
+                </>
+              </AccountsArea>
+            </>
           )
       }
       <ButtonArea>
@@ -79,5 +79,10 @@ const QrButton = styled(Button)`
 
 const AccountsArea = styled.div`
   height: 100%;
-  overflow: scroll;
+  overflow-y: scroll;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;

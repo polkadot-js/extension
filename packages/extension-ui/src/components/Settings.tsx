@@ -99,7 +99,7 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
 
 const SettingsMenu = styled(Menu)`
   margin-top: 56px;
-  right: 30px;
+  right: 24px;
   user-select: none;
 `;
 

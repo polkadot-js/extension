@@ -35,6 +35,14 @@ const BodyTheme = createGlobalStyle<{ theme: Theme }>`
   body {
     background-color: ${({ theme }): string => theme.bodyColor};
   }
+
+  html {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 `;
 
 const Main = styled.main`

@@ -53,13 +53,16 @@ function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: 
   ];
 }
 
+const ACCOUNTS_SCREEN_HEIGHT = 500;
+
 function Address ({ address, className, children, genesisHash, name, actions }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<AccountJson | null>(null);
   const [chain, setChain] = useState<Chain | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
-  const actionsRef = useRef(null);
+  const [moveMenuUp, setIsMovedMenu] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
@@ -72,6 +75,20 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
     setChain(chain);
     setAccount(account);
   }, [address]);
+
+  useEffect(() => {
+    if (!showActionsMenu) {
+      setIsMovedMenu(false);
+      return;
+    }
+    if (!actionsRef.current) {
+      return;
+    }
+    const { bottom } = actionsRef.current.getBoundingClientRect();
+    if (bottom > ACCOUNTS_SCREEN_HEIGHT) {
+      setIsMovedMenu(true);
+    }
+  }, [showActionsMenu]);
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
 
@@ -86,13 +103,14 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
             <FullAddress>{formatted || '<unknown>'}</FullAddress>
+            {chain?.genesisHash && <Banner>{chain.name}</Banner>}
           </Info>
           {actions && (
             <>
               <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
                 {showActionsMenu ? <ActiveActionsIcon /> : <ActionsIcon />}
               </Settings>
-              {showActionsMenu && <Menu reference={actionsRef}>{actions}</Menu>}
+              {showActionsMenu && <MovableMenu reference={actionsRef} isMoved={moveMenuUp}>{actions}</MovableMenu>}
             </>
           )}
         </AccountInfoRow>
@@ -133,6 +151,8 @@ const FullAddress = styled.div`
   font-size: 12px;
   line-height: 16px;
 `;
+
+FullAddress.displayName = 'FullAddress';
 
 const Settings = styled.div`
   position: relative;
@@ -175,6 +195,22 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
   src: DetailsImg
 }))`
   background: ${({ theme }): string => theme.primaryColor};
+`;
+
+const Banner = styled.div`
+  background: ${({ theme }): string => theme.primaryColor};
+  border-radius: 0 0 8px 8px;
+  color: white;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 0.1rem 0.5rem;
+  position: absolute;
+  right: 40px;
+  top: 0;
+`;
+
+const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
+  ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
 `;
 
 export default styled(Address)`

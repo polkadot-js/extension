@@ -9,9 +9,10 @@ import { Button, InputWithLabel } from '../../components';
 interface Props {
   className?: string;
   onSign: (password: string) => Promise<void>;
+  buttonText?: string;
 }
 
-export default function Unlock ({ className, onSign }: Props): React.ReactElement<Props> {
+export default function Unlock ({ className, onSign, buttonText = 'Sign the transaction' }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
@@ -34,7 +35,7 @@ export default function Unlock ({ className, onSign }: Props): React.ReactElemen
         onChange={setPassword}
         type='password'
       />
-      <Button onClick={_onClick}>Sign the transaction</Button>
+      <Button onClick={_onClick}>{buttonText}</Button>
     </div>
   );
 }

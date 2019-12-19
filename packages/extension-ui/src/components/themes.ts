@@ -71,8 +71,8 @@ export function chooseTheme (): AvailableThemes {
   if (preferredTheme) {
     return preferredTheme === 'dark' ? 'dark' : 'light';
   }
-  const isDarkColorSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  return isDarkColorSchemePreferred ? 'dark' : 'light';
+  const isLightColorSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  return isLightColorSchemePreferred ? 'light' : 'dark';
 }
 
 export declare type Theme = typeof darkTheme;

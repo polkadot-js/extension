@@ -23,12 +23,13 @@ interface Props {
   signId: string;
   url: string;
   isFirst?: boolean;
+  buttonText?: string;
 }
 
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-export default function Request ({ account: { isExternal }, request, signId, url, isFirst }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, request, signId, url, isFirst, buttonText }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [hexBytes, setHexBytes] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);
@@ -37,15 +38,17 @@ export default function Request ({ account: { isExternal }, request, signId, url
     const inner = request.inner;
     if ((inner as SignerPayloadRaw).data) {
       setHexBytes((inner as SignerPayloadRaw).data);
+      setExtrinsic(null);
     } else {
       setExtrinsic(createType(registry, 'ExtrinsicPayload', inner, { version: (inner as SignerPayloadJSON).version }));
+      setHexBytes(null);
     }
   }, [request]);
 
-  const _onCancel = (): Promise<void> =>
-    cancelSignRequest(signId)
-      .then((): void => onAction())
+  const _onCancel = (): Promise<void> => {
+    return cancelSignRequest(signId).then((): void => onAction())
       .catch((error: Error) => console.error(error));
+  };
   const _onSign = (password: string): Promise<void> =>
     approveSignPassword(signId, password)
       .then((): void => onAction())
@@ -80,7 +83,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
           )
         }
         <SignArea>
-          {isFirst && !isExternal && <Unlock onSign={_onSign} />}
+          {isFirst && !isExternal && <Unlock onSign={_onSign} buttonText={buttonText} />}
           <CancelButton>
             <Link isDanger onClick={_onCancel}>Cancel</Link>
           </CancelButton>
@@ -95,7 +98,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
         <Bytes bytes={payload.data} url={url} />
         <VerticalSpace />
         <SignArea>
-          {!isExternal && <Unlock onSign={_onSign} />}
+          {!isExternal && <Unlock onSign={_onSign} buttonText={buttonText} />}
           <CancelButton>
             <Link isDanger onClick={_onCancel}>Reject</Link>
           </CancelButton>

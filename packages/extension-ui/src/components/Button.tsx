@@ -5,22 +5,16 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   className?: string;
   children?: React.ReactNode;
   isDanger?: boolean;
   isDisabled?: boolean;
-  isSmall?: boolean;
-  label?: string;
   onClick?: () => void | Promise<void | boolean>;
   to?: string;
 }
 
-const DISABLED_OPACITY = '0.3';
-
-function Button ({ children, className, isDisabled, label, onClick, to }: Props): React.ReactElement<Props> {
+function Button ({ children, className, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
     if (isDisabled) {
       return;
@@ -34,36 +28,38 @@ function Button ({ children, className, isDisabled, label, onClick, to }: Props)
   };
 
   return (
-    <div className={className}>
-      <button onClick={_onClick}>
-        {label}{children}
-      </button>
-    </div>
+    <button
+      className={className}
+      onClick={_onClick}
+      disabled={isDisabled}
+    >
+      {children}
+    </button>
   );
 }
 
 export default styled(Button)`
+  display: block;
+  width: 100%;
+  height: ${({ isDanger }): string => isDanger ? '40px' : '48px'};
   box-sizing: border-box;
-  display: ${({ isSmall }): string => isSmall ? 'inline-block' : 'block'};
-  margin: ${defaults.boxMargin};
-  padding: ${defaults.boxPadding};
-  width: ${({ isSmall }): string => isSmall ? 'auto' : '100%'};
+  border: none;
+  border-radius: ${({ theme }): string => theme.borderRadius};
+  color: ${({ theme }): string => theme.buttonTextColor};
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 20px;
+  padding: 0 1rem;
+  text-align: center;
+  background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+  cursor: pointer;
 
-  button {
-    background: ${({ isDanger }): string => isDanger ? defaults.btnBgDanger : defaults.btnBg};
-    border: ${defaults.btnBorder}${({ isDanger }): string => isDanger ? defaults.btnColorDanger : defaults.btnColor};
-    border-radius: ${defaults.borderRadius};
-    color: ${({ isDanger }): string => isDanger ? defaults.btnColorDanger : defaults.btnColor};
-    cursor: pointer;
-    display: block;
-    font-size: ${defaults.fontSize};
-    opacity: ${({ isDisabled }): string => isDisabled ? DISABLED_OPACITY : '0.8'};
-    padding: ${defaults.btnPadding};
-    text-align: center;
-    width: 100%;
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
 
-    &:hover {
-      opacity: ${({ isDisabled }): string => isDisabled ? DISABLED_OPACITY : '1.0'};
-    }
+  &:not(:disabled):hover {
+    background: ${({ isDanger, theme }): string => isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
   }
 `;

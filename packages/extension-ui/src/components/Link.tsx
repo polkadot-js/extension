@@ -6,8 +6,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link as RouterLink } from 'react-router-dom';
 
-import defaults from './defaults';
-
 interface Props {
   children?: React.ReactNode;
   className?: string;
@@ -18,24 +16,40 @@ interface Props {
 
 function Link ({ children, className, onClick, to }: Props): React.ReactElement<Props> {
   return (
-    to
-      ? <RouterLink className={className} onClick={onClick} to={to}>{children}</RouterLink>
-      : <a href='#' className={className} onClick={onClick}>{children}</a>
+    to ? (
+      <RouterLink
+        className={className}
+        onClick={onClick}
+        to={to}
+      >
+        {children}
+      </RouterLink>
+    ) : (
+      <a
+        href='#'
+        className={className}
+        onClick={onClick}
+      >
+        {children}
+      </a>
+    )
   );
 }
 
 export default styled(Link)`
-  color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
+  display: flex;
+  align-items: center;
+  color: ${({ isDanger, theme }): string => isDanger ? theme.textColorDanger : theme.textColor};
   opacity: 0.9;
   text-decoration: none;
   vertical-align: middle;
 
   &:hover {
-    color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
+    color: ${({ isDanger, theme }): string => isDanger ? theme.textColorDanger : theme.textColor};
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${({ isDanger }): string => isDanger ? defaults.linkColorDanger : defaults.linkColor};
+    color: ${({ isDanger, theme }): string => isDanger ? theme.textColorDanger : theme.textColor};
   }
 `;

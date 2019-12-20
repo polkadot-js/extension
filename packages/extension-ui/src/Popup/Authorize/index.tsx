@@ -6,22 +6,37 @@ import React, { useContext } from 'react';
 
 import { AuthorizeContext, Header } from '../../components';
 import Request from './Request';
+import styled from 'styled-components';
 
 export default function Authorize (): React.ReactElement<{}> {
   const requests = useContext(AuthorizeContext);
 
   return (
-    <div>
-      <Header label='authorize' />
-      {requests.map(({ id, request, url }, index): React.ReactNode => (
-        <Request
-          authId={id}
-          isFirst={index === 0}
-          key={id}
-          request={request}
-          url={url}
-        />
-      ))}
-    </div>
+    <>
+      <Scroll isLastRequest={requests.length === 1}>
+        <Header text='Authorize'/>
+        {requests.map(({ id, request, url }, index): React.ReactNode => (
+          <Request
+            authId={id}
+            isFirst={index === 0}
+            key={id}
+            request={request}
+            url={url}
+          />
+        ))}
+      </Scroll>
+    </>
   );
 }
+
+const Scroll = styled.div<{isLastRequest: boolean}>`
+  overflow-y: ${({ isLastRequest }): string => isLastRequest ? 'hidden' : 'auto'};
+
+  && {
+    padding: 0;
+  }
+
+  ${Request} {
+    padding: 0 24px;
+  }
+`;

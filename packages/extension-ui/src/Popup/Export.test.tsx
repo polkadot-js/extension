@@ -7,15 +7,15 @@ import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { MemoryRouter, Route } from 'react-router';
 import React from 'react';
+import * as messaging from '@polkadot/extension-ui/messaging';
 
-import { Button } from '../components';
+import { Button, themes } from '../components';
 import Export from './Export';
 import { exportAccount } from '../messaging';
+import { ThemeProvider } from 'styled-components';
+import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
 
 configure({ adapter: new Adapter() });
-jest.mock('../messaging');
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const flushAllPromises = (): Promise<void> => new Promise(resolve => setImmediate(resolve));
 
 describe('Export component', () => {
   let wrapper: ReactWrapper;
@@ -26,12 +26,15 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    (exportAccount as jest.Mock).mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
+    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
 
-    wrapper = mount(<MemoryRouter
-      initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
-      <Route path='/account/export/:address' component={ Export }/>
-    </MemoryRouter>);
+    wrapper = mount(
+      <MemoryRouter initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
+        <ThemeProvider theme={themes.dark}>
+          <Route path='/account/export/:address' component={ Export } />
+        </ThemeProvider>
+      </MemoryRouter>
+    );
   });
 
   it('creates export message on button press', async () => {

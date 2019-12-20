@@ -4,21 +4,21 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
-import { AccountContext, Input } from '../components';
+import { AccountContext, InputWithLabel } from '../components';
 
 interface Props {
   address?: string;
   className?: string;
   defaultValue?: string | null;
   isFocussed?: boolean;
-  label?: string | null;
+  label?: string;
   onBlur?: () => void;
   onChange: (name: string | null) => void;
 }
 
 const MIN_LENGTH = 3;
 
-export default function Name ({ address, className, defaultValue, isFocussed, label = 'a descriptive name for this account', onBlur, onChange }: Props): React.ReactElement<Props> {
+export default function Name ({ address, className, defaultValue, isFocussed, label = 'A descriptive name for your account', onBlur, onChange }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [name, setName] = useState('');
   const account = accounts.find((account): boolean => account.address === address);
@@ -36,11 +36,12 @@ export default function Name ({ address, className, defaultValue, isFocussed, la
   }, [name]);
 
   return (
-    <Input
+    <InputWithLabel
+      data-input-name
       className={className}
       defaultValue={startValue}
       isError={isError}
-      isFocussed={isFocussed}
+      isFocused={isFocussed}
       label={label}
       onBlur={onBlur}
       onChange={setName}

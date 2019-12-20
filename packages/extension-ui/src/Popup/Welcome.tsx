@@ -4,7 +4,8 @@
 
 import React, { useContext } from 'react';
 
-import { ActionContext, Box, Button, Header } from '../components';
+import { ActionContext, Box, Button, ButtonArea, Header, List, VerticalSpace } from '../components';
+import styled from 'styled-components';
 
 type Props = {};
 
@@ -17,21 +18,33 @@ export default function Welcome (): React.ReactElement<Props> {
   };
 
   return (
-    <div>
-      <Header label='welcome' />
-      <Box>
-        Before we start, just a couple of notes regarding use -
-        <ul>
+    <>
+      <Header text='Welcome'/>
+      <Note>Before we start, just a couple of notes regarding use:</Note>
+      <TextBox>
+        <List>
           <li>We do not send any clicks, pageviews or events to a central server</li>
           <li>We do not use any trackers or analytics</li>
           <li>We don&apos;t collect keys, addresses or any information - your information never leaves this machine</li>
-        </ul>
-        ... we are not in the information collection business (even anonymized).
-        <Button
-          label='Understood, let me continue'
-          onClick={_onClick}
-        />
-      </Box>
-    </div>
+        </List>
+      </TextBox>
+      <Note>... we are not in the information collection business (even anonymized).</Note>
+      <VerticalSpace />
+      <ButtonArea>
+        <Button onClick={_onClick}>Understood, let me continue</Button>
+      </ButtonArea>
+    </>
   );
 }
+
+const Note = styled.p`
+  margin-bottom: 6px;
+  margin-top: 0;
+  color: ${({ theme }): string => theme.subTextColor};
+`;
+
+const TextBox = styled(Box)`
+  margin: 0.75rem 24px;
+  border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+  color: ${({ theme }): string => theme.subTextColor};
+`;

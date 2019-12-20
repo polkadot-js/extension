@@ -99,7 +99,7 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
 
   useEffect((): void => {
     setDecoded(decodeMethod(method, isDecoded, chain, specVersion));
-  }, [isDecoded]);
+  }, [method, isDecoded, chain, specVersion]);
 
   return (
     <table className={className}>
@@ -137,10 +137,12 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
 }
 
 export default styled(Extrinsic)`
-  border: 0;
+  height: 100%;
+  overflow: scroll;
   display: block;
-  font-size: 0.75rem;
-  margin-top: 0.75rem;
+  border: 0;
+  font-size: ${({ theme }): string => theme.labelFontSize};
+  line-height: ${({ theme }): string => theme.labelLineHeight};
 
   td.data {
     max-width: 0;

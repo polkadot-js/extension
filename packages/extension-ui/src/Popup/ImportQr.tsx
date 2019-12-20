@@ -5,9 +5,9 @@
 import React, { useContext, useState } from 'react';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Address, Button, Header } from '../components';
+import { ActionContext, Address, Button, ButtonArea, Header, VerticalSpace } from '../components';
 import { createAccountExternal } from '../messaging';
-import { Back, Name } from '../partials';
+import { Name } from '../partials';
 
 type Props = {};
 
@@ -26,10 +26,13 @@ export default function ImportQr (): React.ReactElement<Props> {
   };
 
   return (
-    <div>
-      <Header label='import external' />
-      <Back />
-      {!account && <QrScanAddress onScan={setAccount} />}
+    <>
+      <Header showBackArrow text='Scan Address Qr' />
+      {!account && (
+        <div>
+          <QrScanAddress onScan={setAccount} />
+        </div>
+      )}
       {account && (
         <>
           <Name
@@ -39,16 +42,17 @@ export default function ImportQr (): React.ReactElement<Props> {
           <Address
             {...account}
             name={name}
-          >
-            {name && (
-              <Button
-                label='Add the account with identified address'
-                onClick={_onCreate}
-              />
-            )}
-          </Address>
+          />
+          <VerticalSpace />
+          {name && (
+            <ButtonArea>
+              <Button onClick={_onCreate}>
+                Add the account with identified address
+              </Button>
+            </ButtonArea>
+          )}
         </>
       )}
-    </div>
+    </>
   );
 }

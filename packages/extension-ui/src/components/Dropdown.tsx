@@ -4,11 +4,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import arrow from '../assets/arrow-down.svg';
 
 import Label from './Label';
-import defaults from './defaults';
 
-interface DrodownOption {
+interface DropdownOption {
   text: string;
   value: string;
 }
@@ -18,11 +18,10 @@ interface Props {
   defaultValue?: string | null;
   isError?: boolean;
   isFocussed?: boolean;
-  isReadOnly?: boolean;
-  label?: string | null;
+  label: string;
   onBlur?: () => void;
   onChange?: (value: string) => void;
-  options: DrodownOption[];
+  options: DropdownOption[];
   value?: string;
 }
 
@@ -31,54 +30,70 @@ function Dropdown ({ className, defaultValue, label, isFocussed, onBlur, onChang
     onChange && onChange(value.trim());
   };
 
-  console.error(value);
-
   return (
-    <Label
-      className={className}
-      label={label}
-    >
-      <select
-        autoFocus={isFocussed}
-        defaultValue={defaultValue || undefined}
-        onBlur={onBlur}
-        onChange={_onChange}
-        value={value}
+    <>
+      <Label
+        className={className}
+        label={label}
       >
-        {options.map(({ text, value }): React.ReactNode => (
-          <option
-            key={value}
-            value={value}
-          >
-            {text}
-          </option>
-        ))}
-      </select>
-    </Label>
+        <select
+          autoFocus={isFocussed}
+          defaultValue={defaultValue || undefined}
+          onBlur={onBlur}
+          onChange={_onChange}
+          value={value}
+        >
+          {options.map(({ text, value }): React.ReactNode => (
+            <option
+              key={value}
+              value={value}
+            >
+              {text}
+            </option>
+          ))}
+        </select>
+      </Label>
+    </>
   );
 }
 
 export default styled(Dropdown)`
+  position: relative;
+
   select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${({ isError, isReadOnly }): string => isError ? defaults.box.error.background : (isReadOnly ? '#eee' : '#fff')};
-    border-color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.inputBorder};
-    border-radius: ${defaults.borderRadius};
+    background: ${({ theme }): string => theme.readonlyInputBackground};
+    border-color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
+    border-radius: ${({ theme }): string => theme.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError }): string => isError ? defaults.box.error.border : defaults.color};
+    color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.textColor};
     display: block;
-    font-family: ${defaults.fontFamily};
-    font-size: ${defaults.fontSize};
-    padding: ${({ label }): string => label ? defaults.inputPaddingLabel : defaults.inputPadding};
+    font-family: ${({ theme }): string => theme.fontFamily};
+    font-size: ${({ theme }): string => theme.fontSize};
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
     width: 100%;
+    cursor: pointer;
 
     &:read-only {
       box-shadow: none;
       outline: none;
     }
+  }
+
+  label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 5px;
+    width: 8px;
+    height: 6px;
+    background: url(${arrow}) center no-repeat;
+    pointer-events: none;
   }
 `;

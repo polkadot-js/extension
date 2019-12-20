@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { Input } from '../components';
+import { InputWithLabel } from '../components';
 
 interface Props {
   isFocussed?: boolean;
@@ -27,17 +27,19 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
 
   return (
     <>
-      <Input
+      <InputWithLabel
+        data-input-password
         isError={pass1.length < MIN_LENGTH}
-        isFocussed={isFocussed}
-        label='a new password for this account'
+        isFocused={isFocussed}
+        label='A new password for this account'
         onChange={setPass1}
         type='password'
       />
       {(pass1.length >= MIN_LENGTH) && (
-        <Input
+        <InputWithLabel
+          data-input-repeat-password
           isError={pass1 !== pass2}
-          label='repeat password for verification'
+          label='Repeat password for verification'
           onChange={setPass2}
           type='password'
         />

@@ -31,24 +31,38 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
 
   return (
     <div className={className}>
-      {isScanning
-        ? <QrScanSignature onScan={onSignature} />
-        : <QrDisplayPayload
-          address={request.address}
-          cmd={CMD_MORTAL}
-          payload={payloadU8a}
-        />
-      }
+      <QrArea>
+        {isScanning
+          ? <QrScanSignature onScan={onSignature} />
+          : (
+            <QrDisplayPayload
+              address={request.address}
+              cmd={CMD_MORTAL}
+              payload={payloadU8a}
+            />
+          )
+        }
+      </QrArea>
       {!isScanning && (
-        <Button
-          label='Scan signature via camera'
-          onClick={_onShowQr}
-        />
+        <ScanButton onClick={_onShowQr}>Scan signature via camera</ScanButton>
       )}
     </div>
   );
 }
 
+const ScanButton = styled(Button)`
+  margin-bottom: 8px;
+`;
+
+const QrArea = styled.div`
+  width: 65%;
+  margin: 5px auto 10px auto;
+
+  img {
+    border: white solid 1px;
+  }
+`;
+
 export default styled(Qr)`
-  padding: 0.75rem 1.5rem 0 1.5rem;
+  height: 100%;
 `;

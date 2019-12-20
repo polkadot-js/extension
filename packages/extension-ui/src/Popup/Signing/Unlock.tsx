@@ -4,14 +4,15 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { Button, Input } from '../../components';
+import { Button, InputWithLabel } from '../../components';
 
 interface Props {
   className?: string;
   onSign: (password: string) => Promise<void>;
+  buttonText?: string;
 }
 
-export default function Unlock ({ className, onSign }: Props): React.ReactElement<Props> {
+export default function Unlock ({ className, onSign, buttonText = 'Sign the transaction' }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
@@ -27,17 +28,14 @@ export default function Unlock ({ className, onSign }: Props): React.ReactElemen
 
   return (
     <div className={className}>
-      <Input
+      <InputWithLabel
         isError={!password || !!error}
-        isFocussed
-        label='password for this account'
+        isFocused
+        label='Password for this account'
         onChange={setPassword}
         type='password'
       />
-      <Button
-        label='Sign the transaction'
-        onClick={_onClick}
-      />
+      <Button onClick={_onClick}>{buttonText}</Button>
     </div>
   );
 }

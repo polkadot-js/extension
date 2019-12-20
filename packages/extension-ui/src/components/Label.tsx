@@ -5,38 +5,31 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   children: React.ReactNode;
   className?: string;
-  label?: string | null;
+  label: string;
 }
 
 function Label ({ children, className, label }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      {label && <label>{label}</label>}
+      <label>{label}</label>
       {children}
     </div>
   );
 }
 
 export default styled(Label)`
-  box-sizing: border-box;
-  color: ${defaults.labelColor};
-  display: block;
-  font-family: ${defaults.fontFamily};
-  font-size: ${defaults.fontSize};
-  margin: ${defaults.boxMargin};
-  padding: ${defaults.boxPadding};
-  position: relative;
+  color: ${({ theme }): string => theme.textColor};
 
   label {
-    display: block;
-    font-size: 0.75rem;
-    left: 1rem;
-    position: absolute;
-    top: 0.25rem;
+    font-size: 10px;
+    line-height: 14px;
+    letter-spacing: 0.04em;
+    font-weight: 800;
+    opacity: 0.65;
+    margin-bottom: 12px;
+    text-transform: uppercase;
   }
 `;

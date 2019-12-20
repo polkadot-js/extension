@@ -9,25 +9,27 @@ import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import React, { useContext, useState, useEffect } from 'react';
 import { TypeRegistry, createType } from '@polkadot/types';
 
-import { ActionBar, ActionContext, Address, Link } from '../../components';
+import { ActionBar, ActionContext, Address, ButtonArea, Link, VerticalSpace } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
 import Unlock from './Unlock';
+import styled from 'styled-components';
 
 interface Props {
   account: AccountJson;
-  isFirst: boolean;
   request: RequestSign;
   signId: string;
   url: string;
+  isFirst?: boolean;
+  buttonText?: string;
 }
 
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-export default function Request ({ account: { isExternal }, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, request, signId, url, isFirst, buttonText }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [hexBytes, setHexBytes] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);
@@ -36,15 +38,17 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
     const inner = request.inner;
     if ((inner as SignerPayloadRaw).data) {
       setHexBytes((inner as SignerPayloadRaw).data);
+      setExtrinsic(null);
     } else {
       setExtrinsic(createType(registry, 'ExtrinsicPayload', inner, { version: (inner as SignerPayloadJSON).version }));
+      setHexBytes(null);
     }
   }, [request]);
 
-  const _onCancel = (): Promise<void> =>
-    cancelSignRequest(signId)
-      .then((): void => onAction())
+  const _onCancel = (): Promise<void> => {
+    return cancelSignRequest(signId).then((): void => onAction())
       .catch((error: Error) => console.error(error));
+  };
   const _onSign = (password: string): Promise<void> =>
     approveSignPassword(signId, password)
       .then((): void => onAction())
@@ -53,46 +57,71 @@ export default function Request ({ account: { isExternal }, isFirst, request, si
     approveSignSignature(signId, signature)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
+
   if (extrinsic !== null) {
     const payload = request.inner as SignerPayloadJSON;
     return (
-      <Address
-        address={payload.address}
-        genesisHash={payload.genesisHash}
-      >
-        {isExternal && isFirst
-          ? <Qr
-            payload={extrinsic}
-            request={payload}
-            onSignature={_onSignature}
-          />
-          : <Extrinsic
-            isDecoded={isFirst}
-            payload={extrinsic}
-            request={payload}
-            url={url}
-          />
+      <>
+        <Address
+          address={payload.address}
+          genesisHash={payload.genesisHash}
+        />
+        {isExternal
+          ? (
+            <Qr
+              payload={extrinsic}
+              request={payload}
+              onSignature={_onSignature}
+            />
+          ) : (
+            <Extrinsic
+              isDecoded={true}
+              payload={extrinsic}
+              request={payload}
+              url={url}
+            />
+          )
         }
-        {isFirst && !isExternal && <Unlock onSign={_onSign} />}
-        <ActionBar>
-          <div />
-          <Link isDanger onClick={_onCancel}>Cancel</Link>
-        </ActionBar>
-      </Address>
+        <SignArea>
+          {isFirst && !isExternal && <Unlock onSign={_onSign} buttonText={buttonText} />}
+          <CancelButton>
+            <Link isDanger onClick={_onCancel}>Cancel</Link>
+          </CancelButton>
+        </SignArea>
+      </>
     );
   } else if (hexBytes !== null) {
     const payload = request.inner as SignerPayloadRaw;
     return (
-      <Address address={payload.address}>
+      <>
+        <Address address={payload.address} />
         <Bytes bytes={payload.data} url={url} />
-        {isFirst && !isExternal && <Unlock onSign={_onSign} />}
-        <ActionBar>
-          <div />
-          <Link isDanger onClick={_onCancel}>Cancel</Link>
-        </ActionBar>
-      </Address>
+        <VerticalSpace />
+        <SignArea>
+          {!isExternal && <Unlock onSign={_onSign} buttonText={buttonText} />}
+          <CancelButton>
+            <Link isDanger onClick={_onCancel}>Reject</Link>
+          </CancelButton>
+        </SignArea>
+      </>
     );
   } else {
     return null;
   }
 }
+
+const SignArea = styled(ButtonArea)`
+  flex-direction: column;
+  padding: 6px 24px;
+`;
+
+const CancelButton = styled(ActionBar)`
+  margin-top: 4px;
+  margin-bottom: 4px;
+  text-decoration: underline;
+
+  a {
+    margin: auto;
+  }
+`;
+CancelButton.displayName = 'CancelButton';

@@ -2,10 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
-import styled from 'styled-components';
-
-import defaults from './defaults';
+import React, { useState } from 'react';
+import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
+import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext, Theme } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -13,21 +12,57 @@ interface Props {
 }
 
 function View ({ children, className }: Props): React.ReactElement<Props> {
+  const [theme, setTheme] = useState(chooseTheme());
+
+  const switchTheme = (theme: AvailableThemes): void => {
+    localStorage.setItem('theme', theme);
+    setTheme(theme);
+  };
+
   return (
-    <main className={className}>
-      {children}
-    </main>
+    <ThemeSwitchContext.Provider value={switchTheme}>
+      <ThemeProvider theme={themes[theme]}>
+        <BodyTheme theme={themes[theme]} />
+        <Main className={className}>
+          {children}
+        </Main>
+      </ThemeProvider>
+    </ThemeSwitchContext.Provider>
   );
 }
 
-export default styled(View)`
-  color: ${defaults.color};
-  font-family: ${defaults.fontFamily};
-  font-size: ${defaults.fontSize};
-  line-height: ${defaults.lineHeight};
+const BodyTheme = createGlobalStyle<{ theme: Theme }>`
+  body {
+    background-color: ${({ theme }): string => theme.bodyColor};
+  }
 
-  h3 {
-    margin: 0 0 0.75rem;
-    text-transform: uppercase;
+  html {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 `;
+
+const Main = styled.main`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: ${({ theme }): string => theme.background};
+  color: ${({ theme }): string => theme.textColor};
+  font-size: ${({ theme }): string => theme.fontSize};
+  line-height: ${({ theme }): string => theme.lineHeight};
+  border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+
+  * {
+    font-family: ${({ theme }): string => theme.fontFamily};
+  }
+
+  > * {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+`;
+
+export default View;

@@ -57,7 +57,7 @@ function createWebpack ({ alias = {}, context }) {
           ]
         },
         {
-          test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+          test: [/\.svg$/, /\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.woff2?$/],
           use: [
             {
               loader: require.resolve('url-loader'),

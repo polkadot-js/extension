@@ -5,22 +5,26 @@
 import { AccountJson } from '@polkadot/extension/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
-import Identicon from '@polkadot/react-identicon';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import IconBox from './IconBox';
 import { AccountContext } from './contexts';
+import Identicon from '@polkadot/extension-ui/components/Identicon';
+import Svg from '@polkadot/extension-ui/components/Svg';
+import Menu from '@polkadot/extension-ui/components/Menu';
+import DetailsImg from '../assets/details.svg';
+import { useOutsideClick } from '@polkadot/extension-ui/hooks';
 
 interface Props {
   address?: string | null;
-  children?: React.ReactNode;
   className?: string;
   name?: React.ReactNode | null;
+  children?: React.ReactNode;
   genesisHash?: string | null;
+  actions?: React.ReactNode;
 }
 
 // find an account in our list
@@ -49,17 +53,22 @@ function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: 
   ];
 }
 
-function Address ({ address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
+const ACCOUNTS_SCREEN_HEIGHT = 500;
+
+function Address ({ address, className, children, genesisHash, name, actions }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [account, setAccount] = useState<AccountJson | null>(null);
   const [chain, setChain] = useState<Chain | null>(null);
   const [formatted, setFormatted] = useState<string | null>(null);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [moveMenuUp, setIsMovedMenu] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
     if (!address) {
       return;
     }
-
     const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
 
     setFormatted(formatted);
@@ -67,40 +76,161 @@ function Address ({ address, children, className, genesisHash, name }: Props): R
     setAccount(account);
   }, [address]);
 
+  useEffect(() => {
+    if (!showActionsMenu) {
+      setIsMovedMenu(false);
+      return;
+    }
+    if (!actionsRef.current) {
+      return;
+    }
+    const { bottom } = actionsRef.current.getBoundingClientRect();
+    if (bottom > ACCOUNTS_SCREEN_HEIGHT) {
+      setIsMovedMenu(true);
+    }
+  }, [showActionsMenu]);
+
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
 
   return (
-    <IconBox
-      banner={chain && chain.genesisHash && chain.name}
-      className={className}
-      icon={
-        <Identicon
-          className='icon'
-          size={64}
-          theme={theme}
-          value={address}
-        />
-      }
-      intro={
-        <>
-          <div className='name'>{name || (account && account.name) || '<unknown>'}</div>
-          <div className='address'>{formatted || '<unknown>'}</div>
-        </>
-      }
-    >
-      {children}
-    </IconBox>
+    <div className={className}>
+      <div>
+        <AccountInfoRow>
+          <Identicon
+            iconTheme={theme}
+            value={address}
+          />
+          <Info>
+            <Name>{name || (account && account.name) || '<unknown>'}</Name>
+            <FullAddress>{formatted || '<unknown>'}</FullAddress>
+            {chain?.genesisHash && <Banner>{chain.name}</Banner>}
+          </Info>
+          {actions && (
+            <>
+              <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
+                {showActionsMenu ? <ActiveActionsIcon /> : <ActionsIcon />}
+              </Settings>
+              {showActionsMenu && <MovableMenu reference={actionsRef} isMoved={moveMenuUp}>{actions}</MovableMenu>}
+            </>
+          )}
+        </AccountInfoRow>
+        {children}
+      </div>
+    </div>
   );
 }
 
-export default styled(Address)`
-  .address {
-    opacity: 0.5;
-    overflow: hidden;
-    text-overflow: ellipsis;
+const AccountInfoRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  height: 72px;
+  border-radius: 4px;
+`;
+
+const Info = styled.div`
+  width: 100%;
+`;
+
+const Name = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 300px;
+  margin: 2px 0;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 22px;
+`;
+
+const FullAddress = styled.div`
+  width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: ${({ theme }): string => theme.labelColor};
+  font-size: 12px;
+  line-height: 16px;
+`;
+
+FullAddress.displayName = 'FullAddress';
+
+const Settings = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 40px;
+
+  & ${Svg} {
+    width: 3px;
+    height: 19px;
   }
 
-  .name {
-    padding-bottom: 0.5rem;
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 1px;
+    background: ${({ theme }): string => theme.boxBorderColor};
+  }
+
+  &:hover {
+    cursor: pointer;
+    background: ${({ theme }): string => theme.readonlyInputBackground};
+  }
+`;
+
+Settings.displayName = 'Details';
+
+const ActionsIcon = styled(Svg).attrs(() => ({
+  src: DetailsImg
+}))`
+  background: ${({ theme }): string => theme.accountDotsIconColor};
+`;
+
+const ActiveActionsIcon = styled(Svg).attrs(() => ({
+  src: DetailsImg
+}))`
+  background: ${({ theme }): string => theme.primaryColor};
+`;
+
+const Banner = styled.div`
+  background: ${({ theme }): string => theme.primaryColor};
+  border-radius: 0 0 8px 8px;
+  color: white;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 0.1rem 0.5rem;
+  position: absolute;
+  right: 40px;
+  top: 0;
+`;
+
+const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
+  ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
+`;
+
+export default styled(Address)`
+  position: relative;
+  margin-bottom: 8px;
+
+  & > div {
+    background: ${({ theme }): string => theme.accountBackground};
+    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
+    box-sizing: border-box;
+    border-radius: 4px;
+  }
+
+  & ${Identicon} {
+    margin-left: 25px;
+    margin-right: 10px;
+
+    & svg {
+      width: 50px;
+      height: 50px;
+    }
   }
 `;

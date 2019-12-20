@@ -3,46 +3,88 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext } from 'react';
+import QrImage from '../../assets/qr.svg';
 
-import { AccountContext, Button, Header, Link, MediaContext, Tip } from '../../components';
+import {
+  AccountContext,
+  Button,
+  Header,
+  MediaContext,
+  AddAccount,
+  ButtonArea,
+  Svg,
+  ButtonWithSubtitle
+} from '../../components';
 import Account from './Account';
+import styled from 'styled-components';
 
 type Props = {};
 
 export default function Accounts (): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
-
   return (
-    <div>
-      <Header
-        label='accounts'
-        labelExtra={<Link to='/settings'>Options</Link>}
-      />
+    <>
       {
         (accounts.length === 0)
-          ? <Tip header='add accounts' type='warn'>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase</Tip>
-          : accounts.map((json, index): React.ReactNode => (
-            <Account
-              {...json}
-              key={`${index}:${json.address}`}
-            />
-          ))
+          ? <AddAccount />
+          : (
+            <>
+              <Header showSettings text={'Accounts'} />
+              <AccountsArea>
+                <>
+                  {
+                    accounts.map((json, index): React.ReactNode => (
+                      <Account
+                        {...json}
+                        key={`${index}:${json.address}`}
+                      />
+                    ))
+                  }
+                </>
+              </AccountsArea>
+            </>
+          )
       }
-      <Button
-        label='I want to create a new account with a new seed'
-        to='/account/create'
-      />
-      <Button
-        label='I have a pre-existing seed, import the account'
-        to='/account/import-seed'
-      />
-      {mediaAllowed && (
-        <Button
-          label='I have an external account, add it via QR'
-          to='/account/import-qr'
+      <ButtonArea>
+        <ButtonWithSubtitle
+          to='/account/create'
+          title='Create New Account'
+          subTitle='With new seed'
         />
-      )}
-    </div>
+        <ButtonWithSubtitle
+          to='/account/import-seed'
+          title='Import an Account'
+          subTitle='I have a pre-existing seed'
+        />
+        {mediaAllowed && (
+          <QrButton to='/account/import-qr'>
+            <Svg src={QrImage} />
+          </QrButton>
+        )}
+      </ButtonArea>
+    </>
   );
 }
+
+const QrButton = styled(Button)`
+  width: 60px;
+
+  ${Svg} {
+    width: 20px;
+    height: 20px;
+    background: ${({ theme }): string => theme.buttonTextColor};
+  }
+`;
+
+const AccountsArea = styled.div`
+  height: 100%;
+  overflow-y: scroll;
+  margin-top: -25px;
+  padding-top: 25px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;

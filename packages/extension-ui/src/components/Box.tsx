@@ -5,8 +5,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import defaults from './defaults';
-
 interface Props {
   banner?: React.ReactNode;
   children: React.ReactNode;
@@ -23,20 +21,19 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
 }
 
 export default styled(Box)`
-  background: white;
-  border: ${defaults.boxBorder};
-  border-radius: ${defaults.borderRadius};
-  box-shadow: ${defaults.boxShadow};
-  color: ${defaults.color};
-  font-family: ${defaults.fontFamily};
-  font-size: ${defaults.fontSize};
-  margin: ${defaults.boxMargin};
-  padding: 0.75rem 1rem;
+  background: ${({ theme }): string => theme.readonlyInputBackground};
+  border: none;
+  border-radius: ${({ theme }): string => theme.borderRadius};
+  color: ${({ theme }): string => theme.textColor};
+  font-family: ${({ theme }): string => theme.fontFamily};
+  font-size: ${({ theme }): string => theme.fontSize};
+  margin: ${({ theme }): string => theme.boxMargin};
+  padding: ${({ theme }): string => theme.boxPadding};
   position: relative;
 
   .banner {
     background: darkorange;
-    border-radius: 0 ${defaults.borderRadius} 0 ${defaults.borderRadius};
+    border-radius: 0 ${({ theme }): string => theme.borderRadius} 0 ${({ theme }): string => theme.borderRadius};
     color: white;
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;

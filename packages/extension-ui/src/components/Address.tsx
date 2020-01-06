@@ -63,34 +63,33 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
-    if (!address) {
-      return;
-    }
-    const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
+    if (address) {
+      const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
 
-    setFormatted(formatted);
-    setChain(chain);
-    setAccount(account);
+      setFormatted(formatted);
+      setChain(chain);
+      setAccount(account);
+    }
   }, [address]);
 
   useEffect(() => {
     if (!showActionsMenu) {
       setIsMovedMenu(false);
-      return;
-    }
-    if (!actionsRef.current) {
-      return;
-    }
-    const { bottom } = actionsRef.current.getBoundingClientRect();
-    if (bottom > ACCOUNTS_SCREEN_HEIGHT) {
-      setIsMovedMenu(true);
+    } else if (actionsRef.current) {
+      const { bottom } = actionsRef.current.getBoundingClientRect();
+
+      if (bottom > ACCOUNTS_SCREEN_HEIGHT) {
+        setIsMovedMenu(true);
+      }
     }
   }, [showActionsMenu]);
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
+  const _onClick = (): void => setShowActionsMenu(!showActionsMenu);
 
   return (
     <div className={className}>
@@ -107,10 +106,17 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           </Info>
           {actions && (
             <>
-              <Settings onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
+              <Settings onClick={_onClick}>
                 {showActionsMenu ? <ActiveActionsIcon /> : <ActionsIcon />}
               </Settings>
-              {showActionsMenu && <MovableMenu reference={actionsRef} isMoved={moveMenuUp}>{actions}</MovableMenu>}
+              {showActionsMenu && (
+                <MovableMenu
+                  isMoved={moveMenuUp}
+                  reference={actionsRef}
+                >
+                  {actions}
+                </MovableMenu>
+              )}
             </>
           )}
         </AccountInfoRow>

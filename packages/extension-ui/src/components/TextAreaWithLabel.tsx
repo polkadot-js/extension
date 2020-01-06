@@ -5,7 +5,7 @@
 import React from 'react';
 
 import Label from './Label';
-import { TextArea } from '@polkadot/extension-ui/components/TextInputs';
+import { TextArea } from './TextInputs';
 
 interface Props {
   className?: string;
@@ -18,7 +18,7 @@ interface Props {
   value?: string;
 }
 
-function TextAreaWithLabel ({ className, isFocused, isReadOnly, label, onChange, value, rowsCount, isError }: Props): React.ReactElement<Props> {
+export default function TextAreaWithLabel ({ className, isFocused, isReadOnly, label, onChange, value, rowsCount, isError }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -29,15 +29,16 @@ function TextAreaWithLabel ({ className, isFocused, isReadOnly, label, onChange,
       label={label}
     >
       <TextArea
-        withError={isError}
+        autoCapitalize='off'
+        autoCorrect='off'
         autoFocus={isFocused}
         onChange={_onChange}
         readOnly={isReadOnly}
-        value={value}
         rows={rowsCount || 2}
+        spellCheck={false}
+        value={value}
+        withError={isError}
       />
     </Label>
   );
 }
-
-export default TextAreaWithLabel;

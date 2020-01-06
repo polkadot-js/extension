@@ -3,9 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React from 'react';
+import styled from 'styled-components';
 
 import Label from './Label';
-import styled from 'styled-components';
 import { Input } from './TextInputs';
 
 interface Props {
@@ -32,14 +32,17 @@ function InputWithLabel ({ className, defaultValue, label, isFocused, isReadOnly
       label={label}
     >
       <Input
-        withError={isError}
+        autoCapitalize='off'
+        autoCorrect='off'
         autoFocus={isFocused}
         defaultValue={defaultValue || undefined}
-        readOnly={isReadOnly}
         onBlur={onBlur}
         onChange={_onChange}
+        readOnly={isReadOnly}
+        spellCheck={false}
         type={type}
         value={value}
+        withError={isError}
       />
     </Label>
   );

@@ -13,7 +13,10 @@ interface Props {
 
 function Menu ({ children, className, reference }: Props): React.ReactElement<Props> {
   return (
-    <div className={className} ref={reference}>
+    <div
+      className={className}
+      ref={reference}
+    >
       {children}
     </div>
   );

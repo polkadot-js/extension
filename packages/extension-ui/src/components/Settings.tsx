@@ -38,11 +38,7 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
   const setTheme = useContext(ThemeSwitchContext);
 
   useEffect(() => {
-    if (camera) {
-      settings.set({ camera: 'on' });
-    } else {
-      settings.set({ camera: 'off' });
-    }
+    settings.set({ camera: camera ? 'on' : 'off' });
   }, [camera]);
 
   // FIXME check against index, we need a better solution
@@ -55,6 +51,7 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
     settings.set({ prefix });
     location.reload();
   };
+  const _onChangeTheme = (checked: boolean): void => setTheme(checked ? 'dark' : 'light');
 
   return (
     <SettingsMenu reference={reference}>
@@ -62,17 +59,17 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
         <SettingTitle>Theme</SettingTitle>
         <Switch
           checked={themeContext.id === themes.dark.id}
-          uncheckedLabel='Light'
           checkedLabel='Dark'
-          onChange={(checked): void => setTheme(checked ? 'dark' : 'light')}
+          onChange={_onChangeTheme}
+          uncheckedLabel='Light'
         />
       </Setting>
       <Setting>
         <SettingTitle>External QR accounts and Access</SettingTitle>
         <CheckboxSetting
           checked={camera}
-          onChange={setCamera}
           label='Allow Camera Access'
+          onChange={setCamera}
         />
       </Setting>
       <Setting>
@@ -87,9 +84,9 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
       {isPopup && (
         <Setting>
           <OpenInNewWindowButton
+            icon={FullScreenIcon}
             onClick={windowOpen}
             text='Open extension in new window'
-            icon={FullScreenIcon}
           />
         </Setting>
       )}

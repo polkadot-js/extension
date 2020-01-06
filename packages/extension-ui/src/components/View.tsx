@@ -13,6 +13,7 @@ interface Props {
 
 function View ({ children, className }: Props): React.ReactElement<Props> {
   const [theme, setTheme] = useState(chooseTheme());
+  const _theme = themes[theme];
 
   const switchTheme = (theme: AvailableThemes): void => {
     localStorage.setItem('theme', theme);
@@ -21,8 +22,8 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
 
   return (
     <ThemeSwitchContext.Provider value={switchTheme}>
-      <ThemeProvider theme={themes[theme]}>
-        <BodyTheme theme={themes[theme]} />
+      <ThemeProvider theme={_theme}>
+        <BodyTheme theme={_theme} />
         <Main className={className}>
           {children}
         </Main>

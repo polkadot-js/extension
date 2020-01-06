@@ -24,22 +24,27 @@ interface Props {
 function Header ({ children, className, showSettings, text, showBackArrow }: Props): React.ReactElement<Props> {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsRef = useRef(null);
+
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+
+  const _toggleSettings = (): void => setShowActionsMenu(!showActionsMenu);
 
   return (
     <div className={className}>
       <Container>
         <Branding>
-          {showBackArrow ? (
-            <BackLink to={'/'}>
-              <ArrowLeft/>
-            </BackLink>
-          ) : <Logo src={logo}/>
+          {showBackArrow
+            ? (
+              <BackLink to={'/'}>
+                <ArrowLeft/>
+              </BackLink>
+            )
+            : <Logo src={logo}/>
           }
           <LogoText>{text || 'polkadot{.js}'}</LogoText>
         </Branding>
         {showSettings && (
-          <SettingsToggle onClick={(): void => setShowActionsMenu(!showActionsMenu)}>
+          <SettingsToggle onClick={_toggleSettings}>
             <Gear isSelected={showActionsMenu} />
           </SettingsToggle>
         )}

@@ -19,7 +19,7 @@ function Checkbox ({ onChange, label, className, checked }: Props): React.ReactE
       <label>
         {label}
         <input
-          type="checkbox"
+          type='checkbox'
           checked={checked}
           onChange={((event): void => onChange(event.target.checked))}
         />
@@ -60,7 +60,7 @@ export default styled(Checkbox)`
       border: 1px solid ${({ theme }): string => theme.inputBorderColor};
       border: 1px solid ${({ theme }): string => theme.inputBorderColor};
       &:after {
-        content: "";
+        content: '';
         display: none;
         width: 13px;
         height: 10px;

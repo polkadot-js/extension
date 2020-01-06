@@ -17,7 +17,10 @@ function Warning ({ children, className, danger }: Props): React.ReactElement<Pr
   return (
     <div className={className}>
       <div>
-        <WarningImage danger={danger} src={WarningImageSrc} />
+        <WarningImage
+          danger={danger}
+          src={WarningImageSrc}
+        />
       </div>
       <div>
         {children}
@@ -30,7 +33,7 @@ const WarningImage = styled(Svg)<Pick<Props, 'danger'>>`
   width: 16px;
   height: 14px;
   margin: 5px 10px 5px 0;
-  background: ${({ danger, theme }): string => danger ? theme.iconDangerColor : theme.iconWarningColor};  
+  background: ${({ danger, theme }): string => danger ? theme.iconDangerColor : theme.iconWarningColor};
 `;
 
 export default styled(Warning)`

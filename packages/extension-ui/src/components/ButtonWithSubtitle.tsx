@@ -1,4 +1,4 @@
-// Copyright 2019 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
@@ -28,14 +28,14 @@ const StyledButton = styled(Button)`
     padding-top: 0;
     padding-bottom: 0;
   }
-  
+
   p {
     margin: 0;
     font-weight: 800;
     font-size: 15px;
     line-height: 20px;
   }
-  
+
   span {
     display: block;
     font-weight: 600;

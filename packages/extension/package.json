@@ -5,18 +5,18 @@
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/api": "^0.99.0-beta.13",
+    "@polkadot/api": "^0.100.0-beta.18",
     "@polkadot/extension-ui": "^0.14.1",
-    "@polkadot/ui-keyring": "^0.48.0-beta.1"
+    "@polkadot/ui-keyring": "^0.48.0-beta.7"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.7.5",
+    "@babel/runtime": "^7.7.7",
     "@polkadot/keyring": "^1.7.1",
     "@types/chrome": "^0.0.91",
     "@types/firefox-webext-browser": "^70.0.1",
     "extensionizer": "^1.0.1",
     "extract-loader": "^3.1.0",
-    "file-loader": "^4.2.0",
+    "file-loader": "^5.0.2",
     "html-loader": "^0.5.5",
     "webpack-extension-manifest-plugin": "^0.5.0"
   }

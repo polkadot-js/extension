@@ -1,4 +1,4 @@
-// Copyright 2019 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
@@ -34,7 +34,7 @@ const TextInput = css<Props>`
   resize: none;
   width: 100%;
   ${({ withError }): typeof ErroredTextInputColors => (withError ? ErroredTextInputColors : DefaultTextInputColors)};
-  
+
   &:read-only {
     background: ${({ theme }): string => theme.readonlyInputBackground};
     box-shadow: none;

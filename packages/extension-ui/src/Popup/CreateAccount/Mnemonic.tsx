@@ -35,7 +35,6 @@ function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
           onCopy();
           show('copied');
         }}
-        onPrint={onPrint(seed)}
       />
       <VerticalSpace />
       <Checkbox

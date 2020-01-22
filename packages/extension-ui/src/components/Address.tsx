@@ -226,18 +226,6 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
   background: ${({ theme }): string => theme.primaryColor};
 `;
 
-const Banner = styled.div`
-  background: ${({ theme }): string => theme.primaryColor};
-  border-radius: 0 0 8px 8px;
-  color: white;
-  font-size: 12px;
-  line-height: 16px;
-  padding: 0.1rem 0.5rem;
-  position: absolute;
-  right: 40px;
-  top: 0;
-`;
-
 const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
   ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
 `;

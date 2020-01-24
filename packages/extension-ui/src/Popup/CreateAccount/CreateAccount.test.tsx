@@ -20,6 +20,7 @@ import {
   Header
 } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
+import DerivationPath, { OptionsLabel } from '@polkadot/extension-ui/Popup/CreateAccount/DerivationPath';
 
 configure({ adapter: new Adapter() });
 
@@ -44,6 +45,7 @@ describe('Create Account', () => {
     onActionStub = jest.fn();
     jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
     jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
+    jest.spyOn(messaging, 'validateSeed').mockResolvedValue({ address: exampleAccount.address, suri: '' });
     wrapper = mountComponent();
     await act(flushAllPromises);
     wrapper.update();
@@ -67,9 +69,11 @@ describe('Create Account', () => {
       expect(onActionStub).toBeCalledWith('/');
     });
 
-    it('clicking on Next activates phase 2', () => {
+    it('clicking on Next activates phase 2', async () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(Header).text()).toBe('Create an account 2/2Back');
     });
   });
@@ -77,9 +81,32 @@ describe('Create Account', () => {
   describe('Phase 2', () => {
     const type = (input: ReactWrapper, value: string): unknown => input.simulate('change', { target: { value } });
 
-    beforeEach(() => {
+    type AndPassword = {
+      andPassword: (password: string) => AndRepeatedPassword;
+    };
+
+    type AndRepeatedPassword = {
+      andRepeatedPassword: (repeatedPassword: string) => void;
+    };
+
+    const enterName = (name: string): AndPassword => {
+      type(wrapper.find('input'), name);
+      return {
+        andPassword: (password: string): AndRepeatedPassword => {
+          type(wrapper.find('input[type="password"]').first(), password);
+          return {
+            andRepeatedPassword: (repeatedPassword: string): void => {
+              type(wrapper.find('input[type="password"]').last(), repeatedPassword);
+            }
+          };
+        }
+      };
+    };
+
+    beforeEach(async () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
+      await act(flushAllPromises);
     });
 
     it('only account name input is visible at first', () => {
@@ -98,7 +125,7 @@ describe('Create Account', () => {
     });
 
     it('after typing 3 characters into name input, first password input is visible', () => {
-      type(wrapper.find('input'), 'abc');
+      enterName('abc');
       expect(wrapper.find(Input).first().prop('withError')).toBe(false);
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
@@ -106,8 +133,7 @@ describe('Create Account', () => {
     });
 
     it('password shorter than 6 characters should be not valid', () => {
-      type(wrapper.find('input'), 'abc');
-      type(wrapper.find('input[type="password"]'), 'abcde');
+      enterName('abc').andPassword('abcde');
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input).prop('withError')).toBe(true);
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
@@ -115,29 +141,57 @@ describe('Create Account', () => {
     });
 
     it('submit button is not visible until both passwords are equal', () => {
-      type(wrapper.find('input'), 'abc');
-      type(wrapper.find('input[type="password"]').first(), 'abcdef');
-      type(wrapper.find('input[type="password"]').last(), 'abcdeg');
+      enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdeg');
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(true);
       expect(wrapper.find(Button)).toHaveLength(0);
     });
 
-    it('submit button is visible when both passwords are equal', () => {
-      type(wrapper.find('input'), 'abc');
-      type(wrapper.find('input[type="password"]').first(), 'abcdef');
-      type(wrapper.find('input[type="password"]').last(), 'abcdef');
+    it('submit button is visible when both passwords are equal', async () => {
+      enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
+      await act(flushAllPromises);
+
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(false);
       expect(wrapper.find(Button)).toHaveLength(1);
     });
 
     it('saves account with provided name and password', async () => {
-      type(wrapper.find('input'), 'abc');
-      type(wrapper.find('input[type="password"]').first(), 'abcdef');
-      type(wrapper.find('input[type="password"]').last(), 'abcdef');
+      enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
+      await act(flushAllPromises);
       wrapper.find(Button).find('button').simulate('click');
-      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed);
-      await flushAllPromises();
+      await act(flushAllPromises);
+
+      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, 'ed25519');
       expect(onActionStub).toBeCalledWith('/');
+    });
+
+    it('does not show advanced options at first', async () => {
+      enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
+      await act(flushAllPromises);
+
+      expect(wrapper.find(DerivationPath).find('input')).toHaveLength(0);
+    });
+
+    it('concatenates seed with correct derivation path', async () => {
+      enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
+      wrapper.find(DerivationPath).find(OptionsLabel).simulate('click');
+      type(wrapper.find(DerivationPath).find('input'), '//hard///password');
+      await act(flushAllPromises);
+      wrapper.find(Button).find('button').simulate('click');
+      await act(flushAllPromises);
+
+      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', `${exampleAccount.seed}//hard///password`, 'ed25519');
+    });
+
+    it('provided derivation path is invalid submit button is disabled and input field shows error ', async () => {
+      jest.spyOn(messaging, 'validateSeed').mockRejectedValue('');
+      enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
+      wrapper.find(DerivationPath).find(OptionsLabel).simulate('click');
+      type(wrapper.find(DerivationPath).find('input'), 'invalid-path');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(wrapper.find(DerivationPath).find(InputWithLabel).prop('isError')).toBe(true);
+      expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
     });
   });
 });

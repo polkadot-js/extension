@@ -6,8 +6,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ActionContext, Header, Loading, ActionText } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
-import Mnemonic from '@polkadot/extension-ui/Popup/CreateAccount/Mnemonic';
-import AccountName from '@polkadot/extension-ui/Popup/CreateAccount/AccountName';
+import { KeypairType } from '@polkadot/util-crypto/types';
+import Mnemonic from './Mnemonic';
+import AccountCredentials from './AccountCredentials';
 
 export default function CreateAccount (): React.ReactElement {
   const onAction = useContext(ActionContext);
@@ -21,10 +22,9 @@ export default function CreateAccount (): React.ReactElement {
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
-  const _onCreate = (name: string, password: string): void => {
-    // this should always be the case
-    if (name && password && account) {
-      createAccountSuri(name, password, account.seed)
+  const _onCreate = (name: string, password: string, suri: string, type?: KeypairType): void => {
+    if (name && password && suri) {
+      createAccountSuri(name, password, suri, type)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }
@@ -54,7 +54,7 @@ export default function CreateAccount (): React.ReactElement {
       <Loading>{account && (step === 1 ? (
         <Mnemonic seed={account.seed} onNextStep={_onNextStep} />
       ) : (
-        <AccountName address={account.address} onCreate={_onCreate} />
+        <AccountCredentials seed={account.seed} onCreate={_onCreate} />
       ))}</Loading>
     </>
   );

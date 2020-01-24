@@ -16,7 +16,6 @@ interface DropdownOption {
 interface Props {
   className?: string;
   defaultValue?: string | null;
-  isError?: boolean;
   isFocussed?: boolean;
   label: string;
   onBlur?: () => void;
@@ -36,28 +35,30 @@ function Dropdown ({ className, defaultValue, label, isFocussed, onBlur, onChang
         className={className}
         label={label}
       >
-        <select
-          autoFocus={isFocussed}
-          defaultValue={defaultValue || undefined}
-          onBlur={onBlur}
-          onChange={_onChange}
-          value={value}
-        >
-          {options.map(({ text, value }): React.ReactNode => (
-            <option
-              key={value}
-              value={value}
-            >
-              {text}
-            </option>
-          ))}
-        </select>
+        <StyledDropdown>
+          <select
+            autoFocus={isFocussed}
+            defaultValue={defaultValue || undefined}
+            onBlur={onBlur}
+            onChange={_onChange}
+            value={value}
+          >
+            {options.map(({ text, value }): React.ReactNode => (
+              <option
+                key={value}
+                value={value}
+              >
+                {text}
+              </option>
+            ))}
+          </select>
+        </StyledDropdown>
       </Label>
     </>
   );
 }
 
-export default styled(Dropdown)`
+const StyledDropdown = styled.div`
   position: relative;
 
   select {
@@ -65,12 +66,12 @@ export default styled(Dropdown)`
     -moz-appearance: none;
     appearance: none;
     background: ${({ theme }): string => theme.readonlyInputBackground};
-    border-color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
+    border-color: ${({ theme }): string => theme.inputBorderColor};
     border-radius: ${({ theme }): string => theme.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.textColor};
+    color: ${({ theme }): string => theme.textColor};
     display: block;
     font-family: ${({ theme }): string => theme.fontFamily};
     font-size: ${({ theme }): string => theme.fontSize};
@@ -85,15 +86,17 @@ export default styled(Dropdown)`
     }
   }
 
-  label::after {
+  &::after {
     content: '';
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: 5px;
+    right: 10px;
     width: 8px;
     height: 6px;
     background: url(${arrow}) center no-repeat;
     pointer-events: none;
   }
 `;
+
+export default Dropdown;

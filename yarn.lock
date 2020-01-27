@@ -2288,6 +2288,13 @@
     typescript "^3.7.5"
     vuepress "^1.2.0"
 
+"@polkadot/extension-inject@^0.20.1":
+  version "0.20.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.20.1.tgz#839b7c025fb3e18e4bfa02d2713614e46af713df"
+  integrity sha512-qZxJOUkYXdb/6Z8GIu0clenhcr0hu+qLek+DYcRnAgloQAadnVv/HfOXB2mhSLvBIu5J/ceizBMXteHuhq75aQ==
+  dependencies:
+    "@babel/runtime" "^7.8.3"
+
 "@polkadot/jsonrpc@^1.0.0-beta.22":
   version "1.0.0-beta.22"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-1.0.0-beta.22.tgz#13043c7a2f37615e6f35ff44593250e2377af966"
@@ -2553,6 +2560,13 @@
   version "0.0.92"
   resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.92.tgz#8630a52fcbcd0b30a2301f2a092386018ece1de6"
   integrity sha512-bTv1EljZ03bexRJwS5FwSZmrudtw+QNbzwUY2sxVtXWgtxk752G4I2owhZ+Mlzbf3VKvG+rBYSw/FnvzuZ4xOA==
+  dependencies:
+    "@types/filesystem" "*"
+
+"@types/chrome@^0.0.93":
+  version "0.0.93"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.93.tgz#d46aaedfcf36032a749fe63e6268b3265c6dd046"
+  integrity sha512-Esw1xlLYYFj85YdqdM7FCSJ2WtVu75fJ3yikty71zUwQkp3u4dctcVDj5cQIRHCAElUHD0667cpv4U8HZeFiNw==
   dependencies:
     "@types/filesystem" "*"
 
@@ -5994,11 +6008,6 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
-
-edgeware-node-types@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/edgeware-node-types/-/edgeware-node-types-1.1.0.tgz#ce6f773d6907fde929395347d997e21bc37afa87"
-  integrity sha512-0e56OWLDowEvEj30mJ+Sp72WlaGayRobxE7q3vSBTH1wNiPTafLQ53NMCO68j6V0aTycMzC373VR08iGKoDf5g==
 
 ee-first@1.1.1:
   version "1.1.1"

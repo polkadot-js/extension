@@ -27,6 +27,13 @@ interface Props {
   actions?: React.ReactNode;
 }
 
+interface Recoded {
+  account: AccountJson | null;
+  chain: Chain | null;
+  formatted: string | null;
+  prefix: number;
+}
+
 // find an account in our list
 function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
@@ -37,29 +44,29 @@ function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: string | null): [string, AccountJson | null, Chain] {
+function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: string | null): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
   const account = findAccount(accounts, publicKey);
-  const chain = findChain((account && account.genesisHash) || genesisHash);
+  const chain = findChain(account?.genesisHash || genesisHash);
+  const prefix = settings.prefix === -1 ? chain.ss58Format : settings.prefix;
 
-  return [
-    // always allow the actual settings to override the display
-    encodeAddress(publicKey, settings.prefix === -1 ? chain.ss58Format : settings.prefix),
+  // always allow the actual settings to override the display
+  return {
     account,
-    chain
-  ];
+    chain,
+    formatted: encodeAddress(publicKey, prefix),
+    prefix
+  };
 }
 
 const ACCOUNTS_SCREEN_HEIGHT = 500;
 
 function Address ({ address, className, children, genesisHash, name, actions }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
-  const [account, setAccount] = useState<AccountJson | null>(null);
-  const [chain, setChain] = useState<Chain | null>(null);
-  const [formatted, setFormatted] = useState<string | null>(null);
+  const [{ account, chain, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, chain: null, formatted: null, prefix: 42 });
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -68,13 +75,9 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
 
   useEffect((): void => {
     if (address) {
-      const [formatted, account, chain] = recodeAddress(address, accounts, genesisHash);
-
-      setFormatted(formatted);
-      setChain(chain);
-      setAccount(account);
+      setRecoded(recodeAddress(address, accounts, genesisHash));
     }
-  }, [address]);
+  }, [accounts, address, genesisHash]);
 
   useEffect(() => {
     if (!showActionsMenu) {
@@ -97,17 +100,23 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
         <AccountInfoRow>
           <Identicon
             iconTheme={theme}
-            value={address}
+            prefix={prefix}
+            value={formatted || address}
           />
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
             <FullAddress>{formatted || '<unknown>'}</FullAddress>
-            {chain?.genesisHash && <Banner>{chain.name}</Banner>}
+            {chain?.genesisHash && (
+              <Banner>{chain.name}</Banner>
+            )}
           </Info>
           {actions && (
             <>
               <Settings onClick={_onClick}>
-                {showActionsMenu ? <ActiveActionsIcon /> : <ActionsIcon />}
+                {showActionsMenu
+                  ? <ActiveActionsIcon />
+                  : <ActionsIcon />
+                }
               </Settings>
               {showActionsMenu && (
                 <MovableMenu

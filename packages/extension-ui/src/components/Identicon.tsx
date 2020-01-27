@@ -9,16 +9,18 @@ import Icon from '@polkadot/react-identicon';
 interface Props {
   iconTheme?: 'beachball' | 'empty' | 'jdenticon' | 'polkadot' | 'substrate';
   className?: string;
+  prefix?: number;
   value?: string | null;
 }
 
-function Identicon ({ iconTheme, className, value }: Props): React.ReactElement<Props> {
+function Identicon ({ iconTheme, className, prefix, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Icon
         className='icon'
         size={64}
         theme={iconTheme}
+        prefix={prefix}
         value={value}
       />
     </div>

@@ -2288,6 +2288,13 @@
     typescript "^3.7.5"
     vuepress "^1.2.0"
 
+"@polkadot/extension-inject@^0.20.1":
+  version "0.20.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.20.1.tgz#839b7c025fb3e18e4bfa02d2713614e46af713df"
+  integrity sha512-qZxJOUkYXdb/6Z8GIu0clenhcr0hu+qLek+DYcRnAgloQAadnVv/HfOXB2mhSLvBIu5J/ceizBMXteHuhq75aQ==
+  dependencies:
+    "@babel/runtime" "^7.8.3"
+
 "@polkadot/jsonrpc@^1.0.0-beta.22":
   version "1.0.0-beta.22"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-1.0.0-beta.22.tgz#13043c7a2f37615e6f35ff44593250e2377af966"
@@ -5995,11 +6002,6 @@ ecc-jsbn@~0.1.1:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
 
-edgeware-node-types@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/edgeware-node-types/-/edgeware-node-types-1.1.0.tgz#ce6f773d6907fde929395347d997e21bc37afa87"
-  integrity sha512-0e56OWLDowEvEj30mJ+Sp72WlaGayRobxE7q3vSBTH1wNiPTafLQ53NMCO68j6V0aTycMzC373VR08iGKoDf5g==
-
 ee-first@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
@@ -6750,10 +6752,10 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-extract-loader@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/extract-loader/-/extract-loader-3.1.0.tgz#d4b5fe517b9d28f035852602caeb4a215ea41dc3"
-  integrity sha512-baiz/xalbyQJOTHwcMJKXYsHbhEHGWQ2loK26vqZVoqO6eeinrnSrMx9681pNZgGRqz2L/PsyNxz+PVDiSmNPg==
+extract-loader@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/extract-loader/-/extract-loader-4.0.0.tgz#f9a712fdef3b735452ba3fa45c04c48c21ff135c"
+  integrity sha512-IUIHaKQqFcnEF0ySN68XAP2okIBCp5UuRZ4ljBRGPavjaCOlzgkIW364yemPVJg0wHhKLENZvgAdQbYbPtiHog==
   dependencies:
     babel-runtime "^6.26.0"
     btoa "^1.2.1"

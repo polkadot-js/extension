@@ -1,3 +1,9 @@
+# 0.20.1
+
+- Redesign of all UI components and views (Thanks to https://github.com/EthWorks)
+- Account copy now respects the address formatting
+- Updated to latest polkadot-js/api
+
 # 0.14.1
 
 - Support for Kusama CC3

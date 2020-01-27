@@ -15,7 +15,7 @@
     "@types/chrome": "^0.0.92",
     "@types/firefox-webext-browser": "^70.0.1",
     "extensionizer": "^1.0.1",
-    "extract-loader": "^3.1.0",
+    "extract-loader": "^4.0.0",
     "file-loader": "^5.0.2",
     "html-loader": "^0.5.5",
     "webpack-extension-manifest-plugin": "^0.5.0"

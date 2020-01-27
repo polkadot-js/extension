@@ -23,9 +23,7 @@ function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
   );
 }
 
-const ArrowLeft = styled(Svg).attrs(() => ({
-  src: ArrowLeftImage
-}))`
+const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))`
   width: 12px;
   height: 12px;
   margin-right: 13px;

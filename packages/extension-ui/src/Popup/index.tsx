@@ -19,7 +19,6 @@ import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
-import Settings from './Settings';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
@@ -100,7 +99,6 @@ export default function Popup (): React.ReactElement<{}> {
                   <Route path='/account/export/:address' component={Export} />
                   <Route path='/account/import-qr' component={ImportQr} />
                   <Route path='/account/import-seed' component={ImportSeed} />
-                  <Route path='/settings' component={Settings} />
                   <Route exact path='/' component={Root} />
                 </Switch>
               </SigningContext.Provider>

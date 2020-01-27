@@ -4,14 +4,14 @@
 
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
+
+import ArrowLeftImage from '../assets/arrowLeft.svg';
 import logo from '../assets/pjs.svg';
 import gear from '../assets/gear.svg';
 import { useOutsideClick } from '../hooks';
-
-import Svg from '@polkadot/extension-ui/components/Svg';
-import Settings from './Settings';
-import ArrowLeftImage from '../assets/arrowLeft.svg';
 import Link from './Link';
+import Settings from './Settings';
+import Svg from './Svg';
 
 interface Props {
   children?: React.ReactNode;

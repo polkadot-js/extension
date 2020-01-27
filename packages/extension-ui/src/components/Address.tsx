@@ -101,7 +101,7 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           <Identicon
             iconTheme={theme}
             prefix={prefix}
-            value={address}
+            value={formatted || address}
           />
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>

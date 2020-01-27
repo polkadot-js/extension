@@ -68,10 +68,13 @@ const lightTheme: Theme = {
 
 export function chooseTheme (): AvailableThemes {
   const preferredTheme = localStorage.getItem('theme');
+
   if (preferredTheme) {
     return preferredTheme === 'dark' ? 'dark' : 'light';
   }
+
   const isLightColorSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+
   return isLightColorSchemePreferred ? 'light' : 'dark';
 }
 

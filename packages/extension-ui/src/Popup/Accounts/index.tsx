@@ -23,28 +23,24 @@ type Props = {};
 export default function Accounts (): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
+
   return (
     <>
-      {
-        (accounts.length === 0)
-          ? <AddAccount />
-          : (
-            <>
-              <Header showSettings text={'Accounts'} />
-              <AccountsArea>
-                <>
-                  {
-                    accounts.map((json, index): React.ReactNode => (
-                      <Account
-                        {...json}
-                        key={`${index}:${json.address}`}
-                      />
-                    ))
-                  }
-                </>
-              </AccountsArea>
-            </>
-          )
+      {(accounts.length === 0)
+        ? <AddAccount />
+        : (
+          <>
+            <Header showSettings text={'Accounts'} />
+            <AccountsArea>
+              {accounts.map((json, index): React.ReactNode => (
+                <Account
+                  {...json}
+                  key={`${index}:${json.address}`}
+                />
+              ))}
+            </AccountsArea>
+          </>
+        )
       }
       <ButtonArea>
         <ButtonWithSubtitle

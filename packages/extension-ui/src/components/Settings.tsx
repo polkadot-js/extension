@@ -31,6 +31,7 @@ const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option =
   value: `${value}`
 }));
 
+// FIXME This does not belong in components, this is actual functionality
 export default function Settings ({ reference }: { reference: React.MutableRefObject<null> }): React.ReactElement {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
@@ -49,6 +50,8 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
     setPrefix(value);
 
     settings.set({ prefix });
+
+    // FIXME We don't want to reload here
     location.reload();
   };
   const _onChangeTheme = (checked: boolean): void => setTheme(checked ? 'dark' : 'light');

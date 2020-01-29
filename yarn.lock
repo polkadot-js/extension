@@ -2288,6 +2288,13 @@
     typescript "^3.7.5"
     vuepress "^1.2.0"
 
+"@polkadot/extension-inject@^0.21.0-beta.0":
+  version "0.21.0-beta.0"
+  resolved "https://registry.yarnpkg.com/@polkadot/extension-inject/-/extension-inject-0.21.0-beta.0.tgz#62b1b398ca3cc65c247f61d09c35477b873a5753"
+  integrity sha512-Q6vr1JKGiFzKXhgGM3XjuA1KDjzKNCLLraU3uy1Eli5Dnw3GqknSLH0IE3GCwbZB2Zht5WS2SBmzuVwALiwAPQ==
+  dependencies:
+    "@babel/runtime" "^7.8.3"
+
 "@polkadot/jsonrpc@^1.0.0-beta.32":
   version "1.0.0-beta.32"
   resolved "https://registry.yarnpkg.com/@polkadot/jsonrpc/-/jsonrpc-1.0.0-beta.32.tgz#520767c58f9e006c5544594b4cd9c23218cb3ad3"
@@ -2363,10 +2370,10 @@
     isomorphic-fetch "^2.2.1"
     websocket "^1.0.31"
 
-"@polkadot/ts@^0.1.91":
-  version "0.1.91"
-  resolved "https://registry.yarnpkg.com/@polkadot/ts/-/ts-0.1.91.tgz#e3cc05cea480cc3d15b213110aec082fb0af5e79"
-  integrity sha512-UB8zOFZXb/ih03izzAQ1r1DRpiUXBofxAlXjcx4530jopfiNsiU1LZ2J/uS3dVV1QXaGRhkgm8SIJDLsSMRYIQ==
+"@polkadot/ts@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/ts/-/ts-0.2.1.tgz#c30b6f8e74254318314f7879313ead1397dc9691"
+  integrity sha512-TEiuLdKmBYu5pNDdnya6RktZlnaleQn1TT5ZHs+MR0WAQ2Qq3OEf00Bz1spxx4WvWRW8yaAgMdr+AiFbymtwBA==
   dependencies:
     "@types/chrome" "^0.0.92"
 
@@ -5994,11 +6001,6 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
-
-edgeware-node-types@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/edgeware-node-types/-/edgeware-node-types-1.1.0.tgz#ce6f773d6907fde929395347d997e21bc37afa87"
-  integrity sha512-0e56OWLDowEvEj30mJ+Sp72WlaGayRobxE7q3vSBTH1wNiPTafLQ53NMCO68j6V0aTycMzC373VR08iGKoDf5g==
 
 ee-first@1.1.1:
   version "1.1.1"

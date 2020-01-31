@@ -20,9 +20,14 @@ import {
   Header
 } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
-import DerivationPath, { OptionsLabel } from '@polkadot/extension-ui/Popup/CreateAccount/DerivationPath';
+import DerivationPath, { OptionsLabel } from '@polkadot/extension-ui/partials/DerivationPath';
 
 configure({ adapter: new Adapter() });
+// JSDOM is missing scrollTo methods on elements
+Object.defineProperty(window.Element.prototype, 'scrollTo', {
+  writable: true,
+  value: jest.fn()
+});
 
 describe('Create Account', () => {
   let wrapper: ReactWrapper;
@@ -149,7 +154,7 @@ describe('Create Account', () => {
     it('submit button is visible when both passwords are equal', async () => {
       enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
       await act(flushAllPromises);
-
+      wrapper.update();
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(false);
       expect(wrapper.find(Button)).toHaveLength(1);
     });
@@ -157,10 +162,11 @@ describe('Create Account', () => {
     it('saves account with provided name and password', async () => {
       enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
       await act(flushAllPromises);
+      wrapper.update();
       wrapper.find(Button).find('button').simulate('click');
       await act(flushAllPromises);
 
-      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, 'ed25519');
+      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, undefined);
       expect(onActionStub).toBeCalledWith('/');
     });
 
@@ -176,6 +182,7 @@ describe('Create Account', () => {
       wrapper.find(DerivationPath).find(OptionsLabel).simulate('click');
       type(wrapper.find(DerivationPath).find('input'), '//hard///password');
       await act(flushAllPromises);
+      wrapper.update();
       wrapper.find(Button).find('button').simulate('click');
       await act(flushAllPromises);
 
@@ -185,6 +192,7 @@ describe('Create Account', () => {
     it('provided derivation path is invalid submit button is disabled and input field shows error ', async () => {
       jest.spyOn(messaging, 'validateSeed').mockRejectedValue('');
       enterName('abc').andPassword('abcdef').andRepeatedPassword('abcdef');
+      wrapper.update();
       wrapper.find(DerivationPath).find(OptionsLabel).simulate('click');
       type(wrapper.find(DerivationPath).find('input'), 'invalid-path');
       await act(flushAllPromises);

@@ -194,7 +194,7 @@ const Settings = styled.div`
 
   &:hover {
     cursor: pointer;
-    background: ${({ theme }): string => theme.readonlyInputBackground};
+    background: ${({ theme }): string => theme.highlightedAreaBackground};
   }
 `;
 

@@ -12,29 +12,32 @@
     "yarn": "^1.10.1"
   },
   "resolutions": {
-    "@polkadot/api": "^1.2.0-beta.10",
-    "@polkadot/keyring": "^2.3.0-beta.0",
-    "@polkadot/types": "^1.2.0-beta.10",
-    "@polkadot/util": "^2.3.0-beta.0",
-    "@polkadot/util-crypto": "^2.3.0-beta.0",
+    "@polkadot/api": "^1.2.0-beta.12",
+    "@polkadot/keyring": "^2.3.0-beta.1",
+    "@polkadot/types": "^1.2.0-beta.12",
+    "@polkadot/util": "^2.3.0-beta.1",
+    "@polkadot/util-crypto": "^2.3.0-beta.1",
     "babel-core": "^7.0.0-bridge.0",
     "typescript": "^3.7.5"
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
     "build:zip": "(rm -rf ./master-build.zip && yarn build && cd packages/extension/build && zip -r -FS ../../../master-build.zip *) && (rm -rf ./master-src.zip && zip -r -x '*build*' -x '*node_modules*' -FS ./master-src.zip packages .babelrc.js .editorconfig .eslintignore .eslintrc.js babel.config.js CHANGELOG.md CONTRIBUTING.md jest.config.js lerna.json LICENSE package.json README.md tsconfig.json yarn.lock)",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx . && tsc --noEmit --pretty",
+    "lint": "polkadot-dev-run-lint",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
-    "test": "jest",
+    "test": "polkadot-dev-run-test",
     "watch": "cd packages/extension && webpack --config webpack.config.js --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
-    "@polkadot/dev": "^0.34.1",
-    "@polkadot/dev-react": "^0.34.1",
-    "@polkadot/ts": "^0.2.2",
-    "sinon-chrome": "^3.0.1"
+    "@polkadot/dev": "^0.40.3",
+    "@polkadot/ts": "^0.2.3",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "sinon-chrome": "^3.0.1",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
   }
 }

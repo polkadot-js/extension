@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
-    "@polkadot/dev": "^0.34.1",
+    "@polkadot/dev": "^0.40.1",
     "@polkadot/dev-react": "^0.34.1",
     "@polkadot/ts": "^0.2.2",
     "sinon-chrome": "^3.0.1"

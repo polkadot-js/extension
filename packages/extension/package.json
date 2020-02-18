@@ -8,7 +8,7 @@
     "@polkadot/api": "^1.3.0-beta.8",
     "@polkadot/extension-ui": "^0.22.0-beta.4",
     "@polkadot/keyring": "^2.4.0-beta.0",
-    "@polkadot/ui-keyring": "^0.50.1"
+    "@polkadot/ui-keyring": "^0.51.1"
   },
   "devDependencies": {
     "@babel/runtime": "^7.8.4",

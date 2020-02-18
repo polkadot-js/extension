@@ -8,7 +8,7 @@
     "@babel/runtime": "^7.8.4",
     "@polkadot/keyring": "^2.4.0-beta.0",
     "@polkadot/react-identicon": "^0.50.1",
-    "@polkadot/react-qr": "^0.50.1",
+    "@polkadot/react-qr": "^0.51.1",
     "@polkadot/util-crypto": "^2.4.0-beta.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",

@@ -8,7 +8,7 @@ import { RequestSign } from './types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 export default class RequestExtrinsicSign implements RequestSign {
-  inner: SignerPayloadJSON | SignerPayloadRaw;
+  public readonly inner: SignerPayloadJSON | SignerPayloadRaw;
 
   constructor (inner: SignerPayloadJSON) {
     this.inner = inner;
@@ -17,6 +17,7 @@ export default class RequestExtrinsicSign implements RequestSign {
   sign (registry: TypeRegistry, pair: KeyringPair): { signature: string } {
     const inner = this.inner as SignerPayloadJSON;
     const extrinsic = createType(registry, 'ExtrinsicPayload', this.inner, { version: inner.version });
+
     return extrinsic.sign(pair);
   }
 }

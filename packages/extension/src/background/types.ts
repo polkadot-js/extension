@@ -214,6 +214,7 @@ export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
 export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>
 
 export interface RequestSign {
-  inner: SignerPayloadJSON | SignerPayloadRaw;
-  sign(registry: TypeRegistry, pair: KeyringPair): { signature: string };
+  readonly inner: SignerPayloadJSON | SignerPayloadRaw;
+
+  sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
 }

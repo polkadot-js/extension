@@ -9,7 +9,7 @@ import { u8aToHex, hexToU8a } from '@polkadot/util';
 import { TypeRegistry } from '@polkadot/types';
 
 export default class RequestBytesSign implements RequestSign {
-  inner: SignerPayloadJSON | SignerPayloadRaw;
+  public readonly inner: SignerPayloadJSON | SignerPayloadRaw;
 
   constructor (inner: SignerPayloadRaw) {
     this.inner = inner;
@@ -18,6 +18,9 @@ export default class RequestBytesSign implements RequestSign {
   sign (_registry: TypeRegistry, pair: KeyringPair): { signature: string } {
     const inner = this.inner as SignerPayloadRaw;
     const signedBytes = pair.sign(hexToU8a(inner.data));
-    return { signature: u8aToHex(signedBytes) };
+
+    return {
+      signature: u8aToHex(signedBytes)
+    };
   }
 }

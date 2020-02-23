@@ -24,14 +24,14 @@ function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
 }
 
 export default class Tabs {
-  private state: State;
+  readonly #state: State;
 
   constructor (state: State) {
-    this.state = state;
+    this.#state = state;
   }
 
   private authorize (url: string, request: RequestAuthorizeTab): Promise<boolean> {
-    return this.state.authorizeUrl(url, request);
+    return this.#state.authorizeUrl(url, request);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -63,18 +63,18 @@ export default class Tabs {
   private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
-    return this.state.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
+    return this.#state.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
   }
 
   private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
-    return this.state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
+    return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type !== 'pub(authorize.tab)') {
-      this.state.ensureUrlAuthorized(url);
+      this.#state.ensureUrlAuthorized(url);
     }
 
     switch (type) {

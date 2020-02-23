@@ -36,18 +36,29 @@ interface SignRequest {
 
 let idCounter = 0;
 
+const WINDOW_OPTS = {
+  // This is not allowed on FF, only on Chrome - disable completely
+  // focused: true,
+  height: 621,
+  left: 150,
+  top: 150,
+  type: 'popup',
+  url: extension.extension.getURL('index.html'),
+  width: 480
+};
+
 function getId (): string {
   return `${Date.now()}.${++idCounter}`;
 }
 
 export default class State {
-  private _authUrls: AuthUrls = {};
+  readonly #authUrls: AuthUrls = {};
 
-  private _authRequests: Record<string, AuthRequest> = {};
+  readonly #authRequests: Record<string, AuthRequest> = {};
 
-  private _signRequests: Record<string, SignRequest> = {};
+  readonly #signRequests: Record<string, SignRequest> = {};
 
-  private _windows: number[] = [];
+  #windows: number[] = [];
 
   public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
 
@@ -62,45 +73,36 @@ export default class State {
   }
 
   public get numAuthRequests (): number {
-    return Object.keys(this._authRequests).length;
+    return Object.keys(this.#authRequests).length;
   }
 
   public get numSignRequests (): number {
-    return Object.keys(this._signRequests).length;
+    return Object.keys(this.#signRequests).length;
   }
 
   public get allAuthRequests (): AuthorizeRequest[] {
     return Object
-      .values(this._authRequests)
+      .values(this.#authRequests)
       .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
   }
 
   public get allSignRequests (): SigningRequest[] {
     return Object
-      .values(this._signRequests)
+      .values(this.#signRequests)
       .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
   }
 
   private popupClose (): void {
-    this._windows.forEach((id: number): void =>
+    this.#windows.forEach((id: number): void =>
       extension.windows.remove(id)
     );
-    this._windows = [];
+    this.#windows = [];
   }
 
   private popupOpen (): void {
-    extension.windows.create({
-      // This is not allowed on FF, only on Chrome - disable completely
-      // focused: true,
-      height: 621,
-      left: 150,
-      top: 150,
-      type: 'popup',
-      url: extension.extension.getURL('index.html'),
-      width: 480
-    }, (window?: chrome.windows.Window): void => {
+    extension.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {
-        this._windows.push(window.id);
+        this.#windows.push(window.id);
       }
     });
   }
@@ -108,9 +110,9 @@ export default class State {
   private authComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
     return (result: boolean | Error): void => {
       const isAllowed = result === true;
-      const { idStr, request: { origin }, url } = this._authRequests[id];
+      const { idStr, request: { origin }, url } = this.#authRequests[id];
 
-      this._authUrls[this.stripUrl(url)] = {
+      this.#authUrls[this.stripUrl(url)] = {
         count: 0,
         id: idStr,
         isAllowed,
@@ -118,7 +120,7 @@ export default class State {
         url
       };
 
-      delete this._authRequests[id];
+      delete this.#authRequests[id];
       this.updateIconAuth(true);
 
       fn(result);
@@ -127,7 +129,7 @@ export default class State {
 
   private signComplete = (id: string, fn: Function): (result: ResponseSigning | Error) => void => {
     return (result: ResponseSigning | Error): void => {
-      delete this._signRequests[id];
+      delete this.#signRequests[id];
       this.updateIconSign(true);
 
       fn(result);
@@ -171,8 +173,8 @@ export default class State {
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
-    if (this._authUrls[idStr]) {
-      assert(this._authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
+    if (this.#authUrls[idStr]) {
+      assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return true;
     }
@@ -180,7 +182,7 @@ export default class State {
     return new Promise((resolve, reject): void => {
       const id = getId();
 
-      this._authRequests[id] = {
+      this.#authRequests[id] = {
         id,
         idStr,
         request,
@@ -195,7 +197,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this._authUrls[this.stripUrl(url)];
+    const entry = this.#authUrls[this.stripUrl(url)];
 
     assert(entry, `The source ${url} has not been enabled yet`);
     assert(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);
@@ -204,18 +206,18 @@ export default class State {
   }
 
   public getAuthRequest (id: string): AuthRequest {
-    return this._authRequests[id];
+    return this.#authRequests[id];
   }
 
   public getSignRequest (id: string): SignRequest {
-    return this._signRequests[id];
+    return this.#signRequests[id];
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
     const id = getId();
 
     return new Promise((resolve, reject): void => {
-      this._signRequests[id] = {
+      this.#signRequests[id] = {
         account,
         id,
         request,

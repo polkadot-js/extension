@@ -4,7 +4,8 @@
 
 // Generated via (in api) `yarn chain:info --ws wss://mainnet1.edgewa.re`
 
-import { EdgewareTypes } from 'edgeware-node-types/dist';
+// import { EdgewareTypes } from 'edgeware-node-types/dist';
+import { EdgewareTypes } from './edgeware-node-types';
 
 export default {
   chain: 'Edgeware',

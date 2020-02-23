@@ -29,10 +29,10 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
 }
 
 export default class Extension {
-  private state: State;
+  readonly #state: State;
 
   constructor (state: State) {
-    this.state = state;
+    this.#state = state;
   }
 
   private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
@@ -83,7 +83,7 @@ export default class Extension {
   }
 
   private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
-    const queued = this.state.getAuthRequest(id);
+    const queued = this.#state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -95,7 +95,7 @@ export default class Extension {
   }
 
   private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
-    const queued = this.state.getAuthRequest(id);
+    const queued = this.#state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -109,7 +109,7 @@ export default class Extension {
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(authorize.subscribe)'>(id, port);
-    const subscription = this.state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
+    const subscription = this.#state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
     );
 
@@ -148,7 +148,7 @@ export default class Extension {
   }
 
   private signingApprovePassword ({ id, password }: RequestSigningApprovePassword): boolean {
-    const queued = this.state.getSignRequest(id);
+    const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -174,7 +174,7 @@ export default class Extension {
   }
 
   private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
-    const queued = this.state.getSignRequest(id);
+    const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -186,7 +186,7 @@ export default class Extension {
   }
 
   private signingCancel ({ id }: RequestSigningCancel): boolean {
-    const queued = this.state.getSignRequest(id);
+    const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -200,7 +200,7 @@ export default class Extension {
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(signing.subscribe)'>(id, port);
-    const subscription = this.state.signSubject.subscribe((requests: SigningRequest[]): void =>
+    const subscription = this.#state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
 

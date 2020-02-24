@@ -3,9 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import WsProvider from '@polkadot/rpc-provider/ws';
-import { ProviderInterface } from '@polkadot/rpc-provider/types';
+import { JsonRpcResponse, ProviderInterface } from '@polkadot/rpc-provider/types';
 
-import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcProvider, RequestSign, ResponseSigning, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcProvider, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseSigning, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
@@ -222,8 +222,24 @@ export default class State {
     return this.#signRequests[id];
   }
 
+  public rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
+    if (!this.#provider) {
+      throw new Error('Cannot call pub(rpc.send) before provider has been set');
+    }
+
+    return this.#state.provider.send(request.method, request.params);
+  }
+
+  public rpcSubscribe (request: RequestRpcSubscribe): Promise<JsonRpcResponse> {
+    if (!this.#provider) {
+      throw new Error('Cannot call pub(rpc.subscribe) before provider has been set');
+    }
+
+    return this.#provider.subscribe(request.type, request.method, request.params);
+  }
+
   // Change the provider the extension is exposing
-  public setProvider (provider: RequestRpcProvider): void {
+  public async setProvider (provider: RequestRpcProvider): Promise<null> {
     switch (provider.type) {
       case 'WsProvider': {
         this.#provider = new WsProvider(provider.payload);
@@ -233,6 +249,8 @@ export default class State {
         throw new Error(`Unable to instantiate provider of type ${provider.type}`);
       }
     }
+
+    return null;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

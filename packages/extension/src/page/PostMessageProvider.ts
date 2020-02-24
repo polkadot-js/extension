@@ -61,6 +61,7 @@ export default class PostMessageProvider implements InjectedProvider {
    * @description Manually disconnect from the connection, clearing autoconnect logic
    */
   public disconnect (): void {
+    // FIXME This should see if the extension's state's provider can disconnect
     console.error('PostMessageProvider.disconnect() is not implemented.');
   }
 
@@ -68,6 +69,7 @@ export default class PostMessageProvider implements InjectedProvider {
    * @summary `true` when this provider supports subscriptions
    */
   public get hasSubscriptions (): boolean {
+    // FIXME This should see if the extension's state's provider has subscriptions
     return true;
   }
 
@@ -76,7 +78,8 @@ export default class PostMessageProvider implements InjectedProvider {
    * @return {boolean} true if connected
    */
   public isConnected (): boolean {
-    return true; // connects on first RPC request
+    // FIXME This should see if the extension's state's provider is connected
+    return true;
   }
 
   /**

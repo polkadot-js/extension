@@ -4,9 +4,10 @@
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes } from '../types';
+import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, RequestRpcProvider, RequestRpcSend, RequestRpcSubscribe } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -72,6 +73,18 @@ export default class Tabs {
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
+  private rpcProvider (request: RequestRpcProvider): Promise<null> {
+    return this.#state.setProvider(request);
+  }
+
+  private rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
+    return this.#state.rpcSend(request);
+  }
+
+  private rpcSubscribe (request: RequestRpcSubscribe): Promise<JsonRpcResponse> {
+    return this.#state.rpcSubscribe(request);
+  }
+
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type !== 'pub(authorize.tab)') {
       this.#state.ensureUrlAuthorized(url);
@@ -92,6 +105,15 @@ export default class Tabs {
 
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
+
+      case 'pub(rpc.provider)':
+        return this.rpcProvider(request as RequestRpcProvider);
+
+      case 'pub(rpc.send)':
+        return this.rpcSend(request as RequestRpcSend);
+
+      case 'pub(rpc.subscribe)':
+        return this.rpcSubscribe(request as RequestRpcSubscribe);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

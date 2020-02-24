@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;
@@ -175,4 +175,28 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   }
 
   return web3FromSource(found.meta.source);
+}
+
+// retrieve all the providers accross all extensions
+export async function web3Providers (): Promise<InjectedProviderWithMeta[]> {
+  if (!web3EnablePromise) {
+    return throwError('web3Providers');
+  }
+
+  const injected = await web3EnablePromise;
+  const providers: InjectedProviderWithMeta[] = injected
+    .map(({ provider, name: source }): InjectedProviderWithMeta | null =>
+      provider
+        ? { provider, meta: { source } }
+        : null
+    )
+    .filter((x): x is InjectedProviderWithMeta =>
+      x !== null
+    );
+
+  const sources = providers.map(({ meta: { source } }): string => source);
+
+  console.log(`web3Providers: Found ${providers.length} provider${providers.length !== 1 ? 's' : ''} from extension${sources.length !== 1 ? 's' : ''} ${sources.join(', ')}`);
+
+  return providers;
 }

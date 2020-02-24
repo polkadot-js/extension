@@ -7,14 +7,18 @@ import { SendRequest } from './types';
 
 import Accounts from './Accounts';
 import Signer from './Signer';
+import PostMessageProvider from './PostMessageProvider';
 
 export default class implements Injected {
   public readonly accounts: Accounts;
+
+  public readonly provider: PostMessageProvider;
 
   public readonly signer: Signer;
 
   constructor (sendRequest: SendRequest) {
     this.accounts = new Accounts(sendRequest);
     this.signer = new Signer(sendRequest);
+    this.provider = new PostMessageProvider(sendRequest);
   }
 }

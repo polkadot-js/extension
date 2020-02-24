@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { JsonRpcRequest, JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
@@ -67,6 +68,8 @@ export interface RequestSignatures {
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
+  'pub(rpc.send)': [JsonRpcRequest, JsonRpcResponse];
+  'pub(rpc.subscribe)': [JsonRpcRequest, JsonRpcResponse];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -216,5 +219,5 @@ export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof Subscr
 export interface RequestSign {
   readonly inner: SignerPayloadJSON | SignerPayloadRaw;
 
-  sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
+  sign(registry: TypeRegistry, pair: KeyringPair): { signature: string };
 }

@@ -2,7 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '../types';
+import WsProvider from '@polkadot/rpc-provider/ws';
+import { ProviderInterface } from '@polkadot/rpc-provider/types';
+
+import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcProvider, RequestSign, ResponseSigning, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
@@ -55,6 +58,8 @@ export default class State {
   readonly #authUrls: AuthUrls = {};
 
   readonly #authRequests: Record<string, AuthRequest> = {};
+
+  #provider: ProviderInterface | undefined;
 
   readonly #signRequests: Record<string, SignRequest> = {};
 
@@ -196,6 +201,10 @@ export default class State {
     });
   }
 
+  get provider (): ProviderInterface | undefined {
+    return this.#provider;
+  }
+
   public ensureUrlAuthorized (url: string): boolean {
     const entry = this.#authUrls[this.stripUrl(url)];
 
@@ -211,6 +220,19 @@ export default class State {
 
   public getSignRequest (id: string): SignRequest {
     return this.#signRequests[id];
+  }
+
+  // Change the provider the extension is exposing
+  public setProvider (provider: RequestRpcProvider): void {
+    switch (provider.type) {
+      case 'WsProvider': {
+        this.#provider = new WsProvider(provider.payload);
+        break;
+      }
+      default: {
+        throw new Error(`Unable to instantiate provider of type ${provider.type}`);
+      }
+    }
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

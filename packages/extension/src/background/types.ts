@@ -141,7 +141,8 @@ export type RequestAccountSubscribe = null;
 export interface ProviderJSON {
   // Payload to pass into Provider constructor
   payload: string;
-  type: 'WsProvider';
+  // Provider type: 'WsProvider' etc.
+  type: string;
 }
 
 export type RequestRpcProvider = ProviderJSON;

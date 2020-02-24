@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedAccount } from '@polkadot/extension-inject/types';
-import { JsonRpcRequest, JsonRpcResponse } from '@polkadot/rpc-provider/types';
+import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
@@ -68,8 +68,9 @@ export interface RequestSignatures {
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
-  'pub(rpc.send)': [JsonRpcRequest, JsonRpcResponse];
-  'pub(rpc.subscribe)': [JsonRpcRequest, JsonRpcResponse];
+  'pub(rpc.provider)': [RequestRpcProvider, null];
+  'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
+  'pub(rpc.subscribe)': [RequestRpcSubscribe, JsonRpcResponse];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -135,6 +136,25 @@ export interface RequestAccountExport {
 export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;
+
+// JSON-serializable data to instantiate a provider.
+export interface ProviderJSON {
+  // Payload to pass into Provider constructor
+  payload: string;
+  type: 'WsProvider';
+}
+
+export type RequestRpcProvider = ProviderJSON;
+
+export interface RequestRpcSend {
+  method: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params: any[];
+}
+
+export interface RequestRpcSubscribe extends RequestRpcSend {
+  type: string;
+}
 
 export interface RequestSigningApprovePassword {
   id: string;

@@ -3,7 +3,6 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { InjectedProvider } from '@polkadot/extension-inject/types';
-import Coder from '@polkadot/rpc-provider/coder';
 import { ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 import { AnyFunction } from '@polkadot/types/types';
 import { isUndefined, logger } from '@polkadot/util';
@@ -28,8 +27,6 @@ interface SubscriptionHandler {
  * @description Extension provider to be used by dapps
  */
 export default class PostMessageProvider implements InjectedProvider {
-  readonly #coder: Coder;
-
   readonly #eventemitter: EventEmitter;
 
   readonly #sendRequest: SendRequest;
@@ -44,7 +41,6 @@ export default class PostMessageProvider implements InjectedProvider {
    * @param {function}  subscriptionNotificationHandler  Channel for receiving subscription messages
    */
   public constructor (sendRequest: SendRequest) {
-    this.#coder = new Coder();
     this.#eventemitter = new EventEmitter();
     this.#sendRequest = sendRequest;
 
@@ -99,17 +95,15 @@ export default class PostMessageProvider implements InjectedProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public send (method: string, params: any[], subscription?: SubscriptionHandler): Promise<any> {
-    const json = this.#coder.encodeObject(method, params);
-
     if (subscription) {
       const { callback, type } = subscription;
-      return this.#sendRequest('pub(rpc.subscribe)', json).then(({ id }): number => {
+      return this.#sendRequest('pub(rpc.subscribe)', { type, method, params }).then(({ id }): number => {
         this.#subscriptions[`${type}::${id}`] = callback;
 
         return id;
       });
     } else {
-      return this.#sendRequest('pub(rpc.send)', json);
+      return this.#sendRequest('pub(rpc.send)', { method, params });
     }
   }
 

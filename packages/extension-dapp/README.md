@@ -13,7 +13,7 @@ A basic extractor that manipulates the `window.injectedWeb3` to retrieve all the
 ## Usage
 
 ```js
-import { web3Accounts, web3Enable, web3FromAddress, web3Providers } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3FromAddress, web3RpcProvider } from '@polkadot/extension-dapp';
 
 // returns an array of all the injected sources
 // (this needs to be called first, before other requests)
@@ -39,5 +39,5 @@ api.tx.balances
 // retrieve a RPC provider from a particular source
 // if the extension does not expose this provider, it will return an error.
 const provider = web3RpcProvider('polkadot-js', { type: 'WsProvider', payload: 'http://locahost:9944' });
-const head = await provider.send('chain_getHeader'); // logs latest header
+const head = await provider.send('chain_getHeader', []); // shows latest header
 ```

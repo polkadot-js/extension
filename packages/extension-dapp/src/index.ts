@@ -177,35 +177,21 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   return web3FromSource(found.meta.source);
 }
 
-// retrieve all the providers accross all extensions
-export async function web3Providers (providerJSON: ProviderJSON): Promise<InjectedProviderWithMeta[]> {
-  if (!web3EnablePromise) {
-    return throwError('web3Providers');
+// retrieve a provider from one source
+export async function web3RpcProvider (source: string, providerJSON: ProviderJSON): Promise<InjectedProviderWithMeta | null> {
+  const { provider } = await web3FromSource(source);
+
+  try {
+    if (!provider) {
+      console.warn(`Extension ${source} does not expose any provider`);
+
+      return null;
+    }
+
+    await provider.setProvider(providerJSON);
+
+    return { provider, meta: { ...providerJSON, source } };
+  } catch {
+    return null;
   }
-
-  const injected = await web3EnablePromise;
-
-  const providers: InjectedProviderWithMeta[] = (await Promise.all(
-    injected
-      .map(async ({ provider, name: source }): Promise<InjectedProviderWithMeta | null> => {
-        try {
-          if (!provider) {
-            console.warn(`Extension ${source} does not expose any provider`);
-            return null;
-          }
-
-          await provider.setProvider(providerJSON);
-
-          return { provider, meta: { ...providerJSON, source } };
-        } catch {
-          return null;
-        }
-      })
-  )).filter((x): x is InjectedProviderWithMeta => x !== null);
-
-  const sources = providers.map(({ meta: { source } }): string => source);
-
-  console.log(`web3Providers: Found ${providers.length} provider${providers.length !== 1 ? 's' : ''} from extension${sources.length !== 1 ? 's' : ''} ${sources.join(', ')}`);
-
-  return providers;
 }

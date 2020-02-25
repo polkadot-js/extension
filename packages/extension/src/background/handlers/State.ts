@@ -223,7 +223,7 @@ export default class State {
   }
 
   public rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
-    assert(!!this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+    assert(this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
     return this.#provider.send(request.method, request.params);
   }
@@ -244,9 +244,16 @@ export default class State {
   }
 
   public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback): Promise<number> {
-    assert(!!this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+    assert(this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
-    return this.#provider.subscribe(request.type, request.method, request.params, cb);
+    return this.#provider.subscribe(
+      request.type,
+      request.method,
+      request.params,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore WsProvider gives me (error, result)=>void, whereas (result)=>void is expected
+      (_error, res) => { cb(res); }
+    );
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

@@ -68,9 +68,9 @@ export interface RequestSignatures {
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
-  'pub(rpc.provider)': [RequestRpcProvider, null];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
-  'pub(rpc.subscribe)': [RequestRpcSubscribe, JsonRpcResponse];
+  'pub(rpc.setProvider)': [RequestRpcProvider, null];
+  'pub(rpc.subscribe)': [RequestRpcSubscribe, boolean, JsonRpcResponse];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -240,5 +240,5 @@ export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof Subscr
 export interface RequestSign {
   readonly inner: SignerPayloadJSON | SignerPayloadRaw;
 
-  sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
+  sign(registry: TypeRegistry, pair: KeyringPair): { signature: string };
 }

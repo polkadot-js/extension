@@ -73,16 +73,26 @@ export default class Tabs {
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
-  private rpcProvider (request: RequestRpcProvider): Promise<null> {
-    return this.#state.setProvider(request);
+  private rpcSetProvider (request: RequestRpcProvider): Promise<null> {
+    return this.#state.rpcSetProvider(request);
   }
 
   private rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
     return this.#state.rpcSend(request);
   }
 
-  private rpcSubscribe (request: RequestRpcSubscribe): Promise<JsonRpcResponse> {
-    return this.#state.rpcSubscribe(request);
+  private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
+    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
+    const subscription = await this.#state.rpcSubscribe(request, cb);
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      assert(!!this.#state.provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+
+      this.#state.provider.unsubscribe(request.type, request.method, subscription);
+    });
+
+    return true;
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
@@ -106,14 +116,14 @@ export default class Tabs {
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
 
-      case 'pub(rpc.provider)':
-        return this.rpcProvider(request as RequestRpcProvider);
+      case 'pub(rpc.setProvider)':
+        return this.rpcSetProvider(request as RequestRpcProvider);
 
       case 'pub(rpc.send)':
         return this.rpcSend(request as RequestRpcSend);
 
       case 'pub(rpc.subscribe)':
-        return this.rpcSubscribe(request as RequestRpcSubscribe);
+        return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import WsProvider from '@polkadot/rpc-provider/ws';
-import { JsonRpcResponse, ProviderInterface } from '@polkadot/rpc-provider/types';
+import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 
 import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcProvider, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseSigning, SigningRequest } from '../types';
 
@@ -223,34 +223,30 @@ export default class State {
   }
 
   public rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
-    if (!this.#provider) {
-      throw new Error('Cannot call pub(rpc.send) before provider has been set');
-    }
+    assert(!!this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
-    return this.#state.provider.send(request.method, request.params);
-  }
-
-  public rpcSubscribe (request: RequestRpcSubscribe): Promise<JsonRpcResponse> {
-    if (!this.#provider) {
-      throw new Error('Cannot call pub(rpc.subscribe) before provider has been set');
-    }
-
-    return this.#provider.subscribe(request.type, request.method, request.params);
+    return this.#provider.send(request.method, request.params);
   }
 
   // Change the provider the extension is exposing
-  public async setProvider (provider: RequestRpcProvider): Promise<null> {
+  public rpcSetProvider (provider: RequestRpcProvider): Promise<null> {
     switch (provider.type) {
       case 'WsProvider': {
         this.#provider = new WsProvider(provider.payload);
         break;
       }
       default: {
-        throw new Error(`Unable to instantiate provider of type ${provider.type}`);
+        return Promise.reject(new Error(`Unable to instantiate provider of type ${provider.type}`));
       }
     }
 
-    return null;
+    return Promise.resolve(null);
+  }
+
+  public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback): Promise<number> {
+    assert(!!this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+
+    return this.#provider.subscribe(request.type, request.method, request.params, cb);
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

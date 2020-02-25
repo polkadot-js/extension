@@ -73,12 +73,12 @@ export default class Tabs {
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
-  private rpcSetProvider (request: RequestRpcProvider): Promise<null> {
-    return this.#state.rpcSetProvider(request);
-  }
-
   private rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
     return this.#state.rpcSend(request);
+  }
+
+  private rpcSetProvider (request: RequestRpcProvider): Promise<null> {
+    return this.#state.rpcSetProvider(request);
   }
 
   private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
@@ -116,11 +116,11 @@ export default class Tabs {
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
 
-      case 'pub(rpc.setProvider)':
-        return this.rpcSetProvider(request as RequestRpcProvider);
-
       case 'pub(rpc.send)':
         return this.rpcSend(request as RequestRpcSend);
+
+      case 'pub(rpc.setProvider)':
+        return this.rpcSetProvider(request as RequestRpcProvider);
 
       case 'pub(rpc.subscribe)':
         return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);

@@ -190,6 +190,7 @@ export async function web3Providers (providerJSON: ProviderJSON): Promise<Inject
       .map(async ({ provider, name: source }): Promise<InjectedProviderWithMeta | null> => {
         try {
           if (!provider) {
+            console.warn(`Extension ${source} does not expose any provider`);
             return null;
           }
 
@@ -200,7 +201,6 @@ export async function web3Providers (providerJSON: ProviderJSON): Promise<Inject
           return null;
         }
       })
-
   )).filter((x): x is InjectedProviderWithMeta => x !== null);
 
   const sources = providers.map(({ meta: { source } }): string => source);

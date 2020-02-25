@@ -104,7 +104,9 @@ export default class PostMessageProvider implements ProviderInterface {
       return this.#sendRequest(
         'pub(rpc.subscribe)',
         { type, method, params },
-        (res) => { subscription.callback(null, res); }
+        (res) => {
+          subscription.callback(null, res);
+        }
       ).then((id): number => {
         this.#subscriptions[`${type}::${id}`] = callback;
 

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderJSON, Unsubcall } from '@polkadot/extension-inject/types';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;
@@ -178,21 +178,30 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
 }
 
 // retrieve all the providers accross all extensions
-export async function web3Providers (): Promise<InjectedProviderWithMeta[]> {
+export async function web3Providers (providerJSON: ProviderJSON): Promise<InjectedProviderWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Providers');
   }
 
   const injected = await web3EnablePromise;
-  const providers: InjectedProviderWithMeta[] = injected
-    .map(({ provider, name: source }): InjectedProviderWithMeta | null =>
-      provider
-        ? { provider, meta: { source } }
-        : null
-    )
-    .filter((x): x is InjectedProviderWithMeta =>
-      x !== null
-    );
+
+  const providers: InjectedProviderWithMeta[] = (await Promise.all(
+    injected
+      .map(async ({ provider, name: source }): Promise<InjectedProviderWithMeta | null> => {
+        try {
+          if (!provider) {
+            return null;
+          }
+
+          await provider.setProvider(providerJSON);
+
+          return { provider, meta: { ...providerJSON, source } };
+        } catch {
+          return null;
+        }
+      })
+
+  )).filter((x): x is InjectedProviderWithMeta => x !== null);
 
   const sources = providers.map(({ meta: { source } }): string => source);
 

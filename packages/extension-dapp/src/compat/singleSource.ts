@@ -8,7 +8,7 @@ import { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-i
 // RxJs interface, only the bare-bones of what we need here
 interface Subscriber<T> {
   subscribe: (cb: (value: T) => void) => {
-    unsubscribe (): void;
+    unsubscribe(): void;
   };
 }
 

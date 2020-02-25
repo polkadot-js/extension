@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { InjectedAccount, ProviderJSON } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -70,7 +70,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.setProvider)': [RequestRpcProvider, null];
-  'pub(rpc.subscribe)': [RequestRpcSubscribe, boolean, JsonRpcResponse];
+  'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -136,14 +136,6 @@ export interface RequestAccountExport {
 export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;
-
-// JSON-serializable data to instantiate a provider.
-export interface ProviderJSON {
-  // Payload to pass into Provider constructor
-  payload: string;
-  // Provider type: 'WsProvider' etc.
-  type: string;
-}
 
 export type RequestRpcProvider = ProviderJSON;
 

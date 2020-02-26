@@ -178,7 +178,7 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
 }
 
 // retrieve all providers exposed by one source
-export async function web3RpcListProviders (source: string): Promise<ProviderList | null> {
+export async function web3ListRpcProviders (source: string): Promise<ProviderList | null> {
   const { provider } = await web3FromSource(source);
   if (!provider) {
     console.warn(`Extension ${source} does not expose any provider`);
@@ -190,20 +190,14 @@ export async function web3RpcListProviders (source: string): Promise<ProviderLis
 }
 
 // retrieve all providers exposed by one source
-export async function web3RpcStartProvider (source: string, key: string): Promise<InjectedProviderWithMeta | null> {
+export async function web3UseRpcProvider (source: string, key: string): Promise<InjectedProviderWithMeta> {
   const { provider } = await web3FromSource(source);
 
-  try {
-    if (!provider) {
-      console.warn(`Extension ${source} does not expose any provider`);
-
-      return null;
-    }
-
-    const providerMeta = await provider.startProvider(key);
-
-    return { provider, meta: providerMeta };
-  } catch {
-    return null;
+  if (!provider) {
+    throw new Error(`Extension ${source} does not expose any provider`);
   }
+
+  const meta = await provider.startProvider(key);
+
+  return { provider, meta };
 }

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedWindow, Unsubcall } from '@polkadot/extension-inject/types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, Unsubcall, ProviderList } from '@polkadot/extension-inject/types';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;
@@ -175,4 +175,30 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   }
 
   return web3FromSource(found.meta.source);
+}
+
+// retrieve all providers exposed by one source
+export async function web3ListRpcProviders (source: string): Promise<ProviderList | null> {
+  const { provider } = await web3FromSource(source);
+
+  if (!provider) {
+    console.warn(`Extension ${source} does not expose any provider`);
+
+    return null;
+  }
+
+  return provider.listProviders();
+}
+
+// retrieve all providers exposed by one source
+export async function web3UseRpcProvider (source: string, key: string): Promise<InjectedProviderWithMeta> {
+  const { provider } = await web3FromSource(source);
+
+  if (!provider) {
+    throw new Error(`Extension ${source} does not expose any provider`);
+  }
+
+  const meta = await provider.startProvider(key);
+
+  return { provider, meta };
 }

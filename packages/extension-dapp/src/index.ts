@@ -180,6 +180,7 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
 // retrieve all providers exposed by one source
 export async function web3ListRpcProviders (source: string): Promise<ProviderList | null> {
   const { provider } = await web3FromSource(source);
+
   if (!provider) {
     console.warn(`Extension ${source} does not expose any provider`);
 

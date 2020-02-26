@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ProviderInterface, ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
+import { ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 import { AnyFunction } from '@polkadot/types/types';
 import { isUndefined, logger } from '@polkadot/util';
 import EventEmitter from 'eventemitter3';
 
 import { SendRequest } from './types';
-import { ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import { ProviderList, ProviderMeta, InjectedProvider } from '@polkadot/extension-inject/types';
 
 const l = logger('PostMessageProvider');
 
@@ -26,7 +26,7 @@ interface SubscriptionHandler {
  *
  * @description Extension provider to be used by dapps
  */
-export default class PostMessageProvider implements ProviderInterface {
+export default class PostMessageProvider implements InjectedProvider {
   readonly #eventemitter: EventEmitter;
 
   readonly #sendRequest: SendRequest;

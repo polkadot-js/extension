@@ -299,6 +299,7 @@ export default class State {
 
   public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
     const provider = this.getProvider(port);
+
     assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider has been set');
 
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);

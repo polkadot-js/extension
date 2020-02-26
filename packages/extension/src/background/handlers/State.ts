@@ -69,7 +69,7 @@ export default class State {
   readonly #authRequests: Record<string, AuthRequest> = {};
 
   // Map of providers currently injected in tabs
-  readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map()
+  readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map();
 
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;

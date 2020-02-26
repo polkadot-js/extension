@@ -35,7 +35,7 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
 
       // between the start and the end of the promise, the user may have closed
       // the tab, in which case port will be undefined
-      assert(port, `Port ${port.name} has been disconnected`);
+      assert(port, `Port has been disconnected`);
 
       port.postMessage({ id, response });
     })

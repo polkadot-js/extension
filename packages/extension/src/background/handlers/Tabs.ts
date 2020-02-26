@@ -2,12 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { InjectedAccount, ProviderMeta } from '@polkadot/extension-inject/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, RequestRpcSend, RequestRpcSubscribe, ResponseRpcListProviders } from '../types';
+import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -81,7 +81,7 @@ export default class Tabs {
     return this.#state.rpcSend(request, port);
   }
 
-  private rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<null> {
+  private rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
     return this.#state.rpcStartProvider(key, port);
   }
 
@@ -91,10 +91,14 @@ export default class Tabs {
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      this.#state.rpcUnsubscribe({ ...request, subscriptionId }, port);
+      this.rpcUnsubscribe({ ...request, subscriptionId }, port);
     });
 
     return true;
+  }
+
+  private async rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
+    return this.#state.rpcUnsubscribe(request, port);
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
@@ -129,6 +133,9 @@ export default class Tabs {
 
       case 'pub(rpc.subscribe)':
         return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
+
+      case 'pub(rpc.unsubscribe)':
+        return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

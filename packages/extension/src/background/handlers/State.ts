@@ -149,15 +149,6 @@ export default class State {
     };
   }
 
-  // If a provider is already running, return it, or else start it
-  private getProvider (port: chrome.runtime.Port): ProviderInterface | undefined {
-    if (!this.#injectedProviders.has(port)) {
-      throw new Error(`Port ${port.name} has no provider, please call pub(rpc.startProvider) first`);
-    }
-
-    return this.#injectedProviders.get(port) as ProviderInterface;
-  }
-
   private signComplete = (id: string, fn: Function): (result: ResponseSigning | Error) => void => {
     return (result: ResponseSigning | Error): void => {
       delete this.#signRequests[id];
@@ -254,7 +245,8 @@ export default class State {
   }
 
   public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
-    const provider = this.getProvider(port);
+    const provider = this.#injectedProviders.get(port);
+
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
     return provider.send(request.method, request.params);
@@ -262,11 +254,11 @@ export default class State {
 
   // Start a provider, return its meta
   public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
-    if (this.getProvider(port)) {
+    assert(Object.keys(this.#providers).includes(key), `Provider ${key} is not exposed by extension`);
+
+    if (this.#injectedProviders.get(port)) {
       return Promise.resolve(this.#providers[key].meta);
     }
-
-    assert(Object.keys(this.#providers).includes(key), `Provider ${key} is not exposed by extension`);
 
     // Instantiate the provider
     this.#injectedProviders.set(port, this.#providers[key].start());
@@ -284,7 +276,7 @@ export default class State {
   }
 
   public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
-    const provider = this.getProvider(port);
+    const provider = this.#injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
@@ -299,7 +291,7 @@ export default class State {
   }
 
   public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
-    const provider = this.getProvider(port);
+    const provider = this.#injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider has been set');
 

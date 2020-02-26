@@ -285,6 +285,7 @@ export default class State {
 
   public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
     const provider = this.getProvider(port);
+
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
     return provider.subscribe(

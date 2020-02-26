@@ -274,7 +274,9 @@ export default class State {
     // Close provider connection when page is closed
     port.onDisconnect.addListener((): void => {
       const provider = this.#injectedProviders.get(port);
-      if (provider) { provider.disconnect(); }
+      if (provider) {
+        provider.disconnect();
+      }
       this.#injectedProviders.delete(port);
     });
 

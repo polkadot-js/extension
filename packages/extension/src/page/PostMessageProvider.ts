@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ProviderJSON } from '@polkadot/extension-inject/types';
 import { ProviderInterface, ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 import { AnyFunction } from '@polkadot/types/types';
 import { isUndefined, logger } from '@polkadot/util';
 import EventEmitter from 'eventemitter3';
 
 import { SendRequest } from './types';
+import { ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 
 const l = logger('PostMessageProvider');
 
@@ -82,6 +82,10 @@ export default class PostMessageProvider implements ProviderInterface {
     return true;
   }
 
+  public listProviders (): Promise<ProviderList> {
+    return this.#sendRequest('pub(rpc.listProviders)', undefined);
+  }
+
   /**
    * @summary Listens on events after having subscribed using the [[subscribe]] function.
    * @param  {ProviderInterfaceEmitted} type Event
@@ -117,8 +121,8 @@ export default class PostMessageProvider implements ProviderInterface {
     }
   }
 
-  public async setProvider (providerJSON: ProviderJSON): Promise<null> {
-    return this.#sendRequest('pub(rpc.setProvider)', providerJSON);
+  public startProvider (key: string): Promise<ProviderMeta> {
+    return this.#sendRequest('pub(rpc.startProvider)', key);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -2,10 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import WsProvider from '@polkadot/rpc-provider/ws';
+import { ProviderMeta } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 
-import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcProvider, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseSigning, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest, RequestRpcUnsubscribe } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
@@ -27,6 +27,15 @@ type AuthUrls = Record<string, {
   origin: string;
   url: string;
 }>;
+
+// List of providers passed into constructor. This is the list of providers
+// exposed by the extension.
+type Providers = Record<string, {
+  meta: ProviderMeta;
+  // The provider is not running at init, calling this will instantiate the
+  // provider.
+  start: () => ProviderInterface;
+}>
 
 interface SignRequest {
   account: AccountJson;
@@ -59,7 +68,11 @@ export default class State {
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
-  #provider: ProviderInterface | undefined;
+  // Map of providers currently injected in tabs
+  readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map()
+
+  // Map of all providers exposed by the extension, they are retrievable by key
+  readonly #providers: Providers;
 
   readonly #signRequests: Record<string, SignRequest> = {};
 
@@ -68,6 +81,10 @@ export default class State {
   public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
+
+  constructor (providers: Providers = {}) {
+    this.#providers = providers;
+  }
 
   public get hasAuthRequests (): boolean {
     return this.numAuthRequests === 0;
@@ -130,6 +147,15 @@ export default class State {
 
       fn(result);
     };
+  }
+
+  // If a provider is already running, return it, or else start it
+  private getProvider (port: chrome.runtime.Port): ProviderInterface | undefined {
+    if (!this.#injectedProviders.has(port)) {
+      throw new Error(`Port ${port.name} has no provider, please call pub(rpc.startProvider) first`);
+    }
+
+    return this.#injectedProviders.get(port) as ProviderInterface;
   }
 
   private signComplete = (id: string, fn: Function): (result: ResponseSigning | Error) => void => {
@@ -201,10 +227,6 @@ export default class State {
     });
   }
 
-  get provider (): ProviderInterface | undefined {
-    return this.#provider;
-  }
-
   public ensureUrlAuthorized (url: string): boolean {
     const entry = this.#authUrls[this.stripUrl(url)];
 
@@ -222,31 +244,48 @@ export default class State {
     return this.#signRequests[id];
   }
 
-  public rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
-    assert(this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+  // List all providers the extension is exposing
+  public rpcListProviders (): Promise<ResponseRpcListProviders> {
+    return Promise.resolve(Object.keys(this.#providers).reduce((acc, key) => {
+      acc[key] = this.#providers[key].meta;
 
-    return this.#provider.send(request.method, request.params);
+      return acc;
+    }, {} as ResponseRpcListProviders));
   }
 
-  // Change the provider the extension is exposing
-  public rpcSetProvider (provider: RequestRpcProvider): Promise<null> {
-    switch (provider.type) {
-      case 'WsProvider': {
-        this.#provider = new WsProvider(provider.payload);
-        break;
-      }
-      default: {
-        return Promise.reject(new Error(`Unable to instantiate provider of type ${provider.type}`));
-      }
+  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+    const provider = this.getProvider(port);
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+
+    return provider.send(request.method, request.params);
+  }
+
+  // Start a provider, return its meta
+  public rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
+    if (this.getProvider(port)) {
+      return Promise.resolve(this.#providers[key].meta);
     }
 
-    return Promise.resolve(null);
+    assert(Object.keys(this.#providers).includes(key), `Provider ${key} is not exposed by extension`);
+
+    // Instantiate the provider
+    this.#injectedProviders.set(port, this.#providers[key].start());
+
+    // Close provider connection when page is closed
+    port.onDisconnect.addListener((): void => {
+      const provider = this.#injectedProviders.get(port);
+      if (provider) { provider.disconnect(); }
+      this.#injectedProviders.delete(port);
+    });
+
+    return Promise.resolve(this.#providers[key].meta);
   }
 
-  public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback): Promise<number> {
-    assert(this.#provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+  public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
+    const provider = this.getProvider(port);
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
-    return this.#provider.subscribe(
+    return provider.subscribe(
       request.type,
       request.method,
       request.params,
@@ -254,6 +293,13 @@ export default class State {
       // @ts-ignore WsProvider gives me (error, result)=>void, whereas (result)=>void is expected
       (_error, res) => { cb(res); }
     );
+  }
+
+  public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
+    const provider = this.getProvider(port);
+    assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider has been set');
+
+    return provider.unsubscribe(request.type, request.method, request.subscriptionId);
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

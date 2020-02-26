@@ -35,22 +35,24 @@ export interface InjectedExtensionInfo {
   version: string;
 }
 
-// JSON-serializable data to instantiate a provider.
-export interface ProviderJSON {
-  // Payload to pass into Provider constructor
-  payload: string;
-  // Provider type: 'WsProvider' etc.
-  type: string;
+// Metadata about a provider
+export interface ProviderMeta {
+  // Network of the provider
+  network: string;
+  // Light or full node
+  node: 'full' | 'light';
+  // The extension source
+  source: string;
+  // Provider transport: 'WsProvider' etc.
+  transport: string;
 }
 
-interface InjectedProviderMeta extends ProviderJSON {
-  source: string;
-}
+export type ProviderList = Record<string, ProviderMeta>
 
 export interface InjectedProviderWithMeta {
   // InjectedProvider will always be a PostMessageProvider
   provider: PostMessageProvider;
-  meta: InjectedProviderMeta;
+  meta: ProviderMeta;
 }
 
 export interface Injected {

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderJSON, Unsubcall } from '@polkadot/extension-inject/types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, Unsubcall, ProviderList } from '@polkadot/extension-inject/types';
 
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;
@@ -177,8 +177,20 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   return web3FromSource(found.meta.source);
 }
 
-// retrieve a provider from one source
-export async function web3RpcProvider (source: string, providerJSON: ProviderJSON): Promise<InjectedProviderWithMeta | null> {
+// retrieve all providers exposed by one source
+export async function web3RpcListProviders (source: string): Promise<ProviderList | null> {
+  const { provider } = await web3FromSource(source);
+  if (!provider) {
+    console.warn(`Extension ${source} does not expose any provider`);
+
+    return null;
+  }
+
+  return provider.listProviders();
+}
+
+// retrieve all providers exposed by one source
+export async function web3RpcStartProvider (source: string, key: string): Promise<InjectedProviderWithMeta | null> {
   const { provider } = await web3FromSource(source);
 
   try {
@@ -188,9 +200,9 @@ export async function web3RpcProvider (source: string, providerJSON: ProviderJSO
       return null;
     }
 
-    await provider.setProvider(providerJSON);
+    const providerMeta = await provider.startProvider(key);
 
-    return { provider, meta: { ...providerJSON, source } };
+    return { provider, meta: providerMeta };
   } catch {
     return null;
   }

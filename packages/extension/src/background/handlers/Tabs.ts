@@ -7,7 +7,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, RequestRpcProvider, RequestRpcSend, RequestRpcSubscribe } from '../types';
+import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, RequestRpcSend, RequestRpcSubscribe, ResponseRpcListProviders } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -73,23 +73,25 @@ export default class Tabs {
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
-  private rpcSend (request: RequestRpcSend): Promise<JsonRpcResponse> {
-    return this.#state.rpcSend(request);
+  private rpcListProviders (): Promise<ResponseRpcListProviders> {
+    return this.#state.rpcListProviders();
   }
 
-  private rpcSetProvider (request: RequestRpcProvider): Promise<null> {
-    return this.#state.rpcSetProvider(request);
+  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+    return this.#state.rpcSend(request, port);
+  }
+
+  private rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<null> {
+    return this.#state.rpcStartProvider(key, port);
   }
 
   private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
-    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
-    const subscription = await this.#state.rpcSubscribe(request, cb);
+    const cb = createSubscription<'pub(rpc.subscribe)'>(id, port);
+    const subscriptionId = await this.#state.rpcSubscribe(request, cb, port);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      assert(!!this.#state.provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
-
-      this.#state.provider.unsubscribe(request.type, request.method, subscription);
+      this.#state.rpcUnsubscribe({ ...request, subscriptionId }, port);
     });
 
     return true;
@@ -116,11 +118,14 @@ export default class Tabs {
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
 
-      case 'pub(rpc.send)':
-        return this.rpcSend(request as RequestRpcSend);
+      case 'pub(rpc.listProviders)':
+        return this.rpcListProviders();
 
-      case 'pub(rpc.setProvider)':
-        return this.rpcSetProvider(request as RequestRpcProvider);
+      case 'pub(rpc.send)':
+        return this.rpcSend(request as RequestRpcSend, port);
+
+      case 'pub(rpc.startProvider)':
+        return this.rpcStartProvider(request as string, port);
 
       case 'pub(rpc.subscribe)':
         return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);

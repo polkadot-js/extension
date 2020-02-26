@@ -13,7 +13,7 @@ A basic extractor that manipulates the `window.injectedWeb3` to retrieve all the
 ## Usage
 
 ```js
-import { web3Accounts, web3Enable, web3FromAddress, web3RpcProvider } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3FromAddress, web3ListRpcProviders, web3UseRpcProvider } from '@polkadot/extension-dapp';
 
 // returns an array of all the injected sources
 // (this needs to be called first, before other requests)

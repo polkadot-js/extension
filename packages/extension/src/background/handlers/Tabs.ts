@@ -7,7 +7,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe } from '../types';
+import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
 
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -86,7 +86,8 @@ export default class Tabs {
   }
 
   private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
-    const cb = createSubscription<'pub(rpc.subscribe)'>(id, port);
+    const innerCb = createSubscription<'pub(rpc.subscribe)'>(id, port);
+    const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribe)']): void => innerCb(data);
     const subscriptionId = await this.#state.rpcSubscribe(request, cb, port);
 
     port.onDisconnect.addListener((): void => {

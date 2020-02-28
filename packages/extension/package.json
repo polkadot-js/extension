@@ -1,12 +1,12 @@
 {
   "name": "@polkadot/extension",
   "description": "A sample signer extension for the @polkadot/api",
-  "version": "0.22.0-beta.8",
+  "version": "0.22.0-beta.9",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
     "@polkadot/api": "^1.5.0-beta.12",
-    "@polkadot/extension-ui": "0.22.0-beta.8",
+    "@polkadot/extension-ui": "0.22.0-beta.9",
     "@polkadot/keyring": "^2.5.1",
     "@polkadot/ui-keyring": "^0.52.0-beta.3",
     "extensionizer": "^1.0.1"

@@ -5,7 +5,7 @@
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@polkadot/api": "^1.4.0-beta.46",
+    "@polkadot/api": "^1.5.0-beta.12",
     "@polkadot/extension-ui": "0.22.0-beta.8",
     "@polkadot/keyring": "^2.5.1",
     "@polkadot/ui-keyring": "^0.52.0-beta.3",

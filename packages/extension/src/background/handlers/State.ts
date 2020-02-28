@@ -266,28 +266,23 @@ export default class State {
     // Close provider connection when page is closed
     port.onDisconnect.addListener((): void => {
       const provider = this.#injectedProviders.get(port);
+
       if (provider) {
         provider.disconnect();
       }
+
       this.#injectedProviders.delete(port);
     });
 
     return Promise.resolve(this.#providers[key].meta);
   }
 
-  public rpcSubscribe (request: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
+  public rpcSubscribe ({ method, params, type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
     const provider = this.#injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
 
-    return provider.subscribe(
-      request.type,
-      request.method,
-      request.params,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-      // @ts-ignore WsProvider gives me (error, result)=>void, whereas (result)=>void is expected
-      (_error, res) => { cb(res); }
-    );
+    return provider.subscribe(type, method, params, cb);
   }
 
   public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {

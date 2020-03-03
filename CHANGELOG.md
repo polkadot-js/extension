@@ -1,7 +1,12 @@
-# 0.21.1 Mar 03, 20202
+# 0.22.1 Mar 03, 20202
 
 - Fix uncaught exception when tab closes without action (Thanks to https://github.com/amaurymartiny)
 - Add preliminary support for provider injection, no UI config (Thanks to https://github.com/amaurymartiny)
+- Dependencies updated to latest versions
+
+# 0.21.1 Feb 07, 20202
+
+- Rebuild for re-publish
 - Dependencies updated to latest versions
 
 # 0.20.1 Jan 27, 2020

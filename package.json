@@ -6,17 +6,14 @@
   "workspaces": [
     "packages/*"
   ],
-  "engines": {
-    "yarn": "^1.10.1"
-  },
   "resolutions": {
-    "@polkadot/api": "^1.5.0-beta.17",
-    "@polkadot/keyring": "^2.5.1",
-    "@polkadot/types": "^1.5.0-beta.17",
-    "@polkadot/util": "^2.5.1",
-    "@polkadot/util-crypto": "^2.5.1",
+    "@polkadot/api": "^1.5.0-beta.28",
+    "@polkadot/keyring": "^2.6.1",
+    "@polkadot/types": "^1.5.0-beta.28",
+    "@polkadot/util": "^2.6.1",
+    "@polkadot/util-crypto": "^2.6.1",
     "babel-core": "^7.0.0-bridge.0",
-    "typescript": "^3.8.2"
+    "typescript": "^3.8.3"
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
@@ -29,9 +26,9 @@
     "watch": "cd packages/extension && webpack --config webpack.config.js --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.4",
-    "@polkadot/dev": "^0.50.11",
-    "@polkadot/ts": "^0.3.3",
+    "@babel/core": "^7.8.6",
+    "@polkadot/dev": "^0.50.16",
+    "@polkadot/ts": "^0.3.6",
     "sinon-chrome": "^3.0.1"
   }
 }

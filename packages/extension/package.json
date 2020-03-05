@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.8.4",
-    "@types/chrome": "^0.0.98",
+    "@types/chrome": "^0.0.99",
     "@types/firefox-webext-browser": "^70.0.1",
     "babel-loader": "^8.0.6",
     "extract-loader": "^4.0.3",

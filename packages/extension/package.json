@@ -16,7 +16,7 @@
     "@types/chrome": "^0.0.98",
     "@types/firefox-webext-browser": "^70.0.1",
     "babel-loader": "^8.0.6",
-    "extract-loader": "^4.0.3",
+    "extract-loader": "^5.0.0",
     "file-loader": "^5.1.0",
     "html-loader": "^0.5.5",
     "sinon-chrome": "^3.0.1",

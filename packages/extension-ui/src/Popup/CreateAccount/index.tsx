@@ -51,11 +51,13 @@ export default function CreateAccount (): React.ReactElement {
           <ActionText text={step === 1 ? 'Cancel' : 'Back'} onClick={_onCancel} />
         </CreationSteps>
       </Header>
-      <Loading>{account && (step === 1 ? (
-        <Mnemonic seed={account.seed} onNextStep={_onNextStep} />
-      ) : (
-        <AccountCredentials seed={account.seed} onCreate={_onCreate} />
-      ))}</Loading>
+      <Loading>
+        {account && (step === 1 ? (
+          <Mnemonic seed={account.seed} onNextStep={_onNextStep} />
+        ) : (
+          <AccountCredentials seed={account.seed} onCreate={_onCreate} />
+        ))}
+      </Loading>
     </>
   );
 }

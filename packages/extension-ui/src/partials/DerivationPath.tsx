@@ -1,21 +1,30 @@
-// Copyright 2019 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useState, useEffect } from 'react';
-import gearIcon from '../../assets/gear.svg';
-import arrowIcon from '../../assets/arrow-down.svg';
+import gearIcon from '../assets/gear.svg';
+import arrowIcon from '../assets/arrow-down.svg';
 import styled from 'styled-components';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { Dropdown, InputWithLabel, Svg } from '@polkadot/extension-ui/components';
+import { validateSeed } from '@polkadot/extension-ui/messaging';
+
+export type OnDerivationPathChangeProps = {
+  isValid: true;
+  suri: string;
+  address: string;
+  keyPairType?: KeypairType;
+} | {
+  isValid: false;
+  suri: string;
+  error: string;
+}
 
 interface Props {
-  onChange: (derivationPath: {
-    pairType: KeypairType;
-    path: string;
-  }) => void;
-  onExpand: (reverse: boolean) => void;
-  isValid: boolean;
+  onChange: (derivationPath: OnDerivationPathChangeProps) => void;
+  seed: string;
+  onDoScroll: (way: 'up' | 'down') => void;
 }
 
 const keypairs = {
@@ -29,34 +38,58 @@ const keypairs = {
   }
 };
 
-function DerivationPath ({ onChange, isValid, onExpand }: Props): React.ReactElement<Props> {
-  const [type, setType] = useState<KeypairType>('ed25519');
+function DerivationPath ({ onChange, onDoScroll, seed }: Props): React.ReactElement<Props> {
+  const [type, setType] = useState<KeypairType | undefined>(undefined);
   const [path, setPath] = useState('');
+  const [isValid, setValid] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
+  const getSuri = (): string => (path ? `${seed}${path}` : seed);
+
   useEffect(() => {
-    onChange({
-      pairType: type,
-      path
-    });
+    const suri = getSuri();
+    (async (): Promise<void> => {
+      try {
+        const { address } = await validateSeed(suri, type);
+        onChange({
+          isValid: true,
+          address,
+          suri,
+          keyPairType: type
+        });
+        setValid(true);
+      } catch (error) {
+        onChange({
+          isValid: false,
+          suri,
+          error: error.message
+        });
+        setValid(false);
+      }
+    })();
   }, [type, path]);
 
   return (
     <DerivationPathContainer>
       <OptionsLabel
         onClick={(): void => {
+          if (!type) {
+            setType('sr25519');
+          }
           if (showAdvancedOptions) {
-            onExpand(true);
+            onDoScroll('up');
             setTimeout(() => setShowAdvancedOptions(false), 200);
           } else {
             setShowAdvancedOptions(true);
-            setTimeout(() => onExpand(false), 100);
+            setTimeout(() => onDoScroll('down'), 100);
           }
         }}
       >
+        <LabelWithIcon>
+          <GearIcon/>
+          <label>Advanced creation options</label>
+        </LabelWithIcon>
         <ArrowIcon isExpanded={showAdvancedOptions}/>
-        <label>Advanced creation options</label>
-        <GearIcon/>
       </OptionsLabel>
       {showAdvancedOptions && (
         <>
@@ -70,8 +103,8 @@ function DerivationPath ({ onChange, isValid, onExpand }: Props): React.ReactEle
             value={type}
           />
           <InputWithLabel
-            label='Advanced creation options'
-            placeholder={keypairs[type].placeholder}
+            label='Derivation path'
+            placeholder={type ? keypairs[type].placeholder : ''}
             onChange={setPath}
             value={path}
             isError={!isValid}
@@ -107,19 +140,24 @@ const ArrowIcon = styled(Svg).attrs(() => ({
   transition: 0.1s;
 `;
 
+const LabelWithIcon = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
 const GearIcon = styled(Svg).attrs(() => ({
   src: gearIcon
 }))`
   height: 12px;
   width: 12px;
-  margin-left: 6px;
+  margin-right: 6px;
   align-self: center;
   background: ${({ theme }): string => theme.subTextColor};
 `;
 
 export const OptionsLabel = styled.div`
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 

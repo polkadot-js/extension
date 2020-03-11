@@ -2284,7 +2284,7 @@
   dependencies:
     "@types/chrome" "^0.0.95"
 
-"@polkadot/types@1.4.0-beta.46", "@polkadot/types@^1.4.0-beta.46":
+"@polkadot/types@1.4.0-beta.46":
   version "1.4.0-beta.46"
   resolved "https://registry.yarnpkg.com/@polkadot/types/-/types-1.4.0-beta.46.tgz#1e64c9e435fe613867a43d293455c1f1cd29d4e1"
   integrity sha512-r9RlHD6d5s+vs+nZyFoh9ILw5/7/Pk0aQE9j0RKvjFhjhbQ8vW++fkFJeCoKzqPOKZXAyeO31JFIGDxv+2QM5g==
@@ -2598,6 +2598,13 @@
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.2.tgz#690a1475b84f2a884fd07cd797c00f5f31356ea8"
   integrity sha512-ce5d3q03Ex0sy4R14722Rmt6MT07Ua+k4FwDfdcToYJcMKNtRVQvJ6JCAPdAmAnbRb6CsX6aYb9m96NGod9uTw==
+
+"@types/react-copy-to-clipboard@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@types/react-copy-to-clipboard/-/react-copy-to-clipboard-4.3.0.tgz#8e07becb4f11cfced4bd36038cb5bdf5c2658be5"
+  integrity sha512-iideNPRyroENqsOFh1i2Dv3zkviYS9r/9qD9Uh3Z9NNoAAqqa2x53i7iGndGNnJFIo20wIu7Hgh77tx1io8bgw==
+  dependencies:
+    "@types/react" "*"
 
 "@types/react-dom@^16.9.5":
   version "16.9.5"
@@ -14115,7 +14122,12 @@ typedoc@^0.16.9:
     typedoc-default-themes "^0.7.2"
     typescript "3.7.x"
 
-typescript@3.7.x, typescript@^3.0.3, typescript@^3.6.4, typescript@^3.8.2:
+typescript@3.7.x:
+  version "3.7.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.5.tgz#0692e21f65fd4108b9330238aac11dd2e177a1ae"
+  integrity sha512-/P5lkRXkWHNAbcJIiHPfRoKqyd7bsyCma1hZNUGfn20qm64T6ZBlrzprymeu918H+mB/0rIg2gGK/BXkhhYgBw==
+
+typescript@^3.0.3, typescript@^3.6.4, typescript@^3.8.2:
   version "3.8.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.2.tgz#91d6868aaead7da74f493c553aeff76c0c0b1d5a"
   integrity sha512-EgOVgL/4xfVrCMbhYKUQTdF37SQn4Iw73H5BgCrF1Abdun7Kwy/QZsE/ssAy0y4LxBbvua3PIbFsbRczWWnDdQ==

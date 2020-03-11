@@ -16,7 +16,10 @@ import Identicon from '@polkadot/extension-ui/components/Identicon';
 import Svg from '@polkadot/extension-ui/components/Svg';
 import Menu from '@polkadot/extension-ui/components/Menu';
 import DetailsImg from '../assets/details.svg';
+import copyButton from '../assets/copy.svg';
 import { useOutsideClick } from '@polkadot/extension-ui/hooks';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { useToast } from './Toast/useToast';
 
 interface Props {
   address?: string | null;
@@ -93,6 +96,7 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
   const _onClick = (): void => setShowActionsMenu(!showActionsMenu);
+  const { show } = useToast();
 
   return (
     <div className={className}>
@@ -105,10 +109,15 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           />
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
-            <FullAddress>{formatted || '<unknown>'}</FullAddress>
-            {chain?.genesisHash && (
-              <Banner>{chain.name}</Banner>
-            )}
+            <CopyAddress>
+              <FullAddress>{formatted || '<unknown>'}</FullAddress>
+              {chain?.genesisHash && (
+                <Banner>{chain.name}</Banner>
+              )}
+              <CopyToClipboard text={(formatted && formatted) || ''} >
+                <Svg src={copyButton} onClick={(): void => show('Copied')}/>
+              </CopyToClipboard>
+            </CopyAddress>
           </Info>
           {actions && (
             <>
@@ -135,6 +144,22 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   );
 }
 
+const CopyAddress = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  & ${Svg} {
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+    background: ${({ theme }): string => theme.accountDotsIconColor};
+    &:hover {
+      background: ${({ theme }): string => theme.labelColor};
+      cursor: pointer;
+    }
+  }
+`;
+
 const AccountInfoRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -159,7 +184,7 @@ const Name = styled.div`
 `;
 
 const FullAddress = styled.div`
-  width: 300px;
+  width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }): string => theme.labelColor};
@@ -212,6 +237,10 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
   background: ${({ theme }): string => theme.primaryColor};
 `;
 
+const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
+  ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
+`;
+
 const Banner = styled.div`
   background: ${({ theme }): string => theme.primaryColor};
   border-radius: 0 0 8px 8px;
@@ -222,10 +251,6 @@ const Banner = styled.div`
   position: absolute;
   right: 40px;
   top: 0;
-`;
-
-const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
-  ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
 `;
 
 export default styled(Address)`

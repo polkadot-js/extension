@@ -13,7 +13,7 @@ A basic extractor that manipulates the `window.injectedWeb3` to retrieve all the
 ## Usage
 
 ```js
-import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3FromAddress, web3ListRpcProviders, web3UseRpcProvider } from '@polkadot/extension-dapp';
 
 // returns an array of all the injected sources
 // (this needs to be called first, before other requests)
@@ -35,4 +35,12 @@ api.setSigner(injector.signer);
 api.tx.balances
   .transfer('5C5555yEXUcmEJ5kkcCMvdZjUo7NGJiQJMS7vZXEeoMhj3VQ', 123456)
   .signAndSend('5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE', (status) => { ... });
+
+// retrieve all the RPC providers from a particular source. this returns a map
+// of string->ProviderMeta, where the string represents an unique key to identify
+// a provider, and ProviderMeta shows metadata about this provider
+const allProviders = web3ListRpcProviders('polkadot-js');
+// assuming one of the keys in `allProviders` is 'kusama-cc3', we can then use that provider
+const { provider } = web3UseRpcProvider('polkadot-js', 'kusama-cc3');
+const head = await provider.send('chain_getHeader', []); // shows latest header
 ```

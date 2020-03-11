@@ -2,7 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import { InjectedAccount, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
@@ -67,6 +68,11 @@ export interface RequestSignatures {
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
+  'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
+  'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
+  'pub(rpc.startProvider)': [string, ProviderMeta];
+  'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse];
+  'pub(rpc.unsubscribe)': [RequestRpcUnsubscribe, boolean];
 }
 
 export type MessageTypes = keyof RequestSignatures;
@@ -132,6 +138,22 @@ export interface RequestAccountExport {
 export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;
+
+export interface RequestRpcSend {
+  method: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params: any[];
+}
+
+export interface RequestRpcSubscribe extends RequestRpcSend {
+  type: string;
+}
+
+export interface RequestRpcUnsubscribe {
+  method: string;
+  subscriptionId: number;
+  type: string;
+}
 
 export interface RequestSigningApprovePassword {
   id: string;
@@ -203,6 +225,8 @@ export interface ResponseSeedValidate {
 export interface ResponseAccountExport {
   exportedJson: string;
 }
+
+export type ResponseRpcListProviders = ProviderList;
 
 // Subscriptions
 

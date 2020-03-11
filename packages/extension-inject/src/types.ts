@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Signer as InjectedSigner } from '@polkadot/api/types';
+import { ProviderInterface } from '@polkadot/rpc-provider/types';
 
 // eslint-disable-next-line no-undef
 type This = typeof globalThis;
@@ -34,9 +35,35 @@ export interface InjectedExtensionInfo {
   version: string;
 }
 
+// Metadata about a provider
+export interface ProviderMeta {
+  // Network of the provider
+  network: string;
+  // Light or full node
+  node: 'full' | 'light';
+  // The extension source
+  source: string;
+  // Provider transport: 'WsProvider' etc.
+  transport: string;
+}
+
+export type ProviderList = Record<string, ProviderMeta>
+
+export interface InjectedProvider extends ProviderInterface {
+  listProviders: () => Promise<ProviderList>;
+  startProvider: (key: string) => Promise<ProviderMeta>;
+}
+
+export interface InjectedProviderWithMeta {
+  // provider will actually always be a PostMessageProvider, which implements InjectedProvider
+  provider: InjectedProvider;
+  meta: ProviderMeta;
+}
+
 export interface Injected {
   accounts: InjectedAccounts;
   signer: InjectedSigner;
+  provider?: InjectedProvider;
 }
 
 export interface InjectedWindowProvider {

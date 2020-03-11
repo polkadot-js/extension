@@ -8,6 +8,10 @@ tmp/
 .env.test.local
 .env.production.local
 .npmrc
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+.pnp.*
 cc-test-reporter
 lerna-debug.log*
 master-build.zip

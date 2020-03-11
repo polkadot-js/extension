@@ -4,6 +4,8 @@
 
 import { TransportRequestMessage, MessageTypes } from '../types';
 
+import { assert } from '@polkadot/util';
+
 import { PORT_EXTENSION } from '../../defaults';
 import Extension from './Extension';
 import State from './State';
@@ -31,11 +33,18 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
     .then((response): void => {
       console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
+      // between the start and the end of the promise, the user may have closed
+      // the tab, in which case port will be undefined
+      assert(port, `Port has been disconnected`);
+
       port.postMessage({ id, response });
     })
     .catch((error): void => {
       console.log(`[err] ${source}:: ${error.message}`);
 
-      port.postMessage({ id, error: error.message });
+      // only send message back to port if it's still connected
+      if (port) {
+        port.postMessage({ id, error: error.message });
+      }
     });
 }

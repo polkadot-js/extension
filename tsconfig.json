@@ -7,7 +7,6 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
-    "jsx": "react",
     "paths": {
       "@polkadot/extension": ["packages/extension/src"],
       "@polkadot/extension/*": ["packages/extension/src/*"],

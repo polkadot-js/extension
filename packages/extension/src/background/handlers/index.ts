@@ -17,7 +17,7 @@ const tabs = new Tabs(state);
 
 export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port): void {
   const isExtension = port.name === PORT_EXTENSION;
-  const sender = port.sender as chrome.runtime.MessageSender;
+  const sender = port.sender; // as chrome.runtime.MessageSender;
   const from = isExtension
     ? 'extension'
     : (sender.tab && sender.tab.url) || sender.url || '<unknown>';

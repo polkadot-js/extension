@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/@polkadot/dev/config/tsconfig",
+  "extends": "@polkadot/dev/config/tsconfig",
   "exclude": [
     "build/**/*",
     "**/build/*",
@@ -19,10 +19,6 @@
       "@polkadot/extension-ui": ["packages/extension-ui/src"],
       "@polkadot/extension-ui/*": ["packages/extension-ui/src/*"]
     },
-    "skipLibCheck": true,
-    "typeRoots": [
-      "./node_modules/@polkadot/ts",
-      "./node_modules/@types"
-    ]
+    "skipLibCheck": true
   }
 }

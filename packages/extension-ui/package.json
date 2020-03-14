@@ -24,6 +24,7 @@
     "@types/bn.js": "^4.11.6",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/react": "^16.9.5",
     "@types/react-dom": "^16.9.5",
     "@types/react-router": "^5.1.4",
     "@types/react-router-dom": "^5.1.3",

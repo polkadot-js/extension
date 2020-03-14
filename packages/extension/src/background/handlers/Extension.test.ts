@@ -1,9 +1,14 @@
-import Extension from '@polkadot/extension/background/handlers/Extension';
-import keyring from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
-import State from '@polkadot/extension/background/handlers/State';
+// Copyright 2019-2020 @polkadot/extension authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
+
 import { ResponseAccountExport } from '@polkadot/extension/background/types';
+
+import Extension from '@polkadot/extension/background/handlers/Extension';
+import State from '@polkadot/extension/background/handlers/State';
+import keyring from '@polkadot/ui-keyring';
 import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 describe('Extension', () => {
   async function createExtension (): Promise<Extension> {

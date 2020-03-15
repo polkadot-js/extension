@@ -19,16 +19,20 @@
     "rxjs": "^6.5.4"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.7",
     "@babel/runtime": "^7.8.7",
     "@polkadot/dev": "^0.50.33",
     "@types/chrome": "^0.0.100",
     "@types/firefox-webext-browser": "^70.0.1",
     "babel-loader": "^8.0.6",
+    "copy-webpack-plugin": "^5.1.1",
     "extract-loader": "^4.0.3",
     "file-loader": "^5.1.0",
     "html-loader": "^0.5.5",
+    "pnp-webpack-plugin": "^1.6.4",
     "sinon-chrome": "^3.0.1",
     "thread-loader": "^2.1.3",
+    "url-loader": "^3.0.0",
     "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11",
     "webpack-extension-manifest-plugin": "^0.5.0"

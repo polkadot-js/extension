@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.8.7",
-    "@polkadot/dev": "^0.50.31",
+    "@polkadot/dev": "^0.51.1",
     "@types/chrome": "^0.0.100",
     "@types/firefox-webext-browser": "^70.0.1",
     "babel-loader": "^8.0.6",

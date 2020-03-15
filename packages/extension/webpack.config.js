@@ -47,13 +47,13 @@ module.exports = {
     }, {}),
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     plugins: [
-      PnpWebpackPlugin,
+      PnpWebpackPlugin
     ]
   },
   resolveLoader: {
     plugins: [
-      PnpWebpackPlugin.moduleLoader(module),
-    ],
+      PnpWebpackPlugin.moduleLoader(module)
+    ]
   },
   module: {
     rules: [
@@ -113,4 +113,4 @@ module.exports = {
     })
   ].filter((entry) => entry),
   watch: !isProd
-}
+};

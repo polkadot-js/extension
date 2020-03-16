@@ -1,0 +1,14 @@
+{
+  "name": "@polkadot/extension-base",
+  "description": "Background and page handlers for the extension",
+  "version": "0.23.0-beta.1",
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "license": "Apache-2",
+  "dependencies": {
+    "@babel/runtime": "^7.8.7",
+    "@polkadot/api": "^1.7.0-beta.10",
+    "@polkadot/keyring": "^2.6.2",
+    "@polkadot/ui-keyring": "^0.52.0-beta.7",
+    "extensionizer": "^1.0.1"
+  }
+}

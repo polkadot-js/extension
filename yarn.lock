@@ -2901,7 +2901,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@0.23.0-beta.3, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@0.23.0-beta.4, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:

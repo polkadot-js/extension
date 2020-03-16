@@ -7,7 +7,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Header, Loading, SigningContext } from '../../components';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
-import { SigningRequest } from '@polkadot/extension/background/types';
+import { SigningRequest } from '@polkadot/extension-base/background/types';
 
 export default function Signing (): React.ReactElement<{}> {
   const requests = useContext(SigningContext);

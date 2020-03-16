@@ -9,7 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import { AuthorizeContext, themes, Header, Icon } from '@polkadot/extension-ui/components';
 import Authorize from '.';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { AuthorizeRequest } from '@polkadot/extension/background/types';
+import { AuthorizeRequest } from '@polkadot/extension-base/background/types';
 import Request from './Request';
 
 configure({ adapter: new Adapter() });

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson } from '@polkadot/extension/background/types';
+import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
@@ -224,7 +224,7 @@ const Banner = styled.div`
   top: 0;
 `;
 
-const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
+const MovableMenu = styled(Menu) <{ isMoved: boolean }>`
   ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
 `;
 

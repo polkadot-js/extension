@@ -1,6 +1,6 @@
 {
   "name": "@polkadot/extension-base",
-  "description": "Background and page handlers for the extension",
+  "description": "Functions, classes and other utilities used in @polkadot/extension",
   "version": "0.23.0-beta.1",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",

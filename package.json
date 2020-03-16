@@ -17,6 +17,7 @@
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
+    "build:release": "polkadot-ci-ghact-build",
     "build:zip": "(rm -rf ./master-build.zip && yarn build && cd packages/extension/build && zip -r -FS ../../../master-build.zip . -i *) && (rm -rf ./master-src.zip && zip -r -x '*build*' -x '*node_modules*' -FS ./master-src.zip packages .babelrc.js .editorconfig .eslintignore .eslintrc.js babel.config.js CHANGELOG.md CONTRIBUTING.md jest.config.js lerna.json LICENSE package.json README.md tsconfig.json yarn.lock)",
     "lint": "polkadot-dev-run-lint",
     "clean": "polkadot-dev-clean-build",

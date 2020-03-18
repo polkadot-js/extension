@@ -3,12 +3,38 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, ResponseTypes, SigningRequest } from '../types';
+import {
+  AccountJson,
+  AuthorizeRequest,
+  MessageTypes,
+  RequestAccountCreateExternal,
+  RequestAccountCreateSuri,
+  RequestAccountEdit,
+  RequestAccountExport,
+  RequestAuthorizeApprove,
+  RequestAuthorizeReject,
+  RequestSigningApprovePassword,
+  RequestSigningApproveSignature,
+  RequestSigningCancel,
+  RequestSeedCreate,
+  RequestTypes,
+  ResponseAccountExport,
+  RequestAccountForget,
+  ResponseSeedCreate,
+  RequestSeedValidate,
+  ResponseSeedValidate,
+  ResponseType,
+  SigningRequest,
+  RequestDeriveValidate,
+  ResponseDeriveValidate,
+  RequestDeriveCreate
+} from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
+import { KeyringPair$Meta } from "@polkadot/keyring/types";
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
@@ -220,9 +246,33 @@ export default class Extension {
     return true;
   }
 
+  private derive(parentAddress: string, suri: string, metadata: KeyringPair$Meta) {
+    const parentPair = keyring.getPair(parentAddress);
+    return parentPair.derive(suri, metadata);
+  }
+
+  private derivationValidate({parentAddress, suri}: RequestDeriveValidate): ResponseDeriveValidate {
+    try {
+      const childPair = this.derive(parentAddress, suri, {});
+      return {
+        address: childPair.address,
+        suri
+      }
+    } catch (err) {
+      throw new Error(`"${suri}" is not a valid derivation path`);
+    }
+  }
+
+  private derivationCreate({parentAddress, suri, genesisHash, name, password}: RequestDeriveCreate) {
+    const childPair = this.derive(parentAddress, suri, {genesisHash, name});
+    keyring.addPair(childPair, password);
+
+    return true;
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
       case 'pri(authorize.approve)':
         return this.authorizeApprove(request as RequestAuthorizeApprove);
@@ -250,6 +300,12 @@ export default class Extension {
 
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
+
+      case 'pri(derivation.create)':
+        return this.derivationCreate(request as RequestDeriveCreate);
+
+      case 'pri(derivation.validate)':
+        return this.derivationValidate(request as RequestDeriveValidate);
 
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);

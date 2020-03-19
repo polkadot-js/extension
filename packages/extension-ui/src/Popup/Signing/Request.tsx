@@ -7,7 +7,7 @@ import { AccountJson, RequestSign } from '@polkadot/extension/background/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useContext, useState, useEffect } from 'react';
-import { TypeRegistry, createType } from '@polkadot/types';
+import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, ButtonArea, Link, VerticalSpace } from '../../components';
 import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
@@ -40,7 +40,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
       setHexBytes((inner as SignerPayloadRaw).data);
       setExtrinsic(null);
     } else {
-      setExtrinsic(createType(registry, 'ExtrinsicPayload', inner, { version: (inner as SignerPayloadJSON).version }));
+      setExtrinsic(registry.createType('ExtrinsicPayload', inner, { version: (inner as SignerPayloadJSON).version }));
       setHexBytes(null);
     }
   }, [request]);

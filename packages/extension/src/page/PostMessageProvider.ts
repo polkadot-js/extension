@@ -29,6 +29,9 @@ interface SubscriptionHandler {
 export default class PostMessageProvider implements InjectedProvider {
   readonly #eventemitter: EventEmitter;
 
+  // Whether or not the actual extension background provider is connected
+  #isConnected = false
+
   readonly #sendRequest: SendRequest;
 
   // Subscription IDs are (historically) not guaranteed to be globally unique;
@@ -43,11 +46,6 @@ export default class PostMessageProvider implements InjectedProvider {
   public constructor (sendRequest: SendRequest) {
     this.#eventemitter = new EventEmitter();
     this.#sendRequest = sendRequest;
-
-    // Give subscribers time to subscribe
-    setTimeout((): void => {
-      this.#eventemitter.emit('connected');
-    });
   }
 
   /**
@@ -78,8 +76,7 @@ export default class PostMessageProvider implements InjectedProvider {
    * @return {boolean} true if connected
    */
   public isConnected (): boolean {
-    // FIXME This should see if the extension's state's provider is connected
-    return true;
+    return this.#isConnected;
   }
 
   public listProviders (): Promise<ProviderList> {
@@ -121,8 +118,29 @@ export default class PostMessageProvider implements InjectedProvider {
     }
   }
 
-  public startProvider (key: string): Promise<ProviderMeta> {
-    return this.#sendRequest('pub(rpc.startProvider)', key);
+  /**
+   * @summary Spawn a provider on the extension background.
+   */
+  public async startProvider (key: string): Promise<ProviderMeta> {
+    // Disconnect from the previous provider
+    this.#isConnected = false;
+    this.#eventemitter.emit('disconnected');
+
+    const meta = await this.#sendRequest('pub(rpc.startProvider)', key);
+
+    this.#sendRequest('pub(rpc.subscribeConnected)', null, (connected) => {
+      this.#isConnected = connected;
+
+      if (connected) {
+        this.#eventemitter.emit('connected');
+      } else {
+        this.#eventemitter.emit('disconnected');
+      }
+
+      return true;
+    });
+
+    return meta;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

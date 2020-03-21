@@ -3401,6 +3401,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/jest@npm:^25.1.4":
+  version: 25.1.4
+  resolution: "@types/jest@npm:25.1.4"
+  dependencies:
+    jest-diff: ^25.1.0
+    pretty-format: ^25.1.0
+  checksum: 2/1a60d1c9a3a964f08732bd46735fda513a4b4743554fbd3b7aa63f39e47a80353d0967cd138db412b3008cca6c4fe82e60f90f2bb272c0750069966d694f3177
+  languageName: node
+  linkType: hard
+
 "@types/json-schema@npm:^7.0.3":
   version: 7.0.4
   resolution: "@types/json-schema@npm:7.0.4"
@@ -13520,7 +13530,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-types@npm:^2.1.12, mime-types@npm:^2.1.26, mime-types@npm:~2.1.17, mime-types@npm:~2.1.19, mime-types@npm:~2.1.24":
+"mime-types@npm:^2.1.12, mime-types@npm:~2.1.17, mime-types@npm:~2.1.19, mime-types@npm:~2.1.24":
   version: 2.1.26
   resolution: "mime-types@npm:2.1.26"
   dependencies:
@@ -17188,9 +17198,9 @@ __metadata:
     "@babel/core": ^7.9.0
     "@polkadot/dev": ^0.51.6
     "@polkadot/ts": ^0.3.14
+    "@types/jest": ^25.1.4
     copy-webpack-plugin: ^5.1.1
     sinon-chrome: ^3.0.1
-    url-loader: ^4.0.0
   languageName: unknown
   linkType: soft
 
@@ -19497,23 +19507,6 @@ __metadata:
   bin:
     url-loader: ""
   checksum: 2/6e00e42aaf5e2269fdb87b4f8828e9fc884398c260572a84f65ffdbac6e2d77df87006b01a4a462a9d69315191614f29db5b599fdf2d09f149ed851a4736edb2
-  languageName: node
-  linkType: hard
-
-"url-loader@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "url-loader@npm:4.0.0"
-  dependencies:
-    loader-utils: ^2.0.0
-    mime-types: ^2.1.26
-    schema-utils: ^2.6.5
-  peerDependencies:
-    file-loader: "*"
-    webpack: ^4.0.0 || ^5.0.0
-  peerDependenciesMeta:
-    file-loader:
-      optional: true
-  checksum: 2/afb911ab5c52006775be212d1e7700e056a9a5a28b727b9c878a64eed3d97206f571467608084989b815d030a1d75a06d7c59d4237fff6790a76218e00002080
   languageName: node
   linkType: hard
 

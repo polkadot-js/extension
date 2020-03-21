@@ -30,8 +30,8 @@
     "@babel/core": "^7.9.0",
     "@polkadot/dev": "^0.51.6",
     "@polkadot/ts": "^0.3.14",
+    "@types/jest": "^25.1.4",
     "copy-webpack-plugin": "^5.1.1",
-    "sinon-chrome": "^3.0.1",
-    "url-loader": "^4.0.0"
+    "sinon-chrome": "^3.0.1"
   }
 }

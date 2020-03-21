@@ -3,8 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import extension from 'extensionizer';
-
-import { PORT_CONTENT } from './defaults';
+import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
 
 // connect to the extension
 const port = extension.runtime.connect({ name: PORT_CONTENT });

@@ -2862,6 +2862,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/extension-base@0.23.0-beta.5, @polkadot/extension-base@workspace:packages/extension-base":
+  version: 0.0.0-use.local
+  resolution: "@polkadot/extension-base@workspace:packages/extension-base"
+  dependencies:
+    "@babel/runtime": ^7.9.0
+    "@polkadot/api": ^1.7.0-beta.16
+    "@polkadot/keyring": ^2.6.2
+    "@polkadot/ui-keyring": ^0.52.0-beta.14
+    extensionizer: ^1.0.1
+  languageName: unknown
+  linkType: soft
+
 "@polkadot/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
@@ -2929,15 +2941,12 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.9.0
-    "@polkadot/api": ^1.8.0-beta.7
     "@polkadot/dev": ^0.51.6
+    "@polkadot/extension-base": 0.23.0-beta.5
     "@polkadot/extension-ui": 0.23.0-beta.5
-    "@polkadot/keyring": ^2.6.2
-    "@polkadot/ui-keyring": ^0.52.0-beta.16
     "@types/chrome": ^0.0.101
     "@types/firefox-webext-browser": ^70.0.1
     babel-loader: ^8.1.0
-    extensionizer: ^1.0.1
     extract-loader: ^5.0.1
     file-loader: ^6.0.0
     html-loader: ^1.0.0
@@ -3069,9 +3078,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^0.52.0-beta.16":
-  version: 0.52.0-beta.17
-  resolution: "@polkadot/ui-keyring@npm:0.52.0-beta.17"
+"@polkadot/ui-keyring@npm:^0.52.0-beta.14":
+  version: 0.52.0-beta.16
+  resolution: "@polkadot/ui-keyring@npm:0.52.0-beta.16"
   dependencies:
     "@babel/runtime": ^7.9.0
     "@ledgerhq/hw-transport-node-hid": ^5.11.0
@@ -3089,7 +3098,7 @@ __metadata:
   dependenciesMeta:
     "@ledgerhq/hw-transport-node-hid":
       optional: true
-  checksum: 2/ccc46d3782ecc3519cdb14df38c49793a12cac5a69448f8d9763390c2bdb43dea667830df682271cccbd543acf243d19f197f895b56ff189117a647cfcfe54f9
+  checksum: 2/0d18ddfbdc6d29daa7e7a1ca9db7cfd14ac4ab238ff3944ba7b72fe5acd63e099f347aaf924395b73602992ebdba68a445c02e088ba3761e4c82eaaf5160b111
   languageName: node
   linkType: hard
 

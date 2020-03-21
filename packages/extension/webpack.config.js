@@ -28,10 +28,10 @@ function createWebpack ({ alias = {}, context }) {
     context,
     devtool: false,
     entry: {
-      background: './src/background/index.ts',
+      background: './src/background.ts',
       content: './src/content.ts',
       extension: './src/extension.ts',
-      page: './src/page/index.ts'
+      page: './src/page.ts'
     },
     mode: ENV,
     output: {

@@ -2756,7 +2756,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/api@npm:^1.8.0-beta.7":
+"@polkadot/api@npm:^1.8.0-beta.8":
   version: 1.8.0-beta.8
   resolution: "@polkadot/api@npm:1.8.0-beta.8"
   dependencies:
@@ -2776,9 +2776,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.51.6":
-  version: 0.51.6
-  resolution: "@polkadot/dev@npm:0.51.6"
+"@polkadot/dev@npm:^0.51.7":
+  version: 0.51.7
+  resolution: "@polkadot/dev@npm:0.51.7"
   dependencies:
     "@babel/cli": ^7.8.4
     "@babel/core": ^7.9.0
@@ -2858,7 +2858,7 @@ __metadata:
     polkadot-exec-typedoc: scripts/polkadot-exec-typedoc.js
     polkadot-exec-vuepress: scripts/polkadot-exec-vuepress.js
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.js
-  checksum: 2/05d32b22a912e1b283b3dbabd7a73764058b1f6731b6f0a999cad23426311ef8f7a5a27ad2dd405909a5e356a5abbc15d41bd2ed9af2339d86866c6394736bfa
+  checksum: 2/e4c7a2e512343f627e068fc12b696ed4a2dd95c1e608885738b6bcbf979d9aac85940699e7d696cee49e5a3adb66e7ed2635bd260f6fe18b018d7b6df5ca71f9
   languageName: node
   linkType: hard
 
@@ -2867,9 +2867,9 @@ __metadata:
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.9.0
-    "@polkadot/api": ^1.7.0-beta.16
+    "@polkadot/api": ^1.8.0-beta.8
     "@polkadot/keyring": ^2.6.2
-    "@polkadot/ui-keyring": ^0.52.0-beta.14
+    "@polkadot/ui-keyring": ^0.52.0-beta.17
     extensionizer: ^1.0.1
   languageName: unknown
   linkType: soft
@@ -2912,8 +2912,8 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.9.0
     "@polkadot/keyring": ^2.6.2
-    "@polkadot/react-identicon": ^0.52.0-beta.16
-    "@polkadot/react-qr": ^0.52.0-beta.16
+    "@polkadot/react-identicon": ^0.52.0-beta.17
+    "@polkadot/react-qr": ^0.52.0-beta.17
     "@polkadot/util": ^2.6.2
     "@polkadot/util-crypto": ^2.6.2
     "@types/bn.js": ^4.11.6
@@ -2941,7 +2941,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.9.0
-    "@polkadot/dev": ^0.51.6
+    "@polkadot/dev": ^0.51.7
     "@polkadot/extension-base": 0.23.0-beta.6
     "@polkadot/extension-ui": 0.23.0-beta.6
     "@types/chrome": ^0.0.101
@@ -2982,7 +2982,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/react-identicon@npm:^0.52.0-beta.16":
+"@polkadot/react-identicon@npm:^0.52.0-beta.17":
   version: 0.52.0-beta.17
   resolution: "@polkadot/react-identicon@npm:0.52.0-beta.17"
   dependencies:
@@ -3004,7 +3004,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/react-qr@npm:^0.52.0-beta.16":
+"@polkadot/react-qr@npm:^0.52.0-beta.17":
   version: 0.52.0-beta.17
   resolution: "@polkadot/react-qr@npm:0.52.0-beta.17"
   dependencies:
@@ -3062,7 +3062,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/types@npm:^1.8.0-beta.7":
+"@polkadot/types@npm:^1.8.0-beta.8":
   version: 1.8.0-beta.8
   resolution: "@polkadot/types@npm:1.8.0-beta.8"
   dependencies:
@@ -3078,9 +3078,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^0.52.0-beta.14":
-  version: 0.52.0-beta.16
-  resolution: "@polkadot/ui-keyring@npm:0.52.0-beta.16"
+"@polkadot/ui-keyring@npm:^0.52.0-beta.17":
+  version: 0.52.0-beta.17
+  resolution: "@polkadot/ui-keyring@npm:0.52.0-beta.17"
   dependencies:
     "@babel/runtime": ^7.9.0
     "@ledgerhq/hw-transport-node-hid": ^5.11.0
@@ -3098,7 +3098,7 @@ __metadata:
   dependenciesMeta:
     "@ledgerhq/hw-transport-node-hid":
       optional: true
-  checksum: 2/0d18ddfbdc6d29daa7e7a1ca9db7cfd14ac4ab238ff3944ba7b72fe5acd63e099f347aaf924395b73602992ebdba68a445c02e088ba3761e4c82eaaf5160b111
+  checksum: 2/ccc46d3782ecc3519cdb14df38c49793a12cac5a69448f8d9763390c2bdb43dea667830df682271cccbd543acf243d19f197f895b56ff189117a647cfcfe54f9
   languageName: node
   linkType: hard
 
@@ -17205,7 +17205,7 @@ __metadata:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.9.0
-    "@polkadot/dev": ^0.51.6
+    "@polkadot/dev": ^0.51.7
     "@polkadot/ts": ^0.3.14
     "@types/jest": ^25.1.4
     copy-webpack-plugin: ^5.1.1

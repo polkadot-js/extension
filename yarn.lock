@@ -2875,7 +2875,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
-    "@babel/runtime": ^7.9.0
+    "@babel/runtime": ^7.9.2
     "@polkadot/api": ^1.8.1
     "@polkadot/keyring": ^2.6.2
     "@polkadot/ui-keyring": ^0.52.0-beta.18
@@ -2887,7 +2887,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
-    "@babel/runtime": ^7.9.0
+    "@babel/runtime": ^7.9.2
     edgeware-node-types: ^1.2.0
   peerDependencies:
     "@polkadot/api": "*"
@@ -2898,7 +2898,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
-    "@babel/runtime": ^7.9.0
+    "@babel/runtime": ^7.9.2
     "@polkadot/extension-inject": 0.23.0-beta.7
   peerDependencies:
     "@polkadot/api": "*"
@@ -2909,7 +2909,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
-    "@babel/runtime": ^7.9.0
+    "@babel/runtime": ^7.9.2
   peerDependencies:
     "@polkadot/api": "*"
   languageName: unknown
@@ -2919,7 +2919,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
-    "@babel/runtime": ^7.9.0
+    "@babel/runtime": ^7.9.2
     "@polkadot/keyring": ^2.6.2
     "@polkadot/react-identicon": ^0.52.0-beta.18
     "@polkadot/react-qr": ^0.52.0-beta.18
@@ -2949,7 +2949,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
-    "@babel/runtime": ^7.9.0
+    "@babel/runtime": ^7.9.2
     "@polkadot/dev": ^0.51.7
     "@polkadot/extension-base": 0.23.0-beta.7
     "@polkadot/extension-ui": 0.23.0-beta.7

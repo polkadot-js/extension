@@ -4,8 +4,6 @@
 
 import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
 
-import { injectExtension } from '@polkadot/extension-inject';
-
 import Injected from './Injected';
 
 // when sending a message from the injector to the extension, we
@@ -15,7 +13,7 @@ import Injected from './Injected';
 //  - this injector, listens on the events, maps it to the original
 //  - resolves/rejects the promise with the result (or sub data)
 
-interface Handler {
+export interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (data: any) => void;
   reject: (error: Error) => void;
@@ -23,18 +21,18 @@ interface Handler {
   subscriber?: (data: any) => void;
 }
 
-type Handlers = Record<string, Handler>;
+export type Handlers = Record<string, Handler>;
 
 const handlers: Handlers = {};
 let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
-function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+export function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
+export function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
+export function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
+export function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
@@ -52,14 +50,14 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 }
 
 // the enable function, called by the dapp to allow access
-async function enable (origin: string): Promise<Injected> {
+export async function enable (origin: string): Promise<Injected> {
   await sendMessage('pub(authorize.tab)', { origin });
 
   return new Injected(sendMessage);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: any }): void {
+export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: any }): void {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -79,22 +77,3 @@ function handleResponse<TMessageType extends MessageTypes> (data: TransportRespo
     handler.resolve(data.response);
   }
 }
-
-// setup a response listener (events created by the loader for extension responses)
-window.addEventListener('message', ({ data, source }): void => {
-  // only allow messages from our window, by the loader
-  if (source !== window || data.origin !== 'content') {
-    return;
-  }
-
-  if (data.id) {
-    handleResponse(data);
-  } else {
-    console.error('Missing id for response.');
-  }
-});
-
-injectExtension(enable, {
-  name: 'polkadot-js',
-  version: process.env.PKG_VERSION as string
-});

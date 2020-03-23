@@ -6,13 +6,12 @@ import extension from 'extensionizer';
 
 // Runs in the extension background, handling all keyring access
 
+import handlers from '@polkadot/extension-base/background/handlers';
+import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import keyring from '@polkadot/ui-keyring';
 import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-
-import { PORT_CONTENT, PORT_EXTENSION } from '../defaults';
-import handlers from './handlers';
 
 // setup the notification (same a FF default background, white text)
 extension.browserAction.setBadgeBackgroundColor({ color: '#d90000' });

@@ -8,7 +8,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import * as messaging from '@polkadot/extension-ui/messaging';
-import { AccountJson, SigningRequest } from '@polkadot/extension/background/types';
+import { AccountJson, SigningRequest } from '@polkadot/extension-base/background/types';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
 import {
   AccountContext,

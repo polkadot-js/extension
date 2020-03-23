@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { AccountJson, RequestSign } from '@polkadot/extension/background/types';
+import { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useContext, useState, useEffect } from 'react';

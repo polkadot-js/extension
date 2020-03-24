@@ -18,7 +18,7 @@ const chains: Map<string, Chain> = new Map(
 
 const UNKNOWN_CHAIN: Chain = {
   hasMetadata: false,
-  icon: 'substrate',
+  icon: 'polkadot',
   isUnknown: true,
   name: 'Unknown chain',
   registry: new TypeRegistry(),

@@ -98,6 +98,18 @@ export default class Tabs {
     return true;
   }
 
+  private rpcSubscribeConnected (request: null, id: string, port: chrome.runtime.Port): Promise<boolean> {
+    const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, port);
+    const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribeConnected)']): void => innerCb(data);
+    this.#state.rpcSubscribeConnected(request, cb, port);
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return Promise.resolve(true);
+  }
+
   private async rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
     return this.#state.rpcUnsubscribe(request, port);
   }
@@ -134,6 +146,9 @@ export default class Tabs {
 
       case 'pub(rpc.subscribe)':
         return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
+
+      case 'pub(rpc.subscribeConnected)':
+        return this.rpcSubscribeConnected(request as null, id, port);
 
       case 'pub(rpc.unsubscribe)':
         return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);

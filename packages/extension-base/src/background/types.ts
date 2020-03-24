@@ -72,6 +72,7 @@ export interface RequestSignatures {
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.startProvider)': [string, ProviderMeta];
   'pub(rpc.subscribe)': [RequestRpcSubscribe, number, JsonRpcResponse];
+  'pub(rpc.subscribeConnected)': [null, boolean, boolean];
   'pub(rpc.unsubscribe)': [RequestRpcUnsubscribe, boolean];
 }
 

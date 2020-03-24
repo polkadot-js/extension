@@ -247,7 +247,7 @@ export default class State {
   public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
     const provider = this.#injectedProviders.get(port);
 
-    assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
 
     return provider.send(request.method, request.params);
   }
@@ -280,15 +280,25 @@ export default class State {
   public rpcSubscribe ({ method, params, type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
     const provider = this.#injectedProviders.get(port);
 
-    assert(provider, 'Cannot call pub(rpc.subscribe) before provider has been set');
+    assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
 
     return provider.subscribe(type, method, params, cb);
+  }
+
+  public rpcSubscribeConnected (_request: null, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): void {
+    const provider = this.#injectedProviders.get(port);
+
+    assert(provider, 'Cannot call pub(rpc.subscribeConnected) before provider is set');
+
+    cb(null, provider.isConnected()); // Immediately send back current isConnected
+    provider.on('connected', () => cb(null, true));
+    provider.on('disconnected', () => cb(null, false));
   }
 
   public rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
     const provider = this.#injectedProviders.get(port);
 
-    assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider has been set');
+    assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider is set');
 
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);
   }

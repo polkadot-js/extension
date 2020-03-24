@@ -6,6 +6,9 @@
 
 import { EdgewareTypes } from 'edgeware-node-types/dist';
 
+// ...EdgewareTypes,
+//     Keys: 'SessionKeys4'
+
 export default {
   chain: 'Edgeware',
   genesisHash: '0xda60008770287b5eb4f9b5241317ac4c7e42c3c3d8e85fbbfa2a88705394d75e',

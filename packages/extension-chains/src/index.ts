@@ -2,44 +2,23 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Chain } from './types';
+import { Chain, ChainDef } from './types';
 
 import { Metadata, TypeRegistry } from '@polkadot/types';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
-import alexander from './alexander';
 import edgeware from './edgeware';
-import kusamaCC3 from './kusama-cc3';
+import kusama from './kusama';
 
 const chains: Map<string, Chain> = new Map(
-  [alexander, edgeware, kusamaCC3].map(({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
-    let metadata: Metadata | undefined;
-    const registry = new TypeRegistry();
-
-    registry.register(types || {});
-
-    if (metaCalls) {
-      metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
-    }
-
-    return [genesisHash, {
-      genesisHash,
-      hasMetadata: !!metadata,
-      icon,
-      name: chain,
-      registry,
-      specVersion,
-      ss58Format,
-      tokenDecimals,
-      tokenSymbol
-    }];
-  })
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  [edgeware, kusama].map((def) => defToChain(def))
 );
 
 const UNKNOWN_CHAIN: Chain = {
   hasMetadata: false,
-  icon: 'polkadot',
+  icon: 'substrate',
   isUnknown: true,
   name: 'Unknown chain',
   registry: new TypeRegistry(),
@@ -48,6 +27,33 @@ const UNKNOWN_CHAIN: Chain = {
   tokenDecimals: 0,
   tokenSymbol: 'UNIT'
 };
+
+function defToChain ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }: ChainDef): [string, Chain] {
+  const registry = new TypeRegistry();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  registry.register(types as any);
+
+  const metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
+
+  return [genesisHash, {
+    genesisHash,
+    hasMetadata: !!metadata,
+    icon: icon || 'substrate',
+    name: chain,
+    registry,
+    specVersion,
+    ss58Format,
+    tokenDecimals,
+    tokenSymbol
+  }];
+}
+
+export function addChainDef (def: ChainDef): void {
+  const [genesisHash, chain] = defToChain(def);
+
+  chains.set(genesisHash, chain);
+}
 
 export default function findChain (genesisHash?: string | null): Chain {
   return chains.get(genesisHash || '') || UNKNOWN_CHAIN;

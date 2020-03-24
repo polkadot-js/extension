@@ -121,3 +121,11 @@ export async function validateSeed (suri: string, type?: KeypairType): Promise<{
 export async function windowOpen (): Promise<boolean> {
   return sendMessage('pri(window.open)', null);
 }
+
+export async function validateDerivationPath(parentAddress: string, suri: string) {
+  return sendMessage('pri(derivation.validate)', {parentAddress, suri});
+}
+
+export async function deriveAccount(parentAddress: string, suri: string, name: string, password: string) {
+  return sendMessage('pri(derivation.create)', {parentAddress, suri, name, password});
+}

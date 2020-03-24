@@ -55,6 +55,8 @@ export interface RequestSignatures {
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.subscribe)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(derivation.create)': [RequestDeriveCreate, boolean];
+  'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
   'pri(seed.validate)': [RequestSeedValidate, ResponseSeedValidate];
   'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];
@@ -130,6 +132,19 @@ export interface RequestAccountForget {
   address: string;
 }
 
+export interface RequestDeriveCreate {
+  name: string;
+  genesisHash?: string | null;
+  suri: string;
+  parentAddress: string;
+  password: string;
+}
+
+export interface RequestDeriveValidate {
+  suri: string;
+  parentAddress: string;
+}
+
 export interface RequestAccountExport {
   address: string;
   password: string;
@@ -187,6 +202,8 @@ export type ResponseTypes = {
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][1]
 };
 
+export type ResponseType<TMessageType extends keyof RequestSignatures> = RequestSignatures[TMessageType][1];
+
 interface TransportResponseMessageSub<TMessageType extends MessageTypesWithSubscriptions> {
   error?: string;
   id: string;
@@ -210,6 +227,11 @@ export type TransportResponseMessage<TMessageType extends MessageTypes> =
 export interface ResponseSigning {
   id: string;
   signature: string;
+}
+
+export interface ResponseDeriveValidate {
+  address: string;
+  suri: string;
 }
 
 export interface ResponseSeedCreate {

@@ -2,19 +2,20 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
+import { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
 
+import { knownChains } from '@polkadot/extension-chains';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
+
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
-
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -81,6 +82,16 @@ export default class Tabs {
     return this.#state.injectMetadata(url, request);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private metadataList (url: string): InjectedMetadataKnown[] {
+    return knownChains()
+      .filter(({ genesisHash }) => genesisHash !== '0x')
+      .map(({ genesisHash, specVersion }) => ({
+        genesisHash,
+        specVersion
+      }));
+  }
+
   private rpcListProviders (): Promise<ResponseRpcListProviders> {
     return this.#state.rpcListProviders();
   }
@@ -142,6 +153,9 @@ export default class Tabs {
 
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
+
+      case 'pub(metadata.list)':
+        return this.metadataList(url);
 
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);

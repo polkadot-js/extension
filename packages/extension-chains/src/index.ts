@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedExtensionChain, MetadataDef } from '@polkadot/extension-inject/types';
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { Chain } from './types';
 
 // import store from 'store';
@@ -18,7 +18,8 @@ const chains: Map<string, Chain> = new Map(
   [edgeware, kusama].map((def) => defToChain(def))
 );
 
-function defToChain ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }: MetadataDef): [string, Chain] {
+function defToChain (definition: MetadataDef): [string, Chain] {
+  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
   const registry = new TypeRegistry();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +37,7 @@ function defToChain ({ chain, genesisHash, icon, metaCalls, specVersion, ss58For
   }));
 
   return [genesisHash, {
+    definition,
     genesisHash: isUnknown
       ? undefined
       : genesisHash,
@@ -68,14 +70,9 @@ export function addChainDef (def: MetadataDef): void {
   chains.set(genesisHash, chain);
 }
 
-export function knownChains (): InjectedExtensionChain[] {
-  return [...chains.entries()]
-    .map(([genesisHash, { isUnknown, specVersion }]): InjectedExtensionChain | null =>
-      isUnknown
-        ? null
-        : { genesisHash, specVersion }
-    )
-    .filter((chain): chain is InjectedExtensionChain => !!chain);
+export function knownChains (): MetadataDef[] {
+  return [...chains.values()]
+    .map(({ definition }) => definition);
 }
 
 export default function findChain (genesisHash?: string | null): Chain {

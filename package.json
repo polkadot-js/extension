@@ -7,9 +7,9 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^1.9.0-beta.6",
+    "@polkadot/api": "^1.9.0-beta.7",
     "@polkadot/keyring": "^2.7.0-beta.8",
-    "@polkadot/types": "^1.9.0-beta.6",
+    "@polkadot/types": "^1.9.0-beta.7",
     "@polkadot/util": "^2.7.0-beta.8",
     "@polkadot/util-crypto": "^2.7.0-beta.8",
     "babel-core": "^7.0.0-bridge.0",
@@ -30,7 +30,7 @@
     "@babel/core": "^7.9.0",
     "@polkadot/dev": "^0.51.8",
     "@polkadot/ts": "^0.3.14",
-    "@polkadot/typegen": "^1.9.0-beta.6",
+    "@polkadot/typegen": "^1.9.0-beta.7",
     "@types/jest": "^25.1.4",
     "copy-webpack-plugin": "^5.1.1",
     "sinon-chrome": "^3.0.1"

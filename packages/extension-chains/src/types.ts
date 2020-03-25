@@ -26,5 +26,5 @@ export interface ChainDef {
   tokenDecimals: number;
   tokenSymbol: string;
   types: Record<string, object | string>;
-  metaCalls: string;
+  metaCalls?: string;
 }

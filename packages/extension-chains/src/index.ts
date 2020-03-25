@@ -16,29 +16,29 @@ const chains: Map<string, Chain> = new Map(
   [edgeware, kusama].map((def) => defToChain(def))
 );
 
-const UNKNOWN_CHAIN: Chain = {
-  hasMetadata: false,
-  icon: 'polkadot',
-  isUnknown: true,
-  name: 'Unknown chain',
-  registry: new TypeRegistry(),
-  specVersion: 0,
-  ss58Format: 42,
-  tokenDecimals: 0,
-  tokenSymbol: 'UNIT'
-};
-
 function defToChain ({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }: ChainDef): [string, Chain] {
   const registry = new TypeRegistry();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   registry.register(types as any);
 
-  const metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
+  const isUnknown = genesisHash === '0x';
+  const metadata = metaCalls
+    ? new Metadata(registry, Buffer.from(metaCalls, 'base64'))
+    : null;
+
+  registry.setChainProperties(registry.createType('ChainProperties', {
+    ss58Format,
+    tokenDecimals,
+    tokenSymbol
+  }));
 
   return [genesisHash, {
-    genesisHash,
+    genesisHash: isUnknown
+      ? undefined
+      : genesisHash,
     hasMetadata: !!metadata,
+    isUnknown,
     icon: icon || 'substrate',
     name: chain,
     registry,
@@ -48,6 +48,17 @@ function defToChain ({ chain, genesisHash, icon, metaCalls, specVersion, ss58For
     tokenSymbol
   }];
 }
+
+const [, UNKNOWN_CHAIN] = defToChain({
+  chain: 'Unknown chain',
+  genesisHash: '0x',
+  icon: 'polkadot',
+  specVersion: 0,
+  ss58Format: 42,
+  tokenDecimals: 0,
+  tokenSymbol: 'Unit',
+  types: {}
+});
 
 export function addChainDef (def: ChainDef): void {
   const [genesisHash, chain] = defToChain(def);

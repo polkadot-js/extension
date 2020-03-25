@@ -3,23 +3,18 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Chain } from '@polkadot/extension-chains/types';
-import { ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
-import { GenericCall } from '@polkadot/types';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
 interface Decoded {
-  json: MethodJson | null;
-  method: GenericCall | null;
-}
-
-interface MethodJson {
-  args: Record<string, string>;
+  args: AnyJson | null;
+  method: Call | null;
 }
 
 interface Props {
@@ -31,24 +26,25 @@ interface Props {
 }
 
 function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersion: BN): Decoded {
-  let json: MethodJson | null = null;
-  let method: GenericCall | null = null;
+  let args: AnyJson | null = null;
+  let method: Call | null = null;
 
   try {
     if (isDecoded && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
-      method = new GenericCall(chain.registry, data);
-      json = method.toJSON() as unknown as MethodJson;
+      method = chain.registry.createType('Call', data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      args = (method.toHuman() as any).args;
     }
   } catch (error) {
-    json = null;
+    args = null;
     method = null;
   }
 
-  return { json, method };
+  return { args, method };
 }
 
-function renderMethod (data: string, { json, method }: Decoded): React.ReactNode {
-  if (!json || !method) {
+function renderMethod (data: string, { args, method }: Decoded): React.ReactNode {
+  if (!args || !method) {
     return (
       <tr>
         <td className='label'>method data</td>
@@ -61,18 +57,23 @@ function renderMethod (data: string, { json, method }: Decoded): React.ReactNode
     <>
       <tr>
         <td className='label'>method</td>
-        <td className='data'>{method.sectionName}.{method.methodName}</td>
-      </tr>
-      <tr>
-        <td className='label'>&nbsp;</td>
-        <td className='data'><pre>{JSON.stringify(json.args, null, 2)}</pre></td>
+        <td className='data'>
+          <details>
+            <summary>{method.sectionName}.{method.methodName}{
+              method.meta
+                ? `(${method.meta.args.map(({ name }) => name).join(', ')})`
+                : ''
+            }</summary>
+            <pre>{JSON.stringify(args, null, 2)}</pre>
+          </details>
+        </td>
       </tr>
       {method.meta && (
         <tr>
           <td className='label'>info</td>
           <td className='data'>
             <details>
-              <summary>{method.meta.documentation.join(' ')}</summary>
+              <summary>{method.meta.documentation.map((d) => d.toString().trim()).join(' ')}</summary>
             </details>
           </td>
         </tr>
@@ -95,7 +96,7 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string): string {
 function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const chain = useRef(findChain(genesisHash)).current;
   const specVersion = useRef(bnToBn(hexSpec)).current;
-  const [decoded, setDecoded] = useState<Decoded>({ json: null, method: null });
+  const [decoded, setDecoded] = useState<Decoded>({ args: null, method: null });
 
   useEffect((): void => {
     setDecoded(decodeMethod(method, isDecoded, chain, specVersion));
@@ -163,7 +164,7 @@ export default styled(Extrinsic)`
     opacity: 0.5;
     padding: 0 0.5rem;
     text-align: right;
-    vertical-align: middle;
+    vertical-align: top;
     white-space: nowrap;
   }
 

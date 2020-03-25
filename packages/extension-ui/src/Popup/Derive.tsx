@@ -11,7 +11,7 @@ import { DerivationPath, Name, Password } from '../partials';
 
 type Props = RouteComponentProps<{ address: string }>;
 
-export default function Derive({match: {params: {address: parentAddress}}}: Props): React.ReactElement<Props> {
+export default function Derive ({ match: { params: { address: parentAddress } } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);

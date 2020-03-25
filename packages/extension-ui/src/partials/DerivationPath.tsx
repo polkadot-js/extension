@@ -11,7 +11,7 @@ interface Props {
   parentAddress: string;
 }
 
-function DerivationPath({onChange, parentAddress}: Props): React.ReactElement<Props> {
+function DerivationPath ({ onChange, parentAddress }: Props): React.ReactElement<Props> {
   const [path, setPath] = useState<string>('');
   const [isValid, setValid] = useState(false);
 

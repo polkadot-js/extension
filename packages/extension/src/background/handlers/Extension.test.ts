@@ -2,8 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ResponseAccountExport } from '@polkadot/extension/background/types';
-
 import Extension from '@polkadot/extension/background/handlers/Extension';
 import State from '@polkadot/extension/background/handlers/State';
 import keyring from '@polkadot/ui-keyring';
@@ -30,20 +28,20 @@ describe('Extension', () => {
     const result = await extension.handle('id', 'pri(accounts.export)', {
       address,
       password
-    }, {} as chrome.runtime.Port) as ResponseAccountExport;
+    }, {} as chrome.runtime.Port);
 
     expect(result.exportedJson).toContain(address);
     expect(result.exportedJson).toContain('"encoded"');
   });
 
   describe('account derivation', () => {
-    const createAccount = async () => {
+    const createAccount = async (): Promise<string> => {
       await extension.handle('id', 'pri(accounts.create.suri)', {
         name: 'parent',
         password,
         suri
       }, {} as chrome.runtime.Port);
-      const {address} = await extension.handle('id', 'pri(seed.validate)', {
+      const { address } = await extension.handle('id', 'pri(seed.validate)', {
         suri
       }, {} as chrome.runtime.Port);
       return address;
@@ -59,7 +57,10 @@ describe('Extension', () => {
         parentAddress: address,
         suri: '//path'
       }, {} as chrome.runtime.Port);
-      expect(result).toStrictEqual({address: '5FPRjD2NUA9S99ev2dhJjqa58SAHxrKVKZyfrceSiGEfAxXB'});
+      expect(result).toStrictEqual({
+        address: '5FPRjD2NUA9S99ev2dhJjqa58SAHxrKVKZyfrceSiGEfAxXB',
+        suri: '//path'
+      });
     });
 
     test('pri(derivation.validate) throws for invalid suri', async () => {

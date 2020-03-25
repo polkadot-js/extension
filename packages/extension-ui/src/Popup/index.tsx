@@ -15,7 +15,7 @@ import { subscribeAccounts, subscribeAuthorize, subscribeSigning } from '../mess
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
-import Derive from "./Derive";
+import Derive from './Derive';
 import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';

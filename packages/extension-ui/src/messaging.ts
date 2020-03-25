@@ -2,7 +2,20 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '@polkadot/extension/background/types';
+import {
+  AccountJson,
+  AuthorizeRequest,
+  SigningRequest,
+  RequestTypes,
+  MessageTypes,
+  ResponseTypes,
+  SeedLengths,
+  SubscriptionMessageTypes,
+  MessageTypesWithNullRequest,
+  MessageTypesWithNoSubscriptions,
+  MessageTypesWithSubscriptions,
+  ResponseDeriveValidate
+} from '@polkadot/extension/background/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
@@ -122,10 +135,10 @@ export async function windowOpen (): Promise<boolean> {
   return sendMessage('pri(window.open)', null);
 }
 
-export async function validateDerivationPath(parentAddress: string, suri: string) {
-  return sendMessage('pri(derivation.validate)', {parentAddress, suri});
+export async function validateDerivationPath (parentAddress: string, suri: string): Promise<ResponseDeriveValidate> {
+  return sendMessage('pri(derivation.validate)', { parentAddress, suri });
 }
 
-export async function deriveAccount(parentAddress: string, suri: string, name: string, password: string) {
-  return sendMessage('pri(derivation.create)', {parentAddress, suri, name, password});
+export async function deriveAccount (parentAddress: string, suri: string, name: string, password: string): Promise<boolean> {
+  return sendMessage('pri(derivation.create)', { parentAddress, suri, name, password });
 }

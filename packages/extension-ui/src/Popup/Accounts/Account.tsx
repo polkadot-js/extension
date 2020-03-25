@@ -41,7 +41,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           <>
             <MenuGroup>
               <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
-              <MenuItem to={`/account/derive/${address}`}>Derive</MenuItem>
+              {!isExternal && <MenuItem to={`/account/derive/${address}`}>Derive</MenuItem>}
             </MenuGroup>
             {!isExternal && <MenuItem isDanger to={`/account/export/${address}`}>Export Account</MenuItem>}
             <MenuItem isDanger to={`/account/forget/${address}`}>Forget Account</MenuItem>

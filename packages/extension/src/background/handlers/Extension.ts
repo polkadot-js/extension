@@ -34,7 +34,7 @@ import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
-import { KeyringPair$Meta } from "@polkadot/keyring/types";
+import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
@@ -246,25 +246,25 @@ export default class Extension {
     return true;
   }
 
-  private derive(parentAddress: string, suri: string, metadata: KeyringPair$Meta) {
+  private derive (parentAddress: string, suri: string, metadata: KeyringPair$Meta): KeyringPair {
     const parentPair = keyring.getPair(parentAddress);
     return parentPair.derive(suri, metadata);
   }
 
-  private derivationValidate({parentAddress, suri}: RequestDeriveValidate): ResponseDeriveValidate {
+  private derivationValidate ({ parentAddress, suri }: RequestDeriveValidate): ResponseDeriveValidate {
     try {
       const childPair = this.derive(parentAddress, suri, {});
       return {
         address: childPair.address,
         suri
-      }
+      };
     } catch (err) {
       throw new Error(`"${suri}" is not a valid derivation path`);
     }
   }
 
-  private derivationCreate({parentAddress, suri, genesisHash, name, password}: RequestDeriveCreate) {
-    const childPair = this.derive(parentAddress, suri, {genesisHash, name});
+  private derivationCreate ({ parentAddress, suri, genesisHash, name, password }: RequestDeriveCreate): boolean {
+    const childPair = this.derive(parentAddress, suri, { genesisHash, name });
     keyring.addPair(childPair, password);
 
     return true;

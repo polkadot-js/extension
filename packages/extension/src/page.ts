@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { enable, handleResponse } from '@polkadot/extension-base/page';
+import { knownChains } from '@polkadot/extension-chains';
 import { injectExtension } from '@polkadot/extension-inject';
 
 // setup a response listener (events created by the loader for extension responses)
@@ -21,5 +22,6 @@ window.addEventListener('message', ({ data, source }): void => {
 
 injectExtension(enable, {
   name: 'polkadot-js',
+  knownChains: knownChains(),
   version: process.env.PKG_VERSION as string
 });

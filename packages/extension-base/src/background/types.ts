@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -36,6 +36,12 @@ export interface AuthorizeRequest {
   url: string;
 }
 
+export interface MetadataRequest {
+  id: string;
+  request: MetadataDef;
+  url: string;
+}
+
 export interface SigningRequest {
   account: AccountJson;
   id: string;
@@ -55,6 +61,9 @@ export interface RequestSignatures {
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.subscribe)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(metadata.approve)': [RequestMetadataApprove, boolean];
+  'pri(metadata.reject)': [RequestMetadataReject, boolean];
+  'pri(metadata.subscribe)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
   'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
   'pri(seed.validate)': [RequestSeedValidate, ResponseSeedValidate];
   'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];
@@ -68,6 +77,8 @@ export interface RequestSignatures {
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
+  'pub(metadata.list)': [null, InjectedMetadataKnown[]];
+  'pub(metadata.provide)': [MetadataDef, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.startProvider)': [string, ProviderMeta];
@@ -106,6 +117,16 @@ export interface RequestAuthorizeReject {
 }
 
 export type RequestAuthorizeSubscribe = null;
+
+export interface RequestMetadataApprove {
+  id: string;
+}
+
+export interface RequestMetadataReject {
+  id: string;
+}
+
+export type RequestMetadataSubscribe = null;
 
 export interface RequestAccountCreateExternal {
   address: string;

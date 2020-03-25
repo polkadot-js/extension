@@ -16,15 +16,3 @@ export interface Chain {
   tokenDecimals: number;
   tokenSymbol: string;
 }
-
-export interface ChainDef {
-  chain: string;
-  genesisHash: string;
-  icon: string;
-  specVersion: number;
-  ss58Format: number;
-  tokenDecimals: number;
-  tokenSymbol: string;
-  types: Record<string, object | string>;
-  metaCalls?: string;
-}

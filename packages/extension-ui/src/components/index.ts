@@ -24,6 +24,7 @@ export { default as Menu } from './Menu';
 export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as Settings } from './Settings';
 export { default as Svg } from './Svg';
+export { default as Table } from './Table';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Title } from './Title';
 export { default as VerticalSpace } from './VerticalSpace';

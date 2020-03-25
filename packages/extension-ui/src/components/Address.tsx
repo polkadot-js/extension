@@ -183,7 +183,7 @@ const Settings = styled.div`
   }
 
   &:before {
-    content: "";
+    content: '';
     position: absolute;
     left: 0;
     top: 25%;

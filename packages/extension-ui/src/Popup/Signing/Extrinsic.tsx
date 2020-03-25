@@ -8,9 +8,10 @@ import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
 import findChain from '@polkadot/extension-chains';
 import { formatNumber, bnToBn } from '@polkadot/util';
+
+import { Table } from '../../components';
 
 interface Decoded {
   args: AnyJson | null;
@@ -103,84 +104,36 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
   }, [method, isDecoded, chain, specVersion]);
 
   return (
-    <table className={className}>
-      <tbody>
+    <Table className={className}>
+      <tr>
+        <td className='label'>from</td>
+        <td className='data'>{url}</td>
+      </tr>
+      <tr>
+        <td className='label'>{chain.isUnknown ? 'genesis' : 'chain'}</td>
+        <td className='data'>{chain.isUnknown ? genesisHash : chain.name}</td>
+      </tr>
+      <tr>
+        <td className='label'>version</td>
+        <td className='data'>{specVersion.toNumber()}</td>
+      </tr>
+      <tr>
+        <td className='label'>nonce</td>
+        <td className='data'>{formatNumber(nonce)}</td>
+      </tr>
+      {!tip.isEmpty && (
         <tr>
-          <td className='label'>from</td>
-          <td className='data'>{url}</td>
+          <td className='label'>tip</td>
+          <td className='data'>{formatNumber(tip)}</td>
         </tr>
-        <tr>
-          <td className='label'>{chain.isUnknown ? 'genesis' : 'chain'}</td>
-          <td className='data'>{chain.isUnknown ? genesisHash : chain.name}</td>
-        </tr>
-        <tr>
-          <td className='label'>version</td>
-          <td className='data'>{specVersion.toNumber()}</td>
-        </tr>
-        <tr>
-          <td className='label'>nonce</td>
-          <td className='data'>{formatNumber(nonce)}</td>
-        </tr>
-        {!tip.isEmpty && (
-          <tr>
-            <td className='label'>tip</td>
-            <td className='data'>{formatNumber(tip)}</td>
-          </tr>
-        )}
-        {renderMethod(method, decoded)}
-        <tr>
-          <td className='label'>lifetime</td>
-          <td className='data'>{mortalityAsString(era, blockNumber)}</td>
-        </tr>
-      </tbody>
-    </table>
+      )}
+      {renderMethod(method, decoded)}
+      <tr>
+        <td className='label'>lifetime</td>
+        <td className='data'>{mortalityAsString(era, blockNumber)}</td>
+      </tr>
+    </Table>
   );
 }
 
-export default styled(Extrinsic)`
-  height: 100%;
-  overflow: scroll;
-  display: block;
-  border: 0;
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-
-  td.data {
-    max-width: 0;
-    overflow: hidden;
-    text-align: left;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-    width: 100%;
-
-    pre {
-      font-family: inherit;
-      font-size: 0.75rem;
-      margin: 0;
-    }
-  }
-
-  td.label {
-    opacity: 0.5;
-    padding: 0 0.5rem;
-    text-align: right;
-    vertical-align: top;
-    white-space: nowrap;
-  }
-
-  details {
-    cursor: pointer;
-    max-width: 24rem;
-
-    &[open] summary {
-      white-space: normal;
-    }
-
-    summary {
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      outline: 0;
-    }
-  }
-`;
+export default React.memo(Extrinsic);

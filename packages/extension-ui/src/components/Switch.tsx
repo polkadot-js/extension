@@ -39,7 +39,7 @@ const Slider = styled.span`
 
   &:before {
     position: absolute;
-    content: "";
+    content: '';
     height: 16px;
     width: 16px;
     left: 4px;
@@ -56,7 +56,7 @@ const Checkbox = styled.input.attrs(() => ({
   opacity: 0;
   width: 0;
   height: 0;
-  
+
   &:checked + ${Slider}:before {
     transform: translateX(24px);
   }
@@ -70,7 +70,7 @@ export default styled(Switch)`
     height: 24px;
     margin: 8px;
   }
-  
+
   span {
     font-weight: 600;
   }

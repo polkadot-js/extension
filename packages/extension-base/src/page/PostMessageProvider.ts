@@ -21,6 +21,9 @@ interface SubscriptionHandler {
   type: string;
 }
 
+// External to class, this.# is not private enough (yet)
+let sendRequest: SendRequest;
+
 /**
  * @name PostMessageProvider
  *
@@ -32,8 +35,6 @@ export default class PostMessageProvider implements InjectedProvider {
   // Whether or not the actual extension background provider is connected
   #isConnected = false
 
-  readonly #sendRequest: SendRequest;
-
   // Subscription IDs are (historically) not guaranteed to be globally unique;
   // only unique for a given subscription method; which is why we identify
   // the subscriptions based on subscription id + type
@@ -43,16 +44,17 @@ export default class PostMessageProvider implements InjectedProvider {
    * @param {function}  sendRequest  The function to be called to send requests to the node
    * @param {function}  subscriptionNotificationHandler  Channel for receiving subscription messages
    */
-  public constructor (sendRequest: SendRequest) {
+  public constructor (_sendRequest: SendRequest) {
     this.#eventemitter = new EventEmitter();
-    this.#sendRequest = sendRequest;
+
+    sendRequest = _sendRequest;
   }
 
   /**
    * @description Returns a clone of the object
    */
   public clone (): PostMessageProvider {
-    return new PostMessageProvider(this.#sendRequest);
+    return new PostMessageProvider(sendRequest);
   }
 
   /**
@@ -80,7 +82,7 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   public listProviders (): Promise<ProviderList> {
-    return this.#sendRequest('pub(rpc.listProviders)', undefined);
+    return sendRequest('pub(rpc.listProviders)', undefined);
   }
 
   /**
@@ -102,7 +104,7 @@ export default class PostMessageProvider implements InjectedProvider {
     if (subscription) {
       const { callback, type } = subscription;
 
-      return this.#sendRequest(
+      return sendRequest(
         'pub(rpc.subscribe)',
         { type, method, params },
         (res) => {
@@ -114,7 +116,7 @@ export default class PostMessageProvider implements InjectedProvider {
         return id;
       });
     } else {
-      return this.#sendRequest('pub(rpc.send)', { method, params });
+      return sendRequest('pub(rpc.send)', { method, params });
     }
   }
 
@@ -126,9 +128,9 @@ export default class PostMessageProvider implements InjectedProvider {
     this.#isConnected = false;
     this.#eventemitter.emit('disconnected');
 
-    const meta = await this.#sendRequest('pub(rpc.startProvider)', key);
+    const meta = await sendRequest('pub(rpc.startProvider)', key);
 
-    this.#sendRequest('pub(rpc.subscribeConnected)', null, (connected) => {
+    sendRequest('pub(rpc.subscribeConnected)', null, (connected) => {
       this.#isConnected = connected;
 
       if (connected) {

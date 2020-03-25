@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@polkadot/dev": "^0.51.7",
-    "@types/chrome": "^0.0.101",
+    "@types/chrome": "^0.0.102",
     "@types/firefox-webext-browser": "^70.0.1",
     "babel-loader": "^8.1.0",
     "extract-loader": "^5.0.1",

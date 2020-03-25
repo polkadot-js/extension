@@ -114,16 +114,16 @@ export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void):
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 
-export async function subscribeAuthorize (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(authorize.subscribe)', null, cb);
+export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(authorize.requests)', null, cb);
 }
 
-export async function subscribeMetadata (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(metadata.subscribe)', null, cb);
+export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(metadata.requests)', null, cb);
 }
 
-export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(signing.subscribe)', null, cb);
+export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(signing.requests)', null, cb);
 }
 
 export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {

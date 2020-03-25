@@ -108,7 +108,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(authorize.subscribe)'>(id, port);
+    const cb = createSubscription<'pri(authorize.requests)'>(id, port);
     const subscription = this.#state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
     );
@@ -146,7 +146,7 @@ export default class Extension {
   }
 
   private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(metadata.subscribe)'>(id, port);
+    const cb = createSubscription<'pri(metadata.requests)'>(id, port);
     const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
       cb(requests)
     );
@@ -237,7 +237,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(signing.subscribe)'>(id, port);
+    const cb = createSubscription<'pri(signing.requests)'>(id, port);
     const subscription = this.#state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
@@ -268,7 +268,7 @@ export default class Extension {
       case 'pri(authorize.reject)':
         return this.authorizeReject(request as RequestAuthorizeReject);
 
-      case 'pri(authorize.subscribe)':
+      case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);
 
       case 'pri(accounts.create.external)':
@@ -295,7 +295,7 @@ export default class Extension {
       case 'pri(metadata.reject)':
         return this.metadataReject(request as RequestMetadataReject);
 
-      case 'pri(metadata.subscribe)':
+      case 'pri(metadata.requests)':
         return this.metadataSubscribe(id, port);
 
       case 'pri(seed.create)':
@@ -313,7 +313,7 @@ export default class Extension {
       case 'pri(signing.cancel)':
         return this.signingCancel(request as RequestSigningCancel);
 
-      case 'pri(signing.subscribe)':
+      case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);
 
       case 'pri(window.open)':

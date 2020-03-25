@@ -11,7 +11,7 @@ import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeContext, MediaContext, MetadataContext, SigningContext } from '../components/contexts';
-import { subscribeAccounts, subscribeAuthorize, subscribeMetadata, subscribeSigning } from '../messaging';
+import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
@@ -67,9 +67,9 @@ export default function Popup (): React.ReactElement<{}> {
   useEffect((): void => {
     Promise.all([
       subscribeAccounts(setAccounts),
-      subscribeAuthorize(setAuthRequests),
-      subscribeMetadata(setMetaRequests),
-      subscribeSigning(setSignRequests)
+      subscribeAuthorizeRequests(setAuthRequests),
+      subscribeMetadataRequests(setMetaRequests),
+      subscribeSigningRequests(setSignRequests)
     ]).catch((error: Error) => console.error(error));
 
     settings.on('change', ({ camera }): void => setCameraOn(camera === 'on'));

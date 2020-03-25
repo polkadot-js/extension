@@ -74,9 +74,9 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
-    if (address) {
-      setRecoded(recodeAddress(address, accounts, genesisHash));
-    }
+    address && setRecoded(
+      recodeAddress(address, accounts, genesisHash)
+    );
   }, [accounts, address, genesisHash]);
 
   useEffect(() => {

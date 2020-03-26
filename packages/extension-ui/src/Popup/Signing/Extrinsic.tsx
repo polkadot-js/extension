@@ -104,7 +104,7 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
   }, [method, isDecoded, chain, specVersion]);
 
   return (
-    <Table className={className}>
+    <Table className={className} isFull>
       <tr>
         <td className='label'>from</td>
         <td className='data'>{url}</td>

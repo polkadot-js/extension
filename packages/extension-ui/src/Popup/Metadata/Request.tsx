@@ -50,12 +50,12 @@ function Request ({ className, metaId, request: { chain, genesisHash, specVersio
           <td className='data'>{tokenSymbol}</td>
         </tr>
         <tr>
-          <td className='label'>version</td>
-          <td className='data'>{current ? current.specVersion : 'unknown'} -&gt; {specVersion}</td>
+          <td className='label'>upgrade</td>
+          <td className='data'>{current.isUnknown ? 'unknown' : current.specVersion} -&gt; {specVersion}</td>
         </tr>
       </Table>
       <RequestInfo>
-        <RequestWarning>Only approve this request if you trust the application. This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</RequestWarning>
+        <RequestWarning>This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</RequestWarning>
         <AcceptButton onClick={_onApprove}>Yes, do this metadata update</AcceptButton>
         <RejectButton>
           <Link isDanger onClick={_onReject}>Reject</Link>

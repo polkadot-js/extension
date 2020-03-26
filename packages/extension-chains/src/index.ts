@@ -10,12 +10,11 @@ import { Metadata, TypeRegistry } from '@polkadot/types';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
-import edgeware from './edgeware';
 import kusama from './kusama';
 
 const chains: Map<string, Chain> = new Map(
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  [edgeware, kusama].map((def) => defToChain(def))
+  [kusama].map((def) => defToChain(def))
 );
 
 function defToChain (definition: MetadataDef): [string, Chain] {

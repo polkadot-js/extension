@@ -8,11 +8,12 @@ import styled from 'styled-components';
 interface Props {
   children: React.ReactNode;
   className?: string;
+  isFull?: boolean;
 }
 
-function Table ({ children, className }: Props): React.ReactElement<Props> {
+function Table ({ children, className, isFull }: Props): React.ReactElement<Props> {
   return (
-    <table className={className}>
+    <table className={`${className} ${isFull && 'isFull'}`}>
       <tbody>
         {children}
       </tbody>
@@ -21,12 +22,16 @@ function Table ({ children, className }: Props): React.ReactElement<Props> {
 }
 
 export default React.memo(styled(Table)`
-  height: 100%;
-  overflow: scroll;
-  display: block;
+  &.isFull {
+    height: 100%;
+    overflow: scroll;
+  }
+
   border: 0;
+  display: block;
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
+  margin-bottom: 1rem;
 
   td.data {
     max-width: 0;

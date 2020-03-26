@@ -1,4 +1,4 @@
-# 0.23.0-beta.x
+# 0.23.1 Mar 26, 2020
 
 - Extract shared background code for re-use (Thanks to https://github.com/amaurymartiny)
 - Expose available genesisHash/specVersion to the dapps using the extension

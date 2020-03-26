@@ -3049,15 +3049,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ts@npm:^0.3.14":
-  version: 0.3.14
-  resolution: "@polkadot/ts@npm:0.3.14"
-  dependencies:
-    "@types/chrome": ^0.0.101
-  checksum: 2/957242a557833596bbf1a94e4a9340be1bb6152a33aeac1ae94eef20e5380c9af1b41719b2943d96da7019478c09756192b74fc5bb0b7ee5f2fd60d977fe6f23
-  languageName: node
-  linkType: hard
-
 "@polkadot/typegen@npm:^1.9.0-beta.11":
   version: 1.9.0-beta.11
   resolution: "@polkadot/typegen@npm:1.9.0-beta.11"
@@ -3310,15 +3301,6 @@ __metadata:
   dependencies:
     "@types/filesystem": "*"
   checksum: 2/b11cb10d62ca5d7600048485556742f146f3167190822f793cd284265074f63e70ea21d4e5c84b5e9d287f7749846406f17d1dcd74cf8e757038b0882f62e42a
-  languageName: node
-  linkType: hard
-
-"@types/chrome@npm:^0.0.101":
-  version: 0.0.101
-  resolution: "@types/chrome@npm:0.0.101"
-  dependencies:
-    "@types/filesystem": "*"
-  checksum: 2/ad3906874fa0ef3d5921a5d3b56830cef9d03e286b9c475fd6fa6330ddc105873b7626eb6d7112192471e702e5b86563471b6fbc9152fd2209bbf6c0c88a980b
   languageName: node
   linkType: hard
 
@@ -17245,7 +17227,6 @@ __metadata:
   dependencies:
     "@babel/core": ^7.9.0
     "@polkadot/dev": ^0.51.8
-    "@polkadot/ts": ^0.3.14
     "@polkadot/typegen": ^1.9.0-beta.11
     "@types/jest": ^25.1.4
     copy-webpack-plugin: ^5.1.1

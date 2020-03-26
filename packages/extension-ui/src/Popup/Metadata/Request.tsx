@@ -2,55 +2,64 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
+import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
-import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
-
+import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
+import useMetadata from '../../hooks/useMetadata';
+import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
 interface Props {
-  authId: string;
   className?: string;
-  isFirst: boolean;
-  request: RequestAuthorizeTab;
+  request: MetadataDef;
+  metaId: string;
   url: string;
 }
 
-function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
+function Request ({ className, metaId, request, url }: Props): React.ReactElement<Props> {
+  const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
   const _onApprove = (): Promise<void> =>
-    approveAuthRequest(authId)
+    approveMetaRequest(metaId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
   const _onReject = (): Promise<void> =>
-    rejectAuthRequest(authId)
+    rejectMetaRequest(metaId)
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
 
   return (
     <div className={className}>
+      <Table>
+        <tr>
+          <td className='label'>from</td>
+          <td className='data'>{url}</td>
+        </tr>
+        <tr>
+          <td className='label'>chain</td>
+          <td className='data'>{request.chain}</td>
+        </tr>
+        <tr>
+          <td className='label'>icon</td>
+          <td className='data'>{request.icon}</td>
+        </tr>
+        <tr>
+          <td className='label'>decimals</td>
+          <td className='data'>{request.tokenDecimals}</td>
+        </tr>
+        <tr>
+          <td className='label'>symbol</td>
+          <td className='data'>{request.tokenSymbol}</td>
+        </tr>
+        <tr>
+          <td className='label'>upgrade</td>
+          <td className='data'>{chain ? chain.specVersion : 'unknown'} -&gt; {request.specVersion}</td>
+        </tr>
+      </Table>
       <RequestInfo>
-        <Info>
-          <Icon icon='X' onClick={_onReject} />
-          <div className='tab-info'>
-            An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
-            <a
-              href={url}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              <span className='tab-url'>{url}</span>
-            </a>.
-          </div>
-        </Info>
-        {isFirst && (
-          <>
-            <RequestWarning>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</RequestWarning>
-            <AcceptButton onClick={_onApprove}>Yes, allow this application access</AcceptButton>
-          </>
-        )}
+        <RequestWarning>This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</RequestWarning>
+        <AcceptButton onClick={_onApprove}>Yes, do this metadata update</AcceptButton>
         <RejectButton>
           <Link isDanger onClick={_onReject}>Reject</Link>
         </RejectButton>
@@ -65,11 +74,6 @@ const RequestInfo = styled.div`
   align-items: center;
   margin-bottom: 8px;
   background: ${({ theme }): string => theme.highlightedAreaBackground};
-`;
-
-const Info = styled.div`
-  display: flex;
-  flex-direction: row;
 `;
 
 const AcceptButton = styled(Button)`
@@ -89,7 +93,6 @@ const RejectButton = styled(ActionBar)`
 `;
 
 export default styled(Request)`
-
   .icon {
     background: ${({ theme }): string => theme.buttonBackgroundDanger};
     color: white;

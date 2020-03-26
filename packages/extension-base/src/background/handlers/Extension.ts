@@ -2,8 +2,9 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAuthorizeApprove, RequestAuthorizeReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, ResponseTypes, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAuthorizeApprove, RequestAuthorizeReject, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, ResponseTypes, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
@@ -108,8 +109,52 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in accounts
   private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(authorize.subscribe)'>(id, port);
+    const cb = createSubscription<'pri(authorize.requests)'>(id, port);
     const subscription = this.#state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
+      cb(requests)
+    );
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
+  }
+
+  private metadataApprove ({ id }: RequestMetadataApprove): boolean {
+    const queued = this.#state.getMetaRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { resolve, request } = queued;
+
+    this.#state.saveMetadata(request);
+
+    resolve(true);
+
+    return true;
+  }
+
+  private metadataList (): MetadataDef[] {
+    return this.#state.knownMetadata;
+  }
+
+  private metadataReject ({ id }: RequestMetadataReject): boolean {
+    const queued = this.#state.getMetaRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { reject } = queued;
+
+    reject(new Error('Rejected'));
+
+    return true;
+  }
+
+  private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(metadata.requests)'>(id, port);
+    const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
       cb(requests)
     );
 
@@ -199,7 +244,7 @@ export default class Extension {
 
   // FIXME This looks very much like what we have in authorization
   private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(signing.subscribe)'>(id, port);
+    const cb = createSubscription<'pri(signing.requests)'>(id, port);
     const subscription = this.#state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
     );
@@ -228,9 +273,9 @@ export default class Extension {
         return this.authorizeApprove(request as RequestAuthorizeApprove);
 
       case 'pri(authorize.reject)':
-        return this.authorizeReject(request as RequestAuthorizeApprove);
+        return this.authorizeReject(request as RequestAuthorizeReject);
 
-      case 'pri(authorize.subscribe)':
+      case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);
 
       case 'pri(accounts.create.external)':
@@ -251,6 +296,18 @@ export default class Extension {
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
 
+      case 'pri(metadata.approve)':
+        return this.metadataApprove(request as RequestMetadataApprove);
+
+      case 'pri(metadata.list)':
+        return this.metadataList();
+
+      case 'pri(metadata.reject)':
+        return this.metadataReject(request as RequestMetadataReject);
+
+      case 'pri(metadata.requests)':
+        return this.metadataSubscribe(id, port);
+
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);
 
@@ -266,7 +323,7 @@ export default class Extension {
       case 'pri(signing.cancel)':
         return this.signingCancel(request as RequestSigningCancel);
 
-      case 'pri(signing.subscribe)':
+      case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);
 
       case 'pri(window.open)':

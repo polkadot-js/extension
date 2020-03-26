@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson, AuthorizeRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
 import { AvailableThemes } from '.';
@@ -12,16 +12,18 @@ const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountJson[]>([]);
 const ActionContext = React.createContext<(to?: string) => void>(noop);
-const AuthorizeContext = React.createContext<AuthorizeRequest[]>([]);
+const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
-const SigningContext = React.createContext<SigningRequest[]>([]);
+const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
+const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 
 export {
   AccountContext,
   ActionContext,
-  AuthorizeContext,
+  AuthorizeReqContext,
   MediaContext,
-  SigningContext,
+  MetadataReqContext,
+  SigningReqContext,
   ThemeSwitchContext
 };

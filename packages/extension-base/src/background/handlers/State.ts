@@ -2,14 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ProviderMeta } from '@polkadot/extension-inject/types';
+import { knownMetadata, addMetadata } from '@polkadot/extension-chains';
+import { ProviderMeta, MetadataDef } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-
-import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest, RequestRpcUnsubscribe } from '../types';
+import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest, RequestRpcUnsubscribe } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
+
+import MetadataStore from './MetadataStore';
 
 interface AuthRequest {
   id: string;
@@ -27,6 +29,14 @@ type AuthUrls = Record<string, {
   origin: string;
   url: string;
 }>;
+
+interface MetaRequest {
+  id: string;
+  request: MetadataDef;
+  resolve: (result: boolean) => void;
+  reject: (error: Error) => void;
+  url: string;
+}
 
 // List of providers passed into constructor. This is the list of providers
 // exposed by the extension.
@@ -68,8 +78,12 @@ export default class State {
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
+  readonly #metaStore = new MetadataStore();
+
   // Map of providers currently injected in tabs
   readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map();
+
+  readonly #metaRequests: Record<string, MetaRequest> = {};
 
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;
@@ -78,24 +92,32 @@ export default class State {
 
   #windows: number[] = [];
 
-  public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject([] as AuthorizeRequest[]);
+  public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject([] as SigningRequest[]);
+  public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
+
+  public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
+
+    this.#metaStore.all((key: string, def: MetadataDef): void => {
+      if (key.startsWith('metadata:')) {
+        addMetadata(def);
+      }
+    });
   }
 
-  public get hasAuthRequests (): boolean {
-    return this.numAuthRequests === 0;
-  }
-
-  public get hasSignRequests (): boolean {
-    return this.numSignRequests === 0;
+  public get knownMetadata (): MetadataDef[] {
+    return knownMetadata();
   }
 
   public get numAuthRequests (): number {
     return Object.keys(this.#authRequests).length;
+  }
+
+  public get numMetaRequests (): number {
+    return Object.keys(this.#metaRequests).length;
   }
 
   public get numSignRequests (): number {
@@ -106,6 +128,12 @@ export default class State {
     return Object
       .values(this.#authRequests)
       .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
+  }
+
+  public get allMetaRequests (): MetadataRequest[] {
+    return Object
+      .values(this.#metaRequests)
+      .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
   }
 
   public get allSignRequests (): SigningRequest[] {
@@ -149,6 +177,15 @@ export default class State {
     };
   }
 
+  private metaComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
+    return (result: boolean | Error): void => {
+      delete this.#metaRequests[id];
+      this.updateIconMeta(true);
+
+      fn(result);
+    };
+  }
+
   private signComplete = (id: string, fn: Function): (result: ResponseSigning | Error) => void => {
     return (result: ResponseSigning | Error): void => {
       delete this.#signRequests[id];
@@ -168,11 +205,14 @@ export default class State {
 
   private updateIcon (shouldClose?: boolean): void {
     const authCount = this.numAuthRequests;
+    const metaCount = this.numMetaRequests;
     const signCount = this.numSignRequests;
     const text = (
       authCount
         ? 'Auth'
-        : (signCount ? `${signCount}` : '')
+        : metaCount
+          ? 'Meta'
+          : (signCount ? `${signCount}` : '')
     );
 
     extension.browserAction.setBadgeText({ text });
@@ -187,6 +227,11 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
+  private updateIconMeta (shouldClose?: boolean): void {
+    this.metaSubject.next(this.allMetaRequests);
+    this.updateIcon(shouldClose);
+  }
+
   private updateIconSign (shouldClose?: boolean): void {
     this.signSubject.next(this.allSignRequests);
     this.updateIcon(shouldClose);
@@ -198,7 +243,7 @@ export default class State {
     if (this.#authUrls[idStr]) {
       assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
-      return true;
+      return false;
     }
 
     return new Promise((resolve, reject): void => {
@@ -227,8 +272,29 @@ export default class State {
     return true;
   }
 
+  public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
+    return new Promise((resolve, reject): void => {
+      const id = getId();
+
+      this.#metaRequests[id] = {
+        id,
+        request,
+        resolve: this.metaComplete(id, resolve),
+        reject: this.metaComplete(id, reject),
+        url
+      };
+
+      this.updateIconMeta();
+      this.popupOpen();
+    });
+  }
+
   public getAuthRequest (id: string): AuthRequest {
     return this.#authRequests[id];
+  }
+
+  public getMetaRequest (id: string): MetaRequest {
+    return this.#metaRequests[id];
   }
 
   public getSignRequest (id: string): SignRequest {
@@ -301,6 +367,12 @@ export default class State {
     assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider is set');
 
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);
+  }
+
+  public saveMetadata (meta: MetadataDef): void {
+    this.#metaStore.set(`metadata:${meta.genesisHash}`, meta);
+
+    addMetadata(meta);
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

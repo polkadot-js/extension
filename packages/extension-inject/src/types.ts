@@ -30,6 +30,7 @@ export interface InjectedAccounts {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscribe: (cb: (accounts: InjectedAccount[]) => any) => Unsubcall;
 }
+
 export interface InjectedExtensionInfo {
   name: string;
   version: string;
@@ -47,6 +48,28 @@ export interface ProviderMeta {
   transport: string;
 }
 
+export interface MetadataDef {
+  chain: string;
+  genesisHash: string;
+  icon: string;
+  specVersion: number;
+  ss58Format: number;
+  tokenDecimals: number;
+  tokenSymbol: string;
+  types: Record<string, object | string>;
+  metaCalls?: string;
+}
+
+export interface InjectedMetadataKnown {
+  genesisHash: string;
+  specVersion: number;
+}
+
+export interface InjectedMetadata {
+  get: () => Promise<InjectedMetadataKnown[]>;
+  provide: (definition: MetadataDef) => Promise<boolean>;
+}
+
 export type ProviderList = Record<string, ProviderMeta>
 
 export interface InjectedProvider extends ProviderInterface {
@@ -62,8 +85,9 @@ export interface InjectedProviderWithMeta {
 
 export interface Injected {
   accounts: InjectedAccounts;
-  signer: InjectedSigner;
+  metadata?: InjectedMetadata;
   provider?: InjectedProvider;
+  signer: InjectedSigner;
 }
 
 export interface InjectedWindowProvider {

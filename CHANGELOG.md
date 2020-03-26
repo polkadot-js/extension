@@ -1,3 +1,10 @@
+# 0.23.0-beta.x
+
+- Extract shared background code for re-use (Thanks to https://github.com/amaurymartiny)
+- Expose available genesisHash/specVersion to the dapps using the extension
+- Allow prompts for metadata from dapps before decoding
+- Add latest metadata for the Kusama network
+
 # 0.22.1 Mar 03, 20202
 
 - Fix uncaught exception when tab closes without action (Thanks to https://github.com/amaurymartiny)

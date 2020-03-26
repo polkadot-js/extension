@@ -8,10 +8,10 @@ import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
-import findChain from '@polkadot/extension-chains';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
 import { Table } from '../../components';
+import useMetadata from '../../hooks/useMetadata';
 
 interface Decoded {
   args: AnyJson | null;
@@ -26,12 +26,12 @@ interface Props {
   url: string;
 }
 
-function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersion: BN): Decoded {
+function decodeMethod (data: string, isDecoded: boolean, chain: Chain | null, specVersion: BN): Decoded {
   let args: AnyJson | null = null;
   let method: Call | null = null;
 
   try {
-    if (isDecoded && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
+    if (isDecoded && chain && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
       method = chain.registry.createType('Call', data);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args = (method.toHuman() as any).args;
@@ -95,7 +95,7 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string): string {
 }
 
 function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
-  const chain = useRef(findChain(genesisHash)).current;
+  const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
   const [decoded, setDecoded] = useState<Decoded>({ args: null, method: null });
 
@@ -110,8 +110,8 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
         <td className='data'>{url}</td>
       </tr>
       <tr>
-        <td className='label'>{chain.isUnknown ? 'genesis' : 'chain'}</td>
-        <td className='data'>{chain.isUnknown ? genesisHash : chain.name}</td>
+        <td className='label'>{chain ? 'chain' : 'genesis'}</td>
+        <td className='data'>{chain ? chain.name : genesisHash}</td>
       </tr>
       <tr>
         <td className='label'>version</td>

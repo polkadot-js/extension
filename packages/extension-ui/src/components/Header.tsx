@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import ArrowLeftImage from '../assets/arrowLeft.svg';
 import logo from '../assets/pjs.svg';
 import gear from '../assets/gear.svg';
-import { useOutsideClick } from '../hooks';
+import useOutsideClick from '../hooks/useOutsideClick';
 import Link from './Link';
 import Settings from './Settings';
 import Svg from './Svg';

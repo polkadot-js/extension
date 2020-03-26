@@ -10,7 +10,7 @@ import settings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeContext, MediaContext, MetadataContext, SigningContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SigningReqContext } from '../components/contexts';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
@@ -95,10 +95,10 @@ export default function Popup (): React.ReactElement<{}> {
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
       <ActionContext.Provider value={_onAction}>
         <AccountContext.Provider value={accounts}>
-          <AuthorizeContext.Provider value={authRequests}>
+          <AuthorizeReqContext.Provider value={authRequests}>
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
-              <MetadataContext.Provider value={metaRequests}>
-                <SigningContext.Provider value={signRequests}>
+              <MetadataReqContext.Provider value={metaRequests}>
+                <SigningReqContext.Provider value={signRequests}>
                   <Switch>
                     <Route path='/account/create' component={CreateAccount} />
                     <Route path='/account/forget/:address' component={Forget} />
@@ -107,10 +107,10 @@ export default function Popup (): React.ReactElement<{}> {
                     <Route path='/account/import-seed' component={ImportSeed} />
                     <Route exact path='/' component={Root} />
                   </Switch>
-                </SigningContext.Provider>
-              </MetadataContext.Provider>
+                </SigningReqContext.Provider>
+              </MetadataReqContext.Provider>
             </MediaContext.Provider>
-          </AuthorizeContext.Provider>
+          </AuthorizeReqContext.Provider>
         </AccountContext.Provider>
       </ActionContext.Provider>
     )}</Loading>

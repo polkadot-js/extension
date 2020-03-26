@@ -2,14 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { knownMetadata, addMetadata } from '@polkadot/extension-chains';
 import { ProviderMeta, MetadataDef } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-
 import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest, RequestRpcUnsubscribe } from '../types';
 
 import extension from 'extensionizer';
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
+
+import MetadataStore from './MetadataStore';
 
 interface AuthRequest {
   id: string;
@@ -76,6 +78,8 @@ export default class State {
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
+  readonly #metaStore = new MetadataStore();
+
   // Map of providers currently injected in tabs
   readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map();
 
@@ -96,6 +100,16 @@ export default class State {
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
+
+    this.#metaStore.all((key: string, def: MetadataDef): void => {
+      if (key.startsWith('metadata:')) {
+        addMetadata(def);
+      }
+    });
+  }
+
+  public get knownMetadata (): MetadataDef[] {
+    return knownMetadata();
   }
 
   public get numAuthRequests (): number {
@@ -353,6 +367,12 @@ export default class State {
     assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider is set');
 
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);
+  }
+
+  public saveMetadata (meta: MetadataDef): void {
+    this.#metaStore.set(`metadata:${meta.genesisHash}`, meta);
+
+    addMetadata(meta);
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

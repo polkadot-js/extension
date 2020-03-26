@@ -3,10 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '@polkadot/extension-base/background/types';
+import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { findChain } from '@polkadot/extension-chains';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,6 +102,12 @@ export async function createAccountSuri (name: string, password: string, suri: s
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, type });
+}
+
+export async function getMetadata (genesisHash?: string | null): Promise<Chain | null> {
+  const definitions = await sendMessage('pri(metadata.list)');
+
+  return findChain(definitions, genesisHash);
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

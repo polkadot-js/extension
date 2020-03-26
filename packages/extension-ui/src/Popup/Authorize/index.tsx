@@ -4,12 +4,12 @@
 
 import React, { useContext } from 'react';
 
-import { AuthorizeContext, Header } from '../../components';
+import { AuthorizeReqContext, Header } from '../../components';
 import Request from './Request';
 import styled from 'styled-components';
 
 export default function Authorize (): React.ReactElement<{}> {
-  const requests = useContext(AuthorizeContext);
+  const requests = useContext(AuthorizeReqContext);
 
   return (
     <>

@@ -64,6 +64,7 @@ export interface RequestSignatures {
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
+  'pri(metadata.list)': [null, MetadataDef[]];
   'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
   'pri(seed.validate)': [RequestSeedValidate, ResponseSeedValidate];
   'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];

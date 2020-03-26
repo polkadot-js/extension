@@ -12,18 +12,18 @@ const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountJson[]>([]);
 const ActionContext = React.createContext<(to?: string) => void>(noop);
-const AuthorizeContext = React.createContext<AuthorizeRequest[]>([]);
+const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);
 const MediaContext = React.createContext<boolean>(false);
-const MetadataContext = React.createContext<MetadataRequest[]>([]);
-const SigningContext = React.createContext<SigningRequest[]>([]);
+const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
+const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 
 export {
   AccountContext,
   ActionContext,
-  AuthorizeContext,
+  AuthorizeReqContext,
   MediaContext,
-  MetadataContext,
-  SigningContext,
+  MetadataReqContext,
+  SigningReqContext,
   ThemeSwitchContext
 };

@@ -4,11 +4,11 @@
 
 import React, { useContext } from 'react';
 
-import { Header, Loading, MetadataContext } from '../../components';
+import { Header, Loading, MetadataReqContext } from '../../components';
 import Request from './Request';
 
 export default function Metadata (): React.ReactElement<{}> {
-  const requests = useContext(MetadataContext);
+  const requests = useContext(MetadataReqContext);
 
   return (
     <>

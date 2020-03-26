@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAuthorizeApprove, RequestAuthorizeReject, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, ResponseTypes, SigningRequest } from '../types';
 
@@ -126,11 +127,17 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { resolve } = queued;
+    const { resolve, request } = queued;
+
+    this.#state.saveMetadata(request);
 
     resolve(true);
 
     return true;
+  }
+
+  private metadataList (): MetadataDef[] {
+    return this.#state.knownMetadata;
   }
 
   private metadataReject ({ id }: RequestMetadataReject): boolean {
@@ -291,6 +298,9 @@ export default class Extension {
 
       case 'pri(metadata.approve)':
         return this.metadataApprove(request as RequestMetadataApprove);
+
+      case 'pri(metadata.list)':
+        return this.metadataList();
 
       case 'pri(metadata.reject)':
         return this.metadataReject(request as RequestMetadataReject);

@@ -10,15 +10,7 @@ import { act } from 'react-dom/test-utils';
 import * as messaging from '@polkadot/extension-ui/messaging';
 import { AccountJson, SigningRequest } from '@polkadot/extension-base/background/types';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
-import {
-  AccountContext,
-  ActionContext,
-  themes,
-  SigningContext,
-  Address,
-  Input,
-  Button
-} from '@polkadot/extension-ui/components';
+import { AccountContext, ActionContext, Address, Button, Input, SigningReqContext, themes } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
 import Signing from '.';
 import TransactionIndex from './TransactionIndex';
@@ -52,9 +44,9 @@ describe('Signing requests', () => {
     emitter.on('request', setRequests);
 
     return (
-      <SigningContext.Provider value={requests}>
+      <SigningReqContext.Provider value={requests}>
         <Signing />
-      </SigningContext.Provider>
+      </SigningReqContext.Provider>
     );
   }
   const mountComponent = async (): Promise<void> => {

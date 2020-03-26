@@ -7,16 +7,17 @@ import { Chain } from '@polkadot/extension-chains/types';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import findChain from '@polkadot/extension-chains';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import { AccountContext } from './contexts';
-import Identicon from '@polkadot/extension-ui/components/Identicon';
-import Svg from '@polkadot/extension-ui/components/Svg';
-import Menu from '@polkadot/extension-ui/components/Menu';
+import Identicon from './Identicon';
+import Svg from './Svg';
+import Menu from './Menu';
+
 import DetailsImg from '../assets/details.svg';
-import { useOutsideClick } from '@polkadot/extension-ui/hooks';
+import useOutsideClick from '../hooks/useOutsideClick';
+import useMetadata from '../hooks/useMetadata';
 
 interface Props {
   address?: string | null;
@@ -29,7 +30,6 @@ interface Props {
 
 interface Recoded {
   account: AccountJson | null;
-  chain: Chain | null;
   formatted: string | null;
   prefix: number;
 }
@@ -44,19 +44,17 @@ function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountJson[], genesisHash?: string | null): Recoded {
+function recodeAddress (address: string, accounts: AccountJson[], chain: Chain | null): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
   const account = findAccount(accounts, publicKey);
-  const chain = findChain(account?.genesisHash || genesisHash);
-  const prefix = settings.prefix === -1 ? chain.ss58Format : settings.prefix;
+  const prefix = settings.prefix === -1 ? (chain?.ss58Format || 42) : settings.prefix;
 
   // always allow the actual settings to override the display
   return {
     account,
-    chain,
     formatted: encodeAddress(publicKey, prefix),
     prefix
   };
@@ -66,7 +64,8 @@ const ACCOUNTS_SCREEN_HEIGHT = 500;
 
 function Address ({ address, className, children, genesisHash, name, actions }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
-  const [{ account, chain, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, chain: null, formatted: null, prefix: 42 });
+  const chain = useMetadata(genesisHash);
+  const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -75,9 +74,9 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
 
   useEffect((): void => {
     address && setRecoded(
-      recodeAddress(address, accounts, genesisHash)
+      recodeAddress(address, accounts, chain)
     );
-  }, [accounts, address, genesisHash]);
+  }, [accounts, address, chain]);
 
   useEffect(() => {
     if (!showActionsMenu) {

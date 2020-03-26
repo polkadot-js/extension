@@ -4,7 +4,7 @@
 
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
-import { Header, Loading, SigningContext } from '../../components';
+import { Header, Loading, SigningReqContext } from '../../components';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 import { SigningRequest } from '@polkadot/extension-base/background/types';
@@ -14,7 +14,7 @@ function isInnerTransaction (signingRequest: SigningRequest): boolean {
 }
 
 export default function Signing (): React.ReactElement<{}> {
-  const requests = useContext(SigningContext);
+  const requests = useContext(SigningReqContext);
   const [requestIndex, setRequestIndex] = useState(0);
   const isTransaction = useMemo(
     () => isInnerTransaction(requests[requestIndex]),

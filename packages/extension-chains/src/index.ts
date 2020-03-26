@@ -5,19 +5,17 @@
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { Chain } from './types';
 
-// import store from 'store';
 import { Metadata, TypeRegistry } from '@polkadot/types';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
 import kusama from './kusama';
 
-const chains: Map<string, Chain> = new Map(
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-  [kusama].map((def) => defToChain(def))
+const definitions: Map<string, MetadataDef> = new Map(
+  [kusama].map((def) => [def.genesisHash, def])
 );
 
-function defToChain (definition: MetadataDef): [string, Chain] {
+function metadataExpand (definition: MetadataDef): Chain {
   const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
   const registry = new TypeRegistry();
 
@@ -35,7 +33,7 @@ function defToChain (definition: MetadataDef): [string, Chain] {
     tokenSymbol
   }));
 
-  return [genesisHash, {
+  return {
     definition,
     genesisHash: isUnknown
       ? undefined
@@ -49,31 +47,21 @@ function defToChain (definition: MetadataDef): [string, Chain] {
     ss58Format,
     tokenDecimals,
     tokenSymbol
-  }];
+  };
 }
 
-const [, UNKNOWN_CHAIN] = defToChain({
-  chain: 'Unknown chain',
-  genesisHash: '0x',
-  icon: 'polkadot',
-  specVersion: 0,
-  ss58Format: 42,
-  tokenDecimals: 0,
-  tokenSymbol: 'Unit',
-  types: {}
-});
+export function findChain (definitions: MetadataDef[], genesisHash?: string | null): Chain | null {
+  const def = definitions.find((def) => def.genesisHash === genesisHash);
 
-export function addChainDef (def: MetadataDef): void {
-  const [genesisHash, chain] = defToChain(def);
-
-  chains.set(genesisHash, chain);
+  return def
+    ? metadataExpand(def)
+    : null;
 }
 
-export function knownChains (): MetadataDef[] {
-  return [...chains.values()]
-    .map(({ definition }) => definition);
+export function addMetadata (def: MetadataDef): void {
+  definitions.set(def.genesisHash, def);
 }
 
-export default function findChain (genesisHash?: string | null): Chain {
-  return chains.get(genesisHash || '') || UNKNOWN_CHAIN;
+export function knownMetadata (): MetadataDef[] {
+  return [...definitions.values()];
 }

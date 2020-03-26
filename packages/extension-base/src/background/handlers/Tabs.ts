@@ -9,7 +9,6 @@ import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
 
-import { knownChains } from '@polkadot/extension-chains';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
@@ -84,12 +83,10 @@ export default class Tabs {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private metadataList (url: string): InjectedMetadataKnown[] {
-    return knownChains()
-      .filter(({ genesisHash }) => genesisHash !== '0x')
-      .map(({ genesisHash, specVersion }) => ({
-        genesisHash,
-        specVersion
-      }));
+    return this.#state.knownMetadata.map(({ genesisHash, specVersion }) => ({
+      genesisHash,
+      specVersion
+    }));
   }
 
   private rpcListProviders (): Promise<ResponseRpcListProviders> {

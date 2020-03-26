@@ -4,13 +4,12 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
-import React, { useContext, useRef } from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
-import findChain from '@polkadot/extension-chains';
 
 import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
+import useMetadata from '../../hooks/useMetadata';
 import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
-
 interface Props {
   className?: string;
   request: MetadataDef;
@@ -18,8 +17,8 @@ interface Props {
   url: string;
 }
 
-function Request ({ className, metaId, request: { chain, genesisHash, specVersion, tokenDecimals, tokenSymbol }, url }: Props): React.ReactElement<Props> {
-  const current = useRef(findChain(genesisHash)).current;
+function Request ({ className, metaId, request, url }: Props): React.ReactElement<Props> {
+  const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
   const _onApprove = (): Promise<void> =>
     approveMetaRequest(metaId)
@@ -39,19 +38,23 @@ function Request ({ className, metaId, request: { chain, genesisHash, specVersio
         </tr>
         <tr>
           <td className='label'>chain</td>
-          <td className='data'>{chain}</td>
+          <td className='data'>{request.chain}</td>
+        </tr>
+        <tr>
+          <td className='label'>icon</td>
+          <td className='data'>{request.icon}</td>
         </tr>
         <tr>
           <td className='label'>decimals</td>
-          <td className='data'>{tokenDecimals}</td>
+          <td className='data'>{request.tokenDecimals}</td>
         </tr>
         <tr>
           <td className='label'>symbol</td>
-          <td className='data'>{tokenSymbol}</td>
+          <td className='data'>{request.tokenSymbol}</td>
         </tr>
         <tr>
           <td className='label'>upgrade</td>
-          <td className='data'>{current.isUnknown ? 'unknown' : current.specVersion} -&gt; {specVersion}</td>
+          <td className='data'>{chain ? chain.specVersion : 'unknown'} -&gt; {request.specVersion}</td>
         </tr>
       </Table>
       <RequestInfo>

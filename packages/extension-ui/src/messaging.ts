@@ -107,7 +107,7 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
 export async function getMetadata (genesisHash?: string | null): Promise<Chain | null> {
   const definitions = await sendMessage('pri(metadata.list)');
 
-  return findChain(definitions, genesisHash);
+  return findChain(definitions || [], genesisHash);
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

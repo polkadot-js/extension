@@ -21,7 +21,7 @@ import { EventEmitter } from 'events';
 
 configure({ adapter: new Adapter() });
 
-describe('Signing requests', () => {
+describe.skip('Signing requests', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
   let signRequests: SigningRequest[] = [];

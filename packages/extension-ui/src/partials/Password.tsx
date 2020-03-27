@@ -23,7 +23,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         ? pass1
         : null
     );
-  }, [pass1, pass2]);
+  }, [onChange, pass1, pass2]);
 
   return (
     <>

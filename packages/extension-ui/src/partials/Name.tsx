@@ -33,7 +33,7 @@ export default function Name ({ address, className, defaultValue, isFocussed, la
         ? name
         : null
     );
-  }, [name]);
+  }, [name, onChange]);
 
   return (
     <InputWithLabel

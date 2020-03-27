@@ -2,8 +2,6 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ResponseAccountExport } from '../types';
-
 import keyring from '@polkadot/ui-keyring';
 import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
@@ -31,7 +29,7 @@ describe('Extension', () => {
     const result = await extension.handle('id', 'pri(accounts.export)', {
       address,
       password
-    }, {} as chrome.runtime.Port) as ResponseAccountExport;
+    }, {} as chrome.runtime.Port);
 
     expect(result.exportedJson).toContain(address);
     expect(result.exportedJson).toContain('"encoded"');

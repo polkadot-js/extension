@@ -30,7 +30,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
     }
 
     _toggleEdit();
-  }, [editedName, address]);
+  }, [editedName, address, _toggleEdit, onAction]);
 
   return (
     <div className={className}>

@@ -11,7 +11,8 @@ import {
   ResponseTypes,
   SeedLengths,
   SubscriptionMessageTypes,
- MetadataRequest, MessageTypesWithNullRequest,
+  MetadataRequest,
+  MessageTypesWithNullRequest,
   MessageTypesWithNoSubscriptions,
   MessageTypesWithSubscriptions,
   ResponseDeriveValidate

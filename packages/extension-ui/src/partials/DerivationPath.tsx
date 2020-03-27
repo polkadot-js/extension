@@ -25,7 +25,7 @@ function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): Re
       onChange(null);
       setValid(false);
     }
-  }, [parentAddress]);
+  }, [parentAddress, onChange, parentPassword]);
 
   return (
     <div>

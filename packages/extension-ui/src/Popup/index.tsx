@@ -107,7 +107,7 @@ export default function Popup (): React.ReactElement<{}> {
                     <Route path='/account/import-qr' component={ImportQr} />
                     <Route path='/account/import-seed' component={ImportSeed} />
                     <Route path='/account/derive/:address' component={Derive} />
-                  <Route exact path='/' component={Root} />
+                    <Route exact path='/' component={Root} />
                   </Switch>
                 </SigningReqContext.Provider>
               </MetadataReqContext.Provider>

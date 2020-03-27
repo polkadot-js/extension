@@ -27,12 +27,12 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
     }
     await deriveAccount(parentAddress, account.suri, parentPassword, name, password);
     onAction('/');
-  }, [account, name, password]);
+  }, [account, name, password, onAction, parentAddress, parentPassword]);
 
   const _onParentPasswordEnter = useCallback(async (enteredPassword: string) => {
     setParentPassword(enteredPassword);
     setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
-  }, [parentPassword]);
+  }, [parentAddress]);
 
   return (
     <>

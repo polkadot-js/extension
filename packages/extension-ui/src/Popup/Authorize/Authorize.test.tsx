@@ -6,21 +6,21 @@ import React from 'react';
 import Adapter from 'enzyme-adapter-react-16';
 
 import { ThemeProvider } from 'styled-components';
-import { AuthorizeContext, themes, Header, Icon } from '@polkadot/extension-ui/components';
+import { AuthorizeReqContext, themes, Header, Icon } from '@polkadot/extension-ui/components';
 import Authorize from '.';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { AuthorizeRequest } from '@polkadot/extension/background/types';
+import { AuthorizeRequest } from '@polkadot/extension-base/background/types';
 import Request from './Request';
 
 configure({ adapter: new Adapter() });
 
 describe('Authorize', () => {
   const mountAuthorize = (authorizeRequests: AuthorizeRequest[] = []): ReactWrapper => mount(
-    <AuthorizeContext.Provider value={authorizeRequests}>
+    <AuthorizeReqContext.Provider value={authorizeRequests}>
       <ThemeProvider theme={themes.dark}>
         <Authorize />
       </ThemeProvider>
-    </AuthorizeContext.Provider>);
+    </AuthorizeReqContext.Provider>);
 
   it('render component', () => {
     const wrapper = mountAuthorize();

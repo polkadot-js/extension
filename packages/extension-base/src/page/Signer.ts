@@ -6,14 +6,12 @@ import { Signer as SignerInterface, SignerResult } from '@polkadot/api/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SendRequest } from './types';
 
+// External to class, this.# is not private enough (yet)
 let sendRequest: SendRequest;
 let nextId = 0;
 
 export default class Signer implements SignerInterface {
   constructor (_sendRequest: SendRequest) {
-    // NOTE We are storing the `sendRequest` as a global to this class, since we don't
-    // have private members in JS, we err on the side of caution and hide it away so it
-    // is only available internally to the class.
     sendRequest = _sendRequest;
   }
 

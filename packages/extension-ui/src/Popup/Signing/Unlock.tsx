@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { Button, InputWithLabel } from '../../components';
 
@@ -16,15 +16,18 @@ export default function Unlock ({ className, onSign, buttonText = 'Sign the tran
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect((): void => {
-    if (error) {
+  const _onChangePassword = useCallback(
+    (password: string): void => {
+      setPassword(password);
       setError('');
-    }
-  }, [password]);
-
-  const _onClick = (): Promise<void> =>
-    onSign(password)
-      .catch((error): void => setError(error.message));
+    },
+    []
+  );
+  const _onClick = useCallback(
+    (): Promise<void> =>
+      onSign(password).catch((error): void => setError(error.message)),
+    [onSign, password]
+  );
 
   return (
     <div className={className}>
@@ -32,7 +35,7 @@ export default function Unlock ({ className, onSign, buttonText = 'Sign the tran
         isError={!password || !!error}
         isFocused
         label='Password for this account'
-        onChange={setPassword}
+        onChange={_onChangePassword}
         type='password'
       />
       <Button onClick={_onClick}>{buttonText}</Button>

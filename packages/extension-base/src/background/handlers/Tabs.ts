@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { InjectedAccount, ProviderMeta } from '@polkadot/extension-inject/types';
+import { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
@@ -12,9 +12,9 @@ import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, Mess
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
+
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
-
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -57,20 +57,36 @@ export default class Tabs {
 
   private getSigningPair (address: string): KeyringPair {
     const pair = keyring.getPair(address);
+
     assert(pair, 'Unable to find keypair');
+
     return pair;
   }
 
   private bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
+
     return this.#state.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
   }
 
   private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
     const pair = this.getSigningPair(address);
+
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
+  }
+
+  private metadataProvide (url: string, request: MetadataDef): Promise<boolean> {
+    return this.#state.injectMetadata(url, request);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private metadataList (url: string): InjectedMetadataKnown[] {
+    return this.#state.knownMetadata.map(({ genesisHash, specVersion }) => ({
+      genesisHash,
+      specVersion
+    }));
   }
 
   private rpcListProviders (): Promise<ResponseRpcListProviders> {
@@ -98,6 +114,18 @@ export default class Tabs {
     return true;
   }
 
+  private rpcSubscribeConnected (request: null, id: string, port: chrome.runtime.Port): Promise<boolean> {
+    const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, port);
+    const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribeConnected)']): void => innerCb(data);
+    this.#state.rpcSubscribeConnected(request, cb, port);
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return Promise.resolve(true);
+  }
+
   private async rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
     return this.#state.rpcUnsubscribe(request, port);
   }
@@ -123,6 +151,12 @@ export default class Tabs {
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
 
+      case 'pub(metadata.list)':
+        return this.metadataList(url);
+
+      case 'pub(metadata.provide)':
+        return this.metadataProvide(url, request as MetadataDef);
+
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();
 
@@ -134,6 +168,9 @@ export default class Tabs {
 
       case 'pub(rpc.subscribe)':
         return this.rpcSubscribe(request as RequestRpcSubscribe, id, port);
+
+      case 'pub(rpc.subscribeConnected)':
+        return this.rpcSubscribeConnected(request as null, id, port);
 
       case 'pub(rpc.unsubscribe)':
         return this.rpcUnsubscribe(request as RequestRpcUnsubscribe, port);

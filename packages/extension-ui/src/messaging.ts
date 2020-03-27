@@ -11,15 +11,17 @@ import {
   ResponseTypes,
   SeedLengths,
   SubscriptionMessageTypes,
-  MessageTypesWithNullRequest,
+ MetadataRequest, MessageTypesWithNullRequest,
   MessageTypesWithNoSubscriptions,
   MessageTypesWithSubscriptions,
   ResponseDeriveValidate
-} from '@polkadot/extension/background/types';
+} from '@polkadot/extension-base/background/types';
+import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import extension from 'extensionizer';
-import { PORT_EXTENSION } from '@polkadot/extension/defaults';
+import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { findChain } from '@polkadot/extension-chains';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +42,7 @@ port.onMessage.addListener((data): void => {
   const handler = handlers[data.id];
 
   if (!handler) {
-    console.error(`Uknown response: ${JSON.stringify(data)}`);
+    console.error(`Unknown response: ${JSON.stringify(data)}`);
     return;
   }
 
@@ -87,12 +89,12 @@ export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
 
-export async function rejectAuthRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(authorize.reject)', { id });
-}
-
 export async function approveAuthRequest (id: string): Promise<boolean> {
   return sendMessage('pri(authorize.approve)', { id });
+}
+
+export async function approveMetaRequest (id: string): Promise<boolean> {
+  return sendMessage('pri(metadata.approve)', { id });
 }
 
 export async function cancelSignRequest (id: string): Promise<boolean> {
@@ -119,16 +121,34 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
+export async function getMetadata (genesisHash?: string | null): Promise<Chain | null> {
+  const definitions = await sendMessage('pri(metadata.list)');
+
+  return findChain(definitions || [], genesisHash);
+}
+
+export async function rejectAuthRequest (id: string): Promise<boolean> {
+  return sendMessage('pri(authorize.reject)', { id });
+}
+
+export async function rejectMetaRequest (id: string): Promise<boolean> {
+  return sendMessage('pri(metadata.reject)', { id });
+}
+
 export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 
-export async function subscribeAuthorize (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(authorize.subscribe)', null, cb);
+export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(authorize.requests)', null, cb);
 }
 
-export async function subscribeSigning (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(signing.subscribe)', null, cb);
+export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(metadata.requests)', null, cb);
+}
+
+export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(signing.requests)', null, cb);
 }
 
 export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {

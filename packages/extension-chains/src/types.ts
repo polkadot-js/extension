@@ -2,9 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { Registry } from '@polkadot/types/types';
 
 export interface Chain {
+  definition: MetadataDef;
   genesisHash?: string;
   hasMetadata: boolean;
   icon: string;

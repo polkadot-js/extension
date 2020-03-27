@@ -21,6 +21,9 @@ interface SubscriptionHandler {
   type: string;
 }
 
+// External to class, this.# is not private enough (yet)
+let sendRequest: SendRequest;
+
 /**
  * @name PostMessageProvider
  *
@@ -29,7 +32,8 @@ interface SubscriptionHandler {
 export default class PostMessageProvider implements InjectedProvider {
   readonly #eventemitter: EventEmitter;
 
-  readonly #sendRequest: SendRequest;
+  // Whether or not the actual extension background provider is connected
+  #isConnected = false
 
   // Subscription IDs are (historically) not guaranteed to be globally unique;
   // only unique for a given subscription method; which is why we identify
@@ -40,21 +44,17 @@ export default class PostMessageProvider implements InjectedProvider {
    * @param {function}  sendRequest  The function to be called to send requests to the node
    * @param {function}  subscriptionNotificationHandler  Channel for receiving subscription messages
    */
-  public constructor (sendRequest: SendRequest) {
+  public constructor (_sendRequest: SendRequest) {
     this.#eventemitter = new EventEmitter();
-    this.#sendRequest = sendRequest;
 
-    // Give subscribers time to subscribe
-    setTimeout((): void => {
-      this.#eventemitter.emit('connected');
-    });
+    sendRequest = _sendRequest;
   }
 
   /**
    * @description Returns a clone of the object
    */
   public clone (): PostMessageProvider {
-    return new PostMessageProvider(this.#sendRequest);
+    return new PostMessageProvider(sendRequest);
   }
 
   /**
@@ -78,12 +78,11 @@ export default class PostMessageProvider implements InjectedProvider {
    * @return {boolean} true if connected
    */
   public isConnected (): boolean {
-    // FIXME This should see if the extension's state's provider is connected
-    return true;
+    return this.#isConnected;
   }
 
   public listProviders (): Promise<ProviderList> {
-    return this.#sendRequest('pub(rpc.listProviders)', undefined);
+    return sendRequest('pub(rpc.listProviders)', undefined);
   }
 
   /**
@@ -105,7 +104,7 @@ export default class PostMessageProvider implements InjectedProvider {
     if (subscription) {
       const { callback, type } = subscription;
 
-      return this.#sendRequest(
+      return sendRequest(
         'pub(rpc.subscribe)',
         { type, method, params },
         (res) => {
@@ -117,12 +116,33 @@ export default class PostMessageProvider implements InjectedProvider {
         return id;
       });
     } else {
-      return this.#sendRequest('pub(rpc.send)', { method, params });
+      return sendRequest('pub(rpc.send)', { method, params });
     }
   }
 
-  public startProvider (key: string): Promise<ProviderMeta> {
-    return this.#sendRequest('pub(rpc.startProvider)', key);
+  /**
+   * @summary Spawn a provider on the extension background.
+   */
+  public async startProvider (key: string): Promise<ProviderMeta> {
+    // Disconnect from the previous provider
+    this.#isConnected = false;
+    this.#eventemitter.emit('disconnected');
+
+    const meta = await sendRequest('pub(rpc.startProvider)', key);
+
+    sendRequest('pub(rpc.subscribeConnected)', null, (connected) => {
+      this.#isConnected = connected;
+
+      if (connected) {
+        this.#eventemitter.emit('connected');
+      } else {
+        this.#eventemitter.emit('disconnected');
+      }
+
+      return true;
+    });
+
+    return meta;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

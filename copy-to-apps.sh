@@ -10,7 +10,7 @@ function copy_folder () {
   cp -r $SRC $DST
 }
 
-yarn polkadot-dev-build-ts
+yarn build
 
 copy_folder "extension-dapp"
 copy_folder "extension-inject"

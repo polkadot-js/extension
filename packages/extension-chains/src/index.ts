@@ -2,53 +2,66 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { Chain } from './types';
 
 import { Metadata, TypeRegistry } from '@polkadot/types';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
-import alexander from './alexander';
-import edgeware from './edgeware';
-import kusamaCC3 from './kusama-cc3';
+import kusama from './kusama';
 
-const chains: Map<string, Chain> = new Map(
-  [alexander, edgeware, kusamaCC3].map(({ chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types }): [string, Chain] => {
-    let metadata: Metadata | undefined;
-    const registry = new TypeRegistry();
-
-    registry.register(types || {});
-
-    if (metaCalls) {
-      metadata = new Metadata(registry, Buffer.from(metaCalls, 'base64'));
-    }
-
-    return [genesisHash, {
-      genesisHash,
-      hasMetadata: !!metadata,
-      icon,
-      name: chain,
-      registry,
-      specVersion,
-      ss58Format,
-      tokenDecimals,
-      tokenSymbol
-    }];
-  })
+const definitions: Map<string, MetadataDef> = new Map(
+  [kusama].map((def) => [def.genesisHash, def])
 );
 
-const UNKNOWN_CHAIN: Chain = {
-  hasMetadata: false,
-  icon: 'polkadot',
-  isUnknown: true,
-  name: 'Unknown chain',
-  registry: new TypeRegistry(),
-  specVersion: 0,
-  ss58Format: 42,
-  tokenDecimals: 0,
-  tokenSymbol: 'UNIT'
-};
+function metadataExpand (definition: MetadataDef): Chain {
+  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
+  const registry = new TypeRegistry();
 
-export default function findChain (genesisHash?: string | null): Chain {
-  return chains.get(genesisHash || '') || UNKNOWN_CHAIN;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  registry.register(types as any);
+
+  const isUnknown = genesisHash === '0x';
+  const metadata = metaCalls
+    ? new Metadata(registry, Buffer.from(metaCalls, 'base64'))
+    : null;
+
+  registry.setChainProperties(registry.createType('ChainProperties', {
+    ss58Format,
+    tokenDecimals,
+    tokenSymbol
+  }));
+
+  return {
+    definition,
+    genesisHash: isUnknown
+      ? undefined
+      : genesisHash,
+    hasMetadata: !!metadata,
+    isUnknown,
+    icon: icon || 'substrate',
+    name: chain,
+    registry,
+    specVersion,
+    ss58Format,
+    tokenDecimals,
+    tokenSymbol
+  };
+}
+
+export function findChain (definitions: MetadataDef[], genesisHash?: string | null): Chain | null {
+  const def = definitions.find((def) => def.genesisHash === genesisHash);
+
+  return def
+    ? metadataExpand(def)
+    : null;
+}
+
+export function addMetadata (def: MetadataDef): void {
+  definitions.set(def.genesisHash, def);
+}
+
+export function knownMetadata (): MetadataDef[] {
+  return [...definitions.values()];
 }

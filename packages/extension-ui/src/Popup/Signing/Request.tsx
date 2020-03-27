@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { AccountJson, RequestSign } from '@polkadot/extension/background/types';
+import { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useContext, useState, useEffect } from 'react';
@@ -36,6 +36,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
 
   useEffect((): void => {
     const inner = request.inner;
+
     if ((inner as SignerPayloadRaw).data) {
       setHexBytes((inner as SignerPayloadRaw).data);
       setExtrinsic(null);
@@ -45,10 +46,10 @@ export default function Request ({ account: { isExternal }, request, signId, url
     }
   }, [request]);
 
-  const _onCancel = (): Promise<void> => {
-    return cancelSignRequest(signId).then((): void => onAction())
+  const _onCancel = (): Promise<void> =>
+    cancelSignRequest(signId)
+      .then((): void => onAction())
       .catch((error: Error) => console.error(error));
-  };
   const _onSign = (password: string): Promise<void> =>
     approveSignPassword(signId, password)
       .then((): void => onAction())
@@ -60,6 +61,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
 
   if (extrinsic !== null) {
     const payload = request.inner as SignerPayloadJSON;
+
     return (
       <>
         <Address
@@ -92,6 +94,7 @@ export default function Request ({ account: { isExternal }, request, signId, url
     );
   } else if (hexBytes !== null) {
     const payload = request.inner as SignerPayloadRaw;
+
     return (
       <>
         <Address address={payload.address} />
@@ -105,9 +108,9 @@ export default function Request ({ account: { isExternal }, request, signId, url
         </SignArea>
       </>
     );
-  } else {
-    return null;
   }
+
+  return null;
 }
 
 const SignArea = styled(ButtonArea)`

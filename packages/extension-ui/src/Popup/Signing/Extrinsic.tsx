@@ -3,23 +3,19 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Chain } from '@polkadot/extension-chains/types';
-import { ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { SignerPayloadJSON } from '@polkadot/types/types';
+import { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
 import React, { useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
-import findChain from '@polkadot/extension-chains';
-import { GenericCall } from '@polkadot/types';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
-interface Decoded {
-  json: MethodJson | null;
-  method: GenericCall | null;
-}
+import { Table } from '../../components';
+import useMetadata from '../../hooks/useMetadata';
 
-interface MethodJson {
-  args: Record<string, string>;
+interface Decoded {
+  args: AnyJson | null;
+  method: Call | null;
 }
 
 interface Props {
@@ -30,25 +26,26 @@ interface Props {
   url: string;
 }
 
-function decodeMethod (data: string, isDecoded: boolean, chain: Chain, specVersion: BN): Decoded {
-  let json: MethodJson | null = null;
-  let method: GenericCall | null = null;
+function decodeMethod (data: string, isDecoded: boolean, chain: Chain | null, specVersion: BN): Decoded {
+  let args: AnyJson | null = null;
+  let method: Call | null = null;
 
   try {
-    if (isDecoded && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
-      method = new GenericCall(chain.registry, data);
-      json = method.toJSON() as unknown as MethodJson;
+    if (isDecoded && chain && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
+      method = chain.registry.createType('Call', data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      args = (method.toHuman() as any).args;
     }
   } catch (error) {
-    json = null;
+    args = null;
     method = null;
   }
 
-  return { json, method };
+  return { args, method };
 }
 
-function renderMethod (data: string, { json, method }: Decoded): React.ReactNode {
-  if (!json || !method) {
+function renderMethod (data: string, { args, method }: Decoded): React.ReactNode {
+  if (!args || !method) {
     return (
       <tr>
         <td className='label'>method data</td>
@@ -61,18 +58,23 @@ function renderMethod (data: string, { json, method }: Decoded): React.ReactNode
     <>
       <tr>
         <td className='label'>method</td>
-        <td className='data'>{method.sectionName}.{method.methodName}</td>
-      </tr>
-      <tr>
-        <td className='label'>&nbsp;</td>
-        <td className='data'><pre>{JSON.stringify(json.args, null, 2)}</pre></td>
+        <td className='data'>
+          <details>
+            <summary>{method.sectionName}.{method.methodName}{
+              method.meta
+                ? `(${method.meta.args.map(({ name }) => name).join(', ')})`
+                : ''
+            }</summary>
+            <pre>{JSON.stringify(args, null, 2)}</pre>
+          </details>
+        </td>
       </tr>
       {method.meta && (
         <tr>
           <td className='label'>info</td>
           <td className='data'>
             <details>
-              <summary>{method.meta.documentation.join(' ')}</summary>
+              <summary>{method.meta.documentation.map((d) => d.toString().trim()).join(' ')}</summary>
             </details>
           </td>
         </tr>
@@ -93,93 +95,45 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string): string {
 }
 
 function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
-  const chain = useRef(findChain(genesisHash)).current;
+  const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
-  const [decoded, setDecoded] = useState<Decoded>({ json: null, method: null });
+  const [decoded, setDecoded] = useState<Decoded>({ args: null, method: null });
 
   useEffect((): void => {
     setDecoded(decodeMethod(method, isDecoded, chain, specVersion));
   }, [method, isDecoded, chain, specVersion]);
 
   return (
-    <table className={className}>
-      <tbody>
+    <Table className={className} isFull>
+      <tr>
+        <td className='label'>from</td>
+        <td className='data'>{url}</td>
+      </tr>
+      <tr>
+        <td className='label'>{chain ? 'chain' : 'genesis'}</td>
+        <td className='data'>{chain ? chain.name : genesisHash}</td>
+      </tr>
+      <tr>
+        <td className='label'>version</td>
+        <td className='data'>{specVersion.toNumber()}</td>
+      </tr>
+      <tr>
+        <td className='label'>nonce</td>
+        <td className='data'>{formatNumber(nonce)}</td>
+      </tr>
+      {!tip.isEmpty && (
         <tr>
-          <td className='label'>from</td>
-          <td className='data'>{url}</td>
+          <td className='label'>tip</td>
+          <td className='data'>{formatNumber(tip)}</td>
         </tr>
-        <tr>
-          <td className='label'>{chain.isUnknown ? 'genesis' : 'chain'}</td>
-          <td className='data'>{chain.isUnknown ? genesisHash : chain.name}</td>
-        </tr>
-        <tr>
-          <td className='label'>version</td>
-          <td className='data'>{specVersion.toNumber()}</td>
-        </tr>
-        <tr>
-          <td className='label'>nonce</td>
-          <td className='data'>{formatNumber(nonce)}</td>
-        </tr>
-        {!tip.isEmpty && (
-          <tr>
-            <td className='label'>tip</td>
-            <td className='data'>{formatNumber(tip)}</td>
-          </tr>
-        )}
-        {renderMethod(method, decoded)}
-        <tr>
-          <td className='label'>lifetime</td>
-          <td className='data'>{mortalityAsString(era, blockNumber)}</td>
-        </tr>
-      </tbody>
-    </table>
+      )}
+      {renderMethod(method, decoded)}
+      <tr>
+        <td className='label'>lifetime</td>
+        <td className='data'>{mortalityAsString(era, blockNumber)}</td>
+      </tr>
+    </Table>
   );
 }
 
-export default styled(Extrinsic)`
-  height: 100%;
-  overflow: scroll;
-  display: block;
-  border: 0;
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-
-  td.data {
-    max-width: 0;
-    overflow: hidden;
-    text-align: left;
-    text-overflow: ellipsis;
-    vertical-align: middle;
-    width: 100%;
-
-    pre {
-      font-family: inherit;
-      font-size: 0.75rem;
-      margin: 0;
-    }
-  }
-
-  td.label {
-    opacity: 0.5;
-    padding: 0 0.5rem;
-    text-align: right;
-    vertical-align: middle;
-    white-space: nowrap;
-  }
-
-  details {
-    cursor: pointer;
-    max-width: 24rem;
-
-    &[open] summary {
-      white-space: normal;
-    }
-
-    summary {
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      outline: 0;
-    }
-  }
-`;
+export default React.memo(Extrinsic);

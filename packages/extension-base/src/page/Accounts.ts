@@ -5,6 +5,7 @@
 import { InjectedAccounts, InjectedAccount, Unsubcall } from '@polkadot/extension-inject/types';
 import { SendRequest } from './types';
 
+// External to class, this.# is not private enough (yet)
 let sendRequest: SendRequest;
 
 export default class Accounts implements InjectedAccounts {

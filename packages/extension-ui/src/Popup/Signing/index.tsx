@@ -22,9 +22,11 @@ export default function Signing (): React.ReactElement<{}> {
   );
 
   useEffect(() => {
-    if (requestIndex >= requests.length) {
-      setRequestIndex(requests.length - 1);
-    }
+    setRequestIndex(
+      (requestIndex) => requestIndex >= requests.length
+        ? requests.length - 1
+        : requestIndex
+    );
   }, [requests]);
 
   return requests[requestIndex] ? (

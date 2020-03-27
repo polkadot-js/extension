@@ -27,7 +27,8 @@ import {
   SigningRequest,
   RequestDeriveValidate,
   ResponseDeriveValidate,
-  RequestDeriveCreate
+  RequestDeriveCreate,
+  RequestAccountValidate
 } from '../types';
 
 import extension from 'extensionizer';
@@ -85,6 +86,15 @@ export default class Extension {
 
   private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
     return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password)) };
+  }
+
+  private accountsValidate ({ address, password }: RequestAccountValidate): boolean {
+    try {
+      keyring.backupAccount(keyring.getPair(address), password);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   private accountsForget ({ address }: RequestAccountForget): boolean {
@@ -246,25 +256,30 @@ export default class Extension {
     return true;
   }
 
-  private derive (parentAddress: string, suri: string, metadata: KeyringPair$Meta): KeyringPair {
+  private derive (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
     const parentPair = keyring.getPair(parentAddress);
-    return parentPair.derive(suri, metadata);
-  }
-
-  private derivationValidate ({ parentAddress, suri }: RequestDeriveValidate): ResponseDeriveValidate {
     try {
-      const childPair = this.derive(parentAddress, suri, {});
-      return {
-        address: childPair.address,
-        suri
-      };
+      parentPair.decodePkcs8(password);
+    } catch (e) {
+      throw new Error('invalid password');
+    }
+    try {
+      return parentPair.derive(suri, metadata);
     } catch (err) {
       throw new Error(`"${suri}" is not a valid derivation path`);
     }
   }
 
-  private derivationCreate ({ parentAddress, suri, genesisHash, name, password }: RequestDeriveCreate): boolean {
-    const childPair = this.derive(parentAddress, suri, { genesisHash, name });
+  private derivationValidate ({ parentAddress, suri, parentPassword }: RequestDeriveValidate): ResponseDeriveValidate {
+    const childPair = this.derive(parentAddress, suri, parentPassword, {});
+    return {
+      address: childPair.address,
+      suri
+    };
+  }
+
+  private derivationCreate ({ parentAddress, suri, parentPassword, genesisHash, name, password }: RequestDeriveCreate): boolean {
+    const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name });
     keyring.addPair(childPair, password);
 
     return true;
@@ -297,6 +312,9 @@ export default class Extension {
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
+
+      case 'pri(accounts.validate)':
+        return this.accountsValidate(request as RequestAccountValidate);
 
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);

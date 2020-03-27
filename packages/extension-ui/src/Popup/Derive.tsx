@@ -4,9 +4,10 @@
 
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
+import styled from 'styled-components';
 
-import { ActionContext, Address, Button, ButtonArea, Header, VerticalSpace } from '../components';
-import { deriveAccount } from '../messaging';
+import { ActionContext, Address, Button, ButtonArea, Header, InputWithLabel, VerticalSpace } from '../components';
+import { deriveAccount, validateAccount } from '../messaging';
 import { DerivationPath, Name, Password } from '../partials';
 
 type Props = RouteComponentProps<{ address: string }>;
@@ -16,22 +17,47 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
+  const [parentPassword, setParentPassword] = useState<string | null>(null);
+  const [isProperParentPassword, setIsProperParentPassword] = useState(false);
+  const [derivationConfirmed, setDerivationConfirmed] = useState(false);
 
   const _onCreate = useCallback(async () => {
-    if (!account || !name || !password) {
+    if (!account || !name || !password || !parentPassword) {
       return;
     }
-    await deriveAccount(parentAddress, account.suri, name, password);
+    await deriveAccount(parentAddress, account.suri, parentPassword, name, password);
     onAction('/');
   }, [account, name, password]);
+
+  const _onParentPasswordEnter = useCallback(async (enteredPassword: string) => {
+    setParentPassword(enteredPassword);
+    setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
+  }, [parentPassword]);
 
   return (
     <>
       <Header text='Derive account' showBackArrow/>
-      <Name onChange={setName}/>
-      {name && <DerivationPath onChange={setAccount} parentAddress={parentAddress}/>}
-      {account && name && <Password onChange={setPassword}/>}
-      {account && name && password && (
+      {!derivationConfirmed && <InputWithLabel
+        isError={!isProperParentPassword}
+        label='enter the password for the account you want to derive from'
+        onChange={_onParentPasswordEnter}
+        type='password'
+        data-export-password
+      />}
+      {!derivationConfirmed && <DeriveButton
+        isDisabled={!isProperParentPassword}
+        onClick={(): void => setDerivationConfirmed(true)}
+      >
+        I want to derive from this account
+      </DeriveButton>}
+      {isProperParentPassword && derivationConfirmed && <Name onChange={setName}/>}
+      {isProperParentPassword && derivationConfirmed && parentPassword && name && <DerivationPath
+        onChange={setAccount}
+        parentAddress={parentAddress}
+        parentPassword={parentPassword}
+      />}
+      {isProperParentPassword && derivationConfirmed && account && name && <Password onChange={setPassword}/>}
+      {isProperParentPassword && derivationConfirmed && account && name && password && (
         <>
           <Address
             address={account.address}
@@ -46,3 +72,9 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
     </>
   );
 }
+
+const DeriveButton = styled(Button)`
+  margin-left: 24px;
+  margin-right: 24px;
+  width: auto;
+`;

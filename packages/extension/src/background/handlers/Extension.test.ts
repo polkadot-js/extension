@@ -55,10 +55,11 @@ describe('Extension', () => {
     test('pri(derivation.validate) passes for valid suri', async () => {
       const result = await extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
-        suri: '//path'
+        suri: '//path',
+        parentPassword: password
       }, {} as chrome.runtime.Port);
       expect(result).toStrictEqual({
-        address: '5FPRjD2NUA9S99ev2dhJjqa58SAHxrKVKZyfrceSiGEfAxXB',
+        address: '5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN',
         suri: '//path'
       });
     });
@@ -66,8 +67,17 @@ describe('Extension', () => {
     test('pri(derivation.validate) throws for invalid suri', async () => {
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
-        suri: 'invalid-path'
+        suri: 'invalid-path',
+        parentPassword: password
       }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('"invalid-path" is not a valid derivation path'));
+    });
+
+    test('pri(derivation.validate) throws for invalid password', async () => {
+      await expect(extension.handle('id', 'pri(derivation.validate)', {
+        parentAddress: address,
+        suri: '//path',
+        parentPassword: 'invalid-password'
+      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('invalid password'));
     });
 
     test('pri(derivation.create) adds a derived account', async () => {
@@ -75,6 +85,7 @@ describe('Extension', () => {
         parentAddress: address,
         name: 'child',
         suri: '//path',
+        parentPassword: password,
         password
       }, {} as chrome.runtime.Port);
       expect(keyring.getAccounts()).toHaveLength(2);

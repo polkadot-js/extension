@@ -79,6 +79,10 @@ export async function exportAccount (address: string, password: string): Promise
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
+export async function validateAccount (address: string, password: string): Promise<boolean> {
+  return sendMessage('pri(accounts.validate)', { address, password });
+}
+
 export async function forgetAccount (address: string): Promise<boolean> {
   return sendMessage('pri(accounts.forget)', { address });
 }
@@ -135,10 +139,10 @@ export async function windowOpen (): Promise<boolean> {
   return sendMessage('pri(window.open)', null);
 }
 
-export async function validateDerivationPath (parentAddress: string, suri: string): Promise<ResponseDeriveValidate> {
-  return sendMessage('pri(derivation.validate)', { parentAddress, suri });
+export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {
+  return sendMessage('pri(derivation.validate)', { parentAddress, suri, parentPassword });
 }
 
-export async function deriveAccount (parentAddress: string, suri: string, name: string, password: string): Promise<boolean> {
-  return sendMessage('pri(derivation.create)', { parentAddress, suri, name, password });
+export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string): Promise<boolean> {
+  return sendMessage('pri(derivation.create)', { parentAddress, suri, parentPassword, name, password });
 }

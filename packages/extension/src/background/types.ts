@@ -51,6 +51,7 @@ export interface RequestSignatures {
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
+  'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
@@ -132,17 +133,24 @@ export interface RequestAccountForget {
   address: string;
 }
 
+export interface RequestAccountValidate {
+  address: string;
+  password: string;
+}
+
 export interface RequestDeriveCreate {
   name: string;
   genesisHash?: string | null;
   suri: string;
   parentAddress: string;
+  parentPassword: string;
   password: string;
 }
 
 export interface RequestDeriveValidate {
   suri: string;
   parentAddress: string;
+  parentPassword: string;
 }
 
 export interface RequestAccountExport {

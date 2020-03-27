@@ -9,16 +9,17 @@ import { validateDerivationPath } from '@polkadot/extension-ui/messaging';
 interface Props {
   onChange: (derivedAccount: { address: string; suri: string } | null) => void;
   parentAddress: string;
+  parentPassword: string;
 }
 
-function DerivationPath ({ onChange, parentAddress }: Props): React.ReactElement<Props> {
+function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): React.ReactElement<Props> {
   const [path, setPath] = useState<string>('');
   const [isValid, setValid] = useState(false);
 
   const _onChange = useCallback(async (newPath: string) => {
     setPath(newPath);
     try {
-      onChange(await validateDerivationPath(parentAddress, newPath));
+      onChange(await validateDerivationPath(parentAddress, newPath, parentPassword));
       setValid(true);
     } catch (err) {
       onChange(null);

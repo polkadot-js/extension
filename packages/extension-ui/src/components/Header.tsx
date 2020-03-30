@@ -17,7 +17,7 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   showSettings?: boolean;
-  text?: string;
+  text?: React.ReactNode;
   showBackArrow?: boolean;
 }
 

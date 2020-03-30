@@ -15,6 +15,7 @@ import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequest
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
+import Derive from './Derive';
 import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';
@@ -105,6 +106,7 @@ export default function Popup (): React.ReactElement<{}> {
                     <Route path='/account/export/:address' component={Export} />
                     <Route path='/account/import-qr' component={ImportQr} />
                     <Route path='/account/import-seed' component={ImportSeed} />
+                    <Route path='/account/derive/:address' component={Derive} />
                     <Route exact path='/' component={Root} />
                   </Switch>
                 </SigningReqContext.Provider>

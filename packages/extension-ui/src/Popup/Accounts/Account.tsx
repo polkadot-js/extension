@@ -4,7 +4,7 @@
 
 import { AccountJson } from '@polkadot/extension-base/background/types';
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext, Address, Link } from '../../components';
@@ -21,8 +21,8 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
 
-  const _toggleEdit = (): void => setEditing(!isEditing);
-  const _saveChanges = (): void => {
+  const _toggleEdit = useCallback((): void => setEditing(!isEditing), [isEditing]);
+  const _saveChanges = useCallback((): void => {
     if (editedName && editedName !== name) {
       editAccount(address, editedName)
         .then((): void => onAction())
@@ -30,7 +30,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
     }
 
     _toggleEdit();
-  };
+  }, [editedName, address, _toggleEdit, onAction]);
 
   return (
     <div className={className}>
@@ -41,6 +41,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           <>
             <MenuGroup>
               <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
+              {!isExternal && <MenuItem to={`/account/derive/${address}`}>Derive New Account</MenuItem>}
             </MenuGroup>
             {!isExternal && <MenuItem isDanger to={`/account/export/${address}`}>Export Account</MenuItem>}
             <MenuItem isDanger to={`/account/forget/${address}`}>Forget Account</MenuItem>
@@ -51,7 +52,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           <Name
             address={address}
             className='edit-name'
-            isFocussed
+            isFocused
             label={' '}
             onBlur={_saveChanges}
             onChange={setName}

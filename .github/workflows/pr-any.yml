@@ -13,7 +13,7 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-    - name: ${{ matrix.test }}
+    - name: ${{ matrix.step }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
-        yarn ${{ matrix.test }}
+        yarn ${{ matrix.step }}

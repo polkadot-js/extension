@@ -33,7 +33,7 @@ describe('Account component', () => {
 
     expect(wrapper.find('MenuItem').length).toBe(4);
     expect(wrapper.find('MenuItem').at(0).text()).toBe('Rename');
-    expect(wrapper.find('MenuItem').at(1).text()).toBe('Derive');
+    expect(wrapper.find('MenuItem').at(1).text()).toBe('Derive New Account');
     expect(wrapper.find('MenuItem').at(2).text()).toBe('Export Account');
     expect(wrapper.find('MenuItem').at(3).text()).toBe('Forget Account');
   });

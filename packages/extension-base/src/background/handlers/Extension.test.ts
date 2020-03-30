@@ -91,5 +91,16 @@ describe('Extension', () => {
       }, {} as chrome.runtime.Port);
       expect(keyring.getAccounts()).toHaveLength(2);
     });
+
+    test('pri(derivation.create) saves parent address in meta', async () => {
+      await extension.handle('id', 'pri(derivation.create)', {
+        parentAddress: address,
+        name: 'child',
+        suri: '//path',
+        parentPassword: password,
+        password
+      }, {} as chrome.runtime.Port);
+      expect(keyring.getAccount('5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN')?.meta.parentAddress).toEqual(address);
+    });
   });
 });

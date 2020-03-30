@@ -36,7 +36,7 @@ export default function ImportQr (): React.ReactElement<Props> {
       {account && (
         <>
           <Name
-            isFocussed
+            isFocused
             onChange={setName}
           />
           <Address

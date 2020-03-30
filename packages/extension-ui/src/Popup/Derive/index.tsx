@@ -6,9 +6,10 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Button, ButtonArea, Header, InputWithLabel, VerticalSpace } from '../components';
-import { deriveAccount, validateAccount } from '../messaging';
-import { DerivationPath, Name, Password } from '../partials';
+import { ActionContext, Address, Button, ButtonArea, InputWithLabel, VerticalSpace } from '../../components';
+import { deriveAccount, validateAccount } from '../../messaging';
+import { DerivationPath, Name, Password } from '../../partials';
+import Step from './Step';
 
 type Props = RouteComponentProps<{ address: string }>;
 
@@ -36,8 +37,9 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
 
   return (
     <>
-      <Header text='Derive account' showBackArrow/>
+      <Step step={derivationConfirmed ? 2 : 1} />
       {!derivationConfirmed && <InputWithLabel
+        isFocused
         isError={!isProperParentPassword}
         label='enter the password for the account you want to derive from'
         onChange={_onParentPasswordEnter}
@@ -50,7 +52,7 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
       >
         I want to derive from this account
       </DeriveButton>}
-      {isProperParentPassword && derivationConfirmed && <Name onChange={setName}/>}
+      {isProperParentPassword && derivationConfirmed && <Name onChange={setName} isFocused />}
       {isProperParentPassword && derivationConfirmed && parentPassword && name && <DerivationPath
         onChange={setAccount}
         parentAddress={parentAddress}

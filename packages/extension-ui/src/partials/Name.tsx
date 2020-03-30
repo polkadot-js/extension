@@ -10,7 +10,7 @@ interface Props {
   address?: string;
   className?: string;
   defaultValue?: string | null;
-  isFocussed?: boolean;
+  isFocused?: boolean;
   label?: string;
   onBlur?: () => void;
   onChange: (name: string | null) => void;
@@ -18,7 +18,7 @@ interface Props {
 
 const MIN_LENGTH = 3;
 
-export default function Name ({ address, className, defaultValue, isFocussed, label = 'A descriptive name for your account', onBlur, onChange }: Props): React.ReactElement<Props> {
+export default function Name ({ address, className, defaultValue, isFocused, label = 'A descriptive name for your account', onBlur, onChange }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const [name, setName] = useState('');
   const account = accounts.find((account): boolean => account.address === address);
@@ -41,7 +41,7 @@ export default function Name ({ address, className, defaultValue, isFocussed, la
       className={className}
       defaultValue={startValue}
       isError={isError}
-      isFocused={isFocussed}
+      isFocused={isFocused}
       label={label}
       onBlur={onBlur}
       onChange={setName}

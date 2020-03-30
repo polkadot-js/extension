@@ -306,6 +306,7 @@ export default class Extension {
 
   private derive (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
     const parentPair = keyring.getPair(parentAddress);
+
     try {
       parentPair.decodePkcs8(password);
     } catch (e) {
@@ -320,6 +321,7 @@ export default class Extension {
 
   private derivationValidate ({ parentAddress, suri, parentPassword }: RequestDeriveValidate): ResponseDeriveValidate {
     const childPair = this.derive(parentAddress, suri, parentPassword, {});
+
     return {
       address: childPair.address,
       suri
@@ -327,7 +329,7 @@ export default class Extension {
   }
 
   private derivationCreate ({ parentAddress, suri, parentPassword, genesisHash, name, password }: RequestDeriveCreate): boolean {
-    const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name });
+    const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name, parentAddress });
     keyring.addPair(childPair, password);
 
     return true;

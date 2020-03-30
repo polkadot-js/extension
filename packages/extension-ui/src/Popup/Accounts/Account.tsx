@@ -41,7 +41,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           <>
             <MenuGroup>
               <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
-              {!isExternal && <MenuItem to={`/account/derive/${address}`}>Derive</MenuItem>}
+              {!isExternal && <MenuItem to={`/account/derive/${address}`}>Derive New Account</MenuItem>}
             </MenuGroup>
             {!isExternal && <MenuItem isDanger to={`/account/export/${address}`}>Export Account</MenuItem>}
             <MenuItem isDanger to={`/account/forget/${address}`}>Forget Account</MenuItem>
@@ -52,7 +52,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
           <Name
             address={address}
             className='edit-name'
-            isFocussed
+            isFocused
             label={' '}
             onBlur={_saveChanges}
             onChange={setName}

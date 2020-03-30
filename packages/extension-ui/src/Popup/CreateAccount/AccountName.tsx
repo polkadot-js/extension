@@ -18,7 +18,7 @@ function AccountName ({ onCreate, address }: Props): React.ReactElement<Props> {
   return (
     <>
       <Name
-        isFocussed
+        isFocused
         onChange={setName}
       />
       {name && <Password onChange={setPassword} />}

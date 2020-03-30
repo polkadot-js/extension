@@ -2927,6 +2927,7 @@ __metadata:
     "@types/bn.js": ^4.11.6
     "@types/enzyme": ^3.10.5
     "@types/enzyme-adapter-react-16": ^1.0.6
+    "@types/react-copy-to-clipboard": ^4.3.0
     "@types/react-dom": ^16.9.5
     "@types/react-router": ^5.1.4
     "@types/react-router-dom": ^5.1.3
@@ -3489,6 +3490,15 @@ __metadata:
   version: 1.5.2
   resolution: "@types/q@npm:1.5.2"
   checksum: 2/e3d8fcf9aaf9e0c597b9279a7ffe8f0b96f71a7e921bf986ee735e7f698e88f629414d759ab401a71dc38cee7f88ef2d15e4811fec14c37aab3f9f7abe3b1371
+  languageName: node
+  linkType: hard
+
+"@types/react-copy-to-clipboard@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "@types/react-copy-to-clipboard@npm:4.3.0"
+  dependencies:
+    "@types/react": "*"
+  checksum: 2/09816ba8a92fefbcc62abd4eea27881804c3ad0b70b52dcaf6717087ed95533d2afdbda3c78d5e3c5c41ebce13b19ca99aa710f3db258db393c2eada59d19c83
   languageName: node
   linkType: hard
 

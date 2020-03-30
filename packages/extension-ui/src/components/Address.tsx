@@ -6,18 +6,21 @@ import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import settings from '@polkadot/ui-settings';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { AccountContext } from './contexts';
 import Identicon from './Identicon';
 import Svg from './Svg';
-import Menu from './Menu';
 
+import Menu from './Menu';
+import CopyImg from '../assets/copy.svg';
 import DetailsImg from '../assets/details.svg';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
+import useToast from '../hooks/useToast';
 
 interface Props {
   address?: string | null;
@@ -92,6 +95,7 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
   const _onClick = (): void => setShowActionsMenu(!showActionsMenu);
+  const { show } = useToast();
 
   return (
     <div className={className}>
@@ -104,10 +108,15 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
           />
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
-            <FullAddress>{formatted || '<unknown>'}</FullAddress>
-            {chain?.genesisHash && (
-              <Banner>{chain.name}</Banner>
-            )}
+            <CopyAddress>
+              <FullAddress>{formatted || '<unknown>'}</FullAddress>
+              {chain?.genesisHash && (
+                <Banner>{chain.name}</Banner>
+              )}
+              <CopyToClipboard text={(formatted && formatted) || ''} >
+                <Svg src={CopyImg} onClick={(): void => show('Copied')}/>
+              </CopyToClipboard>
+            </CopyAddress>
           </Info>
           {actions && (
             <>
@@ -134,6 +143,22 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   );
 }
 
+const CopyAddress = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  & ${Svg} {
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+    background: ${({ theme }): string => theme.accountDotsIconColor};
+    &:hover {
+      background: ${({ theme }): string => theme.labelColor};
+      cursor: pointer;
+    }
+  }
+`;
+
 const AccountInfoRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -158,7 +183,7 @@ const Name = styled.div`
 `;
 
 const FullAddress = styled.div`
-  width: 300px;
+  width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }): string => theme.labelColor};

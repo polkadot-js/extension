@@ -11,6 +11,7 @@ import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SigningReqContext } from '../components/contexts';
+import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
@@ -100,15 +101,17 @@ export default function Popup (): React.ReactElement<{}> {
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <MetadataReqContext.Provider value={metaRequests}>
                 <SigningReqContext.Provider value={signRequests}>
-                  <Switch>
-                    <Route path='/account/create' component={CreateAccount} />
-                    <Route path='/account/forget/:address' component={Forget} />
-                    <Route path='/account/export/:address' component={Export} />
-                    <Route path='/account/import-qr' component={ImportQr} />
-                    <Route path='/account/import-seed' component={ImportSeed} />
-                    <Route path='/account/derive/:address' component={Derive} />
-                    <Route exact path='/' component={Root} />
-                  </Switch>
+                  <ToastProvider>
+                    <Switch>
+                      <Route path='/account/create' component={CreateAccount} />
+                      <Route path='/account/forget/:address' component={Forget} />
+                      <Route path='/account/export/:address' component={Export} />
+                      <Route path='/account/import-qr' component={ImportQr} />
+                      <Route path='/account/import-seed' component={ImportSeed} />
+                      <Route path='/account/derive/:address' component={Derive} />
+                      <Route exact path='/' component={Root} />
+                    </Switch>
+                  </ToastProvider>
                 </SigningReqContext.Provider>
               </MetadataReqContext.Provider>
             </MediaContext.Provider>

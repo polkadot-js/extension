@@ -30,27 +30,23 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   return (
     <>
       <ValidatedInput
+        component={InputWithLabel}
         validator={isFirstPasswordValid}
-        onChange={setPass1}
-      >
-        <InputWithLabel
-          data-input-password
-          isFocused={isFocussed}
-          label='A new password for this account'
-          type='password'
-        />
-      </ValidatedInput>
+        onValidatedChange={setPass1}
+        data-input-password
+        isFocused={isFocussed}
+        label='A new password for this account'
+        type='password'
+      />
       {pass1 && (
         <ValidatedInput
+          component={InputWithLabel}
           validator={isSecondPasswordValid(pass1)}
-          onChange={setPass2}
-        >
-          <InputWithLabel
-            data-input-repeat-password
-            label='Repeat password for verification'
-            type='password'
-          />
-        </ValidatedInput>
+          onValidatedChange={setPass2}
+          data-input-repeat-password
+          label='Repeat password for verification'
+          type='password'
+        />
       )}
     </>
   );

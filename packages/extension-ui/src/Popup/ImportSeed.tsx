@@ -63,15 +63,13 @@ export default function Import (): React.ReactElement<Props> {
     <>
       <HeaderWithSmallerMargin text='Import account' showBackArrow />
       <ValidatedInput
+        component={SeedInput}
         validator={isSeedValid}
-        onChange={_onChangeSeed}
-      >
-        <SeedInput
-          rowsCount={2}
-          isFocused
-          label='existing 12 or 24-word mnemonic seed'
-        />
-      </ValidatedInput>
+        onValidatedChange={_onChangeSeed}
+        rowsCount={2}
+        isFocused
+        label='existing 12 or 24-word mnemonic seed'
+      />
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}
       {account && name && password && (

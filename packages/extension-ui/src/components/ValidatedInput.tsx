@@ -7,18 +7,19 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Result, Validator } from '../validators';
 
-interface Props {
+interface BasicProps {
+  isError?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
+}
+type Props<T extends BasicProps> = T & {
   className?: string;
   validator: Validator<string>;
-  children: React.ReactElement<{
-    isError: boolean;
-    value: string;
-    onChange: (value: string) => void;
-  }>;
-  onChange: (value: string | null) => void;
+  component: React.ComponentType<T>;
+  onValidatedChange: (value: string | null) => void;
 }
 
-function ValidatedInput ({ className, validator, children, onChange }: Props): React.ReactElement<Props> {
+function ValidatedInput <T extends object>({ className, validator, component: Input, onValidatedChange, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState('');
   const [wasMounted, setWasMounted] = useState(false);
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
@@ -31,14 +32,14 @@ function ValidatedInput ({ className, validator, children, onChange }: Props): R
     (async (): Promise<void> => {
       const result = await validator(value);
       setValidationResult(result);
-      onChange(Result.isOk(result) ? value : null);
+      onValidatedChange(Result.isOk(result) ? value : null);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, validator, onChange]);
+  }, [value, validator, onValidatedChange]);
 
   return (
     <div className={className}>
-      {React.cloneElement(children, { isError: Result.isError(validationResult), value, onChange: setValue })}
+      <Input {...props as T} isError={Result.isError(validationResult)} value={value} onChange={setValue} />
       {Result.isError(validationResult) && <ErrorMessage>{validationResult.error.errorDescription}</ErrorMessage>}
     </div>
   );

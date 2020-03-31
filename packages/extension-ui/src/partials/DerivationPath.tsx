@@ -31,18 +31,14 @@ function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): Re
   }, [parentAddress, onChange, parentPassword]);
 
   return (
-    <div>
-      <ValidatedInput
-        validator={isPathValid}
-        onChange={_onChange}
-      >
-        <InputWithLabel
-          label='Derivation path'
-          placeholder='//hard/soft'
-          value={path}
-        />
-      </ValidatedInput>
-    </div>
+    <ValidatedInput
+      component={InputWithLabel}
+      validator={isPathValid}
+      onValidatedChange={_onChange}
+      label='Derivation path'
+      placeholder='//hard/soft'
+      value={path}
+    />
   );
 }
 

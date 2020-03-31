@@ -19,7 +19,7 @@ type Props<T extends BasicProps> = T & {
   onValidatedChange: (value: string | null) => void;
 }
 
-function ValidatedInput <T extends object>({ className, validator, component: Input, onValidatedChange, ...props }: Props<T>): React.ReactElement<Props<T>> {
+function ValidatedInput<T extends object> ({ className, validator, component: Input, onValidatedChange, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState('');
   const [wasMounted, setWasMounted] = useState(false);
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));

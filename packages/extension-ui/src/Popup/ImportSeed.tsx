@@ -63,6 +63,7 @@ export default function Import (): React.ReactElement<Props> {
     <>
       <HeaderWithSmallerMargin text='Import account' showBackArrow />
       <ValidatedInput
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         component={SeedInput}
         validator={isSeedValid}
         onValidatedChange={_onChangeSeed}

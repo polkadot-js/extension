@@ -47,7 +47,7 @@ export default function Import (): React.ReactElement<Props> {
     } else {
       setAccount(null);
     }
-  }, [setAccount]);
+  }, []);
 
   // FIXME Duplicated between here and Create.tsx
   const _onCreate = useCallback((): void => {

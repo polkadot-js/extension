@@ -5,7 +5,7 @@
 import React, { useContext } from 'react';
 
 import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
-import { isNotShorterThan } from '@polkadot/extension-ui/validators';
+import { isNotShorterThan } from '../validators';
 
 interface Props {
   address?: string;

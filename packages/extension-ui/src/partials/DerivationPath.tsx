@@ -3,9 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useState } from 'react';
-import { InputWithLabel, ValidatedInput } from '@polkadot/extension-ui/components';
 import { validateDerivationPath } from '@polkadot/extension-ui/messaging';
-import { Result } from '@polkadot/extension-ui/validators';
+import { InputWithLabel, ValidatedInput } from '../components';
+import { Result } from '../validators';
 
 interface Props {
   onChange: (derivedAccount: { address: string; suri: string } | null) => void;

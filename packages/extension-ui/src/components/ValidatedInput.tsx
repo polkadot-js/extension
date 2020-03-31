@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 
 import styled from 'styled-components';
-import { Result, Validator } from '@polkadot/extension-ui/validators';
+import { Result, Validator } from '../validators';
 
 interface Props {
   className?: string;

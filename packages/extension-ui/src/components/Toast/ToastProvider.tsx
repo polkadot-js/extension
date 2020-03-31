@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ToastContext } from '..';
 import Toast from './Toast';
 
@@ -16,12 +16,12 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
   const [content, setContent] = useState('');
   const [visible, setVisible] = useState(false);
 
-  const show = (message: string): () => void => {
+  const show = useCallback((message: string): () => void => {
     const timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
     setContent(message);
     setVisible(true);
     return (): void => clearTimeout(timerId);
-  };
+  }, []);
 
   return (
     <ToastContext.Provider value={{ show }}>

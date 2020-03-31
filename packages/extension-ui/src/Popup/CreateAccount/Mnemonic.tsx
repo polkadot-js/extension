@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Button, ButtonArea, Checkbox, MnemonicSeed, VerticalSpace, Warning } from '../../components';
 import useToast from '../../hooks/useToast';
 
@@ -23,6 +23,11 @@ const onCopy = (): void => {
 function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
+  const _onCopy = useCallback((): void => {
+    onCopy();
+    show('Copied');
+  }, [show]);
+
   return (
     <>
       <Warning>
@@ -31,10 +36,7 @@ function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
       </Warning>
       <MnemonicSeed
         seed={seed}
-        onCopy={(): void => {
-          onCopy();
-          show('Copied');
-        }}
+        onCopy={_onCopy}
       />
       <VerticalSpace />
       <Checkbox

@@ -5,12 +5,12 @@
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import settings from '@polkadot/ui-settings';
-
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+
 import { AccountContext } from './contexts';
 import Identicon from './Identicon';
 import Svg from './Svg';
@@ -72,6 +72,7 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const { show } = useToast();
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
@@ -94,8 +95,8 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
   }, [showActionsMenu]);
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
-  const _onClick = (): void => setShowActionsMenu(!showActionsMenu);
-  const { show } = useToast();
+  const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
+  const _onCopy = useCallback((): void => show('Copied'), [show]);
 
   return (
     <div className={className}>
@@ -114,7 +115,7 @@ function Address ({ address, className, children, genesisHash, name, actions }: 
                 <Banner>{chain.name}</Banner>
               )}
               <CopyToClipboard text={(formatted && formatted) || ''} >
-                <Svg src={CopyImg} onClick={(): void => show('Copied')}/>
+                <Svg src={CopyImg} onClick={_onCopy}/>
               </CopyToClipboard>
             </CopyAddress>
           </Info>

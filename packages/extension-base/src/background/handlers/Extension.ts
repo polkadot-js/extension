@@ -67,7 +67,7 @@ export default class Extension {
   }
 
   private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
-    keyring.addExternal(address, { name, genesisHash });
+    keyring.addExternal(address, { genesisHash, name });
 
     return true;
   }
@@ -166,7 +166,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { resolve, request } = queued;
+    const { request, resolve } = queued;
 
     this.#state.saveMetadata(request);
 
@@ -236,7 +236,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { request, resolve, reject } = queued;
+    const { reject, request, resolve } = queued;
     const pair = keyring.getPair(request.inner.address);
 
     if (!pair) {
@@ -319,7 +319,7 @@ export default class Extension {
     }
   }
 
-  private derivationValidate ({ parentAddress, suri, parentPassword }: RequestDeriveValidate): ResponseDeriveValidate {
+  private derivationValidate ({ parentAddress, parentPassword, suri }: RequestDeriveValidate): ResponseDeriveValidate {
     const childPair = this.derive(parentAddress, suri, parentPassword, {});
 
     return {
@@ -328,7 +328,7 @@ export default class Extension {
     };
   }
 
-  private derivationCreate ({ parentAddress, suri, parentPassword, genesisHash, name, password }: RequestDeriveCreate): boolean {
+  private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
     const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name, parentAddress });
     keyring.addPair(childPair, password);
 

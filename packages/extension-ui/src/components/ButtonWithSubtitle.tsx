@@ -13,7 +13,7 @@ interface ButtonWithSubtitleProps {
   to: string;
 }
 
-export default function ButtonWithSubtitle ({ title, subTitle, children, to }: ButtonWithSubtitleProps): React.ReactElement<ButtonWithSubtitleProps> {
+export default function ButtonWithSubtitle ({ children, subTitle, title, to }: ButtonWithSubtitleProps): React.ReactElement<ButtonWithSubtitleProps> {
   return (
     <StyledButton to={to}>
       <p>{title}</p>

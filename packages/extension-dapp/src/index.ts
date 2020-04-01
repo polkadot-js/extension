@@ -200,5 +200,5 @@ export async function web3UseRpcProvider (source: string, key: string): Promise<
 
   const meta = await provider.startProvider(key);
 
-  return { provider, meta };
+  return { meta, provider };
 }

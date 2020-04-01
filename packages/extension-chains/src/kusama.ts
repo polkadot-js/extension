@@ -4,14 +4,16 @@
 
 // Generated via 'yarn run chain:info --ws wss://kusama-rpc.polkadot.io'
 
+/* eslint-disable sort-keys */
+
 export default {
   chain: 'Kusama',
   genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+  icon: 'polkadot',
   specVersion: 1055,
   ss58Format: 2,
   tokenDecimals: 12,
   tokenSymbol: 'KSM',
-  icon: 'polkadot',
   types: {
     Address: 'AccountId',
     Keys: 'SessionKeys5'

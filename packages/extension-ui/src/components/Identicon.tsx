@@ -13,7 +13,7 @@ interface Props {
   value?: string | null;
 }
 
-function Identicon ({ iconTheme, className, prefix, value }: Props): React.ReactElement<Props> {
+function Identicon ({ className, iconTheme, prefix, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Icon

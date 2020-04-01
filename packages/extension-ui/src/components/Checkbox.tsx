@@ -13,7 +13,7 @@ interface Props {
   className?: string;
 }
 
-function Checkbox ({ onChange, label, className, checked }: Props): React.ReactElement<Props> {
+function Checkbox ({ checked, className, label, onChange }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <label>

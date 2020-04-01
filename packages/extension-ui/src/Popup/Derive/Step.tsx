@@ -7,11 +7,11 @@ import styled from 'styled-components';
 import { Header } from '@polkadot/extension-ui/components';
 
 interface Props {
-  step: number;
   className?: string;
+  step: number;
 }
 
-function Step ({ step, className }: Props): React.ReactElement<Props> {
+function Step ({ className, step }: Props): React.ReactElement<Props> {
   return (
     <Header
       className={className}

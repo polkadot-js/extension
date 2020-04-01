@@ -14,7 +14,7 @@ interface Props {
   className?: string;
 }
 
-function MnemonicSeed ({ seed, onCopy, className }: Props): React.ReactElement<Props> {
+function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <MnemonicText value={seed} />
@@ -31,8 +31,8 @@ function MnemonicSeed ({ seed, onCopy, className }: Props): React.ReactElement<P
 }
 
 const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
-  label: 'Generated 12-word mnemonic seed:',
-  isReadOnly: true
+  isReadOnly: true,
+  label: 'Generated 12-word mnemonic seed:'
 }))`
   textarea {
     font-size: ${({ theme }): string => theme.fontSize};

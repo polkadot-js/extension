@@ -44,7 +44,7 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
 
       // only send message back to port if it's still connected
       if (port) {
-        port.postMessage({ id, error: error.message });
+        port.postMessage({ error: error.message, id });
       }
     });
 }

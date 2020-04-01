@@ -7,13 +7,13 @@ import Svg from '@polkadot/extension-ui/components/Svg';
 import styled from 'styled-components';
 
 interface Props {
-  icon?: string;
-  text: string;
-  onClick: MouseEventHandler<HTMLDivElement>;
   className?: string;
+  icon?: string;
+  onClick: MouseEventHandler<HTMLDivElement>;
+  text: string;
 }
 
-function ActionText ({ icon, className, text, onClick }: Props): React.ReactElement<Props> {
+function ActionText ({ className, icon, onClick, text }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}

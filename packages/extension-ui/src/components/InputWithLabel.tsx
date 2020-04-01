@@ -22,7 +22,7 @@ interface Props {
   placeholder?: string;
 }
 
-function InputWithLabel ({ className, defaultValue, label, isError, isFocused, isReadOnly, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, isError, isFocused, isReadOnly, label, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
     onChange && onChange(value.trim());
   };

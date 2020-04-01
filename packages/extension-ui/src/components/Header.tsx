@@ -21,7 +21,7 @@ interface Props {
   showBackArrow?: boolean;
 }
 
-function Header ({ children, className, showSettings, text, showBackArrow }: Props): React.ReactElement<Props> {
+function Header ({ children, className, showBackArrow, showSettings, text }: Props): React.ReactElement<Props> {
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const actionsRef = useRef(null);
 
@@ -112,7 +112,7 @@ const Gear = styled(Svg).attrs(() => ({
   width: 18px;
   margin-right: 24px;
   align-self: center;
-  background: ${({ theme, isSelected }): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
+  background: ${({ isSelected, theme }): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
 `;
 
 Gear.displayName = 'Gear';

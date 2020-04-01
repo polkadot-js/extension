@@ -29,7 +29,7 @@ interface Props {
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-export default function Request ({ account: { isExternal }, request, signId, url, isFirst, buttonText }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [hexBytes, setHexBytes] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);

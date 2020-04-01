@@ -34,21 +34,11 @@ function createWebpack ({ alias = {}, context }) {
       page: './src/page.ts'
     },
     mode: ENV,
-    output: {
-      chunkFilename: '[name].js',
-      filename: '[name].js',
-      globalObject: '(typeof self !== \'undefined\' ? self : this)',
-      path: path.join(context, 'build')
-    },
-    resolve: {
-      alias,
-      extensions: ['.js', '.jsx', '.ts', '.tsx']
-    },
     module: {
       rules: [
         {
-          test: /\.(js|ts|tsx)$/,
           exclude: /(node_modules)/,
+          test: /\.(js|ts|tsx)$/,
           use: [
             require.resolve('thread-loader'),
             {
@@ -79,6 +69,12 @@ function createWebpack ({ alias = {}, context }) {
       net: 'empty',
       tls: 'empty'
     },
+    output: {
+      chunkFilename: '[name].js',
+      filename: '[name].js',
+      globalObject: '(typeof self !== \'undefined\' ? self : this)',
+      path: path.join(context, 'build')
+    },
     performance: {
       hints: false
     },
@@ -101,15 +97,19 @@ function createWebpack ({ alias = {}, context }) {
         }
       })
     ].filter((entry) => entry),
+    resolve: {
+      alias,
+      extensions: ['.js', '.jsx', '.ts', '.tsx']
+    },
     watch: !isProd
   };
 }
 
 module.exports = createWebpack({
-  context: __dirname,
   alias: packages.reduce((alias, pkg) => {
     alias[`@polkadot/${pkg}`] = path.resolve(__dirname, `../${pkg}/src`);
 
     return alias;
-  }, {})
+  }, {}),
+  context: __dirname
 });

@@ -39,12 +39,12 @@ function InputWithLabel ({ className, defaultValue, label, isError, isFocused, i
         defaultValue={defaultValue || undefined}
         onBlur={onBlur}
         onChange={_onChange}
+        placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}
         type={type}
         value={value}
         withError={isError}
-        placeholder={placeholder}
       />
     </Label>
   );

@@ -13,13 +13,17 @@ interface Props {
 
 function Step ({ step, className }: Props): React.ReactElement<Props> {
   return (
-    <Header text={
-      <>
-        <span>Derive new account</span>
-        <CurrentStep>{step}</CurrentStep>
-        <TotalSteps>/2</TotalSteps>
-      </>
-    } showBackArrow className={className} />
+    <Header
+      className={className}
+      showBackArrow
+      text={
+        <>
+          <span>Derive new account</span>
+          <CurrentStep>{step}</CurrentStep>
+          <TotalSteps>/2</TotalSteps>
+        </>
+      }
+    />
   );
 }
 

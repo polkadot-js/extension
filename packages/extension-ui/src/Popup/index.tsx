@@ -101,13 +101,18 @@ export default function Popup (): React.ReactElement<{}> {
               <MetadataReqContext.Provider value={metaRequests}>
                 <SigningReqContext.Provider value={signRequests}>
                   <Switch>
-                    <Route path='/account/create' component={CreateAccount} />
-                    <Route path='/account/forget/:address' component={Forget} />
-                    <Route path='/account/export/:address' component={Export} />
-                    <Route path='/account/import-qr' component={ImportQr} />
-                    <Route path='/account/import-seed' component={ImportSeed} />
-                    <Route path='/account/derive/:address' component={Derive} />
-                    <Route exact path='/' component={Root} />
+                    <Route path='/account/create'><CreateAccount /></Route>
+                    <Route path='/account/forget/:address'><Forget /></Route>
+                    <Route path='/account/export/:address'><Export /></Route>
+                    <Route path='/account/import-qr'><ImportQr /></Route>
+                    <Route path='/account/import-seed'><ImportSeed /></Route>
+                    <Route path='/account/derive/:address'><Derive /></Route>
+                    <Route
+                      exact
+                      path='/'
+                    >
+                      <Root />
+                    </Route>
                   </Switch>
                 </SigningReqContext.Provider>
               </MetadataReqContext.Provider>

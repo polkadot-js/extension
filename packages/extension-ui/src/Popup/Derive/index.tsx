@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useContext, useState } from 'react';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import { ActionContext, Address, Button, ButtonArea, InputWithLabel, VerticalSpace } from '../../components';
@@ -13,7 +13,13 @@ import Step from './Step';
 
 type Props = RouteComponentProps<{ address: string }>;
 
-export default function Derive ({ match: { params: { address: parentAddress } } }: Props): React.ReactElement<Props> {
+const DeriveButton = styled(Button)`
+  margin-left: 24px;
+  margin-right: 24px;
+  width: auto;
+`;
+
+function Derive ({ match: { params: { address: parentAddress } } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
@@ -38,21 +44,30 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
   return (
     <>
       <Step step={derivationConfirmed ? 2 : 1} />
-      {!derivationConfirmed && <InputWithLabel
-        isFocused
-        isError={!isProperParentPassword}
-        label='enter the password for the account you want to derive from'
-        onChange={_onParentPasswordEnter}
-        type='password'
-        data-export-password
-      />}
-      {!derivationConfirmed && <DeriveButton
-        isDisabled={!isProperParentPassword}
-        onClick={(): void => setDerivationConfirmed(true)}
-      >
-        I want to derive from this account
-      </DeriveButton>}
-      {isProperParentPassword && derivationConfirmed && <Name onChange={setName} isFocused />}
+      {!derivationConfirmed && (
+        <InputWithLabel
+          data-export-password
+          isError={!isProperParentPassword}
+          isFocused
+          label='enter the password for the account you want to derive from'
+          onChange={_onParentPasswordEnter}
+          type='password'
+        />
+      )}
+      {!derivationConfirmed && (
+        <DeriveButton
+          isDisabled={!isProperParentPassword}
+          onClick={(): void => setDerivationConfirmed(true)}
+        >
+          I want to derive from this account
+        </DeriveButton>
+      )}
+      {isProperParentPassword && derivationConfirmed && (
+        <Name
+          isFocused
+          onChange={setName}
+        />
+      )}
       {isProperParentPassword && derivationConfirmed && parentPassword && name && <DerivationPath
         onChange={setAccount}
         parentAddress={parentAddress}
@@ -75,8 +90,4 @@ export default function Derive ({ match: { params: { address: parentAddress } } 
   );
 }
 
-const DeriveButton = styled(Button)`
-  margin-left: 24px;
-  margin-right: 24px;
-  width: auto;
-`;
+export default withRouter(Derive);

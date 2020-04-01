@@ -61,7 +61,12 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
         <RequestWarning>This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</RequestWarning>
         <AcceptButton onClick={_onApprove}>Yes, do this metadata update</AcceptButton>
         <RejectButton>
-          <Link isDanger onClick={_onReject}>Reject</Link>
+          <Link
+            isDanger
+            onClick={_onReject}
+          >
+            Reject
+          </Link>
         </RejectButton>
       </RequestInfo>
     </div>

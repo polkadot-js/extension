@@ -37,8 +37,8 @@ export default function Name ({ address, className, defaultValue, isFocused, lab
 
   return (
     <InputWithLabel
-      data-input-name
       className={className}
+      data-input-name
       defaultValue={startValue}
       isError={isError}
       isFocused={isFocused}

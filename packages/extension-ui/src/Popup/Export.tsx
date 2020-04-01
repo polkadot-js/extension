@@ -5,16 +5,7 @@
 import React, { useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import {
-  ActionContext,
-  Address,
-  Button,
-  InputWithLabel,
-  Warning,
-  Header,
-  ActionText,
-  ActionBar
-} from '../components';
+import { ActionContext, Address, Button, InputWithLabel, Warning, Header, ActionText, ActionBar } from '../components';
 import { exportAccount } from '../messaging';
 import styled from 'styled-components';
 
@@ -32,6 +23,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
     exportAccount(address, pass)
       .then(({ exportedJson }) => {
         const element = document.createElement('a');
+
         element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
         element.download = `${JSON.parse(exportedJson).meta.name}_exported_account_${Date.now()}.json`;
         element.click();

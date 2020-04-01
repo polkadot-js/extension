@@ -5,16 +5,7 @@
 import React, { useContext } from 'react';
 import QrImage from '../../assets/qr.svg';
 
-import {
-  AccountContext,
-  Button,
-  Header,
-  MediaContext,
-  AddAccount,
-  ButtonArea,
-  Svg,
-  ButtonWithSubtitle
-} from '../../components';
+import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
 import Account from './Account';
 import styled from 'styled-components';
 

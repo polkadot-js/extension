@@ -10,15 +10,7 @@ import { configure, mount, ReactWrapper } from 'enzyme';
 import * as messaging from '@polkadot/extension-ui/messaging';
 import { act } from 'react-dom/test-utils';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
-import {
-  ActionContext,
-  ActionText,
-  Button,
-  themes,
-  Input,
-  InputWithLabel,
-  Header
-} from '@polkadot/extension-ui/components';
+import { ActionContext, ActionText, Button, themes, Input, InputWithLabel, Header } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
 
 configure({ adapter: new Adapter() });

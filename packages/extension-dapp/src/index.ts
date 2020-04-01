@@ -123,6 +123,7 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
   }
 
   const accounts: Record<string, InjectedAccount[]> = {};
+
   const triggerUpdate = (): void => {
     cb(Object.entries(accounts).reduce((result, [source, list]): InjectedAccountWithMeta[] => {
       result.push(...mapAccounts(source, list));

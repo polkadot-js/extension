@@ -12,15 +12,18 @@ interface Props {
 
 const onCopy = (): void => {
   const mnemonicSeedTextElement = document.querySelector('textarea');
+
   if (!mnemonicSeedTextElement) {
     return;
   }
+
   mnemonicSeedTextElement.select();
   document.execCommand('copy');
 };
 
 function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
+
   return (
     <>
       <Warning>Please write down your wallet’s mnemonic seed and keep it in a safe place. <br />

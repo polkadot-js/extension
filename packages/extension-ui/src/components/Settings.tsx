@@ -54,6 +54,7 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
     // FIXME We don't want to reload here
     location.reload();
   };
+
   const _onChangeTheme = (checked: boolean): void => setTheme(checked ? 'dark' : 'light');
 
   return (

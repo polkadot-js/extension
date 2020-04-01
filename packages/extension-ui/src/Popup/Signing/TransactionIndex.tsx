@@ -75,12 +75,14 @@ const ArrowLeft = styled(Svg).attrs(() => ({
   width: 12px;
   height: 12px;
 `;
+
 ArrowLeft.displayName = 'ArrowLeft';
 
 const ArrowRight = styled(ArrowLeft)`
   margin-left: 6px;
   transform: rotate(180deg);
 `;
+
 ArrowRight.displayName = 'ArrowRight';
 
 export default TransactionIndex;

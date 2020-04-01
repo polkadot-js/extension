@@ -150,4 +150,5 @@ const CancelButton = styled(ActionBar)`
     margin: auto;
   }
 `;
+
 CancelButton.displayName = 'CancelButton';

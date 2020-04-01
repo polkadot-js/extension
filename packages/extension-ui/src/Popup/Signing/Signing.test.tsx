@@ -38,6 +38,7 @@ describe.skip('Signing requests', () => {
   }];
 
   const emitter = new EventEmitter();
+
   function MockRequestsProvider (): React.ReactElement {
     const [requests, setRequests] = useState(signRequests);
 
@@ -49,6 +50,7 @@ describe.skip('Signing requests', () => {
       </SigningReqContext.Provider>
     );
   }
+
   const mountComponent = async (): Promise<void> => {
     wrapper = mount(
       <ActionContext.Provider value={onActionStub}>

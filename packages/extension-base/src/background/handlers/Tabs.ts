@@ -117,6 +117,7 @@ export default class Tabs {
   private rpcSubscribeConnected (request: null, id: string, port: chrome.runtime.Port): Promise<boolean> {
     const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, port);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribeConnected)']): void => innerCb(data);
+
     this.#state.rpcSubscribeConnected(request, cb, port);
 
     port.onDisconnect.addListener((): void => {

@@ -12,9 +12,12 @@ import State from './State';
 describe('Extension', () => {
   async function createExtension (): Promise<Extension> {
     await cryptoWaitReady();
+
     keyring.loadAll({ store: new ExtensionStore() });
+
     return new Extension(new State());
   }
+
   let extension: Extension;
 
   beforeAll(async () => {
@@ -45,8 +48,10 @@ describe('Extension', () => {
       const { address } = await extension.handle('id', 'pri(seed.validate)', {
         suri
       }, {} as chrome.runtime.Port);
+
       return address;
     };
+
     let address: string;
 
     beforeEach(async () => {
@@ -59,6 +64,7 @@ describe('Extension', () => {
         parentPassword: password,
         suri: '//path'
       }, {} as chrome.runtime.Port);
+
       expect(result).toStrictEqual({
         address: '5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN',
         suri: '//path'

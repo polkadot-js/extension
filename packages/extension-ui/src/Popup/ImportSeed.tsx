@@ -4,15 +4,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import {
-  ActionContext,
-  Address,
-  Button,
-  ButtonArea,
-  Header,
-  TextAreaWithLabel,
-  VerticalSpace
-} from '../components';
+import { ActionContext, Address, Button, ButtonArea, Header, TextAreaWithLabel, VerticalSpace } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Name, Password } from '../partials';
 import styled from 'styled-components';

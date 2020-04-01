@@ -32,7 +32,9 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
     if (!account || !name || !password || !parentPassword) {
       return;
     }
+
     await deriveAccount(parentAddress, account.suri, parentPassword, name, password);
+
     onAction('/');
   }, [account, name, password, onAction, parentAddress, parentPassword]);
 

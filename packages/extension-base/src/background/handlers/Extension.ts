@@ -4,36 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import {
-  AccountJson,
-  AuthorizeRequest,
-  MessageTypes,
-  MetadataRequest,
-  RequestAccountCreateExternal,
-  RequestAccountCreateSuri,
-  RequestAccountEdit,
-  RequestAccountExport,
-  RequestAccountValidate,
-  RequestAuthorizeApprove,
-  RequestAuthorizeReject,
-  RequestDeriveCreate,
-  ResponseDeriveValidate,
-  RequestMetadataApprove,
-  RequestMetadataReject,
-  RequestSigningApprovePassword,
-  RequestSigningApproveSignature,
-  RequestSigningCancel,
-  RequestSeedCreate,
-  RequestTypes,
-  ResponseAccountExport,
-  RequestAccountForget,
-  ResponseSeedCreate,
-  RequestSeedValidate,
-  RequestDeriveValidate,
-  ResponseSeedValidate,
-  ResponseType,
-  SigningRequest
-} from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
@@ -95,6 +66,7 @@ export default class Extension {
   private accountsValidate ({ address, password }: RequestAccountValidate): boolean {
     try {
       keyring.backupAccount(keyring.getPair(address), password);
+
       return true;
     } catch (e) {
       return false;
@@ -247,6 +219,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
     const result = request.sign(registry, pair);
+
     pair.lock();
 
     resolve({
@@ -312,6 +285,7 @@ export default class Extension {
     } catch (e) {
       throw new Error('invalid password');
     }
+
     try {
       return parentPair.derive(suri, metadata);
     } catch (err) {
@@ -330,6 +304,7 @@ export default class Extension {
 
   private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
     const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name, parentAddress });
+
     keyring.addPair(childPair, password);
 
     return true;

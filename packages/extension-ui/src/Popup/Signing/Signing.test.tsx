@@ -8,9 +8,9 @@ import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import * as messaging from '@polkadot/extension-ui/messaging';
-import { AccountJson, SigningRequest } from '@polkadot/extension-base/background/types';
+import { SigningRequest } from '@polkadot/extension-base/background/types';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
-import { AccountContext, ActionContext, Address, Button, Input, SigningReqContext, themes } from '@polkadot/extension-ui/components';
+import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
 import Signing from '.';
 import TransactionIndex from './TransactionIndex';
@@ -25,17 +25,6 @@ describe.skip('Signing requests', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
   let signRequests: SigningRequest[] = [];
-  const accounts: AccountJson[] = [{
-    address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-    genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-    isExternal: false,
-    name: 'acc1'
-  }, {
-    address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-    genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-    isExternal: false,
-    name: 'acc2'
-  }];
 
   const emitter = new EventEmitter();
 
@@ -54,11 +43,9 @@ describe.skip('Signing requests', () => {
   const mountComponent = async (): Promise<void> => {
     wrapper = mount(
       <ActionContext.Provider value={onActionStub}>
-        <AccountContext.Provider value={accounts}>
-          <ThemeProvider theme={themes.dark}>
-            <MockRequestsProvider />
-          </ThemeProvider>
-        </AccountContext.Provider>
+        <ThemeProvider theme={themes.dark}>
+          <MockRequestsProvider />
+        </ThemeProvider>
       </ActionContext.Provider>
     );
     await act(flushAllPromises);

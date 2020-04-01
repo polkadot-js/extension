@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson } from '@polkadot/extension-base/background/types';
+import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -47,7 +47,7 @@ function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountJson[], chain: Chain | null): Recoded {
+function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -66,7 +66,7 @@ function recodeAddress (address: string, accounts: AccountJson[], chain: Chain |
 const ACCOUNTS_SCREEN_HEIGHT = 500;
 
 function Address ({ actions, address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
-  const accounts = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const chain = useMetadata(genesisHash);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
   const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -173,7 +173,7 @@ const AccountInfoRow = styled.div`
 `;
 
 const Info = styled.div`
-  width: 100%;
+  width: calc(100% - 120px);
 `;
 
 const Name = styled.div`
@@ -193,6 +193,7 @@ const FullAddress = styled.div`
   color: ${({ theme }): string => theme.labelColor};
   font-size: 12px;
   line-height: 16px;
+  padding-right: 10px;
 `;
 
 FullAddress.displayName = 'FullAddress';

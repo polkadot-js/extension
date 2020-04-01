@@ -5,7 +5,7 @@
 import { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { KeyringPair } from '@polkadot/keyring/types';
+import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { TypeRegistry } from '@polkadot/types';
 
@@ -23,11 +23,22 @@ type NullKeys<T> = { [K in keyof T]: IsNull<T, K> }[keyof T];
 
 export type SeedLengths = 12 | 24;
 
-export interface AccountJson {
+export interface AccountJson extends KeyringPair$Meta {
   address: string;
   genesisHash?: string | null;
   isExternal?: boolean;
   name?: string;
+  parentAddress?: string;
+  derivationPath?: string;
+}
+
+export type AccountWithChildren = AccountJson & {
+  children?: AccountWithChildren[];
+}
+
+export type AccountsContext = {
+  accounts: AccountJson[];
+  hierarchy: AccountWithChildren[];
 }
 
 export interface AuthorizeRequest {

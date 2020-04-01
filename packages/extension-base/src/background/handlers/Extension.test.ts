@@ -107,6 +107,7 @@ describe('Extension', () => {
         suri: '//path'
       }, {} as chrome.runtime.Port);
       expect(keyring.getAccount('5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN')?.meta.parentAddress).toEqual(address);
+      expect(keyring.getAccount('5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN')?.meta.derivationPath).toEqual('//path');
     });
   });
 });

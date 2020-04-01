@@ -68,7 +68,7 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
-    handlers[id] = { resolve, reject, subscriber };
+    handlers[id] = { reject, resolve, subscriber };
 
     port.postMessage({ id, message, request: request || {} });
   });
@@ -161,9 +161,9 @@ export async function windowOpen (): Promise<boolean> {
 }
 
 export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {
-  return sendMessage('pri(derivation.validate)', { parentAddress, suri, parentPassword });
+  return sendMessage('pri(derivation.validate)', { parentAddress, parentPassword, suri });
 }
 
 export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string): Promise<boolean> {
-  return sendMessage('pri(derivation.create)', { parentAddress, suri, parentPassword, name, password });
+  return sendMessage('pri(derivation.create)', { name, parentAddress, parentPassword, password, suri });
 }

@@ -27,8 +27,8 @@ describe('Create Account', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
   const exampleAccount = {
-    seed: 'horse battery staple correct',
-    address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'
+    address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
+    seed: 'horse battery staple correct'
   };
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>

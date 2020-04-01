@@ -15,7 +15,7 @@ interface Props {
   className?: string;
 }
 
-function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick }: Props): React.ReactElement<Props> {
+function TransactionIndex ({ index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 

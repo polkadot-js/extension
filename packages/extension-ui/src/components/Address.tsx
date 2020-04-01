@@ -62,7 +62,7 @@ function recodeAddress (address: string, accounts: AccountJson[], chain: Chain |
 
 const ACCOUNTS_SCREEN_HEIGHT = 500;
 
-function Address ({ address, className, children, genesisHash, name, actions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const chain = useMetadata(genesisHash);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });

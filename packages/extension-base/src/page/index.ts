@@ -36,7 +36,7 @@ export function sendMessage<TMessageType extends MessageTypes> (message: TMessag
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
-    handlers[id] = { resolve, reject, subscriber };
+    handlers[id] = { reject, resolve, subscriber };
 
     const transportRequestMessage: TransportRequestMessage<TMessageType> = {
       id,

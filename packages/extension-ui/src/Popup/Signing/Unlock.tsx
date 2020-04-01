@@ -12,7 +12,7 @@ interface Props {
   buttonText?: string;
 }
 
-export default function Unlock ({ className, onSign, buttonText = 'Sign the transaction' }: Props): React.ReactElement<Props> {
+export default function Unlock ({ buttonText = 'Sign the transaction', className, onSign }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
   const [password, setPassword] = useState('');
 

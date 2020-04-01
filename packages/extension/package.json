@@ -10,7 +10,7 @@
     "@polkadot/extension-ui": "0.24.0-beta.4"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.52.1",
+    "@polkadot/dev": "^0.52.3",
     "@types/chrome": "^0.0.103",
     "@types/firefox-webext-browser": "^70.0.1",
     "babel-loader": "^8.1.0",

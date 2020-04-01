@@ -30,7 +30,10 @@ export default function Accounts (): React.ReactElement<Props> {
         ? <AddAccount />
         : (
           <>
-            <Header showSettings text={'Accounts'} />
+            <Header
+              showSettings
+              text={'Accounts'}
+            />
             <AccountsArea>
               {accounts.map((json, index): React.ReactNode => (
                 <Account
@@ -44,14 +47,14 @@ export default function Accounts (): React.ReactElement<Props> {
       }
       <ButtonArea>
         <ButtonWithSubtitle
-          to='/account/create'
-          title='Create New Account'
           subTitle='With new seed'
+          title='Create New Account'
+          to='/account/create'
         />
         <ButtonWithSubtitle
-          to='/account/import-seed'
-          title='Import an Account'
           subTitle='I have a pre-existing seed'
+          title='Import an Account'
+          to='/account/import-seed'
         />
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>

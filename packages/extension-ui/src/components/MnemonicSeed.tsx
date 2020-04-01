@@ -22,8 +22,8 @@ function MnemonicSeed ({ seed, onCopy, className }: Props): React.ReactElement<P
         <ActionText
           data-seed-action='copy'
           icon={copy}
-          text='Copy to clipboard'
           onClick={onCopy}
+          text='Copy to clipboard'
         />
       </ButtonsRow>
     </div>

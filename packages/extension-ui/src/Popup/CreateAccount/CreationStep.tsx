@@ -12,7 +12,7 @@ interface Props {
   className?: string;
 }
 
-function CreationStep ({ step, onClick, className }: Props): React.ReactElement<Props> {
+function CreationStep ({ className, onClick, step }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <div>
@@ -20,7 +20,10 @@ function CreationStep ({ step, onClick, className }: Props): React.ReactElement<
         <CurrentStep>{step}</CurrentStep>
         <TotalSteps>/2</TotalSteps>
       </div>
-      <ActionText text={step === 1 ? 'Cancel' : 'Back'} onClick={onClick} />
+      <ActionText
+        onClick={onClick}
+        text={step === 1 ? 'Cancel' : 'Back'}
+      />
     </div>
   );
 }

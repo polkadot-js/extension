@@ -19,9 +19,9 @@ function Checkbox ({ onChange, label, className, checked }: Props): React.ReactE
       <label>
         {label}
         <input
-          type='checkbox'
           checked={checked}
           onChange={((event): void => onChange(event.target.checked))}
+          type='checkbox'
         />
         <span />
       </label>

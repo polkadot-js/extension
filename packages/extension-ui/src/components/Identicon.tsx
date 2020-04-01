@@ -18,9 +18,9 @@ function Identicon ({ iconTheme, className, prefix, value }: Props): React.React
     <div className={className}>
       <Icon
         className='icon'
+        prefix={prefix}
         size={64}
         theme={iconTheme}
-        prefix={prefix}
         value={value}
       />
     </div>

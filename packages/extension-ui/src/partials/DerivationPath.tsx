@@ -30,11 +30,11 @@ function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): Re
   return (
     <div>
       <InputWithLabel
-        label='Derivation path'
-        placeholder='//hard/soft'
-        onChange={_onChange}
-        value={path}
         isError={!isValid}
+        label='Derivation path'
+        onChange={_onChange}
+        placeholder='//hard/soft'
+        value={path}
       />
     </div>
   );

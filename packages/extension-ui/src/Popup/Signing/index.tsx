@@ -35,19 +35,19 @@ export default function Signing (): React.ReactElement<{}> {
         {requests.length > 1 && (
           <TransactionIndex
             index={requestIndex}
-            totalItems={requests.length}
             onNextClick={(): void => setRequestIndex(requestIndex + 1)}
             onPreviousClick={(): void => setRequestIndex(requestIndex - 1)}
+            totalItems={requests.length}
           />
         )}
       </Header>
       <Request
-        isFirst={requestIndex === 0}
         account={requests[requestIndex].account}
+        buttonText={isTransaction ? 'Sign the transaction' : 'Sign the message'}
+        isFirst={requestIndex === 0}
         request={requests[requestIndex].request}
         signId={requests[requestIndex].id}
         url={requests[requestIndex].url}
-        buttonText={isTransaction ? 'Sign the transaction' : 'Sign the message'}
       />
     </>
   ) : <Loading />;

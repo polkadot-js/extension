@@ -26,8 +26,14 @@ function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick }: 
         <TotalSteps>/{totalItems}</TotalSteps>
       </div>
       <div>
-        <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
-        <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
+        <ArrowLeft
+          isActive={previousClickActive}
+          onClick={(): unknown => previousClickActive && onPreviousClick()}
+        />
+        <ArrowRight
+          isActive={nextClickActive}
+          onClick={(): unknown => nextClickActive && onNextClick()}
+        />
       </div>
     </CreationSteps>
   );

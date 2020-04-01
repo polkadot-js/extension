@@ -45,29 +45,35 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
 
   return (
     <>
-      <Header text='Export account' showBackArrow/>
+      <Header
+        showBackArrow
+        text='Export account'
+      />
       <div>
         <Address address={address}>
           <MovedWarning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</MovedWarning>
           <ActionArea>
             <InputWithLabel
+              data-export-password
               isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
               label='password for this account'
               onChange={setPass}
               type='password'
-              data-export-password
             />
             <Button
-              isDisabled={pass.length === 0}
-              isDanger
-              onClick={_onExportButtonClick}
               className='export-button'
               data-export-button
+              isDanger
+              isDisabled={pass.length === 0}
+              onClick={_onExportButtonClick}
             >
               I want to export this account
             </Button>
             <CancelButton>
-              <ActionText text='Cancel' onClick={(): void => onAction('/')} />
+              <ActionText
+                onClick={(): void => onAction('/')}
+                text='Cancel'
+              />
             </CancelButton>
           </ActionArea>
         </Address>

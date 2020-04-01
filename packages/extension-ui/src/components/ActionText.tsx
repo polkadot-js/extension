@@ -15,7 +15,10 @@ interface Props {
 
 function ActionText ({ icon, className, text, onClick }: Props): React.ReactElement<Props> {
   return (
-    <div className={className} onClick={onClick}>
+    <div
+      className={className}
+      onClick={onClick}
+    >
       {icon && <Svg src={icon} />}
       <span>{text}</span>
     </div>

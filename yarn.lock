@@ -2867,13 +2867,14 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.9.2
     "@polkadot/api": ^1.9.1
+    "@polkadot/extension-chains": 0.24.0-beta.8
     "@polkadot/keyring": ^2.7.1
     "@polkadot/ui-keyring": ^0.52.0-beta.22
     extensionizer: ^1.0.1
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-chains@0.24.0-beta.1, @polkadot/extension-chains@workspace:packages/extension-chains":
+"@polkadot/extension-chains@0.24.0-beta.8, @polkadot/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:

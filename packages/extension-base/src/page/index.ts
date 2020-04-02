@@ -31,12 +31,13 @@ let idCounter = 0;
 export function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 export function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
 export function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
-    handlers[id] = { resolve, reject, subscriber };
+    handlers[id] = { reject, resolve, subscriber };
 
     const transportRequestMessage: TransportRequestMessage<TMessageType> = {
       id,
@@ -62,6 +63,7 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
 
   if (!handler) {
     console.error(`Unknown response: ${JSON.stringify(data)}`);
+
     return;
   }
 

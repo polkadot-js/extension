@@ -22,3 +22,4 @@ yarn-error.log*
 package-lock.json
 _book
 docs/html
+.idea

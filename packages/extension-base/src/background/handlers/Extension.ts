@@ -4,12 +4,13 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAuthorizeApprove, RequestAuthorizeReject, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, ResponseSeedValidate, ResponseTypes, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
+import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
@@ -37,7 +38,7 @@ export default class Extension {
   }
 
   private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
-    keyring.addExternal(address, { name, genesisHash });
+    keyring.addExternal(address, { genesisHash, name });
 
     return true;
   }
@@ -60,6 +61,16 @@ export default class Extension {
 
   private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
     return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password)) };
+  }
+
+  private accountsValidate ({ address, password }: RequestAccountValidate): boolean {
+    try {
+      keyring.backupAccount(keyring.getPair(address), password);
+
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   private accountsForget ({ address }: RequestAccountForget): boolean {
@@ -127,7 +138,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { resolve, request } = queued;
+    const { request, resolve } = queued;
 
     this.#state.saveMetadata(request);
 
@@ -197,7 +208,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { request, resolve, reject } = queued;
+    const { reject, request, resolve } = queued;
     const pair = keyring.getPair(request.inner.address);
 
     if (!pair) {
@@ -208,6 +219,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
     const result = request.sign(registry, pair);
+
     pair.lock();
 
     resolve({
@@ -265,9 +277,42 @@ export default class Extension {
     return true;
   }
 
+  private derive (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
+    const parentPair = keyring.getPair(parentAddress);
+
+    try {
+      parentPair.decodePkcs8(password);
+    } catch (e) {
+      throw new Error('invalid password');
+    }
+
+    try {
+      return parentPair.derive(suri, metadata);
+    } catch (err) {
+      throw new Error(`"${suri}" is not a valid derivation path`);
+    }
+  }
+
+  private derivationValidate ({ parentAddress, parentPassword, suri }: RequestDeriveValidate): ResponseDeriveValidate {
+    const childPair = this.derive(parentAddress, suri, parentPassword, {});
+
+    return {
+      address: childPair.address,
+      suri
+    };
+  }
+
+  private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
+    const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name, parentAddress });
+
+    keyring.addPair(childPair, password);
+
+    return true;
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
       case 'pri(authorize.approve)':
         return this.authorizeApprove(request as RequestAuthorizeApprove);
@@ -293,6 +338,9 @@ export default class Extension {
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
 
+      case 'pri(accounts.validate)':
+        return this.accountsValidate(request as RequestAccountValidate);
+
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
 
@@ -307,6 +355,12 @@ export default class Extension {
 
       case 'pri(metadata.requests)':
         return this.metadataSubscribe(id, port);
+
+      case 'pri(derivation.create)':
+        return this.derivationCreate(request as RequestDeriveCreate);
+
+      case 'pri(derivation.validate)':
+        return this.derivationValidate(request as RequestDeriveValidate);
 
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);

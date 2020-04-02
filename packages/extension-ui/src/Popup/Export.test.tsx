@@ -31,7 +31,7 @@ describe('Export component', () => {
     wrapper = mount(
       <MemoryRouter initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
         <ThemeProvider theme={themes.dark}>
-          <Route path='/account/export/:address' component={ Export } />
+          <Route path='/account/export/:address'><Export /></Route>
         </ThemeProvider>
       </MemoryRouter>
     );

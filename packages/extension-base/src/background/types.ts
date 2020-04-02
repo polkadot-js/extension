@@ -57,10 +57,13 @@ export interface RequestSignatures {
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
+  'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(derivation.create)': [RequestDeriveCreate, boolean];
+  'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
@@ -153,6 +156,26 @@ export interface RequestAccountForget {
   address: string;
 }
 
+export interface RequestAccountValidate {
+  address: string;
+  password: string;
+}
+
+export interface RequestDeriveCreate {
+  name: string;
+  genesisHash?: string | null;
+  suri: string;
+  parentAddress: string;
+  parentPassword: string;
+  password: string;
+}
+
+export interface RequestDeriveValidate {
+  suri: string;
+  parentAddress: string;
+  parentPassword: string;
+}
+
 export interface RequestAccountExport {
   address: string;
   password: string;
@@ -210,6 +233,8 @@ export type ResponseTypes = {
   [MessageType in keyof RequestSignatures]: RequestSignatures[MessageType][1]
 };
 
+export type ResponseType<TMessageType extends keyof RequestSignatures> = RequestSignatures[TMessageType][1];
+
 interface TransportResponseMessageSub<TMessageType extends MessageTypesWithSubscriptions> {
   error?: string;
   id: string;
@@ -233,6 +258,11 @@ export type TransportResponseMessage<TMessageType extends MessageTypes> =
 export interface ResponseSigning {
   id: string;
   signature: string;
+}
+
+export interface ResponseDeriveValidate {
+  address: string;
+  suri: string;
 }
 
 export interface ResponseSeedCreate {

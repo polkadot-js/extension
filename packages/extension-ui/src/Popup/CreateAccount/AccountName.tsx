@@ -11,14 +11,14 @@ interface Props {
   address: string;
 }
 
-function AccountName ({ onCreate, address }: Props): React.ReactElement<Props> {
+function AccountName ({ address, onCreate }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
   return (
     <>
       <Name
-        isFocussed
+        isFocused
         onChange={setName}
       />
       {name && <Password onChange={setPassword} />}

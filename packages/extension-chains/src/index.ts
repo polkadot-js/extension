@@ -39,8 +39,8 @@ function metadataExpand (definition: MetadataDef): Chain {
       ? undefined
       : genesisHash,
     hasMetadata: !!metadata,
-    isUnknown,
     icon: icon || 'substrate',
+    isUnknown,
     name: chain,
     registry,
     specVersion,

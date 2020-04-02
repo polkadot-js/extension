@@ -4,42 +4,35 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { ActionText, Title } from '@polkadot/extension-ui/components';
+import { Header } from '@polkadot/extension-ui/components';
 
 interface Props {
-  step: number;
-  onClick: () => void;
   className?: string;
+  step: number;
 }
 
-function CreationStep ({ className, onClick, step }: Props): React.ReactElement<Props> {
+function Step ({ className, step }: Props): React.ReactElement<Props> {
   return (
-    <div className={className}>
-      <div>
-        <CreateAnAccount />
-        <CurrentStep>{step}</CurrentStep>
-        <TotalSteps>/2</TotalSteps>
-      </div>
-      <ActionText
-        onClick={onClick}
-        text={step === 1 ? 'Cancel' : 'Back'}
-      />
-    </div>
+    <Header
+      className={className}
+      showBackArrow
+      text={
+        <>
+          <span>Derive new account</span>
+          <CurrentStep>{step}</CurrentStep>
+          <TotalSteps>/2</TotalSteps>
+        </>
+      }
+    />
   );
 }
-
-const CreateAnAccount = styled(Title).attrs(() => ({
-  children: 'Create an account:'
-}))`
-  display: inline;
-  margin-right: 10px;
-`;
 
 const CurrentStep = styled.span`
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
   color: ${({ theme }): string => theme.primaryColor};
   font-weight: 600;
+  margin-left: 10px;
 `;
 
 const TotalSteps = styled.span`
@@ -49,9 +42,4 @@ const TotalSteps = styled.span`
   font-weight: 600;
 `;
 
-export default styled(CreationStep)`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: 17px;
-`;
+export default Step;

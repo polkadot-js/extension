@@ -25,7 +25,7 @@ interface Props {
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, label, isFocussed, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>): void => {
     onChange && onChange(value.trim());
   };

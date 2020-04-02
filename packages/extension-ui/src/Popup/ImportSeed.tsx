@@ -2,22 +2,30 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useContext, useState } from 'react';
-
-import {
-  ActionContext,
-  Address,
-  Button,
-  ButtonArea,
-  Header,
-  TextAreaWithLabel,
-  VerticalSpace
-} from '../components';
-import { createAccountSuri, validateSeed } from '../messaging';
-import { Name, Password } from '../partials';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
+import { ActionContext, Address, Button, ButtonArea, Header, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { createAccountSuri, validateSeed } from '../messaging';
+import { Name, Password } from '../partials';
+import { allOf, isNotShorterThan, Result } from '../validators';
+
 type Props = {};
+
+const validate = async (suri: string): Promise<Result<string>> => {
+  try {
+    await validateSeed(suri);
+
+    return Result.ok(suri);
+  } catch (err) {
+    return Result.error(err.message);
+  }
+};
+
+const isSeedValid = allOf(
+  isNotShorterThan(1, 'Seed is empty'),
+  validate
+);
 
 export default function Import (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
@@ -25,30 +33,38 @@ export default function Import (): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const _onChangeSeed = (suri: string): Promise<void> =>
-    validateSeed(suri)
-      .then(setAccount)
-      .catch((): void => setAccount(null));
+  const _onChangeSeed = useCallback(async (suri: string | null): Promise<void> => {
+    if (suri) {
+      setAccount(await validateSeed(suri));
+    } else {
+      setAccount(null);
+    }
+  }, []);
 
   // FIXME Duplicated between here and Create.tsx
-  const _onCreate = (): void => {
+  const _onCreate = useCallback((): void => {
     // this should always be the case
     if (name && password && account) {
       createAccountSuri(name, password, account.suri)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }
-  };
+  }, [account, name, onAction, password]);
 
   return (
     <>
-      <HeaderWithSmallerMargin text='Import account' showBackArrow />
-      <SeedInput
-        rowsCount={2}
-        isError={!account}
+      <HeaderWithSmallerMargin
+        showBackArrow
+        text='Import account'
+      />
+      <ValidatedInput
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        component={SeedInput}
         isFocused
         label='existing 12 or 24-word mnemonic seed'
-        onChange={_onChangeSeed}
+        onValidatedChange={_onChangeSeed}
+        rowsCount={2}
+        validator={isSeedValid}
       />
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}

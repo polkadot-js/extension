@@ -38,6 +38,7 @@ describe.skip('Signing requests', () => {
   }];
 
   const emitter = new EventEmitter();
+
   function MockRequestsProvider (): React.ReactElement {
     const [requests, setRequests] = useState(signRequests);
 
@@ -49,6 +50,7 @@ describe.skip('Signing requests', () => {
       </SigningReqContext.Provider>
     );
   }
+
   const mountComponent = async (): Promise<void> => {
     wrapper = mount(
       <ActionContext.Provider value={onActionStub}>
@@ -71,10 +73,8 @@ describe.skip('Signing requests', () => {
         address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
         name: 'acc1'
       },
-      url: 'polkadot.js',
       id: '1574174715509.78',
       request: {
-        sign: jest.fn(),
         inner: {
           address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
           blockHash: '0xc288fbc472dab27d13ce58212eeb1243f460c5b0f9a65e9de97cbbf9bc761cb0',
@@ -86,17 +86,17 @@ describe.skip('Signing requests', () => {
           specVersion: '0x00000070',
           tip: '0x00000000000000000000000000000000',
           version: 1
-        }
-      }
+        },
+        sign: jest.fn()
+      },
+      url: 'polkadot.js'
     }, { // 10000000000 nDOT -> 5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj
       account: {
         address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
         name: 'acc2'
       },
-      url: 'polkadot.js',
       id: '1574174306604.76',
       request: {
-        sign: jest.fn(),
         inner: {
           address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
           blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
@@ -108,8 +108,10 @@ describe.skip('Signing requests', () => {
           specVersion: '0x00000070',
           tip: '0x00000000000000000000000000000000',
           version: 1
-        }
-      }
+        },
+        sign: jest.fn()
+      },
+      url: 'polkadot.js'
     }];
     onActionStub = jest.fn();
     await mountComponent();
@@ -157,10 +159,8 @@ describe.skip('Signing requests', () => {
           isExternal: true,
           name: 'external'
         },
-        url: 'polkadot.js',
         id: '1574174306604.76',
         request: {
-          sign: jest.fn(),
           inner: {
             address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
             blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
@@ -172,8 +172,10 @@ describe.skip('Signing requests', () => {
             specVersion: '0x00000070',
             tip: '0x00000000000000000000000000000000',
             version: 1
-          }
-        }
+          },
+          sign: jest.fn()
+        },
+        url: 'polkadot.js'
       }];
       await mountComponent();
       expect(wrapper.find(Extrinsic)).toHaveLength(0);

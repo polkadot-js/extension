@@ -123,6 +123,7 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
   }
 
   const accounts: Record<string, InjectedAccount[]> = {};
+
   const triggerUpdate = (): void => {
     cb(Object.entries(accounts).reduce((result, [source, list]): InjectedAccountWithMeta[] => {
       result.push(...mapAccounts(source, list));
@@ -200,5 +201,5 @@ export async function web3UseRpcProvider (source: string, key: string): Promise<
 
   const meta = await provider.startProvider(key);
 
-  return { provider, meta };
+  return { meta, provider };
 }

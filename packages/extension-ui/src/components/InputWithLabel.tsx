@@ -19,9 +19,10 @@ interface Props {
   onChange?: (value: string) => void;
   type?: 'text' | 'password';
   value?: string;
+  placeholder?: string;
 }
 
-function InputWithLabel ({ className, defaultValue, label, isFocused, isReadOnly, onBlur, onChange, type = 'text', value, isError }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, isError, isFocused, isReadOnly, label, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -38,6 +39,7 @@ function InputWithLabel ({ className, defaultValue, label, isFocused, isReadOnly
         defaultValue={defaultValue || undefined}
         onBlur={onBlur}
         onChange={_onChange}
+        placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}
         type={type}

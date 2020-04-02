@@ -29,7 +29,7 @@ interface Props {
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-export default function Request ({ account: { isExternal }, request, signId, url, isFirst, buttonText }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [hexBytes, setHexBytes] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);
@@ -71,9 +71,9 @@ export default function Request ({ account: { isExternal }, request, signId, url
         {isExternal
           ? (
             <Qr
+              onSignature={_onSignature}
               payload={extrinsic}
               request={payload}
-              onSignature={_onSignature}
             />
           ) : (
             <Extrinsic
@@ -85,9 +85,19 @@ export default function Request ({ account: { isExternal }, request, signId, url
           )
         }
         <SignArea>
-          {isFirst && !isExternal && <Unlock onSign={_onSign} buttonText={buttonText} />}
+          {isFirst && !isExternal && (
+            <Unlock
+              buttonText={buttonText}
+              onSign={_onSign}
+            />
+          )}
           <CancelButton>
-            <Link isDanger onClick={_onCancel}>Cancel</Link>
+            <Link
+              isDanger
+              onClick={_onCancel}
+            >
+              Cancel
+            </Link>
           </CancelButton>
         </SignArea>
       </>
@@ -98,12 +108,25 @@ export default function Request ({ account: { isExternal }, request, signId, url
     return (
       <>
         <Address address={payload.address} />
-        <Bytes bytes={payload.data} url={url} />
+        <Bytes
+          bytes={payload.data}
+          url={url}
+        />
         <VerticalSpace />
         <SignArea>
-          {!isExternal && <Unlock onSign={_onSign} buttonText={buttonText} />}
+          {!isExternal && (
+            <Unlock
+              buttonText={buttonText}
+              onSign={_onSign}
+            />
+          )}
           <CancelButton>
-            <Link isDanger onClick={_onCancel}>Reject</Link>
+            <Link
+              isDanger
+              onClick={_onCancel}
+            >
+              Reject
+            </Link>
           </CancelButton>
         </SignArea>
       </>
@@ -127,4 +150,5 @@ const CancelButton = styled(ActionBar)`
     margin: auto;
   }
 `;
+
 CancelButton.displayName = 'CancelButton';

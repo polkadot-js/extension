@@ -17,6 +17,7 @@ const MediaContext = React.createContext<boolean>(false);
 const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
+const ToastContext = React.createContext<({show: (message: string) => void})>({ show: noop });
 
 export {
   AccountContext,
@@ -25,5 +26,6 @@ export {
   MediaContext,
   MetadataReqContext,
   SigningReqContext,
-  ThemeSwitchContext
+  ThemeSwitchContext,
+  ToastContext
 };

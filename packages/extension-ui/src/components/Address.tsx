@@ -5,7 +5,8 @@
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -13,11 +14,13 @@ import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { AccountContext } from './contexts';
 import Identicon from './Identicon';
 import Svg from './Svg';
-import Menu from './Menu';
 
+import Menu from './Menu';
+import CopyImg from '../assets/copy.svg';
 import DetailsImg from '../assets/details.svg';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
+import useToast from '../hooks/useToast';
 
 interface Props {
   address?: string | null;
@@ -69,6 +72,7 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const { show } = useToast();
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
@@ -91,7 +95,8 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
   }, [showActionsMenu]);
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
-  const _onClick = (): void => setShowActionsMenu(!showActionsMenu);
+  const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
+  const _onCopy = useCallback((): void => show('Copied'), [show]);
 
   return (
     <div className={className}>
@@ -104,10 +109,18 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
           />
           <Info>
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
-            <FullAddress>{formatted || '<unknown>'}</FullAddress>
-            {chain?.genesisHash && (
-              <Banner>{chain.name}</Banner>
-            )}
+            <CopyAddress>
+              <FullAddress>{formatted || '<unknown>'}</FullAddress>
+              {chain?.genesisHash && (
+                <Banner>{chain.name}</Banner>
+              )}
+              <CopyToClipboard text={(formatted && formatted) || ''} >
+                <Svg
+                  onClick={_onCopy}
+                  src={CopyImg}
+                />
+              </CopyToClipboard>
+            </CopyAddress>
           </Info>
           {actions && (
             <>
@@ -134,6 +147,22 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
   );
 }
 
+const CopyAddress = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  & ${Svg} {
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+    background: ${({ theme }): string => theme.accountDotsIconColor};
+    &:hover {
+      background: ${({ theme }): string => theme.labelColor};
+      cursor: pointer;
+    }
+  }
+`;
+
 const AccountInfoRow = styled.div`
   display: flex;
   flex-direction: row;
@@ -158,7 +187,7 @@ const Name = styled.div`
 `;
 
 const FullAddress = styled.div`
-  width: 300px;
+  width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${({ theme }): string => theme.labelColor};

@@ -11,6 +11,7 @@ import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SigningReqContext } from '../components/contexts';
+import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
@@ -100,20 +101,22 @@ export default function Popup (): React.ReactElement<{}> {
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <MetadataReqContext.Provider value={metaRequests}>
                 <SigningReqContext.Provider value={signRequests}>
-                  <Switch>
-                    <Route path='/account/create'><CreateAccount /></Route>
-                    <Route path='/account/forget/:address'><Forget /></Route>
-                    <Route path='/account/export/:address'><Export /></Route>
-                    <Route path='/account/import-qr'><ImportQr /></Route>
-                    <Route path='/account/import-seed'><ImportSeed /></Route>
-                    <Route path='/account/derive/:address'><Derive /></Route>
-                    <Route
-                      exact
-                      path='/'
-                    >
-                      <Root />
-                    </Route>
-                  </Switch>
+                  <ToastProvider>
+                    <Switch>
+                      <Route path='/account/create'><CreateAccount /></Route>
+                      <Route path='/account/forget/:address'><Forget /></Route>
+                      <Route path='/account/export/:address'><Export /></Route>
+                      <Route path='/account/import-qr'><ImportQr /></Route>
+                      <Route path='/account/import-seed'><ImportSeed /></Route>
+                      <Route path='/account/derive/:address'><Derive /></Route>
+                      <Route
+                        exact
+                        path='/'
+                      >
+                        <Root />
+                      </Route>
+                    </Switch>
+                  </ToastProvider>
                 </SigningReqContext.Provider>
               </MetadataReqContext.Provider>
             </MediaContext.Provider>

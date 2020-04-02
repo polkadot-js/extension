@@ -173,7 +173,7 @@ const AccountInfoRow = styled.div`
 `;
 
 const Info = styled.div`
-  width: calc(100% - 120px);
+  width: 100%;
 `;
 
 const Name = styled.div`
@@ -193,7 +193,6 @@ const FullAddress = styled.div`
   color: ${({ theme }): string => theme.labelColor};
   font-size: 12px;
   line-height: 16px;
-  padding-right: 10px;
 `;
 
 FullAddress.displayName = 'FullAddress';

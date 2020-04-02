@@ -2,10 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson,
-  AuthorizeRequest,
-  MetadataRequest,
-  SigningRequest } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';

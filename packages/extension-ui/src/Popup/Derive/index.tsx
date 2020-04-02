@@ -47,14 +47,20 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
     <>
       <Step step={derivationConfirmed ? 2 : 1} />
       {!derivationConfirmed && (
-        <InputWithLabel
-          data-export-password
-          isError={!isProperParentPassword}
-          isFocused
-          label='enter the password for the account you want to derive from'
-          onChange={_onParentPasswordEnter}
-          type='password'
-        />
+        <>
+          <Address
+            address={parentAddress}
+            name={name}
+          />
+          <InputWithLabel
+            data-export-password
+            isError={!isProperParentPassword}
+            isFocused
+            label='enter the password for the account you want to derive from'
+            onChange={_onParentPasswordEnter}
+            type='password'
+          />
+        </>
       )}
       {!derivationConfirmed && (
         <DeriveButton

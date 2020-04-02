@@ -5,15 +5,25 @@
 import React, { useContext } from 'react';
 import QrImage from '../../assets/qr.svg';
 
-import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
+import { AccountContext, AddAccount, Button, ButtonArea, ButtonWithSubtitle, Header, MediaContext, Svg } from '../../components';
 import Account from './Account';
 import styled from 'styled-components';
+import { AccountJson } from '@polkadot/extension-base/background/types';
 
 type Props = {};
+
+function findMasterAccount (accounts: AccountJson[]): AccountJson | undefined {
+  return accounts
+    .map((account) => ({ ...account, whenCreated: account.whenCreated || Infinity }))
+    .sort((a, b) => a.whenCreated - b.whenCreated)
+    .find((account) => !account.parentAddress && !account.isExternal);
+}
 
 export default function Accounts (): React.ReactElement<Props> {
   const accounts = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
+
+  const masterAccount = findMasterAccount(accounts);
 
   return (
     <>
@@ -38,9 +48,9 @@ export default function Accounts (): React.ReactElement<Props> {
       }
       <ButtonArea>
         <ButtonWithSubtitle
-          subTitle='With new seed'
+          subTitle={masterAccount ? 'Derive from master' : 'With new seed'}
           title='Create New Account'
-          to='/account/create'
+          to={masterAccount ? `/account/derive/${masterAccount.address}` : '/account/create'}
         />
         <ButtonWithSubtitle
           subTitle='I have a pre-existing seed'

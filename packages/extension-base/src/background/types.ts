@@ -28,6 +28,8 @@ export interface AccountJson {
   genesisHash?: string | null;
   isExternal?: boolean;
   name?: string;
+  parentAddress?: string;
+  whenCreated?: number;
 }
 
 export interface AuthorizeRequest {

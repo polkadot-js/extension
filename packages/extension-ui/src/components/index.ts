@@ -27,6 +27,7 @@ export { default as Svg } from './Svg';
 export { default as Table } from './Table';
 export { default as TextAreaWithLabel } from './TextAreaWithLabel';
 export { default as Title } from './Title';
+export { default as ValidatedInput } from './ValidatedInput';
 export { default as VerticalSpace } from './VerticalSpace';
 export { default as View } from './View';
 export { default as Warning } from './Warning';

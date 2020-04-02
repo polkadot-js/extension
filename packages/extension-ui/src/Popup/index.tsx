@@ -2,12 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import {
-  AccountJson,
+import { AccountJson,
   AuthorizeRequest,
   MetadataRequest,
-  SigningRequest
-} from '@polkadot/extension-base/background/types';
+  SigningRequest } from '@polkadot/extension-base/background/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
@@ -18,7 +16,7 @@ import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
-import { buildHierarchy } from "../utils/buildHierarchy";
+import { buildHierarchy } from '../utils/buildHierarchy';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
@@ -102,7 +100,7 @@ export default function Popup (): React.ReactElement<{}> {
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
       <ActionContext.Provider value={_onAction}>
-        <AccountContext.Provider value={{accounts, hierarchy: buildHierarchy(accounts)}}>
+        <AccountContext.Provider value={{ accounts, hierarchy: buildHierarchy(accounts) }}>
           <AuthorizeReqContext.Provider value={authRequests}>
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <MetadataReqContext.Provider value={metaRequests}>

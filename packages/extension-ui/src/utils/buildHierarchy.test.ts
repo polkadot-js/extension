@@ -1,5 +1,5 @@
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { buildHierarchy } from "./buildHierarchy";
+import { buildHierarchy } from './buildHierarchy';
 
 const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[]): void => {
   expect(buildHierarchy(accounts)).toEqual(expected);
@@ -12,8 +12,8 @@ describe('Use Account Hierarchy', () => {
     parentAddress?: string;
   } => ({
     address,
-    parentAddress,
-    derivationPath
+    derivationPath,
+    parentAddress
   });
 
   test('for empty account list, returns empty list', () => {

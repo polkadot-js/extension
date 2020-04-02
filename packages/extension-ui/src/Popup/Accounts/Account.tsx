@@ -17,7 +17,7 @@ interface Props extends AccountJson {
   className?: string;
 }
 
-function Account ({ address, className, parentName, isExternal }: Props): React.ReactElement<Props> {
+function Account ({ address, className, isExternal, parentName }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);

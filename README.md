@@ -151,7 +151,7 @@ That is, hard-derivation paths are prefixed with `//`, soft paths with `/`, and 
 
 The extension will still ask you to enter a password for this account. As before, this password only encrypts the private key on disk. It is not required to be the same password as the one that encrypts the mnemonic phrase.
 
-Accounts can also be derived from existing accounts – `Derive New Account` option in account's dropdown menu should be selected. After providing the password of the derived account, along with name and password of the new account, enter derivation path in the following format:
+Accounts can also be derived from existing accounts – `Derive New Account` option in account's dropdown menu should be selected. After providing the password of the parent account, along with name and password of the derived account, enter derivation path in the following format:
 
 ```
 //<hard>/<soft>

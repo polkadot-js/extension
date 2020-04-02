@@ -31,21 +31,21 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
     <>
       <ValidatedInput
         component={InputWithLabel}
-        validator={isFirstPasswordValid}
-        onValidatedChange={setPass1}
         data-input-password
         isFocused={isFocussed}
         label='A new password for this account'
+        onValidatedChange={setPass1}
         type='password'
+        validator={isFirstPasswordValid}
       />
       {pass1 && (
         <ValidatedInput
           component={InputWithLabel}
-          validator={isSecondPasswordValid(pass1)}
-          onValidatedChange={setPass2}
           data-input-repeat-password
           label='Repeat password for verification'
+          onValidatedChange={setPass2}
           type='password'
+          validator={isSecondPasswordValid(pass1)}
         />
       )}
     </>

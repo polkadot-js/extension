@@ -19,6 +19,7 @@ function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): Re
   const isPathValid = useCallback(async (path: string): Promise<Result<string>> => {
     try {
       await validateDerivationPath(parentAddress, path, parentPassword);
+
       return Result.ok(path);
     } catch (error) {
       return Result.error('Invalid derivation path');
@@ -33,10 +34,10 @@ function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): Re
   return (
     <ValidatedInput
       component={InputWithLabel}
-      validator={isPathValid}
-      onValidatedChange={_onChange}
       label='Derivation path'
+      onValidatedChange={_onChange}
       placeholder='//hard/soft'
+      validator={isPathValid}
       value={path}
     />
   );

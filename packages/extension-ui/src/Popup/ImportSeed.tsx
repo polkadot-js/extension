@@ -5,16 +5,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import {
-  ActionContext,
-  Address,
-  Button,
-  ButtonArea,
-  Header,
-  TextAreaWithLabel,
-  ValidatedInput,
-  VerticalSpace
-} from '../components';
+import { ActionContext, Address, Button, ButtonArea, Header, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Name, Password } from '../partials';
 import { allOf, isNotShorterThan, Result } from '../validators';
@@ -24,6 +15,7 @@ type Props = {};
 const validate = async (suri: string): Promise<Result<string>> => {
   try {
     await validateSeed(suri);
+
     return Result.ok(suri);
   } catch (err) {
     return Result.error(err.message);
@@ -68,11 +60,11 @@ export default function Import (): React.ReactElement<Props> {
       <ValidatedInput
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         component={SeedInput}
-        validator={isSeedValid}
-        onValidatedChange={_onChangeSeed}
-        rowsCount={2}
         isFocused
         label='existing 12 or 24-word mnemonic seed'
+        onValidatedChange={_onChangeSeed}
+        rowsCount={2}
+        validator={isSeedValid}
       />
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}

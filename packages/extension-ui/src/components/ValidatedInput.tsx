@@ -19,7 +19,7 @@ type Props<T extends BasicProps> = T & {
   onValidatedChange: (value: string | null) => void;
 }
 
-function ValidatedInput<T extends object> ({ className, validator, component: Input, onValidatedChange, ...props }: Props<T>): React.ReactElement<Props<T>> {
+function ValidatedInput<T extends object> ({ className, component: Input, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState('');
   const [wasMounted, setWasMounted] = useState(false);
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
@@ -27,10 +27,13 @@ function ValidatedInput<T extends object> ({ className, validator, component: In
   useEffect(() => {
     if (!wasMounted) {
       setWasMounted(true);
+
       return;
     }
+
     (async (): Promise<void> => {
       const result = await validator(value);
+
       setValidationResult(result);
       onValidatedChange(Result.isOk(result) ? value : null);
     })();
@@ -39,7 +42,10 @@ function ValidatedInput<T extends object> ({ className, validator, component: In
 
   return (
     <div className={className}>
-      <Input {...props as T} isError={Result.isError(validationResult)} value={value} onChange={setValue} />
+      <Input {...props as T}
+        isError={Result.isError(validationResult)}
+        onChange={setValue}
+        value={value} />
       {Result.isError(validationResult) && <ErrorMessage>{validationResult.error.errorDescription}</ErrorMessage>}
     </div>
   );

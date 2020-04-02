@@ -25,16 +25,16 @@ export default function Name ({ address, className, isFocused, label = 'A descri
 
   return (
     <ValidatedInput
-      validator={isNameValid}
-      onValidatedChange={onChange}
-      component={InputWithLabel}
       className={className}
+      component={InputWithLabel}
       data-input-name
       defaultValue={startValue}
       isFocused={isFocused}
       label={label}
       onBlur={onBlur}
+      onValidatedChange={onChange}
       type='text'
+      validator={isNameValid}
     />
   );
 }

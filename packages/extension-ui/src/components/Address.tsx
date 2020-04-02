@@ -29,6 +29,7 @@ interface Props {
   children?: React.ReactNode;
   genesisHash?: string | null;
   actions?: React.ReactNode;
+  parentName?: string;
 }
 
 interface Recoded {
@@ -65,7 +66,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 500;
 
-function Address ({ actions, address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, name, parentName }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const chain = useMetadata(genesisHash);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
@@ -111,9 +112,8 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
             <CopyAddress>
               <FullAddress>{formatted || '<unknown>'}</FullAddress>
-              {chain?.genesisHash && (
-                <Banner>{chain.name}</Banner>
-              )}
+              {chain?.genesisHash && <ChainBanner>{chain.name}</ChainBanner>}
+              {parentName && <ParentBanner>↳ {parentName}</ParentBanner>}
               <CopyToClipboard text={(formatted && formatted) || ''} >
                 <Svg
                   onClick={_onCopy}
@@ -242,7 +242,6 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
 `;
 
 const Banner = styled.div`
-  background: ${({ theme }): string => theme.primaryColor};
   border-radius: 0 0 8px 8px;
   color: white;
   font-size: 12px;
@@ -251,6 +250,14 @@ const Banner = styled.div`
   position: absolute;
   right: 40px;
   top: 0;
+`;
+
+const ChainBanner = styled(Banner)`
+  background: ${({ theme }): string => theme.primaryColor};
+`;
+
+const ParentBanner = styled(Banner)`
+  background: ${({ theme }): string => theme.parentLabelColor};
 `;
 
 const MovableMenu = styled(Menu) <{ isMoved: boolean }>`

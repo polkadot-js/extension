@@ -35,8 +35,8 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
       <Warning>Please write down your wallet’s mnemonic seed and keep it in a safe place. <br />
       Mnemonic seed is used to restore your wallet. Keep it carefully in case you lose your assets.</Warning>
       <MnemonicSeed
-        seed={seed}
         onCopy={_onCopy}
+        seed={seed}
       />
       <VerticalSpace />
       <Checkbox

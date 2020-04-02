@@ -10,7 +10,7 @@ interface Props {
   className?: string;
 }
 
-function Toast ({ content, className }: Props): React.ReactElement<Props> {
+function Toast ({ className, content }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <p className='snackbar-content'>{content}</p>

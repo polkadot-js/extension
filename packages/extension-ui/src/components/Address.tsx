@@ -115,7 +115,10 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
                 <Banner>{chain.name}</Banner>
               )}
               <CopyToClipboard text={(formatted && formatted) || ''} >
-                <Svg src={CopyImg} onClick={_onCopy}/>
+                <Svg
+                  onClick={_onCopy}
+                  src={CopyImg}
+                />
               </CopyToClipboard>
             </CopyAddress>
           </Info>

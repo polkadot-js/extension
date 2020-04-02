@@ -18,15 +18,20 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
 
   const show = useCallback((message: string): () => void => {
     const timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
+
     setContent(message);
     setVisible(true);
+
     return (): void => clearTimeout(timerId);
   }, []);
 
   return (
     <ToastContext.Provider value={{ show }}>
       {children}
-      <Toast content={content} visible={visible} />
+      <Toast
+        content={content}
+        visible={visible}
+      />
     </ToastContext.Provider>
   );
 };

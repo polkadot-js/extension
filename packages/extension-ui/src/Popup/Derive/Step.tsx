@@ -7,19 +7,23 @@ import styled from 'styled-components';
 import { Header } from '@polkadot/extension-ui/components';
 
 interface Props {
-  step: number;
   className?: string;
+  step: number;
 }
 
-function Step ({ step, className }: Props): React.ReactElement<Props> {
+function Step ({ className, step }: Props): React.ReactElement<Props> {
   return (
-    <Header text={
-      <>
-        <span>Derive new account</span>
-        <CurrentStep>{step}</CurrentStep>
-        <TotalSteps>/2</TotalSteps>
-      </>
-    } showBackArrow className={className} />
+    <Header
+      className={className}
+      showBackArrow
+      text={
+        <>
+          <span>Derive new account</span>
+          <CurrentStep>{step}</CurrentStep>
+          <TotalSteps>/2</TotalSteps>
+        </>
+      }
+    />
   );
 }
 

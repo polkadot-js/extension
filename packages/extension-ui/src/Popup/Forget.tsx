@@ -21,7 +21,10 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
 
   return (
     <>
-      <Header text='Forget account' showBackArrow/>
+      <Header
+        showBackArrow
+        text='Forget account'
+      />
       <div>
         <Address address={address}>
           <MovedWarning danger>
@@ -35,7 +38,10 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
               I want to forget this account
             </Button>
             <CancelButton>
-              <ActionText text='Cancel' onClick={(): void => onAction('/')} />
+              <ActionText
+                onClick={(): void => onAction('/')}
+                text='Cancel'
+              />
             </CancelButton>
           </ActionArea>
         </Address>

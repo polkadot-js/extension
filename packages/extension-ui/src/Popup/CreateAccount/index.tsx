@@ -48,14 +48,26 @@ export default function CreateAccount (): React.ReactElement {
             <CurrentStep>{step}</CurrentStep>
             <TotalSteps>/2</TotalSteps>
           </div>
-          <ActionText text={step === 1 ? 'Cancel' : 'Back'} onClick={_onCancel} />
+          <ActionText
+            onClick={_onCancel}
+            text={step === 1 ? 'Cancel' : 'Back'}
+          />
         </CreationSteps>
       </Header>
-      <Loading>{account && (step === 1 ? (
-        <Mnemonic seed={account.seed} onNextStep={_onNextStep} />
-      ) : (
-        <AccountName address={account.address} onCreate={_onCreate} />
-      ))}</Loading>
+      <Loading>{account && (step === 1
+        ? (
+          <Mnemonic
+            onNextStep={_onNextStep}
+            seed={account.seed}
+          />
+        )
+        : (
+          <AccountName
+            address={account.address}
+            onCreate={_onCreate}
+          />
+        )
+      )}</Loading>
     </>
   );
 }

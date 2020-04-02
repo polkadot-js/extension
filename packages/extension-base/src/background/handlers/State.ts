@@ -252,9 +252,9 @@ export default class State {
       this.#authRequests[id] = {
         id,
         idStr,
+        reject: this.authComplete(id, reject),
         request,
         resolve: this.authComplete(id, resolve),
-        reject: this.authComplete(id, reject),
         url
       };
 
@@ -278,9 +278,9 @@ export default class State {
 
       this.#metaRequests[id] = {
         id,
+        reject: this.metaComplete(id, reject),
         request,
         resolve: this.metaComplete(id, resolve),
-        reject: this.metaComplete(id, reject),
         url
       };
 
@@ -382,9 +382,9 @@ export default class State {
       this.#signRequests[id] = {
         account,
         id,
+        reject: this.signComplete(id, reject),
         request,
         resolve: this.signComplete(id, resolve),
-        reject: this.signComplete(id, reject),
         url
       };
 

@@ -2,15 +2,21 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+// We _could_ reformat, but just keep it as-is, since this is actually
+// externally generated and not really user-editable
+
+/* eslint-disable react/jsx-sort-props */
+/* eslint-disable react/jsx-max-props-per-line */
+
 import React from 'react';
 import styled from 'styled-components';
 
 interface Props {
-  onClick: () => void;
   className?: string;
+  onClick: () => void;
 }
 
-function AddAccountImage ({ onClick, className }: Props): React.ReactElement<Props> {
+function AddAccountImage ({ className, onClick }: Props): React.ReactElement<Props> {
   return (
     <svg className={className} width='265' height='265' viewBox='0 0 265 265' fill='none' xmlns='http://www.w3.org/2000/svg'>
       <mask id='mask0' mask-type='alpha' maskUnits='userSpaceOnUse' x='40' y='40' width='185' height='185'>

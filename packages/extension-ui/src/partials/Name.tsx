@@ -28,8 +28,8 @@ export default function Name ({ address, className, isFocused, label = 'A descri
       validator={isNameValid}
       onValidatedChange={onChange}
       component={InputWithLabel}
-      data-input-name
       className={className}
+      data-input-name
       defaultValue={startValue}
       isFocused={isFocused}
       label={label}

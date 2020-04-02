@@ -12,9 +12,12 @@ import State from './State';
 describe('Extension', () => {
   async function createExtension (): Promise<Extension> {
     await cryptoWaitReady();
+
     keyring.loadAll({ store: new ExtensionStore() });
+
     return new Extension(new State());
   }
+
   let extension: Extension;
 
   beforeAll(async () => {
@@ -45,8 +48,10 @@ describe('Extension', () => {
       const { address } = await extension.handle('id', 'pri(seed.validate)', {
         suri
       }, {} as chrome.runtime.Port);
+
       return address;
     };
+
     let address: string;
 
     beforeEach(async () => {
@@ -56,9 +61,10 @@ describe('Extension', () => {
     test('pri(derivation.validate) passes for valid suri', async () => {
       const result = await extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
-        suri: '//path',
-        parentPassword: password
+        parentPassword: password,
+        suri: '//path'
       }, {} as chrome.runtime.Port);
+
       expect(result).toStrictEqual({
         address: '5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN',
         suri: '//path'
@@ -68,37 +74,37 @@ describe('Extension', () => {
     test('pri(derivation.validate) throws for invalid suri', async () => {
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
-        suri: 'invalid-path',
-        parentPassword: password
+        parentPassword: password,
+        suri: 'invalid-path'
       }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('"invalid-path" is not a valid derivation path'));
     });
 
     test('pri(derivation.validate) throws for invalid password', async () => {
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
-        suri: '//path',
-        parentPassword: 'invalid-password'
+        parentPassword: 'invalid-password',
+        suri: '//path'
       }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('invalid password'));
     });
 
     test('pri(derivation.create) adds a derived account', async () => {
       await extension.handle('id', 'pri(derivation.create)', {
-        parentAddress: address,
         name: 'child',
-        suri: '//path',
+        parentAddress: address,
         parentPassword: password,
-        password
+        password,
+        suri: '//path'
       }, {} as chrome.runtime.Port);
       expect(keyring.getAccounts()).toHaveLength(2);
     });
 
     test('pri(derivation.create) saves parent address in meta', async () => {
       await extension.handle('id', 'pri(derivation.create)', {
-        parentAddress: address,
         name: 'child',
-        suri: '//path',
+        parentAddress: address,
         parentPassword: password,
-        password
+        password,
+        suri: '//path'
       }, {} as chrome.runtime.Port);
       expect(keyring.getAccount('5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN')?.meta.parentAddress).toEqual(address);
     });

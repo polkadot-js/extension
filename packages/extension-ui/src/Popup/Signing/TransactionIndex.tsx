@@ -15,7 +15,7 @@ interface Props {
   className?: string;
 }
 
-function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick }: Props): React.ReactElement<Props> {
+function TransactionIndex ({ index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 
@@ -26,8 +26,14 @@ function TransactionIndex ({ index, totalItems, onNextClick, onPreviousClick }: 
         <TotalSteps>/{totalItems}</TotalSteps>
       </div>
       <div>
-        <ArrowLeft onClick={(): unknown => previousClickActive && onPreviousClick()} isActive={previousClickActive} />
-        <ArrowRight onClick={(): unknown => nextClickActive && onNextClick()} isActive={nextClickActive} />
+        <ArrowLeft
+          isActive={previousClickActive}
+          onClick={(): unknown => previousClickActive && onPreviousClick()}
+        />
+        <ArrowRight
+          isActive={nextClickActive}
+          onClick={(): unknown => nextClickActive && onNextClick()}
+        />
       </div>
     </CreationSteps>
   );
@@ -69,12 +75,14 @@ const ArrowLeft = styled(Svg).attrs(() => ({
   width: 12px;
   height: 12px;
 `;
+
 ArrowLeft.displayName = 'ArrowLeft';
 
 const ArrowRight = styled(ArrowLeft)`
   margin-left: 6px;
   transform: rotate(180deg);
 `;
+
 ArrowRight.displayName = 'ArrowRight';
 
 export default TransactionIndex;

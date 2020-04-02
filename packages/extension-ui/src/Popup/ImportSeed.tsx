@@ -61,7 +61,10 @@ export default function Import (): React.ReactElement<Props> {
 
   return (
     <>
-      <HeaderWithSmallerMargin text='Import account' showBackArrow />
+      <HeaderWithSmallerMargin
+        showBackArrow
+        text='Import account'
+      />
       <ValidatedInput
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         component={SeedInput}

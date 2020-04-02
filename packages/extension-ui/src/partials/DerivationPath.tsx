@@ -16,25 +16,29 @@ function DerivationPath ({ onChange, parentAddress, parentPassword }: Props): Re
   const [path, setPath] = useState<string>('');
   const [isValid, setValid] = useState(false);
 
-  const _onChange = useCallback(async (newPath: string) => {
-    setPath(newPath);
-    try {
-      onChange(await validateDerivationPath(parentAddress, newPath, parentPassword));
-      setValid(true);
-    } catch (err) {
-      onChange(null);
-      setValid(false);
-    }
-  }, [parentAddress, onChange, parentPassword]);
+  const _onChange = useCallback(
+    async (newPath: string) => {
+      setPath(newPath);
+
+      try {
+        onChange(await validateDerivationPath(parentAddress, newPath, parentPassword));
+        setValid(true);
+      } catch (err) {
+        onChange(null);
+        setValid(false);
+      }
+    },
+    [parentAddress, onChange, parentPassword]
+  );
 
   return (
     <div>
       <InputWithLabel
-        label='Derivation path'
-        placeholder='//hard/soft'
-        onChange={_onChange}
-        value={path}
         isError={!isValid}
+        label='Derivation path'
+        onChange={_onChange}
+        placeholder='//hard/soft'
+        value={path}
       />
     </div>
   );

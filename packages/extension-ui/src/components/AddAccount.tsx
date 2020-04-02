@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 import { ActionContext } from './contexts';
 import AddAccountImage from './AddAccountImage';
@@ -14,13 +14,20 @@ interface Props {
 
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
+  const _onClick = useCallback(
+    (): void => onAction('/account/create'),
+    [onAction]
+  );
 
   return (
     <>
-      <Header showSettings text={'Add Account'}/>
+      <Header
+        showSettings
+        text={'Add Account'}
+      />
       <div className={className}>
         <Image>
-          <AddAccountImage onClick={(): void => onAction('/account/create')}/>
+          <AddAccountImage onClick={_onClick}/>
         </Image>
         <div>
           <TipText>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</TipText>

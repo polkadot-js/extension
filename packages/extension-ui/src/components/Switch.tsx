@@ -9,7 +9,7 @@ interface Props {
   className?: string;
 }
 
-function Switch ({ onChange, uncheckedLabel, checkedLabel, className, checked }: Props): React.ReactElement<Props> {
+function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <span>{uncheckedLabel}</span>

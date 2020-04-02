@@ -4,36 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import {
-  AccountJson,
-  AuthorizeRequest,
-  MessageTypes,
-  MetadataRequest,
-  RequestAccountCreateExternal,
-  RequestAccountCreateSuri,
-  RequestAccountEdit,
-  RequestAccountExport,
-  RequestAccountValidate,
-  RequestAuthorizeApprove,
-  RequestAuthorizeReject,
-  RequestDeriveCreate,
-  ResponseDeriveValidate,
-  RequestMetadataApprove,
-  RequestMetadataReject,
-  RequestSigningApprovePassword,
-  RequestSigningApproveSignature,
-  RequestSigningCancel,
-  RequestSeedCreate,
-  RequestTypes,
-  ResponseAccountExport,
-  RequestAccountForget,
-  ResponseSeedCreate,
-  RequestSeedValidate,
-  RequestDeriveValidate,
-  ResponseSeedValidate,
-  ResponseType,
-  SigningRequest
-} from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest } from '../types';
 
 import extension from 'extensionizer';
 import keyring from '@polkadot/ui-keyring';
@@ -67,7 +38,7 @@ export default class Extension {
   }
 
   private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
-    keyring.addExternal(address, { name, genesisHash });
+    keyring.addExternal(address, { genesisHash, name });
 
     return true;
   }
@@ -95,6 +66,7 @@ export default class Extension {
   private accountsValidate ({ address, password }: RequestAccountValidate): boolean {
     try {
       keyring.backupAccount(keyring.getPair(address), password);
+
       return true;
     } catch (e) {
       return false;
@@ -166,7 +138,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { resolve, request } = queued;
+    const { request, resolve } = queued;
 
     this.#state.saveMetadata(request);
 
@@ -236,7 +208,7 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { request, resolve, reject } = queued;
+    const { reject, request, resolve } = queued;
     const pair = keyring.getPair(request.inner.address);
 
     if (!pair) {
@@ -247,6 +219,7 @@ export default class Extension {
 
     pair.decodePkcs8(password);
     const result = request.sign(registry, pair);
+
     pair.lock();
 
     resolve({
@@ -312,6 +285,7 @@ export default class Extension {
     } catch (e) {
       throw new Error('invalid password');
     }
+
     try {
       return parentPair.derive(suri, metadata);
     } catch (err) {
@@ -319,7 +293,7 @@ export default class Extension {
     }
   }
 
-  private derivationValidate ({ parentAddress, suri, parentPassword }: RequestDeriveValidate): ResponseDeriveValidate {
+  private derivationValidate ({ parentAddress, parentPassword, suri }: RequestDeriveValidate): ResponseDeriveValidate {
     const childPair = this.derive(parentAddress, suri, parentPassword, {});
 
     return {
@@ -328,8 +302,9 @@ export default class Extension {
     };
   }
 
-  private derivationCreate ({ parentAddress, suri, parentPassword, genesisHash, name, password }: RequestDeriveCreate): boolean {
+  private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
     const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name, parentAddress });
+
     keyring.addPair(childPair, password);
 
     return true;

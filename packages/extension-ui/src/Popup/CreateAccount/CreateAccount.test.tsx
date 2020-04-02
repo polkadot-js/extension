@@ -10,15 +10,7 @@ import { configure, mount, ReactWrapper } from 'enzyme';
 import * as messaging from '@polkadot/extension-ui/messaging';
 import { act } from 'react-dom/test-utils';
 import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
-import {
-  ActionContext,
-  ActionText,
-  Button,
-  themes,
-  Input,
-  InputWithLabel,
-  Header
-} from '@polkadot/extension-ui/components';
+import { ActionContext, ActionText, Button, themes, Input, InputWithLabel, Header } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
 
 configure({ adapter: new Adapter() });
@@ -27,8 +19,8 @@ describe('Create Account', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
   const exampleAccount = {
-    seed: 'horse battery staple correct',
-    address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5'
+    address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
+    seed: 'horse battery staple correct'
   };
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>

@@ -26,6 +26,7 @@ class MessagingFake {
 }
 
 const messagingFake = new MessagingFake();
+
 chrome.runtime.connect.returns(messagingFake);
 
 export default chrome;

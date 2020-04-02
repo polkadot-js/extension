@@ -4,15 +4,7 @@
 
 import React, { useContext, useState } from 'react';
 
-import {
-  ActionContext,
-  Address,
-  Button,
-  ButtonArea,
-  Header,
-  TextAreaWithLabel,
-  VerticalSpace
-} from '../components';
+import { ActionContext, Address, Button, ButtonArea, Header, TextAreaWithLabel, VerticalSpace } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Name, Password } from '../partials';
 import styled from 'styled-components';
@@ -42,13 +34,16 @@ export default function Import (): React.ReactElement<Props> {
 
   return (
     <>
-      <HeaderWithSmallerMargin text='Import account' showBackArrow />
+      <HeaderWithSmallerMargin
+        showBackArrow
+        text='Import account'
+      />
       <SeedInput
-        rowsCount={2}
         isError={!account}
         isFocused
         label='existing 12 or 24-word mnemonic seed'
         onChange={_onChangeSeed}
+        rowsCount={2}
       />
       {account && <Name onChange={setName} />}
       {account && name && <Password onChange={setPassword} />}

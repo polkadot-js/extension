@@ -26,8 +26,8 @@ function Link ({ children, className, onClick, to }: Props): React.ReactElement<
       </RouterLink>
     ) : (
       <a
-        href='#'
         className={className}
+        href='#'
         onClick={onClick}
       >
         {children}

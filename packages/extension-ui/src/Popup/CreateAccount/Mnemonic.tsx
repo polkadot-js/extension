@@ -7,20 +7,22 @@ import { Button, ButtonArea, Checkbox, MnemonicSeed, VerticalSpace, Warning } fr
 import useToast from '../../hooks/useToast';
 
 interface Props {
-  seed: string;
   onNextStep: () => void;
+  seed: string;
 }
 
 const onCopy = (): void => {
   const mnemonicSeedTextElement = document.querySelector('textarea');
+
   if (!mnemonicSeedTextElement) {
     return;
   }
+
   mnemonicSeedTextElement.select();
   document.execCommand('copy');
 };
 
-function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
+function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
   const _onCopy = useCallback((): void => {
@@ -30,10 +32,8 @@ function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <Warning>
-      Please write down your wallet’s mnemonic seed and keep it in a safe place. <br />
-      Mnemonic seed is used to restore your wallet. Keep it carefully in case you lose your assets.
-      </Warning>
+      <Warning>Please write down your wallet’s mnemonic seed and keep it in a safe place. <br />
+      Mnemonic seed is used to restore your wallet. Keep it carefully in case you lose your assets.</Warning>
       <MnemonicSeed
         seed={seed}
         onCopy={_onCopy}
@@ -41,11 +41,16 @@ function Mnemonic ({ seed, onNextStep }: Props): React.ReactElement<Props> {
       <VerticalSpace />
       <Checkbox
         checked={isMnemonicSaved}
-        onChange={setIsMnemonicSaved}
         label='I have saved my mnemonic seed safely.'
+        onChange={setIsMnemonicSaved}
       />
       <ButtonArea>
-        <Button isDisabled={!isMnemonicSaved} onClick={onNextStep}>Next step</Button>
+        <Button
+          isDisabled={!isMnemonicSaved}
+          onClick={onNextStep}
+        >
+          Next step
+        </Button>
       </ButtonArea>
     </>
   );

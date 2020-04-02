@@ -106,7 +106,7 @@ export default class PostMessageProvider implements InjectedProvider {
 
       return sendRequest(
         'pub(rpc.subscribe)',
-        { type, method, params },
+        { method, params, type },
         (res) => {
           subscription.callback(null, res);
         }
@@ -147,7 +147,7 @@ export default class PostMessageProvider implements InjectedProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async subscribe (type: string, method: string, params: any[], callback: AnyFunction): Promise<number> {
-    const id = await this.send(method, params, { type, callback });
+    const id = await this.send(method, params, { callback, type });
 
     return id as number;
   }

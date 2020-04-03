@@ -5,9 +5,9 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Button, ButtonArea, Header, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { ActionContext, Address, Button, ButtonArea, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
-import { Name, Password } from '../partials';
+import { Header, Name, Password } from '../partials';
 import { allOf, isNotShorterThan, Result } from '../validators';
 
 type Props = {};

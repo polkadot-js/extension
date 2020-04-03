@@ -4,7 +4,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Header } from '@polkadot/extension-ui/components';
+
+import { Header } from '../../partials';
 
 interface Props {
   className?: string;

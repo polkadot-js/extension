@@ -2,16 +2,15 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import ArrowLeftImage from '../assets/arrowLeft.svg';
 import logo from '../assets/pjs.svg';
 import gear from '../assets/gear.svg';
+import { Link, Svg } from '../components';
 import useOutsideClick from '../hooks/useOutsideClick';
-import Link from './Link';
 import Settings from './Settings';
-import Svg from './Svg';
 
 interface Props {
   children?: React.ReactNode;
@@ -27,7 +26,10 @@ function Header ({ children, className, showBackArrow, showSettings, text }: Pro
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
-  const _toggleSettings = (): void => setShowActionsMenu(!showActionsMenu);
+  const _toggleSettings = useCallback(
+    (): void => setShowActionsMenu((showActionsMenu) => !showActionsMenu),
+    []
+  );
 
   return (
     <div className={className}>
@@ -35,7 +37,7 @@ function Header ({ children, className, showBackArrow, showSettings, text }: Pro
         <Branding>
           {showBackArrow
             ? (
-              <BackLink to={'/'}>
+              <BackLink to='/'>
                 <ArrowLeft/>
               </BackLink>
             )

@@ -4,7 +4,8 @@
 
 import React, { useContext } from 'react';
 
-import { Header, Loading, MetadataReqContext } from '../../components';
+import { Loading, MetadataReqContext } from '../../components';
+import { Header } from '../../partials';
 import Request from './Request';
 
 export default function Metadata (): React.ReactElement<{}> {

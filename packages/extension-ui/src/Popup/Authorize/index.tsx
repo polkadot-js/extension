@@ -3,10 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext } from 'react';
-
-import { AuthorizeReqContext, Header } from '../../components';
-import Request from './Request';
 import styled from 'styled-components';
+
+import { AuthorizeReqContext } from '../../components';
+import { Header } from '../../partials';
+import Request from './Request';
 
 export default function Authorize (): React.ReactElement<{}> {
   const requests = useContext(AuthorizeReqContext);

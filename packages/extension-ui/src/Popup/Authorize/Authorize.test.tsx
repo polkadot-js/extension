@@ -2,14 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
-import Adapter from 'enzyme-adapter-react-16';
-
-import { ThemeProvider } from 'styled-components';
-import { AuthorizeReqContext, themes, Header, Icon } from '@polkadot/extension-ui/components';
-import Authorize from '.';
-import { configure, mount, ReactWrapper } from 'enzyme';
 import { AuthorizeRequest } from '@polkadot/extension-base/background/types';
+
+import { configure, mount, ReactWrapper } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import React from 'react';
+import { ThemeProvider } from 'styled-components';
+
+import { AuthorizeReqContext, themes, Icon } from '../../components';
+import { Header } from '../../partials';
+import Authorize from '.';
 import Request from './Request';
 
 configure({ adapter: new Adapter() });

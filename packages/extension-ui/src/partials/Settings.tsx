@@ -2,21 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useContext, useState, useEffect } from 'react';
-import Menu from './Menu';
-import Title from './Title';
-import Checkbox from './Checkbox';
-import ActionText from './ActionText';
-import Svg from './Svg';
-import Switch from './Switch';
-import { themes } from './themes';
-import { ThemeSwitchContext } from './contexts';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 import { setSS58Format } from '@polkadot/util-crypto';
 import settings from '@polkadot/ui-settings';
-import styled, { ThemeContext } from 'styled-components';
-import Dropdown from './Dropdown';
-import { windowOpen } from '../messaging';
+
 import FullScreenIcon from '../assets/fullscreen.svg';
+import { ActionText, Checkbox, Dropdown, Menu, Svg, Switch, ThemeSwitchContext, Title, themes } from '../components';
+import { windowOpen } from '../messaging';
 
 interface Option {
   text: string;
@@ -31,7 +24,6 @@ const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option =
   value: `${value}`
 }));
 
-// FIXME This does not belong in components, this is actual functionality
 export default function Settings ({ reference }: { reference: React.MutableRefObject<null> }): React.ReactElement {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
@@ -43,19 +35,25 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
   }, [camera]);
 
   // FIXME check against index, we need a better solution
-  const _onChangePrefix = (value: string): void => {
-    const prefix = parseInt(value, 10);
+  const _onChangePrefix = useCallback(
+    (value: string): void => {
+      const prefix = parseInt(value, 10);
 
-    setSS58Format(prefix === -1 ? 42 : prefix);
-    setPrefix(value);
+      setSS58Format(prefix === -1 ? 42 : prefix);
+      setPrefix(value);
 
-    settings.set({ prefix });
+      settings.set({ prefix });
 
-    // FIXME We don't want to reload here
-    location.reload();
-  };
+      // FIXME We don't want to reload here
+      location.reload();
+    },
+    []
+  );
 
-  const _onChangeTheme = (checked: boolean): void => setTheme(checked ? 'dark' : 'light');
+  const _onChangeTheme = useCallback(
+    (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
+    [setTheme]
+  );
 
   return (
     <SettingsMenu reference={reference}>

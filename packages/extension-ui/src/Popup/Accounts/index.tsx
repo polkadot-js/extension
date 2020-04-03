@@ -3,11 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext } from 'react';
-import QrImage from '../../assets/qr.svg';
-
-import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
-import Account from './Account';
 import styled from 'styled-components';
+
+import QrImage from '../../assets/qr.svg';
+import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
+import { AddAccount, Header } from '../../partials';
+import Account from './Account';
 
 type Props = {};
 

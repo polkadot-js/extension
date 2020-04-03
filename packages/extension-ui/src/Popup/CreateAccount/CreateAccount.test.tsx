@@ -2,16 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
-import Adapter from 'enzyme-adapter-react-16';
-
-import CreateAccount from '.';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import * as messaging from '@polkadot/extension-ui/messaging';
+import Adapter from 'enzyme-adapter-react-16';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
-import { ActionContext, ActionText, Button, themes, Input, InputWithLabel, Header } from '@polkadot/extension-ui/components';
 import { ThemeProvider } from 'styled-components';
+
+import { ActionContext, ActionText, Button, themes, Input, InputWithLabel } from '../../components';
+import * as messaging from '../../messaging';
+import { Header } from '../../partials';
+import { flushAllPromises } from '../../testHelpers';
+import CreateAccount from '.';
 
 configure({ adapter: new Adapter() });
 

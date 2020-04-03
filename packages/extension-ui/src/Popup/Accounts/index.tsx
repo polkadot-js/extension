@@ -3,12 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext } from 'react';
-import QrImage from '../../assets/qr.svg';
-
-import { AccountContext, AddAccount, Button, ButtonArea, ButtonWithSubtitle, Header, MediaContext, Svg } from '../../components';
-import Account from './Account';
 import styled from 'styled-components';
 import { AccountJson } from '@polkadot/extension-base/background/types';
+
+import QrImage from '../../assets/qr.svg';
+import AccountsTree from './AccountsTree';
+import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
 
 type Props = {};
 
@@ -16,18 +16,18 @@ function findMasterAccount (accounts: AccountJson[]): AccountJson | undefined {
   return accounts
     .map((account) => ({ ...account, whenCreated: account.whenCreated || Infinity }))
     .sort((a, b) => a.whenCreated - b.whenCreated)
-    .find((account) => !account.parentAddress && !account.isExternal);
+    .find((account) => !account.isExternal);
 }
 
 export default function Accounts (): React.ReactElement<Props> {
-  const accounts = useContext(AccountContext);
+  const { hierarchy } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
 
-  const masterAccount = findMasterAccount(accounts);
+  const masterAccount = findMasterAccount(hierarchy);
 
   return (
     <>
-      {(accounts.length === 0)
+      {(hierarchy.length === 0)
         ? <AddAccount />
         : (
           <>
@@ -36,8 +36,8 @@ export default function Accounts (): React.ReactElement<Props> {
               text={'Accounts'}
             />
             <AccountsArea>
-              {accounts.map((json, index): React.ReactNode => (
-                <Account
+              {hierarchy.map((json, index): React.ReactNode => (
+                <AccountsTree
                   {...json}
                   key={`${index}:${json.address}`}
                 />

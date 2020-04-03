@@ -303,7 +303,11 @@ export default class Extension {
   }
 
   private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
-    const childPair = this.derive(parentAddress, suri, parentPassword, { genesisHash, name, parentAddress });
+    const childPair = this.derive(parentAddress, suri, parentPassword, {
+      genesisHash,
+      name,
+      parentAddress
+    });
 
     keyring.addPair(childPair, password);
 

@@ -13,10 +13,11 @@ import { Name } from '../../partials';
 
 interface Props extends AccountJson {
   address: string;
+  parentName?: string;
   className?: string;
 }
 
-function Account ({ address, className, isExternal }: Props): React.ReactElement<Props> {
+function Account ({ address, className, isExternal, parentName }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
@@ -61,6 +62,7 @@ function Account ({ address, className, isExternal }: Props): React.ReactElement
         )}
         address={address}
         name={editedName}
+        parentName={parentName}
       >
         {isEditing && (
           <Name

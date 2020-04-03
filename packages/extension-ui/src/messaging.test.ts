@@ -4,7 +4,6 @@
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure } from 'enzyme';
-import extensionizer from 'extensionizer';
 
 import { exportAccount } from './messaging';
 
@@ -14,7 +13,7 @@ describe('messaging sends message to background via extension port for', () => {
   test('exportAccount', () => {
     const callback = jest.fn();
 
-    extensionizer.runtime.connect().onMessage.addListener(callback);
+    (chrome || browser).runtime.connect().onMessage.addListener(callback);
     exportAccount('HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', 'passw0rd');
 
     expect(callback).toHaveBeenCalledWith(

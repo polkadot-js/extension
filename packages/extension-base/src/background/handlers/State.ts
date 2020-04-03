@@ -82,10 +82,8 @@ export default class State extends StateRpc {
   constructor (providers?: Providers) {
     super(providers);
 
-    this.#metaStore.all((key: string, def: MetadataDef): void => {
-      if (key.startsWith('metadata:')) {
-        addMetadata(def);
-      }
+    this.#metaStore.all((_key: string, def: MetadataDef): void => {
+      addMetadata(def);
     });
   }
 
@@ -275,7 +273,7 @@ export default class State extends StateRpc {
   }
 
   public saveMetadata (meta: MetadataDef): void {
-    this.#metaStore.set(`metadata:${meta.genesisHash}`, meta);
+    this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
   }

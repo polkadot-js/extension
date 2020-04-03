@@ -8,7 +8,6 @@ import styled from 'styled-components';
 import QrImage from '../../assets/qr.svg';
 import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
 import { AddAccount, Header } from '../../partials';
-import Account from './Account';
 import AccountsTree from './AccountsTree';
 
 type Props = {};

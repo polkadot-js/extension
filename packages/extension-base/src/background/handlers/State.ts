@@ -101,10 +101,8 @@ export default class State {
   constructor (providers: Providers = {}) {
     this.#providers = providers;
 
-    this.#metaStore.all((key: string, def: MetadataDef): void => {
-      if (key.startsWith('metadata:')) {
-        addMetadata(def);
-      }
+    this.#metaStore.all((_key: string, def: MetadataDef): void => {
+      addMetadata(def);
     });
   }
 
@@ -370,7 +368,7 @@ export default class State {
   }
 
   public saveMetadata (meta: MetadataDef): void {
-    this.#metaStore.set(`metadata:${meta.genesisHash}`, meta);
+    this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
   }

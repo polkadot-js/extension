@@ -23,22 +23,22 @@ interface MetaRequest {
 export default class StateMetadata {
   public readonly subject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
 
-  readonly #metaStore = new MetadataStore();
+  readonly #requests: Record<string, MetaRequest> = {};
 
-  readonly #metaRequests: Record<string, MetaRequest> = {};
+  readonly #store = new MetadataStore();
 
   readonly #updateIcon: (options?: IconOptions) => void;
 
   constructor (updateIcon: (options?: IconOptions) => void) {
     this.#updateIcon = updateIcon;
-    this.#metaStore.all((_key: string, def: MetadataDef): void => {
+    this.#store.all((_key: string, def: MetadataDef): void => {
       addMetadata(def);
     });
   }
 
   public get allRequests (): MetadataRequest[] {
     return Object
-      .values(this.#metaRequests)
+      .values(this.#requests)
       .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
   }
 
@@ -47,7 +47,7 @@ export default class StateMetadata {
   }
 
   public get numRequests (): number {
-    return Object.keys(this.#metaRequests).length;
+    return Object.keys(this.#requests).length;
   }
 
   private updateIcon (options?: IconOptions): void {
@@ -57,7 +57,7 @@ export default class StateMetadata {
 
   private completeRequest = (id: string, fn: Function): (result: boolean | Error) => void => {
     return (result: boolean | Error): void => {
-      delete this.#metaRequests[id];
+      delete this.#requests[id];
       this.updateIcon({ shouldClose: true });
 
       fn(result);
@@ -68,7 +68,7 @@ export default class StateMetadata {
     return new Promise((resolve, reject): void => {
       const id = getId();
 
-      this.#metaRequests[id] = {
+      this.#requests[id] = {
         id,
         reject: this.completeRequest(id, reject),
         request,
@@ -81,11 +81,11 @@ export default class StateMetadata {
   }
 
   public getRequest (id: string): MetaRequest {
-    return this.#metaRequests[id];
+    return this.#requests[id];
   }
 
   public save (meta: MetadataDef): void {
-    this.#metaStore.set(meta.genesisHash, meta);
+    this.#store.set(meta.genesisHash, meta);
 
     addMetadata(meta);
   }

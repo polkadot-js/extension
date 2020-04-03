@@ -11,7 +11,7 @@ import { assert } from '@polkadot/util';
 
 export default class StateRpc {
   // Map of providers currently injected in tabs
-  readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map();
+  readonly #injected: Map<chrome.runtime.Port, ProviderInterface> = new Map();
 
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;
@@ -30,7 +30,7 @@ export default class StateRpc {
   }
 
   public send (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
-    const provider = this.#injectedProviders.get(port);
+    const provider = this.#injected.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
 
@@ -41,29 +41,29 @@ export default class StateRpc {
   public startProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
     assert(Object.keys(this.#providers).includes(key), `Provider ${key} is not exposed by extension`);
 
-    if (this.#injectedProviders.get(port)) {
+    if (this.#injected.get(port)) {
       return Promise.resolve(this.#providers[key].meta);
     }
 
     // Instantiate the provider
-    this.#injectedProviders.set(port, this.#providers[key].start());
+    this.#injected.set(port, this.#providers[key].start());
 
     // Close provider connection when page is closed
     port.onDisconnect.addListener((): void => {
-      const provider = this.#injectedProviders.get(port);
+      const provider = this.#injected.get(port);
 
       if (provider) {
         provider.disconnect();
       }
 
-      this.#injectedProviders.delete(port);
+      this.#injected.delete(port);
     });
 
     return Promise.resolve(this.#providers[key].meta);
   }
 
   public subscribe ({ method, params, type }: RequestRpcSubscribe, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): Promise<number> {
-    const provider = this.#injectedProviders.get(port);
+    const provider = this.#injected.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
 
@@ -71,7 +71,7 @@ export default class StateRpc {
   }
 
   public subscribeConnected (_request: null, cb: ProviderInterfaceCallback, port: chrome.runtime.Port): void {
-    const provider = this.#injectedProviders.get(port);
+    const provider = this.#injected.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribeConnected) before provider is set');
 
@@ -81,7 +81,7 @@ export default class StateRpc {
   }
 
   public unsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
-    const provider = this.#injectedProviders.get(port);
+    const provider = this.#injected.get(port);
 
     assert(provider, 'Cannot call pub(rpc.unsubscribe) before provider is set');
 

@@ -13,3 +13,8 @@ export type Providers = Record<string, {
   // provider.
   start: () => ProviderInterface;
 }>
+
+export interface IconOptions {
+  shouldClose?: boolean;
+  shouldOpen?: boolean;
+}

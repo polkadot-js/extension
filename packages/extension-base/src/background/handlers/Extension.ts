@@ -134,13 +134,13 @@ export default class Extension {
   }
 
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
-    const queued = this.#state.getMetaRequest(id);
+    const queued = this.#state.metadata.getRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { request, resolve } = queued;
 
-    this.#state.saveMetadata(request);
+    this.#state.metadata.save(request);
 
     resolve(true);
 
@@ -148,11 +148,11 @@ export default class Extension {
   }
 
   private metadataList (): MetadataDef[] {
-    return this.#state.knownMetadata;
+    return this.#state.metadata.known;
   }
 
   private metadataReject ({ id }: RequestMetadataReject): boolean {
-    const queued = this.#state.getMetaRequest(id);
+    const queued = this.#state.metadata.getRequest(id);
 
     assert(queued, 'Unable to find request');
 
@@ -165,7 +165,7 @@ export default class Extension {
 
   private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(metadata.requests)'>(id, port);
-    const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
+    const subscription = this.#state.metadata.subject.subscribe((requests: MetadataRequest[]): void =>
       cb(requests)
     );
 

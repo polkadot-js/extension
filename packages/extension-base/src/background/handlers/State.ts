@@ -2,16 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { knownMetadata, addMetadata } from '@polkadot/extension-chains';
-import { MetadataDef } from '@polkadot/extension-inject/types';
-import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '../types';
-import { Providers } from './types';
+import { AccountJson, AuthorizeRequest, RequestAuthorizeTab, RequestSign, ResponseSigning, SigningRequest } from '../types';
+import { IconOptions, Providers } from './types';
 
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
 
 import chrome from '../../chrome';
-import { MetadataStore } from '../stores';
+import StateMetadata from './StateMetadata';
 import StateRpc from './StateRpc';
 import { getId, stripUrl } from './util';
 
@@ -31,14 +29,6 @@ type AuthUrls = Record<string, {
   origin: string;
   url: string;
 }>;
-
-interface MetaRequest {
-  id: string;
-  request: MetadataDef;
-  resolve: (result: boolean) => void;
-  reject: (error: Error) => void;
-  url: string;
-}
 
 interface SignRequest {
   account: AccountJson;
@@ -60,14 +50,10 @@ const WINDOW_OPTS = {
   width: 480
 };
 
-export default class State extends StateRpc {
+export default class State {
   readonly #authUrls: AuthUrls = {};
 
   readonly #authRequests: Record<string, AuthRequest> = {};
-
-  readonly #metaStore = new MetadataStore();
-
-  readonly #metaRequests: Record<string, MetaRequest> = {};
 
   readonly #signRequests: Record<string, SignRequest> = {};
 
@@ -75,28 +61,19 @@ export default class State extends StateRpc {
 
   public readonly authSubject: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
-
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
+  public readonly metadata: StateMetadata;
+
+  public readonly rpc: StateRpc;
+
   constructor (providers?: Providers) {
-    super(providers);
-
-    this.#metaStore.all((_key: string, def: MetadataDef): void => {
-      addMetadata(def);
-    });
-  }
-
-  public get knownMetadata (): MetadataDef[] {
-    return knownMetadata();
+    this.metadata = new StateMetadata(this.updateIcon);
+    this.rpc = new StateRpc(providers);
   }
 
   public get numAuthRequests (): number {
     return Object.keys(this.#authRequests).length;
-  }
-
-  public get numMetaRequests (): number {
-    return Object.keys(this.#metaRequests).length;
   }
 
   public get numSignRequests (): number {
@@ -109,31 +86,10 @@ export default class State extends StateRpc {
       .map(({ id, request, url }): AuthorizeRequest => ({ id, request, url }));
   }
 
-  public get allMetaRequests (): MetadataRequest[] {
-    return Object
-      .values(this.#metaRequests)
-      .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
-  }
-
   public get allSignRequests (): SigningRequest[] {
     return Object
       .values(this.#signRequests)
       .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
-  }
-
-  private popupClose (): void {
-    this.#windows.forEach((id: number): void =>
-      chrome.windows.remove(id)
-    );
-    this.#windows = [];
-  }
-
-  private popupOpen (): void {
-    chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
-      if (window) {
-        this.#windows.push(window.id);
-      }
-    });
   }
 
   private authComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
@@ -150,16 +106,7 @@ export default class State extends StateRpc {
       };
 
       delete this.#authRequests[id];
-      this.updateIconAuth(true);
-
-      fn(result);
-    };
-  }
-
-  private metaComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
-    return (result: boolean | Error): void => {
-      delete this.#metaRequests[id];
-      this.updateIconMeta(true);
+      this.updateIconAuth({ shouldClose: true });
 
       fn(result);
     };
@@ -168,15 +115,15 @@ export default class State extends StateRpc {
   private signComplete = (id: string, fn: Function): (result: ResponseSigning | Error) => void => {
     return (result: ResponseSigning | Error): void => {
       delete this.#signRequests[id];
-      this.updateIconSign(true);
+      this.updateIconSign({ shouldClose: true });
 
       fn(result);
     };
   }
 
-  private updateIcon (shouldClose?: boolean): void {
+  private updateIcon = ({ shouldClose, shouldOpen }: IconOptions = {}): void => {
     const authCount = this.numAuthRequests;
-    const metaCount = this.numMetaRequests;
+    const metaCount = this.metadata.numRequests;
     const signCount = this.numSignRequests;
     const text = (
       authCount
@@ -189,23 +136,25 @@ export default class State extends StateRpc {
     chrome.browserAction.setBadgeText({ text });
 
     if (shouldClose && text === '') {
-      this.popupClose();
+      this.#windows.forEach((id: number) => chrome.windows.remove(id));
+      this.#windows = [];
+    } else if (shouldOpen && text !== '') {
+      chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
+        if (window) {
+          this.#windows.push(window.id);
+        }
+      });
     }
   }
 
-  private updateIconAuth (shouldClose?: boolean): void {
+  private updateIconAuth (options?: IconOptions): void {
     this.authSubject.next(this.allAuthRequests);
-    this.updateIcon(shouldClose);
+    this.updateIcon(options);
   }
 
-  private updateIconMeta (shouldClose?: boolean): void {
-    this.metaSubject.next(this.allMetaRequests);
-    this.updateIcon(shouldClose);
-  }
-
-  private updateIconSign (shouldClose?: boolean): void {
+  private updateIconSign (options?: IconOptions): void {
     this.signSubject.next(this.allSignRequests);
-    this.updateIcon(shouldClose);
+    this.updateIcon(options);
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
@@ -229,8 +178,7 @@ export default class State extends StateRpc {
         url
       };
 
-      this.updateIconAuth();
-      this.popupOpen();
+      this.updateIconAuth({ shouldOpen: true });
     });
   }
 
@@ -243,39 +191,12 @@ export default class State extends StateRpc {
     return true;
   }
 
-  public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
-    return new Promise((resolve, reject): void => {
-      const id = getId();
-
-      this.#metaRequests[id] = {
-        id,
-        reject: this.metaComplete(id, reject),
-        request,
-        resolve: this.metaComplete(id, resolve),
-        url
-      };
-
-      this.updateIconMeta();
-      this.popupOpen();
-    });
-  }
-
   public getAuthRequest (id: string): AuthRequest {
     return this.#authRequests[id];
   }
 
-  public getMetaRequest (id: string): MetaRequest {
-    return this.#metaRequests[id];
-  }
-
   public getSignRequest (id: string): SignRequest {
     return this.#signRequests[id];
-  }
-
-  public saveMetadata (meta: MetadataDef): void {
-    this.#metaStore.set(meta.genesisHash, meta);
-
-    addMetadata(meta);
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
@@ -291,8 +212,7 @@ export default class State extends StateRpc {
         url
       };
 
-      this.updateIconSign();
-      this.popupOpen();
+      this.updateIconSign({ shouldOpen: true });
     });
   }
 }

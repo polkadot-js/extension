@@ -6,8 +6,8 @@ import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTyp
 import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-import extension from 'extensionizer';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import chrome from '@polkadot/extension-base/chrome';
 import { findChain } from '@polkadot/extension-chains';
 
 interface Handler {
@@ -20,7 +20,7 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const port = extension.runtime.connect({ name: PORT_EXTENSION });
+const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
 

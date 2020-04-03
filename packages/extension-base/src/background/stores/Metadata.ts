@@ -4,23 +4,23 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
-import extension from 'extensionizer';
+import chrome from '@polkadot/extension-base/chrome';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StoreValue = Record<string, any>;
 
 const lastError = (type: string): void => {
-  const error = extension.runtime.lastError;
+  const error = chrome.runtime.lastError;
 
   if (error) {
-    console.error(`ChainStore.${type}:: runtime.lastError:`, error);
+    console.error(`MetadataStore.${type}:: runtime.lastError:`, error);
   }
 };
 
-export default class Store {
+export default class MetadataStore {
   public all (cb: (key: string, value: MetadataDef) => void): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    extension.storage.local.get(null, (result: StoreValue): void => {
+    chrome.storage.local.get(null, (result: StoreValue): void => {
       lastError('all');
 
       Object.entries(result).forEach(([key, value]): void => {
@@ -30,7 +30,7 @@ export default class Store {
   }
 
   public get (key: string, cb: (value: MetadataDef) => void): void {
-    extension.storage.local.get([key], (result: StoreValue): void => {
+    chrome.storage.local.get([key], (result: StoreValue): void => {
       lastError('get');
 
       cb(result[key]);
@@ -38,7 +38,7 @@ export default class Store {
   }
 
   public remove (key: string, cb?: () => void): void {
-    extension.storage.local.remove(key, (): void => {
+    chrome.storage.local.remove(key, (): void => {
       lastError('remove');
 
       cb && cb();
@@ -46,7 +46,7 @@ export default class Store {
   }
 
   public set (key: string, value: MetadataDef, cb?: () => void): void {
-    extension.storage.local.set({ [key]: value }, (): void => {
+    chrome.storage.local.set({ [key]: value }, (): void => {
       lastError('set');
 
       cb && cb();

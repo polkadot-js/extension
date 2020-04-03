@@ -78,37 +78,37 @@ export default class Tabs {
   }
 
   private metadataProvide (url: string, request: MetadataDef): Promise<boolean> {
-    return this.#state.injectMetadata(url, request);
+    return this.#state.metadata.inject(url, request);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private metadataList (url: string): InjectedMetadataKnown[] {
-    return this.#state.knownMetadata.map(({ genesisHash, specVersion }) => ({
+    return this.#state.metadata.known.map(({ genesisHash, specVersion }) => ({
       genesisHash,
       specVersion
     }));
   }
 
   private rpcListProviders (): Promise<ResponseRpcListProviders> {
-    return this.#state.rpcListProviders();
+    return this.#state.rpc.listProviders();
   }
 
   private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
-    return this.#state.rpcSend(request, port);
+    return this.#state.rpc.send(request, port);
   }
 
   private rpcStartProvider (key: string, port: chrome.runtime.Port): Promise<ProviderMeta> {
-    return this.#state.rpcStartProvider(key, port);
+    return this.#state.rpc.startProvider(key, port);
   }
 
   private async rpcSubscribe (request: RequestRpcSubscribe, id: string, port: chrome.runtime.Port): Promise<boolean> {
     const innerCb = createSubscription<'pub(rpc.subscribe)'>(id, port);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribe)']): void => innerCb(data);
-    const subscriptionId = await this.#state.rpcSubscribe(request, cb, port);
+    const subscriptionId = await this.#state.rpc.subscribe(request, cb, port);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      this.rpcUnsubscribe({ ...request, subscriptionId }, port);
+      this.#state.rpc.unsubscribe({ ...request, subscriptionId }, port);
     });
 
     return true;
@@ -118,7 +118,7 @@ export default class Tabs {
     const innerCb = createSubscription<'pub(rpc.subscribeConnected)'>(id, port);
     const cb = (_error: Error | null, data: SubscriptionMessageTypes['pub(rpc.subscribeConnected)']): void => innerCb(data);
 
-    this.#state.rpcSubscribeConnected(request, cb, port);
+    this.#state.rpc.subscribeConnected(request, cb, port);
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -128,7 +128,7 @@ export default class Tabs {
   }
 
   private async rpcUnsubscribe (request: RequestRpcUnsubscribe, port: chrome.runtime.Port): Promise<boolean> {
-    return this.#state.rpcUnsubscribe(request, port);
+    return this.#state.rpc.unsubscribe(request, port);
   }
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {

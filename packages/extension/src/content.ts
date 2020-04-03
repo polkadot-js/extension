@@ -3,10 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
-
-const extension = typeof chrome !== undefined
-  ? chrome
-  : browser as unknown as typeof chrome;
+import extension from '@polkadot/extension-base/extension';
 
 // connect to the extension
 const port = extension.runtime.connect({ name: PORT_CONTENT });

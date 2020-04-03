@@ -7,6 +7,7 @@ import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import extension from '@polkadot/extension-base/extension';
 import { findChain } from '@polkadot/extension-chains';
 
 interface Handler {
@@ -18,10 +19,6 @@ interface Handler {
 }
 
 type Handlers = Record<string, Handler>;
-
-const extension = typeof chrome !== undefined
-  ? chrome
-  : browser as unknown as typeof chrome;
 
 const port = extension.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};

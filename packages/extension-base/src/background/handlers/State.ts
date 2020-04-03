@@ -10,6 +10,7 @@ import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, Re
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
 
+import extension from '../../extension';
 import { MetadataStore } from '../stores';
 
 interface AuthRequest {
@@ -54,10 +55,6 @@ interface SignRequest {
   reject: (error: Error) => void;
   url: string;
 }
-
-const extension = typeof chrome !== undefined
-  ? chrome
-  : browser as unknown as typeof chrome;
 
 let idCounter = 0;
 

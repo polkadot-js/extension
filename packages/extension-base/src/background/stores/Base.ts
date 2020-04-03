@@ -10,6 +10,8 @@ export default abstract class BaseStore {
   constructor () {
     this._storage = typeof chrome !== 'undefined'
       ? chrome.storage.local
-      : browser.storage.local as unknown as StorageInterface;
+      : typeof browser !== 'undefined'
+        ? browser.storage.local as unknown as StorageInterface
+        : null as unknown as StorageInterface;
   }
 }

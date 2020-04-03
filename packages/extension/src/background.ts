@@ -6,14 +6,11 @@
 
 import handlers from '@polkadot/extension-base/background/handlers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import extension from '@polkadot/extension-base/extension';
 import keyring from '@polkadot/ui-keyring';
 import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-
-const extension = typeof chrome !== undefined
-  ? chrome
-  : browser as unknown as typeof chrome;
 
 // setup the notification (same a FF default background, white text)
 extension.browserAction.setBadgeBackgroundColor({ color: '#d90000' });

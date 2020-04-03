@@ -2,13 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import extension from '@polkadot/extension-base/extension';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import BaseStore from './Base';
-
-const extension = typeof chrome !== undefined
-  ? chrome
-  : browser as unknown as typeof chrome;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StoreValue = Record<string, any>;

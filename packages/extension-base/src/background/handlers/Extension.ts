@@ -13,15 +13,12 @@ import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import extension from '../../extension';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 24];
-
-const extension = typeof chrome !== undefined
-  ? chrome
-  : browser as unknown as typeof chrome;
 
 // a global registry to use internally
 const registry = new TypeRegistry();

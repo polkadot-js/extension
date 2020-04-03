@@ -29,7 +29,6 @@ export interface AccountJson extends KeyringPair$Meta {
   isExternal?: boolean;
   name?: string;
   parentAddress?: string;
-  derivationPath?: string;
 }
 
 export type AccountWithChildren = AccountJson & {

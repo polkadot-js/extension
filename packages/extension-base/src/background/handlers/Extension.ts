@@ -304,7 +304,6 @@ export default class Extension {
 
   private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
     const childPair = this.derive(parentAddress, suri, parentPassword, {
-      derivationPath: suri,
       genesisHash,
       name,
       parentAddress

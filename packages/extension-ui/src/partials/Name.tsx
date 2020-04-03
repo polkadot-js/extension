@@ -19,7 +19,7 @@ interface Props {
 const isNameValid = isNotShorterThan(3, 'Account name is too short');
 
 export default function Name ({ address, className, isFocused, label = 'A descriptive name for your account', onBlur, onChange }: Props): React.ReactElement<Props> {
-  const accounts = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const account = accounts.find((account): boolean => account.address === address);
   const startValue = account && account.name;
 

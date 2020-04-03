@@ -13,6 +13,7 @@ import { Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import { buildHierarchy } from '../utils/buildHierarchy';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
@@ -96,7 +97,7 @@ export default function Popup (): React.ReactElement<{}> {
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
       <ActionContext.Provider value={_onAction}>
-        <AccountContext.Provider value={accounts}>
+        <AccountContext.Provider value={{ accounts, hierarchy: buildHierarchy(accounts) }}>
           <AuthorizeReqContext.Provider value={authRequests}>
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <MetadataReqContext.Provider value={metaRequests}>

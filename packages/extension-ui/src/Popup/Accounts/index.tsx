@@ -9,16 +9,17 @@ import QrImage from '../../assets/qr.svg';
 import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
 import { AddAccount, Header } from '../../partials';
 import Account from './Account';
+import AccountsTree from './AccountsTree';
 
 type Props = {};
 
 export default function Accounts (): React.ReactElement<Props> {
-  const accounts = useContext(AccountContext);
+  const { hierarchy } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
 
   return (
     <>
-      {(accounts.length === 0)
+      {(hierarchy.length === 0)
         ? <AddAccount />
         : (
           <>
@@ -27,8 +28,8 @@ export default function Accounts (): React.ReactElement<Props> {
               text={'Accounts'}
             />
             <AccountsArea>
-              {accounts.map((json, index): React.ReactNode => (
-                <Account
+              {hierarchy.map((json, index): React.ReactNode => (
+                <AccountsTree
                   {...json}
                   key={`${index}:${json.address}`}
                 />

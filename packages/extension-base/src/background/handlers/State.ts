@@ -10,7 +10,7 @@ import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, Re
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
 
-import extension from '../../extension';
+import chrome from '../../chrome';
 import { MetadataStore } from '../stores';
 
 interface AuthRequest {
@@ -65,7 +65,7 @@ const WINDOW_OPTS = {
   left: 150,
   top: 150,
   type: 'popup',
-  url: extension.extension.getURL('index.html'),
+  url: chrome.extension.getURL('index.html'),
   width: 480
 };
 
@@ -144,13 +144,13 @@ export default class State {
 
   private popupClose (): void {
     this.#windows.forEach((id: number): void =>
-      extension.windows.remove(id)
+      chrome.windows.remove(id)
     );
     this.#windows = [];
   }
 
   private popupOpen (): void {
-    extension.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
+    chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {
         this.#windows.push(window.id);
       }
@@ -215,7 +215,7 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    extension.browserAction.setBadgeText({ text });
+    chrome.browserAction.setBadgeText({ text });
 
     if (shouldClose && text === '') {
       this.popupClose();

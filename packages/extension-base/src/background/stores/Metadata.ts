@@ -2,26 +2,25 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import extension from '@polkadot/extension-base/extension';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
-import BaseStore from './Base';
+import chrome from '@polkadot/extension-base/chrome';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StoreValue = Record<string, any>;
 
 const lastError = (type: string): void => {
-  const error = extension.runtime.lastError;
+  const error = chrome.runtime.lastError;
 
   if (error) {
     console.error(`MetadataStore.${type}:: runtime.lastError:`, error);
   }
 };
 
-export default class MetadataStore extends BaseStore {
+export default class MetadataStore {
   public all (cb: (key: string, value: MetadataDef) => void): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this._storage.get(null, (result: StoreValue): void => {
+    chrome.storage.local.get(null, (result: StoreValue): void => {
       lastError('all');
 
       Object.entries(result).forEach(([key, value]): void => {
@@ -31,7 +30,7 @@ export default class MetadataStore extends BaseStore {
   }
 
   public get (key: string, cb: (value: MetadataDef) => void): void {
-    this._storage.get([key], (result: StoreValue): void => {
+    chrome.storage.local.get([key], (result: StoreValue): void => {
       lastError('get');
 
       cb(result[key]);
@@ -39,7 +38,7 @@ export default class MetadataStore extends BaseStore {
   }
 
   public remove (key: string, cb?: () => void): void {
-    this._storage.remove(key, (): void => {
+    chrome.storage.local.remove(key, (): void => {
       lastError('remove');
 
       cb && cb();
@@ -47,7 +46,7 @@ export default class MetadataStore extends BaseStore {
   }
 
   public set (key: string, value: MetadataDef, cb?: () => void): void {
-    this._storage.set({ [key]: value }, (): void => {
+    chrome.storage.local.set({ [key]: value }, (): void => {
       lastError('set');
 
       cb && cb();

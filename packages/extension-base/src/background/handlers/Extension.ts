@@ -13,7 +13,7 @@ import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import extension from '../../extension';
+import chrome from '../../chrome';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -270,8 +270,8 @@ export default class Extension {
   }
 
   private windowOpen (): boolean {
-    extension.tabs.create({
-      url: extension.extension.getURL('index.html')
+    chrome.tabs.create({
+      url: chrome.extension.getURL('index.html')
     });
 
     return true;

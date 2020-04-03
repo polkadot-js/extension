@@ -3,8 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useState } from 'react';
-import { validateDerivationPath } from '@polkadot/extension-ui/messaging';
+
 import { InputWithLabel, ValidatedInput } from '../components';
+import { validateDerivationPath } from '../messaging';
 import { Result } from '../validators';
 
 interface Props {

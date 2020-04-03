@@ -6,8 +6,9 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import QrImage from '../../assets/qr.svg';
+import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
+import { AddAccount, Header } from '../../partials';
 import AccountsTree from './AccountsTree';
-import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
 
 type Props = {};
 

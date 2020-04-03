@@ -19,7 +19,11 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const port = (chrome || browser).runtime.connect({ name: PORT_EXTENSION });
+const extension = typeof chrome !== undefined
+  ? chrome
+  : browser as unknown as typeof chrome;
+
+const port = extension.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
 

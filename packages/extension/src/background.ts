@@ -11,11 +11,15 @@ import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+const extension = typeof chrome !== undefined
+  ? chrome
+  : browser as unknown as typeof chrome;
+
 // setup the notification (same a FF default background, white text)
-(chrome || browser).browserAction.setBadgeBackgroundColor({ color: '#d90000' });
+extension.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
 
 // listen to all messages and handle appropriately
-(chrome || browser).runtime.onConnect.addListener((port): void => {
+extension.runtime.onConnect.addListener((port): void => {
   // shouldn't happen, however... only listen to what we know about
   assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 

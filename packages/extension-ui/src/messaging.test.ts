@@ -7,13 +7,17 @@ import { configure } from 'enzyme';
 
 import { exportAccount } from './messaging';
 
+const extension = typeof chrome !== undefined
+  ? chrome
+  : browser as unknown as typeof chrome;
+
 configure({ adapter: new Adapter() });
 
 describe('messaging sends message to background via extension port for', () => {
   test('exportAccount', () => {
     const callback = jest.fn();
 
-    (chrome || browser).runtime.connect().onMessage.addListener(callback);
+    extension.runtime.connect().onMessage.addListener(callback);
     exportAccount('HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5', 'passw0rd');
 
     expect(callback).toHaveBeenCalledWith(

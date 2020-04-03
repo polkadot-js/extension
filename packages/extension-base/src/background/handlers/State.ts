@@ -55,6 +55,10 @@ interface SignRequest {
   url: string;
 }
 
+const extension = typeof chrome !== undefined
+  ? chrome
+  : browser as unknown as typeof chrome;
+
 let idCounter = 0;
 
 const WINDOW_OPTS = {
@@ -64,7 +68,7 @@ const WINDOW_OPTS = {
   left: 150,
   top: 150,
   type: 'popup',
-  url: (chrome || browser).extension.getURL('index.html'),
+  url: extension.extension.getURL('index.html'),
   width: 480
 };
 
@@ -143,13 +147,13 @@ export default class State {
 
   private popupClose (): void {
     this.#windows.forEach((id: number): void =>
-      (chrome || browser).windows.remove(id)
+      extension.windows.remove(id)
     );
     this.#windows = [];
   }
 
   private popupOpen (): void {
-    (chrome || browser).windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
+    extension.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {
         this.#windows.push(window.id);
       }
@@ -214,7 +218,7 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    (chrome || browser).browserAction.setBadgeText({ text });
+    extension.browserAction.setBadgeText({ text });
 
     if (shouldClose && text === '') {
       this.popupClose();

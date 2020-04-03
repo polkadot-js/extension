@@ -6,11 +6,15 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import BaseStore from './Base';
 
+const extension = typeof chrome !== undefined
+  ? chrome
+  : browser as unknown as typeof chrome;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StoreValue = Record<string, any>;
 
 const lastError = (type: string): void => {
-  const error = (chrome || browser).runtime.lastError;
+  const error = extension.runtime.lastError;
 
   if (error) {
     console.error(`MetadataStore.${type}:: runtime.lastError:`, error);

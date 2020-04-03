@@ -4,8 +4,12 @@
 
 import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
 
+const extension = typeof chrome !== undefined
+  ? chrome
+  : browser as unknown as typeof chrome;
+
 // connect to the extension
-const port = (chrome || browser).runtime.connect({ name: PORT_CONTENT });
+const port = extension.runtime.connect({ name: PORT_CONTENT });
 
 // send any messages from the extension back to the page
 port.onMessage.addListener((data): void => {
@@ -25,7 +29,7 @@ window.addEventListener('message', ({ data, source }): void => {
 // inject our data injector
 const script = document.createElement('script');
 
-script.src = (chrome || browser).extension.getURL('page.js');
+script.src = extension.extension.getURL('page.js');
 
 script.onload = (): void => {
   // remove the injecting tag when loaded

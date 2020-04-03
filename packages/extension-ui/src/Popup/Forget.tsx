@@ -4,10 +4,11 @@
 
 import React, { useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import { ActionContext, Address, Button, Warning, Header, ActionBar, ActionText } from '../components';
-
-import { forgetAccount } from '../messaging';
 import styled from 'styled-components';
+
+import { ActionContext, Address, Button, Warning, ActionBar, ActionText } from '../components';
+import { forgetAccount } from '../messaging';
+import { Header } from '../partials';
 
 type Props = RouteComponentProps<{ address: string }>;
 

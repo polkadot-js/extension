@@ -5,6 +5,7 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
+
 import { Fonts, View } from './components';
 
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {

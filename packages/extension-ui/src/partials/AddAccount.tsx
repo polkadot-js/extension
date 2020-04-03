@@ -4,7 +4,8 @@
 
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import { ActionContext } from './contexts';
+
+import { ActionContext } from '../components';
 import AddAccountImage from './AddAccountImage';
 import Header from './Header';
 

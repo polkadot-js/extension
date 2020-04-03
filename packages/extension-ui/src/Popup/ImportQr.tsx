@@ -5,9 +5,9 @@
 import React, { useContext, useState } from 'react';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Address, Button, ButtonArea, Header, VerticalSpace } from '../components';
+import { ActionContext, Address, Button, ButtonArea, VerticalSpace } from '../components';
 import { createAccountExternal } from '../messaging';
-import { Name } from '../partials';
+import { Header, Name } from '../partials';
 
 type Props = {};
 

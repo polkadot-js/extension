@@ -3,21 +3,21 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext } from 'react';
-import QrImage from '../../assets/qr.svg';
-
-import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
-import Account from './Account';
 import styled from 'styled-components';
+
+import QrImage from '../../assets/qr.svg';
+import AccountsTree from './AccountsTree';
+import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
 
 type Props = {};
 
 export default function Accounts (): React.ReactElement<Props> {
-  const accounts = useContext(AccountContext);
+  const { hierarchy } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
 
   return (
     <>
-      {(accounts.length === 0)
+      {(hierarchy.length === 0)
         ? <AddAccount />
         : (
           <>
@@ -26,8 +26,8 @@ export default function Accounts (): React.ReactElement<Props> {
               text={'Accounts'}
             />
             <AccountsArea>
-              {accounts.map((json, index): React.ReactNode => (
-                <Account
+              {hierarchy.map((json, index): React.ReactNode => (
+                <AccountsTree
                   {...json}
                   key={`${index}:${json.address}`}
                 />

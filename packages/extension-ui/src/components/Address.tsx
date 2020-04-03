@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson } from '@polkadot/extension-base/background/types';
+import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -29,6 +29,7 @@ interface Props {
   children?: React.ReactNode;
   genesisHash?: string | null;
   actions?: React.ReactNode;
+  parentName?: string;
 }
 
 interface Recoded {
@@ -47,7 +48,7 @@ function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountJson[], chain: Chain | null): Recoded {
+function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -65,8 +66,8 @@ function recodeAddress (address: string, accounts: AccountJson[], chain: Chain |
 
 const ACCOUNTS_SCREEN_HEIGHT = 500;
 
-function Address ({ actions, address, children, className, genesisHash, name }: Props): React.ReactElement<Props> {
-  const accounts = useContext(AccountContext);
+function Address ({ actions, address, children, className, genesisHash, name, parentName }: Props): React.ReactElement<Props> {
+  const { accounts } = useContext(AccountContext);
   const chain = useMetadata(genesisHash);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
   const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -111,9 +112,8 @@ function Address ({ actions, address, children, className, genesisHash, name }: 
             <Name>{name || (account && account.name) || '<unknown>'}</Name>
             <CopyAddress>
               <FullAddress>{formatted || '<unknown>'}</FullAddress>
-              {chain?.genesisHash && (
-                <Banner>{chain.name}</Banner>
-              )}
+              {chain?.genesisHash && <ChainBanner>{chain.name}</ChainBanner>}
+              {parentName && <ParentBanner>↳ {parentName}</ParentBanner>}
               <CopyToClipboard text={(formatted && formatted) || ''} >
                 <Svg
                   onClick={_onCopy}
@@ -241,7 +241,6 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({
 `;
 
 const Banner = styled.div`
-  background: ${({ theme }): string => theme.primaryColor};
   border-radius: 0 0 8px 8px;
   color: white;
   font-size: 12px;
@@ -250,6 +249,14 @@ const Banner = styled.div`
   position: absolute;
   right: 40px;
   top: 0;
+`;
+
+const ChainBanner = styled(Banner)`
+  background: ${({ theme }): string => theme.primaryColor};
+`;
+
+const ParentBanner = styled(Banner)`
+  background: ${({ theme }): string => theme.parentLabelColor};
 `;
 
 const MovableMenu = styled(Menu) <{ isMoved: boolean }>`

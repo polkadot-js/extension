@@ -133,15 +133,6 @@ export default class Extension {
     return true;
   }
 
-  private contentInject (): boolean {
-    extension.tabs.executeScript({
-      file: 'content.js',
-      runAt: 'document_start'
-    });
-
-    return true;
-  }
-
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
     const queued = this.#state.getMetaRequest(id);
 
@@ -352,9 +343,6 @@ export default class Extension {
 
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
-
-      case 'pri(content.inject)':
-        return this.contentInject();
 
       case 'pri(metadata.approve)':
         return this.metadataApprove(request as RequestMetadataApprove);

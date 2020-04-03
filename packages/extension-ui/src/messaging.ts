@@ -89,10 +89,6 @@ export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
 }
 
-export async function contentInject (): Promise<boolean> {
-  return sendMessage('pri(content.inject)', null);
-}
-
 export async function approveSignPassword (id: string, password: string): Promise<boolean> {
   return sendMessage('pri(signing.approve.password)', { id, password });
 }

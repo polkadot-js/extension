@@ -2860,7 +2860,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@0.24.0-beta.14, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@0.24.0-beta.14, @polkadot/extension-base@^0.24.0-beta.14, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -2910,6 +2910,8 @@ __metadata:
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
     "@babel/runtime": ^7.9.2
+    "@polkadot/extension-base": ^0.24.0-beta.14
+    "@polkadot/extension-inject": ^0.24.0-beta.14
     "@polkadot/keyring": ^2.7.1
     "@polkadot/react-identicon": ^0.52.0-beta.27
     "@polkadot/react-qr": ^0.52.0-beta.27

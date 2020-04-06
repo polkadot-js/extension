@@ -6,7 +6,7 @@ import '../../../__mocks__/chrome';
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure } from 'enzyme';
-import chrome from '@polkadot/extension-base/chrome';
+import chrome from '@polkadot/extension-inject/chrome';
 
 import { exportAccount } from './messaging';
 

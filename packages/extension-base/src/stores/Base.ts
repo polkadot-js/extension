@@ -1,8 +1,8 @@
-// Copyright 2019 @polkadot/extension-base authors & contributors
+// Copyright 2019-2020 @polkadot/extension-base authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import chrome from '@polkadot/extension-base/chrome';
+import chrome from '@polkadot/extension-inject/chrome';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StoreValue = Record<string, any>;
@@ -18,8 +18,8 @@ const lastError = (type: string): void => {
 export default abstract class BaseStore {
   #prefix: string;
 
-  constructor (prefix: string) {
-    this.#prefix = `${prefix}:`;
+  constructor (prefix: string | null) {
+    this.#prefix = prefix ? `${prefix}:` : '';
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

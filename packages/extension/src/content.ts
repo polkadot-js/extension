@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import chrome from '@polkadot/extension-base/chrome';
 import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
+import chrome from '@polkadot/extension-inject/chrome';
 
 // connect to the extension
 const port = chrome.runtime.connect({ name: PORT_CONTENT });

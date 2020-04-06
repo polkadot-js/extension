@@ -7,12 +7,11 @@
   "dependencies": {
     "@babel/runtime": "^7.9.2",
     "@polkadot/extension-base": "0.24.0-beta.14",
+    "@polkadot/extension-inject": "0.24.0-beta.14",
     "@polkadot/extension-ui": "0.24.0-beta.14"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.52.5",
-    "@types/chrome": "^0.0.103",
-    "@types/firefox-webext-browser": "^70.0.1",
+    "@polkadot/dev": "^0.52.6",
     "babel-loader": "^8.1.0",
     "extract-loader": "^5.0.1",
     "file-loader": "^6.0.0",

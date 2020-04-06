@@ -5,9 +5,9 @@
 import '../../../../../__mocks__/chrome';
 
 import keyring from '@polkadot/ui-keyring';
-import ExtensionStore from '@polkadot/ui-keyring/stores/Extension';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+import { AccountsStore } from '../../stores';
 import Extension from './Extension';
 import State from './State';
 
@@ -15,7 +15,7 @@ describe('Extension', () => {
   async function createExtension (): Promise<Extension> {
     await cryptoWaitReady();
 
-    keyring.loadAll({ store: new ExtensionStore() });
+    keyring.loadAll({ store: new AccountsStore() });
 
     return new Extension(new State());
   }

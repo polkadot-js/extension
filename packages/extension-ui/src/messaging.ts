@@ -7,7 +7,7 @@ import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import chrome from '@polkadot/extension-base/chrome';
+import chrome from '@polkadot/extension-inject/chrome';
 import { findChain } from '@polkadot/extension-chains';
 
 interface Handler {

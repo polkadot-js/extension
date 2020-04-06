@@ -7,6 +7,10 @@
   "dependencies": {
     "@babel/runtime": "^7.9.2"
   },
+  "devDependencies": {
+    "@types/chrome": "^0.0.103",
+    "@types/firefox-webext-browser": "^70.0.1"
+  },
   "peerDependencies": {
     "@polkadot/api": "*"
   }

@@ -9,9 +9,9 @@ import { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, Re
 
 import { BehaviorSubject } from 'rxjs';
 import { assert } from '@polkadot/util';
+import chrome from '@polkadot/extension-inject/chrome';
 
-import chrome from '../../chrome';
-import { MetadataStore } from '../stores';
+import { MetadataStore } from '../../stores';
 
 interface AuthRequest {
   id: string;

@@ -5,9 +5,9 @@
 // Runs in the extension background, handling all keyring access
 
 import handlers from '@polkadot/extension-base/background/handlers';
-import { AccountsStore } from '@polkadot/extension-base/background/stores';
-import chrome from '@polkadot/extension-base/chrome';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { AccountsStore } from '@polkadot/extension-base/stores';
+import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';

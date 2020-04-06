@@ -2866,6 +2866,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.9.2
     "@polkadot/api": ^1.10.0-beta.11
+    "@polkadot/extension-inject": ^0.24.0-beta.14
     "@polkadot/keyring": ^2.7.1
     "@polkadot/ui-keyring": ^0.52.0-beta.26
   languageName: unknown
@@ -2892,11 +2893,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@0.24.0-beta.14, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@0.24.0-beta.14, @polkadot/extension-inject@^0.24.0-beta.14, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
     "@babel/runtime": ^7.9.2
+    "@types/chrome": ^0.0.103
+    "@types/firefox-webext-browser": ^70.0.1
   peerDependencies:
     "@polkadot/api": "*"
   languageName: unknown
@@ -2940,9 +2943,8 @@ __metadata:
     "@babel/runtime": ^7.9.2
     "@polkadot/dev": ^0.52.6
     "@polkadot/extension-base": 0.24.0-beta.14
+    "@polkadot/extension-inject": 0.24.0-beta.14
     "@polkadot/extension-ui": 0.24.0-beta.14
-    "@types/chrome": ^0.0.103
-    "@types/firefox-webext-browser": ^70.0.1
     babel-loader: ^8.1.0
     extract-loader: ^5.0.1
     file-loader: ^6.0.0

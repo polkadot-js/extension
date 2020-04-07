@@ -1,4 +1,8 @@
-import React from 'react';
+// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
+
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -10,13 +14,18 @@ interface Props {
 }
 
 function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
+  const _onChange = useCallback(
+    (event) => onChange(event.target.checked),
+    [onChange]
+  );
+
   return (
     <div className={className}>
       <span>{uncheckedLabel}</span>
       <label>
         <Checkbox
           checked={checked}
-          onChange={((event): void => onChange(event.target.checked))}
+          onChange={_onChange}
         />
         <Slider />
       </label>

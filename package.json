@@ -7,9 +7,9 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^1.10.0-beta.11",
+    "@polkadot/api": "^1.10.0-beta.12",
     "@polkadot/keyring": "^2.7.1",
-    "@polkadot/types": "^1.10.0-beta.11",
+    "@polkadot/types": "^1.10.0-beta.12",
     "@polkadot/util": "^2.7.1",
     "@polkadot/util-crypto": "^2.7.1",
     "babel-core": "^7.0.0-bridge.0",
@@ -20,6 +20,7 @@
     "build:release": "polkadot-ci-ghact-build",
     "build:zip": "(rm -rf ./master-build.zip && yarn build && cd packages/extension/build && zip -r -FS ../../../master-build.zip . -i *) && (rm -rf ./master-src.zip && zip -r -x '*build*' -x '*node_modules*' -FS ./master-src.zip packages .babelrc.js .editorconfig .eslintignore .eslintrc.js babel.config.js CHANGELOG.md CONTRIBUTING.md jest.config.js lerna.json LICENSE package.json README.md tsconfig.json yarn.lock)",
     "lint": "polkadot-dev-run-lint",
+    "lint:css": "stylelint './packages/**/src/**/*.tsx'",
     "clean": "polkadot-dev-clean-build",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
@@ -28,10 +29,14 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
-    "@polkadot/dev": "^0.52.6",
-    "@polkadot/typegen": "^1.10.0-beta.11",
+    "@polkadot/dev": "^0.52.7",
+    "@polkadot/typegen": "^1.10.0-beta.12",
     "@types/jest": "^25.2.1",
     "copy-webpack-plugin": "^5.1.1",
-    "sinon-chrome": "^3.0.1"
+    "sinon-chrome": "^3.0.1",
+    "stylelint": "^13.3.0",
+    "stylelint-config-recommended": "^3.0.0",
+    "stylelint-config-styled-components": "^0.1.1",
+    "stylelint-processor-styled-components": "^1.10.0"
   }
 }

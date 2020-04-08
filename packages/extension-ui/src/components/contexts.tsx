@@ -12,7 +12,8 @@ const noop = (): void => undefined;
 
 const AccountContext = React.createContext<AccountsContext>({
   accounts: [],
-  hierarchy: []
+  hierarchy: [],
+  master: undefined
 });
 const ActionContext = React.createContext<(to?: string) => void>(noop);
 const AuthorizeReqContext = React.createContext<AuthorizeRequest[]>([]);

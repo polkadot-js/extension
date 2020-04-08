@@ -39,6 +39,7 @@ export type AccountWithChildren = AccountJson & {
 export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
+  master?: AccountJson;
 }
 
 export interface AuthorizeRequest {

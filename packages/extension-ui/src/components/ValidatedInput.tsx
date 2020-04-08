@@ -17,18 +17,17 @@ type Props<T extends BasicProps> = T & {
   validator: Validator<string>;
   component: React.ComponentType<T>;
   onValidatedChange: (value: string | null) => void;
+  defaultValue?: string;
 }
 
-function ValidatedInput<T extends object> ({ className, component: Input, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
-  const [value, setValue] = useState('');
+function ValidatedInput<T extends object> ({ className, component: Input, defaultValue, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
+  const [value, setValue] = useState(defaultValue || '');
   const [wasMounted, setWasMounted] = useState(false);
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
 
   useEffect(() => {
     if (!wasMounted) {
       setWasMounted(true);
-
-      return;
     }
 
     (async (): Promise<void> => {

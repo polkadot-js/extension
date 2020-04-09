@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useState } from 'react';
-import { Address, Button, ButtonArea, VerticalSpace } from '@polkadot/extension-ui/components';
+import React, { useCallback, useState } from 'react';
+import { Address, ButtonArea, NextStepButton, VerticalSpace } from '@polkadot/extension-ui/components';
 import { Name, Password } from '@polkadot/extension-ui/partials';
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
 function AccountName ({ address, onCreate }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
+
+  const _onCreate = useCallback(() => name && password && onCreate(name, password), [name, password, onCreate]);
 
   return (
     <>
@@ -30,11 +32,7 @@ function AccountName ({ address, onCreate }: Props): React.ReactElement<Props> {
           />
           <VerticalSpace />
           <ButtonArea>
-            <Button
-              onClick={(): void | Promise<void | boolean> => onCreate(name, password)}
-            >
-            Add the account with the generated seed
-            </Button>
+            <NextStepButton onClick={_onCreate}>Add the account with the generated seed</NextStepButton>
           </ButtonArea>
         </>
       )}

@@ -4,9 +4,8 @@
 
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address, Button, ButtonArea, InputWithLabel, VerticalSpace } from '../../components';
+import { AccountContext, ActionContext, Address, BackButton, ButtonArea, InputWithLabel, NextStepButton, VerticalSpace } from '../../components';
 import { deriveAccount, validateAccount } from '../../messaging';
 import { DerivationPath, Name, Password } from '../../partials';
 import Step from './Step';
@@ -23,6 +22,8 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
   const [parentPassword, setParentPassword] = useState<string | null>(null);
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
   const [derivationConfirmed, setDerivationConfirmed] = useState(false);
+
+  const [step, setStep] = useState(1);
   const _onCreate = useCallback(async () => {
     if (!account || !name || !password || !parentPassword) {
       return;
@@ -37,6 +38,15 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
     setParentPassword(enteredPassword);
     setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
   }, [parentAddress]);
+
+  const _onCancel = (): void => {
+    if (derivationConfirmed) {
+      setStep(step - 1);
+      setDerivationConfirmed(false);
+    } else {
+      onAction('/');
+    }
+  };
 
   return (
     <>
@@ -58,12 +68,14 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
         </>
       )}
       {!derivationConfirmed && (
-        <DeriveButton
-          isDisabled={!isProperParentPassword}
-          onClick={(): void => setDerivationConfirmed(true)}
-        >
-          I want to derive from this account
-        </DeriveButton>
+        <ButtonArea>
+          <NextStepButton
+            isDisabled={!isProperParentPassword}
+            onClick={(): void => setDerivationConfirmed(true)}
+          >
+            I want to derive from this account
+          </NextStepButton>
+        </ButtonArea>
       )}
       {isProperParentPassword && derivationConfirmed && (
         <Name
@@ -79,25 +91,27 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
       />}
       {isProperParentPassword && derivationConfirmed && account && name && <Password onChange={setPassword}/>}
       {isProperParentPassword && derivationConfirmed && account && name && password && (
+        <Address
+          address={account.address}
+          name={name}
+        />
+      )}
+      {derivationConfirmed && (
         <>
-          <Address
-            address={account.address}
-            name={name}
-          />
           <VerticalSpace/>
           <ButtonArea>
-            <Button onClick={_onCreate}>Create derived account</Button>
+            <BackButton onClick={_onCancel}/>
+            <NextStepButton
+              isDisabled={!password}
+              onClick={_onCreate}
+            >
+              Create derived account
+            </NextStepButton>
           </ButtonArea>
         </>
       )}
     </>
   );
 }
-
-const DeriveButton = styled(Button)`
-  margin-left: 24px;
-  margin-right: 24px;
-  width: auto;
-`;
 
 export default withRouter(Derive);

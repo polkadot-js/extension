@@ -16,7 +16,6 @@ interface Props {
 
 function DerivationPath ({ defaultPath, onChange, parentAddress, parentPassword }: Props): React.ReactElement<Props> {
   const [path, setPath] = useState<string>(defaultPath);
-
   const isPathValid = useCallback(async (path: string): Promise<Result<string>> => {
     try {
       await validateDerivationPath(parentAddress, path, parentPassword);

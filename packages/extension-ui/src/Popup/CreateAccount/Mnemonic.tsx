@@ -3,9 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useState } from 'react';
-import { Button, ButtonArea, Checkbox, MnemonicSeed, VerticalSpace, Warning } from '../../components';
+import { ButtonArea, Checkbox, MnemonicSeed, NextStepButton, VerticalSpace, Warning } from '../../components';
 import useToast from '../../hooks/useToast';
-
 interface Props {
   onNextStep: () => void;
   seed: string;
@@ -45,12 +44,12 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
         onChange={setIsMnemonicSaved}
       />
       <ButtonArea>
-        <Button
+        <NextStepButton
           isDisabled={!isMnemonicSaved}
           onClick={onNextStep}
         >
           Next step
-        </Button>
+        </NextStepButton>
       </ButtonArea>
     </>
   );

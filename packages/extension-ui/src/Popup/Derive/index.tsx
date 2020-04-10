@@ -5,25 +5,20 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { AccountContext, ActionContext, Address, BackButton, ButtonArea, InputWithLabel, NextStepButton, VerticalSpace } from '../../components';
-import { deriveAccount, validateAccount } from '../../messaging';
-import { DerivationPath, Name, Password } from '../../partials';
-import Step from './Step';
-import { nextDerivationPath } from '@polkadot/extension-ui/utils/nextDerivationPath';
+import { ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
+import { deriveAccount } from '../../messaging';
+import { HeaderWithSteps, Name, Password } from '../../partials';
+import { SelectParent } from './SelectParent';
 
 type Props = RouteComponentProps<{ address: string }>;
 
 function Derive ({ match: { params: { address: parentAddress } } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const { accounts } = useContext(AccountContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
-  const [isProperParentPassword, setIsProperParentPassword] = useState(false);
-  const [derivationConfirmed, setDerivationConfirmed] = useState(false);
 
-  const [step, setStep] = useState(1);
   const _onCreate = useCallback(async () => {
     if (!account || !name || !password || !parentPassword) {
       return;
@@ -34,73 +29,48 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
     onAction('/');
   }, [account, name, password, onAction, parentAddress, parentPassword]);
 
-  const _onParentPasswordEnter = useCallback(async (enteredPassword: string) => {
-    setParentPassword(enteredPassword);
-    setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
-  }, [parentAddress]);
+  const _onDerivationConfirmed = useCallback(({ account, parentPassword }: {
+    account: { address: string; suri: string };
+    parentPassword: string;
+  }) => {
+    setAccount(account);
+    setParentPassword(parentPassword);
+  }, []);
 
-  const _onCancel = (): void => {
-    if (derivationConfirmed) {
-      setStep(step - 1);
-      setDerivationConfirmed(false);
-    } else {
-      onAction('/');
-    }
-  };
+  const _onBackClick = useCallback(() => {
+    setAccount(null);
+  }, []);
 
   return (
     <>
-      <Step step={derivationConfirmed ? 2 : 1} />
-      {!derivationConfirmed && (
-        <>
-          <Address
-            address={parentAddress}
-            name={name}
-          />
-          <InputWithLabel
-            data-export-password
-            isError={!isProperParentPassword}
-            isFocused
-            label='enter the password for the account you want to derive from'
-            onChange={_onParentPasswordEnter}
-            type='password'
-          />
-        </>
+      <HeaderWithSteps
+        step={account ? 2 : 1}
+        text='Add new account:&nbsp;'
+      />
+      {!account && (
+        <SelectParent
+          onDerivationConfirmed={_onDerivationConfirmed}
+          parentAddress={parentAddress}
+        />
       )}
-      {!derivationConfirmed && (
-        <ButtonArea>
-          <NextStepButton
-            isDisabled={!isProperParentPassword}
-            onClick={(): void => setDerivationConfirmed(true)}
-          >
-            I want to derive from this account
-          </NextStepButton>
-        </ButtonArea>
-      )}
-      {isProperParentPassword && derivationConfirmed && (
+      {account && (
         <Name
           isFocused
           onChange={setName}
         />
       )}
-      {isProperParentPassword && derivationConfirmed && parentPassword && name && <DerivationPath
-        defaultPath={nextDerivationPath(accounts, parentAddress)}
-        onChange={setAccount}
-        parentAddress={parentAddress}
-        parentPassword={parentPassword}
-      />}
-      {isProperParentPassword && derivationConfirmed && account && name && <Password onChange={setPassword}/>}
-      {isProperParentPassword && derivationConfirmed && account && name && password && (
+      {account && name && <Password onChange={setPassword}/>}
+      {account && name && password && (
         <Address
           address={account.address}
           name={name}
         />
       )}
-      {derivationConfirmed && (
+      {account && (
         <>
           <VerticalSpace/>
           <ButtonArea>
-            <BackButton onClick={_onCancel}/>
+            <BackButton onClick={_onBackClick}/>
             <NextStepButton
               isDisabled={!password}
               onClick={_onCreate}

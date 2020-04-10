@@ -116,16 +116,16 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
               <>
                 <Banner>
                   <ArrowLabel/>
-                  <ParentName>{parentName}</ParentName>
+                  <ParentName data-field='parent'>{parentName}</ParentName>
                 </Banner>
                 <DisplacedName>{displayedName}</DisplacedName>
               </>
             ) : (
-              <Name>{displayedName}</Name>
+              <Name data-field='name'>{displayedName}</Name>
             )}
             <CopyAddress>
-              <FullAddress>{formatted || '<unknown>'}</FullAddress>
-              {chain?.genesisHash && <ChainBanner>{chain.name}</ChainBanner>}
+              <FullAddress data-field='address'>{formatted || '<unknown>'}</FullAddress>
+              {chain?.genesisHash && <ChainBanner data-field='chain'>{chain.name}</ChainBanner>}
               <CopyToClipboard text={(formatted && formatted) || ''} >
                 <Svg
                   onClick={_onCopy}

@@ -90,7 +90,7 @@ export default styled(Dropdown)`
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: 5px;
+    right: 12px;
     width: 8px;
     height: 6px;
     background: url(${arrow}) center no-repeat;

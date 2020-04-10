@@ -3,11 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { ActionContext, Header, Loading, ActionText } from '../../components';
+import { ActionContext, Loading } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
 import Mnemonic from '@polkadot/extension-ui/Popup/CreateAccount/Mnemonic';
 import AccountName from '@polkadot/extension-ui/Popup/CreateAccount/AccountName';
+import { HeaderWithSteps } from '@polkadot/extension-ui/partials';
 
 export default function CreateAccount (): React.ReactElement {
   const onAction = useContext(ActionContext);
@@ -31,29 +31,14 @@ export default function CreateAccount (): React.ReactElement {
   };
 
   const _onNextStep = (): void => setStep(step + 1);
-
-  const _onCancel = (): void => {
-    if (step === 2) {
-      setStep(step - 1);
-    } else {
-      onAction('/');
-    }
-  };
+  const _onPreviousStep = (): void => setStep(step - 1);
 
   return (
     <>
-      <Header text={'Create an account '}>
-        <CreationSteps>
-          <div>
-            <CurrentStep>{step}</CurrentStep>
-            <TotalSteps>/2</TotalSteps>
-          </div>
-          <ActionText
-            onClick={_onCancel}
-            text={step === 1 ? 'Cancel' : 'Back'}
-          />
-        </CreationSteps>
-      </Header>
+      <HeaderWithSteps
+        step={step}
+        text='Create an account:&nbsp;'
+      />
       <Loading>{account && (step === 1
         ? (
           <Mnemonic
@@ -64,6 +49,7 @@ export default function CreateAccount (): React.ReactElement {
         : (
           <AccountName
             address={account.address}
+            onBackClick={_onPreviousStep}
             onCreate={_onCreate}
           />
         )
@@ -71,27 +57,3 @@ export default function CreateAccount (): React.ReactElement {
     </>
   );
 }
-
-const CreationSteps = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  flex-grow: 1;
-  padding-right: 24px;
-  margin-top: 3px;
-`;
-
-const CurrentStep = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.primaryColor};
-  font-weight: 800;
-  margin-left: 10px;
-`;
-
-const TotalSteps = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.textColor};
-  font-weight: 800;
-`;

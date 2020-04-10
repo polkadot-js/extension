@@ -16,24 +16,25 @@ interface Props {
 
 function DerivationPath ({ defaultPath, onChange, parentAddress, parentPassword }: Props): React.ReactElement<Props> {
   const [path, setPath] = useState<string>(defaultPath);
-  const isPathValid = useCallback(async (path: string): Promise<Result<string>> => {
+  const isPathValid = useCallback(async (newPath: string): Promise<Result<string>> => {
     try {
-      await validateDerivationPath(parentAddress, path, parentPassword);
+      await validateDerivationPath(parentAddress, newPath, parentPassword);
 
-      return Result.ok(path);
+      return Result.ok(newPath);
     } catch (error) {
-      return Result.error('Invalid derivation path');
+      return Result.error(newPath === path ? '' : 'Invalid derivation path');
     }
-  }, [parentAddress, parentPassword]);
+  }, [path, parentAddress, parentPassword]);
 
   const _onChange = useCallback(async (newPath: string | null) => {
-    newPath && setPath(newPath);
-    onChange(newPath ? await validateDerivationPath(parentAddress, newPath, parentPassword) : null);
+    newPath !== null && setPath(newPath);
+    onChange(newPath === null ? null : await validateDerivationPath(parentAddress, newPath, parentPassword));
   }, [parentAddress, onChange, parentPassword]);
 
   return (
     <ValidatedInput
       component={InputWithLabel}
+      data-input-suri
       defaultValue={defaultPath}
       label='Derivation path'
       onValidatedChange={_onChange}

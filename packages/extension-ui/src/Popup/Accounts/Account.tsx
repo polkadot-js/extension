@@ -41,7 +41,7 @@ function Account ({ address, className, isExternal, parentName }: Props): React.
             <MenuGroup>
               <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
               {!isExternal && (
-                <MenuItem to={`/account/derive/${address}`}>Derive New Account</MenuItem>
+                <MenuItem to={`/account/derive/${address}/locked`}>Derive New Account</MenuItem>
               )}
             </MenuGroup>
             {!isExternal && (

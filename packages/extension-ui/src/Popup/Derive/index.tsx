@@ -3,17 +3,20 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useContext, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { useParams } from 'react-router';
 
 import { ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps, Name, Password } from '../../partials';
 import { SelectParent } from './SelectParent';
 
-type Props = RouteComponentProps<{ address: string }>;
+interface Props {
+  isLocked?: boolean;
+}
 
-function Derive ({ match: { params: { address: parentAddress } } }: Props): React.ReactElement<Props> {
+function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
+  const { address: parentAddress } = useParams<{ address: string }>();
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -49,6 +52,7 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
       />
       {!account && (
         <SelectParent
+          isLocked={isLocked}
           onDerivationConfirmed={_onDerivationConfirmed}
           parentAddress={parentAddress}
         />
@@ -84,4 +88,4 @@ function Derive ({ match: { params: { address: parentAddress } } }: Props): Reac
   );
 }
 
-export default withRouter(Derive);
+export default Derive;

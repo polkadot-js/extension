@@ -14,6 +14,7 @@ import { AccountContext, ActionContext, themes } from '../../components';
 import { flushAllPromises } from '../../testHelpers';
 import { buildHierarchy } from '../../utils/buildHierarchy';
 import Derive from '.';
+import AddressDropdown from '@polkadot/extension-ui/Popup/Derive/AddressDropdown';
 
 configure({ adapter: new Adapter() });
 
@@ -27,7 +28,7 @@ const accounts = [
 ];
 
 describe('Derive', () => {
-  const mountComponent = async (): Promise<{
+  const mountComponent = async (locked = false): Promise<{
     wrapper: ReactWrapper;
     onActionStub: jest.Mock;
   }> => {
@@ -42,7 +43,7 @@ describe('Derive', () => {
           }}>
             <ThemeProvider theme={themes.dark}>
               <Route path='/account/derive/:address'>
-                <Derive/>
+                <Derive isLocked={locked}/>
               </Route>
             </ThemeProvider>
           </AccountContext.Provider>
@@ -158,6 +159,26 @@ describe('Derive', () => {
       wrapper.find('[data-parent-option]').first().simulate('click');
 
       expect(onActionStub).toBeCalledWith(`/account/derive/${accounts[0].address}`);
+    });
+  });
+
+  describe('Locked parent selection', () => {
+    it('checkbox does not exist', async () => {
+      const { wrapper } = await mountComponent(true);
+
+      expect(wrapper.exists('[type="checkbox"]')).toBe(false);
+    });
+
+    it('address dropdown does not exist', async () => {
+      const { wrapper } = await mountComponent(true);
+
+      expect(wrapper.exists(AddressDropdown)).toBe(false);
+    });
+
+    it('parent is taken from URL', async () => {
+      const { wrapper } = await mountComponent(true);
+
+      expect(wrapper.find('[data-field="name"]').first().text()).toBe('B');
     });
   });
 });

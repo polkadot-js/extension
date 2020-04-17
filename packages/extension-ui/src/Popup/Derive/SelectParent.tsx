@@ -5,18 +5,19 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, ButtonArea, Checkbox, InputWithLabel, NextStepButton, VerticalSpace } from '../../components';
+import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, NextStepButton, VerticalSpace } from '../../components';
 import AddressDropdown from './AddressDropdown';
 import { validateAccount } from '../../messaging';
 import { DerivationPath } from '../../partials';
 import { nextDerivationPath } from '../../utils/nextDerivationPath';
 
 interface Props {
+  isLocked?: boolean;
   parentAddress: string;
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
 }
 
-export function SelectParent ({ onDerivationConfirmed, parentAddress }: Props): React.ReactElement<Props> {
+export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const { accounts, hierarchy } = useContext(AccountContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
@@ -47,17 +48,23 @@ export function SelectParent ({ onDerivationConfirmed, parentAddress }: Props): 
 
   return (
     <>
-      <Checkbox
-        checked={shouldAccountBeDerived}
-        label='Nest Account under'
-        onChange={setShouldAccountBeDerived}
-      />
-      <DisableableArea isDisabled={!shouldAccountBeDerived}>
-        <AddressDropdown
-          allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
-          onSelect={_onParentChange}
-          selectedAddress={parentAddress}
+      {!isLocked && (
+        <Checkbox
+          checked={shouldAccountBeDerived}
+          label='Nest Account under'
+          onChange={setShouldAccountBeDerived}
         />
+      )}
+      <DisableableArea isDisabled={!shouldAccountBeDerived}>
+        {isLocked ? (
+          <Address address={parentAddress} />
+        ) : (
+          <AddressDropdown
+            allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
+            onSelect={_onParentChange}
+            selectedAddress={parentAddress}
+          />
+        )}
         <div ref={passwordInputRef}>
           <InputWithLabel
             data-export-password

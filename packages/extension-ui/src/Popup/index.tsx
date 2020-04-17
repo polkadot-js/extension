@@ -121,6 +121,7 @@ export default function Popup (): React.ReactElement<{}> {
                       <Route path='/account/export/:address'><Export /></Route>
                       <Route path='/account/import-qr'><ImportQr /></Route>
                       <Route path='/account/import-seed'><ImportSeed /></Route>
+                      <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
                       <Route path='/account/derive/:address'><Derive /></Route>
                       <Route
                         exact

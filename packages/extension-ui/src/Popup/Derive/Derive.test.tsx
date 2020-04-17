@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import '../../../../../__mocks__/chrome';
+
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import { configure, mount, ReactWrapper } from 'enzyme';
@@ -11,10 +13,10 @@ import { ThemeProvider } from 'styled-components';
 import * as messaging from '@polkadot/extension-ui/messaging';
 
 import { AccountContext, ActionContext, themes } from '../../components';
-import { flushAllPromises } from '../../testHelpers';
 import { buildHierarchy } from '../../utils/buildHierarchy';
+import { flushAllPromises } from '../../testHelpers';
+import AddressDropdown from './AddressDropdown';
 import Derive from '.';
-import AddressDropdown from '@polkadot/extension-ui/Popup/Derive/AddressDropdown';
 
 configure({ adapter: new Adapter() });
 

@@ -6,7 +6,7 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest } from '../types';
 
-import extension from 'extensionizer';
+import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
@@ -270,8 +270,8 @@ export default class Extension {
   }
 
   private windowOpen (): boolean {
-    extension.tabs.create({
-      url: extension.extension.getURL('index.html')
+    chrome.tabs.create({
+      url: chrome.extension.getURL('index.html')
     });
 
     return true;

@@ -11,17 +11,17 @@ import styled from 'styled-components';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
+import copy from '../assets/copy.svg';
+import details from '../assets/details.svg';
+import parentArrow from '../assets/arrowParentLabel.svg';
+
 import { AccountContext } from './contexts';
 import Identicon from './Identicon';
-import Svg from './Svg';
-
 import Menu from './Menu';
-import CopyImg from '../assets/copy.svg';
-import DetailsImg from '../assets/details.svg';
+import Svg from './Svg';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
 import useToast from '../hooks/useToast';
-import arrowParentLabel from '../assets/arrowParentLabel.svg';
 
 interface Props {
   address?: string | null;
@@ -130,7 +130,7 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
               <CopyToClipboard text={(formatted && formatted) || ''} >
                 <Svg
                   onClick={_onCopy}
-                  src={CopyImg}
+                  src={copy}
                 />
               </CopyToClipboard>
             </CopyAddress>
@@ -246,13 +246,13 @@ const Settings = styled.div`
 Settings.displayName = 'Details';
 
 const ActionsIcon = styled(Svg).attrs(() => ({
-  src: DetailsImg
+  src: details
 }))`
   background: ${({ theme }): string => theme.accountDotsIconColor};
 `;
 
 const ActiveActionsIcon = styled(Svg).attrs(() => ({
-  src: DetailsImg
+  src: details
 }))`
   background: ${({ theme }): string => theme.primaryColor};
 `;
@@ -284,7 +284,7 @@ const ParentName = styled.div`
 `;
 
 const ArrowLabel = styled(Svg).attrs(() => ({
-  src: arrowParentLabel
+  src: parentArrow
 }))`
   position: absolute;
   top: 5px;

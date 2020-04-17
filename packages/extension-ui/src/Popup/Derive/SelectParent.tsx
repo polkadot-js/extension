@@ -6,10 +6,10 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, NextStepButton, VerticalSpace } from '../../components';
-import AddressDropdown from './AddressDropdown';
 import { validateAccount } from '../../messaging';
 import { DerivationPath } from '../../partials';
 import { nextDerivationPath } from '../../utils/nextDerivationPath';
+import AddressDropdown from './AddressDropdown';
 
 interface Props {
   isLocked?: boolean;

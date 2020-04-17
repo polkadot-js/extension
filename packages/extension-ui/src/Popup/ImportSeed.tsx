@@ -5,10 +5,10 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, ButtonArea, Header, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
-import { createAccountSuri, validateSeed } from '../messaging';
-import { Name, Password } from '../partials';
+import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
 import { allOf, isNotShorterThan, Result } from '../validators';
+import { createAccountSuri, validateSeed } from '../messaging';
+import { Header, Name, Password } from '../partials';
 
 type Props = {};
 

@@ -2,13 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import '../../../../__mocks__/chrome';
+
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { themes, Header, Settings } from '@polkadot/extension-ui/components';
-import { MemoryRouter } from 'react-router';
 import React from 'react';
-
+import { MemoryRouter } from 'react-router';
 import { ThemeProvider } from 'styled-components';
+
+import { themes } from '../components';
+import Header from './Header';
+import Settings from './Settings';
 
 configure({ adapter: new Adapter() });
 

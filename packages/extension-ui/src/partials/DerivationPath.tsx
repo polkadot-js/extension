@@ -4,8 +4,9 @@
 
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { validateDerivationPath } from '@polkadot/extension-ui/messaging';
+
 import { InputWithLabel, Svg, ValidatedInput } from '../components';
+import { validateDerivationPath } from '../messaging';
 import { Result } from '../validators';
 import arrowIcon from '../assets/arrow-down.svg';
 import gearIcon from '../assets/gear.svg';

@@ -5,6 +5,7 @@
 import React, { useCallback, useState } from 'react';
 import { ButtonArea, Checkbox, MnemonicSeed, NextStepButton, VerticalSpace, Warning } from '../../components';
 import useToast from '../../hooks/useToast';
+
 interface Props {
   onNextStep: () => void;
   seed: string;

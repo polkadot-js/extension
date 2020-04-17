@@ -5,9 +5,10 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import QrImage from '../../assets/qr.svg';
+import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
+import { AddAccount, Header } from '../../partials';
 import AccountsTree from './AccountsTree';
-import { AccountContext, Button, Header, MediaContext, AddAccount, ButtonArea, Svg, ButtonWithSubtitle } from '../../components';
+import qrIcon from '../../assets/qr.svg';
 
 type Props = {};
 
@@ -49,7 +50,7 @@ export default function Accounts (): React.ReactElement<Props> {
         />
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>
-            <Svg src={QrImage} />
+            <Svg src={qrIcon} />
           </QrButton>
         )}
       </ButtonArea>

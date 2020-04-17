@@ -3,10 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useRef, useState } from 'react';
-import { Address, Svg } from '@polkadot/extension-ui/components';
 import styled from 'styled-components';
-import useOutsideClick from '@polkadot/extension-ui/hooks/useOutsideClick';
+
+import { Address, Svg } from '../../components';
 import arrow from '../../assets/arrow-down.svg';
+import useOutsideClick from '../../hooks/useOutsideClick';
 
 interface Props {
   allAddresses: string[];

@@ -5,8 +5,9 @@
 import React, { useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionContext, Address, Button, InputWithLabel, Warning, Header, ActionText, ActionBar } from '../components';
+import { ActionContext, Address, Button, InputWithLabel, Warning, ActionText, ActionBar } from '../components';
 import { exportAccount } from '../messaging';
+import { Header } from '../partials';
 import styled from 'styled-components';
 
 const MIN_LENGTH = 6;

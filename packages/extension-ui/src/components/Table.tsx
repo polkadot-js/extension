@@ -22,16 +22,16 @@ function Table ({ children, className, isFull }: Props): React.ReactElement<Prop
 }
 
 export default React.memo(styled(Table)`
-  &.isFull {
-    height: 100%;
-    overflow: scroll;
-  }
-
   border: 0;
   display: block;
   font-size: ${({ theme }): string => theme.labelFontSize};
   line-height: ${({ theme }): string => theme.labelLineHeight};
   margin-bottom: 1rem;
+
+  &.isFull {
+    height: 100%;
+    overflow: scroll;
+  }
 
   td.data {
     max-width: 0;
@@ -60,15 +60,15 @@ export default React.memo(styled(Table)`
     cursor: pointer;
     max-width: 24rem;
 
-    &[open] summary {
-      white-space: normal;
-    }
-
     summary {
       text-overflow: ellipsis;
+      outline: 0;
       overflow: hidden;
       white-space: nowrap;
-      outline: 0;
+    }
+
+    &[open] summary {
+      white-space: normal;
     }
   }
 `);

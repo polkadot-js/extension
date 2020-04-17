@@ -4,7 +4,9 @@
 
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import { ActionContext, ActionText, Header } from '@polkadot/extension-ui/components';
+
+import { ActionContext, ActionText } from '../components';
+import Header from './Header';
 
 interface Props {
   step: number;

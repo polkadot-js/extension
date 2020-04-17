@@ -5,9 +5,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ActionContext, Loading } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
-import Mnemonic from '@polkadot/extension-ui/Popup/CreateAccount/Mnemonic';
-import AccountName from '@polkadot/extension-ui/Popup/CreateAccount/AccountName';
-import { HeaderWithSteps } from '@polkadot/extension-ui/partials';
+import { HeaderWithSteps } from '../../partials';
+import AccountName from './AccountName';
+import Mnemonic from './Mnemonic';
 
 export default function CreateAccount (): React.ReactElement {
   const onAction = useContext(ActionContext);

@@ -5,14 +5,11 @@ jobs:
   pr:
     strategy:
       matrix:
-        step: ['lint', 'test', 'build']
+        step: ['lint', 'lint:css', 'test', 'build']
     name: ${{ matrix.step }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
     - name: ${{ matrix.step }}
       run: |
         yarn install --immutable | grep -v 'YN0013'

@@ -2,12 +2,14 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { SigningRequest } from '@polkadot/extension-base/background/types';
+
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
-import { Header, Loading, SigningReqContext } from '../../components';
+import { Loading, SigningReqContext } from '../../components';
+import { Header } from '../../partials';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
-import { SigningRequest } from '@polkadot/extension-base/background/types';
 
 function isInnerTransaction (signingRequest: SigningRequest): boolean {
   return 'blockNumber' in signingRequest.request.inner;

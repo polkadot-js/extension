@@ -1,3 +1,12 @@
+# 0.24.1 Apr 19, 2020
+
+- Allow for per root-account derivation & indicators (Thanks to https://github.com/EthWorks)
+- Add consistent validation to all text inputs (Thanks to https://github.com/EthWorks)
+- Make address copy interfaces easily accessible (Thanks to https://github.com/EthWorks)
+- Latest dependency updates, base types for all latest Polkadot/Substrate chains
+- Rework base storage access & cross-browser interfaces for consistency
+- UI consistency adjustments & code maintainability cleanups
+
 # 0.23.1 Mar 26, 2020
 
 - Extract shared background code for re-use (Thanks to https://github.com/amaurymartiny)

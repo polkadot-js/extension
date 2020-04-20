@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import Label from './Label';
@@ -23,9 +23,12 @@ interface Props {
 }
 
 function InputWithLabel ({ className, defaultValue, isError, isFocused, isReadOnly, label, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
-  const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
-    onChange && onChange(value.trim());
-  };
+  const _onChange = useCallback(
+    ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
+      onChange && onChange(value);
+    },
+    [onChange]
+  );
 
   return (
     <Label

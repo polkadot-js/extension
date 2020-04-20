@@ -33,13 +33,16 @@ export default function Import (): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const _onChangeSeed = useCallback(async (suri: string | null): Promise<void> => {
-    if (suri) {
-      setAccount(await validateSeed(suri));
-    } else {
-      setAccount(null);
-    }
-  }, []);
+  const _onChangeSeed = useCallback(
+    async (suri: string | null): Promise<void> => {
+      if (suri) {
+        setAccount(await validateSeed(suri));
+      } else {
+        setAccount(null);
+      }
+    },
+    []
+  );
 
   // FIXME Duplicated between here and Create.tsx
   const _onCreate = useCallback((): void => {

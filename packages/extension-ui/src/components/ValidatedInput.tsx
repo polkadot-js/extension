@@ -12,6 +12,7 @@ interface BasicProps {
   value?: string;
   onChange?: (value: string) => void;
 }
+
 type Props<T extends BasicProps> = T & {
   className?: string;
   validator: Validator<string>;
@@ -42,10 +43,12 @@ function ValidatedInput<T extends object> ({ className, component: Input, onVali
 
   return (
     <div className={className}>
-      <Input {...props as T}
+      <Input
+        {...props as T}
         isError={Result.isError(validationResult)}
         onChange={setValue}
-        value={value} />
+        value={value}
+      />
       {Result.isError(validationResult) && <ErrorMessage>{validationResult.error.errorDescription}</ErrorMessage>}
     </div>
   );

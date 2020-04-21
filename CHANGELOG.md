@@ -1,3 +1,7 @@
+# 0.25.0-beta.x
+
+- Adjust `web3Enable` promise to only resolve after the document has been loaded (is interactive)
+
 # 0.24.1 Apr 19, 2020
 
 - Allow for per root-account derivation & indicators (Thanks to https://github.com/EthWorks)

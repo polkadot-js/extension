@@ -4,7 +4,7 @@
 
 export function documentReadyPromise <T> (creator: () => Promise<T>): Promise<T> {
   return new Promise((resolve): void => {
-    if (['interactive', 'loaded'].includes(document.readyState)) {
+    if (['interactive', 'complete'].includes(document.readyState)) {
       resolve(creator());
     } else {
       window.addEventListener('load', (): void => {

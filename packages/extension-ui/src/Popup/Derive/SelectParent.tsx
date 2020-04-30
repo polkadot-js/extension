@@ -5,7 +5,7 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, NextStepButton, VerticalSpace } from '../../components';
+import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace } from '../../components';
 import { validateAccount } from '../../messaging';
 import { DerivationPath } from '../../partials';
 import { nextDerivationPath } from '../../utils/nextDerivationPath';
@@ -49,9 +49,9 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
   return (
     <>
       {!isLocked && (
-        <Checkbox
+        <CheckboxWithSmallerMargins
           checked={shouldAccountBeDerived}
-          label='Nest Account under'
+          label='Derive'
           onChange={setShouldAccountBeDerived}
         />
       )}
@@ -59,11 +59,13 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
         {isLocked ? (
           <Address address={parentAddress} />
         ) : (
-          <AddressDropdown
-            allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
-            onSelect={_onParentChange}
-            selectedAddress={parentAddress}
-          />
+          <Label label='Choose Parent Account:'>
+            <AddressDropdown
+              allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
+              onSelect={_onParentChange}
+              selectedAddress={parentAddress}
+            />
+          </Label>
         )}
         <div ref={passwordInputRef}>
           <InputWithLabel
@@ -102,7 +104,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
               data-button-action='create root account'
               onClick={(): void => onAction('/account/create')}
             >
-              Create new root account
+              Create account from new seed
             </NextStepButton>
           )
         }
@@ -110,6 +112,11 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
     </>
   );
 }
+
+const CheckboxWithSmallerMargins = styled(Checkbox)`
+  margin-top: 0;
+  margin-bottom: 10px;
+`;
 
 const DisableableArea = styled.div<{ isDisabled: boolean }>`
   opacity: ${({ isDisabled }): string => isDisabled ? '0.2' : '1'};

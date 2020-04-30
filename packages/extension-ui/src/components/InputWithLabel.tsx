@@ -11,6 +11,7 @@ import { Input } from './TextInputs';
 interface Props {
   className?: string;
   defaultValue?: string | null;
+  disabled?: boolean;
   isError?: boolean;
   isFocused?: boolean;
   isReadOnly?: boolean;
@@ -22,7 +23,7 @@ interface Props {
   placeholder?: string;
 }
 
-function InputWithLabel ({ className, defaultValue, isError, isFocused, isReadOnly, label, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -37,6 +38,7 @@ function InputWithLabel ({ className, defaultValue, isError, isFocused, isReadOn
         autoCorrect='off'
         autoFocus={isFocused}
         defaultValue={defaultValue || undefined}
+        disabled={disabled}
         onBlur={onBlur}
         onChange={_onChange}
         placeholder={placeholder}

@@ -11,7 +11,7 @@ const darkTheme = {
   background: '#26272C',
   bodyColor: '#20222A',
   borderRadius: '4px',
-  boxBorderColor: '#43444B',
+  boxBorderColor: '#303030',
   boxMargin: '0.75rem 0',
   boxPadding: '0 0.25rem',
   boxShadow: 'rgba(0, 0, 0, 0.86)',

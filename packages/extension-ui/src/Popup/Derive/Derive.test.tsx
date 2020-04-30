@@ -70,7 +70,7 @@ describe('Derive', () => {
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === 'pass');
 
-    it('"Nest Account under" checkbox is selected by default', async () => {
+    it('"Derive" checkbox is selected by default', async () => {
       const { wrapper } = await mountComponent();
       const checkbox = wrapper.find('input[type="checkbox"]');
 

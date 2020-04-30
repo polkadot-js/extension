@@ -54,7 +54,7 @@ const HiddenOptions = styled.div<{ visible: boolean }>`
   visibility: ${({ visible }): string => (visible ? 'visible' : 'hidden')};
   width: 430px;
   z-index: 100;
-  background: #20222A;
+  background: ${({ theme }): string => theme.bodyColor};
   max-height: ${({ visible }): string => (visible ? '200px' : '0')};
   overflow: scroll;
   padding: 5px;
@@ -69,6 +69,7 @@ const HiddenOptions = styled.div<{ visible: boolean }>`
 `;
 
 export default styled(AddressDropdown)`
+  margin-bottom: 16px;
   cursor: pointer;
 
   & > div:first-child > ${Address}::after {
@@ -76,11 +77,14 @@ export default styled(AddressDropdown)`
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: 12px;
-    width: 8px;
-    height: 6px;
+    right: 11px;
+    width: 30px;
+    height: 30px;
     background: url(${arrow}) center no-repeat;
+    background-color: ${({ theme }): string => theme.inputBackground};
     pointer-events: none;
+    border-radius: 4px;
+    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
   }
 
   ${Address} ${Svg} {

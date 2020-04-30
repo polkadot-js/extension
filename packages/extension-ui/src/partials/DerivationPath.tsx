@@ -5,11 +5,11 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { InputWithLabel, Svg, ValidatedInput } from '../components';
+import { InputWithLabel, Svg, ValidatedInput, Button } from '../components';
 import { validateDerivationPath } from '../messaging';
 import { Result } from '../validators';
-import arrowIcon from '../assets/arrow-down.svg';
-import gearIcon from '../assets/gear.svg';
+import lockIcon from '../assets/lock.svg';
+import unlockIcon from '../assets/unlock.svg';
 
 interface Props {
   className?: string;
@@ -21,7 +21,7 @@ interface Props {
 
 function DerivationPath ({ className, defaultPath, onChange, parentAddress, parentPassword }: Props): React.ReactElement<Props> {
   const [path, setPath] = useState<string>(defaultPath);
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const isPathValid = useCallback(async (newPath: string): Promise<Result<string>> => {
     try {
@@ -33,7 +33,7 @@ function DerivationPath ({ className, defaultPath, onChange, parentAddress, pare
     }
   }, [path, parentAddress, parentPassword]);
 
-  const _onExpand = useCallback(() => setShowAdvancedOptions(!showAdvancedOptions), [showAdvancedOptions]);
+  const _onExpand = useCallback(() => setIsDisabled(!isDisabled), [isDisabled]);
 
   const _onChange = useCallback(async (newPath: string | null) => {
     newPath !== null && setPath(newPath);
@@ -42,90 +42,76 @@ function DerivationPath ({ className, defaultPath, onChange, parentAddress, pare
 
   return (
     <div className={className}>
-      <OptionsLabel onClick={_onExpand}>
-        <LabelWithIcon>
-          <GearIcon/>
-          <label>Advanced derivation options</label>
-        </LabelWithIcon>
-        <ArrowIcon isExpanded={showAdvancedOptions}/>
-      </OptionsLabel>
-      <Expandable isExpanded={showAdvancedOptions}>
-        <ValidatedInput
-          component={InputWithLabel}
-          data-input-suri
-          defaultValue={defaultPath}
-          label='Derivation path'
-          onValidatedChange={_onChange}
-          placeholder='//hard/soft'
-          validator={isPathValid}
-          value={path}
-        />
-      </Expandable>
+      <PathField>
+        <PathInput isUnlocked={isDisabled}>
+          <ValidatedInput
+            component={InputWithLabel}
+            data-input-suri
+            defaultValue={defaultPath}
+            disabled={!isDisabled}
+            label='Derivation Path'
+            onValidatedChange={_onChange}
+            placeholder='//hard/soft'
+            validator={isPathValid}
+            value={path}
+          />
+        </PathInput>
+        <LockButton onClick={_onExpand}>
+          {!isDisabled ? <LockIcon/> : <UnlockIcon/>}
+        </LockButton>
+      </PathField>
     </div>
   );
 }
 
-interface ExpandableComponentProps {
-  isExpanded: boolean;
-}
-
-const ArrowIcon = styled(Svg).attrs(() => ({
-  src: arrowIcon
-}))<ExpandableComponentProps>`
-  height: 6px;
-  width: 8px;
-  margin-right: 6px;
-  align-self: center;
-  background: ${({ theme }): string => theme.subTextColor};
-  transform: ${({ isExpanded }): string => `rotate(${isExpanded ? '0' : '-90'}deg)`};
-  transition: 0.1s;
-`;
-
-const LabelWithIcon = styled.div`
+const PathField = styled.div`
   display: flex;
   flex-direction: row;
-  user-select: none;
 `;
 
-const GearIcon = styled(Svg).attrs(() => ({
-  src: gearIcon
+interface UnlockableComponentProps {
+  isUnlocked: boolean;
+}
+
+const PathInput = styled.div<UnlockableComponentProps>`
+  width: 100%;
+
+  & input {
+    opacity: ${({ isUnlocked }): string => isUnlocked ? '100' : '30'}%;
+  }
+`;
+
+const LockIcon = styled(Svg).attrs(() => ({
+  src: lockIcon
 }))`
-  height: 12px;
-  width: 12px;
-  margin-right: 6px;
-  align-self: center;
-  background: ${({ theme }): string => theme.subTextColor};
+  width: 11px;
+  height: 14px;
+  background: ${({ theme }): string => theme.iconNeutralColor};
 `;
 
-export const OptionsLabel = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  &:hover {
-    cursor: pointer;
-    color: ${({ theme }): string => `${theme.subTextColor}`};
+const UnlockIcon = styled(Svg).attrs(() => ({
+  src: unlockIcon
+}))`
+  width: 11px;
+  height: 14px;
+  background: ${({ theme }): string => theme.iconNeutralColor};
+`;
+
+const LockButton = styled(Button)`
+  width: 11px;
+  height: 14px;
+  padding: 3px;
+  margin: 36px 2px 0 10px;
+  background: none;
+  &:not(:disabled):hover {
+    background: none;
   }
-  label{
-    font-size: 10px;
-    margin-top: 1px;
-    line-height: 10px;
-    letter-spacing: 0.04em;
-    font-weight: 800;
-    opacity: 0.65;
-    text-transform: uppercase;
-    &:hover {
-      cursor: pointer;
-      color: ${({ theme }): string => `${theme.subTextColor}`};
-    }
+  &:active, &:focus {
+    outline: none;
+  }
+  &::-moz-focus-inner {
+    border: 0;
   }
 `;
 
-const Expandable = styled.div<ExpandableComponentProps>`
-  visibility: ${({ isExpanded }): string => isExpanded ? 'visible' : 'hidden'};
-`;
-
-export default styled(DerivationPath)`
-  border-top: ${({ theme }): string => `1px solid ${theme.inputBorderColor}`};
-  padding-top: 10px;
-`;
+export default DerivationPath;

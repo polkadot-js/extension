@@ -16,6 +16,7 @@ export { default as Fonts } from './Fonts';
 export { default as Icon } from './Icon';
 export { default as Identicon } from './Identicon';
 export { default as InputWithLabel } from './InputWithLabel';
+export { default as Label } from './Label';
 export { default as Link } from './Link';
 export { default as List } from './List';
 export { default as Loading } from './Loading';

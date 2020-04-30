@@ -4,6 +4,8 @@
 
 import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, Unsubcall, ProviderList } from '@polkadot/extension-inject/types';
 
+import { documentReadyPromise } from './util';
+
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;
 
@@ -38,7 +40,7 @@ export { isWeb3Injected, web3EnablePromise };
 
 // enables all the providers found on the injected window interface
 export function web3Enable (originName: string): Promise<InjectedExtension[]> {
-  web3EnablePromise =
+  web3EnablePromise = documentReadyPromise((): Promise<InjectedExtension[]> =>
     Promise
       .all(
         Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> => {
@@ -79,7 +81,8 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
         console.log(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
 
         return values;
-      });
+      })
+  );
 
   return web3EnablePromise;
 }

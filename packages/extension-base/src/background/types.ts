@@ -29,6 +29,7 @@ export interface AccountJson extends KeyringPair$Meta {
   isExternal?: boolean;
   name?: string;
   parentAddress?: string;
+  whenCreated?: number;
 }
 
 export type AccountWithChildren = AccountJson & {
@@ -38,6 +39,7 @@ export type AccountWithChildren = AccountJson & {
 export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
+  master?: AccountJson;
 }
 
 export interface AuthorizeRequest {

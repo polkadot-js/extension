@@ -75,7 +75,7 @@ describe('Create Account', () => {
     it('clicking on Next activates phase 2', () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
-      expect(wrapper.find(Header).text()).toBe('Create an account 2/2Back');
+      expect(wrapper.find(Header).text()).toBe('Create an account: 2/2Cancel');
     });
   });
 
@@ -90,7 +90,7 @@ describe('Create Account', () => {
       expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-password]')).toHaveLength(0);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('input should not be highlighted as error until first interaction', () => {
@@ -103,7 +103,7 @@ describe('Create Account', () => {
       expect(wrapper.find('ErrorMessage').text()).toBe('Account name is too short');
       expect(wrapper.find(InputWithLabel).find('[data-input-password]')).toHaveLength(0);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('input should keep showing error when something has been typed but then erased', async () => {
@@ -117,7 +117,7 @@ describe('Create Account', () => {
       expect(wrapper.find(Input).first().prop('withError')).toBe(false);
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('password shorter than 6 characters should be not valid', async () => {
@@ -126,21 +126,21 @@ describe('Create Account', () => {
       expect(wrapper.find('ErrorMessage').text()).toBe('Password is too short');
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('submit button is not visible until both passwords are equal', async () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdeg'));
       expect(wrapper.find('ErrorMessage').text()).toBe('Passwords do not match');
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(true);
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('submit button is visible when both passwords are equal', async () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
       expect(wrapper.find('ErrorMessage')).toHaveLength(0);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(false);
-      expect(wrapper.find(Button)).toHaveLength(1);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
     });
 
     it('saves account with provided name and password', async () => {
@@ -161,28 +161,28 @@ describe('Create Account', () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
     });
 
-    it('first password input is cleared - second one and button get hidden', async () => {
+    it('first password input is cleared - second one disappears and button get disabled', async () => {
       await type(wrapper.find('input[type="password"]').first(), '');
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
-    it('first password changes - button is not visible', async () => {
+    it('first password changes - button is not disabled', async () => {
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
       expect(wrapper.find('ErrorMessage').text()).toBe('Passwords do not match');
-      expect(wrapper.find(Button)).toHaveLength(0);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('first password changes, then second changes too - button is visible', async () => {
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
       await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
-      expect(wrapper.find(Button)).toHaveLength(1);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
     });
 
     it('second password changes, then first changes too - button is visible', async () => {
       await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
-      expect(wrapper.find(Button)).toHaveLength(1);
+      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
     });
   });
 });

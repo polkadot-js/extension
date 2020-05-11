@@ -4,8 +4,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import arrow from '../assets/arrow-down.svg';
 
+import arrow from '../assets/arrow-down.svg';
 import Label from './Label';
 
 interface DropdownOption {
@@ -90,7 +90,7 @@ export default styled(Dropdown)`
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    right: 5px;
+    right: 12px;
     width: 8px;
     height: 6px;
     background: url(${arrow}) center no-repeat;

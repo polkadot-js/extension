@@ -5,15 +5,15 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import QrImage from '../../assets/qr.svg';
 import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
 import { AddAccount, Header } from '../../partials';
 import AccountsTree from './AccountsTree';
+import qrIcon from '../../assets/qr.svg';
 
 type Props = {};
 
 export default function Accounts (): React.ReactElement<Props> {
-  const { hierarchy } = useContext(AccountContext);
+  const { hierarchy, master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
 
   return (
@@ -39,9 +39,9 @@ export default function Accounts (): React.ReactElement<Props> {
       }
       <ButtonArea>
         <ButtonWithSubtitle
-          subTitle='With new seed'
+          subTitle={master ? 'Derive from master' : 'With new seed'}
           title='Create New Account'
-          to='/account/create'
+          to={master ? `/account/derive/${master.address}` : '/account/create'}
         />
         <ButtonWithSubtitle
           subTitle='I have a pre-existing seed'
@@ -50,7 +50,7 @@ export default function Accounts (): React.ReactElement<Props> {
         />
         {mediaAllowed && (
           <QrButton to='/account/import-qr'>
-            <Svg src={QrImage} />
+            <Svg src={qrIcon} />
           </QrButton>
         )}
       </ButtonArea>

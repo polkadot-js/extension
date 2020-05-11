@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
@@ -48,6 +48,18 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
   }
 
   return false;
+}
+
+function initAccountContext (accounts: AccountJson[]): AccountsContext {
+  const hierarchy = buildHierarchy(accounts);
+  const isNotExternal = (account: AccountJson): boolean => !account.isExternal;
+  const master = hierarchy.find(isNotExternal);
+
+  return {
+    accounts,
+    hierarchy,
+    master
+  };
 }
 
 export default function Popup (): React.ReactElement<{}> {
@@ -97,7 +109,7 @@ export default function Popup (): React.ReactElement<{}> {
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
       <ActionContext.Provider value={_onAction}>
-        <AccountContext.Provider value={{ accounts, hierarchy: buildHierarchy(accounts) }}>
+        <AccountContext.Provider value={initAccountContext(accounts)}>
           <AuthorizeReqContext.Provider value={authRequests}>
             <MediaContext.Provider value={cameraOn && mediaAllowed}>
               <MetadataReqContext.Provider value={metaRequests}>
@@ -109,6 +121,7 @@ export default function Popup (): React.ReactElement<{}> {
                       <Route path='/account/export/:address'><Export /></Route>
                       <Route path='/account/import-qr'><ImportQr /></Route>
                       <Route path='/account/import-seed'><ImportSeed /></Route>
+                      <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
                       <Route path='/account/derive/:address'><Derive /></Route>
                       <Route
                         exact

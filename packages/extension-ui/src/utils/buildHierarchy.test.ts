@@ -10,14 +10,14 @@ const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[])
 };
 
 describe('Use Account Hierarchy', () => {
-  const acc = (address: string, parentAddress?: string, derivationPath?: string): {
+  const acc = (address: string, parentAddress?: string, whenCreated?: number): {
     address: string;
-    derivationPath?: string;
+    whenCreated?: number;
     parentAddress?: string;
   } => ({
     address,
-    derivationPath,
-    parentAddress
+    parentAddress,
+    whenCreated
   });
 
   test('for empty account list, returns empty list', () => {
@@ -55,5 +55,19 @@ describe('Use Account Hierarchy', () => {
         children: [acc('c', 'b')]
       }]
     }]);
+  });
+
+  test('sorts accounts by creation time', () => {
+    testHierarchy(
+      [acc('a', undefined, 2), acc('b', 'a', 4), acc('c', 'a', 3), acc('d', undefined, 1)],
+      [acc('d', undefined, 1), { address: 'a', children: [acc('c', 'a', 3), acc('b', 'a', 4)], whenCreated: 2 }]
+    );
+  });
+
+  test('if creation time is missing, puts account at the back of a list', () => {
+    testHierarchy(
+      [acc('a'), acc('b', undefined, 2), acc('c', undefined, 1)],
+      [acc('c', undefined, 1), acc('b', undefined, 2), acc('a')]
+    );
   });
 });

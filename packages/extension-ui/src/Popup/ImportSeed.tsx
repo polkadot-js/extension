@@ -5,10 +5,10 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Button, ButtonArea, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { allOf, isNotShorterThan, Result } from '../validators';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Header, Name, Password } from '../partials';
-import { allOf, isNotShorterThan, Result } from '../validators';
 
 type Props = {};
 
@@ -79,7 +79,11 @@ export default function Import (): React.ReactElement<Props> {
           />
           <VerticalSpace />
           <ButtonArea>
-            <Button onClick={_onCreate}>Add the account with the supplied seed</Button>
+            <NextStepButton
+              onClick={_onCreate}
+            >
+              Add the account with the supplied seed
+            </NextStepButton>
           </ButtonArea>
         </>
       )}
@@ -93,7 +97,6 @@ const HeaderWithSmallerMargin = styled(Header)`
 
 const SeedInput = styled(TextAreaWithLabel)`
   margin-bottom: 16px;
-
   textarea {
     height: unset;
   }

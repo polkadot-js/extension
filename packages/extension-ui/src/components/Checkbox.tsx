@@ -30,13 +30,15 @@ function Checkbox ({ checked, className, label, onChange }: Props): React.ReactE
 }
 
 export default styled(Checkbox)`
+  margin: ${({ theme }): string => theme.boxMargin};
+
   label {
     display: block;
     position: relative;
     cursor: pointer;
     user-select: none;
-    margin: ${({ theme }): string => theme.boxMargin};
     padding-left: 24px;
+    padding-top: 1px;
     color: ${({ theme }): string => theme.subTextColor};
     font-size: ${({ theme }): string => theme.fontSize};
     line-height: ${({ theme }): string => theme.lineHeight};

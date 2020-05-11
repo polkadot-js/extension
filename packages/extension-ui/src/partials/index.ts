@@ -9,3 +9,4 @@ export { default as Header } from './Header';
 export { default as Name } from './Name';
 export { default as Password } from './Password';
 export { default as Settings } from './Settings';
+export { default as HeaderWithSteps } from './HeaderWithSteps';

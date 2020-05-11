@@ -11,13 +11,14 @@ import styled from 'styled-components';
 import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
+import copy from '../assets/copy.svg';
+import details from '../assets/details.svg';
+import parentArrow from '../assets/arrowParentLabel.svg';
+
 import { AccountContext } from './contexts';
 import Identicon from './Identicon';
-import Svg from './Svg';
-
 import Menu from './Menu';
-import CopyImg from '../assets/copy.svg';
-import DetailsImg from '../assets/details.svg';
+import Svg from './Svg';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
 import useToast from '../hooks/useToast';
@@ -29,7 +30,7 @@ interface Props {
   children?: React.ReactNode;
   genesisHash?: string | null;
   actions?: React.ReactNode;
-  parentName?: string;
+  parentName?: string | null;
 }
 
 interface Recoded {
@@ -99,25 +100,37 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show('Copied'), [show]);
 
+  const displayedName = name || (account && account.name) || '<unknown>';
+
   return (
     <div className={className}>
       <div>
         <AccountInfoRow>
           <Identicon
             iconTheme={theme}
+            onCopy={_onCopy}
             prefix={prefix}
             value={formatted || address}
           />
           <Info>
-            <Name>{name || (account && account.name) || '<unknown>'}</Name>
+            {parentName ? (
+              <>
+                <Banner>
+                  <ArrowLabel/>
+                  <ParentName data-field='parent'>{parentName}</ParentName>
+                </Banner>
+                <DisplacedName>{displayedName}</DisplacedName>
+              </>
+            ) : (
+              <Name data-field='name'>{displayedName}</Name>
+            )}
             <CopyAddress>
-              <FullAddress>{formatted || '<unknown>'}</FullAddress>
-              {chain?.genesisHash && <ChainBanner>{chain.name}</ChainBanner>}
-              {parentName && <ParentBanner>↳ {parentName}</ParentBanner>}
+              <FullAddress data-field='address'>{formatted || '<unknown>'}</FullAddress>
+              {chain?.genesisHash && <ChainBanner data-field='chain'>{chain.name}</ChainBanner>}
               <CopyToClipboard text={(formatted && formatted) || ''} >
                 <Svg
                   onClick={_onCopy}
-                  src={CopyImg}
+                  src={copy}
                 />
               </CopyToClipboard>
             </CopyAddress>
@@ -186,6 +199,10 @@ const Name = styled.div`
   line-height: 22px;
 `;
 
+const DisplacedName = styled(Name)`
+  padding-top: 10px;
+`;
+
 const FullAddress = styled.div`
   width: 270px;
   overflow: hidden;
@@ -229,13 +246,13 @@ const Settings = styled.div`
 Settings.displayName = 'Details';
 
 const ActionsIcon = styled(Svg).attrs(() => ({
-  src: DetailsImg
+  src: details
 }))`
   background: ${({ theme }): string => theme.accountDotsIconColor};
 `;
 
 const ActiveActionsIcon = styled(Svg).attrs(() => ({
-  src: DetailsImg
+  src: details
 }))`
   background: ${({ theme }): string => theme.primaryColor};
 `;
@@ -245,18 +262,35 @@ const Banner = styled.div`
   color: white;
   font-size: 12px;
   line-height: 16px;
-  padding: 0.1rem 0.5rem;
   position: absolute;
-  right: 40px;
   top: 0;
 `;
 
 const ChainBanner = styled(Banner)`
+  padding: 0.1rem 0.5rem;
+  right: 40px;
   background: ${({ theme }): string => theme.primaryColor};
 `;
 
-const ParentBanner = styled(Banner)`
-  background: ${({ theme }): string => theme.parentLabelColor};
+const ParentName = styled.div`
+  padding: 0.25rem 0 0 0.8rem;
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 14px;
+  color: ${({ theme }): string => theme.labelColor};
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 270px;
+`;
+
+const ArrowLabel = styled(Svg).attrs(() => ({
+  src: parentArrow
+}))`
+  position: absolute;
+  top: 5px;
+  width: 9px;
+  height: 9px;
+  background: ${({ theme }): string => theme.labelColor};
 `;
 
 const MovableMenu = styled(Menu) <{ isMoved: boolean }>`

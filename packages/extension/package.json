@@ -11,7 +11,7 @@
     "@polkadot/extension-ui": "0.25.0-beta.4"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.52.12",
+    "@polkadot/dev": "^0.52.17",
     "babel-loader": "^8.1.0",
     "extract-loader": "^5.0.1",
     "file-loader": "^6.0.0",

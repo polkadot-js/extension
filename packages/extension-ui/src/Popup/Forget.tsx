@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
@@ -15,10 +15,18 @@ type Props = RouteComponentProps<{ address: string }>;
 function Forget ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
 
-  const _onClick = (): Promise<void> =>
-    forgetAccount(address)
-      .then((): void => onAction('/'))
-      .catch((error: Error) => console.error(error));
+  const _goHome = useCallback(
+    (): void => onAction('/'),
+    [onAction]
+  );
+
+  const _onClick = useCallback(
+    (): Promise<void> =>
+      forgetAccount(address)
+        .then((): void => onAction('/'))
+        .catch((error: Error) => console.error(error)),
+    [address, onAction]
+  );
 
   return (
     <>
@@ -40,7 +48,7 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
             </Button>
             <CancelButton>
               <ActionText
-                onClick={(): void => onAction('/')}
+                onClick={_goHome}
                 text='Cancel'
               />
             </CancelButton>

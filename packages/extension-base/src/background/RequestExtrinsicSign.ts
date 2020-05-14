@@ -3,22 +3,24 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringPair } from '@polkadot/keyring/types';
-import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import { SignerPayloadJSON } from '@polkadot/types/types';
 import { RequestSign } from './types';
 
 import { TypeRegistry } from '@polkadot/types';
 
 export default class RequestExtrinsicSign implements RequestSign {
-  public readonly inner: SignerPayloadJSON | SignerPayloadRaw;
+  public readonly payload: SignerPayloadJSON;
 
-  constructor (inner: SignerPayloadJSON) {
-    this.inner = inner;
+  constructor (payload: SignerPayloadJSON) {
+    this.payload = payload;
   }
 
   sign (registry: TypeRegistry, pair: KeyringPair): { signature: string } {
-    const inner = this.inner as SignerPayloadJSON;
-    const extrinsic = registry.createType('ExtrinsicPayload', this.inner, { version: inner.version });
+    // inject the current signed extensions for encoding
+    registry.setSignedExtensions(this.payload.signedExtensions);
 
-    return extrinsic.sign(pair);
+    return registry
+      .createType('ExtrinsicPayload', this.payload, { version: this.payload.version })
+      .sign(pair);
   }
 }

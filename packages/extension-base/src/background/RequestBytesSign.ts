@@ -4,23 +4,24 @@
 
 import { KeyringPair } from '@polkadot/keyring/types';
 import { RequestSign } from './types';
-import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import { SignerPayloadRaw } from '@polkadot/types/types';
 import { u8aToHex, hexToU8a } from '@polkadot/util';
 import { TypeRegistry } from '@polkadot/types';
 
 export default class RequestBytesSign implements RequestSign {
-  public readonly inner: SignerPayloadJSON | SignerPayloadRaw;
+  public readonly payload: SignerPayloadRaw;
 
-  constructor (inner: SignerPayloadRaw) {
-    this.inner = inner;
+  constructor (payload: SignerPayloadRaw) {
+    this.payload = payload;
   }
 
   sign (_registry: TypeRegistry, pair: KeyringPair): { signature: string } {
-    const inner = this.inner as SignerPayloadRaw;
-    const signedBytes = pair.sign(hexToU8a(inner.data));
-
     return {
-      signature: u8aToHex(signedBytes)
+      signature: u8aToHex(
+        pair.sign(
+          hexToU8a(this.payload.data)
+        )
+      )
     };
   }
 }

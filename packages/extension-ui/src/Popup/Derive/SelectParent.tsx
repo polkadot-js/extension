@@ -27,16 +27,28 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
 
   const passwordInputRef = useRef<HTMLDivElement>(null);
 
-  const _onParentPasswordEnter = useCallback(async (enteredPassword: string) => {
-    setParentPassword(enteredPassword);
-    setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
-  }, [parentAddress]);
+  const _goCreate = useCallback(
+    (): void => onAction('/account/create'),
+    [onAction]
+  );
 
-  const _onParentChange = useCallback((address: string) => onAction(`/account/derive/${address}`), [onAction]);
+  const _onParentPasswordEnter = useCallback(
+    async (enteredPassword: string) => {
+      setParentPassword(enteredPassword);
+      setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
+    },
+    [parentAddress]
+  );
 
-  const _onSubmit = useCallback(() => {
-    parentPassword && account && onDerivationConfirmed({ account, parentPassword });
-  }, [account, parentPassword, onDerivationConfirmed]);
+  const _onParentChange = useCallback(
+    (address: string) => onAction(`/account/derive/${address}`),
+    [onAction]
+  );
+
+  const _onSubmit = useCallback(
+    () => parentPassword && account && onDerivationConfirmed({ account, parentPassword }),
+    [account, parentPassword, onDerivationConfirmed]
+  );
 
   useEffect(() => {
     setParentPassword('');
@@ -51,7 +63,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
       {!isLocked && (
         <CheckboxWithSmallerMargins
           checked={shouldAccountBeDerived}
-          label='Derive'
+          label='Derive new account from existing'
           onChange={setShouldAccountBeDerived}
         />
       )}
@@ -102,7 +114,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
           : (
             <NextStepButton
               data-button-action='create root account'
-              onClick={(): void => onAction('/account/create')}
+              onClick={_goCreate}
             >
               Create account from new seed
             </NextStepButton>

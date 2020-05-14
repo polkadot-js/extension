@@ -209,7 +209,7 @@ export default class Extension {
     assert(queued, 'Unable to find request');
 
     const { reject, request, resolve } = queued;
-    const pair = keyring.getPair(request.inner.address);
+    const pair = keyring.getPair(request.payload.address);
 
     if (!pair) {
       reject(new Error('Unable to find pair'));
@@ -218,6 +218,7 @@ export default class Extension {
     }
 
     pair.decodePkcs8(password);
+
     const result = request.sign(registry, pair);
 
     pair.lock();

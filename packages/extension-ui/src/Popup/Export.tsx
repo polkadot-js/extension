@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
 import { ActionContext, Address, Button, InputWithLabel, Warning, ActionText, ActionBar } from '../components';
@@ -16,25 +16,34 @@ type Props = RouteComponentProps<{ address: string }>;
 
 function Export ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-
   const [pass, setPass] = useState('');
   const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
 
-  const _onExportButtonClick = (): Promise<void> =>
-    exportAccount(address, pass)
-      .then(({ exportedJson }) => {
-        const element = document.createElement('a');
+  const _goHome = useCallback(
+    (): void => onAction('/'),
+    [onAction]
+  );
 
-        element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
-        element.download = `${JSON.parse(exportedJson).meta.name}_exported_account_${Date.now()}.json`;
-        element.click();
-        onAction('/');
-      })
-      .catch((error: Error) => {
-        console.error(error);
-        setWrongPasswordHighlight(true);
-        setTimeout(() => setWrongPasswordHighlight(false), 100);
-      });
+  const _onExportButtonClick = useCallback(
+    (): Promise<void> =>
+      exportAccount(address, pass)
+        .then(({ exportedJson }) => {
+          const element = document.createElement('a');
+
+          element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
+          element.download = `${JSON.parse(exportedJson).meta.name}_exported_account_${Date.now()}.json`;
+          element.click();
+
+          onAction('/');
+        })
+        .catch((error: Error) => {
+          console.error(error);
+
+          setWrongPasswordHighlight(true);
+          setTimeout(() => setWrongPasswordHighlight(false), 100);
+        }),
+    [address, onAction, pass]
+  );
 
   return (
     <>
@@ -64,7 +73,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
             </Button>
             <CancelButton>
               <ActionText
-                onClick={(): void => onAction('/')}
+                onClick={_goHome}
                 text='Cancel'
               />
             </CancelButton>

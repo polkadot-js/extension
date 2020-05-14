@@ -26,23 +26,37 @@ interface Props {
   buttonText?: string;
 }
 
+interface Data {
+  hexBytes: string | null;
+  payload: ExtrinsicPayload | null;
+}
+
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
+function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
+  return !!(payload as SignerPayloadRaw).data;
+}
+
 export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
-  const [hexBytes, setHexBytes] = useState<string | null>(null);
-  const [extrinsic, setExtrinsic] = useState<ExtrinsicPayload | null>(null);
+  const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
 
   useEffect((): void => {
-    const inner = request.inner;
+    const payload = request.payload;
 
-    if ((inner as SignerPayloadRaw).data) {
-      setHexBytes((inner as SignerPayloadRaw).data);
-      setExtrinsic(null);
+    if (isRawPayload(payload)) {
+      setData({
+        hexBytes: payload.data,
+        payload: null
+      });
     } else {
-      setExtrinsic(registry.createType('ExtrinsicPayload', inner, { version: (inner as SignerPayloadJSON).version }));
-      setHexBytes(null);
+      registry.setSignedExtensions(payload.signedExtensions);
+
+      setData({
+        hexBytes: null,
+        payload: registry.createType('ExtrinsicPayload', payload, { version: payload.version })
+      });
     }
   }, [request]);
 
@@ -59,27 +73,27 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
       .then((): void => onAction())
       .catch((error: Error) => console.error(error));
 
-  if (extrinsic !== null) {
-    const payload = request.inner as SignerPayloadJSON;
+  if (payload !== null) {
+    const json = request.payload as SignerPayloadJSON;
 
     return (
       <>
         <Address
-          address={payload.address}
-          genesisHash={payload.genesisHash}
+          address={json.address}
+          genesisHash={json.genesisHash}
         />
         {isExternal
           ? (
             <Qr
               onSignature={_onSignature}
-              payload={extrinsic}
-              request={payload}
+              payload={payload}
+              request={json}
             />
           ) : (
             <Extrinsic
               isDecoded={true}
-              payload={extrinsic}
-              request={payload}
+              payload={payload}
+              request={json}
               url={url}
             />
           )
@@ -103,13 +117,13 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
       </>
     );
   } else if (hexBytes !== null) {
-    const payload = request.inner as SignerPayloadRaw;
+    const raw = request.payload as SignerPayloadRaw;
 
     return (
       <>
-        <Address address={payload.address} />
+        <Address address={raw.address} />
         <Bytes
-          bytes={payload.data}
+          bytes={raw.data}
           url={url}
         />
         <VerticalSpace />

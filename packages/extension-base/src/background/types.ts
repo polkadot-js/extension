@@ -303,7 +303,7 @@ export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
 export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>
 
 export interface RequestSign {
-  readonly inner: SignerPayloadJSON | SignerPayloadRaw;
+  readonly payload: SignerPayloadJSON | SignerPayloadRaw;
 
   sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
 }

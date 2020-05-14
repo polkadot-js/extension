@@ -49,7 +49,11 @@ function DerivationPath ({ className, defaultPath, onChange, parentAddress, pare
             data-input-suri
             defaultValue={defaultPath}
             disabled={!isDisabled}
-            label='Derivation Path'
+            label={
+              isDisabled
+                ? 'Derivation Path'
+                : 'Derivation Path (unlock to edit)'
+            }
             onValidatedChange={_onChange}
             placeholder='//hard/soft'
             validator={isPathValid}
@@ -77,7 +81,7 @@ const PathInput = styled.div<UnlockableComponentProps>`
   width: 100%;
 
   & input {
-    opacity: ${({ isUnlocked }): string => isUnlocked ? '100' : '30'}%;
+    opacity: ${({ isUnlocked }): string => isUnlocked ? '100' : '50'}%;
   }
 `;
 

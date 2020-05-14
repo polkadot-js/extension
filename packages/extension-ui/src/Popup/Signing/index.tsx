@@ -4,7 +4,7 @@
 
 import { SigningRequest } from '@polkadot/extension-base/background/types';
 
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { Loading, SigningReqContext } from '../../components';
 import { Header } from '../../partials';
@@ -12,7 +12,7 @@ import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 
 function isInnerTransaction (signingRequest: SigningRequest): boolean {
-  return 'blockNumber' in signingRequest.request.inner;
+  return 'blockNumber' in signingRequest.request.payload;
 }
 
 export default function Signing (): React.ReactElement<{}> {
@@ -21,6 +21,16 @@ export default function Signing (): React.ReactElement<{}> {
   const isTransaction = useMemo(
     () => isInnerTransaction(requests[requestIndex]),
     [requests, requestIndex]
+  );
+
+  const _onNextClick = useCallback(
+    () => setRequestIndex((requestIndex) => requestIndex + 1),
+    []
+  );
+
+  const _onPreviousClick = useCallback(
+    () => setRequestIndex((requestIndex) => requestIndex - 1),
+    []
   );
 
   useEffect(() => {
@@ -37,8 +47,8 @@ export default function Signing (): React.ReactElement<{}> {
         {requests.length > 1 && (
           <TransactionIndex
             index={requestIndex}
-            onNextClick={(): void => setRequestIndex(requestIndex + 1)}
-            onPreviousClick={(): void => setRequestIndex(requestIndex - 1)}
+            onNextClick={_onNextClick}
+            onPreviousClick={_onPreviousClick}
             totalItems={requests.length}
           />
         )}

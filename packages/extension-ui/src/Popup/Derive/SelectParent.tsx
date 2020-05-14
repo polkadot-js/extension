@@ -63,7 +63,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
       {!isLocked && (
         <CheckboxWithSmallerMargins
           checked={shouldAccountBeDerived}
-          label='Derive'
+          label='Derive new account from existing'
           onChange={setShouldAccountBeDerived}
         />
       )}

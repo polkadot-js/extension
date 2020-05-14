@@ -1,6 +1,9 @@
-# 0.25.0-beta.x
+# 0.25.1 May 14, 2020
 
+- New account creation with default derivation (Thanks to https://github.com/EthWorks)
 - Adjust `web3Enable` promise to only resolve after the document has been loaded (is interactive)
+- Update `signedExtensions` to cater for new chains
+- Update metadata for latest Kusama
 
 # 0.24.1 Apr 19, 2020
 

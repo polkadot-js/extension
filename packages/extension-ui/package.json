@@ -1,13 +1,13 @@
 {
   "name": "@polkadot/extension-ui",
   "description": "A sample signer extension for the @polkadot/api",
-  "version": "0.26.0-beta.0",
+  "version": "0.26.0-beta.1",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
     "@babel/runtime": "^7.9.6",
-    "@polkadot/extension-base": "0.26.0-beta.0",
-    "@polkadot/extension-inject": "0.26.0-beta.0",
+    "@polkadot/extension-base": "0.26.0-beta.1",
+    "@polkadot/extension-inject": "0.26.0-beta.1",
     "@polkadot/keyring": "^2.10.1",
     "@polkadot/react-identicon": "^0.53.1",
     "@polkadot/react-qr": "^0.53.1",

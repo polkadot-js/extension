@@ -12,8 +12,7 @@
     "@polkadot/types": "^1.14.1",
     "@polkadot/util": "^2.10.1",
     "@polkadot/util-crypto": "^2.10.1",
-    "babel-core": "^7.0.0-bridge.0",
-    "typescript": "^3.8.3"
+    "babel-core": "^7.0.0-bridge.0"
   },
   "scripts": {
     "build": "NODE_ENV=production polkadot-dev-build-ts",
@@ -31,9 +30,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
-    "@polkadot/dev": "^0.52.19",
+    "@polkadot/dev": "^0.53.5",
     "@polkadot/typegen": "^1.14.1",
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^25.2.2",
     "copy-webpack-plugin": "^5.1.1",
     "sinon-chrome": "^3.0.1",
     "stylelint": "^13.3.3",

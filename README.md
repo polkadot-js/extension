@@ -22,6 +22,9 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 ### Why can't I import an account with a seed?
 This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They have a checksum (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
 
+### What does it mean to derive account?
+We can imagine that accounts are stored as a tree. It allows us to structure accounts by our own needs. The root account is created at first and all the new ones will be its children by default. If we want to derive from other accounts, it can be done by selecting Derive New Account option in parent account’s context menu. Before deriving an account, the [HDKD derivation path](https://github.com/paritytech/parity-signer/wiki/HDKD-on-Parity-Signer#the-form-of-path) can be provided - it is a great tool that could be used for further account structuring.
+
 ### I want to send funds directly from the extension.
 The extension is not meant to be a full wallet replacement. It tries to focus on account management and making it as smooth as possible - and then makes these accounts to any dapp that can perform transfers, allow you to vote on democracy proposals and/or participate in any feature available on Polkadot and Substrate. We really aim to keep this singular account-only focus, leaving the hard-work of understanding chains and their intricacies over to over to wallets such as [polkadot-js/apps](https://polkadot.js.org/apps/).
 

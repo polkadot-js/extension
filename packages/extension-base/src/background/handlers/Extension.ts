@@ -270,6 +270,14 @@ export default class Extension {
     return true;
   }
 
+  private uploadJson(): boolean {
+    chrome.tabs.create({
+      url: chrome.extension.getURL('index.html#/account/upload-json')
+    });
+
+    return true;
+  }
+
   private windowOpen (): boolean {
     chrome.tabs.create({
       url: chrome.extension.getURL('index.html')
@@ -384,6 +392,9 @@ export default class Extension {
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);
+
+      case 'pri(upload.json)':
+        return this.uploadJson();
 
       case 'pri(window.open)':
         return this.windowOpen();

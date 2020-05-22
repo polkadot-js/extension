@@ -143,7 +143,11 @@ export async function validateSeed (suri: string, type?: KeypairType): Promise<{
   return sendMessage('pri(seed.validate)', { suri, type });
 }
 
-export async function windowOpen (): Promise<boolean> {
+export async function uploadJson (): Promise<boolean> {
+  return sendMessage('pri(upload.json)', null);
+}
+
+export async function windowOpen(): Promise<boolean> {
   return sendMessage('pri(window.open)', null);
 }
 

@@ -5,10 +5,11 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace, ActionText } from '../components';
 import { allOf, isNotShorterThan, Result } from '../validators';
-import { createAccountSuri, validateSeed } from '../messaging';
+import { createAccountSuri, validateSeed, uploadJson } from '../messaging';
 import { Header, Name, Password } from '../partials';
+import unlock from '../assets/unlock.svg';
 
 type Props = {};
 
@@ -87,6 +88,16 @@ export default function Import (): React.ReactElement<Props> {
           </ButtonArea>
         </>
       )}
+      {!account &&
+        <ButtonsRow>
+          <ActionText
+            data-seed-action='upload'
+            icon={unlock}
+            onClick={uploadJson}
+            text='Upload JSON backup'
+          />
+        </ButtonsRow>
+      }
     </>
   );
 }
@@ -99,5 +110,14 @@ const SeedInput = styled(TextAreaWithLabel)`
   margin-bottom: 16px;
   textarea {
     height: unset;
+  }
+`;
+
+const ButtonsRow = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  ${ActionText} {
+    margin-right: 32px;
   }
 `;

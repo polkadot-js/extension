@@ -9,6 +9,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import { findChain } from '@polkadot/extension-chains';
+import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,8 +144,12 @@ export async function validateSeed (suri: string, type?: KeypairType): Promise<{
   return sendMessage('pri(seed.validate)', { suri, type });
 }
 
-export async function uploadJson (): Promise<boolean> {
-  return sendMessage('pri(upload.json)', null);
+export async function jsonUpload (): Promise<boolean> {
+  return sendMessage('pri(json.upload)', null);
+}
+
+export async function jsonRestore(json: KeyringPair$Json, password: string): Promise<{ address: string }> {
+  return sendMessage('pri(json.restore)', { json, password });
 }
 
 export async function windowOpen(): Promise<boolean> {

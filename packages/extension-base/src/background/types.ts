@@ -5,7 +5,7 @@
 import { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
+import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { TypeRegistry } from '@polkadot/types';
 
@@ -86,7 +86,8 @@ export interface RequestSignatures {
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
-  'pri(upload.json)': [null, boolean];
+  'pri(json.upload)': [null, boolean];
+  'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
   'pri(window.open)': [null, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
@@ -307,4 +308,13 @@ export interface RequestSign {
   readonly payload: SignerPayloadJSON | SignerPayloadRaw;
 
   sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
+}
+
+export interface RequestJsonRestore {
+  json: KeyringPair$Json;
+  password: string;
+}
+
+export interface ResponseJsonRestore {
+  address: string;
 }

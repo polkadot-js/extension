@@ -4,7 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -270,12 +270,21 @@ export default class Extension {
     return true;
   }
 
-  private uploadJson(): boolean {
+  private jsonUpload(): boolean {
     chrome.tabs.create({
       url: chrome.extension.getURL('index.html#/account/upload-json')
     });
 
     return true;
+  }
+
+  private jsonRestore({json, password}: RequestJsonRestore): ResponseJsonRestore {
+      const pair = keyring.restoreAccount(json, password);
+      const { address } = pair;
+
+      assert(pair, "Could not recover key pair");
+
+      return { address };
   }
 
   private windowOpen (): boolean {
@@ -393,8 +402,11 @@ export default class Extension {
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);
 
-      case 'pri(upload.json)':
-        return this.uploadJson();
+      case 'pri(json.upload)':
+        return this.jsonUpload();
+
+      case 'pri(json.restore)':
+        return this.jsonRestore(request as RequestJsonRestore);
 
       case 'pri(window.open)':
         return this.windowOpen();

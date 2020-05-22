@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace, ActionText } from '../components';
 import { allOf, isNotShorterThan, Result } from '../validators';
-import { createAccountSuri, validateSeed, uploadJson } from '../messaging';
+import { createAccountSuri, validateSeed, jsonUpload } from '../messaging';
 import { Header, Name, Password } from '../partials';
 import unlock from '../assets/unlock.svg';
 
@@ -93,7 +93,7 @@ export default function Import (): React.ReactElement<Props> {
           <ActionText
             data-seed-action='upload'
             icon={unlock}
-            onClick={uploadJson}
+            onClick={jsonUpload}
             text='Upload JSON backup'
           />
         </ButtonsRow>

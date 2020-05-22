@@ -11,7 +11,7 @@ import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
 import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
-import { assert, isHex } from '@polkadot/util';
+import { assert, isHex, isObject } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import State from './State';
@@ -177,6 +177,46 @@ export default class Extension {
     return true;
   }
 
+  private jsonRestore({ json, password }: RequestJsonRestore): ResponseJsonRestore {
+    const pair = keyring.restoreAccount(json, password);
+
+    if (pair) {
+      const { address } = pair;
+      return { message: `Successfully added ${ address }` };
+    }
+
+    return { message: 'Could not restore account.'}
+  }
+
+  private jsonRestoreWindowOpen(): boolean {
+    chrome.tabs.create({
+      url: chrome.extension.getURL('index.html#/account/restore-json')
+    });
+
+    return true;
+  }
+
+  private jsonVerifyFile({ json }: RequestJsonRestore): boolean {
+    try {
+      const publicKey = keyring.decodeAddress(json.address, true);
+      const isFileValid = publicKey.length === 32 && isHex(json.encoded) && isObject(json.meta) && (
+        Array.isArray(json.encoding.content)
+          ? json.encoding.content[0] === 'pkcs8'
+          : json.encoding.content === 'pkcs8'
+      );
+
+      return isFileValid;
+    } catch (error) {
+      console.error(error);
+    }
+
+    return false;
+  }
+
+  private jsonVerifyPassword({ password }: RequestJsonRestore): boolean {
+    return keyring.isPassValid(password);
+  }
+
   private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
     const seed = mnemonicGenerate(length);
 
@@ -268,23 +308,6 @@ export default class Extension {
     });
 
     return true;
-  }
-
-  private jsonUpload(): boolean {
-    chrome.tabs.create({
-      url: chrome.extension.getURL('index.html#/account/upload-json')
-    });
-
-    return true;
-  }
-
-  private jsonRestore({json, password}: RequestJsonRestore): ResponseJsonRestore {
-      const pair = keyring.restoreAccount(json, password);
-      const { address } = pair;
-
-      assert(pair, "Could not recover key pair");
-
-      return { address };
   }
 
   private windowOpen (): boolean {
@@ -384,6 +407,18 @@ export default class Extension {
       case 'pri(derivation.validate)':
         return this.derivationValidate(request as RequestDeriveValidate);
 
+      case 'pri(json.restore)':
+        return this.jsonRestore(request as RequestJsonRestore);
+
+      case 'pri(json.restore.window.open)':
+        return this.jsonRestoreWindowOpen();
+
+      case 'pri(json.verify.file)':
+        return this.jsonVerifyFile(request as RequestJsonRestore);
+
+      case 'pri(json.verify.password)':
+        return this.jsonVerifyPassword(request as RequestJsonRestore);
+
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);
 
@@ -401,12 +436,6 @@ export default class Extension {
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);
-
-      case 'pri(json.upload)':
-        return this.jsonUpload();
-
-      case 'pri(json.restore)':
-        return this.jsonRestore(request as RequestJsonRestore);
 
       case 'pri(window.open)':
         return this.windowOpen();

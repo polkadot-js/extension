@@ -76,6 +76,10 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
+  'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
+  'pri(json.restore.window.open)': [null, boolean];
+  'pri(json.verify.file)': [RequestJsonRestore, boolean];
+  'pri(json.verify.password)': [RequestJsonRestore, boolean];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
@@ -86,8 +90,6 @@ export interface RequestSignatures {
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
-  'pri(json.upload)': [null, boolean];
-  'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
   'pri(window.open)': [null, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
@@ -316,5 +318,5 @@ export interface RequestJsonRestore {
 }
 
 export interface ResponseJsonRestore {
-  address: string;
+  message: string;
 }

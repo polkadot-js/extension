@@ -5,10 +5,10 @@
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import React, { useCallback, useState, createRef } from 'react';
 import Dropzone, { DropzoneRef } from 'react-dropzone';
-import { InputWithLabel, Button } from '../components';
+import { InputWithLabel, Button, Address } from '../components';
 import { isHex, u8aToString, hexToU8a, formatNumber } from '@polkadot/util';
 import styled from 'styled-components';
-import { jsonRestore } from '../messaging';
+import { jsonRestore, /* jsonVerifyPassword, jsonVerifyFile */ } from '../messaging';
 
 import { Header } from '../partials';
 
@@ -35,26 +35,36 @@ interface FileState {
 	size: number;
 }
 
+interface JsonState {
+	address: string | null;
+	isJsonValid: boolean;
+	json: KeyringPair$Json | null;
+}
+
+interface PassState {
+	isPassValid: boolean;
+	password: string;
+}
+
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
 export default function Upload(): React.ReactElement<Props> {
-	const [json, setJson] = useState<KeyringPair$Json>();
-	const [password, setPass] = useState<string>('');
+	const [{ address, isJsonValid, json }, setJson] = useState<JsonState>({ address: null, isJsonValid: false, json: null });
+	const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
 
 	const _onChangePass = useCallback(
-		(password: string): void =>
-			setPass( password ),
-		[]
-	);
-
-	const _onChangeFile = useCallback(
-		(file: Uint8Array): void => {
-		  const json = JSON.parse(u8aToString(file));
-			setJson(json)
+		(password: string): void => {
+			const isPassValid = true; //jsonVerifyPassword(null, password)
+			setPass({ isPassValid, password })
 		}, []
 	);
 
-	const _onSave = useCallback(
+	const _onChangeFile = useCallback(
+		(file: Uint8Array): void =>
+		setJson(parseFile(file)), []
+	);
+
+	const _onRestore = useCallback(
 		(): void => {
 			if (!json || !password) { return; }
 			jsonRestore(json, password);
@@ -65,11 +75,14 @@ export default function Upload(): React.ReactElement<Props> {
 	return (
 		<>
 			<HeaderWithSmallerMargin
-				text='Restore JSON'
+				text='Restore Account from JSON'
+			/>
+			<Address
+				name={isJsonValid && json ? json.meta.name : null}
+				address={isJsonValid && address ? address : null}
 			/>
 			<InputFile
 				accept={acceptedFormats}
-				//className='full'
 				help={'Select the JSON key file that was downloaded when you created the account. This JSON file contains your private key encrypted with your password.'}
 				label={'backup file'}
 				onChange={_onChangeFile}
@@ -81,8 +94,8 @@ export default function Upload(): React.ReactElement<Props> {
 				type='password'
 			/>
 			<Button
-				isDisabled={!json || !password}
-				onClick={_onSave}
+				isDisabled={!isJsonValid || !isPassValid}
+				onClick={_onRestore}
 			>
 				Restore
 			</Button>
@@ -130,13 +143,13 @@ function InputFile({ accept, clearContent, convertHex, help, isDisabled, isError
 			ref={dropRef}
 		>
 			{({ getInputProps, getRootProps }): JSX.Element => (
-				<div {...getRootProps({  })} >
+				<div {...getRootProps()} >
 					<input {...getInputProps()} />
 					<em className='label' >
 						{
 							!file || clearContent
 								? placeholder || 'click to select or drag and drop the file here'
-								: placeholder || `${ file.name }(${ formatNumber(file.size) } bytes)`
+								: placeholder || `${ file.name } (${ formatNumber(file.size) } bytes)`
 						}
 					</em>
 				</div>
@@ -164,6 +177,20 @@ function convertResult(result: ArrayBuffer, convertHex?: boolean): Uint8Array {
 	}
 
 	return data;
+}
+
+function parseFile(file: Uint8Array): JsonState {
+	try {
+		const json = JSON.parse(u8aToString(file));
+		const address = json.address;
+		const isJsonValid = true;
+
+		return { address, isJsonValid, json };
+	} catch (error) {
+		console.error(error);
+	}
+
+	return { address: null, isJsonValid: false, json: null };
 }
 
 const HeaderWithSmallerMargin = styled(Header)`

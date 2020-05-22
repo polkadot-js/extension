@@ -14,7 +14,53 @@ import { Header } from '../partials';
 
 type Props = {};
 
+export interface InputFileProps {
+	// Reference Example Usage: https://github.com/react-dropzone/react-dropzone/tree/master/examples/Accept
+	// i.e. MIME types: 'application/json, text/plain', or '.json, .txt'
+	accept?: string;
+	clearContent?: boolean;
+	convertHex?: boolean;
+	help?: React.ReactNode;
+	isDisabled?: boolean;
+	isError?: boolean;
+	label: React.ReactNode;
+	onChange?: (contents: Uint8Array, name: string) => void;
+	placeholder?: React.ReactNode | null;
+	withEllipsis?: boolean;
+	withLabel?: boolean;
+}
+
+interface FileState {
+	name: string;
+	size: number;
+}
+
+const acceptedFormats = ['application/json', 'text/plain'].join(', ');
+
 export default function Upload(): React.ReactElement<Props> {
+	const [json, setJson] = useState<KeyringPair$Json>();
+	const [password, setPass] = useState<string>('');
+
+	const _onChangePass = useCallback(
+		(password: string): void =>
+			setPass( password ),
+		[]
+	);
+
+	const _onChangeFile = useCallback(
+		(file: Uint8Array): void => {
+		  const json = JSON.parse(u8aToString(file));
+			setJson(json)
+		}, []
+	);
+
+	const _onSave = useCallback(
+		(): void => {
+			if (!json || !password) { return; }
+			jsonRestore(json, password);
+		},
+		[json, password]
+	);
 
 	return (
 		<>

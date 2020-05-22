@@ -144,7 +144,7 @@ export async function validateSeed (suri: string, type?: KeypairType): Promise<{
   return sendMessage('pri(seed.validate)', { suri, type });
 }
 
-export async function windowOpen(): Promise<boolean> {
+export async function windowOpen (): Promise<boolean> {
   return sendMessage('pri(window.open)', null);
 }
 
@@ -156,18 +156,18 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
   return sendMessage('pri(derivation.create)', { name, parentAddress, parentPassword, password, suri });
 }
 
-export async function jsonRestoreWindowOpen(): Promise<boolean> {
+export async function jsonRestoreWindowOpen (): Promise<boolean> {
   return sendMessage('pri(json.restore.window.open)', null);
 }
 
-export async function jsonVerifyFile(json: KeyringPair$Json): Promise<boolean> {
+export async function jsonVerifyFile (json: KeyringPair$Json): Promise<boolean> {
   return sendMessage('pri(json.verify.file)', { json, password: '' });
 }
 
-export async function jsonVerifyPassword(json: KeyringPair$Json, password: string): Promise<boolean> {
+export async function jsonVerifyPassword (json: KeyringPair$Json, password: string): Promise<boolean> {
   return sendMessage('pri(json.verify.password)', { json, password });
 }
 
-export async function jsonRestore(json: KeyringPair$Json, password: string): Promise<{ message: string }> {
+export async function jsonRestore (json: KeyringPair$Json, password: string): Promise<{ message: string }> {
   return sendMessage('pri(json.restore)', { json, password });
 }

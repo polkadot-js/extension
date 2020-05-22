@@ -177,18 +177,19 @@ export default class Extension {
     return true;
   }
 
-  private jsonRestore({ json, password }: RequestJsonRestore): ResponseJsonRestore {
+  private jsonRestore ({ json, password }: RequestJsonRestore): ResponseJsonRestore {
     const pair = keyring.restoreAccount(json, password);
 
     if (pair) {
       const { address } = pair;
-      return { message: `Successfully added ${ address }` };
+
+      return { message: `Successfully added ${address}` };
     }
 
-    return { message: 'Could not restore account.'}
+    return { message: 'Could not restore account.' };
   }
 
-  private jsonRestoreWindowOpen(): boolean {
+  private jsonRestoreWindowOpen (): boolean {
     chrome.tabs.create({
       url: chrome.extension.getURL('index.html#/account/restore-json')
     });
@@ -196,7 +197,7 @@ export default class Extension {
     return true;
   }
 
-  private jsonVerifyFile({ json }: RequestJsonRestore): boolean {
+  private jsonVerifyFile ({ json }: RequestJsonRestore): boolean {
     try {
       const publicKey = keyring.decodeAddress(json.address, true);
       const isFileValid = publicKey.length === 32 && isHex(json.encoded) && isObject(json.meta) && (
@@ -213,7 +214,7 @@ export default class Extension {
     return false;
   }
 
-  private jsonVerifyPassword({ password }: RequestJsonRestore): boolean {
+  private jsonVerifyPassword ({ password }: RequestJsonRestore): boolean {
     return keyring.isPassValid(password);
   }
 

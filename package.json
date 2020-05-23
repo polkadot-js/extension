@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
-    "@polkadot/dev": "^0.53.5",
+    "@polkadot/dev": "^0.54.1",
     "@polkadot/typegen": "^1.14.1",
     "@types/jest": "^25.2.2",
     "copy-webpack-plugin": "^5.1.1",

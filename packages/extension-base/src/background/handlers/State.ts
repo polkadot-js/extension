@@ -81,7 +81,7 @@ export default class State {
   readonly #metaStore = new MetadataStore();
 
   // Map of providers currently injected in tabs
-  readonly #injectedProviders: Map<chrome.runtime.Port, ProviderInterface> = new Map();
+  readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
 
   readonly #metaRequests: Record<string, MetaRequest> = {};
 
@@ -155,7 +155,7 @@ export default class State {
     });
   }
 
-  private authComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
+  private authComplete = (id: string, fn: (result: boolean | Error) => void): (result: boolean | Error) => void => {
     return (result: boolean | Error): void => {
       const isAllowed = result === true;
       const { idStr, request: { origin }, url } = this.#authRequests[id];
@@ -175,7 +175,7 @@ export default class State {
     };
   }
 
-  private metaComplete = (id: string, fn: Function): (result: boolean | Error) => void => {
+  private metaComplete = (id: string, fn: (result: boolean | Error) => void): (result: boolean | Error) => void => {
     return (result: boolean | Error): void => {
       delete this.#metaRequests[id];
       this.updateIconMeta(true);
@@ -184,7 +184,7 @@ export default class State {
     };
   }
 
-  private signComplete = (id: string, fn: Function): (result: ResponseSigning | Error) => void => {
+  private signComplete = (id: string, fn: (result: ResponseSigning | Error) => void): (result: ResponseSigning | Error) => void => {
     return (result: ResponseSigning | Error): void => {
       delete this.#signRequests[id];
       this.updateIconSign(true);

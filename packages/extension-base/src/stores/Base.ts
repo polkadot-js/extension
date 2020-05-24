@@ -4,8 +4,7 @@
 
 import chrome from '@polkadot/extension-inject/chrome';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type StoreValue = Record<string, any>;
+type StoreValue = Record<string, unknown>;
 
 const lastError = (type: string): void => {
   const error = chrome.runtime.lastError;
@@ -22,8 +21,7 @@ export default abstract class BaseStore {
     this.#prefix = prefix ? `${prefix}:` : '';
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public all (cb: (key: string, value: any) => void): void {
+  public all (cb: (key: string, value: unknown) => void): void {
     chrome.storage.local.get(null, (result: StoreValue): void => {
       lastError('all');
 
@@ -36,8 +34,7 @@ export default abstract class BaseStore {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public get (_key: string, cb: (value: any) => void): void {
+  public get (_key: string, cb: (value: unknown) => void): void {
     const key = `${this.#prefix}${_key}`;
 
     chrome.storage.local.get([key], (result: StoreValue): void => {
@@ -47,7 +44,6 @@ export default abstract class BaseStore {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public remove (_key: string, cb?: () => void): void {
     const key = `${this.#prefix}${_key}`;
 
@@ -58,8 +54,7 @@ export default abstract class BaseStore {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public set (_key: string, value: any, cb?: () => void): void {
+  public set (_key: string, value: unknown, cb?: () => void): void {
     const key = `${this.#prefix}${_key}`;
 
     chrome.storage.local.set({ [key]: value }, (): void => {

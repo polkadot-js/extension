@@ -14,11 +14,9 @@ import Injected from './Injected';
 //  - resolves/rejects the promise with the result (or sub data)
 
 export interface Handler {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resolve: (data: any) => void;
+  resolve: (data?: unknown) => void;
   reject: (error: Error) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscriber?: (data: any) => void;
+  subscriber?: (data: unknown) => void;
 }
 
 export type Handlers = Record<string, Handler>;
@@ -32,8 +30,7 @@ export function sendMessage<TMessageType extends MessageTypesWithNullRequest>(me
 export function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
 export function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
+export function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 
@@ -57,8 +54,7 @@ export async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: any }): void {
+export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: unknown }): void {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -72,6 +68,7 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
   }
 
   if (data.subscription) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
   } else if (data.error) {
     handler.reject(new Error(data.error));

@@ -12,8 +12,7 @@ const subscriptions: Subscriptions = {};
 export function createSubscription<TMessageType extends MessageTypesWithSubscriptions> (id: string, port: chrome.runtime.Port): (data: SubscriptionMessageTypes[TMessageType]) => void {
   subscriptions[id] = port;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (subscription: any): void => {
+  return (subscription: unknown): void => {
     if (subscriptions[id]) {
       port.postMessage({ id, subscription });
     }

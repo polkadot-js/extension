@@ -17,8 +17,7 @@ export default class Accounts implements InjectedAccounts {
     return sendRequest('pub(accounts.list)');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public subscribe (cb: (accounts: InjectedAccount[]) => any): Unsubcall {
+  public subscribe (cb: (accounts: InjectedAccount[]) => unknown): Unsubcall {
     sendRequest('pub(accounts.subscribe)', null, cb)
       .catch((error: Error) => console.error(error));
 

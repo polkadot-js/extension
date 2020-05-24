@@ -58,9 +58,8 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
           .map(([info, ext]): InjectedExtension => {
             // if we don't have an accounts subscriber, add a single-shot version
             if (ext && !ext.accounts.subscribe) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => any): Unsubcall => {
-                ext.accounts.get().then(cb).catch((error: Error) => console.error(error));
+              ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
+                ext.accounts.get().then(cb).catch(console.error);
 
                 return (): void => {
                   // no ubsubscribe needed, this is a single-shot
@@ -119,25 +118,28 @@ export async function web3Accounts (): Promise<InjectedAccountWithMeta[]> {
   return accounts;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => any): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }
 
   const accounts: Record<string, InjectedAccount[]> = {};
 
-  const triggerUpdate = (): void => {
-    cb(Object.entries(accounts).reduce((result, [source, list]): InjectedAccountWithMeta[] => {
-      result.push(...mapAccounts(source, list));
+  const triggerUpdate = (): void | Promise<void> => cb(
+    Object
+      .entries(accounts)
+      .reduce((result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
+        result.push(...mapAccounts(source, list));
 
-      return result;
-    }, [] as InjectedAccountWithMeta[]));
-  };
+        return result;
+      }, [])
+  );
 
   const unsubs = (await web3EnablePromise).map(({ accounts: { subscribe }, name: source }): Unsubcall =>
     subscribe((result): void => {
       accounts[source] = result;
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       triggerUpdate();
     })
   );

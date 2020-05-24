@@ -39,7 +39,7 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
 
       port.postMessage({ id, response });
     })
-    .catch((error): void => {
+    .catch((error: Error): void => {
       console.log(`[err] ${source}:: ${error.message}`);
 
       // only send message back to port if it's still connected

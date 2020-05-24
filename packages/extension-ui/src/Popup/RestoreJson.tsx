@@ -47,7 +47,7 @@ export default function Upload (): React.ReactElement<Props> {
 
   const _onChangePass = useCallback(
     async (password: string): Promise<void> => {
-      const isPassValid = await jsonVerifyPassword(password)
+      const isPassValid = await jsonVerifyPassword(password);
 
       setPass({ isPassValid, password });
     }, []
@@ -79,8 +79,8 @@ export default function Upload (): React.ReactElement<Props> {
           name={isFileValid && json ? json.meta.name : null}
         />
         <InputFileWithLabel
-          isError={!isFileValid}
           accept={acceptedFormats}
+          isError={!isFileValid}
           label={'backup file'}
           onChange={_onChangeFile}
           withLabel

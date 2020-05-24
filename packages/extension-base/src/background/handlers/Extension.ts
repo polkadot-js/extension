@@ -178,12 +178,16 @@ export default class Extension {
   }
 
   private jsonRestore ({ json, password }: RequestJsonRestore): ResponseJsonRestore {
-    const pair = keyring.restoreAccount(json, password);
+    try {
+      const pair = keyring.restoreAccount(json, password);
 
-    if (pair) {
-      const { address } = pair;
+      if (pair) {
+        const { address } = pair;
 
-      return { message: `Successfully added ${address}` };
+        return { message: `Successfully added ${address}` };
+      }
+    } catch (error) {
+      return { message: `${error}` };
     }
 
     return { message: 'Could not restore account.' };
@@ -214,7 +218,7 @@ export default class Extension {
     return false;
   }
 
-  private jsonVerifyPassword ({ password }: RequestJsonRestore): boolean {
+  private jsonVerifyPassword (password: string): boolean {
     return keyring.isPassValid(password);
   }
 
@@ -418,7 +422,7 @@ export default class Extension {
         return this.jsonVerifyFile(request as RequestJsonRestore);
 
       case 'pri(json.verify.password)':
-        return this.jsonVerifyPassword(request as RequestJsonRestore);
+        return this.jsonVerifyPassword(request as string);
 
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);

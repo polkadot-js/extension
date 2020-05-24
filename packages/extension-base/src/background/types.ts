@@ -79,7 +79,7 @@ export interface RequestSignatures {
   'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
   'pri(json.restore.window.open)': [null, boolean];
   'pri(json.verify.file)': [RequestJsonRestore, boolean];
-  'pri(json.verify.password)': [RequestJsonRestore, boolean];
+  'pri(json.verify.password)': [string, boolean];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];

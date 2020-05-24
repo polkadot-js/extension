@@ -164,8 +164,8 @@ export async function jsonVerifyFile (json: KeyringPair$Json): Promise<boolean> 
   return sendMessage('pri(json.verify.file)', { json, password: '' });
 }
 
-export async function jsonVerifyPassword (json: KeyringPair$Json, password: string): Promise<boolean> {
-  return sendMessage('pri(json.verify.password)', { json, password });
+export async function jsonVerifyPassword (password: string): Promise<boolean> {
+  return sendMessage('pri(json.verify.password)', password);
 }
 
 export async function jsonRestore (json: KeyringPair$Json, password: string): Promise<{ message: string }> {

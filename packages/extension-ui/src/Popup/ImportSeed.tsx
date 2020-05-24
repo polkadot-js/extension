@@ -9,7 +9,7 @@ import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, 
 import { allOf, isNotShorterThan, Result } from '../validators';
 import { createAccountSuri, validateSeed, jsonRestoreWindowOpen } from '../messaging';
 import { Header, Name, Password } from '../partials';
-import unlock from '../assets/unlock.svg';
+import upload from '../assets/file-upload.svg';
 
 type Props = {};
 
@@ -91,8 +91,7 @@ export default function Import (): React.ReactElement<Props> {
       {!account &&
         <ButtonsRow>
           <ActionText
-            data-seed-action='upload'
-            icon={unlock}
+            icon={upload}
             onClick={jsonRestoreWindowOpen}
             text='Restore from JSON backup'
           />

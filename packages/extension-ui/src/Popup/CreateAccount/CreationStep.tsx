@@ -2,9 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../../types';
+
 import React from 'react';
 import styled from 'styled-components';
-import { ActionText, Title } from '@polkadot/extension-ui/components';
+
+import { ActionText, Title } from '../../components';
 
 interface Props {
   step: number;
@@ -36,16 +39,16 @@ const CreateAnAccount = styled(Title).attrs(() => ({
 `;
 
 const CurrentStep = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.primaryColor};
+  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+  color: ${({ theme }: ThemeProps): string => theme.primaryColor};
   font-weight: 600;
 `;
 
 const TotalSteps = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.textColor};
+  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
   font-weight: 600;
 `;
 

@@ -2,9 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ThemeProps } from '../../types';
-
 import { MetadataDef } from '@polkadot/extension-inject/types';
+import { ThemeProps } from '../../types';
 
 import React, { useContext } from 'react';
 import styled from 'styled-components';
@@ -12,6 +11,7 @@ import styled from 'styled-components';
 import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
+
 interface Props {
   className?: string;
   request: MetadataDef;

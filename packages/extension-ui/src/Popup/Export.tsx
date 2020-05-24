@@ -29,9 +29,10 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       exportAccount(address, pass)
         .then(({ exportedJson }) => {
           const element = document.createElement('a');
+          const { meta } = JSON.parse(exportedJson) as { meta: { name: string } };
 
           element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
-          element.download = `${JSON.parse(exportedJson).meta.name}_exported_account_${Date.now()}.json`;
+          element.download = `${meta.name}_exported_account_${Date.now()}.json`;
           element.click();
 
           onAction('/');

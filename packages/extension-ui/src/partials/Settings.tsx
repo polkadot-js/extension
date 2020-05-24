@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Theme, ThemeProps } from '../types';
+
 import React, { useCallback, useContext, useState, useEffect } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { setSS58Format } from '@polkadot/util-crypto';
@@ -16,6 +18,11 @@ interface Option {
   value: string;
 }
 
+interface Props extends ThemeProps {
+  className?: string;
+  reference: React.MutableRefObject<null>;
+}
+
 const isPopup = window.innerWidth <= 480;
 const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option => ({
   text: value === -1
@@ -24,10 +31,10 @@ const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option =
   value: `${value}`
 }));
 
-export default function Settings ({ reference }: { reference: React.MutableRefObject<null> }): React.ReactElement {
+function Settings ({ className, reference }: Props): React.ReactElement<Props> {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix}`);
-  const themeContext = useContext(ThemeContext);
+  const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
 
   useEffect(() => {
@@ -56,7 +63,10 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
   );
 
   return (
-    <SettingsMenu reference={reference}>
+    <Menu
+      className={className}
+      reference={reference}
+    >
       <Setting>
         <SettingTitle>Theme</SettingTitle>
         <Switch
@@ -92,28 +102,22 @@ export default function Settings ({ reference }: { reference: React.MutableRefOb
           />
         </Setting>
       )}
-    </SettingsMenu>
+    </Menu>
   );
 }
-
-const SettingsMenu = styled(Menu)`
-  margin-top: 56px;
-  right: 24px;
-  user-select: none;
-`;
 
 const CheckboxSetting = styled(Checkbox)`
   font-size: 15px;
   font-weight: 600;
   line-height: 20px;
-  color: ${({ theme }): string => theme.textColor};
+  color: ${({ theme }: ThemeProps) => theme.textColor};
   label {
-    color: ${({ theme }): string => theme.textColor};
+    color: ${({ theme }: ThemeProps) => theme.textColor};
   }
 `;
 
 const DropdownSetting = styled(Dropdown)`
-  background: ${({ theme }): string => theme.background};
+  background: ${({ theme }: ThemeProps) => theme.background};
   margin-top: 9px;
   margin-bottom: 12px;
   width : 100%;
@@ -125,27 +129,38 @@ const SettingTitle = styled(Title)`
 `;
 
 const Setting = styled.div`
-  padding: 0 16px;
-  max-width: 100%;
-  & + & {
-    padding-top: 18px;
-    border-top: 1px solid ${({ theme }): string => theme.inputBorderColor};
-  }
+
 `;
 
 const OpenInNewWindowButton = styled(ActionText)`
   span {
-    color: ${({ theme }): string => theme.textColor};
+    color: ${({ theme }: ThemeProps) => theme.textColor};
     text-decoration: none;
     font-weight: 600;
-    font-size: ${({ theme }): string => theme.fontSize};
-    line-height: ${({ theme }): string => theme.lineHeight};
+    font-size: ${({ theme }: ThemeProps) => theme.fontSize};
+    line-height: ${({ theme }: ThemeProps) => theme.lineHeight};
   }
 
   ${Svg} {
     width: 20px;
     height: 20px;
     top: 4px;
-    background: ${({ theme }): string => theme.textColor};
+    background: ${({ theme }: ThemeProps) => theme.textColor};
   }
 `;
+
+export default React.memo(styled(Settings)`
+  margin-top: 56px;
+  right: 24px;
+  user-select: none;
+
+  .setting {
+    padding: 0 16px;
+    max-width: 100%;
+
+    & + & {
+      padding-top: 18px;
+      border-top: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
+    }
+  }
+`);

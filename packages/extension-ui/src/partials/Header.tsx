@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -62,28 +64,26 @@ function Header ({ children, className, showBackArrow, showSettings, text }: Pro
 const BackLink = styled(Link)`
   width: min-content;
   text-decoration: underline;
-  color: ${({ theme }): string => theme.labelColor};
+  color: ${({ theme }: ThemeProps) => theme.labelColor};
   min-height: 52px;
 
   &:visited {
-    color: ${({ theme }): string => theme.labelColor};
+    color: ${({ theme }: ThemeProps) => theme.labelColor};
   }
 `;
 
-const ArrowLeft = styled(Svg).attrs(() => ({
-  src: ArrowLeftImage
-}))`
+const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))`
   width: 12px;
   height: 12px;
   margin-right: 13px;
-  background: ${({ theme }): string => theme.labelColor};
+  background: ${({ theme }: ThemeProps) => theme.labelColor};
 `;
 
 const Container = styled.div`
     display: flex;
     justify-content: space-between;
     width: 100%;
-    border-bottom: 1px solid ${({ theme }): string => theme.inputBorderColor};
+    border-bottom: 1px solid ${({ theme }: ThemeProps) => theme.inputBorderColor};
     min-height: 70px;
 `;
 
@@ -91,8 +91,8 @@ const Branding = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  color: ${({ theme }): string => theme.labelColor};
-  font-family: ${({ theme }): string => theme.fontFamily};
+  color: ${({ theme }: ThemeProps) => theme.labelColor};
+  font-family: ${({ theme }: ThemeProps) => theme.fontFamily};
   text-align: center;
   margin-left: 24px;
 `;
@@ -107,21 +107,19 @@ interface GearProps {
   isSelected: boolean;
 }
 
-const Gear = styled(Svg).attrs(() => ({
-  src: gear
-}))<GearProps>`
+const Gear = styled(Svg).attrs(() => ({ src: gear }))<GearProps>`
   height: 18px;
   width: 18px;
   margin-right: 24px;
   align-self: center;
-  background: ${({ isSelected, theme }): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
+  background: ${({ isSelected, theme }: ThemeProps & GearProps): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
 `;
 
 Gear.displayName = 'Gear';
 
 const LogoText = styled.span`
-  color: ${({ theme }): string => theme.textColor};
-  font-family: ${({ theme }): string => theme.fontFamily};
+  color: ${({ theme }: ThemeProps) => theme.textColor};
+  font-family: ${({ theme }: ThemeProps) => theme.fontFamily};
   font-size: 20px;
   line-height: 27px;
 `;

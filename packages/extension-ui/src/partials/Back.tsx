@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -28,22 +30,22 @@ const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))`
   width: 12px;
   height: 12px;
   margin-right: 13px;
-  background: ${({ theme }): string => theme.labelColor};
+  background: ${({ theme }: ThemeProps) => theme.labelColor};
 `;
 
 const BackLink = styled(Link)`
   width: min-content;
   text-decoration: underline;
-  color: ${({ theme }): string => theme.labelColor};
+  color: ${({ theme }: ThemeProps) => theme.labelColor};
 
   &:visited {
-    color: ${({ theme }): string => theme.labelColor};
+    color: ${({ theme }: ThemeProps) => theme.labelColor};
   }
 `;
 
 export default styled(Back)`
   margin: 0;
   line-height: 52px;
-  border-bottom: 1px solid ${({ theme }): string => theme.inputBorderColor};
-  font-size: ${({ theme }): string => theme.labelFontSize};
+  border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
+  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
 `;

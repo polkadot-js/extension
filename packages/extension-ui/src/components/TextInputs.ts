@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import styled, { css } from 'styled-components';
 
 interface Props {
@@ -9,25 +11,25 @@ interface Props {
 }
 
 const DefaultTextInputColors = css`
-  background: ${({ theme }): string => theme.inputBackground};
-  border-color: ${({ theme }): string => theme.inputBorderColor};
-  color: ${({ theme }): string => theme.textColor};
+  background: ${({ theme }: ThemeProps): string => theme.inputBackground};
+  border-color: ${({ theme }: ThemeProps): string => theme.inputBorderColor};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
 `;
 
 const ErroredTextInputColors = css`
-  background: ${({ theme }): string => theme.inputBackground};
-  border-color: ${({ theme }): string => theme.errorBorderColor};
-  color: ${({ theme }): string => theme.errorColor};
+  background: ${({ theme }: ThemeProps): string => theme.inputBackground};
+  border-color: ${({ theme }: ThemeProps): string => theme.errorBorderColor};
+  color: ${({ theme }: ThemeProps): string => theme.errorColor};
 `;
 
 const TextInput = css<Props>`
-  border-radius: ${({ theme }): string => theme.borderRadius};
-  border: ${({ theme }): string => `1px solid ${theme.inputBorderColor}`};
+  border-radius: ${({ theme }: ThemeProps): string => theme.borderRadius};
+  border: ${({ theme }: ThemeProps): string => `1px solid ${theme.inputBorderColor}`};
   outline: none;
   box-sizing: border-box;
   display: block;
-  font-family: ${({ theme }): string => theme.fontFamily};
-  font-size: ${({ theme }): string => theme.fontSize};
+  font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
+  font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
   font-weight: 600;
   height: 40px;
   padding: 0.5rem 0.75rem;
@@ -36,7 +38,7 @@ const TextInput = css<Props>`
   ${({ withError }): typeof ErroredTextInputColors => (withError ? ErroredTextInputColors : DefaultTextInputColors)};
 
   &:read-only {
-    background: ${({ theme }): string => theme.readonlyInputBackground};
+    background: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
     box-shadow: none;
     outline: none;
   }

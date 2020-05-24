@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -15,7 +17,7 @@ interface Props {
 
 function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
-    (event) => onChange(event.target.checked),
+    (event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.checked),
     [onChange]
   );
 
@@ -41,10 +43,10 @@ const Slider = styled.span`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${({ theme }): string => theme.readonlyInputBackground};
+  background-color: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
   transition: 0.2s;
   border-radius: 100px;
-  border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+  border: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
 
   &:before {
     position: absolute;
@@ -53,7 +55,7 @@ const Slider = styled.span`
     width: 16px;
     left: 4px;
     bottom: 3px;
-    background-color: ${({ theme }): string => theme.primaryColor};
+    background-color: ${({ theme }: ThemeProps): string => theme.primaryColor};
     transition: 0.4s;
     border-radius: 50%;
   }

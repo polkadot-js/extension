@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import styled from 'styled-components';
 
 export default styled.div`
@@ -13,6 +15,6 @@ export default styled.div`
   line-height: 14px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: ${({ theme }): string => theme.textColor};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
   opacity: 0.65;
 `;

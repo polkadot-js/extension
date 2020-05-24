@@ -14,9 +14,11 @@ import Injected from './Injected';
 //  - resolves/rejects the promise with the result (or sub data)
 
 export interface Handler {
-  resolve: (data?: unknown) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (data?: any) => void;
   reject: (error: Error) => void;
-  subscriber?: (data: unknown) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscriber?: (data: any) => void;
 }
 
 export type Handlers = Record<string, Handler>;
@@ -54,7 +56,7 @@ export async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: unknown }): void {
+export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: string }): void {
   const handler = handlers[data.id];
 
   if (!handler) {

@@ -15,7 +15,8 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 
   if (data.id) {
-    handleResponse(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleResponse(data as any);
   } else {
     console.error('Missing id for response.');
   }

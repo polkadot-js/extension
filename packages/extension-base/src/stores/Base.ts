@@ -14,14 +14,14 @@ const lastError = (type: string): void => {
   }
 };
 
-export default abstract class BaseStore {
+export default abstract class BaseStore <T> {
   #prefix: string;
 
   constructor (prefix: string | null) {
     this.#prefix = prefix ? `${prefix}:` : '';
   }
 
-  public all (cb: (key: string, value: unknown) => void): void {
+  public all (update: (key: string, value: T) => void): void {
     chrome.storage.local.get(null, (result: StoreValue): void => {
       lastError('all');
 
@@ -29,38 +29,38 @@ export default abstract class BaseStore {
         .entries(result)
         .filter(([key]) => key.startsWith(this.#prefix))
         .forEach(([key, value]): void => {
-          cb(key.replace(this.#prefix, ''), value);
+          update(key.replace(this.#prefix, ''), value as T);
         });
     });
   }
 
-  public get (_key: string, cb: (value: unknown) => void): void {
+  public get (_key: string, update: (value: T) => void): void {
     const key = `${this.#prefix}${_key}`;
 
     chrome.storage.local.get([key], (result: StoreValue): void => {
       lastError('get');
 
-      cb(result[key]);
+      update(result[key] as T);
     });
   }
 
-  public remove (_key: string, cb?: () => void): void {
+  public remove (_key: string, update?: () => void): void {
     const key = `${this.#prefix}${_key}`;
 
     chrome.storage.local.remove(key, (): void => {
       lastError('remove');
 
-      cb && cb();
+      update && update();
     });
   }
 
-  public set (_key: string, value: unknown, cb?: () => void): void {
+  public set (_key: string, value: T, update?: () => void): void {
     const key = `${this.#prefix}${_key}`;
 
     chrome.storage.local.set({ [key]: value }, (): void => {
       lastError('set');
 
-      cb && cb();
+      update && update();
     });
   }
 }

@@ -13,12 +13,15 @@ import chrome from '@polkadot/extension-inject/chrome';
 
 import { MetadataStore } from '../../stores';
 
-interface AuthRequest {
+interface Resolver <T> {
+  reject: (error: Error) => void;
+  resolve: (result: T) => void;
+}
+
+interface AuthRequest extends Resolver<boolean> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
-  resolve: (result: boolean) => void;
-  reject: (error: Error) => void;
   url: string;
 }
 
@@ -30,11 +33,9 @@ type AuthUrls = Record<string, {
   url: string;
 }>;
 
-interface MetaRequest {
+interface MetaRequest extends Resolver<boolean> {
   id: string;
   request: MetadataDef;
-  resolve: (result: boolean) => void;
-  reject: (error: Error) => void;
   url: string;
 }
 
@@ -47,12 +48,10 @@ type Providers = Record<string, {
   start: () => ProviderInterface;
 }>
 
-interface SignRequest {
+interface SignRequest extends Resolver<ResponseSigning> {
   account: AccountJson;
   id: string;
   request: RequestSign;
-  resolve: (result: ResponseSigning) => void;
-  reject: (error: Error) => void;
   url: string;
 }
 
@@ -155,8 +154,8 @@ export default class State {
     });
   }
 
-  private authComplete = (id: string, fn: (result: boolean | Error) => void): (result: boolean | Error) => void => {
-    return (result: boolean | Error): void => {
+  private authComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
+    const complete = (result: boolean | Error) => {
       const isAllowed = result === true;
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
@@ -170,26 +169,53 @@ export default class State {
 
       delete this.#authRequests[id];
       this.updateIconAuth(true);
+    };
 
-      fn(result);
+    return {
+      reject: (error: Error): void => {
+        complete(error);
+        reject(error);
+      },
+      resolve: (result: boolean): void => {
+        complete(result);
+        resolve(result);
+      }
     };
   }
 
-  private metaComplete = (id: string, fn: (result: boolean | Error) => void): (result: boolean | Error) => void => {
-    return (result: boolean | Error): void => {
+  private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
+    const complete = (): void => {
       delete this.#metaRequests[id];
       this.updateIconMeta(true);
+    };
 
-      fn(result);
+    return {
+      reject: (error: Error): void => {
+        complete();
+        reject(error);
+      },
+      resolve: (result: boolean): void => {
+        complete();
+        resolve(result);
+      }
     };
   }
 
-  private signComplete = (id: string, fn: (result: ResponseSigning | Error) => void): (result: ResponseSigning | Error) => void => {
-    return (result: ResponseSigning | Error): void => {
+  private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
+    const complete = (): void => {
       delete this.#signRequests[id];
       this.updateIconSign(true);
+    };
 
-      fn(result);
+    return {
+      reject: (error: Error): void => {
+        complete();
+        reject(error);
+      },
+      resolve: (result: ResponseSigning): void => {
+        complete();
+        resolve(result);
+      }
     };
   }
 
@@ -248,11 +274,10 @@ export default class State {
       const id = getId();
 
       this.#authRequests[id] = {
+        ...this.authComplete(id, resolve, reject),
         id,
         idStr,
-        reject: this.authComplete(id, reject),
         request,
-        resolve: this.authComplete(id, resolve),
         url
       };
 
@@ -275,10 +300,9 @@ export default class State {
       const id = getId();
 
       this.#metaRequests[id] = {
+        ...this.metaComplete(id, resolve, reject),
         id,
-        reject: this.metaComplete(id, reject),
         request,
-        resolve: this.metaComplete(id, resolve),
         url
       };
 
@@ -378,11 +402,10 @@ export default class State {
 
     return new Promise((resolve, reject): void => {
       this.#signRequests[id] = {
+        ...this.signComplete(id, resolve, reject),
         account,
         id,
-        reject: this.signComplete(id, reject),
         request,
-        resolve: this.signComplete(id, resolve),
         url
       };
 

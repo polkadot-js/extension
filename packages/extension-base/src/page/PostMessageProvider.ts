@@ -98,7 +98,8 @@ export default class PostMessageProvider implements InjectedProvider {
     };
   }
 
-  public async send <R = number | boolean> (method: string, params: unknown[], subscription?: SubscriptionHandler): Promise<R> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public async send (method: string, params: unknown[], subscription?: SubscriptionHandler): Promise<any> {
     if (subscription) {
       const { callback, type } = subscription;
 
@@ -141,7 +142,7 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   public subscribe (type: string, method: string, params: unknown[], callback: AnyFunction): Promise<number> {
-    return this.send(method, params, { callback, type });
+    return this.send(method, params, { callback, type }) as Promise<number>;
   }
 
   /**
@@ -162,6 +163,6 @@ export default class PostMessageProvider implements InjectedProvider {
 
     delete this.#subscriptions[subscription];
 
-    return this.send(method, [id]);
+    return this.send(method, [id]) as Promise<boolean>;
   }
 }

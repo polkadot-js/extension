@@ -55,7 +55,7 @@ export interface MetadataDef {
   ss58Format: number;
   tokenDecimals: number;
   tokenSymbol: string;
-  types: Record<string, Record<string, unknown> | string>;
+  types: Record<string, Record<string, string> | string>;
   metaCalls?: string;
 }
 

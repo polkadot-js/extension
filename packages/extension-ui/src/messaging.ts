@@ -12,9 +12,11 @@ import chrome from '@polkadot/extension-inject/chrome';
 import { findChain } from '@polkadot/extension-chains';
 
 interface Handler {
-  resolve: <T> (data: T) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (data: any) => void;
   reject: (error: Error) => void;
-  subscriber?: <T> (data: T) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscriber?: (data: any) => void;
 }
 
 type Handlers = Record<string, Handler>;
@@ -24,7 +26,7 @@ const handlers: Handlers = {};
 let idCounter = 0;
 
 // setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data: Message): void => {
+port.onMessage.addListener((data: Message['data']): void => {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -38,6 +40,7 @@ port.onMessage.addListener((data: Message): void => {
   }
 
   if (data.subscription) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
   } else if (data.error) {
     handler.reject(new Error(data.error));

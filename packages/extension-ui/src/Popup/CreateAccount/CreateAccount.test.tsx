@@ -25,6 +25,7 @@ describe('Create Account', () => {
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
     seed: 'horse battery staple correct'
   };
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>
       <ThemeProvider theme={themes.dark}>

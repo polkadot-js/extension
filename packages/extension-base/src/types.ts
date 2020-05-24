@@ -4,7 +4,7 @@
 
 export interface Message extends MessageEvent {
   data: {
-    errors?: string;
+    error?: string;
     id: string;
     origin: string;
     response?: string;

@@ -18,6 +18,7 @@ configure({ adapter: new Adapter() });
 
 describe('Header component', () => {
   let wrapper: ReactWrapper;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountHeader = (props: React.ComponentProps<typeof Header> = {}): ReactWrapper => mount(
     <MemoryRouter>
       <ThemeProvider theme={themes.dark}>

@@ -25,7 +25,7 @@ export default function Unlock ({ buttonText = 'Sign the transaction', className
   );
   const _onClick = useCallback(
     (): Promise<void> =>
-      onSign(password).catch((error): void => setError(error.message)),
+      onSign(password).catch((error: Error) => setError(error.message)),
     [onSign, password]
   );
 

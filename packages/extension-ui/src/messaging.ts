@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Message } from '@polkadot/extension-base/types';
 import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -25,7 +26,7 @@ const handlers: Handlers = {};
 let idCounter = 0;
 
 // setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data): void => {
+port.onMessage.addListener((data: Message): void => {
   const handler = handlers[data.id];
 
   if (!handler) {

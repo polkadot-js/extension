@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../../types';
+
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import React, { useContext } from 'react';
@@ -78,7 +80,7 @@ const RequestInfo = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 8px;
-  background: ${({ theme }): string => theme.highlightedAreaBackground};
+  background: ${({ theme }: ThemeProps): string => theme.highlightedAreaBackground};
 `;
 
 const AcceptButton = styled(Button)`
@@ -99,7 +101,7 @@ const RejectButton = styled(ActionBar)`
 
 export default styled(Request)`
   .icon {
-    background: ${({ theme }): string => theme.buttonBackgroundDanger};
+    background: ${({ theme }: ThemeProps): string => theme.buttonBackgroundDanger};
     color: white;
     min-width: 18px;
     width: 14px;
@@ -118,7 +120,7 @@ export default styled(Request)`
 
   .tab-name,
   .tab-url {
-    color: ${({ theme }): string => theme.textColor};
+    color: ${({ theme }: ThemeProps): string => theme.textColor};
     display: inline-block;
     max-width: 20rem;
     overflow: hidden;

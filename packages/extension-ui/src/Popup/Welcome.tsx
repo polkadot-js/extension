@@ -2,13 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps as Props } from '../types';
+
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
 import { Header } from '../partials';
-
-type Props = {};
 
 export default function Welcome (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
@@ -41,11 +41,11 @@ export default function Welcome (): React.ReactElement<Props> {
 const Note = styled.p`
   margin-bottom: 6px;
   margin-top: 0;
-  color: ${({ theme }): string => theme.subTextColor};
+  color: ${({ theme }: Props): string => theme.subTextColor};
 `;
 
 const TextBox = styled(Box)`
   margin: 0.75rem 24px;
-  border: 1px solid ${({ theme }): string => theme.inputBorderColor};
-  color: ${({ theme }): string => theme.subTextColor};
+  border: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
+  color: ${({ theme }: Props): string => theme.subTextColor};
 `;

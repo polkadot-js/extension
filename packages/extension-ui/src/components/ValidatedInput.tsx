@@ -46,7 +46,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
   return (
     <div className={className}>
       <Input
-        {...props as T}
+        {...props as unknown as T}
         isError={Result.isError(validationResult)}
         onChange={setValue}
         value={value}

@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -11,9 +13,9 @@ interface Props {
   isFull?: boolean;
 }
 
-function Table ({ children, className, isFull }: Props): React.ReactElement<Props> {
+function Table ({ children, className = '', isFull }: Props): React.ReactElement<Props> {
   return (
-    <table className={`${className} ${isFull && 'isFull'}`}>
+    <table className={`${className} ${isFull ? 'isFull' : ''}`}>
       <tbody>
         {children}
       </tbody>
@@ -24,8 +26,8 @@ function Table ({ children, className, isFull }: Props): React.ReactElement<Prop
 export default React.memo(styled(Table)`
   border: 0;
   display: block;
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
+  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
   margin-bottom: 1rem;
 
   &.isFull {

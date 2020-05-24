@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
+import { ThemeProps } from '../../types';
 
 import React, { useContext } from 'react';
 import styled from 'styled-components';
@@ -72,7 +73,7 @@ const RequestInfo = styled.div`
   flex-direction: column;
   align-items: center;
   margin-bottom: 8px;
-  background: ${({ theme }): string => theme.highlightedAreaBackground};
+  background: ${({ theme }: ThemeProps): string => theme.highlightedAreaBackground};
 `;
 
 const Info = styled.div`
@@ -99,7 +100,7 @@ const RejectButton = styled(ActionBar)`
 export default styled(Request)`
 
   .icon {
-    background: ${({ theme }): string => theme.buttonBackgroundDanger};
+    background: ${({ theme }: ThemeProps): string => theme.buttonBackgroundDanger};
     color: white;
     min-width: 18px;
     width: 14px;
@@ -118,7 +119,7 @@ export default styled(Request)`
 
   .tab-name,
   .tab-url {
-    color: ${({ theme }): string => theme.textColor};
+    color: ${({ theme }: ThemeProps): string => theme.textColor};
     display: inline-block;
     max-width: 20rem;
     overflow: hidden;

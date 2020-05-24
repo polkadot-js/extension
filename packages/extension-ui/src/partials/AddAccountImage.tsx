@@ -8,10 +8,12 @@
 /* eslint-disable react/jsx-sort-props */
 /* eslint-disable react/jsx-max-props-per-line */
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
   onClick: () => void;
 }
@@ -73,11 +75,11 @@ export default styled(AddAccountImage)`
   }
 
   path {
-    fill: ${({ theme }): string => theme.textColor};
+    fill: ${({ theme }: Props): string => theme.textColor};
   }
 
   & > g > circle {
-    stroke: ${({ theme }): string => theme.inputBorderColor};
-    fill: ${({ theme }): string => theme.addAccountImageBackground};
+    stroke: ${({ theme }: Props): string => theme.inputBorderColor};
+    fill: ${({ theme }: Props): string => theme.addAccountImageBackground};
   }
 `;

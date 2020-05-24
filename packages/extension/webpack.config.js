@@ -61,7 +61,6 @@ function createWebpack ({ alias = {}, context }) {
       ]
     },
     node: {
-      // eslint-disable-next-line @typescript-eslint/camelcase
       child_process: 'empty',
       dgram: 'empty',
       fs: 'empty',

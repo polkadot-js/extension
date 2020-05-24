@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 
@@ -168,9 +170,9 @@ const CopyAddress = styled.div`
     width: 14px;
     height: 14px;
     margin-right: 10px;
-    background: ${({ theme }): string => theme.accountDotsIconColor};
+    background: ${({ theme }: ThemeProps): string => theme.accountDotsIconColor};
     &:hover {
-      background: ${({ theme }): string => theme.labelColor};
+      background: ${({ theme }: ThemeProps): string => theme.labelColor};
       cursor: pointer;
     }
   }
@@ -207,7 +209,7 @@ const FullAddress = styled.div`
   width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: ${({ theme }): string => theme.labelColor};
+  color: ${({ theme }: ThemeProps): string => theme.labelColor};
   font-size: 12px;
   line-height: 16px;
 `;
@@ -234,12 +236,12 @@ const Settings = styled.div`
     top: 25%;
     bottom: 25%;
     width: 1px;
-    background: ${({ theme }): string => theme.boxBorderColor};
+    background: ${({ theme }: ThemeProps): string => theme.boxBorderColor};
   }
 
   &:hover {
     cursor: pointer;
-    background: ${({ theme }): string => theme.readonlyInputBackground};
+    background: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
   }
 `;
 
@@ -248,13 +250,13 @@ Settings.displayName = 'Details';
 const ActionsIcon = styled(Svg).attrs(() => ({
   src: details
 }))`
-  background: ${({ theme }): string => theme.accountDotsIconColor};
+  background: ${({ theme }: ThemeProps): string => theme.accountDotsIconColor};
 `;
 
 const ActiveActionsIcon = styled(Svg).attrs(() => ({
   src: details
 }))`
-  background: ${({ theme }): string => theme.primaryColor};
+  background: ${({ theme }: ThemeProps): string => theme.primaryColor};
 `;
 
 const Banner = styled.div`
@@ -269,7 +271,7 @@ const Banner = styled.div`
 const ChainBanner = styled(Banner)`
   padding: 0.1rem 0.5rem;
   right: 40px;
-  background: ${({ theme }): string => theme.primaryColor};
+  background: ${({ theme }: ThemeProps): string => theme.primaryColor};
 `;
 
 const ParentName = styled.div`
@@ -277,7 +279,7 @@ const ParentName = styled.div`
   font-weight: 600;
   font-size: 10px;
   line-height: 14px;
-  color: ${({ theme }): string => theme.labelColor};
+  color: ${({ theme }: ThemeProps): string => theme.labelColor};
   text-overflow: ellipsis;
   overflow: hidden;
   width: 270px;
@@ -290,7 +292,7 @@ const ArrowLabel = styled(Svg).attrs(() => ({
   top: 5px;
   width: 9px;
   height: 9px;
-  background: ${({ theme }): string => theme.labelColor};
+  background: ${({ theme }: ThemeProps): string => theme.labelColor};
 `;
 
 const MovableMenu = styled(Menu) <{ isMoved: boolean }>`
@@ -302,8 +304,8 @@ export default styled(Address)`
   margin-bottom: 8px;
 
   & > div {
-    background: ${({ theme }): string => theme.accountBackground};
-    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
+    background: ${({ theme }: ThemeProps): string => theme.accountBackground};
+    border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
     box-sizing: border-box;
     border-radius: 4px;
   }

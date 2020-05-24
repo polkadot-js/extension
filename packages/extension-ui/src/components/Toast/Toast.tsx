@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -30,6 +32,6 @@ export default styled(Toast)<{visible: boolean}>`
   && {
     margin: auto;
     border-radius: 25px;
-    background: ${({ theme }): string => theme.highlightedAreaBackground};
+    background: ${({ theme }: ThemeProps): string => theme.highlightedAreaBackground};
   }
 `;

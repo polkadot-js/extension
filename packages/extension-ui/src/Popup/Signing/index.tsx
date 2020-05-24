@@ -15,7 +15,7 @@ function isInnerTransaction (signingRequest: SigningRequest): boolean {
   return 'blockNumber' in signingRequest.request.payload;
 }
 
-export default function Signing (): React.ReactElement<{}> {
+export default function Signing (): React.ReactElement {
   const requests = useContext(SigningReqContext);
   const [requestIndex, setRequestIndex] = useState(0);
   const isTransaction = useMemo(

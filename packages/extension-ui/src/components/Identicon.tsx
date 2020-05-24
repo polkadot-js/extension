@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 import Icon from '@polkadot/react-identicon';
@@ -35,7 +37,7 @@ export default styled(Identicon)`
 
   .container:before {
     box-shadow: none;
-    background: ${({ theme }): string => theme.identiconBackground};
+    background: ${({ theme }: ThemeProps): string => theme.identiconBackground};
   }
 
   svg {

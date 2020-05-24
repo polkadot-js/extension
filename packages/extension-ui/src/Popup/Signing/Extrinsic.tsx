@@ -33,8 +33,7 @@ function decodeMethod (data: string, isDecoded: boolean, chain: Chain | null, sp
   try {
     if (isDecoded && chain && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
       method = chain.registry.createType('Call', data);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      args = (method.toHuman() as any).args;
+      args = (method.toHuman() as { args: AnyJson }).args;
     }
   } catch (error) {
     args = null;

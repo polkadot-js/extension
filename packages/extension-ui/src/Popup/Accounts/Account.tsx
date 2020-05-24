@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountJson } from '@polkadot/extension-base/background/types';
+import { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -82,7 +83,7 @@ function Account ({ address, className, isExternal, parentName }: Props): React.
 const MenuGroup = styled.div`
   padding-bottom: 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid ${({ theme }): string => theme.boxBorderColor};
+  border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
 `;
 
 const MenuItem = styled(Link)`

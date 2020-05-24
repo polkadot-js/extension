@@ -9,7 +9,7 @@ import { AuthorizeReqContext } from '../../components';
 import { Header } from '../../partials';
 import Request from './Request';
 
-export default function Authorize (): React.ReactElement<{}> {
+export default function Authorize (): React.ReactElement {
   const requests = useContext(AuthorizeReqContext);
 
   return (

@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import styled from 'styled-components';
 
 export default styled.ul`
@@ -17,7 +19,7 @@ export default styled.ul`
 
   li::before {
     content: '\\2022';
-    color: ${({ theme }): string => theme.primaryColor};
+    color: ${({ theme }: ThemeProps): string => theme.primaryColor};
     font-size: 30px;
     font-weight: bold;
     margin-right: 10px;

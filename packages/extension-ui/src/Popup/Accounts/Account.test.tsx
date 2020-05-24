@@ -18,8 +18,8 @@ configure({ adapter: new Adapter() });
 describe('Account component', () => {
   let wrapper: ReactWrapper;
   const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mountAccountComponent = (additionalAccountProperties: any, theme: Theme = themes.dark): ReactWrapper => mount(
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>, theme: Theme = themes.dark): ReactWrapper => mount(
     <MemoryRouter>
       <ThemeProvider theme={theme}>
         <Account

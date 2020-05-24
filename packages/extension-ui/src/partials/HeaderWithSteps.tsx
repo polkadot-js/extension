@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
@@ -46,15 +48,15 @@ const CreationSteps = styled.div`
 `;
 
 const CurrentStep = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.primaryColor};
+  font-size: ${({ theme }: ThemeProps) => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps) => theme.labelLineHeight};
+  color: ${({ theme }: ThemeProps) => theme.primaryColor};
   font-weight: 600;
 `;
 
 const TotalSteps = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.textColor};
+  font-size: ${({ theme }: ThemeProps) => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps) => theme.labelLineHeight};
+  color: ${({ theme }: ThemeProps) => theme.textColor};
   font-weight: 600;
 `;

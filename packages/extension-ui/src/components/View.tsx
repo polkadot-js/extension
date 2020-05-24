@@ -2,9 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useState } from 'react';
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
-import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext, Theme } from '.';
+
+// FIXME We should not import from index when this one is imported there as well
+import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -32,9 +36,9 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-const BodyTheme = createGlobalStyle<{ theme: Theme }>`
+const BodyTheme = createGlobalStyle<ThemeProps>`
   body {
-    background-color: ${({ theme }): string => theme.bodyColor};
+    background-color: ${({ theme }: ThemeProps): string => theme.bodyColor};
   }
 
   html {
@@ -50,14 +54,14 @@ const Main = styled.main`
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: ${({ theme }): string => theme.background};
-  color: ${({ theme }): string => theme.textColor};
-  font-size: ${({ theme }): string => theme.fontSize};
-  line-height: ${({ theme }): string => theme.lineHeight};
-  border: 1px solid ${({ theme }): string => theme.inputBorderColor};
+  background: ${({ theme }: ThemeProps): string => theme.background};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
+  font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
+  line-height: ${({ theme }: ThemeProps): string => theme.lineHeight};
+  border: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
 
   * {
-    font-family: ${({ theme }): string => theme.fontFamily};
+    font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
   }
 
   > * {

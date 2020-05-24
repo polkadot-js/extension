@@ -2,8 +2,11 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../../types';
+
 import React from 'react';
 import styled from 'styled-components';
+
 import { Svg } from '../../components';
 import ArrowLeftImage from '../../assets/arrowLeft.svg';
 
@@ -13,6 +16,10 @@ interface Props {
   onNextClick: () => void;
   onPreviousClick: () => void;
   className?: string;
+}
+
+interface ArrowProps extends ThemeProps {
+  isActive: boolean;
 }
 
 function TransactionIndex ({ index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
@@ -48,29 +55,23 @@ const CreationSteps = styled.div`
 `;
 
 const CurrentStep = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.primaryColor};
+  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+  color: ${({ theme }: ThemeProps): string => theme.primaryColor};
   font-weight: 600;
   margin-left: 10px;
 `;
 
 const TotalSteps = styled.span`
-  font-size: ${({ theme }): string => theme.labelFontSize};
-  line-height: ${({ theme }): string => theme.labelLineHeight};
-  color: ${({ theme }): string => theme.textColor};
+  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
   font-weight: 600;
 `;
 
-interface ArrowProps {
-  isActive: boolean;
-}
-
-const ArrowLeft = styled(Svg).attrs(() => ({
-  src: ArrowLeftImage
-}))<ArrowProps>`
+const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))<ArrowProps>`
   display: inline-block;
-  background: ${({ isActive, theme }): string => isActive ? theme.primaryColor : theme.iconNeutralColor};
+  background: ${({ isActive, theme }: ArrowProps): string => isActive ? theme.primaryColor : theme.iconNeutralColor};
   cursor: ${({ isActive }): string => isActive ? 'pointer' : 'default'};
   width: 12px;
   height: 12px;

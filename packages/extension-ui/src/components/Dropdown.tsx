@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -13,7 +15,7 @@ interface DropdownOption {
   value: string;
 }
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
   defaultValue?: string | null;
   isError?: boolean;
@@ -64,16 +66,16 @@ export default styled(Dropdown)`
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: ${({ theme }): string => theme.readonlyInputBackground};
-    border-color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
-    border-radius: ${({ theme }): string => theme.borderRadius};
+    background: ${({ theme }: Props): string => theme.readonlyInputBackground};
+    border-color: ${({ isError, theme }: Props): string => isError ? theme.errorBorderColor : theme.inputBorderColor};
+    border-radius: ${({ theme }: ThemeProps): string => theme.borderRadius};
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
-    color: ${({ isError, theme }): string => isError ? theme.errorBorderColor : theme.textColor};
+    color: ${({ isError, theme }: Props): string => isError ? theme.errorBorderColor : theme.textColor};
     display: block;
-    font-family: ${({ theme }): string => theme.fontFamily};
-    font-size: ${({ theme }): string => theme.fontSize};
+    font-family: ${({ theme }: Props): string => theme.fontFamily};
+    font-size: ${({ theme }: Props): string => theme.fontSize};
     font-weight: 600;
     padding: 0.5rem 0.75rem;
     width: 100%;

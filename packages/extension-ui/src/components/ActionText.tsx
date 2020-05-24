@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { MouseEventHandler } from 'react';
 import Svg from '@polkadot/extension-ui/components/Svg';
 import styled from 'styled-components';
@@ -29,14 +31,14 @@ export default styled(ActionText)`
   cursor: pointer;
 
   span {
-    font-size: ${({ theme }): string => theme.labelFontSize};
-    line-height: ${({ theme }): string => theme.labelLineHeight};
+    font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+    line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
     text-decoration-line: underline;
-    color: ${({ theme }): string => theme.labelColor}
+    color: ${({ theme }: ThemeProps): string => theme.labelColor}
   }
 
   ${Svg} {
-    background: ${({ theme }): string => theme.iconNeutralColor};
+    background: ${({ theme }: ThemeProps): string => theme.iconNeutralColor};
     display: inline-block;
     position: relative;
     top: 2px;

@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Message } from '@polkadot/extension-base/types';
 import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -25,7 +26,7 @@ const handlers: Handlers = {};
 let idCounter = 0;
 
 // setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data): void => {
+port.onMessage.addListener((data: Message['data']): void => {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -39,6 +40,7 @@ port.onMessage.addListener((data): void => {
   }
 
   if (data.subscription) {
+    // eslint-disable-next-line @typescript-eslint/ban-types
     (handler.subscriber as Function)(data.subscription);
   } else if (data.error) {
     handler.reject(new Error(data.error));
@@ -50,8 +52,7 @@ port.onMessage.addListener((data): void => {
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: any) => void): Promise<ResponseTypes[TMessageType]> {
+function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = `${Date.now()}.${++idCounter}`;
 

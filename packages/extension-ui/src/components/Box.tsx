@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,19 +23,19 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
 }
 
 export default styled(Box)`
-  background: ${({ theme }): string => theme.readonlyInputBackground};
+  background: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
   border: none;
-  border-radius: ${({ theme }): string => theme.borderRadius};
-  color: ${({ theme }): string => theme.textColor};
-  font-family: ${({ theme }): string => theme.fontFamily};
-  font-size: ${({ theme }): string => theme.fontSize};
-  margin: ${({ theme }): string => theme.boxMargin};
-  padding: ${({ theme }): string => theme.boxPadding};
+  border-radius: ${({ theme }: ThemeProps): string => theme.borderRadius};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
+  font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
+  font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
+  margin: ${({ theme }: ThemeProps): string => theme.boxMargin};
+  padding: ${({ theme }: ThemeProps): string => theme.boxPadding};
   position: relative;
 
   .banner {
     background: darkorange;
-    border-radius: 0 ${({ theme }): string => theme.borderRadius} 0 ${({ theme }): string => theme.borderRadius};
+    border-radius: 0 ${({ theme }: ThemeProps): string => theme.borderRadius} 0 ${({ theme }: ThemeProps): string => theme.borderRadius};
     color: white;
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;

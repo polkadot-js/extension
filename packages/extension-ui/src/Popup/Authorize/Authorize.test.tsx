@@ -19,6 +19,7 @@ import Request from './Request';
 configure({ adapter: new Adapter() });
 
 describe('Authorize', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountAuthorize = (authorizeRequests: AuthorizeRequest[] = []): ReactWrapper => mount(
     <AuthorizeReqContext.Provider value={authorizeRequests}>
       <ThemeProvider theme={themes.dark}>

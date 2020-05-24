@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -24,7 +26,7 @@ export default function BackButton ({ onClick }: Props): React.ReactElement<Prop
 const SmallButton = styled(Button)`
   margin-right: 11px;
   width: 42px;
-  background: ${({ theme }): string => theme.backButtonBackground};
+  background: ${({ theme }: ThemeProps): string => theme.backButtonBackground};
 `;
 
 const ArrowLeft = styled(Svg).attrs(() => ({
@@ -34,5 +36,5 @@ const ArrowLeft = styled(Svg).attrs(() => ({
   height: 12px;
   display: block;
   margin: auto;
-  background: ${({ theme }): string => theme.backButtonTextColor};
+  background: ${({ theme }: ThemeProps): string => theme.backButtonTextColor};
 `;

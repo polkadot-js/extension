@@ -3,7 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useState } from 'react';
-import { Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../..//components';
+
+import { Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
 import { Name, Password } from '../../partials';
 
 interface Props {

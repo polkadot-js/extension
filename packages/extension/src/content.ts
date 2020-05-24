@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Message } from '@polkadot/extension-base/types';
+
 import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 
@@ -14,7 +16,7 @@ port.onMessage.addListener((data): void => {
 });
 
 // all messages from the page, pass them to the extension
-window.addEventListener('message', ({ data, source }): void => {
+window.addEventListener('message', ({ data, source }: Message): void => {
   // only allow messages from our window, by the inject
   if (source !== window || data.origin !== 'page') {
     return;

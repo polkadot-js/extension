@@ -42,11 +42,11 @@ function HeaderWithSteps ({ className, step, text }: Props): React.ReactElement<
   );
 }
 
-export default React.memo(styled(HeaderWithSteps)`
+export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
   .current {
-    font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-    line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
-    color: ${({ theme }: ThemeProps): string => theme.primaryColor};
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.primaryColor};
     font-weight: 600;
   }
 
@@ -60,9 +60,9 @@ export default React.memo(styled(HeaderWithSteps)`
   }
 
   .total {
-    font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-    line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
-    color: ${({ theme }: ThemeProps): string => theme.textColor};
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.textColor};
     font-weight: 600;
   }
-`);
+`));

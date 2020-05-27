@@ -14,7 +14,7 @@ import { Link, Svg } from '../components';
 import useOutsideClick from '../hooks/useOutsideClick';
 import Settings from './Settings';
 
-interface Props {
+interface Props extends ThemeProps {
   children?: React.ReactNode;
   className?: string;
   showSettings?: boolean;
@@ -101,7 +101,7 @@ const Gear = styled(Svg).attrs(() => ({ src: gear }))<GearProps>`
 
 Gear.displayName = 'Gear';
 
-export default React.memo(styled(Header)`
+export default React.memo(styled(Header)(({ theme }: Props) => `
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
@@ -117,15 +117,15 @@ export default React.memo(styled(Header)`
     display: flex;
     justify-content: space-between;
     width: 100%;
-    border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
+    border-bottom: 1px solid ${theme.inputBorderColor};
     min-height: 70px;
 
     .branding {
       display: flex;
       justify-content: center;
       align-items: center;
-      color: ${({ theme }: ThemeProps): string => theme.labelColor};
-      font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
+      color: ${theme.labelColor};
+      font-family: ${theme.fontFamily};
       text-align: center;
       margin-left: 24px;
 
@@ -136,8 +136,8 @@ export default React.memo(styled(Header)`
       }
 
       .logoText {
-        color: ${({ theme }: ThemeProps): string => theme.textColor};
-        font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
+        color: ${theme.textColor};
+        font-family: ${theme.fontFamily};
         font-size: 20px;
         line-height: 27px;
       }
@@ -151,4 +151,4 @@ export default React.memo(styled(Header)`
       }
     }
   }
-`);
+`));

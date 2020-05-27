@@ -108,24 +108,24 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-const OpenInNewWindowButton = styled(ActionText)`
+const OpenInNewWindowButton = styled(ActionText)(({ theme }: ThemeProps) => `
   span {
-    color: ${({ theme }: ThemeProps) => theme.textColor};
-    text-decoration: none;
+    color: ${theme.textColor};
+    font-size: ${theme.fontSize};
     font-weight: 600;
-    font-size: ${({ theme }: ThemeProps) => theme.fontSize};
-    line-height: ${({ theme }: ThemeProps) => theme.lineHeight};
+    line-height: ${theme.lineHeight};
+    text-decoration: none;
   }
 
   ${Svg} {
-    width: 20px;
+    background: ${theme.textColor};
     height: 20px;
     top: 4px;
-    background: ${({ theme }: ThemeProps) => theme.textColor};
+    width: 20px;
   }
-`;
+`);
 
-export default React.memo(styled(Settings)`
+export default React.memo(styled(Settings)(({ theme }: Props) => `
   margin-top: 56px;
   right: 24px;
   user-select: none;
@@ -135,22 +135,22 @@ export default React.memo(styled(Settings)`
     max-width: 100%;
 
     > .checkbox {
-      color: ${({ theme }: ThemeProps): string => theme.textColor};
+      color: ${theme.textColor};
+      line-height: 20px;
       font-size: 15px;
       font-weight: 600;
-      line-height: 20px;
 
       label {
-        color: ${({ theme }: ThemeProps): string => theme.textColor};
+        color: ${theme.textColor};
       }
     }
 
     > .dropdown {
-      background: ${({ theme }: ThemeProps): string => theme.background};
-      margin-top: 9px;
+      background: ${theme.background};
       margin-bottom: 12px;
-      width : 100%;
+      margin-top: 9px;
       margin-right: 0;
+      width: 100%;
     }
 
     > .title {
@@ -160,6 +160,6 @@ export default React.memo(styled(Settings)`
 
   .setting+.setting {
     padding-top: 18px;
-    border-top: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
+    border-top: 1px solid ${theme.inputBorderColor};
   }
-`);
+`));

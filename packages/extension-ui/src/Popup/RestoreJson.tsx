@@ -11,8 +11,6 @@ import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
 
 import { Header } from '../partials';
 
-type Props = {};
-
 interface FileState {
   address: string | null;
   isFileValid: boolean;
@@ -28,7 +26,7 @@ const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
 async function parseFile (file: Uint8Array): Promise<FileState> {
   try {
-    const json = JSON.parse(u8aToString(file));
+    const json = JSON.parse(u8aToString(file)) as KeyringPair$Json;
     const isFileValid = await jsonVerifyFile(json);
     const address = json.address;
 
@@ -40,7 +38,7 @@ async function parseFile (file: Uint8Array): Promise<FileState> {
   return { address: null, isFileValid: false, json: null };
 }
 
-export default function Upload (): React.ReactElement<Props> {
+export default function Upload (): React.ReactElement {
   const [{ address, isFileValid, json }, setJson] = useState<FileState>({ address: null, isFileValid: false, json: null });
   const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
   const [message, setMessage] = useState<string>('');
@@ -76,7 +74,7 @@ export default function Upload (): React.ReactElement<Props> {
       <div>
         <Address
           address={isFileValid && address ? address : null}
-          name={isFileValid && json ? json.meta.name : null}
+          name={isFileValid && json ? json.meta.name as string : null}
         />
         <InputFileWithLabel
           accept={acceptedFormats}

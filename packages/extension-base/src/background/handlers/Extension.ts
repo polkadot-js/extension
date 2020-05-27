@@ -187,7 +187,7 @@ export default class Extension {
         return { message: `Successfully added ${address}` };
       }
     } catch (error) {
-      return { message: `${error}` };
+      return { message: (error as Error).message };
     }
 
     return { message: 'Could not restore account.' };

@@ -68,7 +68,7 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
       reference={reference}
     >
       <div className='setting'>
-        <SettingTitle>Theme</SettingTitle>
+        <Title className='title'>Theme</Title>
         <Switch
           checked={themeContext.id === themes.dark.id}
           checkedLabel='Dark'
@@ -77,16 +77,18 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
         />
       </div>
       <div className='setting'>
-        <SettingTitle>External QR accounts and Access</SettingTitle>
-        <CheckboxSetting
+        <Title className='title'>External QR accounts and Access</Title>
+        <Checkbox
           checked={camera}
+          className='checkbox'
           label='Allow Camera Access'
           onChange={setCamera}
         />
       </div>
       <div className='setting'>
-        <SettingTitle>Display address format For:</SettingTitle>
-        <DropdownSetting
+        <Title className='title'>Display address format For:</Title>
+        <Dropdown
+          className='dropdown'
           label=''
           onChange={_onChangePrefix}
           options={prefixOptions}
@@ -105,28 +107,6 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
     </Menu>
   );
 }
-
-const CheckboxSetting = styled(Checkbox)`
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 20px;
-  color: ${({ theme }: ThemeProps) => theme.textColor};
-  label {
-    color: ${({ theme }: ThemeProps) => theme.textColor};
-  }
-`;
-
-const DropdownSetting = styled(Dropdown)`
-  background: ${({ theme }: ThemeProps) => theme.background};
-  margin-top: 9px;
-  margin-bottom: 12px;
-  width : 100%;
-  margin-right: 0;
-`;
-
-const SettingTitle = styled(Title)`
-  margin: 0;
-`;
 
 const OpenInNewWindowButton = styled(ActionText)`
   span {
@@ -153,6 +133,29 @@ export default React.memo(styled(Settings)`
   > .setting {
     padding: 0 16px;
     max-width: 100%;
+
+    > .checkbox {
+      color: ${({ theme }: ThemeProps): string => theme.textColor};
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 20px;
+
+      label {
+        color: ${({ theme }: ThemeProps): string => theme.textColor};
+      }
+    }
+
+    > .dropdown {
+      background: ${({ theme }: ThemeProps): string => theme.background};
+      margin-top: 9px;
+      margin-bottom: 12px;
+      width : 100%;
+      margin-right: 0;
+    }
+
+    > .title {
+      margin: 0;
+    }
   }
 
   .setting+.setting {

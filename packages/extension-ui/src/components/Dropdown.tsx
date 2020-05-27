@@ -59,7 +59,7 @@ function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChang
   );
 }
 
-export default styled(Dropdown)`
+export default React.memo(styled(Dropdown)`
   position: relative;
 
   select {
@@ -98,4 +98,4 @@ export default styled(Dropdown)`
     background: url(${arrow}) center no-repeat;
     pointer-events: none;
   }
-`;
+`);

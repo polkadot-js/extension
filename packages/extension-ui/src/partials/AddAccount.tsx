@@ -40,7 +40,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(AddAccount)`
+export default React.memo(styled(AddAccount)`
   color: ${({ theme }: ThemeProps): string => theme.textColor};
   height: 100%;
 
@@ -65,4 +65,4 @@ export default styled(AddAccount)`
     margin: 0 30px;
     color: ${({ theme }: ThemeProps): string => theme.subTextColor};
   }
-`;
+`);

@@ -101,7 +101,7 @@ const Gear = styled(Svg).attrs(() => ({ src: gear }))<GearProps>`
 
 Gear.displayName = 'Gear';
 
-export default styled(Header)`
+export default React.memo(styled(Header)`
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
@@ -151,4 +151,4 @@ export default styled(Header)`
       }
     }
   }
-`;
+`);

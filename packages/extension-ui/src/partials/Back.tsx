@@ -43,9 +43,9 @@ const BackLink = styled(Link)`
   }
 `;
 
-export default styled(Back)`
+export default React.memo(styled(Back)`
   margin: 0;
   line-height: 52px;
   border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
   font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-`;
+`);

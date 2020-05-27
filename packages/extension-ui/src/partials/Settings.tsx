@@ -67,7 +67,7 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
       className={className}
       reference={reference}
     >
-      <Setting>
+      <div className='setting'>
         <SettingTitle>Theme</SettingTitle>
         <Switch
           checked={themeContext.id === themes.dark.id}
@@ -75,16 +75,16 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
           onChange={_onChangeTheme}
           uncheckedLabel='Light'
         />
-      </Setting>
-      <Setting>
+      </div>
+      <div className='setting'>
         <SettingTitle>External QR accounts and Access</SettingTitle>
         <CheckboxSetting
           checked={camera}
           label='Allow Camera Access'
           onChange={setCamera}
         />
-      </Setting>
-      <Setting>
+      </div>
+      <div className='setting'>
         <SettingTitle>Display address format For:</SettingTitle>
         <DropdownSetting
           label=''
@@ -92,15 +92,15 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
           options={prefixOptions}
           value={`${prefix}`}
         />
-      </Setting>
+      </div>
       {isPopup && (
-        <Setting>
+        <div className='setting'>
           <OpenInNewWindowButton
             icon={FullScreenIcon}
             onClick={windowOpen}
             text='Open extension in new window'
           />
-        </Setting>
+        </div>
       )}
     </Menu>
   );
@@ -126,10 +126,6 @@ const DropdownSetting = styled(Dropdown)`
 
 const SettingTitle = styled(Title)`
   margin: 0;
-`;
-
-const Setting = styled.div`
-
 `;
 
 const OpenInNewWindowButton = styled(ActionText)`

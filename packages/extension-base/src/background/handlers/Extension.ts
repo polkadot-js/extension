@@ -18,7 +18,7 @@ import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 const SEED_DEFAULT_LENGTH = 12;
-const SEED_LENGTHS = [12, 24];
+const SEED_LENGTHS = [12, 15, 18, 21, 24];
 
 // a global registry to use internally
 const registry = new TypeRegistry();

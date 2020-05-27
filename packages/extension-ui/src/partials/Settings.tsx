@@ -150,7 +150,7 @@ export default React.memo(styled(Settings)`
   right: 24px;
   user-select: none;
 
-  .setting {
+  > .setting {
     padding: 0 16px;
     max-width: 100%;
   }

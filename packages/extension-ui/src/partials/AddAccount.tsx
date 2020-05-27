@@ -11,7 +11,7 @@ import { ActionContext } from '../components';
 import AddAccountImage from './AddAccountImage';
 import Header from './Header';
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
 }
 
@@ -26,32 +26,19 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
     <>
       <Header
         showSettings
-        text={'Add Account'}
+        text='Add Account'
       />
       <div className={className}>
-        <Image>
+        <div className='image'>
           <AddAccountImage onClick={_onClick}/>
-        </Image>
-        <div>
-          <TipText>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</TipText>
+        </div>
+        <div className='no-accounts'>
+          <p >You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</p>
         </div>
       </div>
     </>
   );
 }
-
-const TipText = styled.p`
-  text-align: center;
-  font-size: 16px;
-  line-height: 26px;
-  margin: 0 30px;
-  color: ${({ theme }: ThemeProps): string => theme.subTextColor};
-`;
-
-const Image = styled.div`
-  display: flex;
-  justify-content: center;
-`;
 
 export default styled(AddAccount)`
   color: ${({ theme }: ThemeProps): string => theme.textColor};
@@ -64,5 +51,18 @@ export default styled(AddAccount)`
     font-size: 24px;
     line-height: 33px;
     text-align: center;
+  }
+
+  > .image {
+    display: flex;
+    justify-content: center;
+  }
+
+  > .no-accounts p {
+    text-align: center;
+    font-size: 16px;
+    line-height: 26px;
+    margin: 0 30px;
+    color: ${({ theme }: ThemeProps): string => theme.subTextColor};
   }
 `;

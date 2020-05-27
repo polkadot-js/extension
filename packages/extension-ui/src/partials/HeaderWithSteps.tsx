@@ -10,12 +10,13 @@ import styled from 'styled-components';
 import { ActionContext, ActionText } from '../components';
 import Header from './Header';
 
-interface Props {
+interface Props extends ThemeProps {
+  className?: string;
   step: number;
   text: string;
 }
 
-export default function HeaderWithSteps ({ step, text }: Props): React.ReactElement<Props> {
+function HeaderWithSteps ({ className, step, text }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
 
   const _onCancel = useCallback(() => {
@@ -23,40 +24,45 @@ export default function HeaderWithSteps ({ step, text }: Props): React.ReactElem
   }, [onAction]);
 
   return (
-    <Header text={text}>
-      <CreationSteps>
+    <Header
+      className={className}
+      text={text}
+    >
+      <div className='steps'>
         <div>
-          <CurrentStep>{step}</CurrentStep>
-          <TotalSteps>/2</TotalSteps>
+          <span className='current'>{step}</span>
+          <span className='total'>/2</span>
         </div>
         <ActionText
           onClick={_onCancel}
           text='Cancel'
         />
-      </CreationSteps>
+      </div>
     </Header>
   );
 }
 
-const CreationSteps = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  flex-grow: 1;
-  padding-right: 24px;
-  margin-top: 3px;
-`;
+export default React.memo(styled(HeaderWithSteps)`
+  .current {
+    font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+    line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+    color: ${({ theme }: ThemeProps): string => theme.primaryColor};
+    font-weight: 600;
+  }
 
-const CurrentStep = styled.span`
-  font-size: ${({ theme }: ThemeProps) => theme.labelFontSize};
-  line-height: ${({ theme }: ThemeProps) => theme.labelLineHeight};
-  color: ${({ theme }: ThemeProps) => theme.primaryColor};
-  font-weight: 600;
-`;
+  .steps {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    flex-grow: 1;
+    padding-right: 24px;
+    margin-top: 3px;
+  }
 
-const TotalSteps = styled.span`
-  font-size: ${({ theme }: ThemeProps) => theme.labelFontSize};
-  line-height: ${({ theme }: ThemeProps) => theme.labelLineHeight};
-  color: ${({ theme }: ThemeProps) => theme.textColor};
-  font-weight: 600;
-`;
+  .total {
+    font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
+    line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+    color: ${({ theme }: ThemeProps): string => theme.textColor};
+    font-weight: 600;
+  }
+`);

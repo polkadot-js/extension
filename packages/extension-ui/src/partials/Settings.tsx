@@ -153,10 +153,10 @@ export default React.memo(styled(Settings)`
   .setting {
     padding: 0 16px;
     max-width: 100%;
+  }
 
-    & + & {
-      padding-top: 18px;
-      border-top: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
-    }
+  .setting+.setting {
+    padding-top: 18px;
+    border-top: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
   }
 `);

@@ -10,7 +10,7 @@ jobs:
       matrix:
         step: ['build:release']
     name: ${{ matrix.step }}
-    if: "! contains(github.event.head_commit.message, '[CI Skip]') && github.repository == 'polkadot-js/extension'"
+    if: "! startsWith(github.event.head_commit.message, '[CI Skip]') && github.repository == 'polkadot-js/extension'"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -28,8 +28,6 @@ jobs:
         yarn ${{ matrix.step }}
 
   dummy:
-    name: Dummy
-    if: "contains(github.event.head_commit.message, '[CI Skip]')"
     runs-on: ubuntu-latest
     steps:
     - name: dummy

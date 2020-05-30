@@ -30,6 +30,7 @@ describe('Export component', () => {
   beforeEach(() => {
     jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(
       <MemoryRouter initialEntries={ [`/account/export/${VALID_ADDRESS}`] }>
         <ThemeProvider theme={themes.dark}>

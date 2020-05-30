@@ -8,7 +8,7 @@ import { Loading, MetadataReqContext } from '../../components';
 import { Header } from '../../partials';
 import Request from './Request';
 
-export default function Metadata (): React.ReactElement<{}> {
+export default function Metadata (): React.ReactElement {
   const requests = useContext(MetadataReqContext);
 
   return (

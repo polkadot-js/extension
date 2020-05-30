@@ -27,8 +27,7 @@ export interface InjectedAccountWithMeta {
 
 export interface InjectedAccounts {
   get: () => Promise<InjectedAccount[]>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscribe: (cb: (accounts: InjectedAccount[]) => any) => Unsubcall;
+  subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>) => Unsubcall;
 }
 
 export interface InjectedExtensionInfo {
@@ -56,7 +55,7 @@ export interface MetadataDef {
   ss58Format: number;
   tokenDecimals: number;
   tokenSymbol: string;
-  types: Record<string, object | string>;
+  types: Record<string, Record<string, string> | string>;
   metaCalls?: string;
 }
 

@@ -11,24 +11,22 @@ import { createAccountSuri, validateSeed, jsonRestoreWindowOpen } from '../messa
 import { Header, Name, Password } from '../partials';
 import upload from '../assets/file-upload.svg';
 
-type Props = {};
-
-const validate = async (suri: string): Promise<Result<string>> => {
+async function validate (suri: string): Promise<Result<string>> {
   try {
     await validateSeed(suri);
 
     return Result.ok(suri);
-  } catch (err) {
-    return Result.error(err.message);
+  } catch (error) {
+    return Result.error((error as Error).message);
   }
-};
+}
 
 const isSeedValid = allOf(
   isNotShorterThan(1, 'Seed is empty'),
   validate
 );
 
-export default function Import (): React.ReactElement<Props> {
+export default function Import (): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
@@ -50,8 +48,8 @@ export default function Import (): React.ReactElement<Props> {
     // this should always be the case
     if (name && password && account) {
       createAccountSuri(name, password, account.suri)
-        .then((): void => onAction('/'))
-        .catch((error: Error) => console.error(error));
+        .then(() => onAction('/'))
+        .catch(console.error);
     }
   }, [account, name, onAction, password]);
 

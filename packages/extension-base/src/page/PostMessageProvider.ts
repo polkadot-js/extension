@@ -12,8 +12,7 @@ import { ProviderList, ProviderMeta, InjectedProvider } from '@polkadot/extensio
 
 const l = logger('PostMessageProvider');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type CallbackHandler = (error?: null | Error, value?: any) => void;
+type CallbackHandler = (error?: null | Error, value?: unknown) => void;
 
 // Same as https://github.com/polkadot-js/api/blob/57ca9a9c3204339e1e1f693fcacc33039868dc27/packages/rpc-provider/src/ws/Provider.ts#L17
 interface SubscriptionHandler {
@@ -100,24 +99,20 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public send (method: string, params: any[], subscription?: SubscriptionHandler): Promise<any> {
+  public async send (method: string, params: unknown[], subscription?: SubscriptionHandler): Promise<any> {
     if (subscription) {
       const { callback, type } = subscription;
 
-      return sendRequest(
-        'pub(rpc.subscribe)',
-        { method, params, type },
-        (res) => {
-          subscription.callback(null, res);
-        }
-      ).then((id): number => {
-        this.#subscriptions[`${type}::${id}`] = callback;
-
-        return id;
+      const id = await sendRequest('pub(rpc.subscribe)', { method, params, type }, (res): void => {
+        subscription.callback(null, res);
       });
-    } else {
-      return sendRequest('pub(rpc.send)', { method, params });
+
+      this.#subscriptions[`${type}::${id}`] = callback;
+
+      return id;
     }
+
+    return sendRequest('pub(rpc.send)', { method, params });
   }
 
   /**
@@ -130,6 +125,7 @@ export default class PostMessageProvider implements InjectedProvider {
 
     const meta = await sendRequest('pub(rpc.startProvider)', key);
 
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     sendRequest('pub(rpc.subscribeConnected)', null, (connected) => {
       this.#isConnected = connected;
 
@@ -145,11 +141,8 @@ export default class PostMessageProvider implements InjectedProvider {
     return meta;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async subscribe (type: string, method: string, params: any[], callback: AnyFunction): Promise<number> {
-    const id = await this.send(method, params, { callback, type });
-
-    return id as number;
+  public subscribe (type: string, method: string, params: unknown[], callback: AnyFunction): Promise<number> {
+    return this.send(method, params, { callback, type }) as Promise<number>;
   }
 
   /**
@@ -170,8 +163,6 @@ export default class PostMessageProvider implements InjectedProvider {
 
     delete this.#subscriptions[subscription];
 
-    const result = await this.send(method, [id]);
-
-    return result as boolean;
+    return this.send(method, [id]) as Promise<boolean>;
   }
 }

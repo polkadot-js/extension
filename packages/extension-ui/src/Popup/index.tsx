@@ -45,7 +45,7 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
 
     return true;
   } catch (error) {
-    console.error('Permission for video declined', error.message);
+    console.error('Permission for video declined', (error as Error).message);
   }
 
   return false;
@@ -63,7 +63,7 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
-export default function Popup (): React.ReactElement<{}> {
+export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
   const [cameraOn, setCameraOn] = useState(settings.get().camera === 'on');
@@ -94,7 +94,7 @@ export default function Popup (): React.ReactElement<{}> {
   }, []);
 
   useEffect((): void => {
-    requestMediaAccess(cameraOn).then(setMediaAllowed);
+    requestMediaAccess(cameraOn).then(setMediaAllowed).catch(console.error);
   }, [cameraOn]);
 
   const Root = isWelcomeDone

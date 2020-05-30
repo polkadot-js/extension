@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../../types';
+
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -54,11 +56,11 @@ const HiddenOptions = styled.div<{ visible: boolean }>`
   visibility: ${({ visible }): string => (visible ? 'visible' : 'hidden')};
   width: 430px;
   z-index: 100;
-  background: ${({ theme }): string => theme.bodyColor};
+  background: ${({ theme }: ThemeProps): string => theme.bodyColor};
   max-height: ${({ visible }): string => (visible ? '200px' : '0')};
   overflow: scroll;
   padding: 5px;
-  border: 1px solid ${({ theme }): string => theme.boxBorderColor};
+  border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 4px;
   margin-top: -8px;
@@ -81,10 +83,10 @@ export default styled(AddressDropdown)`
     width: 30px;
     height: 30px;
     background: url(${arrow}) center no-repeat;
-    background-color: ${({ theme }): string => theme.inputBackground};
+    background-color: ${({ theme }: ThemeProps): string => theme.inputBackground};
     pointer-events: none;
     border-radius: 4px;
-    border: 1px solid ${({ theme }): string => theme.boxBorderColor};
+    border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
   }
 
   ${Address} ${Svg} {

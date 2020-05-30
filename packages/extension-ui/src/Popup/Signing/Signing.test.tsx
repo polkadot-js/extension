@@ -43,6 +43,7 @@ describe.skip('Signing requests', () => {
   }
 
   const mountComponent = async (): Promise<void> => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(
       <ActionContext.Provider value={onActionStub}>
         <ThemeProvider theme={themes.dark}>

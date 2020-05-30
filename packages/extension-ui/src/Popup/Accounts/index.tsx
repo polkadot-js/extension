@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../../types';
+
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
@@ -10,9 +12,7 @@ import { AddAccount, Header } from '../../partials';
 import AccountsTree from './AccountsTree';
 import qrIcon from '../../assets/qr.svg';
 
-type Props = {};
-
-export default function Accounts (): React.ReactElement<Props> {
+export default function Accounts (): React.ReactElement {
   const { hierarchy, master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
 
@@ -64,7 +64,7 @@ const QrButton = styled(Button)`
   ${Svg} {
     width: 20px;
     height: 20px;
-    background: ${({ theme }): string => theme.buttonTextColor};
+    background: ${({ theme }: ThemeProps): string => theme.buttonTextColor};
   }
 `;
 

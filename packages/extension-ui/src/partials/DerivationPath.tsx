@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -90,7 +92,7 @@ const LockIcon = styled(Svg).attrs(() => ({
 }))`
   width: 11px;
   height: 14px;
-  background: ${({ theme }): string => theme.iconNeutralColor};
+  background: ${({ theme }: ThemeProps) => theme.iconNeutralColor};
 `;
 
 const UnlockIcon = styled(Svg).attrs(() => ({
@@ -98,7 +100,7 @@ const UnlockIcon = styled(Svg).attrs(() => ({
 }))`
   width: 11px;
   height: 14px;
-  background: ${({ theme }): string => theme.iconNeutralColor};
+  background: ${({ theme }: ThemeProps) => theme.iconNeutralColor};
 `;
 
 const LockButton = styled(Button)`

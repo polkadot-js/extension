@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import styled from 'styled-components';
 import React, { MouseEventHandler } from 'react';
 import TextAreaWithLabel from './TextAreaWithLabel';
@@ -35,13 +37,13 @@ const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
   label: 'Generated 12-word mnemonic seed:'
 }))`
   textarea {
-    font-size: ${({ theme }): string => theme.fontSize};
-    line-height: ${({ theme }): string => theme.lineHeight};
+    font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
+    line-height: ${({ theme }: ThemeProps): string => theme.lineHeight};
     height: unset;
     letter-spacing: -0.01em;
     padding: 14px;
     margin-bottom: 10px;
-    color: ${({ theme }): string => theme.primaryColor};
+    color: ${({ theme }: ThemeProps): string => theme.primaryColor};
   }
 `;
 

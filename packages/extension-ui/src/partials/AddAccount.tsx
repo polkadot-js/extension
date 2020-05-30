@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
@@ -43,7 +45,7 @@ const TipText = styled.p`
   font-size: 16px;
   line-height: 26px;
   margin: 0 30px;
-  color: ${({ theme }): string => theme.subTextColor};
+  color: ${({ theme }: ThemeProps): string => theme.subTextColor};
 `;
 
 const Image = styled.div`
@@ -52,11 +54,11 @@ const Image = styled.div`
 `;
 
 export default styled(AddAccount)`
-  color: ${({ theme }): string => theme.textColor};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
   height: 100%;
 
   h3 {
-    color: ${({ theme }): string => theme.textColor};
+    color: ${({ theme }: ThemeProps): string => theme.textColor};
     margin-top: 0;
     font-weight: normal;
     font-size: 24px;

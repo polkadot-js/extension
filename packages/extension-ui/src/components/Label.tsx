@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
 
@@ -21,7 +23,7 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
 }
 
 export default styled(Label)`
-  color: ${({ theme }): string => theme.textColor};
+  color: ${({ theme }: ThemeProps): string => theme.textColor};
 
   label {
     font-size: 10px;

@@ -1,14 +1,14 @@
 {
   "name": "@polkadot/extension-inject",
   "description": "A generic injector (usable to any extension), that populates the base exposed interfaces to be used by dapps.",
-  "version": "0.26.0-beta.2",
+  "version": "0.26.0-beta.7",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@babel/runtime": "^7.9.6"
+    "@babel/runtime": "^7.10.1"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.112",
+    "@types/chrome": "^0.0.114",
     "@types/firefox-webext-browser": "^70.0.1"
   },
   "peerDependencies": {

@@ -108,7 +108,7 @@ export default class Tabs {
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      this.rpcUnsubscribe({ ...request, subscriptionId }, port);
+      this.rpcUnsubscribe({ ...request, subscriptionId }, port).catch(console.error);
     });
 
     return true;

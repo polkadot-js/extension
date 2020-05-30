@@ -19,8 +19,7 @@ function metadataExpand (definition: MetadataDef): Chain {
   const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
   const registry = new TypeRegistry();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registry.register(types as any);
+  registry.register(types);
 
   const isUnknown = genesisHash === '0x';
   const metadata = metaCalls

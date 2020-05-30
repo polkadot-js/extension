@@ -17,7 +17,9 @@ interface FileState {
   json: KeyringPair$Json | null;
 }
 
+// FIXME We want to display the decodeError
 interface PassState {
+  decodeError?: string | null;
   isPassValid: boolean;
   password: string;
 }
@@ -66,7 +68,7 @@ export default function Upload (): React.ReactElement {
       jsonRestore(json, password)
         .then(({ error }): void => {
           if (error) {
-            setPass(({ password }) => ({ isPassValid: false, password }));
+            setPass(({ password }) => ({ decodeError: error, isPassValid: false, password }));
           } else {
             onAction('/');
           }
@@ -79,12 +81,13 @@ export default function Upload (): React.ReactElement {
   return (
     <>
       <HeaderWithSmallerMargin
-        text='Restore Account from JSON'
+        showBackArrow
+        text='Restore from JSON'
       />
       <div>
         <Address
-          address={isFileValid && address ? address : null}
-          name={isFileValid && json ? json.meta.name as string : null}
+          address={(isFileValid && address) || null}
+          name={(isFileValid && json?.meta.name as string) || null}
         />
         <InputFileWithLabel
           accept={acceptedFormats}

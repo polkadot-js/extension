@@ -53,6 +53,15 @@ export default function Import (): React.ReactElement {
     }
   }, [account, name, onAction, password]);
 
+  const _toJson = useCallback((): void => {
+    // are we in a popup?
+    if (window.innerWidth <= 480) {
+      jsonRestoreWindowOpen().catch(console.error);
+    } else {
+      onAction('/account/restore-json');
+    }
+  }, [onAction]);
+
   return (
     <>
       <HeaderWithSmallerMargin
@@ -90,7 +99,7 @@ export default function Import (): React.ReactElement {
         <ButtonsRow>
           <ActionText
             icon={upload}
-            onClick={jsonRestoreWindowOpen}
+            onClick={_toJson}
             text='Restore from JSON backup'
           />
         </ButtonsRow>

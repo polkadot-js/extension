@@ -2970,7 +2970,7 @@ __metadata:
     "@polkadot/api": ^1.17.0-beta.5
     "@polkadot/extension-inject": 0.26.0-beta.8
     "@polkadot/keyring": ^2.11.1
-    "@polkadot/ui-keyring": ^0.54.0-beta.3
+    "@polkadot/ui-keyring": ^0.54.0-beta.4
   languageName: unknown
   linkType: soft
 
@@ -3015,8 +3015,8 @@ __metadata:
     "@polkadot/extension-base": 0.26.0-beta.8
     "@polkadot/extension-inject": 0.26.0-beta.8
     "@polkadot/keyring": ^2.11.1
-    "@polkadot/react-identicon": ^0.54.0-beta.3
-    "@polkadot/react-qr": ^0.54.0-beta.3
+    "@polkadot/react-identicon": ^0.54.0-beta.4
+    "@polkadot/react-qr": ^0.54.0-beta.4
     "@polkadot/util": ^2.11.1
     "@polkadot/util-crypto": ^2.11.1
     "@types/bn.js": ^4.11.6
@@ -3087,7 +3087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/react-identicon@npm:^0.54.0-beta.3":
+"@polkadot/react-identicon@npm:^0.54.0-beta.4":
   version: 0.54.0-beta.4
   resolution: "@polkadot/react-identicon@npm:0.54.0-beta.4"
   dependencies:
@@ -3109,7 +3109,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/react-qr@npm:^0.54.0-beta.3":
+"@polkadot/react-qr@npm:^0.54.0-beta.4":
   version: 0.54.0-beta.4
   resolution: "@polkadot/react-qr@npm:0.54.0-beta.4"
   dependencies:
@@ -3211,7 +3211,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^0.54.0-beta.3":
+"@polkadot/ui-keyring@npm:^0.54.0-beta.4":
   version: 0.54.0-beta.4
   resolution: "@polkadot/ui-keyring@npm:0.54.0-beta.4"
   dependencies:

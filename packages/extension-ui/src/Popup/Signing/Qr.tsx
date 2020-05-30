@@ -38,6 +38,7 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
             <QrDisplayPayload
               address={request.address}
               cmd={CMD_MORTAL}
+              genesisHash={request.genesisHash}
               payload={payloadU8a}
             />
           )

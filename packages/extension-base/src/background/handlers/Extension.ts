@@ -193,14 +193,6 @@ export default class Extension {
     return { message: 'Could not restore account.' };
   }
 
-  private jsonRestoreWindowOpen (): boolean {
-    chrome.tabs.create({
-      url: chrome.extension.getURL('index.html#/account/restore-json')
-    });
-
-    return true;
-  }
-
   private jsonVerifyFile ({ json }: RequestJsonRestore): boolean {
     try {
       const publicKey = keyring.decodeAddress(json.address, true);
@@ -315,9 +307,11 @@ export default class Extension {
     return true;
   }
 
-  private windowOpen (): boolean {
+  private windowOpen (path = '/'): boolean {
+    console.error('open', `${chrome.extension.getURL('index.html')}#${path}`);
+
     chrome.tabs.create({
-      url: chrome.extension.getURL('index.html')
+      url: `${chrome.extension.getURL('index.html')}#${path}`
     });
 
     return true;
@@ -415,9 +409,6 @@ export default class Extension {
       case 'pri(json.restore)':
         return this.jsonRestore(request as RequestJsonRestore);
 
-      case 'pri(json.restore.window.open)':
-        return this.jsonRestoreWindowOpen();
-
       case 'pri(json.verify.file)':
         return this.jsonVerifyFile(request as RequestJsonRestore);
 
@@ -444,6 +435,9 @@ export default class Extension {
 
       case 'pri(window.open)':
         return this.windowOpen();
+
+      case 'pri(window.open.json)':
+        return this.windowOpen('/account/restore-json');
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

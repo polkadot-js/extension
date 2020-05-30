@@ -157,7 +157,7 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
 }
 
 export async function jsonRestoreWindowOpen (): Promise<boolean> {
-  return sendMessage('pri(json.restore.window.open)', null);
+  return sendMessage('pri(window.open.json)', null);
 }
 
 export async function jsonVerifyFile (json: KeyringPair$Json): Promise<boolean> {

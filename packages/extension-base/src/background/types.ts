@@ -77,7 +77,6 @@ export interface RequestSignatures {
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
-  'pri(json.restore.window.open)': [null, boolean];
   'pri(json.verify.file)': [RequestJsonRestore, boolean];
   'pri(json.verify.password)': [string, boolean];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
@@ -91,6 +90,7 @@ export interface RequestSignatures {
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   'pri(window.open)': [null, boolean];
+  'pri(window.open.json)': [null, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];

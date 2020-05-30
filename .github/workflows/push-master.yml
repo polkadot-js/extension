@@ -20,8 +20,7 @@ jobs:
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         GH_PAT: ${{ secrets.GH_PAT }}
-        GH_TOKEN: ${{ secrets.GH_PAT }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         yarn install --immutable | grep -v 'YN0013'

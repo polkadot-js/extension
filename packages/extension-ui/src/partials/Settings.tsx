@@ -24,16 +24,13 @@ interface Props extends ThemeProps {
 }
 
 const isPopup = window.innerWidth <= 480;
-const prefixOptions = settings.availablePrefixes.map(({ text, value }): Option => ({
-  text: value === -1
-    ? 'Default'
-    : text,
-  value: `${value}`
-}));
+const prefixOptions = settings.availablePrefixes
+  .filter(({ value }) => value !== -1)
+  .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
 function Settings ({ className, reference }: Props): React.ReactElement<Props> {
   const [camera, setCamera] = useState(settings.camera === 'on');
-  const [prefix, setPrefix] = useState(`${settings.prefix}`);
+  const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
 
@@ -46,7 +43,7 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
     (value: string): void => {
       const prefix = parseInt(value, 10);
 
-      setSS58Format(prefix === -1 ? 42 : prefix);
+      setSS58Format(prefix);
       setPrefix(value);
 
       settings.set({ prefix });

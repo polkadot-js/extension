@@ -5,7 +5,7 @@
 import { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
+import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { TypeRegistry } from '@polkadot/types';
 
@@ -76,6 +76,9 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
+  'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
+  'pri(json.verify.file)': [RequestJsonRestore, boolean];
+  'pri(json.verify.password)': [string, boolean];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
@@ -87,6 +90,7 @@ export interface RequestSignatures {
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   'pri(window.open)': [null, boolean];
+  'pri(window.open.json)': [null, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -305,4 +309,13 @@ export interface RequestSign {
   readonly payload: SignerPayloadJSON | SignerPayloadRaw;
 
   sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
+}
+
+export interface RequestJsonRestore {
+  json: KeyringPair$Json;
+  password: string;
+}
+
+export interface ResponseJsonRestore {
+  error: string | null;
 }

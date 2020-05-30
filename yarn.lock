@@ -3030,6 +3030,7 @@ __metadata:
     enzyme-adapter-react-16: ^1.15.2
     react: ^16.13.1
     react-dom: ^16.13.1
+    react-dropzone: ^11.0.1
     react-is: ^16.13.1
     react-router: ^5.2.0
     react-router-dom: ^5.2.0
@@ -5041,6 +5042,13 @@ __metadata:
   bin:
     atob: bin/atob.js
   checksum: 3/597c0d1a740bb6522c98bea8fe362ae9420b4203af588d2bd470326d9abd4504264956b8355923d7019a21527ef5e6526a7b4455862ec5178ccd81e0ea289d5f
+  languageName: node
+  linkType: hard
+
+"attr-accept@npm:^2.0.0":
+  version: 2.1.0
+  resolution: "attr-accept@npm:2.1.0"
+  checksum: 3/a31fdf3b37daed32e8f33a46e17b3a85b156900c9b7e564cf9202a4893bf475aeebda41421c0febce65bac02c528cbe603abc18592af907fc4a7b839a181a5e4
   languageName: node
   linkType: hard
 
@@ -9816,6 +9824,15 @@ __metadata:
   peerDependencies:
     webpack: ^4.0.0 || ^5.0.0
   checksum: 3/745f5ee763fe46f2124921ff4fb7ed601eb1e8d6ac975cf6af321b3957ce8f78afb885c636e64a9031634e85e26dc9e8ef40ebeb532153c6a80a7d06b56876cb
+  languageName: node
+  linkType: hard
+
+"file-selector@npm:^0.1.12":
+  version: 0.1.12
+  resolution: "file-selector@npm:0.1.12"
+  dependencies:
+    tslib: ^1.9.0
+  checksum: 3/b1a8287dabc8c239998ecb319c5b4eae156bdeb23130d3b5b6bed349f296d7798d0e5ef43e83dad3550aa2b1d1fd45ab7c5302fe8a9e26196676089de565f4ac
   languageName: node
   linkType: hard
 
@@ -17259,6 +17276,19 @@ __metadata:
   peerDependencies:
     react: ^16.13.1
   checksum: 3/fb5c3ad41360c6a8674f33916aa895d05e79d063d31a6963074220c1cda9e07e880799d01670b4ebd570b4d3457584f13cc898b5033a05641e8e801f5611607e
+  languageName: node
+  linkType: hard
+
+"react-dropzone@npm:^11.0.1":
+  version: 11.0.1
+  resolution: "react-dropzone@npm:11.0.1"
+  dependencies:
+    attr-accept: ^2.0.0
+    file-selector: ^0.1.12
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ">= 16.8"
+  checksum: 3/c5192e7367df18d77b8b4c219fd9e091d9d63e7a530ec9f983b42e32a738079f0f5f5082057a867ffd7031aa0a703638d7e873476cb6a27b96c0f330e4166523
   languageName: node
   linkType: hard
 

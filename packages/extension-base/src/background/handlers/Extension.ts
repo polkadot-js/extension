@@ -182,15 +182,13 @@ export default class Extension {
       const pair = keyring.restoreAccount(json, password);
 
       if (pair) {
-        const { address } = pair;
-
-        return { message: `Successfully added ${address}` };
+        return { error: null };
       }
     } catch (error) {
-      return { message: (error as Error).message };
+      return { error: (error as Error).message };
     }
 
-    return { message: 'Could not restore account.' };
+    return { error: 'Could not restore account.' };
   }
 
   private jsonVerifyFile ({ json }: RequestJsonRestore): boolean {

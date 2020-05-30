@@ -317,5 +317,5 @@ export interface RequestJsonRestore {
 }
 
 export interface ResponseJsonRestore {
-  message: string;
+  error: string | null;
 }

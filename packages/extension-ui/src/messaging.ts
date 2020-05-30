@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Message } from '@polkadot/extension-base/types';
-import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -169,6 +169,6 @@ export async function jsonVerifyPassword (password: string): Promise<boolean> {
   return sendMessage('pri(json.verify.password)', password);
 }
 
-export async function jsonRestore (json: KeyringPair$Json, password: string): Promise<{ message: string }> {
+export async function jsonRestore (json: KeyringPair$Json, password: string): Promise<ResponseJsonRestore> {
   return sendMessage('pri(json.restore)', { json, password });
 }

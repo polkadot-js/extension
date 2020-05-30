@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringPair$Json } from '@polkadot/keyring/types';
-import React, { useCallback, useState } from 'react';
-import { InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
+import React, { useCallback, useContext, useState } from 'react';
+import { ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
 import { u8aToString } from '@polkadot/util';
 import styled from 'styled-components';
 import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
@@ -39,15 +39,15 @@ async function parseFile (file: Uint8Array): Promise<FileState> {
 }
 
 export default function Upload (): React.ReactElement {
+  const onAction = useContext(ActionContext);
   const [{ address, isFileValid, json }, setJson] = useState<FileState>({ address: null, isFileValid: false, json: null });
   const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
-  const [message, setMessage] = useState<string>('');
 
   const _onChangePass = useCallback(
-    async (password: string): Promise<void> => {
-      const isPassValid = await jsonVerifyPassword(password);
-
-      setPass({ isPassValid, password });
+    (password: string): void => {
+      jsonVerifyPassword(password)
+        .then((isPassValid) => setPass({ isPassValid, password }))
+        .catch(console.error);
     }, []
   );
 
@@ -58,12 +58,22 @@ export default function Upload (): React.ReactElement {
   );
 
   const _onRestore = useCallback(
-    async (): Promise<void> => {
-      if (!json || !password) { return; }
+    (): void => {
+      if (!json || !password) {
+        return;
+      }
 
-      setMessage((await jsonRestore(json, password)).message);
+      jsonRestore(json, password)
+        .then(({ error }): void => {
+          if (error) {
+            setPass(({ password }) => ({ isPassValid: false, password }));
+          } else {
+            onAction('/');
+          }
+        })
+        .catch(console.error);
     },
-    [json, password]
+    [json, onAction, password]
   );
 
   return (
@@ -95,7 +105,6 @@ export default function Upload (): React.ReactElement {
         >
         Restore
         </Button>
-        {message}
       </div>
     </>
   );

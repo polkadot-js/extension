@@ -6,7 +6,6 @@ import { Theme, ThemeProps } from '../types';
 
 import React, { useCallback, useContext, useState, useEffect } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import { setSS58Format } from '@polkadot/util-crypto';
 import settings from '@polkadot/ui-settings';
 
 import FullScreenIcon from '../assets/fullscreen.svg';
@@ -38,18 +37,10 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
     settings.set({ camera: camera ? 'on' : 'off' });
   }, [camera]);
 
-  // FIXME check against index, we need a better solution
   const _onChangePrefix = useCallback(
     (value: string): void => {
-      const prefix = parseInt(value, 10);
-
-      setSS58Format(prefix);
       setPrefix(value);
-
-      settings.set({ prefix });
-
-      // FIXME We don't want to reload here
-      location.reload();
+      settings.set({ prefix: parseInt(value, 10) });
     },
     []
   );

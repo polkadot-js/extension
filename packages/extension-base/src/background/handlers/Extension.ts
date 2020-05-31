@@ -4,21 +4,21 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
 import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
-import { assert, isHex } from '@polkadot/util';
+import { assert, isHex, isObject } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 const SEED_DEFAULT_LENGTH = 12;
-const SEED_LENGTHS = [12, 24];
+const SEED_LENGTHS = [12, 15, 18, 21, 24];
 
 // a global registry to use internally
 const registry = new TypeRegistry();
@@ -177,6 +177,41 @@ export default class Extension {
     return true;
   }
 
+  private jsonRestore ({ json, password }: RequestJsonRestore): ResponseJsonRestore {
+    try {
+      const pair = keyring.restoreAccount(json, password);
+
+      if (pair) {
+        return { error: null };
+      }
+    } catch (error) {
+      return { error: (error as Error).message };
+    }
+
+    return { error: 'Could not restore account.' };
+  }
+
+  private jsonVerifyFile ({ json }: RequestJsonRestore): boolean {
+    try {
+      const publicKey = keyring.decodeAddress(json.address, true);
+      const isFileValid = publicKey.length === 32 && isHex(json.encoded) && isObject(json.meta) && (
+        Array.isArray(json.encoding.content)
+          ? json.encoding.content[0] === 'pkcs8'
+          : json.encoding.content === 'pkcs8'
+      );
+
+      return isFileValid;
+    } catch (error) {
+      console.error(error);
+    }
+
+    return false;
+  }
+
+  private jsonVerifyPassword (password: string): boolean {
+    return keyring.isPassValid(password);
+  }
+
   private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
     const seed = mnemonicGenerate(length);
 
@@ -270,9 +305,11 @@ export default class Extension {
     return true;
   }
 
-  private windowOpen (): boolean {
+  private windowOpen (path = '/'): boolean {
+    console.error('open', `${chrome.extension.getURL('index.html')}#${path}`);
+
     chrome.tabs.create({
-      url: chrome.extension.getURL('index.html')
+      url: `${chrome.extension.getURL('index.html')}#${path}`
     });
 
     return true;
@@ -307,7 +344,8 @@ export default class Extension {
     const childPair = this.derive(parentAddress, suri, parentPassword, {
       genesisHash,
       name,
-      parentAddress
+      parentAddress,
+      suri
     });
 
     keyring.addPair(childPair, password);
@@ -367,6 +405,15 @@ export default class Extension {
       case 'pri(derivation.validate)':
         return this.derivationValidate(request as RequestDeriveValidate);
 
+      case 'pri(json.restore)':
+        return this.jsonRestore(request as RequestJsonRestore);
+
+      case 'pri(json.verify.file)':
+        return this.jsonVerifyFile(request as RequestJsonRestore);
+
+      case 'pri(json.verify.password)':
+        return this.jsonVerifyPassword(request as string);
+
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);
 
@@ -387,6 +434,9 @@ export default class Extension {
 
       case 'pri(window.open)':
         return this.windowOpen();
+
+      case 'pri(window.open.json)':
+        return this.windowOpen('/account/restore-json');
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

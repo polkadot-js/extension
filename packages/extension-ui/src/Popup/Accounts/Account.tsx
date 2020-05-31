@@ -5,7 +5,7 @@
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext, Address, Link } from '../../components';
@@ -13,12 +13,11 @@ import { editAccount } from '../../messaging';
 import { Name } from '../../partials';
 
 interface Props extends AccountJson {
-  address: string;
-  parentName?: string;
   className?: string;
+  parentName?: string;
 }
 
-function Account ({ address, className, isExternal, parentName }: Props): React.ReactElement<Props> {
+function Account ({ address, className, isExternal, parentName, suri }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
@@ -27,48 +26,63 @@ function Account ({ address, className, isExternal, parentName }: Props): React.
   const _saveChanges = useCallback((): void => {
     if (editedName && editedName !== name) {
       editAccount(address, editedName)
-        .then((): void => onAction())
-        .catch((error: Error) => console.error(error));
+        .then(() => onAction())
+        .catch(console.error);
     }
 
     _toggleEdit();
   }, [editedName, address, _toggleEdit, onAction]);
 
+  const _actions = useMemo(() => (
+    <>
+      <Link
+        className='menuItem'
+        onClick={_toggleEdit}
+      >
+        Rename
+      </Link>
+      {!isExternal && (
+        <Link
+          className='menuItem'
+          to={`/account/derive/${address}/locked`}
+        >
+          Derive New Account
+        </Link>
+      )}
+      <div className='divider' />
+      {!isExternal && (
+        <Link
+          className='menuItem'
+          isDanger
+          to={`/account/export/${address}`}
+        >
+          Export Account
+        </Link>
+      )}
+      <Link
+        className='menuItem'
+        isDanger
+        to={`/account/forget/${address}`}
+      >
+        Forget Account
+      </Link>
+    </>
+  ), [_toggleEdit, address, isExternal]);
+
   return (
     <div className={className}>
       <Address
-        actions={(
-          <>
-            <MenuGroup>
-              <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
-              {!isExternal && (
-                <MenuItem to={`/account/derive/${address}/locked`}>Derive New Account</MenuItem>
-              )}
-            </MenuGroup>
-            {!isExternal && (
-              <MenuItem
-                isDanger
-                to={`/account/export/${address}`}
-              >
-                Export Account
-              </MenuItem>
-            )}
-            <MenuItem
-              isDanger
-              to={`/account/forget/${address}`}
-            >
-              Forget Account
-            </MenuItem>
-          </>
-        )}
+        actions={_actions}
         address={address}
+        className='address'
         name={editedName}
         parentName={parentName}
+        suri={suri}
       >
         {isEditing && (
           <Name
             address={address}
-            className='edit-name'
+            className='editName'
             isFocused
             label={' '}
             onBlur={_saveChanges}
@@ -80,33 +94,31 @@ function Account ({ address, className, isExternal, parentName }: Props): React.
   );
 }
 
-const MenuGroup = styled.div`
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
-`;
-
-const MenuItem = styled(Link)`
-  padding: 4px 16px;
-  display: block;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 20px;
-`;
-
-MenuItem.displayName = 'MenuItem';
-
-export default styled(Account)`
-  ${Address} {
+export default styled(Account)(({ theme }: ThemeProps) => `
+  .address {
     margin-bottom: 8px;
   }
 
-  .edit-name {
+  .divider {
+    padding-top: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid ${theme.inputBorderColor};
+  }
+
+  .editName {
     position: absolute;
     flex: 1;
     left: 80px;
     top: 6px;
     width: 315px;
   }
-`;
+
+  .menuItem {
+    border-radius: 8px;
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    padding: 4px 16px;
+  }
+`);

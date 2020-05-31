@@ -3,13 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Message } from '@polkadot/extension-base/types';
-import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import { findChain } from '@polkadot/extension-chains';
+import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -154,4 +155,20 @@ export async function validateDerivationPath (parentAddress: string, suri: strin
 
 export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string): Promise<boolean> {
   return sendMessage('pri(derivation.create)', { name, parentAddress, parentPassword, password, suri });
+}
+
+export async function jsonRestoreWindowOpen (): Promise<boolean> {
+  return sendMessage('pri(window.open.json)', null);
+}
+
+export async function jsonVerifyFile (json: KeyringPair$Json): Promise<boolean> {
+  return sendMessage('pri(json.verify.file)', { json, password: '' });
+}
+
+export async function jsonVerifyPassword (password: string): Promise<boolean> {
+  return sendMessage('pri(json.verify.password)', password);
+}
+
+export async function jsonRestore (json: KeyringPair$Json, password: string): Promise<ResponseJsonRestore> {
+  return sendMessage('pri(json.restore)', { json, password });
 }

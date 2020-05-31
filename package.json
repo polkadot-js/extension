@@ -2,22 +2,24 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
+  "version": "0.26.0-beta.11",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^1.16.1",
+    "@polkadot/api": "^1.17.0-beta.5",
     "@polkadot/keyring": "^2.11.1",
-    "@polkadot/types": "^1.16.1",
+    "@polkadot/types": "^1.17.0-beta.5",
     "@polkadot/util": "^2.11.1",
     "@polkadot/util-crypto": "^2.11.1",
     "babel-core": "^7.0.0-bridge.0"
   },
   "scripts": {
-    "build": "NODE_ENV=production polkadot-dev-build-ts",
+    "build": "yarn build:code && yarn build:zip",
+    "build:code": "NODE_ENV=production polkadot-dev-build-ts",
     "build:release": "polkadot-ci-ghact-build",
-    "build:zip": "yarn build && yarn build:zip:dst && yarn build:zip:src",
+    "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build*' -x '*node_modules*' -FS ./master-src.zip packages .babelrc.js .editorconfig .eslintignore .eslintrc.js babel.config.js CHANGELOG.md CONTRIBUTING.md jest.config.js lerna.json LICENSE package.json README.md tsconfig.json yarn.lock",
     "lint": "polkadot-dev-run-lint",
@@ -29,9 +31,9 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.config.js --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@polkadot/dev": "^0.54.1",
-    "@polkadot/typegen": "^1.16.1",
+    "@babel/core": "^7.10.1",
+    "@polkadot/dev": "^0.55.6",
+    "@polkadot/typegen": "^1.17.0-beta.5",
     "@types/jest": "^25.2.3",
     "copy-webpack-plugin": "^5.1.1",
     "sinon-chrome": "^3.0.1",

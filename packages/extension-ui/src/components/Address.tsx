@@ -33,6 +33,7 @@ interface Props {
   genesisHash?: string | null;
   actions?: React.ReactNode;
   parentName?: string | null;
+  suri?: string;
 }
 
 interface Recoded {
@@ -69,7 +70,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 500;
 
-function Address ({ actions, address, children, className, genesisHash, name, parentName }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, name, parentName, suri }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const chain = useMetadata(genesisHash);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
@@ -119,7 +120,7 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
               <>
                 <Banner>
                   <ArrowLabel/>
-                  <ParentName data-field='parent'>{parentName}</ParentName>
+                  <ParentName data-field='parent'>{parentName}{suri || ''}</ParentName>
                 </Banner>
                 <DisplacedName>{displayedName}</DisplacedName>
               </>

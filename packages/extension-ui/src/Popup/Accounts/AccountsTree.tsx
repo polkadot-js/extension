@@ -10,7 +10,7 @@ interface Props extends AccountWithChildren {
   parentName?: string;
 }
 
-function AccountsTree ({ parentName, suri, ...account }: Props): React.ReactElement<Props> {
+export default function AccountsTree ({ parentName, suri, ...account }: Props): React.ReactElement<Props> {
   return (
     <>
       <Account
@@ -28,5 +28,3 @@ function AccountsTree ({ parentName, suri, ...account }: Props): React.ReactElem
     </>
   );
 }
-
-export default AccountsTree;

@@ -35,25 +35,37 @@ function Account ({ address, className, isExternal, parentName, suri }: Props): 
 
   const _actions = useMemo(() => (
     <>
-      <MenuItem onClick={_toggleEdit}>Rename</MenuItem>
+      <Link
+        className='menuItem'
+        onClick={_toggleEdit}
+      >
+        Rename
+      </Link>
       {!isExternal && (
-        <MenuItem to={`/account/derive/${address}/locked`}>Derive New Account</MenuItem>
+        <Link
+          className='menuItem'
+          to={`/account/derive/${address}/locked`}
+        >
+          Derive New Account
+        </Link>
       )}
       <div className='divider' />
       {!isExternal && (
-        <MenuItem
+        <Link
+          className='menuItem'
           isDanger
           to={`/account/export/${address}`}
         >
           Export Account
-        </MenuItem>
+        </Link>
       )}
-      <MenuItem
+      <Link
+        className='menuItem'
         isDanger
         to={`/account/forget/${address}`}
       >
         Forget Account
-      </MenuItem>
+      </Link>
     </>
   ), [_toggleEdit, address, isExternal]);
 
@@ -62,6 +74,7 @@ function Account ({ address, className, isExternal, parentName, suri }: Props): 
       <Address
         actions={_actions}
         address={address}
+        className='address'
         name={editedName}
         parentName={parentName}
         suri={suri}
@@ -69,7 +82,7 @@ function Account ({ address, className, isExternal, parentName, suri }: Props): 
         {isEditing && (
           <Name
             address={address}
-            className='edit-name'
+            className='editName'
             isFocused
             label={' '}
             onBlur={_saveChanges}
@@ -81,33 +94,31 @@ function Account ({ address, className, isExternal, parentName, suri }: Props): 
   );
 }
 
-const MenuItem = styled(Link)`
-  padding: 4px 16px;
-  display: block;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 15px;
-  line-height: 20px;
-`;
-
-MenuItem.displayName = 'MenuItem';
-
-export default styled(Account)`
-  ${Address} {
+export default styled(Account)(({ theme }: ThemeProps) => `
+  .address {
     margin-bottom: 8px;
   }
 
   .divider {
     padding-top: 16px;
     margin-bottom: 16px;
-    border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
+    border-bottom: 1px solid ${theme.inputBorderColor};
   }
 
-  .edit-name {
+  .editName {
     position: absolute;
     flex: 1;
     left: 80px;
     top: 6px;
     width: 315px;
   }
-`;
+
+  .menuItem {
+    border-radius: 8px;
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 20px;
+    padding: 4px 16px;
+  }
+`);

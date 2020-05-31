@@ -31,13 +31,13 @@ function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): Rea
   );
 }
 
-export default styled(Identicon)`
+export default styled(Identicon)(({ theme }: ThemeProps) => `
   display: flex;
   justify-content: center;
 
   .container:before {
     box-shadow: none;
-    background: ${({ theme }: ThemeProps): string => theme.identiconBackground};
+    background: ${theme.identiconBackground};
   }
 
   svg {
@@ -45,4 +45,4 @@ export default styled(Identicon)`
       display: none;
     }
   }
-`;
+`);

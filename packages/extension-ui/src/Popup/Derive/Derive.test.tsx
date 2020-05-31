@@ -150,7 +150,7 @@ describe('Derive', () => {
     it('selects internal root accounts as other options', async () => {
       const { wrapper } = await mountComponent();
 
-      const options = wrapper.find('[data-parent-option] [data-field="name"] div').map((el) => el.text());
+      const options = wrapper.find('[data-parent-option] [data-field="name"]').map((el) => el.text());
 
       expect(options).toEqual(['A', 'B', 'D']);
     });

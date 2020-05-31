@@ -6,7 +6,7 @@ import { ThemeProps } from '../types';
 
 import styled from 'styled-components';
 
-export default styled.div`
+export default styled.div(({ theme }: ThemeProps) => `
   width: 100%;
   margin-bottom: 8px;
   margin-top: 18px;
@@ -15,6 +15,6 @@ export default styled.div`
   line-height: 14px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: ${({ theme }: ThemeProps): string => theme.textColor};
+  color: ${theme.textColor};
   opacity: 0.65;
-`;
+`);

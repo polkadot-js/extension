@@ -20,14 +20,14 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
   return (
     <div className={className}>
       <MnemonicText value={seed} />
-      <ButtonsRow>
+      <div className='buttonsRow'>
         <ActionText
           data-seed-action='copy'
           icon={copy}
           onClick={onCopy}
           text='Copy to clipboard'
         />
-      </ButtonsRow>
+      </div>
     </div>
   );
 }
@@ -47,15 +47,15 @@ const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
   }
 `;
 
-const ButtonsRow = styled.div`
-  display: flex;
-  flex-direction: row;
-
-  ${ActionText} {
-    margin-right: 32px;
-  }
-`;
-
 export default styled(MnemonicSeed)`
   margin-top: 21px;
+
+  .buttonsRow {
+    display: flex;
+    flex-direction: row;
+
+    ${ActionText} {
+      margin-right: 32px;
+    }
+  }
 `;

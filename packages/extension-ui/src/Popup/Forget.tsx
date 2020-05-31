@@ -36,7 +36,7 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
       />
       <div>
         <Address address={address}>
-          <MovedWarning danger>
+          <MovedWarning isDanger>
             You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.
           </MovedWarning>
           <ActionArea>

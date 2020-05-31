@@ -37,7 +37,7 @@ describe('Header component', () => {
   it('highlights gear icon when settings are toggled', () => {
     wrapper = mountHeader({ showSettings: true });
 
-    wrapper.find('SettingsToggle').simulate('click');
+    wrapper.find('div.settingsToggle').simulate('click');
 
     expect(wrapper.find(Settings).length).toBe(1);
     expect(wrapper.find('Gear').prop('isSelected')).toBe(true);

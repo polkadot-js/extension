@@ -53,8 +53,7 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
 
 function initAccountContext (accounts: AccountJson[]): AccountsContext {
   const hierarchy = buildHierarchy(accounts);
-  const isNotExternal = (account: AccountJson): boolean => !account.isExternal;
-  const master = hierarchy.find(isNotExternal);
+  const master = hierarchy.find((account) => !account.isExternal);
 
   return {
     accounts,

@@ -38,20 +38,20 @@ function Link ({ children, className, onClick, to }: Props): React.ReactElement<
     );
 }
 
-export default styled(Link)`
-  display: flex;
+export default styled(Link)(({ isDanger, theme }: Props) => `
   align-items: center;
-  color: ${({ isDanger, theme }: Props): string => isDanger ? theme.textColorDanger : theme.textColor};
+  color: ${isDanger ? theme.textColorDanger : theme.textColor};
+  display: flex;
   opacity: 0.9;
   text-decoration: none;
   vertical-align: middle;
 
   &:hover {
-    color: ${({ isDanger, theme }: Props): string => isDanger ? theme.textColorDanger : theme.textColor};
+    color: ${isDanger ? theme.textColorDanger : theme.textColor};
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${({ isDanger, theme }: Props): string => isDanger ? theme.textColorDanger : theme.textColor};
+    color: ${isDanger ? theme.textColorDanger : theme.textColor};
   }
-`;
+`);

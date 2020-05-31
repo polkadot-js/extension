@@ -1,11 +1,13 @@
 # CHANGELOG
 
-## 0.26.0-beta.11
+## 0.26.0-beta.x
 
 - Add the ability to import JSON keystore files (Thanks to https://github.com/shawntabrizi)
 - updated to derivation documentation (Thanks to https://github.com/EthWorks)
 - Adjust allowed mnemonic seed strengths, 12, 15, 18, 21 & 24 all allowed
 - Remove duplication with Default/Substrate prefixes in dropdown (equivalent, only generic displayed)
+- Display child accounts when no parent has been found (orphans)
+- Display derived suri alongside parent account names
 
 ## 0.25.1 May 14, 2020
 

@@ -344,7 +344,8 @@ export default class Extension {
     const childPair = this.derive(parentAddress, suri, parentPassword, {
       genesisHash,
       name,
-      parentAddress
+      parentAddress,
+      suri
     });
 
     keyring.addPair(childPair, password);

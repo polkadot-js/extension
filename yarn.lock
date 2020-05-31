@@ -2873,9 +2873,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.55.3":
-  version: 0.55.3
-  resolution: "@polkadot/dev@npm:0.55.3"
+"@polkadot/dev@npm:^0.55.6":
+  version: 0.55.6
+  resolution: "@polkadot/dev@npm:0.55.6"
   dependencies:
     "@babel/cli": ^7.10.1
     "@babel/core": ^7.10.1
@@ -2958,7 +2958,7 @@ __metadata:
     polkadot-exec-typedoc: scripts/polkadot-exec-typedoc.js
     polkadot-exec-vuepress: scripts/polkadot-exec-vuepress.js
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.js
-  checksum: 3/254e81360f548ada9d6aaa43db4a002c8960483e387053be97e7b5b7ea1bf7acd1633f986747d76639a660b73041fed8f4e9196c62acae1a3f12589efed7bb8e
+  checksum: 3/02e4d5b40af762f8eef1efaff808aa64a16f8b0cd0b96f516f0fbadf774716b9fe481e6d15d1d74199ddf212f7da689a30e21cca20c7ce41098c80982754a45b
   languageName: node
   linkType: hard
 
@@ -3046,7 +3046,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.10.1
-    "@polkadot/dev": ^0.55.3
+    "@polkadot/dev": ^0.55.6
     "@polkadot/extension-base": 0.26.0-beta.9
     "@polkadot/extension-inject": 0.26.0-beta.9
     "@polkadot/extension-ui": 0.26.0-beta.9
@@ -18620,7 +18620,7 @@ __metadata:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.10.1
-    "@polkadot/dev": ^0.55.3
+    "@polkadot/dev": ^0.55.6
     "@polkadot/typegen": ^1.17.0-beta.5
     "@types/jest": ^25.2.3
     copy-webpack-plugin: ^5.1.1

@@ -29,9 +29,7 @@ const SmallButton = styled(Button)`
   background: ${({ theme }: ThemeProps): string => theme.backButtonBackground};
 `;
 
-const ArrowLeft = styled(Svg).attrs(() => ({
-  src: arrowLeft
-}))`
+const ArrowLeft = styled(Svg).attrs(() => ({ src: arrowLeft }))`
   width: 12px;
   height: 12px;
   display: block;

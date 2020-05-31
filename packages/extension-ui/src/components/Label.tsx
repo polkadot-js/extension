@@ -22,8 +22,8 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
   );
 }
 
-export default styled(Label)`
-  color: ${({ theme }: ThemeProps): string => theme.textColor};
+export default styled(Label)(({ theme }: ThemeProps) => `
+  color: ${theme.textColor};
 
   label {
     font-size: 10px;
@@ -34,4 +34,4 @@ export default styled(Label)`
     margin-bottom: 12px;
     text-transform: uppercase;
   }
-`;
+`);

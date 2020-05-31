@@ -3,14 +3,15 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
-import settings from '@polkadot/ui-settings';
+import uiSettings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SigningReqContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../utils/buildHierarchy';
@@ -27,12 +28,7 @@ import Metadata from './Metadata';
 import Signing from './Signing';
 import Welcome from './Welcome';
 
-// load the ui settings, actually only used for address prefix atm
-// probably overkill (however can replace once we have actual others)
-const { prefix } = settings.get();
-
-// FIXME Duplicated in Settings, horrible...
-setSS58Format(prefix === -1 ? 42 : prefix);
+const startSettings = uiSettings.get();
 
 // Request permission for video, based on access we can hide/show import
 async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
@@ -64,12 +60,14 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
 
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
+  const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
-  const [cameraOn, setCameraOn] = useState(settings.get().camera === 'on');
+  const [cameraOn, setCameraOn] = useState(startSettings.camera === 'on');
   const [mediaAllowed, setMediaAllowed] = useState(false);
   const [metaRequests, setMetaRequests] = useState<null | MetadataRequest[]>(null);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
+  const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -85,15 +83,25 @@ export default function Popup (): React.ReactElement {
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests)
-    ]).catch((error: Error) => console.error(error));
+    ]).catch(console.error);
 
-    settings.on('change', ({ camera }): void => setCameraOn(camera === 'on'));
+    uiSettings.on('change', (settings): void => {
+      setSettingsCtx(settings);
+      setCameraOn(settings.camera === 'on');
+      setSS58Format(settings.prefix === -1 ? 42 : settings.prefix);
+    });
 
     _onAction();
   }, []);
 
   useEffect((): void => {
-    requestMediaAccess(cameraOn).then(setMediaAllowed).catch(console.error);
+    setAccountCtx(initAccountContext(accounts || []));
+  }, [accounts]);
+
+  useEffect((): void => {
+    requestMediaAccess(cameraOn)
+      .then(setMediaAllowed)
+      .catch(console.error);
   }, [cameraOn]);
 
   const Root = isWelcomeDone
@@ -109,34 +117,36 @@ export default function Popup (): React.ReactElement {
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
       <ActionContext.Provider value={_onAction}>
-        <AccountContext.Provider value={initAccountContext(accounts)}>
-          <AuthorizeReqContext.Provider value={authRequests}>
-            <MediaContext.Provider value={cameraOn && mediaAllowed}>
-              <MetadataReqContext.Provider value={metaRequests}>
-                <SigningReqContext.Provider value={signRequests}>
-                  <ToastProvider>
-                    <Switch>
-                      <Route path='/account/create'><CreateAccount /></Route>
-                      <Route path='/account/forget/:address'><Forget /></Route>
-                      <Route path='/account/export/:address'><Export /></Route>
-                      <Route path='/account/import-qr'><ImportQr /></Route>
-                      <Route path='/account/import-seed'><ImportSeed /></Route>
-                      <Route path='/account/restore-json'><RestoreJson /></Route>
-                      <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
-                      <Route path='/account/derive/:address'><Derive /></Route>
-                      <Route
-                        exact
-                        path='/'
-                      >
-                        <Root />
-                      </Route>
-                    </Switch>
-                  </ToastProvider>
-                </SigningReqContext.Provider>
-              </MetadataReqContext.Provider>
-            </MediaContext.Provider>
-          </AuthorizeReqContext.Provider>
-        </AccountContext.Provider>
+        <SettingsContext.Provider value={settingsCtx}>
+          <AccountContext.Provider value={accountCtx}>
+            <AuthorizeReqContext.Provider value={authRequests}>
+              <MediaContext.Provider value={cameraOn && mediaAllowed}>
+                <MetadataReqContext.Provider value={metaRequests}>
+                  <SigningReqContext.Provider value={signRequests}>
+                    <ToastProvider>
+                      <Switch>
+                        <Route path='/account/create'><CreateAccount /></Route>
+                        <Route path='/account/forget/:address'><Forget /></Route>
+                        <Route path='/account/export/:address'><Export /></Route>
+                        <Route path='/account/import-qr'><ImportQr /></Route>
+                        <Route path='/account/import-seed'><ImportSeed /></Route>
+                        <Route path='/account/restore-json'><RestoreJson /></Route>
+                        <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
+                        <Route path='/account/derive/:address'><Derive /></Route>
+                        <Route
+                          exact
+                          path='/'
+                        >
+                          <Root />
+                        </Route>
+                      </Switch>
+                    </ToastProvider>
+                  </SigningReqContext.Provider>
+                </MetadataReqContext.Provider>
+              </MediaContext.Provider>
+            </AuthorizeReqContext.Provider>
+          </AccountContext.Provider>
+        </SettingsContext.Provider>
       </ActionContext.Provider>
     )}</Loading>
   );

@@ -2,22 +2,21 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ThemeProps } from '../types';
-
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
+import { SettingsStruct } from '@polkadot/ui-settings/types';
+import { ThemeProps } from '../types';
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
-import settings from '@polkadot/ui-settings';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import copy from '../assets/copy.svg';
 import details from '../assets/details.svg';
 import parentArrow from '../assets/arrowParentLabel.svg';
 
-import { AccountContext } from './contexts';
+import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
 import Svg from './Svg';
@@ -52,7 +51,7 @@ function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJs
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null): Recoded {
+function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -72,6 +71,7 @@ const ACCOUNTS_SCREEN_HEIGHT = 500;
 
 function Address ({ actions, address, children, className, genesisHash, name, parentName, suri }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
+  const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
   const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -83,9 +83,9 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
 
   useEffect((): void => {
     address && setRecoded(
-      recodeAddress(address, accounts, chain)
+      recodeAddress(address, accounts, chain, settings)
     );
-  }, [accounts, address, chain]);
+  }, [accounts, address, chain, settings]);
 
   useEffect(() => {
     if (!showActionsMenu) {

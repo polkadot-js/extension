@@ -14,28 +14,38 @@ interface Props {
   isLocked?: boolean;
 }
 
+interface AddressState {
+  address: string;
+}
+
+interface PathState extends AddressState {
+  suri: string;
+}
+
+interface ConfirmState {
+  account: PathState;
+  parentPassword: string;
+}
+
 function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const { address: parentAddress } = useParams<{ address: string }>();
-  const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
+  const { address: parentAddress } = useParams<AddressState>();
+  const [account, setAccount] = useState<null | PathState>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
 
-  const _onCreate = useCallback(async () => {
+  const _onCreate = useCallback(() => {
     if (!account || !name || !password || !parentPassword) {
       return;
     }
 
-    await deriveAccount(parentAddress, account.suri, parentPassword, name, password);
-
-    onAction('/');
+    deriveAccount(parentAddress, account.suri, parentPassword, name, password)
+      .then(() => onAction('/'))
+      .catch(console.error);
   }, [account, name, password, onAction, parentAddress, parentPassword]);
 
-  const _onDerivationConfirmed = useCallback(({ account, parentPassword }: {
-    account: { address: string; suri: string };
-    parentPassword: string;
-  }) => {
+  const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
     setAccount(account);
     setParentPassword(parentPassword);
   }, []);

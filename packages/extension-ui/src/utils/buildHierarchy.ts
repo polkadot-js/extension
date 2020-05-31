@@ -4,28 +4,33 @@
 
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
-const isRoot = (account: AccountJson): boolean => !account.parentAddress;
-const isChild = (parent: AccountJson) => (account: AccountJson): boolean => account.parentAddress === parent.address;
-const compareByCreationTime = (a: AccountJson, b: AccountJson): number => (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
+type ChildFilter = (account: AccountJson) => AccountWithChildren;
 
-export const accountWithChildren = (allAccounts: AccountJson[]) => (account: AccountJson): AccountWithChildren => {
-  const children = allAccounts
-    .filter(isChild(account))
-    .map(accountWithChildren(allAccounts))
-    .sort(compareByCreationTime);
+function compareByCreationTime (a: AccountJson, b: AccountJson): number {
+  return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
+}
 
-  if (children.length === 0) {
-    return account;
-  }
+export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
+  return (account: AccountJson): AccountWithChildren => {
+    const children = accounts
+      .filter(({ parentAddress }) => account.address === parentAddress)
+      .map(accountWithChildren(accounts))
+      .sort(compareByCreationTime);
 
-  return {
-    ...account,
-    children
+    return children.length === 0
+      ? account
+      : { children, ...account };
   };
-};
+}
 
-export const buildHierarchy = (accounts: AccountJson[]): AccountWithChildren[] =>
-  accounts
-    .filter(isRoot)
+export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] {
+  return accounts
+    .filter(({ parentAddress }) =>
+      // it is a parent
+      !parentAddress ||
+      // we don't have a parent for this one
+      !accounts.some(({ address }) => parentAddress === address)
+    )
     .map(accountWithChildren(accounts))
     .sort(compareByCreationTime);
+}

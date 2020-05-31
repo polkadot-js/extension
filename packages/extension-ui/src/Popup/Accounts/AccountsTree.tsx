@@ -10,12 +10,13 @@ interface Props extends AccountWithChildren {
   parentName?: string;
 }
 
-function AccountsTree ({ parentName, ...account }: Props): React.ReactElement<Props> {
+function AccountsTree ({ parentName, suri, ...account }: Props): React.ReactElement<Props> {
   return (
     <>
       <Account
         {...account}
         parentName={parentName}
+        suri={suri}
       />
       {account?.children?.map((child, index) => (
         <AccountsTree

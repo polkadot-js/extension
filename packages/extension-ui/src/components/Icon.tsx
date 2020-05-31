@@ -22,13 +22,10 @@ function Icon ({ className = '', icon, onClick }: Props): React.ReactElement<Pro
   );
 }
 
-export default styled(Icon)`
+export default styled(Icon)(({ onClick }: Props) => `
   background: white;
   border-radius: 50%;
   box-sizing: border-box;
-  cursor: ${({ onClick }): string =>
-    onClick
-      ? 'pointer'
-      : 'inherit'};
+  cursor: ${onClick ? 'pointer' : 'inherit'};
   text-align: center;
-`;
+`);

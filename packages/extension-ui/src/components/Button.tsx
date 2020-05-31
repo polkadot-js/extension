@@ -40,20 +40,20 @@ function Button ({ children, className, isDisabled, onClick, to }: Props): React
   );
 }
 
-export default styled(Button)`
+export default styled(Button)(({ isDanger, theme }: Props) => `
   display: block;
   width: 100%;
-  height: ${({ isDanger }: Props): string => isDanger ? '40px' : '48px'};
+  height: ${isDanger ? '40px' : '48px'};
   box-sizing: border-box;
   border: none;
-  border-radius: ${({ theme }: Props): string => theme.borderRadius};
-  color: ${({ theme }: Props): string => theme.buttonTextColor};
+  border-radius: ${theme.borderRadius};
+  color: ${theme.buttonTextColor};
   font-size: 15px;
   font-weight: 800;
   line-height: 20px;
   padding: 0 1rem;
   text-align: center;
-  background: ${({ isDanger, theme }: Props): string => isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+  background: ${isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
   cursor: pointer;
 
   &:disabled {
@@ -62,6 +62,6 @@ export default styled(Button)`
   }
 
   &:not(:disabled):hover {
-    background: ${({ isDanger, theme }: Props): string => isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
+    background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
   }
-`;
+`);

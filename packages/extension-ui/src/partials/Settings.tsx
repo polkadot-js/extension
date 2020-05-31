@@ -56,7 +56,7 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
       reference={reference}
     >
       <div className='setting'>
-        <SettingTitle>Theme</SettingTitle>
+        <Title className='title'>Theme</Title>
         <Switch
           checked={themeContext.id === themes.dark.id}
           checkedLabel='Dark'
@@ -65,16 +65,18 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
         />
       </div>
       <div className='setting'>
-        <SettingTitle>External QR accounts and Access</SettingTitle>
-        <CheckboxSetting
+        <Title className='title'>External QR accounts and Access</Title>
+        <Checkbox
           checked={camera}
+          className='checkbox'
           label='Allow Camera Access'
           onChange={setCamera}
         />
       </div>
       <div className='setting'>
-        <SettingTitle>Display address format For:</SettingTitle>
-        <DropdownSetting
+        <Title className='title'>Display address format For:</Title>
+        <Dropdown
+          className='dropdown'
           label=''
           onChange={_onChangePrefix}
           options={prefixOptions}
@@ -83,7 +85,8 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
       </div>
       {isPopup && (
         <div className='setting'>
-          <OpenInNewWindowButton
+          <ActionText
+            className='openWindow'
             icon={FullScreenIcon}
             onClick={windowOpen}
             text='Open extension in new window'
@@ -94,57 +97,58 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-const CheckboxSetting = styled(Checkbox)`
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 20px;
-  color: ${({ theme }: ThemeProps) => theme.textColor};
-  label {
-    color: ${({ theme }: ThemeProps) => theme.textColor};
-  }
-`;
-
-const DropdownSetting = styled(Dropdown)`
-  background: ${({ theme }: ThemeProps) => theme.background};
-  margin-top: 9px;
-  margin-bottom: 12px;
-  width : 100%;
-  margin-right: 0;
-`;
-
-const SettingTitle = styled(Title)`
-  margin: 0;
-`;
-
-const OpenInNewWindowButton = styled(ActionText)`
-  span {
-    color: ${({ theme }: ThemeProps) => theme.textColor};
-    text-decoration: none;
-    font-weight: 600;
-    font-size: ${({ theme }: ThemeProps) => theme.fontSize};
-    line-height: ${({ theme }: ThemeProps) => theme.lineHeight};
-  }
-
-  ${Svg} {
-    width: 20px;
-    height: 20px;
-    top: 4px;
-    background: ${({ theme }: ThemeProps) => theme.textColor};
-  }
-`;
-
-export default React.memo(styled(Settings)`
+export default React.memo(styled(Settings)(({ theme }: Props) => `
   margin-top: 56px;
   right: 24px;
   user-select: none;
 
-  .setting {
+  .openWindow {
+    span {
+      color: ${theme.textColor};
+      font-size: ${theme.fontSize};
+      font-weight: 600;
+      line-height: ${theme.lineHeight};
+      text-decoration: none;
+    }
+
+    ${Svg} {
+      background: ${theme.textColor};
+      height: 20px;
+      top: 4px;
+      width: 20px;
+    }
+  }
+
+  > .setting {
     padding: 0 16px;
     max-width: 100%;
+
+    > .checkbox {
+      color: ${theme.textColor};
+      line-height: 20px;
+      font-size: 15px;
+      font-weight: 600;
+
+      label {
+        color: ${theme.textColor};
+      }
+    }
+
+    > .dropdown {
+      background: ${theme.background};
+      margin-bottom: 12px;
+      margin-top: 9px;
+      margin-right: 0;
+      width: 100%;
+    }
+
+    > .title {
+      margin: 0;
+    }
   }
 
   .setting+.setting {
     padding-top: 18px;
-    border-top: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
+    border-top: 1px solid ${theme.inputBorderColor};
   }
-`);
+`));

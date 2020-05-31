@@ -22,20 +22,20 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
   );
 }
 
-export default styled(Box)`
-  background: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
+export default styled(Box)(({ theme }: ThemeProps) => `
+  background: ${theme.readonlyInputBackground};
   border: none;
-  border-radius: ${({ theme }: ThemeProps): string => theme.borderRadius};
-  color: ${({ theme }: ThemeProps): string => theme.textColor};
-  font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
-  font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
-  margin: ${({ theme }: ThemeProps): string => theme.boxMargin};
-  padding: ${({ theme }: ThemeProps): string => theme.boxPadding};
+  border-radius: ${theme.borderRadius};
+  color: ${theme.textColor};
+  font-family: ${theme.fontFamily};
+  font-size: ${theme.fontSize};
+  margin: ${theme.boxMargin};
+  padding: ${theme.boxPadding};
   position: relative;
 
   .banner {
     background: darkorange;
-    border-radius: 0 ${({ theme }: ThemeProps): string => theme.borderRadius} 0 ${({ theme }: ThemeProps): string => theme.borderRadius};
+    border-radius: 0 ${theme.borderRadius} 0 ${theme.borderRadius};
     color: white;
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
@@ -43,4 +43,4 @@ export default styled(Box)`
     right: 0;
     top: 0;
   }
-`;
+`);

@@ -22,9 +22,7 @@ export default function NextStepButton ({ children, ...props }: Props): React.Re
   );
 }
 
-const ArrowRight = styled(Svg).attrs(() => ({
-  src: arrowLeft
-}))`
+const ArrowRight = styled(Svg).attrs(() => ({ src: arrowLeft }))`
   float: right;
   width: 12px;
   height: 12px;

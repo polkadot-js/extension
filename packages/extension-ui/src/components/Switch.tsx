@@ -25,55 +25,20 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
     <div className={className}>
       <span>{uncheckedLabel}</span>
       <label>
-        <Checkbox
+        <input
           checked={checked}
+          className='checkbox'
           onChange={_onChange}
+          type='checkbox'
         />
-        <Slider />
+        <span className='slider' />
       </label>
       <span>{checkedLabel}</span>
     </div>
   );
 }
 
-const Slider = styled.span`
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
-  transition: 0.2s;
-  border-radius: 100px;
-  border: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
-
-  &:before {
-    position: absolute;
-    content: '';
-    height: 16px;
-    width: 16px;
-    left: 4px;
-    bottom: 3px;
-    background-color: ${({ theme }: ThemeProps): string => theme.primaryColor};
-    transition: 0.4s;
-    border-radius: 50%;
-  }
-`;
-
-const Checkbox = styled.input.attrs(() => ({
-  type: 'checkbox'
-}))`
-  opacity: 0;
-  width: 0;
-  height: 0;
-
-  &:checked + ${Slider}:before {
-    transform: translateX(24px);
-  }
-`;
-
-export default styled(Switch)`
+export default styled(Switch)(({ theme }: ThemeProps) => `
   label {
     position: relative;
     display: inline-block;
@@ -85,4 +50,39 @@ export default styled(Switch)`
   span {
     font-weight: 600;
   }
-`;
+
+  .checkbox {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider:before {
+      transform: translateX(24px);
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: ${theme.readonlyInputBackground};
+    transition: 0.2s;
+    border-radius: 100px;
+    border: 1px solid ${theme.inputBorderColor};
+
+    &:before {
+      position: absolute;
+      content: '';
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 3px;
+      background-color: ${theme.primaryColor};
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+  }
+`);

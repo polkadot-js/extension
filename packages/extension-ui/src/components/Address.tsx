@@ -107,104 +107,80 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
 
   return (
     <div className={className}>
-      <div>
-        <AccountInfoRow>
-          <Identicon
-            iconTheme={theme}
-            onCopy={_onCopy}
-            prefix={prefix}
-            value={formatted || address}
-          />
-          <Info>
-            {parentName ? (
+      <div className='infoRow'>
+        <Identicon
+          className='identityIcon'
+          iconTheme={theme}
+          onCopy={_onCopy}
+          prefix={prefix}
+          value={formatted || address}
+        />
+        <div className='info'>
+          {parentName
+            ? (
               <>
-                <Banner>
+                <div className='banner'>
                   <ArrowLabel/>
-                  <ParentName data-field='parent'>{parentName}{suri || ''}</ParentName>
-                </Banner>
-                <DisplacedName>{displayedName}</DisplacedName>
+                  <div
+                    className='parentName'
+                    data-field='parent'
+                  >
+                    {parentName}{suri || ''}
+                  </div>
+                </div>
+                <div className='name displaced'>{displayedName}</div>
               </>
-            ) : (
-              <Name data-field='name'>{displayedName}</Name>
+            )
+            : (
+              <div
+                className='name'
+                data-field='name'
+              >
+                {displayedName}
+              </div>
+            )
+          }
+          <div className='copyAddress'>
+            <FullAddress data-field='address'>{formatted || '<unknown>'}</FullAddress>
+            {chain?.genesisHash && (
+              <div
+                className='banner chain'
+                data-field='chain'
+              >
+                {chain.name}
+              </div>
             )}
-            <CopyAddress>
-              <FullAddress data-field='address'>{formatted || '<unknown>'}</FullAddress>
-              {chain?.genesisHash && <ChainBanner data-field='chain'>{chain.name}</ChainBanner>}
-              <CopyToClipboard text={(formatted && formatted) || ''} >
-                <Svg
-                  onClick={_onCopy}
-                  src={copy}
-                />
-              </CopyToClipboard>
-            </CopyAddress>
-          </Info>
-          {actions && (
-            <>
-              <Settings onClick={_onClick}>
-                {showActionsMenu
-                  ? <ActiveActionsIcon />
-                  : <ActionsIcon />
-                }
-              </Settings>
-              {showActionsMenu && (
-                <MovableMenu
-                  isMoved={moveMenuUp}
-                  reference={actionsRef}
-                >
-                  {actions}
-                </MovableMenu>
-              )}
-            </>
-          )}
-        </AccountInfoRow>
-        {children}
+            <CopyToClipboard text={(formatted && formatted) || ''} >
+              <Svg
+                onClick={_onCopy}
+                src={copy}
+              />
+            </CopyToClipboard>
+          </div>
+        </div>
+        {actions && (
+          <>
+            <Settings onClick={_onClick}>
+              {showActionsMenu
+                ? <ActiveActionsIcon />
+                : <ActionsIcon />
+              }
+            </Settings>
+            {showActionsMenu && (
+              <MovableMenu
+                isMoved={moveMenuUp}
+                reference={actionsRef}
+              >
+                {actions}
+              </MovableMenu>
+            )}
+          </>
+        )}
       </div>
+      {children}
     </div>
   );
 }
-
-const CopyAddress = styled.div`
-  display: flex;
-  justify-content: space-between;
-
-  & ${Svg} {
-    width: 14px;
-    height: 14px;
-    margin-right: 10px;
-    background: ${({ theme }: ThemeProps): string => theme.accountDotsIconColor};
-    &:hover {
-      background: ${({ theme }: ThemeProps): string => theme.labelColor};
-      cursor: pointer;
-    }
-  }
-`;
-
-const AccountInfoRow = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  height: 72px;
-  border-radius: 4px;
-`;
-
-const Info = styled.div`
-  width: 100%;
-`;
-
-const Name = styled.div`
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 300px;
-  margin: 2px 0;
-  font-weight: 600;
-  font-size: 16px;
-  line-height: 22px;
-`;
-
-const DisplacedName = styled(Name)`
-  padding-top: 10px;
-`;
 
 const FullAddress = styled.div`
   width: 270px;
@@ -248,47 +224,15 @@ const Settings = styled.div`
 
 Settings.displayName = 'Details';
 
-const ActionsIcon = styled(Svg).attrs(() => ({
-  src: details
-}))`
+const ActionsIcon = styled(Svg).attrs(() => ({ src: details }))`
   background: ${({ theme }: ThemeProps): string => theme.accountDotsIconColor};
 `;
 
-const ActiveActionsIcon = styled(Svg).attrs(() => ({
-  src: details
-}))`
+const ActiveActionsIcon = styled(Svg).attrs(() => ({ src: details }))`
   background: ${({ theme }: ThemeProps): string => theme.primaryColor};
 `;
 
-const Banner = styled.div`
-  border-radius: 0 0 8px 8px;
-  color: white;
-  font-size: 12px;
-  line-height: 16px;
-  position: absolute;
-  top: 0;
-`;
-
-const ChainBanner = styled(Banner)`
-  padding: 0.1rem 0.5rem;
-  right: 40px;
-  background: ${({ theme }: ThemeProps): string => theme.primaryColor};
-`;
-
-const ParentName = styled.div`
-  padding: 0.25rem 0 0 0.8rem;
-  font-weight: 600;
-  font-size: 10px;
-  line-height: 14px;
-  color: ${({ theme }: ThemeProps): string => theme.labelColor};
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 270px;
-`;
-
-const ArrowLabel = styled(Svg).attrs(() => ({
-  src: parentArrow
-}))`
+const ArrowLabel = styled(Svg).attrs(() => ({ src: parentArrow }))`
   position: absolute;
   top: 5px;
   width: 9px;
@@ -296,22 +240,51 @@ const ArrowLabel = styled(Svg).attrs(() => ({
   background: ${({ theme }: ThemeProps): string => theme.labelColor};
 `;
 
-const MovableMenu = styled(Menu) <{ isMoved: boolean }>`
+const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
   ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
 `;
 
-export default styled(Address)`
+export default styled(Address)(({ theme }: ThemeProps) => `
   position: relative;
   margin-bottom: 8px;
 
-  & > div {
-    background: ${({ theme }: ThemeProps): string => theme.accountBackground};
-    border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
-    box-sizing: border-box;
-    border-radius: 4px;
+  background: ${theme.accountBackground};
+  border: 1px solid ${theme.boxBorderColor};
+  box-sizing: border-box;
+  border-radius: 4px;
+
+  .banner {
+    border-radius: 0 0 8px 8px;
+    color: white;
+    font-size: 12px;
+    line-height: 16px;
+    position: absolute;
+    top: 0;
+
+    &.chain {
+      background: ${theme.primaryColor};
+      padding: 0.1rem 0.5rem;
+      right: 40px;
+    }
   }
 
-  & ${Identicon} {
+  .copyAddress {
+    display: flex;
+    justify-content: space-between;
+
+    & ${Svg} {
+      width: 14px;
+      height: 14px;
+      margin-right: 10px;
+      background: ${theme.accountDotsIconColor};
+      &:hover {
+        background: ${theme.labelColor};
+        cursor: pointer;
+      }
+    }
+  }
+
+  .identityIcon {
     margin-left: 25px;
     margin-right: 10px;
 
@@ -320,4 +293,42 @@ export default styled(Address)`
       height: 50px;
     }
   }
-`;
+
+  .info {
+    width: 100%;
+  }
+
+  .infoRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    height: 72px;
+    border-radius: 4px;
+  }
+
+  .name {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    margin: 2px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 300px;
+
+    &.displaced {
+      padding-top: 10px;
+    }
+  }
+
+  .parentName {
+    color: ${theme.labelColor};
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 14px;
+    overflow: hidden;
+    padding: 0.25rem 0 0 0.8rem;
+    text-overflow: ellipsis;
+    width: 270px;
+  }
+`);

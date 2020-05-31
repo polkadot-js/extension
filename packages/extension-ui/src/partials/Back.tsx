@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import ArrowLeftImage from '../assets/arrowLeft.svg';
 import { Link, Svg } from '../components';
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
   to?: string;
 }
@@ -43,9 +43,9 @@ const BackLink = styled(Link)`
   }
 `;
 
-export default styled(Back)`
+export default React.memo(styled(Back)(({ theme }: Props) => `
   margin: 0;
   line-height: 52px;
-  border-bottom: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
-  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-`;
+  border-bottom: 1px solid ${theme.inputBorderColor};
+  font-size: ${theme.labelFontSize};
+`));

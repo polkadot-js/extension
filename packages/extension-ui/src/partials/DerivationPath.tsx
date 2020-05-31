@@ -44,7 +44,7 @@ function DerivationPath ({ className, defaultPath, onChange, parentAddress, pare
 
   return (
     <div className={className}>
-      <PathField>
+      <div className='container'>
         <PathInput isUnlocked={isDisabled}>
           <ValidatedInput
             component={InputWithLabel}
@@ -65,15 +65,10 @@ function DerivationPath ({ className, defaultPath, onChange, parentAddress, pare
         <LockButton onClick={_onExpand}>
           {!isDisabled ? <LockIcon/> : <UnlockIcon/>}
         </LockButton>
-      </PathField>
+      </div>
     </div>
   );
 }
-
-const PathField = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
 
 interface UnlockableComponentProps {
   isUnlocked: boolean;
@@ -87,37 +82,41 @@ const PathInput = styled.div<UnlockableComponentProps>`
   }
 `;
 
-const LockIcon = styled(Svg).attrs(() => ({
-  src: lockIcon
-}))`
+const LockIcon = styled(Svg).attrs(() => ({ src: lockIcon }))`
   width: 11px;
   height: 14px;
   background: ${({ theme }: ThemeProps) => theme.iconNeutralColor};
 `;
 
-const UnlockIcon = styled(Svg).attrs(() => ({
-  src: unlockIcon
-}))`
+const UnlockIcon = styled(Svg).attrs(() => ({ src: unlockIcon }))`
   width: 11px;
   height: 14px;
   background: ${({ theme }: ThemeProps) => theme.iconNeutralColor};
 `;
 
 const LockButton = styled(Button)`
-  width: 11px;
-  height: 14px;
-  padding: 3px;
-  margin: 36px 2px 0 10px;
   background: none;
+  height: 14px;
+  margin: 36px 2px 0 10px;
+  padding: 3px;
+  width: 11px;
+
   &:not(:disabled):hover {
     background: none;
   }
+
   &:active, &:focus {
     outline: none;
   }
+
   &::-moz-focus-inner {
     border: 0;
   }
 `;
 
-export default DerivationPath;
+export default React.memo(styled(DerivationPath)`
+  > .container {
+    display: flex;
+    flex-direction: row;
+  }
+`);

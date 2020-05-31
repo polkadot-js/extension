@@ -12,8 +12,8 @@ import Svg from './Svg';
 
 interface Props extends ThemeProps {
   children: React.ReactNode;
-  danger?: boolean;
   className?: string;
+  isDanger?: boolean;
 }
 
 function Warning ({ children, className }: Props): React.ReactElement<Props> {
@@ -30,18 +30,18 @@ function Warning ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(Warning)`
+export default React.memo(styled(Warning)(({ isDanger, theme }: Props) => `
   display: flex;
   flex-direction: row;
-  padding-left: ${({ danger }): string => danger ? '18px' : ''};
-  color: ${({ theme }: Props): string => theme.subTextColor};
+  padding-left: ${isDanger ? '18px' : ''};
+  color: ${theme.subTextColor};
   margin-right: 20px;
-  border-left: ${({ danger, theme }: Props): string => danger ? `0.25rem solid ${theme.buttonBackgroundDanger}` : ''};
+  border-left: ${isDanger ? `0.25rem solid ${theme.buttonBackgroundDanger}` : ''};
 
   .warningImage {
     width: 16px;
     height: 14px;
     margin: 5px 10px 5px 0;
-    background: ${({ danger, theme }: Props): string => danger ? theme.iconDangerColor : theme.iconWarningColor};
+    background: ${isDanger ? theme.iconDangerColor : theme.iconWarningColor};
   }
-`);
+`));

@@ -23,11 +23,11 @@ function Table ({ children, className = '', isFull }: Props): React.ReactElement
   );
 }
 
-export default React.memo(styled(Table)`
+export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
   border: 0;
   display: block;
-  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+  font-size: ${theme.labelFontSize};
+  line-height: ${theme.labelLineHeight};
   margin-bottom: 1rem;
 
   &.isFull {
@@ -73,4 +73,4 @@ export default React.memo(styled(Table)`
       white-space: normal;
     }
   }
-`);
+`));

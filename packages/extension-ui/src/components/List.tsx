@@ -6,7 +6,7 @@ import { ThemeProps } from '../types';
 
 import styled from 'styled-components';
 
-export default styled.ul`
+export default styled.ul(({ theme }: ThemeProps) => `
   list-style: none;
   padding-inline-start: 10px;
   padding-inline-end: 10px;
@@ -19,10 +19,10 @@ export default styled.ul`
 
   li::before {
     content: '\\2022';
-    color: ${({ theme }: ThemeProps): string => theme.primaryColor};
+    color: ${theme.primaryColor};
     font-size: 30px;
     font-weight: bold;
     margin-right: 10px;
     vertical-align: -20%;
   }
-`;
+`);

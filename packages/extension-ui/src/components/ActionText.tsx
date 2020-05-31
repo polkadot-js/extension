@@ -27,23 +27,23 @@ function ActionText ({ className, icon, onClick, text }: Props): React.ReactElem
   );
 }
 
-export default styled(ActionText)`
+export default styled(ActionText)(({ theme }: ThemeProps) => `
   cursor: pointer;
 
   span {
-    font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-    line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
+    color: ${theme.labelColor}
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
     text-decoration-line: underline;
-    color: ${({ theme }: ThemeProps): string => theme.labelColor}
   }
 
   ${Svg} {
-    background: ${({ theme }: ThemeProps): string => theme.iconNeutralColor};
+    background: ${theme.iconNeutralColor};
     display: inline-block;
+    height: 14px;
+    margin-right: 6px;
     position: relative;
     top: 2px;
     width: 14px;
-    height: 14px;
-    margin-right: 6px;
   }
-`;
+`);

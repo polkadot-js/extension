@@ -24,15 +24,15 @@ function Menu ({ children, className, reference }: Props): React.ReactElement<Pr
   );
 }
 
-export default styled(Menu)`
+export default styled(Menu)(({ theme }: ThemeProps) => `
   position: absolute;
   right: 0;
   margin-top: 90px;
   padding: 16px 0;
-  background: ${({ theme }: ThemeProps): string => theme.popupBackground};
+  background: ${theme.popupBackground};
   border-radius: 4px;
-  border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
+  border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
-  box-shadow: 0 0 32px ${({ theme }: ThemeProps): string => theme.boxShadow};
+  box-shadow: 0 0 32px ${theme.boxShadow};
   z-index: 1;
-`;
+`);

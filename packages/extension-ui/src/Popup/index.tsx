@@ -55,8 +55,6 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   const hierarchy = buildHierarchy(accounts);
   const master = hierarchy.find((account) => !account.isExternal);
 
-  console.log(hierarchy);
-
   return {
     accounts,
     hierarchy,

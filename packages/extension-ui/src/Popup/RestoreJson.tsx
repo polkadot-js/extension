@@ -54,8 +54,10 @@ export default function Upload (): React.ReactElement {
   );
 
   const _onChangeFile = useCallback(
-    async (file: Uint8Array): Promise<void> => {
-      setJson(await parseFile(file));
+    (file: Uint8Array): void => {
+      parseFile(file)
+        .then(setJson)
+        .catch(console.error);
     }, []
   );
 

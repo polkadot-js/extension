@@ -94,7 +94,8 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
       </div>
       {isPopup && (
         <div className='setting'>
-          <OpenInNewWindowButton
+          <ActionText
+            className='openWindow'
             icon={FullScreenIcon}
             onClick={windowOpen}
             text='Open extension in new window'
@@ -105,27 +106,27 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-const OpenInNewWindowButton = styled(ActionText)(({ theme }: ThemeProps) => `
-  span {
-    color: ${theme.textColor};
-    font-size: ${theme.fontSize};
-    font-weight: 600;
-    line-height: ${theme.lineHeight};
-    text-decoration: none;
-  }
-
-  ${Svg} {
-    background: ${theme.textColor};
-    height: 20px;
-    top: 4px;
-    width: 20px;
-  }
-`);
-
 export default React.memo(styled(Settings)(({ theme }: Props) => `
   margin-top: 56px;
   right: 24px;
   user-select: none;
+
+  .openWindow {
+    span {
+      color: ${theme.textColor};
+      font-size: ${theme.fontSize};
+      font-weight: 600;
+      line-height: ${theme.lineHeight};
+      text-decoration: none;
+    }
+
+    ${Svg} {
+      background: ${theme.textColor};
+      height: 20px;
+      top: 4px;
+      width: 20px;
+    }
+  }
 
   > .setting {
     padding: 0 16px;

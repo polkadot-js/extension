@@ -11,26 +11,26 @@ import { Svg } from '../../components';
 import ArrowLeftImage from '../../assets/arrowLeft.svg';
 
 interface Props {
+  className?: string;
   index: number;
   totalItems: number;
   onNextClick: () => void;
   onPreviousClick: () => void;
-  className?: string;
 }
 
 interface ArrowProps extends ThemeProps {
   isActive: boolean;
 }
 
-function TransactionIndex ({ index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
+function TransactionIndex ({ className, index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 
   return (
-    <CreationSteps>
+    <div className={className}>
       <div>
-        <CurrentStep>{index + 1}</CurrentStep>
-        <TotalSteps>/{totalItems}</TotalSteps>
+        <span className='currentStep'>{index + 1}</span>
+        <span className='totalSteps'>/{totalItems}</span>
       </div>
       <div>
         <ArrowLeft
@@ -42,32 +42,9 @@ function TransactionIndex ({ index, onNextClick, onPreviousClick, totalItems }: 
           onClick={(): unknown => nextClickActive && onNextClick()}
         />
       </div>
-    </CreationSteps>
+    </div>
   );
 }
-
-const CreationSteps = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  flex-grow: 1;
-  padding-right: 24px;
-`;
-
-const CurrentStep = styled.span`
-  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
-  color: ${({ theme }: ThemeProps): string => theme.primaryColor};
-  font-weight: 600;
-  margin-left: 10px;
-`;
-
-const TotalSteps = styled.span`
-  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
-  color: ${({ theme }: ThemeProps): string => theme.textColor};
-  font-weight: 600;
-`;
 
 const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))<ArrowProps>`
   display: inline-block;
@@ -86,4 +63,25 @@ const ArrowRight = styled(ArrowLeft)`
 
 ArrowRight.displayName = 'ArrowRight';
 
-export default TransactionIndex;
+export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+  padding-right: 24px;
+
+  .currentStep {
+    color: ${theme.primaryColor};
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    font-weight: 600;
+    margin-left: 10px;
+  }
+
+  .totalSteps {
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.textColor};
+    font-weight: 600;
+  }
+`);

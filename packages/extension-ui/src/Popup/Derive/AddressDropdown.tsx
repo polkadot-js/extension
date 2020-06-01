@@ -70,7 +70,7 @@ const HiddenOptions = styled.div<{ visible: boolean }>`
   }
 `;
 
-export default styled(AddressDropdown)`
+export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
   margin-bottom: 16px;
   cursor: pointer;
 
@@ -83,13 +83,13 @@ export default styled(AddressDropdown)`
     width: 30px;
     height: 30px;
     background: url(${arrow}) center no-repeat;
-    background-color: ${({ theme }: ThemeProps): string => theme.inputBackground};
+    background-color: ${theme.inputBackground};
     pointer-events: none;
     border-radius: 4px;
-    border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
+    border: 1px solid ${theme.boxBorderColor};
   }
 
   ${Address} ${Svg} {
     visibility: hidden;
   }
-`;
+`);

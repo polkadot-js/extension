@@ -31,7 +31,7 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
 
   return (
     <div className={className}>
-      <QrArea>
+      <div className='qrContainer'>
         {isScanning
           ? <QrScanSignature onScan={onSignature} />
           : (
@@ -43,27 +43,32 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
             />
           )
         }
-      </QrArea>
+      </div>
       {!isScanning && (
-        <ScanButton onClick={_onShowQr}>Scan signature via camera</ScanButton>
+        <Button
+          className='scanButton'
+          onClick={_onShowQr}
+        >
+          Scan signature via camera
+        </Button>
       )}
     </div>
   );
 }
 
-const ScanButton = styled(Button)`
-  margin-bottom: 8px;
-`;
-
-const QrArea = styled.div`
-  width: 65%;
-  margin: 5px auto 10px auto;
-
-  img {
-    border: white solid 1px;
-  }
-`;
-
 export default styled(Qr)`
   height: 100%;
+
+  .qrContainer {
+    margin: 5px auto 10px auto;
+    width: 65%;
+
+    img {
+      border: white solid 1px;
+    }
+  }
+
+  .scanButton {
+    margin-bottom: 8px;
+  }
 `;

@@ -4,25 +4,38 @@
 
 import { ThemeProps } from '../types';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
+
 import Checkmark from '../assets/checkmark.svg';
 
 interface Props {
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
+  onClick?: () => void;
   label: string;
   className?: string;
 }
 
-function Checkbox ({ checked, className, label, onChange }: Props): React.ReactElement<Props> {
+function Checkbox ({ checked, className, label, onChange, onClick }: Props): React.ReactElement<Props> {
+  const _onChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => onChange && onChange(event.target.checked),
+    [onChange]
+  );
+
+  const _onClick = useCallback(
+    () => onClick && onClick(),
+    [onClick]
+  );
+
   return (
     <div className={className}>
       <label>
         {label}
         <input
           checked={checked}
-          onChange={((event): void => onChange(event.target.checked))}
+          onChange={_onChange}
+          onClick={_onClick}
           type='checkbox'
         />
         <span />

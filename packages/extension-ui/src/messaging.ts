@@ -67,6 +67,10 @@ export async function editAccount (address: string, name: string): Promise<boole
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
+export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
+  return sendMessage('pri(accounts.show)', { address, isShowing });
+}
+
 export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
   return sendMessage('pri(accounts.export)', { address, password });
 }

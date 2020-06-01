@@ -19,9 +19,12 @@ import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
-  return Object.values(accounts).map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
-    address, genesisHash, name
-  }));
+  return Object
+    .values(accounts)
+    .filter(({ json: { meta: { isHidden } } }) => !isHidden)
+    .map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
+      address, genesisHash, name
+    }));
 }
 
 export default class Tabs {

@@ -27,6 +27,7 @@ export interface AccountJson extends KeyringPair$Meta {
   address: string;
   genesisHash?: string | null;
   isExternal?: boolean;
+  isHidden?: boolean;
   name?: string;
   parentAddress?: string;
   suri?: string;
@@ -70,8 +71,9 @@ export interface RequestSignatures {
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
-  'pri(accounts.validate)': [RequestAccountValidate, boolean];
+  'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
+  'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
@@ -171,6 +173,11 @@ export interface RequestAccountEdit {
 
 export interface RequestAccountForget {
   address: string;
+}
+
+export interface RequestAccountShow {
+  address: string;
+  isShowing: boolean;
 }
 
 export interface RequestAccountValidate {

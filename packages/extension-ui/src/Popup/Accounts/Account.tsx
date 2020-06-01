@@ -8,8 +8,8 @@ import { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Link } from '../../components';
-import { editAccount } from '../../messaging';
+import { ActionContext, Address, Checkbox, Link } from '../../components';
+import { editAccount, showAccount } from '../../messaging';
 import { Name } from '../../partials';
 
 interface Props extends AccountJson {
@@ -17,21 +17,35 @@ interface Props extends AccountJson {
   parentName?: string;
 }
 
-function Account ({ address, className, isExternal, parentName, suri }: Props): React.ReactElement<Props> {
+function Account ({ address, className, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [isEditing, setEditing] = useState(false);
   const [editedName, setName] = useState<string | null>(null);
 
-  const _toggleEdit = useCallback((): void => setEditing(!isEditing), [isEditing]);
-  const _saveChanges = useCallback((): void => {
-    if (editedName && editedName !== name) {
-      editAccount(address, editedName)
-        .then(() => onAction())
-        .catch(console.error);
-    }
+  const _toggleEdit = useCallback(
+    (): void => setEditing(!isEditing),
+    [isEditing]
+  );
 
-    _toggleEdit();
-  }, [editedName, address, _toggleEdit, onAction]);
+  const _saveChanges = useCallback(
+    (): void => {
+      if (editedName && editedName !== name) {
+        editAccount(address, editedName)
+          .then(() => onAction())
+          .catch(console.error);
+      }
+
+      _toggleEdit();
+    },
+    [editedName, address, _toggleEdit, onAction]
+  );
+  const _toggleVisibility = useCallback(
+    (): void => {
+      showAccount(address, isHidden || false)
+        .catch(console.error);
+    },
+    [address, isHidden]
+  );
 
   const _actions = useMemo(() => (
     <>
@@ -66,8 +80,15 @@ function Account ({ address, className, isExternal, parentName, suri }: Props): 
       >
         Forget Account
       </Link>
+      <div className='divider' />
+      <Checkbox
+        checked={!isHidden}
+        className='menuItem'
+        label='Visible (always inject)'
+        onClick={_toggleVisibility}
+      />
     </>
-  ), [_toggleEdit, address, isExternal]);
+  ), [_toggleEdit, _toggleVisibility, address, isExternal, isHidden]);
 
   return (
     <div className={className}>
@@ -119,6 +140,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     font-weight: 600;
     font-size: 15px;
     line-height: 20px;
+    margin: 0;
     padding: 4px 16px;
   }
 `);

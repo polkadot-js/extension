@@ -4,13 +4,13 @@
 
 interface Option {
   text: string;
-  value: string | null;
+  value: string;
 }
 
 const hashes: Option[] = [
   {
     text: 'Allow use on any chain',
-    value: null
+    value: ''
   },
   {
     text: 'Polkadot CC1 (live)',

@@ -5,6 +5,7 @@
 import { Message } from '@polkadot/extension-base/types';
 import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
@@ -22,6 +23,7 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
+const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
@@ -119,11 +121,22 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-export async function getMetadata (genesisHash?: string | null): Promise<Chain | null> {
-  const def = await sendMessage('pri(metadata.get)', genesisHash || null);
+export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
+  if (!genesisHash) {
+    return null;
+  }
+
+  let request = metadataGets.get(genesisHash);
+
+  if (!request) {
+    request = sendMessage('pri(metadata.get)', genesisHash || null);
+    metadataGets.set(genesisHash, request);
+  }
+
+  const def = await request;
 
   return def
-    ? metadataExpand(def)
+    ? metadataExpand(def, isPartial)
     : null;
 }
 

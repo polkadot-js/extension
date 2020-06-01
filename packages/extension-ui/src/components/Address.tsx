@@ -72,7 +72,7 @@ const ACCOUNTS_SCREEN_HEIGHT = 500;
 function Address ({ actions, address, children, className, genesisHash, name, parentName, suri }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
-  const chain = useMetadata(genesisHash);
+  const chain = useMetadata(genesisHash, true);
   const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);

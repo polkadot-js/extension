@@ -5,11 +5,12 @@
 import { Message } from '@polkadot/extension-base/types';
 import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
+import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
-import { findChain } from '@polkadot/extension-chains';
+import { metadataExpand } from '@polkadot/extension-chains';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 interface Handler {
@@ -22,6 +23,7 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
+const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
@@ -71,6 +73,10 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
+export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
+  return sendMessage('pri(accounts.tie)', { address, genesisHash });
+}
+
 export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
   return sendMessage('pri(accounts.export)', { address, password });
 }
@@ -115,10 +121,23 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-export async function getMetadata (genesisHash?: string | null): Promise<Chain | null> {
-  const definitions = await sendMessage('pri(metadata.list)');
+export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
+  if (!genesisHash) {
+    return null;
+  }
 
-  return findChain(definitions || [], genesisHash);
+  let request = metadataGets.get(genesisHash);
+
+  if (!request) {
+    request = sendMessage('pri(metadata.get)', genesisHash || null);
+    metadataGets.set(genesisHash, request);
+  }
+
+  const def = await request;
+
+  return def
+    ? metadataExpand(def, isPartial)
+    : null;
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

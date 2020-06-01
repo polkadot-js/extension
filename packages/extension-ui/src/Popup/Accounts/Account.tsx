@@ -7,9 +7,10 @@ import { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import genesisOptions from '@polkadot/extension-chains/genesisHashes';
 
-import { ActionContext, Address, Checkbox, Link } from '../../components';
-import { editAccount, showAccount } from '../../messaging';
+import { ActionContext, Address, Checkbox, Dropdown, Link } from '../../components';
+import { editAccount, showAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
 
 interface Props extends AccountJson {
@@ -17,13 +18,26 @@ interface Props extends AccountJson {
   parentName?: string;
 }
 
-function Account ({ address, className, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
+interface EditState {
+  isEditing: boolean;
+  toggleActions: number;
+}
+
+function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const [isEditing, setEditing] = useState(false);
+  const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | null>(null);
 
+  const _onChangeGenesis = useCallback(
+    (genesisHash?: string | null): void => {
+      tieAccount(address, genesisHash || null)
+        .catch(console.error);
+    },
+    [address]
+  );
+
   const _toggleEdit = useCallback(
-    (): void => setEditing(!isEditing),
+    (): void => setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions })),
     [isEditing]
   );
 
@@ -39,6 +53,7 @@ function Account ({ address, className, isExternal, isHidden, parentName, suri }
     },
     [editedName, address, _toggleEdit, onAction]
   );
+
   const _toggleVisibility = useCallback(
     (): void => {
       showAccount(address, isHidden || false)
@@ -87,8 +102,15 @@ function Account ({ address, className, isExternal, isHidden, parentName, suri }
         label='Visible (always inject)'
         onClick={_toggleVisibility}
       />
+      <Dropdown
+        className='menuItem'
+        label=''
+        onChange={_onChangeGenesis}
+        options={genesisOptions}
+        value={genesisHash || ''}
+      />
     </>
-  ), [_toggleEdit, _toggleVisibility, address, isExternal, isHidden]);
+  ), [_onChangeGenesis, _toggleEdit, _toggleVisibility, address, genesisHash, isExternal, isHidden]);
 
   return (
     <div className={className}>
@@ -96,9 +118,11 @@ function Account ({ address, className, isExternal, isHidden, parentName, suri }
         actions={_actions}
         address={address}
         className='address'
+        genesisHash={genesisHash}
         name={editedName}
         parentName={parentName}
         suri={suri}
+        toggleActions={toggleActions}
       >
         {isEditing && (
           <Name
@@ -141,6 +165,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     font-size: 15px;
     line-height: 20px;
     margin: 0;
+    min-width: 13rem;
     padding: 4px 16px;
   }
 `);

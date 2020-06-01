@@ -11,20 +11,27 @@ import { Metadata, TypeRegistry } from '@polkadot/types';
 // inside the api, run `yarn chain:info --ws <url>`
 import kusama from './kusama';
 
-const definitions: Map<string, MetadataDef> = new Map(
+const definitions = new Map<string, MetadataDef>(
   [kusama].map((def) => [def.genesisHash, def])
 );
 
-function metadataExpand (definition: MetadataDef): Chain {
+const expanded = new Map<string, Chain>();
+
+export function metadataExpand (definition: MetadataDef, isPartial = false): Chain {
+  const cached = expanded.get(definition.genesisHash);
+
+  if (cached && cached.specVersion === definition.specVersion) {
+    return cached;
+  }
+
   const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
   const registry = new TypeRegistry();
 
-  registry.register(types);
+  if (!isPartial) {
+    registry.register(types);
+  }
 
   const isUnknown = genesisHash === '0x';
-  const metadata = metaCalls
-    ? new Metadata(registry, Buffer.from(metaCalls, 'base64'))
-    : null;
 
   registry.setChainProperties(registry.createType('ChainProperties', {
     ss58Format,
@@ -32,7 +39,11 @@ function metadataExpand (definition: MetadataDef): Chain {
     tokenSymbol
   }));
 
-  return {
+  const metadata = metaCalls && !isPartial
+    ? new Metadata(registry, Buffer.from(metaCalls, 'base64'))
+    : null;
+
+  const result = {
     definition,
     genesisHash: isUnknown
       ? undefined
@@ -47,6 +58,12 @@ function metadataExpand (definition: MetadataDef): Chain {
     tokenDecimals,
     tokenSymbol
   };
+
+  if (result.genesisHash && !isPartial) {
+    expanded.set(result.genesisHash, result);
+  }
+
+  return result;
 }
 
 export function findChain (definitions: MetadataDef[], genesisHash?: string | null): Chain | null {

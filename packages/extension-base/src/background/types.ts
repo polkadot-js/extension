@@ -72,6 +72,7 @@ export interface RequestSignatures {
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.show)': [RequestAccountShow, boolean];
+  'pri(accounts.tie)': [RequestAccountTie, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
@@ -83,6 +84,7 @@ export interface RequestSignatures {
   'pri(json.verify.file)': [RequestJsonRestore, boolean];
   'pri(json.verify.password)': [string, boolean];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
+  'pri(metadata.get)': [string | null, MetadataDef | null];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
   'pri(metadata.list)': [null, MetadataDef[]];
@@ -178,6 +180,11 @@ export interface RequestAccountForget {
 export interface RequestAccountShow {
   address: string;
   isShowing: boolean;
+}
+
+export interface RequestAccountTie {
+  address: string;
+  genesisHash: string | null;
 }
 
 export interface RequestAccountValidate {

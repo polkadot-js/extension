@@ -57,7 +57,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
   // find our account using the actual publicKey, and then find the associated chain
   const account = findAccount(accounts, publicKey);
-  const prefix = settings.prefix === -1 ? (chain?.ss58Format || 42) : settings.prefix;
+  const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
 
   // always allow the actual settings to override the display
   return {

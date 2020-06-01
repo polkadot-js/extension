@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback, useState, createRef } from 'react';
 import Dropzone, { DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
@@ -15,7 +17,7 @@ function classes (...classNames: (boolean | null | string | undefined)[]): strin
     .join(' ');
 }
 
-export interface InputFileProps {
+export interface InputFileProps extends ThemeProps {
   // Reference Example Usage: https://github.com/react-dropzone/react-dropzone/tree/master/examples/Accept
   // i.e. MIME types: 'application/json, text/plain', or '.json, .txt'
   className?: string;
@@ -121,21 +123,17 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
     : dropZone;
 }
 
-export default React.memo(styled(InputFile)`
-  border: 1px solid rgb(67, 68, 75);
-  background: rgb(17, 18, 24);
-  border-radius: 0.28571429rem;
+export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps) => `
+  border: 1px solid ${isError ? theme.errorBorderColor : theme.inputBorderColor};
+  background: ${theme.inputBackground};
+  border-radius: ${theme.borderRadius};
+  color: ${isError ? theme.errorBorderColor : theme.textColor};
   font-size: 1rem;
   margin: 0.25rem 0;
-  color: rgb(255, 255, 255);
-  padding: 0.5rem 0.75rem;
   overflow-wrap: anywhere;
-
-  &.error {
-    border-color: rgb(126, 53, 48);
-  }
+  padding: 0.5rem 0.75rem;
 
   &:hover {
     cursor: pointer;
   }
-`);
+`));

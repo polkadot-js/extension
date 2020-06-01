@@ -4,7 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -63,6 +63,22 @@ export default class Extension {
     return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password)) };
   }
 
+  private accountsForget ({ address }: RequestAccountForget): boolean {
+    keyring.forgetAccount(address);
+
+    return true;
+  }
+
+  private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    keyring.saveAccountMeta(pair, { ...pair.meta, isHidden: !isShowing });
+
+    return true;
+  }
+
   private accountsValidate ({ address, password }: RequestAccountValidate): boolean {
     try {
       keyring.backupAccount(keyring.getPair(address), password);
@@ -71,12 +87,6 @@ export default class Extension {
     } catch (e) {
       return false;
     }
-  }
-
-  private accountsForget ({ address }: RequestAccountForget): boolean {
-    keyring.forgetAccount(address);
-
-    return true;
   }
 
   // FIXME This looks very much like what we have in Tabs
@@ -380,6 +390,9 @@ export default class Extension {
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
+
+      case 'pri(accounts.show)':
+        return this.accountsShow(request as RequestAccountShow);
 
       case 'pri(accounts.validate)':
         return this.accountsValidate(request as RequestAccountValidate);

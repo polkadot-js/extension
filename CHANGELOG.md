@@ -4,6 +4,7 @@
 
 - Add the ability to import JSON keystore files (Thanks to https://github.com/shawntabrizi)
 - updated to derivation documentation (Thanks to https://github.com/EthWorks)
+- Allow accounts to be hidden, i.e. not injected (per account setting)
 - Adjust allowed mnemonic seed strengths, 12, 15, 18, 21 & 24 all allowed
 - Remove duplication with Default/Substrate prefixes in dropdown (equivalent, only generic displayed)
 - Display child accounts when no parent has been found (orphans)

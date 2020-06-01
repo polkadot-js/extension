@@ -12,9 +12,13 @@ export default function useMetadata (genesisHash?: string | null): Chain | null 
   const [chain, setChain] = useState<Chain | null>(null);
 
   useEffect((): void => {
-    getMetadata(genesisHash)
-      .then(setChain)
-      .catch(console.error);
+    if (genesisHash) {
+      getMetadata(genesisHash)
+        .then(setChain)
+        .catch(console.error);
+    } else {
+      setChain(null);
+    }
   }, [genesisHash]);
 
   return chain;

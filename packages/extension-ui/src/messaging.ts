@@ -9,7 +9,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
-import { findChain } from '@polkadot/extension-chains';
+import { metadataExpand } from '@polkadot/extension-chains';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 interface Handler {
@@ -71,6 +71,10 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
+export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
+  return sendMessage('pri(accounts.tie)', { address, genesisHash });
+}
+
 export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
   return sendMessage('pri(accounts.export)', { address, password });
 }
@@ -116,9 +120,11 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
 }
 
 export async function getMetadata (genesisHash?: string | null): Promise<Chain | null> {
-  const definitions = await sendMessage('pri(metadata.list)');
+  const def = await sendMessage('pri(metadata.get)', genesisHash || null);
 
-  return findChain(definitions || [], genesisHash);
+  return def
+    ? metadataExpand(def)
+    : null;
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

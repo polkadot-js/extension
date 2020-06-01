@@ -4,7 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -75,6 +75,16 @@ export default class Extension {
     assert(pair, 'Unable to find pair');
 
     keyring.saveAccountMeta(pair, { ...pair.meta, isHidden: !isShowing });
+
+    return true;
+  }
+
+  private accountsTie ({ address, genesisHash }: RequestAccountTie): boolean {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash });
 
     return true;
   }
@@ -155,6 +165,10 @@ export default class Extension {
     resolve(true);
 
     return true;
+  }
+
+  private metadataGet (genesisHash: string | null): MetadataDef | null {
+    return this.#state.knownMetadata.find((result) => result.genesisHash === genesisHash) || null;
   }
 
   private metadataList (): MetadataDef[] {
@@ -394,14 +408,20 @@ export default class Extension {
       case 'pri(accounts.show)':
         return this.accountsShow(request as RequestAccountShow);
 
-      case 'pri(accounts.validate)':
-        return this.accountsValidate(request as RequestAccountValidate);
-
       case 'pri(accounts.subscribe)':
         return this.accountsSubscribe(id, port);
 
+      case 'pri(accounts.tie)':
+        return this.accountsTie(request as RequestAccountTie);
+
+      case 'pri(accounts.validate)':
+        return this.accountsValidate(request as RequestAccountValidate);
+
       case 'pri(metadata.approve)':
         return this.metadataApprove(request as RequestMetadataApprove);
+
+      case 'pri(metadata.get)':
+        return this.metadataGet(request as string);
 
       case 'pri(metadata.list)':
         return this.metadataList();

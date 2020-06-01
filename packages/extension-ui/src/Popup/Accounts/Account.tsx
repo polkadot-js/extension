@@ -18,9 +18,14 @@ interface Props extends AccountJson {
   parentName?: string;
 }
 
+interface EditState {
+  isEditing: boolean;
+  toggleActions: number;
+}
+
 function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const [isEditing, setEditing] = useState(false);
+  const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | null>(null);
 
   const _onChangeGenesis = useCallback(
@@ -32,7 +37,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
   );
 
   const _toggleEdit = useCallback(
-    (): void => setEditing(!isEditing),
+    (): void => setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions })),
     [isEditing]
   );
 
@@ -102,7 +107,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         label=''
         onChange={_onChangeGenesis}
         options={genesisOptions}
-        value={genesisHash || null}
+        value={genesisHash || ''}
       />
     </>
   ), [_onChangeGenesis, _toggleEdit, _toggleVisibility, address, genesisHash, isExternal, isHidden]);
@@ -117,6 +122,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         name={editedName}
         parentName={parentName}
         suri={suri}
+        toggleActions={toggleActions}
       >
         {isEditing && (
           <Name

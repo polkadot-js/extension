@@ -33,6 +33,7 @@ interface Props {
   actions?: React.ReactNode;
   parentName?: string | null;
   suri?: string;
+  toggleActions?: number;
 }
 
 interface Recoded {
@@ -67,9 +68,9 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   };
 }
 
-const ACCOUNTS_SCREEN_HEIGHT = 500;
+const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, children, className, genesisHash, name, parentName, suri }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash, true);
@@ -99,6 +100,10 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
     }
   }, [showActionsMenu]);
 
+  useEffect((): void => {
+    setShowActionsMenu(false);
+  }, [toggleActions]);
+
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show('Copied'), [show]);
@@ -125,7 +130,7 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
                     className='parentName'
                     data-field='parent'
                   >
-                    {parentName}{suri || ''}
+                    {parentName}&nbsp;&nbsp;{suri || ''}
                   </div>
                 </div>
                 <div className='name displaced'>{displayedName}</div>
@@ -182,18 +187,18 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
   );
 }
 
-const FullAddress = styled.div`
+const FullAddress = styled.div(({ theme }: ThemeProps) => `
   width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: ${({ theme }: ThemeProps): string => theme.labelColor};
+  color: ${theme.labelColor};
   font-size: 12px;
   line-height: 16px;
-`;
+`);
 
 FullAddress.displayName = 'FullAddress';
 
-const Settings = styled.div`
+const Settings = styled.div(({ theme }: ThemeProps) => `
   position: relative;
   display: flex;
   justify-content: center;
@@ -213,14 +218,14 @@ const Settings = styled.div`
     top: 25%;
     bottom: 25%;
     width: 1px;
-    background: ${({ theme }: ThemeProps): string => theme.boxBorderColor};
+    background: ${theme.boxBorderColor};
   }
 
   &:hover {
     cursor: pointer;
-    background: ${({ theme }: ThemeProps): string => theme.readonlyInputBackground};
+    background: ${theme.readonlyInputBackground};
   }
-`;
+`);
 
 Settings.displayName = 'Details';
 

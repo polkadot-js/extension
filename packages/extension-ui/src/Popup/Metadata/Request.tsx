@@ -5,7 +5,7 @@
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { ThemeProps } from '../../types';
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
@@ -22,14 +22,24 @@ interface Props {
 function Request ({ className, metaId, request, url }: Props): React.ReactElement<Props> {
   const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
-  const _onApprove = (): Promise<void> =>
-    approveMetaRequest(metaId)
-      .then((): void => onAction())
-      .catch((error: Error) => console.error(error));
-  const _onReject = (): Promise<void> =>
-    rejectMetaRequest(metaId)
-      .then((): void => onAction())
-      .catch((error: Error) => console.error(error));
+
+  const _onApprove = useCallback(
+    (): void => {
+      approveMetaRequest(metaId)
+        .then(() => onAction())
+        .catch(console.error);
+    },
+    [metaId, onAction]
+  );
+
+  const _onReject = useCallback(
+    (): void => {
+      rejectMetaRequest(metaId)
+        .then(() => onAction())
+        .catch(console.error);
+    },
+    [metaId, onAction]
+  );
 
   return (
     <div className={className}>
@@ -59,49 +69,40 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
           <td className='data'>{chain ? chain.specVersion : 'unknown'} -&gt; {request.specVersion}</td>
         </tr>
       </Table>
-      <RequestInfo>
-        <RequestWarning>This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</RequestWarning>
-        <AcceptButton onClick={_onApprove}>Yes, do this metadata update</AcceptButton>
-        <RejectButton>
+      <div className='requestInfo'>
+        <Warning className='requestWarning'>This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</Warning>
+        <Button
+          className='btnAccept'
+          onClick={_onApprove}
+        >
+            Yes, do this metadata update
+        </Button>
+        <ActionBar className='btnReject'>
           <Link
             isDanger
             onClick={_onReject}
           >
             Reject
           </Link>
-        </RejectButton>
-      </RequestInfo>
+        </ActionBar>
+      </div>
     </div>
   );
 }
 
-const RequestInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 8px;
-  background: ${({ theme }: ThemeProps): string => theme.highlightedAreaBackground};
-`;
+export default styled(Request)(({ theme }: ThemeProps) => `
+  .btnAccept {
+    margin: 25px auto 0;
+    width: 90%;
+  }
 
-const AcceptButton = styled(Button)`
-  width: 90%;
-  margin: 25px auto 0;
-`;
+  .btnReject {
+    margin: 8px 0 15px 0;
+    text-decoration: underline;
+  }
 
-const RequestWarning = styled(Warning)`
-  margin: 24px 24px 0 1.45rem;
-`;
-
-AcceptButton.displayName = 'AcceptButton';
-
-const RejectButton = styled(ActionBar)`
-  margin: 8px 0 15px 0;
-  text-decoration: underline;
-`;
-
-export default styled(Request)`
   .icon {
-    background: ${({ theme }: ThemeProps): string => theme.buttonBackgroundDanger};
+    background: ${theme.buttonBackgroundDanger};
     color: white;
     min-width: 18px;
     width: 14px;
@@ -113,20 +114,15 @@ export default styled(Request)`
     padding-left: 0.5px;
   }
 
-  .tab-info {
-    overflow: hidden;
-    margin: 0.75rem 20px 0 0;
+  .requestInfo {
+    align-items: center;
+    background: ${theme.highlightedAreaBackground};
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
   }
 
-  .tab-name,
-  .tab-url {
-    color: ${({ theme }: ThemeProps): string => theme.textColor};
-    display: inline-block;
-    max-width: 20rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: top;
-    cursor: pointer;
-    text-decoration: underline;
+  .requestWarning {
+    margin: 24px 24px 0 1.45rem;
   }
-`;
+`);

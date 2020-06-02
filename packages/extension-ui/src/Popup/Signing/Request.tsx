@@ -78,10 +78,12 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
 
     return (
       <>
-        <Address
-          address={json.address}
-          genesisHash={json.genesisHash}
-        />
+        <div>
+          <Address
+            address={json.address}
+            genesisHash={json.genesisHash}
+          />
+        </div>
         {isExternal
           ? (
             <Qr
@@ -121,7 +123,9 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
 
     return (
       <>
-        <Address address={raw.address} />
+        <div>
+          <Address address={raw.address} />
+        </div>
         <Bytes
           bytes={raw.data}
           url={url}

@@ -146,7 +146,7 @@ describe('Create Account', () => {
 
     it('saves account with provided name and password', async () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
-      wrapper.find(Button).find('button').simulate('click');
+      wrapper.find('[data-button-action="add new root"] button').simulate('click');
       await act(flushAllPromises);
 
       expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed);

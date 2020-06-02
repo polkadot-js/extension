@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { InputWithLabel, ValidatedInput } from '../components';
-import { allOf, isNotShorterThan, isSameAs, Validator } from '../validators';
+import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
 
 interface Props {
   isFocussed?: boolean;

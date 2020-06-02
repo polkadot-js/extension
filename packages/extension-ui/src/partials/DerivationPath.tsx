@@ -7,11 +7,11 @@ import { ThemeProps } from '../types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { InputWithLabel, Svg, ValidatedInput, Button } from '../components';
-import { validateDerivationPath } from '../messaging';
-import { Result } from '../validators';
 import lockIcon from '../assets/lock.svg';
 import unlockIcon from '../assets/unlock.svg';
+import { InputWithLabel, Svg, ValidatedInput, Button } from '../components';
+import { validateDerivationPath } from '../messaging';
+import { Result } from '../util/validators';
 
 interface Props {
   className?: string;

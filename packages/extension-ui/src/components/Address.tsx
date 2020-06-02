@@ -151,6 +151,11 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
               <div
                 className='banner chain'
                 data-field='chain'
+                style={
+                  chain.definition.color
+                    ? { backgroundColor: chain.definition.color }
+                    : undefined
+                }
               >
                 {chain.name}
               </div>

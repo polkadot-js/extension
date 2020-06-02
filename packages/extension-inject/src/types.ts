@@ -48,6 +48,7 @@ export interface ProviderMeta {
 }
 
 export interface MetadataDef {
+  color?: string;
   chain: string;
   genesisHash: string;
   icon: string;

@@ -12,27 +12,34 @@ import Button from './Button';
 import Svg from './Svg';
 
 interface Props {
+  className?: string;
   onClick: () => void;
 }
 
-export default function BackButton ({ onClick }: Props): React.ReactElement<Props> {
+function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
   return (
-    <SmallButton onClick={onClick}>
-      <ArrowLeft />
-    </SmallButton>
+    <Button
+      className={className}
+      onClick={onClick}
+    >
+      <Svg
+        className='arrowLeft'
+        src={arrowLeft}
+      />
+    </Button>
   );
 }
 
-const SmallButton = styled(Button)`
+export default styled(BackButton)(({ theme }: ThemeProps) => `
+  background: ${theme.backButtonBackground};
   margin-right: 11px;
   width: 42px;
-  background: ${({ theme }: ThemeProps): string => theme.backButtonBackground};
-`;
 
-const ArrowLeft = styled(Svg).attrs(() => ({ src: arrowLeft }))`
-  width: 12px;
-  height: 12px;
-  display: block;
-  margin: auto;
-  background: ${({ theme }: ThemeProps): string => theme.backButtonTextColor};
-`;
+  > .arrowLeft {
+    background: ${theme.backButtonTextColor};
+    display: block;
+    height: 12px;
+    margin: auto;
+    width: 12px;
+  }
+`);

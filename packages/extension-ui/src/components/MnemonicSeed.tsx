@@ -4,11 +4,12 @@
 
 import { ThemeProps } from '../types';
 
-import styled from 'styled-components';
 import React, { MouseEventHandler } from 'react';
-import TextAreaWithLabel from './TextAreaWithLabel';
-import ActionText from '@polkadot/extension-ui/components/ActionText';
+import styled from 'styled-components';
+
 import copy from '../assets/copy.svg';
+import ActionText from './ActionText';
+import TextAreaWithLabel from './TextAreaWithLabel';
 
 interface Props {
   seed: string;
@@ -19,9 +20,15 @@ interface Props {
 function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <MnemonicText value={seed} />
+      <TextAreaWithLabel
+        className='mnemonicDisplay'
+        isReadOnly
+        label='Generated 12-word mnemonic seed:'
+        value={seed}
+      />
       <div className='buttonsRow'>
         <ActionText
+          className='copyBtn'
           data-seed-action='copy'
           icon={copy}
           onClick={onCopy}
@@ -32,30 +39,27 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
   );
 }
 
-const MnemonicText = styled(TextAreaWithLabel).attrs(() => ({
-  isReadOnly: true,
-  label: 'Generated 12-word mnemonic seed:'
-}))`
-  textarea {
-    font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
-    line-height: ${({ theme }: ThemeProps): string => theme.lineHeight};
-    height: unset;
-    letter-spacing: -0.01em;
-    padding: 14px;
-    margin-bottom: 10px;
-    color: ${({ theme }: ThemeProps): string => theme.primaryColor};
-  }
-`;
-
-export default styled(MnemonicSeed)`
+export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
   margin-top: 21px;
 
   .buttonsRow {
     display: flex;
     flex-direction: row;
 
-    ${ActionText} {
+    .copyBtn {
       margin-right: 32px;
     }
   }
-`;
+
+  .mnemonicDisplay {
+    textarea {
+      color: ${theme.primaryColor};
+      font-size: ${theme.fontSize};
+      height: unset;
+      letter-spacing: -0.01em;
+      line-height: ${theme.lineHeight};
+      margin-bottom: 10px;
+      padding: 14px;
+    }
+  }
+`);

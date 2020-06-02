@@ -5,7 +5,7 @@
 import React, { useContext } from 'react';
 
 import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
-import { isNotShorterThan } from '../validators';
+import { isNotShorterThan } from '../util/validators';
 
 interface Props {
   address?: string;

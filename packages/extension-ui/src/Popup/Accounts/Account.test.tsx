@@ -6,12 +6,12 @@ import '../../../../../__mocks__/chrome';
 
 import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { themes, Theme } from '@polkadot/extension-ui/components';
 import { MemoryRouter } from 'react-router';
 import React from 'react';
-
-import Account from './Account';
 import { ThemeProvider } from 'styled-components';
+
+import { themes, Theme } from '../../components';
+import Account from './Account';
 
 configure({ adapter: new Adapter() });
 

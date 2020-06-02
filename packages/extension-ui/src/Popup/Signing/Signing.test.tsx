@@ -4,22 +4,23 @@
 
 import '../../../../../__mocks__/chrome';
 
-import React, { useState } from 'react';
-import Adapter from 'enzyme-adapter-react-16';
-
-import { configure, mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import * as messaging from '@polkadot/extension-ui/messaging';
 import { SigningRequest } from '@polkadot/extension-base/background/types';
-import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
-import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '@polkadot/extension-ui/components';
+
+import Adapter from 'enzyme-adapter-react-16';
+import { configure, mount, ReactWrapper } from 'enzyme';
+import { EventEmitter } from 'events';
+import React, { useState } from 'react';
+import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
-import Signing from '.';
+
+import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
+import * as messaging from '../../messaging';
+import { flushAllPromises } from '../../testHelpers';
 import TransactionIndex from './TransactionIndex';
 import Request from './Request';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
-import { EventEmitter } from 'events';
+import Signing from '.';
 
 configure({ adapter: new Adapter() });
 

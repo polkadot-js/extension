@@ -7,7 +7,7 @@ import { ThemeProps } from '../types';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { Result, Validator } from '../validators';
+import { Result, Validator } from '../util/validators';
 
 interface BasicProps {
   isError?: boolean;

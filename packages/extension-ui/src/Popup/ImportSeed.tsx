@@ -5,11 +5,11 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
+import upload from '../assets/file-upload.svg';
 import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace, ActionText } from '../components';
-import { allOf, isNotShorterThan, Result } from '../validators';
 import { createAccountSuri, validateSeed, jsonRestoreWindowOpen } from '../messaging';
 import { Header, Name, Password } from '../partials';
-import upload from '../assets/file-upload.svg';
+import { allOf, isNotShorterThan, Result } from '../util/validators';
 
 async function validate (suri: string): Promise<Result<string>> {
   try {

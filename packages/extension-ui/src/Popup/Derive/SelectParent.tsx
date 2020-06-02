@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace } from '../../components';
 import { validateAccount } from '../../messaging';
 import { DerivationPath } from '../../partials';
-import { nextDerivationPath } from '../../utils/nextDerivationPath';
+import { nextDerivationPath } from '../../util/nextDerivationPath';
 import AddressDropdown from './AddressDropdown';
 
 interface Props {

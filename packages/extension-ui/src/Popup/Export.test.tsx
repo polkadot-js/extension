@@ -9,13 +9,12 @@ import Adapter from 'enzyme-adapter-react-16';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { MemoryRouter, Route } from 'react-router';
 import React from 'react';
-import * as messaging from '@polkadot/extension-ui/messaging';
+import { ThemeProvider } from 'styled-components';
 
 import { Button, themes } from '../components';
 import Export from './Export';
-import { exportAccount } from '../messaging';
-import { ThemeProvider } from 'styled-components';
-import { flushAllPromises } from '@polkadot/extension-ui/testHelpers';
+import * as messaging from '../messaging';
+import { flushAllPromises } from '../testHelpers';
 
 configure({ adapter: new Adapter() });
 
@@ -45,7 +44,7 @@ describe('Export component', () => {
     wrapper.find('[data-export-button] button').simulate('click');
     await act(flushAllPromises);
 
-    expect(exportAccount).toHaveBeenCalledWith(VALID_ADDRESS, 'passw0rd');
+    expect(messaging.exportAccount).toHaveBeenCalledWith(VALID_ADDRESS, 'passw0rd');
   });
 
   it('button is disabled before any password is typed', () => {

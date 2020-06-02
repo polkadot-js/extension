@@ -10,10 +10,10 @@ import { configure, mount, ReactWrapper } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
-import * as messaging from '@polkadot/extension-ui/messaging';
 
 import { AccountContext, ActionContext, themes } from '../../components';
-import { buildHierarchy } from '../../utils/buildHierarchy';
+import * as messaging from '../../messaging';
+import { buildHierarchy } from '../../util/buildHierarchy';
 import { flushAllPromises } from '../../testHelpers';
 import AddressDropdown from './AddressDropdown';
 import Derive from '.';

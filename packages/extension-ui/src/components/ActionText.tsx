@@ -5,8 +5,9 @@
 import { ThemeProps } from '../types';
 
 import React, { MouseEventHandler } from 'react';
-import Svg from '@polkadot/extension-ui/components/Svg';
 import styled from 'styled-components';
+
+import Svg from './Svg';
 
 interface Props {
   className?: string;

@@ -238,11 +238,11 @@ const ActiveActionsIcon = styled(Svg).attrs(() => ({ src: details }))`
 `;
 
 const ArrowLabel = styled(Svg).attrs(() => ({ src: parentArrow }))`
+  background: ${({ theme }: ThemeProps): string => theme.labelColor};
   position: absolute;
   top: 5px;
   width: 9px;
   height: 9px;
-  background: ${({ theme }: ThemeProps): string => theme.labelColor};
 `;
 
 const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
@@ -250,17 +250,14 @@ const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
 `;
 
 export default styled(Address)(({ theme }: ThemeProps) => `
-  position: relative;
-  margin-bottom: 8px;
-
   background: ${theme.accountBackground};
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 4px;
+  margin-bottom: 8px;
+  position: relative;
 
   .banner {
-    border-radius: 0 0 8px 8px;
-    color: white;
     font-size: 12px;
     line-height: 16px;
     position: absolute;
@@ -268,8 +265,11 @@ export default styled(Address)(({ theme }: ThemeProps) => `
 
     &.chain {
       background: ${theme.primaryColor};
-      padding: 0.1rem 0.5rem;
-      right: 40px;
+      border-radius: 0 0 0 10px;
+      color: white;
+      padding: 0.1rem 0.5rem 0.1rem 0.75rem;
+      right: 0;
+      z-index: 1;
     }
   }
 

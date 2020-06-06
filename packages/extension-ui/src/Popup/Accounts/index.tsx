@@ -7,10 +7,11 @@ import { ThemeProps } from '../../types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
-import { AddAccount, Header } from '../../partials';
-import AccountsTree from './AccountsTree';
 import qrIcon from '../../assets/qr.svg';
+import { AccountContext, Button, ButtonArea, ButtonWithSubtitle, MediaContext, Svg } from '../../components';
+import { Header } from '../../partials';
+import AccountsTree from './AccountsTree';
+import AddAccount from './AddAccount';
 
 export default function Accounts (): React.ReactElement {
   const { hierarchy, master } = useContext(AccountContext);
@@ -23,6 +24,7 @@ export default function Accounts (): React.ReactElement {
         : (
           <>
             <Header
+              showAdd
               showSettings
               text={'Accounts'}
             />

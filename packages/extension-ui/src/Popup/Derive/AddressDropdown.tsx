@@ -7,8 +7,8 @@ import { ThemeProps } from '../../types';
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { Address, Svg } from '../../components';
 import arrow from '../../assets/arrow-down.svg';
+import { Address, Svg } from '../../components';
 import useOutsideClick from '../../hooks/useOutsideClick';
 
 interface Props {
@@ -21,7 +21,6 @@ interface Props {
 function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }: Props): React.ReactElement<Props> {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
   const hideDropdown = useCallback(() => setDropdownVisible(false), []);
   const toggleDropdown = useCallback(() => setDropdownVisible(!isDropdownVisible), [isDropdownVisible]);
   const selectParent = (newParent: string) => (): void => onSelect(newParent);

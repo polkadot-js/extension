@@ -15,14 +15,13 @@ import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import copy from '../assets/copy.svg';
 import details from '../assets/details.svg';
 import parentArrow from '../assets/arrowParentLabel.svg';
-
 import { AccountContext, SettingsContext } from './contexts';
-import Identicon from './Identicon';
-import Menu from './Menu';
-import Svg from './Svg';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
 import useToast from '../hooks/useToast';
+import Identicon from './Identicon';
+import Menu from './Menu';
+import Svg from './Svg';
 
 interface Props {
   address?: string | null;

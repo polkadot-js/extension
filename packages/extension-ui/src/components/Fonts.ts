@@ -3,6 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { createGlobalStyle } from 'styled-components';
+
 import NunitosansregularWoff2 from '../assets/fonts/Nunitosansregular.woff2';
 import NunitosansregularWoff from '../assets/fonts/Nunitosansregular.woff';
 import NunitosanssemiboldWoff2 from '../assets/fonts/Nunitosanssemibold.woff2';

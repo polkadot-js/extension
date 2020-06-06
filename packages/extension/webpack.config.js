@@ -85,7 +85,7 @@ function createWebpack ({ alias = {}, context }) {
           PKG_VERSION: JSON.stringify(pkgJson.version)
         }
       }),
-      new CopyPlugin([{ from: 'public' }]),
+      new CopyPlugin({ patterns: [{ from: 'public' }] }),
       new ManifestPlugin({
         config: {
           base: manifest,

@@ -8,28 +8,48 @@ import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import ArrowLeftImage from '../assets/arrowLeft.svg';
-import logo from '../assets/pjs.svg';
 import gear from '../assets/gear.svg';
+import plus from '../assets/plus.svg';
+import logo from '../assets/pjs.svg';
 import { Link, Svg } from '../components';
 import useOutsideClick from '../hooks/useOutsideClick';
-import Settings from './Settings';
+import MenuAdd from './MenuAdd';
+import MenuSettings from './MenuSettings';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
   className?: string;
+  showAdd?: boolean;
+  showBackArrow?: boolean;
   showSettings?: boolean;
   text?: React.ReactNode;
-  showBackArrow?: boolean;
 }
 
-function Header ({ children, className, showBackArrow, showSettings, text }: Props): React.ReactElement<Props> {
-  const [showActionsMenu, setShowActionsMenu] = useState(false);
-  const actionsRef = useRef(null);
+interface MenuSelectProps {
+  isSelected: boolean;
+}
 
-  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+function Header ({ children, className, showAdd, showBackArrow, showSettings, text }: Props): React.ReactElement<Props> {
+  const [isAddOpen, setShowAdd] = useState(false);
+  const [isSettingsOpen, setShowSettings] = useState(false);
+  const addRef = useRef(null);
+  const setRef = useRef(null);
+
+  useOutsideClick(addRef, (): void => {
+    isAddOpen && setShowAdd(!isAddOpen);
+  });
+
+  useOutsideClick(setRef, (): void => {
+    isSettingsOpen && setShowSettings(!isSettingsOpen);
+  });
+
+  const _toggleAdd = useCallback(
+    (): void => setShowAdd((isAddOpen) => !isAddOpen),
+    []
+  );
 
   const _toggleSettings = useCallback(
-    (): void => setShowActionsMenu((showActionsMenu) => !showActionsMenu),
+    (): void => setShowSettings((isSettingsOpen) => !isSettingsOpen),
     []
   );
 
@@ -52,16 +72,30 @@ function Header ({ children, className, showBackArrow, showSettings, text }: Pro
           }
           <span className='logoText'>{text || 'polkadot{.js}'}</span>
         </div>
-        {showSettings && (
-          <div
-            className='settingsToggle'
-            onClick={_toggleSettings}
-          >
-            <Gear isSelected={showActionsMenu} />
-          </div>
+        <div className='popupMenus'>
+          {showAdd && (
+            <div
+              className='popupToggle'
+              onClick={_toggleAdd}
+            >
+              <Plus isSelected={isAddOpen} />
+            </div>
+          )}
+          {showSettings && (
+            <div
+              className='popupToggle'
+              data-toggle-settings
+              onClick={_toggleSettings}
+            >
+              <Gear isSelected={isSettingsOpen} />
+            </div>
+          )}
+        </div>
+        {isAddOpen && (
+          <MenuAdd reference={addRef}/>
         )}
-        {showActionsMenu && (
-          <Settings reference={actionsRef}/>
+        {isSettingsOpen && (
+          <MenuSettings reference={setRef}/>
         )}
         {children}
       </div>
@@ -70,10 +104,10 @@ function Header ({ children, className, showBackArrow, showSettings, text }: Pro
 }
 
 const BackLink = styled(Link)`
-  width: min-content;
-  text-decoration: underline;
   color: ${({ theme }: ThemeProps) => theme.labelColor};
   min-height: 52px;
+  text-decoration: underline;
+  width: min-content;
 
   &:visited {
     color: ${({ theme }: ThemeProps) => theme.labelColor};
@@ -81,25 +115,25 @@ const BackLink = styled(Link)`
 `;
 
 const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))`
+  background: ${({ theme }: ThemeProps) => theme.labelColor};
   width: 12px;
   height: 12px;
   margin-right: 13px;
-  background: ${({ theme }: ThemeProps) => theme.labelColor};
 `;
 
-interface GearProps {
-  isSelected: boolean;
-}
-
-const Gear = styled(Svg).attrs(() => ({ src: gear }))<GearProps>`
-  height: 18px;
-  width: 18px;
-  margin-right: 24px;
-  align-self: center;
-  background: ${({ isSelected, theme }: ThemeProps & GearProps): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
+const Gear = styled(Svg).attrs(() => ({ src: gear }))<MenuSelectProps>`
+  background: ${({ isSelected, theme }: ThemeProps & MenuSelectProps): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
+  height: 22px;
+  width: 22px;
 `;
 
 Gear.displayName = 'Gear';
+
+const Plus = styled(Svg).attrs(() => ({ src: plus }))<MenuSelectProps>`
+  background: ${({ isSelected, theme }: ThemeProps & MenuSelectProps): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
+  height: 22px;
+  width: 22px;
+`;
 
 export default React.memo(styled(Header)(({ theme }: Props) => `
   max-width: 100%;
@@ -143,11 +177,24 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       }
     }
 
-    .settingsToggle {
+    .popupMenus {
       align-self: center;
 
-      &:hover {
-        cursor: pointer;
+      .popupToggle {
+        display: inline-block;
+        vertical-align: middle;
+
+        &:last-child {
+          margin-right: 24px;
+        }
+
+        &:hover {
+          cursor: pointer;
+        }
+      }
+
+      .popupToggle+.popupToggle {
+        margin-left: 8px;
       }
     }
   }

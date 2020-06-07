@@ -22,6 +22,8 @@ export { default as Link } from './Link';
 export { default as List } from './List';
 export { default as Loading } from './Loading';
 export { default as Menu } from './Menu';
+export { default as MenuDivider } from './MenuDivider';
+export { default as MenuItem } from './MenuItem';
 export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as NextStepButton } from './NextStepButton';
 export { default as Svg } from './Svg';

@@ -5,9 +5,8 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import upload from '../assets/file-upload.svg';
-import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace, ActionText } from '../components';
-import { createAccountSuri, validateSeed, jsonRestoreWindowOpen } from '../messaging';
+import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { createAccountSuri, validateSeed } from '../messaging';
 import { Header, Name, Password } from '../partials';
 import { allOf, isNotShorterThan, Result } from '../util/validators';
 
@@ -53,15 +52,6 @@ export default function Import (): React.ReactElement {
     }
   }, [account, name, onAction, password]);
 
-  const _toJson = useCallback((): void => {
-    // are we in a popup?
-    if (window.innerWidth <= 480) {
-      jsonRestoreWindowOpen().catch(console.error);
-    } else {
-      onAction('/account/restore-json');
-    }
-  }, [onAction]);
-
   return (
     <>
       <HeaderWithSmallerMargin
@@ -95,15 +85,6 @@ export default function Import (): React.ReactElement {
           </ButtonArea>
         </>
       )}
-      {!account &&
-        <ButtonsRow>
-          <ActionText
-            icon={upload}
-            onClick={_toJson}
-            text='Restore from JSON backup'
-          />
-        </ButtonsRow>
-      }
     </>
   );
 }
@@ -116,14 +97,5 @@ const SeedInput = styled(TextAreaWithLabel)`
   margin-bottom: 16px;
   textarea {
     height: unset;
-  }
-`;
-
-const ButtonsRow = styled.div`
-  display: flex;
-  flex-direction: row;
-
-  ${ActionText} {
-    margin-right: 32px;
   }
 `;

@@ -10,9 +10,9 @@ interface Props {
   src: string;
 }
 
-export default styled.span<Props>`
-  display: block;
-  mask: ${({ src }): string => `url(${src})`};
+export default styled.span<Props>(({ src, theme }: Props & ThemeProps) => `
+  background: ${theme.textColor};
+  display: inline-block;
+  mask: url(${src});
   mask-size: cover;
-  background: ${({ theme }: ThemeProps): string => theme.textColor};
-`;
+`);

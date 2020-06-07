@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { themes } from '../components';
 import Header from './Header';
-import Settings from './Settings';
+import Settings from './MenuSettings';
 
 configure({ adapter: new Adapter() });
 
@@ -37,7 +37,7 @@ describe('Header component', () => {
   it('highlights gear icon when settings are toggled', () => {
     wrapper = mountHeader({ showSettings: true });
 
-    wrapper.find('div.settingsToggle').simulate('click');
+    wrapper.find('div[data-toggle-settings]').simulate('click');
 
     expect(wrapper.find(Settings).length).toBe(1);
     expect(wrapper.find('Gear').prop('isSelected')).toBe(true);

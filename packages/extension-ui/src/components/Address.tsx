@@ -250,7 +250,8 @@ const ArrowLabel = styled(Svg).attrs(() => ({ src: parentArrow }))`
 `;
 
 const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
-  ${({ isMoved }): string => isMoved ? 'bottom: 50px' : ''};
+  ${({ isMoved }): string => isMoved ? 'bottom: 0;' : ''}
+  right: 28px;
 `;
 
 export default styled(Address)(({ theme }: ThemeProps) => `

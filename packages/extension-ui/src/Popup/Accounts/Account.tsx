@@ -95,19 +95,23 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         Forget Account
       </Link>
       <MenuDivider />
-      <Checkbox
-        checked={!isHidden}
-        className='menuItem'
-        label='Visible (always inject)'
-        onClick={_toggleVisibility}
-      />
-      <Dropdown
-        className='menuItem'
-        label=''
-        onChange={_onChangeGenesis}
-        options={genesisOptions}
-        value={genesisHash || ''}
-      />
+      <div className='menuItem'>
+        <Checkbox
+          checked={!isHidden}
+          className='inputItem'
+          label='Visible (always inject)'
+          onClick={_toggleVisibility}
+        />
+      </div>
+      <div className='menuItem'>
+        <Dropdown
+          className='inputItem'
+          label=''
+          onChange={_onChangeGenesis}
+          options={genesisOptions}
+          value={genesisHash || ''}
+        />
+      </div>
     </>
   ), [_onChangeGenesis, _toggleEdit, _toggleVisibility, address, genesisHash, isExternal, isHidden]);
 
@@ -160,5 +164,9 @@ export default styled(Account)`
     margin: 0;
     min-width: 13rem;
     padding: 4px 16px;
+
+    .inputItem {
+      margin: 0;
+    }
   }
 `;

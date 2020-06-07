@@ -26,6 +26,7 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
 }
 
 export default styled(MenuItem)`
+  min-width: 13rem;
   padding: 0 16px;
   max-width: 100%;
 

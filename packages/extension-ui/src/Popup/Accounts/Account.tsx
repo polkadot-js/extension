@@ -3,13 +3,12 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountJson } from '@polkadot/extension-base/background/types';
-import { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import genesisOptions from '@polkadot/extension-chains/genesisHashes';
 
-import { ActionContext, Address, Checkbox, Dropdown, Link } from '../../components';
+import { ActionContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components';
 import { editAccount, showAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
 
@@ -78,7 +77,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
           Derive New Account
         </Link>
       )}
-      <div className='divider' />
+      <MenuDivider />
       {!isExternal && (
         <Link
           className='menuItem'
@@ -95,7 +94,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       >
         Forget Account
       </Link>
-      <div className='divider' />
+      <MenuDivider />
       <Checkbox
         checked={!isHidden}
         className='menuItem'
@@ -139,15 +138,9 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
   );
 }
 
-export default styled(Account)(({ theme }: ThemeProps) => `
+export default styled(Account)`
   .address {
     margin-bottom: 8px;
-  }
-
-  .divider {
-    padding-top: 16px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid ${theme.inputBorderColor};
   }
 
   .editName {
@@ -168,4 +161,4 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     min-width: 13rem;
     padding: 4px 16px;
   }
-`);
+`;

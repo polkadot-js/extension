@@ -9,7 +9,7 @@ import styled, { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
 
 import FullScreenIcon from '../assets/fullscreen.svg';
-import { ActionText, Checkbox, Dropdown, Menu, Svg, Switch, ThemeSwitchContext, Title, themes } from '../components';
+import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
 import { windowOpen } from '../messaging';
 
 interface Option {
@@ -27,7 +27,7 @@ const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
-function Settings ({ className, reference }: Props): React.ReactElement<Props> {
+function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
@@ -55,26 +55,34 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
       className={className}
       reference={reference}
     >
-      <div className='setting'>
-        <Title className='title'>Theme</Title>
+      <MenuItem
+        className='setting'
+        title='Theme'
+      >
         <Switch
           checked={themeContext.id === themes.dark.id}
           checkedLabel='Dark'
           onChange={_onChangeTheme}
           uncheckedLabel='Light'
         />
-      </div>
-      <div className='setting'>
-        <Title className='title'>External QR accounts and Access</Title>
+      </MenuItem>
+      <MenuDivider />
+      <MenuItem
+        className='setting'
+        title='External QR accounts and Access'
+      >
         <Checkbox
           checked={camera}
           className='checkbox'
           label='Allow Camera Access'
           onChange={setCamera}
         />
-      </div>
-      <div className='setting'>
-        <Title className='title'>Display address format For:</Title>
+      </MenuItem>
+      <MenuDivider />
+      <MenuItem
+        className='setting'
+        title='Display address format For'
+      >
         <Dropdown
           className='dropdown'
           label=''
@@ -82,23 +90,26 @@ function Settings ({ className, reference }: Props): React.ReactElement<Props> {
           options={prefixOptions}
           value={`${prefix}`}
         />
-      </div>
+      </MenuItem>
       {isPopup && (
-        <div className='setting'>
-          <ActionText
-            className='openWindow'
-            icon={FullScreenIcon}
-            onClick={windowOpen}
-            text='Open extension in new window'
-          />
-        </div>
+        <>
+          <MenuDivider />
+          <MenuItem className='setting'>
+            <ActionText
+              className='openWindow'
+              icon={FullScreenIcon}
+              onClick={windowOpen}
+              text='Open extension in new window'
+            />
+          </MenuItem>
+        </>
       )}
     </Menu>
   );
 }
 
-export default React.memo(styled(Settings)(({ theme }: Props) => `
-  margin-top: 56px;
+export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
+  margin-top: 50px;
   right: 24px;
   user-select: none;
 
@@ -120,14 +131,12 @@ export default React.memo(styled(Settings)(({ theme }: Props) => `
   }
 
   > .setting {
-    padding: 0 16px;
-    max-width: 100%;
-
     > .checkbox {
       color: ${theme.textColor};
       line-height: 20px;
       font-size: 15px;
       font-weight: 600;
+      margin-bottom: 0;
 
       label {
         color: ${theme.textColor};
@@ -136,19 +145,10 @@ export default React.memo(styled(Settings)(({ theme }: Props) => `
 
     > .dropdown {
       background: ${theme.background};
-      margin-bottom: 12px;
+      margin-bottom: 0;
       margin-top: 9px;
       margin-right: 0;
       width: 100%;
     }
-
-    > .title {
-      margin: 0;
-    }
-  }
-
-  .setting+.setting {
-    padding-top: 18px;
-    border-top: 1px solid ${theme.inputBorderColor};
   }
 `));

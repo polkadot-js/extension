@@ -12,11 +12,18 @@ interface Props extends ThemeProps {
   children?: React.ReactNode;
   className?: string;
   isDanger?: boolean;
+  isDisabled?: boolean;
   onClick?: () => void;
   to?: string;
 }
 
-function Link ({ children, className, onClick, to }: Props): React.ReactElement<Props> {
+function Link ({ children, className = '', isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+  if (isDisabled) {
+    return (
+      <div className={`${className} isDisabled`}>{children}</div>
+    );
+  }
+
   return to
     ? (
       <RouterLink
@@ -42,7 +49,7 @@ export default styled(Link)(({ isDanger, theme }: Props) => `
   align-items: center;
   color: ${isDanger ? theme.textColorDanger : theme.textColor};
   display: flex;
-  opacity: 0.9;
+  opacity: 0.85;
   text-decoration: none;
   vertical-align: middle;
 
@@ -53,5 +60,9 @@ export default styled(Link)(({ isDanger, theme }: Props) => `
 
   &:visited {
     color: ${isDanger ? theme.textColorDanger : theme.textColor};
+  }
+
+  &.isDisabled {
+    opacity: 0.4;
   }
 `);

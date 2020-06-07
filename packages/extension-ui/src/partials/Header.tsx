@@ -32,10 +32,14 @@ interface MenuSelectProps {
 function Header ({ children, className, showAdd, showBackArrow, showSettings, text }: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
-  const actionsRef = useRef(null);
+  const addRef = useRef(null);
+  const setRef = useRef(null);
 
-  useOutsideClick(actionsRef, (): void => {
+  useOutsideClick(addRef, (): void => {
     isAddOpen && setShowAdd(!isAddOpen);
+  });
+
+  useOutsideClick(setRef, (): void => {
     isSettingsOpen && setShowSettings(!isSettingsOpen);
   });
 
@@ -80,6 +84,7 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
           {showSettings && (
             <div
               className='popupToggle'
+              data-toggle-settings
               onClick={_toggleSettings}
             >
               <Gear isSelected={isSettingsOpen} />
@@ -87,10 +92,10 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
           )}
         </div>
         {isAddOpen && (
-          <MenuAdd reference={actionsRef}/>
+          <MenuAdd reference={addRef}/>
         )}
         {isSettingsOpen && (
-          <MenuSettings reference={actionsRef}/>
+          <MenuSettings reference={setRef}/>
         )}
         {children}
       </div>

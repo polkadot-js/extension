@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.26.0-beta.x Jun 8, 2020
+## 0.30.1 Jun 8, 2020
 
 - Add the ability to import JSON keystore files (Thanks to https://github.com/shawntabrizi)
 - Updated to derivation documentation (Thanks to https://github.com/EthWorks)

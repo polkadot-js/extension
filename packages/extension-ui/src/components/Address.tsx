@@ -12,7 +12,8 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import copy from '../assets/copy.svg';
+import copyIcon from '../assets/copy.svg';
+import hiddenIcon from '../assets/hidden.svg';
 import details from '../assets/details.svg';
 import parentArrow from '../assets/arrowParentLabel.svg';
 import { AccountContext, SettingsContext } from './contexts';
@@ -24,12 +25,13 @@ import Menu from './Menu';
 import Svg from './Svg';
 
 interface Props {
-  address?: string | null;
-  className?: string;
-  name?: React.ReactNode | null;
-  children?: React.ReactNode;
-  genesisHash?: string | null;
   actions?: React.ReactNode;
+  address?: string | null;
+  children?: React.ReactNode;
+  className?: string;
+  genesisHash?: string | null;
+  isHidden?: boolean;
+  name?: React.ReactNode | null;
   parentName?: string | null;
   suri?: string;
   toggleActions?: number;
@@ -69,7 +71,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, children, className, genesisHash, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash, true);
@@ -144,27 +146,33 @@ function Address ({ actions, address, children, className, genesisHash, name, pa
               </div>
             )
           }
-          <div className='copyAddress'>
+          {chain?.genesisHash && (
+            <div
+              className='banner chain'
+              data-field='chain'
+              style={
+                chain.definition.color
+                  ? { backgroundColor: chain.definition.color }
+                  : undefined
+              }
+            >
+              {chain.name}
+            </div>
+          )}
+          <div className='addressDisplay'>
             <FullAddress data-field='address'>{formatted || '<unknown>'}</FullAddress>
-            {chain?.genesisHash && (
-              <div
-                className='banner chain'
-                data-field='chain'
-                style={
-                  chain.definition.color
-                    ? { backgroundColor: chain.definition.color }
-                    : undefined
-                }
-              >
-                {chain.name}
-              </div>
-            )}
             <CopyToClipboard text={(formatted && formatted) || ''} >
               <Svg
                 onClick={_onCopy}
-                src={copy}
+                src={copyIcon}
               />
             </CopyToClipboard>
+            {isHidden && (
+              <Svg
+                className='hiddenIcon'
+                src={hiddenIcon}
+              />
+            )}
           </div>
         </div>
         {actions && (
@@ -278,9 +286,10 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     }
   }
 
-  .copyAddress {
+  .addressDisplay {
     display: flex;
     justify-content: space-between;
+    position: relative;
 
     & ${Svg} {
       width: 14px;
@@ -291,6 +300,12 @@ export default styled(Address)(({ theme }: ThemeProps) => `
         background: ${theme.labelColor};
         cursor: pointer;
       }
+    }
+
+    .hiddenIcon {
+      position: absolute;
+      right: 2px;
+      top: -18px;
     }
   }
 

@@ -22,6 +22,7 @@ function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
   return Object
     .values(accounts)
     .filter(({ json: { meta: { isHidden } } }) => !isHidden)
+    .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
     .map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
       address, genesisHash, name
     }));

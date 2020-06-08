@@ -54,7 +54,7 @@ const lightTheme: Theme = {
   background: '#FAFAFA',
   bodyColor: '#FFFFFF',
   boxBorderColor: '#DADFEA',
-  boxShadow: 'rgba(0, 0, 0, 0.06)',
+  boxShadow: 'rgba(0, 0, 0, 0.3)',
   buttonBackgroundDanger: '#DC2222',
   errorBorderColor: '#E42F2F',
   highlightedAreaBackground: '#EFEFEF',

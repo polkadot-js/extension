@@ -122,6 +122,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         address={address}
         className='address'
         genesisHash={genesisHash}
+        isHidden={isHidden}
         name={editedName}
         parentName={parentName}
         suri={suri}

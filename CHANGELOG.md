@@ -1,9 +1,10 @@
 # CHANGELOG
 
-## 0.26.0-beta.x
+## 0.26.0-beta.x Jun 8, 2020
 
 - Add the ability to import JSON keystore files (Thanks to https://github.com/shawntabrizi)
 - Updated to derivation documentation (Thanks to https://github.com/EthWorks)
+- Rework account creation with top-level menu
 - Allow accounts to be hidden, i.e. not injected (per account setting)
 - Adjust allowed mnemonic seed strengths, 12, 15, 18, 21 & 24 all allowed
 - Allow accounts to be tied to a specific network genesis (along with display)
@@ -12,6 +13,7 @@
 - Display child accounts when no parent has been found (orphans)
 - Display derived suri alongside parent account names
 - Remove all bundled metadata, update is available for dapps to keep current
+- Sorting of injected accounts based on created timestamp
 
 ## 0.25.1 May 14, 2020
 

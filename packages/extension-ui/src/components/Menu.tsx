@@ -29,7 +29,8 @@ export default styled(Menu)(({ theme }: ThemeProps) => `
   border-radius: 4px;
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
-  box-shadow: 0 0 32px ${theme.boxShadow};
+  // box-shadow: 0 0 32px ${theme.boxShadow};
+  box-shadow: 0 0 10px ${theme.boxShadow};
   margin-top: 90px;
   padding: 16px 0;
   position: absolute;

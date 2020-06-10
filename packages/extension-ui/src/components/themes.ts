@@ -1,6 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2020 Polymath Inc 
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
+// This file has been modified by Polymath to change theme colors to match Polymath's UI style
 
 const darkTheme = {
   accountBackground: '#1A1B20',
@@ -15,10 +17,10 @@ const darkTheme = {
   boxMargin: '0.75rem 0',
   boxPadding: '0 0.25rem',
   boxShadow: 'rgba(0, 0, 0, 0.86)',
-  buttonBackground: '#E86F00',
+  buttonBackground: '#1347e4',
   buttonBackgroundDanger: '#AF1111',
   buttonBackgroundDangerHover: '#D93B3B',
-  buttonBackgroundHover: '#ED9329',
+  buttonBackgroundHover: '#1347e4',
   buttonTextColor: '#FFFFFF',
   errorBorderColor: '#7E3530',
   errorColor: '#E42F2F',
@@ -38,7 +40,7 @@ const darkTheme = {
   lineHeight: '26px',
   parentLabelColor: '#4A7463',
   popupBackground: '#38393F',
-  primaryColor: '#FF7D01',
+  primaryColor: '#1347e4',
   readonlyInputBackground: '#1A1B20',
   subTextColor: '#DDD',
   textColor: '#FFFFFF',

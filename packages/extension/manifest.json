@@ -2,7 +2,7 @@
   "author": "Polymath",
   "description": "Manage your Polymesh accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
   "homepage_url": "https://github.com/PolymathNetwork/extension",
-  "name": "Aldebaran Testing Wallet",
+  "name": "Polymesh Simple Wallet",
   "short_name": "Polymesh",
   "manifest_version": 2,
   "permissions": ["storage"],

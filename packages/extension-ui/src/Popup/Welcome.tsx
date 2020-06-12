@@ -32,18 +32,16 @@ export default function Welcome (): React.ReactElement<Props> {
           <li>Please read our <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/privacy-policy">Privacy Policy</a></li> to see what information we do collect and how it is processed.
         </List>
       </TextBox>
-      <List>
-        <Checkbox checked={isPPChecked} onClick={() => setIsPPChecked(!isPPChecked)}
-          label={<>
-            I have read and accept the Polymath <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/privacy-policy">Privacy Policy</a>
-          </>}
-        />
-        <Checkbox checked={isTSChecked} onClick={() => setIsTSChecked(!isTSChecked)}
-          label={<>
-            I have read and accept the Polymath <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/wallet-terms">Terms of Service</a>
-          </>}
-        />
-      </List>
+      <Checkbox className='checkbox' checked={isPPChecked} onClick={() => setIsPPChecked(!isPPChecked)}
+        label={<>
+          I have read and accept the Polymath <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/privacy-policy">Privacy Policy</a>
+        </>}
+      />
+      <Checkbox className='checkbox' checked={isTSChecked} onClick={() => setIsTSChecked(!isTSChecked)}
+        label={<>
+          I have read and accept the Polymath <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/wallet-terms">Terms of Service</a>
+        </>}
+      />
       <VerticalSpace />
       <ButtonArea>
         <Button onClick={_onClick} isDisabled={!isPPChecked || !isTSChecked}>Continue</Button>

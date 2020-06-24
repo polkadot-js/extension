@@ -41,6 +41,7 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
 export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect((): void => {
     const payload = request.payload;
@@ -67,11 +68,17 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   const _onSign = (password: string): Promise<void> =>
     approveSignPassword(signId, password)
       .then((): void => onAction())
-      .catch((error: Error) => console.error(error));
+      .catch((error: Error): void => {
+        setError(error.message);
+        console.error(error);
+      });
   const _onSignature = ({ signature }: { signature: string }): Promise<void> =>
     approveSignSignature(signId, signature)
       .then((): void => onAction())
-      .catch((error: Error) => console.error(error));
+      .catch((error: Error): void => {
+        setError(error.message);
+        console.error(error);
+      });
 
   if (payload !== null) {
     const json = request.payload as SignerPayloadJSON;
@@ -104,6 +111,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           {isFirst && !isExternal && (
             <Unlock
               buttonText={buttonText}
+              error={error}
               onSign={_onSign}
             />
           )}

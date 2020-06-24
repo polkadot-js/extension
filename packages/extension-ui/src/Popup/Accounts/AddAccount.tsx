@@ -33,7 +33,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           <AddAccountImage onClick={_onClick}/>
         </div>
         <div className='no-accounts'>
-          <p>You currently don&apos;t have any accounts. Either create a new account or if you have an existing account you wish to use, import it with the seed phrase.</p>
+          <p>You currently don&apos;t have any accounts. Create your first account to get started.</p>
         </div>
       </div>
     </>

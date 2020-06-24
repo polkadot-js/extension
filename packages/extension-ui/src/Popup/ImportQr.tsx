@@ -11,13 +11,13 @@ import { Header, Name } from '../partials';
 
 export default function ImportQr (): React.ReactElement {
   const onAction = useContext(ActionContext);
-  const [account, setAccount] = useState<null | { address: string; genesisHash: string }>(null);
+  const [account, setAccount] = useState<null | { content: string; genesisHash: string }>(null);
   const [name, setName] = useState<string | null>(null);
 
   // FIXME Duplicated between here and Create.tsx
   const _onCreate = (): void => {
     if (account && name) {
-      createAccountExternal(name, account.address, account.genesisHash)
+      createAccountExternal(name, account.content, account.genesisHash)
         .then((): void => onAction('/'))
         .catch((error: Error) => console.error(error));
     }

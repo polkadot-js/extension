@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.31.1 Jun 24, 2020
+
+- Indicate password error when account cannot be unlocked on signing
+- Support for new Polkadot/Kusama/Substrate signing payloads
+
 ## 0.30.1 Jun 8, 2020
 
 - Add the ability to import JSON keystore files (Thanks to https://github.com/shawntabrizi)

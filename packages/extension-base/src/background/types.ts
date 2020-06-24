@@ -227,7 +227,7 @@ export interface RequestRpcSubscribe extends RequestRpcSend {
 
 export interface RequestRpcUnsubscribe {
   method: string;
-  subscriptionId: number;
+  subscriptionId: number | string;
   type: string;
 }
 

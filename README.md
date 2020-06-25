@@ -19,7 +19,7 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 
 ## FAQ
 
-### Why can't I import an account with a seed?
+### Why can't I import an account with a hex-encoded private key?
 This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They have a checksum (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
 
 ### What does it mean to derive account?

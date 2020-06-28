@@ -26,21 +26,15 @@ const allAccounts = await web3Accounts();
 // finds an injector for an address
 const injector = await web3FromAddress('5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE');
 
-// sets the signer for the address on the @polkadot/api
+// sets the signer for the address on the @polkadot/api. The alternative approach it to pass the signer through
+// options to signAndSend in the next step where we are sending (and skip this injection here), e.g
+// `.signAndSend(<address>, { signer: injector.signer }, (status) => { ... })` 
 api.setSigner(injector.signer);
 
-// sign and send out transaction - notice here that the address of the account (as retrieved injected)
+// sign and send our transaction - notice here that the address of the account (as retrieved injected)
 // is passed through as the param to the `signAndSend`, the API then calls the extension to present
-// to the user and get it signed. Once completex, the api sends the tx + signature via the normal process
+// to the user and get it signed. Once complete, the api sends the tx + signature via the normal process
 api.tx.balances
   .transfer('5C5555yEXUcmEJ5kkcCMvdZjUo7NGJiQJMS7vZXEeoMhj3VQ', 123456)
   .signAndSend('5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE', (status) => { ... });
-
-// retrieve all the RPC providers from a particular source. this returns a map
-// of string->ProviderMeta, where the string represents an unique key to identify
-// a provider, and ProviderMeta shows metadata about this provider
-const allProviders = web3ListRpcProviders('polkadot-js');
-// assuming one of the keys in `allProviders` is 'kusama-cc3', we can then use that provider
-const { provider } = web3UseRpcProvider('polkadot-js', 'kusama-cc3');
-const head = await provider.send('chain_getHeader', []); // shows latest header
 ```

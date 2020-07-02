@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Link as RouterLink } from 'react-router-dom';
 
-interface Props extends ThemeProps {
+interface Props {
   children?: React.ReactNode;
   className?: string;
   isDanger?: boolean;
@@ -17,6 +17,7 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
+// eslint-disable-next-line react/prop-types
 function Link ({ children, className = '', isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   if (isDisabled) {
     return (
@@ -45,7 +46,7 @@ function Link ({ children, className = '', isDisabled, onClick, to }: Props): Re
     );
 }
 
-export default styled(Link)(({ isDanger, theme }: Props) => `
+export default styled(Link)(({ isDanger, theme }: Props & ThemeProps) => `
   align-items: center;
   color: ${isDanger ? theme.textColorDanger : theme.textColor};
   display: flex;

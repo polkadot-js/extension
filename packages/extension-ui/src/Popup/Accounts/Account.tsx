@@ -22,6 +22,8 @@ interface EditState {
   toggleActions: number;
 }
 
+// Prop types is severely broken
+// eslint-disable-next-line react/prop-types
 function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });

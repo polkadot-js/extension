@@ -10,6 +10,8 @@ interface Props extends AccountWithChildren {
   parentName?: string;
 }
 
+// Prop types is severely broken
+// eslint-disable-next-line react/prop-types
 export default function AccountsTree ({ parentName, suri, ...account }: Props): React.ReactElement<Props> {
   return (
     <>

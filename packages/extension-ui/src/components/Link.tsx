@@ -17,7 +17,6 @@ interface Props {
   to?: string;
 }
 
-// eslint-disable-next-line react/prop-types
 function Link ({ children, className = '', isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   if (isDisabled) {
     return (

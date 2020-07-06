@@ -23,6 +23,10 @@ const hashes: Option[] = [
   {
     text: 'Edgeware (live)',
     value: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b'
+  },
+  {
+    text: 'Kulupu (live)',
+    value: '0xf7a99d3cb92853d00d5275c971c132c074636256583fee53b3bbe60d7b8769ba'
   }
 ];
 

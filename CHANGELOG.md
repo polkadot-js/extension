@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.32.0-beta.x
+
+- Add Kulupu to the chain lock dropdown (Thanks to https://github.com/carumusan)
+- Minor README updates (Thanks to https://github.com/marceljay)
+- Add base known chain info to icon/ss58 display lookups
+
 ## 0.31.1 Jun 24, 2020
 
 - Indicate password error when account cannot be unlocked on signing

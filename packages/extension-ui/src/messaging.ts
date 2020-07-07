@@ -9,8 +9,9 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import chrome from '@polkadot/extension-inject/chrome';
+import allChains from '@polkadot/extension-chains/chains';
 import { metadataExpand } from '@polkadot/extension-chains';
+import chrome from '@polkadot/extension-inject/chrome';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 interface Handler {
@@ -135,9 +136,23 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
 
   const def = await request;
 
-  return def
-    ? metadataExpand(def, isPartial)
-    : null;
+  if (def) {
+    return metadataExpand(def, isPartial);
+  } else if (isPartial) {
+    const chain = allChains.find((chain) => chain.genesisHash === genesisHash);
+
+    if (chain) {
+      return metadataExpand({
+        ...chain,
+        specVersion: 0,
+        tokenDecimals: 15,
+        tokenSymbol: 'Unit',
+        types: {}
+      }, isPartial);
+    }
+  }
+
+  return null;
 }
 
 export async function rejectAuthRequest (id: string): Promise<boolean> {

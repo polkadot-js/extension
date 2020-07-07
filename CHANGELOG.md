@@ -5,6 +5,7 @@
 - Add Kulupu to the chain lock dropdown (Thanks to https://github.com/carumusan)
 - Minor README updates (Thanks to https://github.com/marceljay)
 - Add base known chain info to icon/ss58 display lookups
+- Adjust IdentityIcon backgrounds between dark/light themes
 
 ## 0.31.1 Jun 24, 2020
 

@@ -47,13 +47,16 @@ export interface ProviderMeta {
   transport: string;
 }
 
-export interface MetadataDef {
-  color?: string;
+export interface MetadataDefBase {
   chain: string;
   genesisHash: string;
   icon: string;
-  specVersion: number;
   ss58Format: number;
+}
+
+export interface MetadataDef extends MetadataDefBase {
+  color?: string;
+  specVersion: number;
   tokenDecimals: number;
   tokenSymbol: string;
   types: Record<string, Record<string, string> | string>;

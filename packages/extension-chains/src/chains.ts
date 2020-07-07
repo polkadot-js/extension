@@ -5,6 +5,7 @@
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 
 const hashes: MetadataDefBase[] = [
+  // keep at the top (favoritism)
   {
     chain: 'Polkadot CC1',
     genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
@@ -17,6 +18,7 @@ const hashes: MetadataDefBase[] = [
     icon: 'polkadot',
     ss58Format: 2
   },
+  // alphabetical to avoid (further) favorites
   {
     chain: 'Edgeware',
     genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',

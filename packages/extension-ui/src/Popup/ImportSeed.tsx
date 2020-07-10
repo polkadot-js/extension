@@ -26,15 +26,15 @@ const isSeedValid = allOf(
 );
 
 export default function Import (): React.ReactElement {
-  const { hierarchy } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
   useEffect((): void => {
-    !hierarchy.length && onAction();
-  }, [hierarchy, onAction]);
+    !accounts.length && onAction();
+  }, [accounts, onAction]);
 
   const _onChangeSeed = useCallback(
     async (suri: string | null): Promise<void> => {

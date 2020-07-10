@@ -41,14 +41,14 @@ async function parseFile (file: Uint8Array): Promise<FileState> {
 }
 
 export default function Upload (): React.ReactElement {
-  const { hierarchy } = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [{ address, isFileValid, json }, setJson] = useState<FileState>({ address: null, isFileValid: false, json: null });
   const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
 
   useEffect((): void => {
-    !hierarchy.length && onAction();
-  }, [hierarchy, onAction]);
+    !accounts.length && onAction();
+  }, [accounts, onAction]);
 
   const _onChangePass = useCallback(
     (password: string): void => {

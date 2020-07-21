@@ -30,6 +30,7 @@ interface ConfirmState {
 function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const { address: parentAddress } = useParams<AddressState>();
+  const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -40,9 +41,14 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
       return;
     }
 
+    setIsBusy(true);
+
     deriveAccount(parentAddress, account.suri, parentPassword, name, password)
       .then(() => onAction('/'))
-      .catch(console.error);
+      .catch((error): void => {
+        setIsBusy(false);
+        console.error(error);
+      });
   }, [account, name, password, onAction, parentAddress, parentPassword]);
 
   const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
@@ -86,7 +92,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
           <ButtonArea>
             <BackButton onClick={_onBackClick}/>
             <NextStepButton
-              isDisabled={!password}
+              isDisabled={!password || isBusy}
               onClick={_onCreate}
             >
               Create derived account

@@ -16,6 +16,7 @@ type Props = RouteComponentProps<{ address: string }>;
 
 function Export ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
 
@@ -25,7 +26,9 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
   );
 
   const _onExportButtonClick = useCallback(
-    (): Promise<void> =>
+    (): void => {
+      setIsBusy(true);
+
       exportAccount(address, pass)
         .then(({ exportedJson }) => {
           const element = document.createElement('a');
@@ -40,9 +43,11 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
         .catch((error: Error) => {
           console.error(error);
 
+          setIsBusy(false);
           setWrongPasswordHighlight(true);
           setTimeout(() => setWrongPasswordHighlight(false), 100);
-        }),
+        });
+    },
     [address, onAction, pass]
   );
 
@@ -67,7 +72,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
               className='export-button'
               data-export-button
               isDanger
-              isDisabled={pass.length === 0}
+              isDisabled={pass.length === 0 || isBusy}
               onClick={_onExportButtonClick}
             >
               I want to export this account

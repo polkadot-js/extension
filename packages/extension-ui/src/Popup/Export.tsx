@@ -5,7 +5,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionContext, Address, Button, InputWithLabel, Warning, ActionText, ActionBar } from '../components';
+import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components';
 import { exportAccount } from '../messaging';
 import { Header } from '../partials';
 import styled from 'styled-components';
@@ -63,6 +63,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
           <ActionArea>
             <InputWithLabel
               data-export-password
+              disabled={isBusy}
               isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
               label='password for this account'
               onChange={setPass}
@@ -71,8 +72,9 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
             <Button
               className='export-button'
               data-export-button
+              isBusy={isBusy}
               isDanger
-              isDisabled={pass.length === 0 || isBusy}
+              isDisabled={pass.length === 0}
               onClick={_onExportButtonClick}
             >
               I want to export this account
@@ -96,6 +98,10 @@ const MovedWarning = styled(Warning)`
 
 const ActionArea = styled.div`
   padding: 10px 24px;
+
+  > .spinButton {
+    position: relative;
+  }
 `;
 
 const CancelButton = styled(ActionBar)`

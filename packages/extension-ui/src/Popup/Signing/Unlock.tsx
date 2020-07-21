@@ -3,9 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 
-import { Button, InputWithLabel, Spinner } from '../../components';
+import { Button, InputWithLabel } from '../../components';
 
 interface Props {
   className?: string;
@@ -55,24 +54,13 @@ function Unlock ({ buttonText = 'Sign the transaction', className, error, onSign
         type='password'
       />
       <Button
-        isDisabled={isBusy}
+        isBusy={isBusy}
         onClick={_onClick}
       >
         {buttonText}
       </Button>
-      {isBusy && (
-        <Spinner className='unlockSpinner' />
-      )}
     </div>
   );
 }
 
-export default React.memo(styled(Unlock)`
-  position: relative;
-
-  .unlockSpinner {
-    position: absolute;
-    right: 1rem;
-    top: 2.05rem;
-  }
-`);
+export default React.memo(Unlock);

@@ -41,7 +41,8 @@ function AccountName ({ address, isBusy, onBackClick, onCreate }: Props): React.
         <BackButton onClick={onBackClick} />
         <NextStepButton
           data-button-action='add new root'
-          isDisabled={!password || !name || isBusy}
+          isBusy={isBusy}
+          isDisabled={!password || !name}
           onClick={_onCreate}
         >
           Add the account with the generated seed

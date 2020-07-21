@@ -114,7 +114,8 @@ export default function Upload (): React.ReactElement {
           type='password'
         />
         <Button
-          isDisabled={!isFileValid || !isPassValid || isBusy}
+          isBusy={isBusy}
+          isDisabled={!isFileValid || !isPassValid}
           onClick={_onRestore}
         >
           Restore

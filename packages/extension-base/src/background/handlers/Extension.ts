@@ -218,7 +218,7 @@ export default class Extension {
   private jsonVerifyFile ({ json }: RequestJsonRestore): boolean {
     try {
       const publicKey = keyring.decodeAddress(json.address, true);
-      const isFileValid = publicKey.length === 32 && isHex(json.encoded) && isObject(json.meta) && (
+      const isFileValid = publicKey.length === 32 && !!json.encoded && isObject(json.meta) && (
         Array.isArray(json.encoding.content)
           ? json.encoding.content[0] === 'pkcs8'
           : json.encoding.content === 'pkcs8'

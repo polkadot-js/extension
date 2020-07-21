@@ -89,7 +89,7 @@ export default function Import (): React.ReactElement {
           <VerticalSpace />
           <ButtonArea>
             <NextStepButton
-              isDisabled={isBusy}
+              isBusy={isBusy}
               onClick={_onCreate}
             >
               Add the account with the supplied seed

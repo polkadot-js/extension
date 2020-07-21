@@ -92,7 +92,8 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
           <ButtonArea>
             <BackButton onClick={_onBackClick}/>
             <NextStepButton
-              isDisabled={!password || isBusy}
+              isBusy={isBusy}
+              isDisabled={!password}
               onClick={_onCreate}
             >
               Create derived account

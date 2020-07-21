@@ -7,6 +7,8 @@ import { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
+import spinnerSrc from '../assets/spinner.svg';
+
 interface Props extends ThemeProps {
   className?: string;
   size?: 'normal';
@@ -14,46 +16,18 @@ interface Props extends ThemeProps {
 
 function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElement<Props> {
   return (
-    <div className={`${className} ${size}Size`}>
-      <div></div>
-      <div></div>
-    </div>
+    <img
+      className={`${className} ${size}Size`}
+      src={spinnerSrc}
+    />
   );
 }
 
-export default React.memo(styled(Spinner)(({ theme }: ThemeProps): string => `
-  display: inline-block;
-  position: relative;
-  width: 1.25em;
-  height: 1.25em;
-
-  div {
-    position: absolute;
-    border: 4px solid ${theme.textColor};
-    opacity: 1;
-    border-radius: 50%;
-    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-  }
-
-  div:nth-child(2) {
-    animation-delay: -0.5s;
-  }
-
-  @keyframes lds-ripple {
-    0% {
-      top: 0.5626em;
-      left: 0.5625em;
-      width: 0;
-      height: 0;
-      opacity: 1;
-    }
-
-    100% {
-      top: 0px;
-      left: 0px;
-      width: 1.125em;
-      height: 1.125em;
-      opacity: 0;
-    }
-  }
-`));
+export default React.memo(styled(Spinner)`
+  bottom: 0.12rem;
+  height: 3rem;
+  position: absolute;
+  right: 1rem;
+  width: 3rem;
+  z-index:
+`);

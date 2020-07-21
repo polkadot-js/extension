@@ -18,12 +18,20 @@ interface Props {
   label: string;
   onBlur?: () => void;
   onChange?: (value: string) => void;
+  onEnter?: () => void;
   type?: 'text' | 'password';
   value?: string;
   placeholder?: string;
 }
 
-function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label, onBlur, onChange, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label, onBlur, onChange, onEnter, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
+  const _checkEnter = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>): void => {
+      onEnter && event.key === 'Enter' && onEnter();
+    },
+    [onEnter]
+  );
+
   const _onChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>): void => {
       onChange && onChange(value);
@@ -44,6 +52,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         disabled={disabled}
         onBlur={onBlur}
         onChange={_onChange}
+        onKeyPress={_checkEnter}
         placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}

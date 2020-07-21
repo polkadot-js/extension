@@ -3,8 +3,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
-import { Button, InputWithLabel } from '../../components';
+import { Button, InputWithLabel, Spinner } from '../../components';
 
 interface Props {
   className?: string;
@@ -13,7 +14,8 @@ interface Props {
   buttonText?: string;
 }
 
-export default function Unlock ({ buttonText = 'Sign the transaction', className, error, onSign }: Props): React.ReactElement<Props> {
+function Unlock ({ buttonText = 'Sign the transaction', className, error, onSign }: Props): React.ReactElement<Props> {
+  const [isBusy, setIsBusy] = useState(false);
   const [ownError, setError] = useState<string | null>();
   const [password, setPassword] = useState('');
 
@@ -29,21 +31,48 @@ export default function Unlock ({ buttonText = 'Sign the transaction', className
     []
   );
   const _onClick = useCallback(
-    (): Promise<void> =>
-      onSign(password).catch((error: Error) => setError(error.message)),
+    (): void => {
+      setIsBusy(true);
+      onSign(password)
+        .then(() => setIsBusy(false))
+        .catch((error: Error): void => {
+          setIsBusy(false);
+          setError(error.message);
+        });
+    },
     [onSign, password]
   );
 
   return (
     <div className={className}>
       <InputWithLabel
+        disabled={isBusy}
         isError={!password || !!ownError}
         isFocused
         label='Password for this account'
         onChange={_onChangePassword}
+        onEnter={_onClick}
         type='password'
       />
-      <Button onClick={_onClick}>{buttonText}</Button>
+      <Button
+        isDisabled={isBusy}
+        onClick={_onClick}
+      >
+        {buttonText}
+      </Button>
+      {isBusy && (
+        <Spinner className='unlockSpinner' />
+      )}
     </div>
   );
 }
+
+export default React.memo(styled(Unlock)`
+  position: relative;
+
+  .unlockSpinner {
+    position: absolute;
+    right: 1rem;
+    top: 2.05rem;
+  }
+`);

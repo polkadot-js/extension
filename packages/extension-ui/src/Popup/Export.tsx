@@ -98,10 +98,6 @@ const MovedWarning = styled(Warning)`
 
 const ActionArea = styled.div`
   padding: 10px 24px;
-
-  > .spinButton {
-    position: relative;
-  }
 `;
 
 const CancelButton = styled(ActionBar)`

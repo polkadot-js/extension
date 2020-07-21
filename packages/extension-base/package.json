@@ -9,6 +9,6 @@
     "@polkadot/api": "^1.26.0-beta.1",
     "@polkadot/extension-inject": "0.32.0-beta.8",
     "@polkadot/keyring": "^3.0.0-beta.2",
-    "@polkadot/ui-keyring": "^0.56.1"
+    "@polkadot/ui-keyring": "^0.57.0-beta.0"
   }
 }

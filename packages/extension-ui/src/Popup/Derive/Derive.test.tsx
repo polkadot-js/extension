@@ -117,7 +117,7 @@ describe('Derive', () => {
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
-      expect(button.prop('disabled')).toBe(false);
+      expect(button.prop('disabled')).not.toBe(true);
     });
 
     it('derivation path input is not present until password is correct', async () => {
@@ -138,7 +138,7 @@ describe('Derive', () => {
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
-      expect(button.prop('disabled')).toBe(false);
+      expect(button.prop('disabled')).not.toBe(true);
     });
 
     it('takes selected address from URL as parent account', async () => {

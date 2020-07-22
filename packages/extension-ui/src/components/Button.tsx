@@ -7,18 +7,26 @@ import { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
+import Spinner from './Spinner';
+
 interface Props extends ThemeProps {
   className?: string;
   children?: React.ReactNode;
+  isBusy?: boolean;
   isDanger?: boolean;
   isDisabled?: boolean;
   onClick?: () => void | Promise<void | boolean>;
   to?: string;
 }
 
-function Button ({ children, className, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+const STYLE: { position: 'relative'; width: string } = {
+  position: 'relative',
+  width: '100%'
+};
+
+function Button ({ children, className, isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
-    if (isDisabled) {
+    if (isBusy || isDisabled) {
       return;
     }
 
@@ -30,13 +38,16 @@ function Button ({ children, className, isDisabled, onClick, to }: Props): React
   };
 
   return (
-    <button
-      className={className}
-      disabled={isDisabled}
-      onClick={_onClick}
-    >
-      {children}
-    </button>
+    <div style={STYLE}>
+      <button
+        className={className}
+        disabled={isDisabled || isBusy}
+        onClick={_onClick}
+      >
+        {children}
+      </button>
+      {isBusy && <Spinner />}
+    </div>
   );
 }
 

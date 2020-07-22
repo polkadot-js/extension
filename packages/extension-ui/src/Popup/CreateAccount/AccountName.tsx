@@ -9,15 +9,19 @@ import { Name, Password } from '../../partials';
 
 interface Props {
   address: string;
+  isBusy: boolean;
   onBackClick: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
 }
 
-function AccountName ({ address, onBackClick, onCreate }: Props): React.ReactElement<Props> {
+function AccountName ({ address, isBusy, onBackClick, onCreate }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
-  const _onCreate = useCallback(() => name && password && onCreate(name, password), [name, password, onCreate]);
+  const _onCreate = useCallback(
+    () => name && password && onCreate(name, password),
+    [name, password, onCreate]
+  );
 
   return (
     <>
@@ -37,6 +41,7 @@ function AccountName ({ address, onBackClick, onCreate }: Props): React.ReactEle
         <BackButton onClick={onBackClick} />
         <NextStepButton
           data-button-action='add new root'
+          isBusy={isBusy}
           isDisabled={!password || !name}
           onClick={_onCreate}
         >

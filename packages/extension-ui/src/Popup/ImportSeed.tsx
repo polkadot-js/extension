@@ -28,6 +28,7 @@ const isSeedValid = allOf(
 export default function Import (): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -51,9 +52,14 @@ export default function Import (): React.ReactElement {
   const _onCreate = useCallback((): void => {
     // this should always be the case
     if (name && password && account) {
+      setIsBusy(true);
+
       createAccountSuri(name, password, account.suri)
         .then(() => onAction('/'))
-        .catch(console.error);
+        .catch((error): void => {
+          setIsBusy(false);
+          console.error(error);
+        });
     }
   }, [account, name, onAction, password]);
 
@@ -83,6 +89,7 @@ export default function Import (): React.ReactElement {
           <VerticalSpace />
           <ButtonArea>
             <NextStepButton
+              isBusy={isBusy}
               onClick={_onCreate}
             >
               Add the account with the supplied seed

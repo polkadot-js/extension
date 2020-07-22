@@ -43,6 +43,7 @@ async function parseFile (file: Uint8Array): Promise<FileState> {
 export default function Upload (): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const [{ address, isFileValid, json }, setJson] = useState<FileState>({ address: null, isFileValid: false, json: null });
   const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
 
@@ -72,9 +73,12 @@ export default function Upload (): React.ReactElement {
         return;
       }
 
+      setIsBusy(true);
+
       jsonRestore(json, password)
         .then(({ error }): void => {
           if (error) {
+            setIsBusy(false);
             setPass(({ password }) => ({ decodeError: error, isPassValid: false, password }));
           } else {
             onAction('/');
@@ -110,10 +114,11 @@ export default function Upload (): React.ReactElement {
           type='password'
         />
         <Button
+          isBusy={isBusy}
           isDisabled={!isFileValid || !isPassValid}
           onClick={_onRestore}
         >
-        Restore
+          Restore
         </Button>
       </div>
     </>

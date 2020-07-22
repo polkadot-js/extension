@@ -310,7 +310,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   }
 
   .identityIcon {
-    margin-left: 25px;
+    margin-left: 15px;
     margin-right: 10px;
 
     & svg {

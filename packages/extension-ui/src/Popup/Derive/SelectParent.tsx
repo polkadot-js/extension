@@ -4,12 +4,13 @@
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { assert } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace } from '../../components';
-import { validateAccount } from '../../messaging';
-import { DerivationPath } from '../../partials';
+import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
 import AddressDropdown from './AddressDropdown';
+import DerivationPath from './DerivationPath';
 
 interface Props {
   isLocked?: boolean;
@@ -19,8 +20,10 @@ interface Props {
 
 export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const { accounts, hierarchy } = useContext(AccountContext);
-  const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
+  const [defaultPath] = useState(nextDerivationPath(accounts, parentAddress));
+  const [suriPath, setSuriPath] = useState<null | string>(null);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
   const [shouldAccountBeDerived, setShouldAccountBeDerived] = useState(true);
@@ -33,11 +36,11 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
   );
 
   const _onParentPasswordEnter = useCallback(
-    async (enteredPassword: string) => {
-      setParentPassword(enteredPassword);
-      setIsProperParentPassword(await validateAccount(parentAddress, enteredPassword));
+    (parentPassword: string): void => {
+      setParentPassword(parentPassword);
+      setIsProperParentPassword(!!parentPassword);
     },
-    [parentAddress]
+    []
   );
 
   const _onParentChange = useCallback(
@@ -46,8 +49,28 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
   );
 
   const _onSubmit = useCallback(
-    () => parentPassword && account && onDerivationConfirmed({ account, parentPassword }),
-    [account, parentPassword, onDerivationConfirmed]
+    async (): Promise<void> => {
+      if (suriPath && parentAddress && parentPassword) {
+        setIsBusy(true);
+
+        const isUnlockable = await validateAccount(parentAddress, parentPassword);
+
+        if (isUnlockable) {
+          try {
+            const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
+
+            assert(account, 'Unable to derive');
+
+            onDerivationConfirmed({ account, parentPassword });
+          } catch (error) {
+            setSuriPath(null);
+          }
+        } else {
+          setIsProperParentPassword(false);
+        }
+      }
+    },
+    [parentAddress, parentPassword, onDerivationConfirmed, suriPath]
   );
 
   useEffect(() => {
@@ -68,17 +91,18 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
         />
       )}
       <DisableableArea isDisabled={!shouldAccountBeDerived}>
-        {isLocked ? (
-          <Address address={parentAddress} />
-        ) : (
-          <Label label='Choose Parent Account:'>
-            <AddressDropdown
-              allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
-              onSelect={_onParentChange}
-              selectedAddress={parentAddress}
-            />
-          </Label>
-        )}
+        {isLocked
+          ? <Address address={parentAddress} />
+          : (
+            <Label label='Choose Parent Account:'>
+              <AddressDropdown
+                allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
+                onSelect={_onParentChange}
+                selectedAddress={parentAddress}
+              />
+            </Label>
+          )
+        }
         <div ref={passwordInputRef}>
           <InputWithLabel
             data-export-password
@@ -92,8 +116,8 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
         </div>
         {isProperParentPassword && (
           <DerivationPath
-            defaultPath={nextDerivationPath(accounts, parentAddress)}
-            onChange={setAccount}
+            defaultPath={defaultPath}
+            onChange={setSuriPath}
             parentAddress={parentAddress}
             parentPassword={parentPassword}
           />
@@ -105,7 +129,8 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
           ? (
             <NextStepButton
               data-button-action='create derived account'
-              isDisabled={!isProperParentPassword || account === null}
+              isBusy={isBusy}
+              isDisabled={!isProperParentPassword || !suriPath}
               onClick={_onSubmit}
             >
               Create a derived account

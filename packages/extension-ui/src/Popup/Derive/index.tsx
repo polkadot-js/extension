@@ -42,7 +42,6 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
     }
 
     setIsBusy(true);
-
     deriveAccount(parentAddress, account.suri, parentPassword, name, password)
       .then(() => onAction('/'))
       .catch((error): void => {

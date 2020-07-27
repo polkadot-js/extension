@@ -120,16 +120,6 @@ describe('Derive', () => {
       expect(button.prop('disabled')).not.toBe(true);
     });
 
-    it('derivation path input is not present until password is correct', async () => {
-      const { wrapper } = await mountComponent();
-
-      expect(wrapper.exists('[data-input-suri]')).toBe(false);
-      await type(wrapper.find('input[type="password"]'), 'pass');
-      expect(wrapper.exists('[data-input-suri]')).toBe(true);
-      await type(wrapper.find('input[type="password"]'), 'pass2');
-      expect(wrapper.exists('[data-input-suri]')).toBe(false);
-    });
-
     it('"Create derived account" is disabled when suri is incorrect', async () => {
       const { wrapper } = await mountComponent();
 

@@ -26,7 +26,6 @@ export default function CreateAccount (): React.ReactElement {
     // this should always be the case
     if (name && password && account) {
       setIsBusy(true);
-
       createAccountSuri(name, password, account.seed)
         .then((): void => onAction('/'))
         .catch((error: Error): void => {

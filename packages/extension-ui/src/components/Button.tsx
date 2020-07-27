@@ -19,12 +19,7 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-const STYLE: { position: 'relative'; width: string } = {
-  position: 'relative',
-  width: '100%'
-};
-
-function Button ({ children, className, isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
     if (isBusy || isDisabled) {
       return;
@@ -38,20 +33,21 @@ function Button ({ children, className, isBusy, isDisabled, onClick, to }: Props
   };
 
   return (
-    <div style={STYLE}>
-      <button
-        className={className}
-        disabled={isDisabled || isBusy}
-        onClick={_onClick}
-      >
-        {children}
-      </button>
-      {isBusy && <Spinner />}
-    </div>
+    <button
+      className={`${className}${(isDisabled || isBusy) ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
+      disabled={isDisabled || isBusy}
+      onClick={_onClick}
+    >
+      {children}
+      <div className='disabledOverlay' />
+      <Spinner className='busyOverlay' />
+    </button>
   );
 }
 
 export default styled(Button)(({ isDanger, theme }: Props) => `
+  background: ${isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
+  cursor: pointer;
   display: block;
   width: 100%;
   height: ${isDanger ? '40px' : '48px'};
@@ -63,16 +59,37 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   font-weight: 800;
   line-height: 20px;
   padding: 0 1rem;
+  position: relative;
   text-align: center;
-  background: ${isDanger ? theme.buttonBackgroundDanger : theme.buttonBackground};
-  cursor: pointer;
 
   &:disabled {
-    opacity: 0.3;
     cursor: default;
   }
 
   &:not(:disabled):hover {
     background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
+  }
+
+  .busyOverlay,
+  .disabledOverlay {
+    visibility: hidden;
+  }
+
+  .disabledOverlay {
+    background: rgba(96,96,96,0.75);
+    border-radius: ${theme.borderRadius};
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  &.isBusy .busyOverlay {
+    visibility: visible;
+  }
+
+  &.isDisabled .disabledOverlay {
+    visibility: visible;
   }
 `);

@@ -4,6 +4,9 @@
 
 - Add Kulupu to the chain lock dropdown (Thanks to https://github.com/carumusan)
 - Minor README updates (Thanks to https://github.com/marceljay)
+- Allow enter on signing to screens to submit
+- Update to v3 JSON file format (with kdf)
+- Update Polkadot naming (dropping CC1)
 - Add base known chain info to icon/ss58 display lookups
 - Adjust IdentityIcon backgrounds between dark/light themes
 

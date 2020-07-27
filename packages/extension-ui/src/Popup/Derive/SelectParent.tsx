@@ -23,7 +23,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
   const [isBusy, setIsBusy] = useState(false);
   const { accounts, hierarchy } = useContext(AccountContext);
   const [defaultPath] = useState(nextDerivationPath(accounts, parentAddress));
-  const [suriPath, setSuriPath] = useState<null | string>(null);
+  const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
   const [shouldAccountBeDerived, setShouldAccountBeDerived] = useState(true);
@@ -60,6 +60,8 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
             const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
 
             assert(account, 'Unable to derive');
+
+            console.log(account);
 
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {

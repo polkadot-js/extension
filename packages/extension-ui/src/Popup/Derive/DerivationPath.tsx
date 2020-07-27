@@ -36,7 +36,6 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
         <PathInput isUnlocked={isDisabled}>
           <InputWithLabel
             data-input-suri
-            defaultValue={defaultPath}
             disabled={!isDisabled}
             isError={isError || !path}
             label={

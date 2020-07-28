@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.32.0-beta.x
+## 0.32.1 Jul 27, 2020
 
 - Add Kulupu to the chain lock dropdown (Thanks to https://github.com/carumusan)
 - Minor README updates (Thanks to https://github.com/marceljay)

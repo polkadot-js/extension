@@ -5,7 +5,7 @@
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@babel/runtime": "^7.10.5"
+    "@babel/runtime": "^7.11.0"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

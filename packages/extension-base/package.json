@@ -6,9 +6,9 @@
   "license": "Apache-2",
   "dependencies": {
     "@babel/runtime": "^7.11.0",
-    "@polkadot/api": "^1.27.0-beta.3",
+    "@polkadot/api": "^1.28.0-beta.2",
     "@polkadot/extension-inject": "0.33.0-beta.0",
-    "@polkadot/keyring": "^3.1.0-beta.1",
+    "@polkadot/keyring": "^3.1.0-beta.3",
     "@polkadot/ui-keyring": "^0.58.0-beta.2"
   }
 }

@@ -148,7 +148,7 @@ When you create a keypair via the extension, it supplies a 12-word mnemonic seed
 
 ### Importing mnemonics from other key generation utilities
 
-Some key-generation tools, e.g. [Subkey](https://substrate.dev/docs/en/next/development/tools/subkey), support hard and soft key derivation as well as passwords that encrypt the mnemonic phrase such that the mnemonic phrase itself is insufficient to spend funds.
+Some key-generation tools, e.g. [Subkey](https://www.substrate.io/kb/integrate/subkey), support hard and soft key derivation as well as passwords that encrypt the mnemonic phrase such that the mnemonic phrase itself is insufficient to spend funds.
 
 The extension supports these advanced features. When you import an account from a seed, you can add these derivation paths or password to the end of the mnemonic in the following format:
 

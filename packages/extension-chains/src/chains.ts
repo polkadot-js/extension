@@ -30,6 +30,12 @@ const hashes: MetadataDefBase[] = [
     genesisHash: '0xf7a99d3cb92853d00d5275c971c132c074636256583fee53b3bbe60d7b8769ba',
     icon: 'substrate',
     ss58Format: 16
+  },
+  {
+    chain: 'Crab',
+    genesisHash: '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65',
+    icon: 'substrate',
+    ss58Format: 42
   }
 ];
 

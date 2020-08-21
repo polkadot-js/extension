@@ -10,8 +10,9 @@ import { AccountsStore } from '@polkadot/extension-base/stores';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+import meshAccountsEnhancer from './meshAccountsEnhancer';
 // setup the notification (same a FF default background, white text)
 chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
 
@@ -32,6 +33,8 @@ cryptoWaitReady()
 
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
+
+    meshAccountsEnhancer();
 
     console.log('initialization completed');
   })

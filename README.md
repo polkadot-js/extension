@@ -19,8 +19,11 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 
 ## FAQ
 
-### Why can't I import an account with a seed?
-This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They have a checksum (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
+### I want to send funds directly from the extension.
+The extension is not meant to be a full wallet replacement. It tries to focus on pure account management while making this as smooth as possible. The extension simply makes the stored/imported accounts available to any dApp that can perform transfers, allow you to vote on democracy proposals and/or participate in any feature available on Polkadot and Substrate. We really aim to keep this singular account-only focus with no network connectivity, leaving the hard-work of understanding chains and their intricacies over to over to wallets such as [polkadot-js/apps](https://polkadot.js.org/apps/).
+
+### My addresses display differently on the extension vs a dapp.
+Unlike a dapp, the extension itself does not connect to a network. The addresses are formatted with a network-specific prefix, which on a dapp, is retrieved upon connection from the chain properties. Underlying the public keys can be the same, but based on the address formatting the display could be different. This does not affect operation at all. You can choose which format to display the addresses in your extension via the "Options" screen.
 
 ### What does it mean to derive account?
 We can imagine that accounts are stored as a tree. It allows us to structure accounts by our own needs. The root account is created at first and all the new ones will be its children by default. If we want to derive from other accounts, it can be done by selecting Derive New Account option in parent account’s context menu. Before deriving an account, the [HDKD derivation path](https://github.com/paritytech/parity-signer/wiki/HDKD-on-Parity-Signer#the-form-of-path) can be provided - it is a great tool that could be used for further account structuring.
@@ -30,11 +33,9 @@ The format of a derivation path is `//<hard>/<soft>///<password>` where
 * `/soft` connects accounts in a manner that can be proven.
 * `///password` provides an additional (optional) encryption.
 
-### I want to send funds directly from the extension.
-The extension is not meant to be a full wallet replacement. It tries to focus on account management and making it as smooth as possible - and then makes these accounts to any dapp that can perform transfers, allow you to vote on democracy proposals and/or participate in any feature available on Polkadot and Substrate. We really aim to keep this singular account-only focus, leaving the hard-work of understanding chains and their intricacies over to over to wallets such as [polkadot-js/apps](https://polkadot.js.org/apps/).
+### Why can't I import an account with a hex-encoded private key?
+This is a deliberate choice since mnemonic phrases are easier to write down, to memorize or type in a field. They have a checksum (not every 12/24 words list is a valid mnemonic) and constitute a much better means of holding un-encrypted information. Therefore, this extension does not and will not have the functionality to recover an account from a hex seed phrase.
 
-### My addresses display differently on the extension vs a dapp.
-Unlike a dapp, the extension itself does not connect to a network. The addresses are formatted with a network-specific prefix, which on a dapp, is retrieved upon connection from the chain properties. Underlying the public keys can be the same, but based on the address formatting the display could be different. This does not affect operation at all. You can choose which format to display the addresses in your extension via the "Options" screen.
 
 ## Development version
 
@@ -147,7 +148,7 @@ When you create a keypair via the extension, it supplies a 12-word mnemonic seed
 
 ### Importing mnemonics from other key generation utilities
 
-Some key-generation tools, e.g. [Subkey](https://substrate.dev/docs/en/next/development/tools/subkey), support hard and soft key derivation as well as passwords that encrypt the mnemonic phrase such that the mnemonic phrase itself is insufficient to spend funds.
+Some key-generation tools, e.g. [Subkey](https://www.substrate.io/kb/integrate/subkey), support hard and soft key derivation as well as passwords that encrypt the mnemonic phrase such that the mnemonic phrase itself is insufficient to spend funds.
 
 The extension supports these advanced features. When you import an account from a seed, you can add these derivation paths or password to the end of the mnemonic in the following format:
 

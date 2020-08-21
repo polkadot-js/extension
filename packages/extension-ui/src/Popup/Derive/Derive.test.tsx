@@ -117,17 +117,7 @@ describe('Derive', () => {
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
-      expect(button.prop('disabled')).toBe(false);
-    });
-
-    it('derivation path input is not present until password is correct', async () => {
-      const { wrapper } = await mountComponent();
-
-      expect(wrapper.exists('[data-input-suri]')).toBe(false);
-      await type(wrapper.find('input[type="password"]'), 'pass');
-      expect(wrapper.exists('[data-input-suri]')).toBe(true);
-      await type(wrapper.find('input[type="password"]'), 'pass2');
-      expect(wrapper.exists('[data-input-suri]')).toBe(false);
+      expect(button.prop('disabled')).not.toBe(true);
     });
 
     it('"Create derived account" is disabled when suri is incorrect', async () => {
@@ -138,7 +128,7 @@ describe('Derive', () => {
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
-      expect(button.prop('disabled')).toBe(false);
+      expect(button.prop('disabled')).not.toBe(true);
     });
 
     it('takes selected address from URL as parent account', async () => {

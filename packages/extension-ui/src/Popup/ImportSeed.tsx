@@ -2,10 +2,10 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { AccountContext, ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Header, Name, Password } from '../partials';
 import { allOf, isNotShorterThan, Result } from '../util/validators';
@@ -26,10 +26,16 @@ const isSeedValid = allOf(
 );
 
 export default function Import (): React.ReactElement {
+  const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
+
+  useEffect((): void => {
+    !accounts.length && onAction();
+  }, [accounts, onAction]);
 
   const _onChangeSeed = useCallback(
     async (suri: string | null): Promise<void> => {
@@ -46,9 +52,14 @@ export default function Import (): React.ReactElement {
   const _onCreate = useCallback((): void => {
     // this should always be the case
     if (name && password && account) {
+      setIsBusy(true);
+
       createAccountSuri(name, password, account.suri)
         .then(() => onAction('/'))
-        .catch(console.error);
+        .catch((error): void => {
+          setIsBusy(false);
+          console.error(error);
+        });
     }
   }, [account, name, onAction, password]);
 
@@ -78,6 +89,7 @@ export default function Import (): React.ReactElement {
           <VerticalSpace />
           <ButtonArea>
             <NextStepButton
+              isBusy={isBusy}
               onClick={_onCreate}
             >
               Add the account with the supplied seed

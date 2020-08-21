@@ -11,6 +11,7 @@ import Mnemonic from './Mnemonic';
 
 export default function CreateAccount (): React.ReactElement {
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
 
@@ -24,9 +25,13 @@ export default function CreateAccount (): React.ReactElement {
   const _onCreate = (name: string, password: string): void => {
     // this should always be the case
     if (name && password && account) {
+      setIsBusy(true);
       createAccountSuri(name, password, account.seed)
         .then((): void => onAction('/'))
-        .catch((error: Error) => console.error(error));
+        .catch((error: Error): void => {
+          setIsBusy(false);
+          console.error(error);
+        });
     }
   };
 
@@ -49,6 +54,7 @@ export default function CreateAccount (): React.ReactElement {
         : (
           <AccountName
             address={account.address}
+            isBusy={isBusy}
             onBackClick={_onPreviousStep}
             onCreate={_onCreate}
           />

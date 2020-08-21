@@ -2,63 +2,49 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ThemeProps } from '../types';
+import { ThemeProps } from '../../types';
 
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import lockIcon from '../assets/lock.svg';
-import unlockIcon from '../assets/unlock.svg';
-import { InputWithLabel, Svg, ValidatedInput, Button } from '../components';
-import { validateDerivationPath } from '../messaging';
-import { Result } from '../util/validators';
+import lockIcon from '../../assets/lock.svg';
+import unlockIcon from '../../assets/unlock.svg';
+import { InputWithLabel, Svg, Button } from '../../components';
 
 interface Props {
   className?: string;
-  onChange: (derivedAccount: { address: string; suri: string } | null) => void;
+  defaultPath: string;
+  isError: boolean;
+  onChange: (suri: string) => void;
   parentAddress: string;
   parentPassword: string;
-  defaultPath: string;
 }
 
-function DerivationPath ({ className, defaultPath, onChange, parentAddress, parentPassword }: Props): React.ReactElement<Props> {
+function DerivationPath ({ className, defaultPath, isError, onChange }: Props): React.ReactElement<Props> {
   const [path, setPath] = useState<string>(defaultPath);
   const [isDisabled, setIsDisabled] = useState(false);
-
-  const isPathValid = useCallback(async (newPath: string): Promise<Result<string>> => {
-    try {
-      await validateDerivationPath(parentAddress, newPath, parentPassword);
-
-      return Result.ok(newPath);
-    } catch (error) {
-      return Result.error(newPath === path ? '' : 'Invalid derivation path');
-    }
-  }, [path, parentAddress, parentPassword]);
-
   const _onExpand = useCallback(() => setIsDisabled(!isDisabled), [isDisabled]);
 
-  const _onChange = useCallback(async (newPath: string | null) => {
-    newPath !== null && setPath(newPath);
-    onChange(newPath === null ? null : await validateDerivationPath(parentAddress, newPath, parentPassword));
-  }, [parentAddress, onChange, parentPassword]);
+  const _onChange = useCallback((newPath: string): void => {
+    setPath(newPath);
+    onChange(newPath);
+  }, [onChange]);
 
   return (
     <div className={className}>
       <div className='container'>
         <PathInput isUnlocked={isDisabled}>
-          <ValidatedInput
-            component={InputWithLabel}
+          <InputWithLabel
             data-input-suri
-            defaultValue={defaultPath}
             disabled={!isDisabled}
+            isError={isError || !path}
             label={
               isDisabled
                 ? 'Derivation Path'
                 : 'Derivation Path (unlock to edit)'
             }
-            onValidatedChange={_onChange}
+            onChange={_onChange}
             placeholder='//hard/soft'
-            validator={isPathValid}
             value={path}
           />
         </PathInput>

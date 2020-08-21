@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringPair$Json } from '@polkadot/keyring/types';
-import React, { useCallback, useContext, useState } from 'react';
-import { ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
 import { u8aToString } from '@polkadot/util';
 import styled from 'styled-components';
 import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
@@ -41,9 +41,15 @@ async function parseFile (file: Uint8Array): Promise<FileState> {
 }
 
 export default function Upload (): React.ReactElement {
+  const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
   const [{ address, isFileValid, json }, setJson] = useState<FileState>({ address: null, isFileValid: false, json: null });
   const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
+
+  useEffect((): void => {
+    !accounts.length && onAction();
+  }, [accounts, onAction]);
 
   const _onChangePass = useCallback(
     (password: string): void => {
@@ -67,9 +73,12 @@ export default function Upload (): React.ReactElement {
         return;
       }
 
+      setIsBusy(true);
+
       jsonRestore(json, password)
         .then(({ error }): void => {
           if (error) {
+            setIsBusy(false);
             setPass(({ password }) => ({ decodeError: error, isPassValid: false, password }));
           } else {
             onAction('/');
@@ -105,10 +114,11 @@ export default function Upload (): React.ReactElement {
           type='password'
         />
         <Button
+          isBusy={isBusy}
           isDisabled={!isFileValid || !isPassValid}
           onClick={_onRestore}
         >
-        Restore
+          Restore
         </Button>
       </div>
     </>

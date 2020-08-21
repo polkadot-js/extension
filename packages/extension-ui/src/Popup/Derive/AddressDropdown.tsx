@@ -21,16 +21,17 @@ interface Props {
 function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }: Props): React.ReactElement<Props> {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const hideDropdown = useCallback(() => setDropdownVisible(false), []);
-  const toggleDropdown = useCallback(() => setDropdownVisible(!isDropdownVisible), [isDropdownVisible]);
-  const selectParent = (newParent: string) => (): void => onSelect(newParent);
 
-  useOutsideClick(ref, hideDropdown);
+  const _hideDropdown = useCallback(() => setDropdownVisible(false), []);
+  const _toggleDropdown = useCallback(() => setDropdownVisible(!isDropdownVisible), [isDropdownVisible]);
+  const _selectParent = useCallback((newParent: string) => () => onSelect(newParent), [onSelect]);
+
+  useOutsideClick(ref, _hideDropdown);
 
   return (
     <div className={className}>
       <div
-        onClick={toggleDropdown}
+        onClick={_toggleDropdown}
         ref={ref}
       >
         <Address address={selectedAddress} />
@@ -40,7 +41,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }
           <div
             data-parent-option
             key={address}
-            onClick={selectParent(address)}
+            onClick={_selectParent(address)}
           >
             <Address address={address} />
           </div>

@@ -50,14 +50,14 @@ export default function Welcome (): React.ReactElement<Props> {
   );
 }
 
-const Note = styled.p`
+const Note = styled.p(({ theme }: Props) => `
+  color: ${theme.subTextColor};
   margin-bottom: 6px;
   margin-top: 0;
-  color: ${({ theme }: Props): string => theme.subTextColor};
-`;
+`);
 
-const TextBox = styled(Box)`
+const TextBox = styled(Box)(({ theme }: Props) => `
+  border: 1px solid ${theme.inputBorderColor};
+  color: ${theme.subTextColor};
   margin: 0.75rem 24px;
-  border: 1px solid ${({ theme }: Props): string => theme.inputBorderColor};
-  color: ${({ theme }: Props): string => theme.subTextColor};
-`;
+`);

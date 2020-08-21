@@ -258,7 +258,8 @@ const ArrowLabel = styled(Svg).attrs(() => ({ src: parentArrow }))`
 `;
 
 const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
-  ${({ isMoved }): string => isMoved ? 'bottom: 0;' : ''}
+  ${({ isMoved }): string => isMoved ? 'bottom: 0;' : 'top: 0;'}
+  margin-top: -20px;
   right: 28px;
 `;
 
@@ -310,7 +311,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   }
 
   .identityIcon {
-    margin-left: 25px;
+    margin-left: 15px;
     margin-right: 10px;
 
     & svg {

@@ -32,6 +32,8 @@ function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): Rea
 }
 
 export default styled(Identicon)(({ theme }: ThemeProps) => `
+  background: rgba(192, 192, 292, 0.25);
+  border-radius: 50%;
   display: flex;
   justify-content: center;
 

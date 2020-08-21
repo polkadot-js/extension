@@ -26,6 +26,7 @@ export { default as MenuDivider } from './MenuDivider';
 export { default as MenuItem } from './MenuItem';
 export { default as MnemonicSeed } from './MnemonicSeed';
 export { default as NextStepButton } from './NextStepButton';
+export { default as Spinner } from './Spinner';
 export { default as Svg } from './Svg';
 export { default as Switch } from './Switch';
 export { default as Table } from './Table';

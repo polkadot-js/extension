@@ -17,7 +17,7 @@ function classes (...classNames: (boolean | null | string | undefined)[]): strin
     .join(' ');
 }
 
-export interface InputFileProps extends ThemeProps {
+export interface InputFileProps {
   // Reference Example Usage: https://github.com/react-dropzone/react-dropzone/tree/master/examples/Accept
   // i.e. MIME types: 'application/json, text/plain', or '.json, .txt'
   className?: string;
@@ -123,7 +123,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
     : dropZone;
 }
 
-export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps) => `
+export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps & ThemeProps) => `
   border: 1px solid ${isError ? theme.errorBorderColor : theme.inputBorderColor};
   background: ${theme.inputBackground};
   border-radius: ${theme.borderRadius};

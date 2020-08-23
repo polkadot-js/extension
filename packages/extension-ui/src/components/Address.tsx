@@ -35,6 +35,7 @@ interface Props {
   parentName?: string | null;
   suri?: string;
   balance?: number,
+  did?: string,
   toggleActions?: number;
 }
 
@@ -72,7 +73,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, balance, children, className, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, balance, children, className, did, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash, true);
@@ -115,6 +116,8 @@ function Address ({ actions, address, balance, children, className, genesisHash,
 
   displayedName += ` (${balanceStr} PolyX)`;
 
+  console.log('DID', did, balanceStr);
+
   return (
     <div className={className}>
       <div className='infoRow'>
@@ -139,7 +142,6 @@ function Address ({ actions, address, balance, children, className, genesisHash,
                   </div>
                 </div>
                 <div className='name displaced'>{displayedName}</div>
-                <span>Balance</span><div className='balance displaced'>{balance}</div>
               </>
             )
             : (
@@ -179,6 +181,9 @@ function Address ({ actions, address, balance, children, className, genesisHash,
               />
             )}
           </div>
+          {did && <div className='addressDisplay'>
+            <FullAddress data-field='address'>{'DID: ' + did}</FullAddress>
+          </div>}
         </div>
         {actions && (
           <>

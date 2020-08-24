@@ -26,7 +26,10 @@ function meshAccountsEnhancer (): void {
 
     // @TODO manage this subscription.
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
-      const newAccounts = transformAccounts(accounts).filter((account) => !unsubCallbacks[account]);
+      const currentAccounts = Object.keys(unsubCallbacks);
+      const transformedAccounts = transformAccounts(accounts).filter((account) => !unsubCallbacks[account]);
+      const newAccounts = transformedAccounts.filter((account) => !unsubCallbacks[account]);
+      const removedAccounts = currentAccounts.filter((account) => transformedAccounts.indexOf(account) === -1);
 
       // @TODO construct a single queries array
       newAccounts.forEach((account) => {
@@ -45,6 +48,9 @@ function meshAccountsEnhancer (): void {
           unsubCallbacks[account] = unsub;
         }).catch(console.error);
       });
+
+      // Unsubscribe from removed accounts.
+      removedAccounts.forEach((account) => unsubCallbacks[account]());
     });
 
     console.log('meshAccountsEnhancer initialization completed');

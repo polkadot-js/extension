@@ -49,8 +49,9 @@ function meshAccountsEnhancer (): void {
         }).catch(console.error);
       });
 
-      // Unsubscribe from removed accounts.
-      removedAccounts.forEach((account) => unsubCallbacks[account]());
+      // @TODO Unsubscribe from removed accounts.
+      // console.log('currentAccounts, transformedAccounts, newAccounts, removedAccounts', currentAccounts, transformedAccounts, newAccounts, removedAccounts);
+      // removedAccounts.forEach((account) => unsubCallbacks[account]());
     });
 
     console.log('meshAccountsEnhancer initialization completed');

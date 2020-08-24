@@ -116,8 +116,6 @@ function Address ({ actions, address, balance, children, className, did, genesis
 
   displayedName += ` (${balanceStr} PolyX)`;
 
-  console.log('DID', did, balanceStr);
-
   return (
     <div className={className}>
       <div className='infoRow'>

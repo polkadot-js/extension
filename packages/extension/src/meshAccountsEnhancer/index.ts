@@ -12,6 +12,7 @@ import { Option } from '@polkadot/types/codec';
 import keyring from '@polkadot/ui-keyring';
 import meshApi from './meshApi';
 import { LinkedKeyInfo } from './meshTypes';
+import { AccountInfo } from '@polkadot/types/interfaces/system';
 
 function transformAccounts (accounts: SubjectInfo): string[] {
   return Object.values(accounts).map(({ json: { address } }): string => address);
@@ -23,40 +24,28 @@ function meshAccountsEnhancer (): void {
   cryptoWaitReady()
     .then((): void => {
       meshApi.then((api) => {
-        const balanceUnsubCallbacks: Record<string, UnsubCallback> = {};
-        const identityUnsubCallbacks: Record<string, UnsubCallback> = {};
+        const unsubCallbacks: Record<string, UnsubCallback> = {};
 
         // @TODO manage this subscription.
         const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
-          const newAccounts = transformAccounts(accounts);
+          const newAccounts = transformAccounts(accounts).filter((account) => !unsubCallbacks[account]);
 
+          // @TODO construct a single queries array
           newAccounts.forEach((account) => {
-            if (!balanceUnsubCallbacks[account]) {
-              api.query.system.account(account, (result) => {
-                const pair = keyring.getPair(account);
+            api.queryMulti([
+              [api.query.system.account, account],
+              [api.query.identity.keyToIdentityIds, account]
+            ], ([accData, linkedKeyInfo]: [AccountInfo, Option<LinkedKeyInfo>]) => {
+              const pair = keyring.getPair(account);
 
-                assert(pair, 'Unable to find pair');
-                const balance = result.data.free.toNumber();
+              assert(pair, 'Unable to find pair');
+              const balance = accData.data.free.toNumber();
+              const did = linkedKeyInfo.unwrapOrDefault().asUnique;
 
-                keyring.saveAccountMeta(pair, { ...pair.meta, balance });
-              }).then((unsub) => {
-                balanceUnsubCallbacks[account] = unsub;
-              }).catch(console.error);
-
-              api.query.identity.keyToIdentityIds(account, (result: Option<LinkedKeyInfo>) => {
-                const did = result.unwrapOrDefault().asUnique;
-
-                if (!did.isEmpty) {
-                  const pair = keyring.getPair(account);
-
-                  assert(pair, 'Unable to find pair');
-
-                  keyring.saveAccountMeta(pair, { ...pair.meta, did: did.toString() });
-                }
-              }).then((unsub) => {
-                identityUnsubCallbacks[account] = unsub;
-              }).catch(console.error);
-            }
+              keyring.saveAccountMeta(pair, { ...pair.meta, balance, did: did.toString() });
+            }).then((unsub) => {
+              unsubCallbacks[account] = unsub;
+            }).catch(console.error);
           });
         });
 

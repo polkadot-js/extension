@@ -21,39 +21,34 @@ function transformAccounts (accounts: SubjectInfo): string[] {
 type UnsubCallback = () => void;
 
 function meshAccountsEnhancer (): void {
-  cryptoWaitReady()
-    .then((): void => {
-      meshApi.then((api) => {
-        const unsubCallbacks: Record<string, UnsubCallback> = {};
+  meshApi.then((api) => {
+    const unsubCallbacks: Record<string, UnsubCallback> = {};
 
-        // @TODO manage this subscription.
-        const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
-          const newAccounts = transformAccounts(accounts).filter((account) => !unsubCallbacks[account]);
+    // @TODO manage this subscription.
+    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+      const newAccounts = transformAccounts(accounts).filter((account) => !unsubCallbacks[account]);
 
-          // @TODO construct a single queries array
-          newAccounts.forEach((account) => {
-            api.queryMulti([
-              [api.query.system.account, account],
-              [api.query.identity.keyToIdentityIds, account]
-            ], ([accData, linkedKeyInfo]: [AccountInfo, Option<LinkedKeyInfo>]) => {
-              const pair = keyring.getPair(account);
+      // @TODO construct a single queries array
+      newAccounts.forEach((account) => {
+        api.queryMulti([
+          [api.query.system.account, account],
+          [api.query.identity.keyToIdentityIds, account]
+        ], ([accData, linkedKeyInfo]: [AccountInfo, Option<LinkedKeyInfo>]) => {
+          const pair = keyring.getPair(account);
 
-              assert(pair, 'Unable to find pair');
-              const balance = accData.data.free.toNumber();
-              const did = linkedKeyInfo.unwrapOrDefault().asUnique;
+          assert(pair, 'Unable to find pair');
+          const balance = accData.data.free.toNumber();
+          const did = linkedKeyInfo.unwrapOrDefault().asUnique;
 
-              keyring.saveAccountMeta(pair, { ...pair.meta, balance, did: did.toString() });
-            }).then((unsub) => {
-              unsubCallbacks[account] = unsub;
-            }).catch(console.error);
-          });
-        });
-
-        console.log('meshAccountsEnhancer initialization complete');
-      }).catch(console.error);
-    }).catch((error): void => {
-      console.error('initialization failed', error);
+          keyring.saveAccountMeta(pair, { ...pair.meta, balance, did: did.toString() });
+        }).then((unsub) => {
+          unsubCallbacks[account] = unsub;
+        }).catch(console.error);
+      });
     });
+
+    console.log('meshAccountsEnhancer initialization completed');
+  }).catch((err) => console.error('meshAccountsEnhancer initialization failed', err));
 }
 
 export default meshAccountsEnhancer;

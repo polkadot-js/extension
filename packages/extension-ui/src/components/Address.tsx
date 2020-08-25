@@ -34,6 +34,8 @@ interface Props {
   name?: React.ReactNode | null;
   parentName?: string | null;
   suri?: string;
+  balance?: number,
+  did?: string,
   toggleActions?: number;
 }
 
@@ -71,7 +73,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, children, className, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, balance, children, className, did, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash, true);
@@ -109,7 +111,10 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show('Copied'), [show]);
 
-  const displayedName = name || (account && account.name) || '<unknown>';
+  let displayedName = name || (account && account.name) || '<unknown>';
+  const balanceStr = balance !== undefined ? (balance / 1000000).toString() : '';
+
+  displayedName += ` (${balanceStr} PolyX)`;
 
   return (
     <div className={className}>
@@ -174,6 +179,9 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
               />
             )}
           </div>
+          {did && <div className='addressDisplay'>
+            <FullAddress data-field='address'>{'DID: ' + did}</FullAddress>
+          </div>}
         </div>
         {actions && (
           <>

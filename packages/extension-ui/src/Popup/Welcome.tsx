@@ -5,10 +5,10 @@
 import { ThemeProps as Props } from '../types';
 
 import React, { useContext, useState } from 'react';
-import styled from 'styled-components';
 
-import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace, Checkbox } from '../components';
-import { Header } from '../partials';
+import { ActionContext } from '../components';
+import { Button, Box, VerticalSpace, Checkbox, Text, Header, Icon } from '../ui';
+import { SvgBull }  from '../assets/images/Bull';
 
 export default function Welcome (): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
@@ -23,41 +23,34 @@ export default function Welcome (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text='Welcome'/>
-      <Note>A couple of things to note before we begin:</Note>
-      <TextBox>
-        <List>
-          <li>We do not collect keys and passwords in our servers.</li>
-          <li>This wallet does not use any trackers or analytics; however, some applications you connect the wallet to may use trackers or analytics.</li>
-          <li>Please read our <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/privacy-policy">Privacy Policy</a></li> to see what information we do collect and how it is processed.
-        </List>
-      </TextBox>
-      <Checkbox className='checkbox' checked={isPPChecked} onClick={() => setIsPPChecked(!isPPChecked)}
-        label={<>
+      <Header>
+      <Icon Asset={SvgBull} width={328} height={140} />
+      </Header>
+      <Box mt="m">
+      <Box><Text>A couple of things to note before we begin:</Text></Box>
+      <Box m="s">
+        <Box>
+          <li><Text>We do not collect keys and passwords in our servers.</Text></li>
+          <li><Text>This wallet does not use any trackers or analytics; however, some applications you connect the wallet to may use trackers or analytics.</Text></li>
+          <li><Text>Please read our <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/privacy-policy">Privacy Policy</a> to see what information we do collect and how it is processed.</Text></li>
+        </Box>
+      </Box>
+      <Box m="s">
+      <Checkbox checked={isPPChecked} onClick={() => setIsPPChecked(!isPPChecked)}
+        label={<Text fontSize="0">
           I have read and accept the Polymath <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/privacy-policy">Privacy Policy</a>
-        </>}
+        </Text>}
       />
-      <Checkbox className='checkbox' checked={isTSChecked} onClick={() => setIsTSChecked(!isTSChecked)}
-        label={<>
+      <Checkbox checked={isTSChecked} onClick={() => setIsTSChecked(!isTSChecked)}
+        label={<Text fontSize="0">
           I have read and accept the Polymath <a rel="noopener noreferrer" target="_blank" href="https://polymath.network/polymesh-aldebaran-testnet/wallet-terms">Terms of Service</a>
-        </>}
+        </Text>}
       />
-      <VerticalSpace />
-      <ButtonArea>
-        <Button onClick={_onClick} isDisabled={!isPPChecked || !isTSChecked}>Continue</Button>
-      </ButtonArea>
+      </Box>
+      </Box>
+      <Box mb="m" mt="l">
+        <Button onClick={_onClick} fluid disabled={!isPPChecked || !isTSChecked}>Continue</Button>
+      </Box>
     </>
   );
 }
-
-const Note = styled.p(({ theme }: Props) => `
-  color: ${theme.subTextColor};
-  margin-bottom: 6px;
-  margin-top: 0;
-`);
-
-const TextBox = styled(Box)(({ theme }: Props) => `
-  border: 1px solid ${theme.inputBorderColor};
-  color: ${theme.subTextColor};
-  margin: 0.75rem 24px;
-`);

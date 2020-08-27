@@ -36,6 +36,12 @@ const hashes: MetadataDefBase[] = [
     genesisHash: '0xf7a99d3cb92853d00d5275c971c132c074636256583fee53b3bbe60d7b8769ba',
     icon: 'substrate',
     ss58Format: 16
+  },
+  {
+    chain: 'Subsocial',
+    genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',
+    icon: 'substrate',
+    ss58Format: 28
   }
 ];
 

@@ -1,10 +1,49 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
-// Copyright 2020 Polymath Inc 
-// This software may be modified and distributed under the terms
-// of the Apache-2.0 license. See the LICENSE file for details.
-// This file has been modified by Polymath to change theme colors to match Polymath's UI style
+import {
+  fontSizes,
+  borderWidths,
+  fontFamilies,
+  breakpoints,
+  lineHeights,
+  fontWeights,
+  space,
+  zIndexes,
+  headings,
+  texts,
+  shadows,
+  radii,
+  links,
+  header,
+  footer,
+  sidebar,
+  transitions,
+  colors,
+  maxWidth,
+} from './themeDefinitions';
+
+const polymathTheme = {
+  breakpoints,
+  fontSizes,
+  fontFamilies,
+  lineHeights,
+  fontWeights,
+  space,
+  zIndexes,
+  colors,
+  shadows,
+  radii,
+  headings,
+  texts,
+  links,
+  transitions,
+  maxWidth,
+  header,
+  sidebar,
+  footer,
+  borderWidths,
+};
 
 const darkTheme = {
+  ...polymathTheme,
   accountBackground: '#1A1B20',
   accountDotsIconColor: '#8E8E8E',
   addAccountImageBackground: '#1A1B20',
@@ -75,17 +114,18 @@ const lightTheme: Theme = {
 };
 
 export function chooseTheme (): AvailableThemes {
-  const preferredTheme = localStorage.getItem('theme');
+  // const preferredTheme = localStorage.getItem('theme');
 
-  if (preferredTheme) {
-    return preferredTheme === 'dark'
-      ? 'dark'
-      : 'light';
-  }
+  // if (preferredTheme) {
+  //   return preferredTheme === 'dark'
+  //     ? 'dark'
+  //     : 'light';
+  // }
 
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
-    ? 'light'
-    : 'dark';
+  // return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+  //   ? 'light'
+  //   : 'dark';
+  return 'light';
 }
 
 export declare type Theme = typeof darkTheme;

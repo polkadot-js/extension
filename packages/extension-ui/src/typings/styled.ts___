@@ -1,0 +1,23 @@
+declare module 'styled-components' {
+  export interface DefaultTheme {
+    breakpoints: typeof breakpoints;
+    fontSizes: typeof fontSizes;
+    fontFamilies: typeof fontFamilies;
+    lineHeights: typeof lineHeights;
+    fontWeights: typeof fontWeights;
+    space: typeof space;
+    zIndexes: typeof zIndexes;
+    colors: typeof colors;
+    headings: typeof headings;
+    texts: typeof texts;
+    shadows: typeof shadows;
+    radii: typeof radii;
+    transitions: typeof transitions;
+    maxWidth: typeof maxWidth;
+    links: typeof links;
+    header: typeof header;
+    footer: typeof footer;
+    sidebar: typeof sidebar;
+    borderWidths: typeof borderWidths;
+  }
+}

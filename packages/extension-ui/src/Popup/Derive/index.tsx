@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { AccountContext, ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
@@ -37,22 +37,24 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   const [password, setPassword] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
 
+  const parentGenesis = useMemo(
+    () => accounts.find((a) => a.address === parentAddress)?.genesisHash || null,
+    [accounts, parentAddress]
+  );
+
   const _onCreate = useCallback(() => {
     if (!account || !name || !password || !parentPassword) {
       return;
     }
 
-    const parentAccount = accounts.find((a) => a.address === parentAddress);
-    const genesisHash = parentAccount?.genesisHash || null;
-
     setIsBusy(true);
-    deriveAccount(parentAddress, account.suri, parentPassword, name, password, genesisHash)
+    deriveAccount(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
       .then(() => onAction('/'))
       .catch((error): void => {
         setIsBusy(false);
         console.error(error);
       });
-  }, [account, accounts, name, password, onAction, parentAddress, parentPassword]);
+  }, [account, name, password, onAction, parentAddress, parentGenesis, parentPassword]);
 
   const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
     setAccount(account);
@@ -74,23 +76,23 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
           isLocked={isLocked}
           onDerivationConfirmed={_onDerivationConfirmed}
           parentAddress={parentAddress}
-        />
-      )}
-      {account && (
-        <Name
-          isFocused
-          onChange={setName}
-        />
-      )}
-      {account && name && <Password onChange={setPassword}/>}
-      {account && name && password && (
-        <Address
-          address={account.address}
-          name={name}
+          parentGenesis={parentGenesis}
         />
       )}
       {account && (
         <>
+          <div>
+            <Address
+              address={account.address}
+              genesisHash={parentGenesis}
+              name={name}
+            />
+          </div>
+          <Name
+            isFocused
+            onChange={setName}
+          />
+          <Password onChange={setPassword} />
           <VerticalSpace/>
           <ButtonArea>
             <BackButton onClick={_onBackClick}/>
@@ -108,4 +110,4 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   );
 }
 
-export default Derive;
+export default React.memo(Derive);

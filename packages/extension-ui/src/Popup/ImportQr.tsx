@@ -36,13 +36,15 @@ export default function ImportQr (): React.ReactElement {
       )}
       {account && (
         <>
+          <div>
+            <Address
+              {...account}
+              name={name}
+            />
+          </div>
           <Name
             isFocused
             onChange={setName}
-          />
-          <Address
-            {...account}
-            name={name}
           />
           <VerticalSpace />
           {name && (

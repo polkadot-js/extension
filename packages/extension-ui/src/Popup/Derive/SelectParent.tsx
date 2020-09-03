@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { assert } from '@polkadot/util';
 
@@ -15,10 +15,11 @@ import DerivationPath from './DerivationPath';
 interface Props {
   isLocked?: boolean;
   parentAddress: string;
+  parentGenesis: string | null;
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
 }
 
-export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }: Props): React.ReactElement<Props> {
+export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const { accounts, hierarchy } = useContext(AccountContext);
@@ -29,6 +30,13 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
   const [shouldAccountBeDerived, setShouldAccountBeDerived] = useState(true);
 
   const passwordInputRef = useRef<HTMLDivElement>(null);
+
+  const allAddresses = useMemo(
+    () => hierarchy
+      .filter(({ isExternal }) => !isExternal)
+      .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
+    [hierarchy]
+  );
 
   const _goCreate = useCallback(
     () => onAction('/account/create'),
@@ -91,13 +99,19 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
       )}
       <DisableableArea isDisabled={!shouldAccountBeDerived}>
         {isLocked
-          ? <Address address={parentAddress} />
+          ? (
+            <Address
+              address={parentAddress}
+              genesisHash={parentGenesis}
+            />
+          )
           : (
             <Label label='Choose Parent Account:'>
               <AddressDropdown
-                allAddresses={hierarchy.filter(({ isExternal }) => !isExternal).map(({ address }) => address)}
+                allAddresses={allAddresses}
                 onSelect={_onParentChange}
                 selectedAddress={parentAddress}
+                selectedGenesis={parentGenesis}
               />
             </Label>
           )

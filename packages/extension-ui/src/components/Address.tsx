@@ -200,7 +200,6 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
 }
 
 const FullAddress = styled.div(({ theme }: ThemeProps) => `
-  width: 270px;
   overflow: hidden;
   text-overflow: ellipsis;
   color: ${theme.labelColor};

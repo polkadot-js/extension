@@ -19,9 +19,10 @@ interface Props {
   onBlur?: () => void;
   onChange?: (value: string) => void;
   onEnter?: () => void;
+  placeholder?: string;
   type?: 'text' | 'password';
   value?: string;
-  placeholder?: string;
+  withoutMargin?: boolean;
 }
 
 function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label, onBlur, onChange, onEnter, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
@@ -64,6 +65,6 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
   );
 }
 
-export default styled(InputWithLabel)`
-  margin-bottom: 16px;
-`;
+export default styled(InputWithLabel)(({ withoutMargin }: Props) => `
+  margin-bottom: ${withoutMargin ? 0 : 16}px;
+`);

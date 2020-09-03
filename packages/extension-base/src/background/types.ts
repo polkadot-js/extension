@@ -95,6 +95,7 @@ export interface RequestSignatures {
   'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
+  'pri(signing.isLocked)': [RequestSigningIsLocked, boolean];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   'pri(window.open)': [null, boolean];
   'pri(window.open.json)': [null, boolean];
@@ -235,6 +236,7 @@ export interface RequestRpcUnsubscribe {
 
 export interface RequestSigningApprovePassword {
   id: string;
+  isSavedPass: boolean;
   password: string;
 }
 
@@ -244,6 +246,10 @@ export interface RequestSigningApproveSignature {
 }
 
 export interface RequestSigningCancel {
+  id: string;
+}
+
+export interface RequestSigningIsLocked {
   id: string;
 }
 

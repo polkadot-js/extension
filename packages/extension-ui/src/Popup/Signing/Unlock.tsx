@@ -7,14 +7,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, InputWithLabel } from '../../components';
 
 interface Props {
+  children?: React.ReactNode;
   className?: string;
   error?: string | null;
+  isBusy: boolean;
   onSign: (password: string) => Promise<void>;
   buttonText?: string;
 }
 
-function Unlock ({ buttonText = 'Sign the transaction', className, error, onSign }: Props): React.ReactElement<Props> {
-  const [isBusy, setIsBusy] = useState(false);
+function Unlock ({ buttonText = 'Sign the transaction', children, className, error, isBusy, onSign }: Props): React.ReactElement<Props> {
   const [ownError, setError] = useState<string | null>();
   const [password, setPassword] = useState('');
 
@@ -29,16 +30,9 @@ function Unlock ({ buttonText = 'Sign the transaction', className, error, onSign
     },
     []
   );
+
   const _onClick = useCallback(
-    (): void => {
-      setIsBusy(true);
-      onSign(password)
-        .then(() => setIsBusy(false))
-        .catch((error: Error): void => {
-          setIsBusy(false);
-          setError(error.message);
-        });
-    },
+    () => onSign(password),
     [onSign, password]
   );
 
@@ -52,7 +46,9 @@ function Unlock ({ buttonText = 'Sign the transaction', className, error, onSign
         onChange={_onChangePassword}
         onEnter={_onClick}
         type='password'
+        withoutMargin={!!children}
       />
+      {children}
       <Button
         isBusy={isBusy}
         onClick={_onClick}

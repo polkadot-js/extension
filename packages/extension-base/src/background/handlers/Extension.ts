@@ -4,7 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -17,8 +17,11 @@ import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/ut
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
+type CachedUnlocks = Record<string, number>;
+
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
+const PASSWORD_EXPIRY = 15 * 60 * 1000;
 
 // a global registry to use internally
 const registry = new TypeRegistry();
@@ -31,9 +34,12 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
 }
 
 export default class Extension {
+  readonly #cachedUnlocks: CachedUnlocks;
+
   readonly #state: State;
 
   constructor (state: State) {
+    this.#cachedUnlocks = {};
     this.#state = state;
   }
 
@@ -262,7 +268,7 @@ export default class Extension {
     };
   }
 
-  private signingApprovePassword ({ id, password }: RequestSigningApprovePassword): boolean {
+  private signingApprovePassword ({ id, isSavedPass, password }: RequestSigningApprovePassword): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -276,11 +282,21 @@ export default class Extension {
       return false;
     }
 
-    pair.decodePkcs8(password);
+    const now = Date.now();
+
+    if (pair.isLocked || password) {
+      pair.decodePkcs8(password);
+    }
 
     const result = request.sign(registry, pair);
+    const savedExpiry = this.#cachedUnlocks[request.payload.address] || 0;
 
-    pair.lock();
+    if (isSavedPass) {
+      this.#cachedUnlocks[request.payload.address] = now + PASSWORD_EXPIRY;
+    } else if (savedExpiry < now) {
+      this.#cachedUnlocks[request.payload.address] = 0;
+      pair.lock();
+    }
 
     resolve({
       id,
@@ -312,6 +328,19 @@ export default class Extension {
     reject(new Error('Cancelled'));
 
     return true;
+  }
+
+  private signingIsLocked ({ id }: RequestSigningIsLocked): boolean {
+    const queued = this.#state.getSignRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { request } = queued;
+    const pair = keyring.getPair(request.payload.address);
+
+    assert(pair, 'Unable to find pair');
+
+    return pair.isLocked || ((this.#cachedUnlocks[request.payload.address] || 0) < Date.now());
   }
 
   // FIXME This looks very much like what we have in authorization
@@ -461,6 +490,9 @@ export default class Extension {
 
       case 'pri(signing.cancel)':
         return this.signingCancel(request as RequestSigningCancel);
+
+      case 'pri(signing.isLocked)':
+        return this.signingIsLocked(request as RequestSigningIsLocked);
 
       case 'pri(signing.requests)':
         return this.signingSubscribe(id, port);

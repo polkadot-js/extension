@@ -6,11 +6,11 @@ import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 
-import { ActionBar, ActionContext, Address, ButtonArea, Link, VerticalSpace } from '../../components';
-import { approveSignPassword, approveSignSignature, cancelSignRequest } from '../../messaging';
+import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
+import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
@@ -42,6 +42,16 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
+  const [isBusy, setIsBusy] = useState(false);
+  const [isLocked, setIsLocked] = useState<boolean | null>(null);
+  const [isSavedPass, setIsSavedPass] = useState(false);
+
+  useEffect((): void => {
+    setIsLocked(null);
+    !isExternal && isSignLocked(signId)
+      .then((isLocked) => setIsLocked(isLocked))
+      .catch((error: Error) => console.error(error));
+  }, [isExternal, signId]);
 
   useEffect((): void => {
     const payload = request.payload;
@@ -61,24 +71,70 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     }
   }, [request]);
 
-  const _onCancel = (): Promise<void> =>
-    cancelSignRequest(signId)
+  const _onCancel = useCallback(
+    (): Promise<void> => cancelSignRequest(signId)
       .then(() => onAction())
-      .catch((error: Error) => console.error(error));
-  const _onSign = (password: string): Promise<void> =>
-    approveSignPassword(signId, password)
-      .then(() => onAction())
-      .catch((error: Error): void => {
-        setError(error.message);
-        console.error(error);
-      });
-  const _onSignature = ({ signature }: { signature: string }): Promise<void> =>
-    approveSignSignature(signId, signature)
-      .then(() => onAction())
-      .catch((error: Error): void => {
-        setError(error.message);
-        console.error(error);
-      });
+      .catch((error: Error) => console.error(error)),
+    [onAction, signId]
+  );
+
+  const _onSign = useCallback(
+    (password: string): Promise<void> => {
+      setIsBusy(true);
+
+      return approveSignPassword(signId, password, !!(password && isSavedPass))
+        .then((): void => {
+          setIsBusy(false);
+          onAction();
+        })
+        .catch((error: Error): void => {
+          setIsBusy(false);
+          setError(error.message);
+          console.error(error);
+        });
+    },
+    [onAction, isSavedPass, signId]
+  );
+
+  const _onSignQuick = useCallback(
+    () => _onSign(''),
+    [_onSign]
+  );
+
+  const _onSignature = useCallback(
+    ({ signature }: { signature: string }): Promise<void> =>
+      approveSignSignature(signId, signature)
+        .then(() => onAction())
+        .catch((error: Error): void => {
+          setError(error.message);
+          console.error(error);
+        }),
+    [onAction, signId]
+  );
+
+  const signButton = isLocked
+    ? (
+      <Unlock
+        buttonText={buttonText}
+        error={error}
+        isBusy={isBusy}
+        onSign={_onSign}
+      >
+        <Checkbox
+          checked={!!isSavedPass}
+          label="Don't ask me again for the next 15 minutes"
+          onChange={setIsSavedPass}
+        />
+      </Unlock>
+    )
+    : (
+      <Button
+        isBusy={isBusy}
+        onClick={_onSignQuick}
+      >
+        Sign the transaction
+      </Button>
+    );
 
   if (payload !== null) {
     const json = request.payload as SignerPayloadJSON;
@@ -108,13 +164,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
         }
         <SignArea>
-          {isFirst && !isExternal && (
-            <Unlock
-              buttonText={buttonText}
-              error={error}
-              onSign={_onSign}
-            />
-          )}
+          {(isLocked !== null) && isFirst && !isExternal && signButton}
           <CancelButton>
             <Link
               isDanger
@@ -140,12 +190,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
         />
         <VerticalSpace />
         <SignArea>
-          {!isExternal && (
-            <Unlock
-              buttonText={buttonText}
-              onSign={_onSign}
-            />
-          )}
+          {!isExternal && signButton}
           <CancelButton>
             <Link
               isDanger

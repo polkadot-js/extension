@@ -13,6 +13,9 @@ Changes:
 - Add option to not ask password for 15 minutes (when signing transactions)
 - Derived accounts uses the parent genesisHash by default (attaches to same chain)
 - Make import from seed, QR & JSON options available on first-start
+- Adjust popup width, allowing full display of e.g. addresses
+- Handling signing rejections (any order) transparently
+- Small overall UI and use adjustments
 - Latest upstream polkadot-js dependencies
 
 

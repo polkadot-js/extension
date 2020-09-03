@@ -284,7 +284,7 @@ export default class Extension {
 
     const now = Date.now();
 
-    if (password) {
+    if (pair.isLocked || password) {
       pair.decodePkcs8(password);
     }
 

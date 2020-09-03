@@ -18,7 +18,7 @@ export default function ImportQr (): React.ReactElement {
   const _onCreate = (): void => {
     if (account && name) {
       createAccountExternal(name, account.content, account.genesisHash)
-        .then((): void => onAction('/'))
+        .then(() => onAction('/'))
         .catch((error: Error) => console.error(error));
     }
   };

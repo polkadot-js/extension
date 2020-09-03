@@ -10,6 +10,7 @@ Contributed:
 
 Changes:
 
+- Make import from seed, QR & JSON options available on first-start
 - Latest upstream polkadot-js dependencies
 
 

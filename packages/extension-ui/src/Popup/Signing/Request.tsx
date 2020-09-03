@@ -50,7 +50,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     !isExternal && isSignLocked(signId)
       .then((isLocked) => setIsLocked(isLocked))
       .catch((error: Error) => console.error(error));
-  }, []);
+  }, [isExternal, signId]);
 
   useEffect((): void => {
     const payload = request.payload;
@@ -70,26 +70,27 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     }
   }, [request]);
 
-  const _onCancel = useCallback((): Promise<void> =>
-    cancelSignRequest(signId)
-      .then((): void => onAction())
+  const _onCancel = useCallback(
+    (): Promise<void> => cancelSignRequest(signId)
+      .then(() => onAction())
       .catch((error: Error) => console.error(error)),
     [onAction, signId]
   );
 
-  const _onSign = useCallback((password: string): Promise<void> => {
-    setIsBusy(true);
+  const _onSign = useCallback(
+    (password: string): Promise<void> => {
+      setIsBusy(true);
 
-    return approveSignPassword(signId, password, !!password && isSavedPass)
-      .then((): void => {
-        setIsBusy(false);
-        onAction();
-      })
-      .catch((error: Error): void => {
-        setIsBusy(false);
-        setError(error.message);
-        console.error(error);
-      });
+      return approveSignPassword(signId, password, !!password && isSavedPass)
+        .then((): void => {
+          setIsBusy(false);
+          onAction();
+        })
+        .catch((error: Error): void => {
+          setIsBusy(false);
+          setError(error.message);
+          console.error(error);
+        });
     },
     [onAction, isSavedPass, signId]
   );
@@ -99,13 +100,14 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     [_onSign]
   );
 
-  const _onSignature = useCallback(({ signature }: { signature: string }): Promise<void> =>
-    approveSignSignature(signId, signature)
-      .then((): void => onAction())
-      .catch((error: Error): void => {
-        setError(error.message);
-        console.error(error);
-      }),
+  const _onSignature = useCallback(
+    ({ signature }: { signature: string }): Promise<void> =>
+      approveSignSignature(signId, signature)
+        .then(() => onAction())
+        .catch((error: Error): void => {
+          setError(error.message);
+          console.error(error);
+        }),
     [onAction, signId]
   );
 

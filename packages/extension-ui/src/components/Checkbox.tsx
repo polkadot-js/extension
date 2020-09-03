@@ -11,10 +11,10 @@ import Checkmark from '../assets/checkmark.svg';
 
 interface Props {
   checked: boolean;
+  className?: string;
+  label: string;
   onChange?: (checked: boolean) => void;
   onClick?: () => void;
-  label: string;
-  className?: string;
 }
 
 function Checkbox ({ checked, className, label, onChange, onClick }: Props): React.ReactElement<Props> {

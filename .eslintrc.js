@@ -7,5 +7,10 @@ module.exports = {
     project: [
       './tsconfig.json'
     ]
+  },
+  rules: {
+    ...base.rules,
+    // this seems very broken atm, false positives
+    '@typescript-eslint/unbound-method': 'off'
   }
 };

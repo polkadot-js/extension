@@ -37,7 +37,11 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link to={master ? `/account/derive/${master.address}` : '/account/create'}>
           <Svg src={plusIcon} />
-          <span>Create new account (root or derived)</span>
+          <span>{
+            master
+              ? 'Create new account (root or derived)'
+              : 'Create new account'
+          }</span>
         </Link>
       </MenuItem>
       <MenuDivider />

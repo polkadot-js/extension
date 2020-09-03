@@ -18,13 +18,14 @@ interface Props extends ThemeProps {
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const _onClick = useCallback(
-    (): void => onAction('/account/create'),
+    () => onAction('/account/create'),
     [onAction]
   );
 
   return (
     <>
       <Header
+        showAdd
         showSettings
         text='Add Account'
       />

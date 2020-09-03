@@ -42,7 +42,7 @@ describe('Create Account', () => {
     wrapper.update();
   };
 
-  const enterName = (name: string): Promise<void> => type(wrapper.find('input'), name);
+  const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
   const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
   const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
 
@@ -89,20 +89,20 @@ describe('Create Account', () => {
 
     it('only account name input is visible at first', () => {
       expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input)).toHaveLength(1);
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]')).toHaveLength(0);
+      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
     it('input should not be highlighted as error until first interaction', () => {
-      expect(wrapper.find(Input).prop('withError')).toBe(false);
+      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(false);
     });
 
     it('after typing less than 3 characters into name input, password input is not visible', async () => {
       await enterName('ab');
-      expect(wrapper.find(Input).prop('withError')).toBe(true);
-      expect(wrapper.find('ErrorMessage').text()).toBe('Account name is too short');
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]')).toHaveLength(0);
+      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(true);
+      expect(wrapper.find('ErrorMessage').first().text()).toBe('Account name is too short');
+      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
@@ -110,12 +110,12 @@ describe('Create Account', () => {
     it('input should keep showing error when something has been typed but then erased', async () => {
       await enterName('ab');
       await enterName('');
-      expect(wrapper.find(Input).prop('withError')).toBe(true);
+      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(true);
     });
 
     it('after typing 3 characters into name input, first password input is visible', async () => {
       await enterName('abc');
-      expect(wrapper.find(Input).first().prop('withError')).toBe(false);
+      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).first().prop('withError')).toBe(false);
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);

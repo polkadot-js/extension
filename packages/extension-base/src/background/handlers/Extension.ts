@@ -17,10 +17,7 @@ import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/ut
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-type CachedPasswords = Record<string, {
-  expires: number;
-  password: string;
-}>;
+type CachedUnlocks = Record<string, number>;
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
@@ -37,12 +34,12 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
 }
 
 export default class Extension {
-  readonly #passwords: CachedPasswords;
+  readonly #cachedUnlocks: CachedUnlocks;
 
   readonly #state: State;
 
   constructor (state: State) {
-    this.#passwords = {};
+    this.#cachedUnlocks = {};
     this.#state = state;
   }
 
@@ -286,24 +283,18 @@ export default class Extension {
     }
 
     const now = Date.now();
-    const savedPassword = this.#passwords[request.payload.address];
 
-    if (pair.isLocked) {
-      pair.decodePkcs8(password || savedPassword?.password);
+    if (password) {
+      pair.decodePkcs8(password);
     }
 
     const result = request.sign(registry, pair);
+    const savedExpiry = this.#cachedUnlocks[request.payload.address] || 0;
 
     if (isSavedPass) {
-      this.#passwords[request.payload.address] = {
-        expires: now + PASSWORD_EXPIRY,
-        password
-      };
-    } else if (!savedPassword || (savedPassword.expires < now)) {
-      this.#passwords[request.payload.address] = {
-        expires: 0,
-        password
-      };
+      this.#cachedUnlocks[request.payload.address] = now + PASSWORD_EXPIRY;
+    } else if (savedExpiry < now) {
+      this.#cachedUnlocks[request.payload.address] = 0;
       pair.lock();
     }
 
@@ -349,7 +340,7 @@ export default class Extension {
 
     assert(pair, 'Unable to find pair');
 
-    return pair.isLocked || ((this.#passwords[request.payload.address]?.expires || 0) < Date.now());
+    return pair.isLocked || ((this.#cachedUnlocks[request.payload.address] || 0) < Date.now());
   }
 
   // FIXME This looks very much like what we have in authorization

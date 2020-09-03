@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { ActionContext, Loading } from '../../components';
+import { ActionContext, Address, Loading } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import AccountName from './AccountName';
@@ -27,6 +27,7 @@ export default function CreateAccount (): React.ReactElement {
       // this should always be the case
       if (name && password && account) {
         setIsBusy(true);
+
         createAccountSuri(name, password, account.seed)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
@@ -47,23 +48,31 @@ export default function CreateAccount (): React.ReactElement {
         step={step}
         text='Create an account:&nbsp;'
       />
-      <Loading>{account && (
-        step === 1
-          ? (
-            <Mnemonic
-              onNextStep={_onNextStep}
-              seed={account.seed}
-            />
-          )
-          : (
-            <AccountName
-              address={account.address}
-              isBusy={isBusy}
-              onBackClick={_onPreviousStep}
-              onCreate={_onCreate}
-            />
-          )
-      )}</Loading>
+      <Loading>
+        <div>
+          <Address
+            address={account?.address}
+            name={name}
+          />
+        </div>
+        {account && (
+          step === 1
+            ? (
+              <Mnemonic
+                onNextStep={_onNextStep}
+                seed={account.seed}
+              />
+            )
+            : (
+              <AccountName
+                address={account.address}
+                isBusy={isBusy}
+                onBackClick={_onPreviousStep}
+                onCreate={_onCreate}
+              />
+            )
+        )}
+      </Loading>
     </>
   );
 }

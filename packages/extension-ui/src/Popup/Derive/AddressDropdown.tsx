@@ -12,13 +12,14 @@ import { Address, Svg } from '../../components';
 import useOutsideClick from '../../hooks/useOutsideClick';
 
 interface Props {
-  allAddresses: string[];
+  allAddresses: [string, string | null][];
   className?: string;
   onSelect: (address: string) => void;
   selectedAddress: string;
+  selectedGenesis: string | null;
 }
 
-function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }: Props): React.ReactElement<Props> {
+function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, selectedGenesis }: Props): React.ReactElement<Props> {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -34,16 +35,22 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }
         onClick={_toggleDropdown}
         ref={ref}
       >
-        <Address address={selectedAddress} />
+        <Address
+          address={selectedAddress}
+          genesisHash={selectedGenesis}
+        />
       </div>
       <HiddenOptions visible={isDropdownVisible}>
-        {allAddresses.map((address) => (
+        {allAddresses.map(([address, genesisHash]) => (
           <div
             data-parent-option
             key={address}
             onClick={_selectParent(address)}
           >
-            <Address address={address} />
+            <Address
+              address={address}
+              genesisHash={genesisHash}
+            />
           </div>
         ))}
       </HiddenOptions>
@@ -54,7 +61,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress }
 const HiddenOptions = styled.div<{ visible: boolean }>`
   position: absolute;
   visibility: ${({ visible }): string => (visible ? 'visible' : 'hidden')};
-  width: 430px;
+  width: 510px;
   z-index: 100;
   background: ${({ theme }: ThemeProps): string => theme.bodyColor};
   max-height: ${({ visible }): string => (visible ? '200px' : '0')};
@@ -77,7 +84,7 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
   & > div:first-child > ${Address}::after {
     content: '';
     position: absolute;
-    top: 50%;
+    top: 66%;
     transform: translateY(-50%);
     right: 11px;
     width: 30px;

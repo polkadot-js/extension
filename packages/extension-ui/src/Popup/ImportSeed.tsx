@@ -40,10 +40,14 @@ export default function Import (): React.ReactElement {
   const _onChangeSeed = useCallback(
     async (suri: string | null): Promise<void> => {
       if (suri) {
-        setAccount(await validateSeed(suri));
-      } else {
-        setAccount(null);
+        try {
+          return setAccount(await validateSeed(suri));
+        } catch (error) {
+          console.error(error);
+        }
       }
+
+      setAccount(null);
     },
     []
   );
@@ -69,6 +73,12 @@ export default function Import (): React.ReactElement {
         showBackArrow
         text='Import account'
       />
+      <div>
+        <Address
+          address={account?.address}
+          name={name}
+        />
+      </div>
       <ValidatedInput
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         component={SeedInput}
@@ -78,14 +88,14 @@ export default function Import (): React.ReactElement {
         rowsCount={2}
         validator={isSeedValid}
       />
-      {account && <Name onChange={setName} />}
-      {account && name && <Password onChange={setPassword} />}
+      {account && (
+        <>
+          <Name onChange={setName} />
+          <Password onChange={setPassword} />
+        </>
+      )}
       {account && name && password && (
         <>
-          <Address
-            address={account.address}
-            name={name}
-          />
           <VerticalSpace />
           <ButtonArea>
             <NextStepButton

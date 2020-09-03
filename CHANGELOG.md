@@ -14,6 +14,7 @@ Changes:
 - Derived accounts uses the parent genesisHash by default (attaches to same chain)
 - Make import from seed, QR & JSON options available on first-start
 - Adjust popup width, allowing full display of e.g. addresses
+- Always display network selection on all accounts
 - Handling signing rejections (any order) transparently
 - Small overall UI and use adjustments
 - Latest upstream polkadot-js dependencies

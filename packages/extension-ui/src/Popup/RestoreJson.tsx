@@ -96,10 +96,13 @@ export default function Upload (): React.ReactElement {
         text='Restore from JSON'
       />
       <div>
-        <Address
-          address={(isFileValid && address) || null}
-          name={(isFileValid && json?.meta.name as string) || null}
-        />
+        <div>
+          <Address
+            address={(isFileValid && address) || null}
+            genesisHash={(isFileValid && json?.meta.genesisHash as string) || null}
+            name={(isFileValid && json?.meta.name as string) || null}
+          />
+        </div>
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={!isFileValid}

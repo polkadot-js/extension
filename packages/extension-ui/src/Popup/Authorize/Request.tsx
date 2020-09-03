@@ -5,7 +5,7 @@
 import { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { ThemeProps } from '../../types';
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
@@ -21,14 +21,20 @@ interface Props {
 
 function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  const _onApprove = (): Promise<void> =>
-    approveAuthRequest(authId)
+
+  const _onApprove = useCallback(
+    () => approveAuthRequest(authId)
       .then(() => onAction())
-      .catch((error: Error) => console.error(error));
-  const _onReject = (): Promise<void> =>
-    rejectAuthRequest(authId)
+      .catch((error: Error) => console.error(error)),
+    [authId, onAction]
+  );
+
+  const _onReject = useCallback(
+    () => rejectAuthRequest(authId)
       .then(() => onAction())
-      .catch((error: Error) => console.error(error));
+      .catch((error: Error) => console.error(error)),
+    [authId, onAction]
+  );
 
   return (
     <div className={className}>

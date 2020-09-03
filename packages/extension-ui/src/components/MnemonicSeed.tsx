@@ -40,7 +40,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
 }
 
 export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
-  margin-top: 21px;
+  margin-bottom: 21px;
 
   .buttonsRow {
     display: flex;

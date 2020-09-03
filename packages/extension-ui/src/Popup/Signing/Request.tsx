@@ -48,6 +48,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
 
   useEffect((): void => {
     setIsLocked(null);
+
     !isExternal && isSignLocked(signId)
       .then((isLocked) => setIsLocked(isLocked))
       .catch((error: Error) => console.error(error));

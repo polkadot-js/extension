@@ -347,7 +347,9 @@ export default class Extension {
     const { request } = queued;
     const pair = keyring.getPair(request.payload.address);
 
-    return !pair || pair.isLocked;
+    assert(pair, 'Unable to find pair');
+
+    return pair.isLocked || ((this.#passwords[request.payload.address]?.expires || 0) < Date.now());
   }
 
   // FIXME This looks very much like what we have in authorization

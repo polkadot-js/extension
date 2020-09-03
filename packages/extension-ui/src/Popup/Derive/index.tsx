@@ -5,7 +5,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
+import { AccountContext, ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps, Name, Password } from '../../partials';
 import { SelectParent } from './SelectParent';
@@ -29,6 +29,7 @@ interface ConfirmState {
 
 function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
+  const { accounts } = useContext(AccountContext);
   const { address: parentAddress } = useParams<AddressState>();
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
@@ -41,14 +42,17 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
       return;
     }
 
+    const parentAccount = accounts.find((a) => a.address === parentAddress);
+    const genesisHash = parentAccount?.genesisHash || null;
+
     setIsBusy(true);
-    deriveAccount(parentAddress, account.suri, parentPassword, name, password)
+    deriveAccount(parentAddress, account.suri, parentPassword, name, password, genesisHash)
       .then(() => onAction('/'))
       .catch((error): void => {
         setIsBusy(false);
         console.error(error);
       });
-  }, [account, name, password, onAction, parentAddress, parentPassword]);
+  }, [account, accounts, name, password, onAction, parentAddress, parentPassword]);
 
   const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
     setAccount(account);

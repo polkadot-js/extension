@@ -21,7 +21,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
   const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
 
   const _goHome = useCallback(
-    (): void => onAction('/'),
+    () => onAction('/'),
     [onAction]
   );
 

@@ -31,7 +31,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
   const passwordInputRef = useRef<HTMLDivElement>(null);
 
   const _goCreate = useCallback(
-    (): void => onAction('/account/create'),
+    () => onAction('/account/create'),
     [onAction]
   );
 

@@ -63,18 +63,18 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
 
   const _onCancel = (): Promise<void> =>
     cancelSignRequest(signId)
-      .then((): void => onAction())
+      .then(() => onAction())
       .catch((error: Error) => console.error(error));
   const _onSign = (password: string): Promise<void> =>
     approveSignPassword(signId, password)
-      .then((): void => onAction())
+      .then(() => onAction())
       .catch((error: Error): void => {
         setError(error.message);
         console.error(error);
       });
   const _onSignature = ({ signature }: { signature: string }): Promise<void> =>
     approveSignSignature(signId, signature)
-      .then((): void => onAction())
+      .then(() => onAction())
       .catch((error: Error): void => {
         setError(error.message);
         console.error(error);

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { ActionContext, Loading } from '../../components';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
@@ -22,21 +22,24 @@ export default function CreateAccount (): React.ReactElement {
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
-  const _onCreate = (name: string, password: string): void => {
-    // this should always be the case
-    if (name && password && account) {
-      setIsBusy(true);
-      createAccountSuri(name, password, account.seed)
-        .then((): void => onAction('/'))
-        .catch((error: Error): void => {
-          setIsBusy(false);
-          console.error(error);
-        });
-    }
-  };
+  const _onCreate = useCallback(
+    (name: string, password: string): void => {
+      // this should always be the case
+      if (name && password && account) {
+        setIsBusy(true);
+        createAccountSuri(name, password, account.seed)
+          .then(() => onAction('/'))
+          .catch((error: Error): void => {
+            setIsBusy(false);
+            console.error(error);
+          });
+      }
+    },
+    [account, onAction]
+  );
 
-  const _onNextStep = (): void => setStep(step + 1);
-  const _onPreviousStep = (): void => setStep(step - 1);
+  const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
+  const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
   return (
     <>
@@ -44,21 +47,22 @@ export default function CreateAccount (): React.ReactElement {
         step={step}
         text='Create an account:&nbsp;'
       />
-      <Loading>{account && (step === 1
-        ? (
-          <Mnemonic
-            onNextStep={_onNextStep}
-            seed={account.seed}
-          />
-        )
-        : (
-          <AccountName
-            address={account.address}
-            isBusy={isBusy}
-            onBackClick={_onPreviousStep}
-            onCreate={_onCreate}
-          />
-        )
+      <Loading>{account && (
+        step === 1
+          ? (
+            <Mnemonic
+              onNextStep={_onNextStep}
+              seed={account.seed}
+            />
+          )
+          : (
+            <AccountName
+              address={account.address}
+              isBusy={isBusy}
+              onBackClick={_onPreviousStep}
+              onCreate={_onCreate}
+            />
+          )
       )}</Loading>
     </>
   );

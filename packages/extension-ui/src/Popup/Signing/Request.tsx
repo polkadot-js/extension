@@ -43,10 +43,11 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
-  const [isLocked, setIsLocked] = useState(true);
+  const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [isSavedPass, setIsSavedPass] = useState(false);
 
   useEffect((): void => {
+    setIsLocked(null);
     !isExternal && isSignLocked(signId)
       .then((isLocked) => setIsLocked(isLocked))
       .catch((error: Error) => console.error(error));
@@ -81,7 +82,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     (password: string): Promise<void> => {
       setIsBusy(true);
 
-      return approveSignPassword(signId, password, !!password && isSavedPass)
+      return approveSignPassword(signId, password, !!(password && isSavedPass))
         .then((): void => {
           setIsBusy(false);
           onAction();
@@ -120,8 +121,8 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
         onSign={_onSign}
       >
         <Checkbox
-          checked={isSavedPass}
-          label="Don't ask again for the next 15 minutes"
+          checked={!!isSavedPass}
+          label="Don't ask me again for the next 15 minutes"
           onChange={setIsSavedPass}
         />
       </Unlock>
@@ -163,7 +164,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
         }
         <SignArea>
-          {isFirst && !isExternal && signButton}
+          {(isLocked !== null) && isFirst && !isExternal && signButton}
           <CancelButton>
             <Link
               isDanger

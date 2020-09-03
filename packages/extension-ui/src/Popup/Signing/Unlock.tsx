@@ -46,6 +46,7 @@ function Unlock ({ buttonText = 'Sign the transaction', children, className, err
         onChange={_onChangePassword}
         onEnter={_onClick}
         type='password'
+        withoutMargin={!!children}
       />
       {children}
       <Button

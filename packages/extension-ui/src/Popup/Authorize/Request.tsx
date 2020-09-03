@@ -23,11 +23,11 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   const onAction = useContext(ActionContext);
   const _onApprove = (): Promise<void> =>
     approveAuthRequest(authId)
-      .then((): void => onAction())
+      .then(() => onAction())
       .catch((error: Error) => console.error(error));
   const _onReject = (): Promise<void> =>
     rejectAuthRequest(authId)
-      .then((): void => onAction())
+      .then(() => onAction())
       .catch((error: Error) => console.error(error));
 
   return (

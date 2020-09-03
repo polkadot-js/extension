@@ -28,14 +28,14 @@ export default function CreateAccount (): React.ReactElement {
       if (name && password && account) {
         setIsBusy(true);
         createAccountSuri(name, password, account.seed)
-          .then((): void => onAction('/'))
+          .then(() => onAction('/'))
           .catch((error: Error): void => {
             setIsBusy(false);
             console.error(error);
           });
       }
     },
-    [account]
+    [account, onAction]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);

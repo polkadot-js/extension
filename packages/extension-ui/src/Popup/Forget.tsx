@@ -16,14 +16,14 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
   const onAction = useContext(ActionContext);
 
   const _goHome = useCallback(
-    (): void => onAction('/'),
+    () => onAction('/'),
     [onAction]
   );
 
   const _onClick = useCallback(
     (): Promise<void> =>
       forgetAccount(address)
-        .then((): void => onAction('/'))
+        .then(() => onAction('/'))
         .catch((error: Error) => console.error(error)),
     [address, onAction]
   );

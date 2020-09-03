@@ -6,7 +6,8 @@ interface InputError {
   errorDescription: string;
 }
 
-export type Result<T> = { error: InputError } | { ok: T }
+export type Result<T> = { error: InputError } | { ok: T };
+
 export const Result = {
   error: <T>(errorDescription: string): Result<T> => ({ error: { errorDescription } }),
   isError<T> (value: Result<T>): value is ({ error: InputError }) {
@@ -20,31 +21,32 @@ export const Result = {
 
 export declare type Validator<T> = (value: T) => Result<T> | Promise<Result<T>>;
 
-export const allOf = <T>(...validators: Validator<T>[]): Validator<T> => async (value: T): Promise<Result<T>> => {
-  for (const validator of validators) {
-    const validationResult = await validator(value);
+export function allOf <T> (...validators: Validator<T>[]): Validator<T> {
+  return async (value: T): Promise<Result<T>> => {
+    for (const validator of validators) {
+      const validationResult = await validator(value);
 
-    if (Result.isError(validationResult)) {
-      return validationResult;
-    }
-  }
-
-  return Result.ok(value);
-};
-
-export const isNotShorterThan = (minLength: number, errorText: string): Validator<string> =>
-  (value: string): Result<string> => {
-    if (value.length < minLength) {
-      return Result.error(errorText);
+      if (Result.isError(validationResult)) {
+        return validationResult;
+      }
     }
 
     return Result.ok(value);
   };
+}
 
-export const isSameAs = <T>(expectedValue: T, errorText: string): Validator<T> => (value: T): Result<T> => {
-  if (value !== expectedValue) {
-    return Result.error(errorText);
-  }
+export function isNotShorterThan (minLength: number, errorText: string): Validator<string> {
+  return (value: string): Result<string> => {
+    return value.length < minLength
+      ? Result.error(errorText)
+      : Result.ok(value);
+  };
+}
 
-  return Result.ok(value);
-};
+export function isSameAs <T> (expectedValue: T, errorText: string): Validator<T> {
+  return (value: T): Result<T> => {
+    return value !== expectedValue
+      ? Result.error(errorText)
+      : Result.ok(value);
+  };
+}

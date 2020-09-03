@@ -60,9 +60,6 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress }
             const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
 
             assert(account, 'Unable to derive');
-
-            console.log(account);
-
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {
             setSuriPath(null);

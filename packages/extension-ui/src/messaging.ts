@@ -191,8 +191,8 @@ export async function validateDerivationPath (parentAddress: string, suri: strin
   return sendMessage('pri(derivation.validate)', { parentAddress, parentPassword, suri });
 }
 
-export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string): Promise<boolean> {
-  return sendMessage('pri(derivation.create)', { name, parentAddress, parentPassword, password, suri });
+export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
+  return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
 export async function jsonRestoreWindowOpen (): Promise<boolean> {

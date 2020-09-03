@@ -56,11 +56,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
   );
 }
 
-interface UnlockableComponentProps {
-  isUnlocked: boolean;
-}
-
-const PathInput = styled.div<UnlockableComponentProps>`
+const PathInput = styled.div<{ isUnlocked: boolean }>`
   width: 100%;
 
   & input {

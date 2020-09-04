@@ -10,6 +10,7 @@ import settings from '@polkadot/ui-settings';
 
 import FullScreenIcon from '../assets/fullscreen.svg';
 import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
 
 interface Option {
@@ -22,12 +23,13 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
-const isPopup = window.innerWidth <= 480;
+const isPopup = window.innerWidth <= 560;
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
 function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
@@ -69,19 +71,19 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider />
       <MenuItem
         className='setting'
-        title='External QR accounts and Access'
+        title={t('External QR accounts and Access')}
       >
         <Checkbox
           checked={camera}
           className='checkbox'
-          label='Allow Camera Access'
+          label={t('Allow Camera Access')}
           onChange={setCamera}
         />
       </MenuItem>
       <MenuDivider />
       <MenuItem
         className='setting'
-        title='Display address format For'
+        title={t('Display address format For')}
       >
         <Dropdown
           className='dropdown'
@@ -99,7 +101,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
               className='openWindow'
               icon={FullScreenIcon}
               onClick={windowOpen}
-              text='Open extension in new window'
+              text={t('Open extension in new window')}
             />
           </MenuItem>
         </>

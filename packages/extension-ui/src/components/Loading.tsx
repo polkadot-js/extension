@@ -4,14 +4,18 @@
 
 import React from 'react';
 
+import useTranslation from '../hooks/useTranslation';
+
 interface Props {
   children?: React.ReactNode;
 }
 
 export default function Loading ({ children }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   if (!children) {
     return (
-      <div>... loading ...</div>
+      <div>{t('... loading ...')}</div>
     );
   }
 

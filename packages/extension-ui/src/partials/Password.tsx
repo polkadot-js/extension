@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { InputWithLabel, ValidatedInput } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 }
 
 const MIN_LENGTH = 6;
+
+// FIXME i18n
 const isFirstPasswordValid = isNotShorterThan(MIN_LENGTH, 'Password is too short');
 const isSecondPasswordValid = (firstPassword: string): Validator<string> => allOf(
   isNotShorterThan(MIN_LENGTH, 'Password is too short'),
@@ -20,6 +23,7 @@ const isSecondPasswordValid = (firstPassword: string): Validator<string> => allO
 );
 
 export default function Password ({ isFocussed, onChange }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
 
@@ -33,7 +37,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}
-        label='A new password for this account'
+        label={t('A new password for this account')}
         onValidatedChange={setPass1}
         type='password'
         validator={isFirstPasswordValid}
@@ -42,7 +46,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         <ValidatedInput
           component={InputWithLabel}
           data-input-repeat-password
-          label='Repeat password for verification'
+          label={t('Repeat password for verification')}
           onValidatedChange={setPass2}
           type='password'
           validator={isSecondPasswordValid(pass1)}

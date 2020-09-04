@@ -3,12 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { KeyringPair$Json } from '@polkadot/keyring/types';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
-import { u8aToString } from '@polkadot/util';
-import styled from 'styled-components';
-import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
 
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { u8aToString } from '@polkadot/util';
+
+import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
+import useTranslation from '../hooks/useTranslation';
+import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
 import { Header } from '../partials';
 
 interface FileState {
@@ -41,6 +43,7 @@ async function parseFile (file: Uint8Array): Promise<FileState> {
 }
 
 export default function Upload (): React.ReactElement {
+  const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -93,7 +96,7 @@ export default function Upload (): React.ReactElement {
     <>
       <HeaderWithSmallerMargin
         showBackArrow
-        text='Restore from JSON'
+        text={t('Restore from JSON')}
       />
       <div>
         <div>
@@ -106,13 +109,13 @@ export default function Upload (): React.ReactElement {
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={!isFileValid}
-          label={'backup file'}
+          label={t('backup file')}
           onChange={_onChangeFile}
           withLabel
         />
         <InputWithLabel
           isError={!isPassValid}
-          label='Password for this file'
+          label={t('Password for this file')}
           onChange={_onChangePass}
           type='password'
         />
@@ -121,7 +124,7 @@ export default function Upload (): React.ReactElement {
           isDisabled={!isFileValid || !isPassValid}
           onClick={_onRestore}
         >
-          Restore
+          {t('Restore')}
         </Button>
       </div>
     </>

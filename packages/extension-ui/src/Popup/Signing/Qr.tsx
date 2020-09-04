@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
 import { Button } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   children?: React.ReactNode;
@@ -22,6 +23,7 @@ interface Props {
 const CMD_MORTAL = 2;
 
 function Qr ({ className, onSignature, payload, request }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
   const [payloadU8a, setPayloadU8a] = useState(new Uint8Array());
 
@@ -49,7 +51,7 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
           className='scanButton'
           onClick={_onShowQr}
         >
-          Scan signature via camera
+          {t('Scan signature via camera')}
         </Button>
       )}
     </div>

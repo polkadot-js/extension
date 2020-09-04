@@ -7,12 +7,14 @@ import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
 import { ActionContext, Address, Button, Warning, ActionBar, ActionText } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
 
 type Props = RouteComponentProps<{ address: string }>;
 
 function Forget ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
   const _goHome = useCallback(
@@ -32,24 +34,22 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
     <>
       <Header
         showBackArrow
-        text='Forget account'
+        text={t('Forget account')}
       />
       <div>
         <Address address={address}>
-          <MovedWarning isDanger>
-            You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.
-          </MovedWarning>
+          <MovedWarning isDanger>{t('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
           <ActionArea>
             <Button
               isDanger
               onClick={_onClick}
             >
-              I want to forget this account
+              {t('I want to forget this account')}
             </Button>
             <CancelButton>
               <ActionText
                 onClick={_goHome}
-                text='Cancel'
+                text={t('Cancel')}
               />
             </CancelButton>
           </ActionArea>

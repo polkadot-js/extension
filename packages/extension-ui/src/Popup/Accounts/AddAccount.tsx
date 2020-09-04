@@ -8,6 +8,7 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
 import AddAccountImage from './AddAccountImage';
 
@@ -16,6 +17,7 @@ interface Props extends ThemeProps {
 }
 
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const _onClick = useCallback(
     () => onAction('/account/create'),
@@ -34,7 +36,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           <AddAccountImage onClick={_onClick}/>
         </div>
         <div className='no-accounts'>
-          <p>You currently don&apos;t have any accounts. Create your first account to get started.</p>
+          <p>{t("You currently don't have any accounts. Create your first account to get started.")}</p>
         </div>
       </div>
     </>

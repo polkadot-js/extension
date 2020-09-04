@@ -10,6 +10,7 @@ import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
@@ -39,6 +40,7 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
 }
 
 export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
@@ -123,7 +125,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
       >
         <Checkbox
           checked={!!isSavedPass}
-          label="Don't ask me again for the next 15 minutes"
+          label={t("Don't ask me again for the next 15 minutes")}
           onChange={setIsSavedPass}
         />
       </Unlock>
@@ -172,7 +174,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
               isDanger
               onClick={_onCancel}
             >
-              Cancel
+              {t('Cancel')}
             </Link>
           </CancelButton>
         </SignArea>
@@ -198,7 +200,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
               isDanger
               onClick={_onCancel}
             >
-              Reject
+              {t('Reject')}
             </Link>
           </CancelButton>
         </SignArea>

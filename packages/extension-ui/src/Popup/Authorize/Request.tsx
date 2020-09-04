@@ -9,6 +9,7 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
   const _onApprove = useCallback(
@@ -36,6 +38,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     [authId, onAction]
   );
 
+  // FIXME i18next <Trans /> component to be used here
   return (
     <div className={className}>
       <RequestInfo>
@@ -57,8 +60,8 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
         </Info>
         {isFirst && (
           <>
-            <RequestWarning>Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.</RequestWarning>
-            <AcceptButton onClick={_onApprove}>Yes, allow this application access</AcceptButton>
+            <RequestWarning>{t('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</RequestWarning>
+            <AcceptButton onClick={_onApprove}>{t('Yes, allow this application access')}</AcceptButton>
           </>
         )}
         <RejectButton>

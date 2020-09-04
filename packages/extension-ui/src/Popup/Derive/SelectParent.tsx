@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { assert } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
 import AddressDropdown from './AddressDropdown';
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const { accounts, hierarchy } = useContext(AccountContext);
@@ -93,7 +95,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
       {!isLocked && (
         <CheckboxWithSmallerMargins
           checked={shouldAccountBeDerived}
-          label='Derive new account from existing'
+          label={t('Derive new account from existing')}
           onChange={setShouldAccountBeDerived}
         />
       )}
@@ -106,7 +108,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
             />
           )
           : (
-            <Label label='Choose Parent Account:'>
+            <Label label={t('Choose Parent Account:')}>
               <AddressDropdown
                 allAddresses={allAddresses}
                 onSelect={_onParentChange}
@@ -121,7 +123,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
             data-export-password
             isError={!isProperParentPassword}
             isFocused
-            label='enter the password for the account you want to derive from'
+            label={t('enter the password for the account you want to derive from')}
             onChange={_onParentPasswordEnter}
             type='password'
             value={parentPassword}
@@ -146,7 +148,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
               isDisabled={!isProperParentPassword || !suriPath}
               onClick={_onSubmit}
             >
-              Create a derived account
+              {t('Create a derived account')}
             </NextStepButton>
           )
           : (
@@ -154,7 +156,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
               data-button-action='create root account'
               onClick={_goCreate}
             >
-              Create account from new seed
+              {t('Create account from new seed')}
             </NextStepButton>
           )
         }

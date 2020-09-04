@@ -7,11 +7,13 @@ import { SignerPayloadJSON } from '@polkadot/types/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { Loading, SigningReqContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 
 export default function Signing (): React.ReactElement {
+  const { t } = useTranslation();
   const requests = useContext(SigningReqContext);
   const [requestIndex, setRequestIndex] = useState(0);
 
@@ -46,7 +48,7 @@ export default function Signing (): React.ReactElement {
   return request
     ? (
       <>
-        <Header text={isTransaction ? 'Transaction' : 'Sign message'}>
+        <Header text={isTransaction ? t('Transaction') : t('Sign message')}>
           {requests.length > 1 && (
             <TransactionIndex
               index={requestIndex}
@@ -58,7 +60,7 @@ export default function Signing (): React.ReactElement {
         </Header>
         <Request
           account={request.account}
-          buttonText={isTransaction ? 'Sign the transaction' : 'Sign the message'}
+          buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}
           isFirst={requestIndex === 0}
           request={request.request}
           signId={request.id}

@@ -8,6 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import ArrowLeftImage from '../assets/arrowLeft.svg';
+import useTranslation from '../hooks/useTranslation';
 import { Link, Svg } from '../components';
 
 interface Props extends ThemeProps {
@@ -16,11 +17,13 @@ interface Props extends ThemeProps {
 }
 
 function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
     <div className={className}>
       <BackLink to={to}>
         <ArrowLeft />
-        Back
+        {t('Back')}
       </BackLink>
     </div>
   );

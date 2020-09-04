@@ -19,6 +19,7 @@ import parentArrow from '../assets/arrowParentLabel.svg';
 import { AccountContext, SettingsContext } from './contexts';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
+import useTranslation from '../hooks/useTranslation';
 import useToast from '../hooks/useToast';
 import Identicon from './Identicon';
 import Menu from './Menu';
@@ -72,6 +73,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
 function Address ({ actions, address, children, className, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash, true);
@@ -107,9 +109,9 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
 
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
-  const _onCopy = useCallback((): void => show('Copied'), [show]);
+  const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
 
-  const displayedName = name || (account && account.name) || '<unknown>';
+  const displayedName = name || (account && account.name) || t('<unknown>');
 
   return (
     <div className={className}>
@@ -160,7 +162,7 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
             </div>
           )}
           <div className='addressDisplay'>
-            <FullAddress data-field='address'>{formatted || '<unknown>'}</FullAddress>
+            <FullAddress data-field='address'>{formatted || t('<unknown>')}</FullAddress>
             <CopyToClipboard text={(formatted && formatted) || ''} >
               <Svg
                 onClick={_onCopy}

@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import genesisOptions from '@polkadot/extension-chains/genesisHashes';
 
 import { ActionContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { editAccount, showAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
 
@@ -23,6 +24,7 @@ interface EditState {
 }
 
 function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | null>(null);
@@ -67,14 +69,14 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         className='menuItem'
         onClick={_toggleEdit}
       >
-        Rename
+        {t('Rename')}
       </Link>
       {!isExternal && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}
         >
-          Derive New Account
+          {t('Derive New Account')}
         </Link>
       )}
       <MenuDivider />
@@ -84,7 +86,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
           isDanger
           to={`/account/export/${address}`}
         >
-          Export Account
+          {t('Export Account')}
         </Link>
       )}
       <Link
@@ -92,14 +94,14 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         isDanger
         to={`/account/forget/${address}`}
       >
-        Forget Account
+        {t('Forget Account')}
       </Link>
       <MenuDivider />
       <div className='menuItem'>
         <Checkbox
           checked={!isHidden}
           className='inputItem'
-          label='Visible (always inject)'
+          label={t('Visible (always inject)')}
           onClick={_toggleVisibility}
         />
       </div>
@@ -113,7 +115,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         />
       </div>
     </>
-  ), [_onChangeGenesis, _toggleEdit, _toggleVisibility, address, genesisHash, isExternal, isHidden]);
+  ), [_onChangeGenesis, _toggleEdit, _toggleVisibility, address, genesisHash, isExternal, isHidden, t]);
 
   return (
     <div className={className}>

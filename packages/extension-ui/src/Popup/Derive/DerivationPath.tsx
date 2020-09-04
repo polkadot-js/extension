@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import lockIcon from '../../assets/lock.svg';
 import unlockIcon from '../../assets/unlock.svg';
 import { InputWithLabel, Svg, Button } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   className?: string;
@@ -21,8 +22,10 @@ interface Props {
 }
 
 function DerivationPath ({ className, defaultPath, isError, onChange }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [path, setPath] = useState<string>(defaultPath);
   const [isDisabled, setIsDisabled] = useState(false);
+
   const _onExpand = useCallback(() => setIsDisabled(!isDisabled), [isDisabled]);
 
   const _onChange = useCallback((newPath: string): void => {
@@ -40,11 +43,11 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
             isError={isError || !path}
             label={
               isDisabled
-                ? 'Derivation Path'
-                : 'Derivation Path (unlock to edit)'
+                ? t('Derivation Path')
+                : t('Derivation Path (unlock to edit)')
             }
             onChange={_onChange}
-            placeholder='//hard/soft'
+            placeholder={t('//hard/soft')}
             value={path}
           />
         </PathInput>

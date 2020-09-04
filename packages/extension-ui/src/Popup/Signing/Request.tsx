@@ -125,7 +125,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
       >
         <Checkbox
           checked={!!isSavedPass}
-          label={t("Don't ask me again for the next 15 minutes")}
+          label={t<string>("Don't ask me again for the next 15 minutes")}
           onChange={setIsSavedPass}
         />
       </Unlock>
@@ -174,7 +174,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
               isDanger
               onClick={_onCancel}
             >
-              {t('Cancel')}
+              {t<string>('Cancel')}
             </Link>
           </CancelButton>
         </SignArea>
@@ -200,7 +200,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
               isDanger
               onClick={_onCancel}
             >
-              {t('Reject')}
+              {t<string>('Reject')}
             </Link>
           </CancelButton>
         </SignArea>

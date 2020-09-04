@@ -50,7 +50,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
           <Svg src={seedIcon} />
-          <span>{t('Import account from pre-existing seed')}</span>
+          <span>{t<string>('Import account from pre-existing seed')}</span>
         </Link>
       </MenuItem>
       <MenuItem className='menuItem'>
@@ -59,7 +59,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           to={isPopup ? undefined : '/account/restore-json'}
         >
           <Svg src={fileIcon} />
-          <span>{t('Restore account from backup JSON file')}</span>
+          <span>{t<string>('Restore account from backup JSON file')}</span>
         </Link>
       </MenuItem>
       <MenuDivider />
@@ -69,7 +69,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           to='/account/import-qr'
         >
           <Svg src={qrIcon} />
-          <span>{t('Attach external QR-signer account')}</span>
+          <span>{t<string>('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
     </Menu>

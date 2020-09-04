@@ -6,6 +6,7 @@ import { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext } from 'react';
+import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
@@ -38,7 +39,6 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     [authId, onAction]
   );
 
-  // FIXME i18next <Trans /> component to be used here
   return (
     <div className={className}>
       <RequestInfo>
@@ -48,20 +48,21 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
             onClick={_onReject}
           />
           <div className='tab-info'>
-            An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
-            <a
-              href={url}
-              rel='noopener noreferrer'
-              target='_blank'
-            >
-              <span className='tab-url'>{url}</span>
-            </a>.
+            <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
+              <a
+                href={url}
+                rel='noopener noreferrer'
+                target='_blank'
+              >
+                <span className='tab-url'>{url}</span>
+              </a>.
+            </Trans>
           </div>
         </Info>
         {isFirst && (
           <>
-            <RequestWarning>{t('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</RequestWarning>
-            <AcceptButton onClick={_onApprove}>{t('Yes, allow this application access')}</AcceptButton>
+            <RequestWarning>{t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</RequestWarning>
+            <AcceptButton onClick={_onApprove}>{t<string>('Yes, allow this application access')}</AcceptButton>
           </>
         )}
         <RejectButton>

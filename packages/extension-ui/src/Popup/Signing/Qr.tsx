@@ -56,7 +56,7 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
           className='scanButton'
           onClick={_onShowQr}
         >
-          {t('Scan signature via camera')}
+          {t<string>('Scan signature via camera')}
         </Button>
       )}
     </div>

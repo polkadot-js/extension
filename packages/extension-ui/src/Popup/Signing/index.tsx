@@ -48,7 +48,7 @@ export default function Signing (): React.ReactElement {
   return request
     ? (
       <>
-        <Header text={isTransaction ? t('Transaction') : t('Sign message')}>
+        <Header text={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}>
           {requests.length > 1 && (
             <TransactionIndex
               index={requestIndex}

@@ -24,7 +24,7 @@ export default function Accounts (): React.ReactElement {
             <Header
               showAdd
               showSettings
-              text={t('Accounts')}
+              text={t<string>('Accounts')}
             />
             <AccountsArea>
               {hierarchy.map((json, index): React.ReactNode => (

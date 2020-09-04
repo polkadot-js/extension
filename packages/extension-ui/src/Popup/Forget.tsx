@@ -34,22 +34,22 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
     <>
       <Header
         showBackArrow
-        text={t('Forget account')}
+        text={t<string>('Forget account')}
       />
       <div>
         <Address address={address}>
-          <MovedWarning isDanger>{t('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
+          <MovedWarning isDanger>{t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
           <ActionArea>
             <Button
               isDanger
               onClick={_onClick}
             >
-              {t('I want to forget this account')}
+              {t<string>('I want to forget this account')}
             </Button>
             <CancelButton>
               <ActionText
                 onClick={_goHome}
-                text={t('Cancel')}
+                text={t<string>('Cancel')}
               />
             </CancelButton>
           </ActionArea>

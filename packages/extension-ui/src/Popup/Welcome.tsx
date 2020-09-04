@@ -22,19 +22,19 @@ export default function Welcome (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text={t('Welcome')} />
-      <Note>{t('Before we start, just a couple of notes regarding use:')}</Note>
+      <Header text={t<string>('Welcome')} />
+      <Note>{t<string>('Before we start, just a couple of notes regarding use:')}</Note>
       <TextBox>
         <List>
-          <li>{t('We do not send any clicks, pageviews or events to a central server')}</li>
-          <li>{t('We do not use any trackers or analytics')}</li>
-          <li>{t("We don't collect keys, addresses or any information - your information never leaves this machine")}</li>
+          <li>{t<string>('We do not send any clicks, pageviews or events to a central server')}</li>
+          <li>{t<string>('We do not use any trackers or analytics')}</li>
+          <li>{t<string>("We don't collect keys, addresses or any information - your information never leaves this machine")}</li>
         </List>
       </TextBox>
-      <Note>{t('... we are not in the information collection business (even anonymized).')}</Note>
+      <Note>{t<string>('... we are not in the information collection business (even anonymized).')}</Note>
       <VerticalSpace />
       <ButtonArea>
-        <Button onClick={_onClick}>{t('Understood, let me continue')}</Button>
+        <Button onClick={_onClick}>{t<string>('Understood, let me continue')}</Button>
       </ButtonArea>
     </>
   );

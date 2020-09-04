@@ -47,44 +47,44 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
     <div className={className}>
       <Table>
         <tr>
-          <td className='label'>{t('from')}</td>
+          <td className='label'>{t<string>('from')}</td>
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>{t('chain')}</td>
+          <td className='label'>{t<string>('chain')}</td>
           <td className='data'>{request.chain}</td>
         </tr>
         <tr>
-          <td className='label'>{t('icon')}</td>
+          <td className='label'>{t<string>('icon')}</td>
           <td className='data'>{request.icon}</td>
         </tr>
         <tr>
-          <td className='label'>{t('decimals')}</td>
+          <td className='label'>{t<string>('decimals')}</td>
           <td className='data'>{request.tokenDecimals}</td>
         </tr>
         <tr>
-          <td className='label'>{t('symbol')}</td>
+          <td className='label'>{t<string>('symbol')}</td>
           <td className='data'>{request.tokenSymbol}</td>
         </tr>
         <tr>
-          <td className='label'>{t('upgrade')}</td>
+          <td className='label'>{t<string>('upgrade')}</td>
           <td className='data'>{chain ? chain.specVersion : t('<unknown>')} -&gt; {request.specVersion}</td>
         </tr>
       </Table>
       <div className='requestInfo'>
-        <Warning className='requestWarning'>{t('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}</Warning>
+        <Warning className='requestWarning'>{t<string>('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}</Warning>
         <Button
           className='btnAccept'
           onClick={_onApprove}
         >
-          {t('Yes, do this metadata update')}
+          {t<string>('Yes, do this metadata update')}
         </Button>
         <ActionBar className='btnReject'>
           <Link
             isDanger
             onClick={_onReject}
           >
-            {t('Reject')}
+            {t<string>('Reject')}
           </Link>
         </ActionBar>
       </div>

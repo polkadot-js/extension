@@ -8,6 +8,7 @@ import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
 import React, { useMemo, useRef } from 'react';
+import { TFunction } from 'i18next';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
 import { Table } from '../../components';
@@ -44,11 +45,11 @@ function decodeMethod (data: string, isDecoded: boolean, chain: Chain | null, sp
   return { args, method };
 }
 
-function renderMethod (data: string, { args, method }: Decoded, t: (key: string) => string): React.ReactNode {
+function renderMethod (data: string, { args, method }: Decoded, t: TFunction): React.ReactNode {
   if (!args || !method) {
     return (
       <tr>
-        <td className='label'>{t('method data')}</td>
+        <td className='label'>{t<string>('method data')}</td>
         <td className='data'>{data}</td>
       </tr>
     );
@@ -57,7 +58,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: (key: string)
   return (
     <>
       <tr>
-        <td className='label'>{t('method')}</td>
+        <td className='label'>{t<string>('method')}</td>
         <td className='data'>
           <details>
             <summary>{method.sectionName}.{method.methodName}{
@@ -71,7 +72,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: (key: string)
       </tr>
       {method.meta && (
         <tr>
-          <td className='label'>{t('info')}</td>
+          <td className='label'>{t<string>('info')}</td>
           <td className='data'>
             <details>
               <summary>{method.meta.documentation.map((d) => d.toString().trim()).join(' ')}</summary>
@@ -83,15 +84,15 @@ function renderMethod (data: string, { args, method }: Decoded, t: (key: string)
   );
 }
 
-function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: (key: string, options?: { replace: Record<string, string> }) => string): string {
+function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunction): string {
   if (era.isImmortalEra) {
-    return t('immortal');
+    return t<string>('immortal');
   }
 
   const blockNumber = bnToBn(hexBlockNumber);
   const mortal = era.asMortalEra;
 
-  return t('mortal, valid from {{birth}} to {{death}}', {
+  return t<string>('mortal, valid from {{birth}} to {{death}}', {
     replace: {
       birth: formatNumber(mortal.birth(blockNumber)),
       death: formatNumber(mortal.death(blockNumber))
@@ -115,24 +116,24 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
       isFull
     >
       <tr>
-        <td className='label'>{t('from')}</td>
+        <td className='label'>{t<string>('from')}</td>
         <td className='data'>{url}</td>
       </tr>
       <tr>
-        <td className='label'>{chain ? t('chain') : t('genesis')}</td>
+        <td className='label'>{chain ? t<string>('chain') : t<string>('genesis')}</td>
         <td className='data'>{chain ? chain.name : genesisHash}</td>
       </tr>
       <tr>
-        <td className='label'>{t('version')}</td>
+        <td className='label'>{t<string>('version')}</td>
         <td className='data'>{specVersion.toNumber()}</td>
       </tr>
       <tr>
-        <td className='label'>{t('nonce')}</td>
+        <td className='label'>{t<string>('nonce')}</td>
         <td className='data'>{formatNumber(nonce)}</td>
       </tr>
       {!tip.isEmpty && (
         <tr>
-          <td className='label'>{t('tip')}</td>
+          <td className='label'>{t<string>('tip')}</td>
           <td className='data'>{formatNumber(tip)}</td>
         </tr>
       )}

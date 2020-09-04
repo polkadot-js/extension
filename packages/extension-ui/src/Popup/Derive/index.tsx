@@ -71,7 +71,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
     <>
       <HeaderWithSteps
         step={account ? 2 : 1}
-        text={t('Add new account')}
+        text={t<string>('Add new account')}
       />
       {!account && (
         <SelectParent
@@ -103,7 +103,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
               isDisabled={!password}
               onClick={_onCreate}
             >
-              {t('Create derived account')}
+              {t<string>('Create derived account')}
             </NextStepButton>
           </ButtonArea>
         </>

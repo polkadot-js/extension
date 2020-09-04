@@ -44,7 +44,7 @@ function Unlock ({ buttonText, children, className, error, isBusy, onSign }: Pro
         disabled={isBusy}
         isError={!password || !!ownError}
         isFocused
-        label={t('Password for this account')}
+        label={t<string>('Password for this account')}
         onChange={_onChangePassword}
         onEnter={_onClick}
         type='password'

@@ -47,7 +47,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
                 : t('Derivation Path (unlock to edit)')
             }
             onChange={_onChange}
-            placeholder={t('//hard/soft')}
+            placeholder={t<string>('//hard/soft')}
             value={path}
           />
         </PathInput>

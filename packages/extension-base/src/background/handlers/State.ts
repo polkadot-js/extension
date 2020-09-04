@@ -356,7 +356,7 @@ export default class State {
       const provider = this.#injectedProviders.get(port);
 
       if (provider) {
-        provider.disconnect();
+        provider.disconnect().catch(console.error);
       }
 
       this.#injectedProviders.delete(port);

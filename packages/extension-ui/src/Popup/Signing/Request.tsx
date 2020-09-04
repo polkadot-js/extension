@@ -19,11 +19,11 @@ import styled from 'styled-components';
 
 interface Props {
   account: AccountJson;
+  buttonText: string;
+  isFirst?: boolean;
   request: RequestSign;
   signId: string;
   url: string;
-  isFirst?: boolean;
-  buttonText?: string;
 }
 
 interface Data {
@@ -134,7 +134,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
         isDisabled={isLocked === null}
         onClick={_onSignQuick}
       >
-        Sign the transaction
+        {buttonText}
       </Button>
     );
 

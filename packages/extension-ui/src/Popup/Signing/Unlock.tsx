@@ -7,15 +7,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, InputWithLabel } from '../../components';
 
 interface Props {
+  buttonText: string;
   children?: React.ReactNode;
   className?: string;
   error?: string | null;
   isBusy: boolean;
   onSign: (password: string) => Promise<void>;
-  buttonText?: string;
 }
 
-function Unlock ({ buttonText = 'Sign the transaction', children, className, error, isBusy, onSign }: Props): React.ReactElement<Props> {
+function Unlock ({ buttonText, children, className, error, isBusy, onSign }: Props): React.ReactElement<Props> {
   const [ownError, setError] = useState<string | null>();
   const [password, setPassword] = useState('');
 

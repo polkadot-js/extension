@@ -94,5 +94,8 @@
   "We do not use any trackers or analytics": "",
   "We don't collect keys, addresses or any information - your information never leaves this machine": "",
   "... we are not in the information collection business (even anonymized).": "",
-  "Understood, let me continue": ""
+  "Understood, let me continue": "",
+  "You currently don't have any accounts. Create your first account to get started.": "",
+  "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.": "",
+  "You are exporting your account. Keep it safe and don't share it with anyone.": ""
 }

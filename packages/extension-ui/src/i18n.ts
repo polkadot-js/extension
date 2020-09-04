@@ -10,8 +10,20 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
+    backend: {},
     debug: false,
-    fallbackLng: 'en'
+    fallbackLng: 'en',
+    interpolation: {
+      escapeValue: false
+    },
+    keySeparator: false,
+    load: 'languageOnly',
+    nsSeparator: false,
+    react: {
+      wait: true
+    },
+    returnEmptyString: false,
+    returnNull: false
   })
   .catch(console.error);
 

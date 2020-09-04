@@ -131,6 +131,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     : (
       <Button
         isBusy={isBusy}
+        isDisabled={isLocked === null}
         onClick={_onSignQuick}
       >
         Sign the transaction
@@ -165,7 +166,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
         }
         <SignArea>
-          {(isLocked !== null) && isFirst && !isExternal && signButton}
+          {isFirst && !isExternal && signButton}
           <CancelButton>
             <Link
               isDanger

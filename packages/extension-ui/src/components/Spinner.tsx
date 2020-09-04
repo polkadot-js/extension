@@ -26,6 +26,8 @@ function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElemen
 export default React.memo(styled(Spinner)`
   bottom: 0rem;
   height: 3rem;
+  left: 50%;
+  margin-left: -1.5rem;
   position: absolute;
   right: 0.75rem;
   width: 3rem;

@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { AccountContext, ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps, Name, Password } from '../../partials';
 import { SelectParent } from './SelectParent';
@@ -28,6 +29,7 @@ interface ConfirmState {
 }
 
 function Derive ({ isLocked }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
   const { address: parentAddress } = useParams<AddressState>();
@@ -69,7 +71,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
     <>
       <HeaderWithSteps
         step={account ? 2 : 1}
-        text='Add new account:&nbsp;'
+        text={t('Add new account')}
       />
       {!account && (
         <SelectParent
@@ -101,7 +103,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
               isDisabled={!password}
               onClick={_onCreate}
             >
-              Create derived account
+              {t('Create derived account')}
             </NextStepButton>
           </ButtonArea>
         </>

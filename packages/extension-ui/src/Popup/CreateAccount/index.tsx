@@ -3,13 +3,16 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+
 import { ActionContext, Address, Loading } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';
 
 export default function CreateAccount (): React.ReactElement {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
@@ -46,7 +49,7 @@ export default function CreateAccount (): React.ReactElement {
     <>
       <HeaderWithSteps
         step={step}
-        text='Create an account:&nbsp;'
+        text={t('Create an account')}
       />
       <Loading>
         <div>

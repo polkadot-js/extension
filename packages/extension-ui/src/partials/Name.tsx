@@ -5,6 +5,7 @@
 import React, { useContext } from 'react';
 
 import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { isNotShorterThan } from '../util/validators';
 
 interface Props {
@@ -16,11 +17,14 @@ interface Props {
   onChange: (name: string | null) => void;
 }
 
+// FIXME i18n
 const isNameValid = isNotShorterThan(3, 'Account name is too short');
 
-export default function Name ({ address, className, isFocused, label = 'A descriptive name for your account', onBlur, onChange }: Props): React.ReactElement<Props> {
+export default function Name ({ address, className, isFocused, label, onBlur, onChange }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
-  const account = accounts.find((account): boolean => account.address === address);
+
+  const account = accounts.find((account) => account.address === address);
   const startValue = account && account.name;
 
   return (
@@ -30,7 +34,7 @@ export default function Name ({ address, className, isFocused, label = 'A descri
       data-input-name
       defaultValue={startValue}
       isFocused={isFocused}
-      label={label}
+      label={label || t('A descriptive name for your account')}
       onBlur={onBlur}
       onValidatedChange={onChange}
       type='text'

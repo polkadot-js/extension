@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
 import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
 import { Header } from '../partials';
 import styled from 'styled-components';
@@ -15,6 +16,7 @@ const MIN_LENGTH = 6;
 type Props = RouteComponentProps<{ address: string }>;
 
 function Export ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
@@ -55,17 +57,17 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
     <>
       <Header
         showBackArrow
-        text='Export account'
+        text={t('Export account')}
       />
       <div>
         <Address address={address}>
-          <MovedWarning danger>You are exporting your account. Keep it safe and don&apos;t share it with anyone.</MovedWarning>
+          <MovedWarning danger>{t('You are exporting your account. Keep it safe and don&apos;t share it with anyone.')}</MovedWarning>
           <ActionArea>
             <InputWithLabel
               data-export-password
               disabled={isBusy}
               isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
-              label='password for this account'
+              label={t('password for this account')}
               onChange={setPass}
               type='password'
             />
@@ -77,12 +79,12 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
               isDisabled={pass.length === 0}
               onClick={_onExportButtonClick}
             >
-              I want to export this account
+              {t('I want to export this account')}
             </Button>
             <CancelButton>
               <ActionText
                 onClick={_goHome}
-                text='Cancel'
+                text={t('Cancel')}
               />
             </CancelButton>
           </ActionArea>

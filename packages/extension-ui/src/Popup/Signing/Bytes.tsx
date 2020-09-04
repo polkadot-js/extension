@@ -5,6 +5,8 @@
 import styled from 'styled-components';
 import React from 'react';
 
+import useTranslation from '../../hooks/useTranslation';
+
 interface Props {
   className?: string;
   bytes: string;
@@ -12,15 +14,17 @@ interface Props {
 }
 
 function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
     <table className={className}>
       <tbody>
         <tr>
-          <td className='label'>from</td>
+          <td className='label'>{t('from')}</td>
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>bytes</td>
+          <td className='label'>{t('bytes')}</td>
           <td className='data'>{bytes}</td>
         </tr>
       </tbody>

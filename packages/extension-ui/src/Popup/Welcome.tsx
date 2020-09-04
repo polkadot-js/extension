@@ -8,9 +8,11 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { Header } from '../partials';
 
 export default function Welcome (): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
   const _onClick = (): void => {
@@ -20,19 +22,19 @@ export default function Welcome (): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text='Welcome'/>
-      <Note>Before we start, just a couple of notes regarding use:</Note>
+      <Header text={t('Welcome')} />
+      <Note>{t('Before we start, just a couple of notes regarding use:')}</Note>
       <TextBox>
         <List>
-          <li>We do not send any clicks, pageviews or events to a central server</li>
-          <li>We do not use any trackers or analytics</li>
-          <li>We don&apos;t collect keys, addresses or any information - your information never leaves this machine</li>
+          <li>{t('We do not send any clicks, pageviews or events to a central server')}</li>
+          <li>{t('We do not use any trackers or analytics')}</li>
+          <li>{t("We don't collect keys, addresses or any information - your information never leaves this machine")}</li>
         </List>
       </TextBox>
-      <Note>... we are not in the information collection business (even anonymized).</Note>
+      <Note>{t('... we are not in the information collection business (even anonymized).')}</Note>
       <VerticalSpace />
       <ButtonArea>
-        <Button onClick={_onClick}>Understood, let me continue</Button>
+        <Button onClick={_onClick}>{t('Understood, let me continue')}</Button>
       </ButtonArea>
     </>
   );

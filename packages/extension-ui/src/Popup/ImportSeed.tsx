@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Header, Name, Password } from '../partials';
 import { allOf, isNotShorterThan, Result } from '../util/validators';
@@ -26,6 +27,7 @@ const isSeedValid = allOf(
 );
 
 export default function Import (): React.ReactElement {
+  const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -71,7 +73,7 @@ export default function Import (): React.ReactElement {
     <>
       <HeaderWithSmallerMargin
         showBackArrow
-        text='Import account'
+        text={t('Import account')}
       />
       <div>
         <Address
@@ -83,7 +85,7 @@ export default function Import (): React.ReactElement {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         component={SeedInput}
         isFocused
-        label='existing 12 or 24-word mnemonic seed'
+        label={t('existing 12 or 24-word mnemonic seed')}
         onValidatedChange={_onChangeSeed}
         rowsCount={2}
         validator={isSeedValid}
@@ -102,7 +104,7 @@ export default function Import (): React.ReactElement {
               isBusy={isBusy}
               onClick={_onCreate}
             >
-              Add the account with the supplied seed
+              {t('Add the account with the supplied seed')}
             </NextStepButton>
           </ButtonArea>
         </>

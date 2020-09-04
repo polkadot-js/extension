@@ -6,11 +6,13 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { AccountContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
 import AddAccount from './AddAccount';
 
 export default function Accounts (): React.ReactElement {
+  const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
 
   return (
@@ -22,7 +24,7 @@ export default function Accounts (): React.ReactElement {
             <Header
               showAdd
               showSettings
-              text={'Accounts'}
+              text={t('Accounts')}
             />
             <AccountsArea>
               {hierarchy.map((json, index): React.ReactNode => (

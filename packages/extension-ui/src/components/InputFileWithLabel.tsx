@@ -9,6 +9,7 @@ import Dropzone, { DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
 import { formatNumber, isHex, u8aToString, hexToU8a } from '@polkadot/util';
 
+import useTranslation from '../hooks/useTranslation';
 import Label from './Label';
 
 function classes (...classNames: (boolean | null | string | undefined)[]): string {
@@ -59,6 +60,7 @@ function convertResult (result: ArrayBuffer, convertHex?: boolean): Uint8Array {
 }
 
 function InputFile ({ accept, className = '', clearContent, convertHex, isDisabled, isError = false, label, onChange, placeholder }: InputFileProps): React.ReactElement<InputFileProps> {
+  const { t } = useTranslation();
   const dropRef = createRef<DropzoneRef>();
   const [file, setFile] = useState<FileState | undefined>();
 
@@ -103,8 +105,13 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
           <em className='label' >
             {
               !file || clearContent
-                ? placeholder || 'click to select or drag and drop the file here'
-                : placeholder || `${file.name} (${formatNumber(file.size)} bytes)`
+                ? placeholder || t('click to select or drag and drop the file here')
+                : placeholder || t('{{name}} ({{size}} bytes)', {
+                  replace: {
+                    name: file.name,
+                    size: formatNumber(file.size)
+                  }
+                })
             }
           </em>
         </div>

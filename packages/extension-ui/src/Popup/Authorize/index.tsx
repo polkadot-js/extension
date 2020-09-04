@@ -6,16 +6,18 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { AuthorizeReqContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
 
 export default function Authorize (): React.ReactElement {
+  const { t } = useTranslation();
   const requests = useContext(AuthorizeReqContext);
 
   return (
     <>
       <Scroll isLastRequest={requests.length === 1}>
-        <Header text='Authorize' />
+        <Header text={t('Authorize')} />
         {requests.map(({ id, request, url }, index): React.ReactNode => (
           <Request
             authId={id}

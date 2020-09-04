@@ -5,15 +5,17 @@
 import React, { useContext } from 'react';
 
 import { Loading, MetadataReqContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
 
 export default function Metadata (): React.ReactElement {
+  const { t } = useTranslation();
   const requests = useContext(MetadataReqContext);
 
   return (
     <>
-      <Header text='Metadata' />
+      <Header text={t('Metadata')} />
       {requests[0]
         ? (
           <Request

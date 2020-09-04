@@ -12,6 +12,7 @@ import plusIcon from '../assets/plus.svg';
 import qrIcon from '../assets/qr.svg';
 import seedIcon from '../assets/secret.svg';
 import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem, Svg } from '../components';
+import useTranslation from '../hooks/useTranslation';
 import { jsonRestoreWindowOpen } from '../messaging';
 
 interface Props extends ThemeProps {
@@ -22,6 +23,7 @@ interface Props extends ThemeProps {
 const isPopup = window.innerWidth <= 480;
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
 
@@ -39,8 +41,8 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           <Svg src={plusIcon} />
           <span>{
             master
-              ? 'Create new account (root or derived)'
-              : 'Create new account'
+              ? t('Create new account (root or derived)')
+              : t('Create new account')
           }</span>
         </Link>
       </MenuItem>
@@ -48,7 +50,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
           <Svg src={seedIcon} />
-          <span>Import account from pre-existing seed</span>
+          <span>{t('Import account from pre-existing seed')}</span>
         </Link>
       </MenuItem>
       <MenuItem className='menuItem'>
@@ -57,7 +59,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           to={isPopup ? undefined : '/account/restore-json'}
         >
           <Svg src={fileIcon} />
-          <span>Restore account from backup JSON file</span>
+          <span>{t('Restore account from backup JSON file')}</span>
         </Link>
       </MenuItem>
       <MenuDivider />
@@ -67,7 +69,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           to='/account/import-qr'
         >
           <Svg src={qrIcon} />
-          <span>Attach external QR-signer account</span>
+          <span>{t('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
     </Menu>

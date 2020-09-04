@@ -5,6 +5,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 import { Name, Password } from '../../partials';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 }
 
 function AccountName ({ isBusy, onBackClick, onCreate }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
@@ -39,7 +41,7 @@ function AccountName ({ isBusy, onBackClick, onCreate }: Props): React.ReactElem
           isDisabled={!password || !name}
           onClick={_onCreate}
         >
-          Add the account with the generated seed
+          {t('Add the account with the generated seed')}
         </NextStepButton>
       </ButtonArea>
     </>

@@ -55,6 +55,7 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
     display: flex;
     justify-content: space-between;
     flex-grow: 1;
+    padding-left: 1em;
     padding-right: 24px;
     margin-top: 3px;
   }

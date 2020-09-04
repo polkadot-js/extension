@@ -8,6 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { ActionText, Title } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   step: number;
@@ -16,6 +17,8 @@ interface Props {
 }
 
 function CreationStep ({ className, onClick, step }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
     <div className={className}>
       <div>
@@ -25,12 +28,13 @@ function CreationStep ({ className, onClick, step }: Props): React.ReactElement<
       </div>
       <ActionText
         onClick={onClick}
-        text={step === 1 ? 'Cancel' : 'Back'}
+        text={step === 1 ? t('Cancel') : t('Back')}
       />
     </div>
   );
 }
 
+// FIXME i18n
 const CreateAnAccount = styled(Title).attrs(() => ({
   children: 'Create an account:'
 }))`

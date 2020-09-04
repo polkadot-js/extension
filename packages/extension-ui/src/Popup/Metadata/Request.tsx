@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
+import useTranslation from '../../hooks/useTranslation';
 import { approveMetaRequest, rejectMetaRequest } from '../../messaging';
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 function Request ({ className, metaId, request, url }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
 
@@ -45,44 +47,44 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
     <div className={className}>
       <Table>
         <tr>
-          <td className='label'>from</td>
+          <td className='label'>{t('from')}</td>
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>chain</td>
+          <td className='label'>{t('chain')}</td>
           <td className='data'>{request.chain}</td>
         </tr>
         <tr>
-          <td className='label'>icon</td>
+          <td className='label'>{t('icon')}</td>
           <td className='data'>{request.icon}</td>
         </tr>
         <tr>
-          <td className='label'>decimals</td>
+          <td className='label'>{t('decimals')}</td>
           <td className='data'>{request.tokenDecimals}</td>
         </tr>
         <tr>
-          <td className='label'>symbol</td>
+          <td className='label'>{t('symbol')}</td>
           <td className='data'>{request.tokenSymbol}</td>
         </tr>
         <tr>
-          <td className='label'>upgrade</td>
-          <td className='data'>{chain ? chain.specVersion : 'unknown'} -&gt; {request.specVersion}</td>
+          <td className='label'>{t('upgrade')}</td>
+          <td className='data'>{chain ? chain.specVersion : t('<unknown>')} -&gt; {request.specVersion}</td>
         </tr>
       </Table>
       <div className='requestInfo'>
-        <Warning className='requestWarning'>This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.</Warning>
+        <Warning className='requestWarning'>{t('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}</Warning>
         <Button
           className='btnAccept'
           onClick={_onApprove}
         >
-            Yes, do this metadata update
+          {t('Yes, do this metadata update')}
         </Button>
         <ActionBar className='btnReject'>
           <Link
             isDanger
             onClick={_onReject}
           >
-            Reject
+            {t('Reject')}
           </Link>
         </ActionBar>
       </div>

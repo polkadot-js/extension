@@ -8,6 +8,7 @@ import React, { MouseEventHandler } from 'react';
 import styled from 'styled-components';
 
 import copy from '../assets/copy.svg';
+import useTranslation from '../hooks/useTranslation';
 import ActionText from './ActionText';
 import TextAreaWithLabel from './TextAreaWithLabel';
 
@@ -18,12 +19,14 @@ interface Props {
 }
 
 function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
     <div className={className}>
       <TextAreaWithLabel
         className='mnemonicDisplay'
         isReadOnly
-        label='Generated 12-word mnemonic seed:'
+        label={t('Generated 12-word mnemonic seed:')}
         value={seed}
       />
       <div className='buttonsRow'>
@@ -32,7 +35,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
           data-seed-action='copy'
           icon={copy}
           onClick={onCopy}
-          text='Copy to clipboard'
+          text={t('Copy to clipboard')}
         />
       </div>
     </div>

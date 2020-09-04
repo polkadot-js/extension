@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { Button, InputWithLabel } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   buttonText: string;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 function Unlock ({ buttonText, children, className, error, isBusy, onSign }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [ownError, setError] = useState<string | null>();
   const [password, setPassword] = useState('');
 
@@ -42,7 +44,7 @@ function Unlock ({ buttonText, children, className, error, isBusy, onSign }: Pro
         disabled={isBusy}
         isError={!password || !!ownError}
         isFocused
-        label='Password for this account'
+        label={t('Password for this account')}
         onChange={_onChangePassword}
         onEnter={_onClick}
         type='password'

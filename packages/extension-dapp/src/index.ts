@@ -40,6 +40,10 @@ export { isWeb3Injected, web3EnablePromise };
 
 // enables all the providers found on the injected window interface
 export function web3Enable (originName: string): Promise<InjectedExtension[]> {
+  if (!originName){
+    throw new Error('You must pass a name for your app to the web3Enable function');
+  }
+
   web3EnablePromise = documentReadyPromise((): Promise<InjectedExtension[]> =>
     Promise
       .all(

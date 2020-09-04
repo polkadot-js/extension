@@ -23,7 +23,7 @@ function Back ({ className, to = '/' }: Props): React.ReactElement<Props> {
     <div className={className}>
       <BackLink to={to}>
         <ArrowLeft />
-        {t('Back')}
+        {t<string>('Back')}
       </BackLink>
     </div>
   );

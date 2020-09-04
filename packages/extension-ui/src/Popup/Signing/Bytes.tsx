@@ -20,11 +20,11 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
     <table className={className}>
       <tbody>
         <tr>
-          <td className='label'>{t('from')}</td>
+          <td className='label'>{t<string>('from')}</td>
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>{t('bytes')}</td>
+          <td className='label'>{t<string>('bytes')}</td>
           <td className='data'>{bytes}</td>
         </tr>
       </tbody>

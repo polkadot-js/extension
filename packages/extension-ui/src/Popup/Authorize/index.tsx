@@ -17,7 +17,7 @@ export default function Authorize (): React.ReactElement {
   return (
     <>
       <Scroll isLastRequest={requests.length === 1}>
-        <Header text={t('Authorize')} />
+        <Header text={t<string>('Authorize')} />
         {requests.map(({ id, request, url }, index): React.ReactNode => (
           <Request
             authId={id}

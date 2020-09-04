@@ -15,7 +15,7 @@ export default function Metadata (): React.ReactElement {
 
   return (
     <>
-      <Header text={t('Metadata')} />
+      <Header text={t<string>('Metadata')} />
       {requests[0]
         ? (
           <Request

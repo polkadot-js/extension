@@ -26,7 +26,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
       <TextAreaWithLabel
         className='mnemonicDisplay'
         isReadOnly
-        label={t('Generated 12-word mnemonic seed:')}
+        label={t<string>('Generated 12-word mnemonic seed:')}
         value={seed}
       />
       <div className='buttonsRow'>
@@ -35,7 +35,7 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
           data-seed-action='copy'
           icon={copy}
           onClick={onCopy}
-          text={t('Copy to clipboard')}
+          text={t<string>('Copy to clipboard')}
         />
       </div>
     </div>

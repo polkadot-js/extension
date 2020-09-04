@@ -95,7 +95,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
       {!isLocked && (
         <CheckboxWithSmallerMargins
           checked={shouldAccountBeDerived}
-          label={t('Derive new account from existing')}
+          label={t<string>('Derive new account from existing')}
           onChange={setShouldAccountBeDerived}
         />
       )}
@@ -108,7 +108,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
             />
           )
           : (
-            <Label label={t('Choose Parent Account:')}>
+            <Label label={t<string>('Choose Parent Account:')}>
               <AddressDropdown
                 allAddresses={allAddresses}
                 onSelect={_onParentChange}
@@ -123,7 +123,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
             data-export-password
             isError={!isProperParentPassword}
             isFocused
-            label={t('enter the password for the account you want to derive from')}
+            label={t<string>('enter the password for the account you want to derive from')}
             onChange={_onParentPasswordEnter}
             type='password'
             value={parentPassword}
@@ -148,7 +148,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
               isDisabled={!isProperParentPassword || !suriPath}
               onClick={_onSubmit}
             >
-              {t('Create a derived account')}
+              {t<string>('Create a derived account')}
             </NextStepButton>
           )
           : (
@@ -156,7 +156,7 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
               data-button-action='create root account'
               onClick={_goCreate}
             >
-              {t('Create account from new seed')}
+              {t<string>('Create account from new seed')}
             </NextStepButton>
           )
         }

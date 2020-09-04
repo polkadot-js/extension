@@ -378,7 +378,7 @@ export default class State {
 
     assert(provider, 'Cannot call pub(rpc.subscribeConnected) before provider is set');
 
-    cb(null, provider.isConnected()); // Immediately send back current isConnected
+    cb(null, provider.isConnected); // Immediately send back current isConnected
     provider.on('connected', () => cb(null, true));
     provider.on('disconnected', () => cb(null, false));
   }

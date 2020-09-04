@@ -38,7 +38,7 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
       disabled={isDisabled || isBusy}
       onClick={_onClick}
     >
-      {children}
+      <div className='children'>{children}</div>
       <div className='disabledOverlay' />
       <Spinner className='busyOverlay' />
     </button>
@@ -85,8 +85,16 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     top: 0;
   }
 
-  &.isBusy .busyOverlay {
-    visibility: visible;
+  &.isBusy {
+    background: rgba(96,96,96,0.15);
+
+    .children {
+      opacity: 0.25;
+    }
+
+    .busyOverlay {
+      visibility: visible;
+    }
   }
 
   &.isDisabled .disabledOverlay {

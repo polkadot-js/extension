@@ -5,7 +5,7 @@
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
@@ -25,11 +25,16 @@ const CMD_MORTAL = 2;
 function Qr ({ className, onSignature, payload, request }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
-  const [payloadU8a, setPayloadU8a] = useState(new Uint8Array());
 
-  useEffect((): void => setPayloadU8a(payload.toU8a()), [payload]);
+  const payloadU8a = useMemo(
+    () => payload.toU8a(),
+    [payload]
+  );
 
-  const _onShowQr = (): void => setIsScanning(true);
+  const _onShowQr = useCallback(
+    () => setIsScanning(true),
+    []
+  );
 
   return (
     <div className={className}>

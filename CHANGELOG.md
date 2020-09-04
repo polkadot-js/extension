@@ -18,7 +18,8 @@ Changes:
 - Handling signing rejections (any order) transparently
 - Small overall UI and use adjustments
 - Latest upstream polkadot-js dependencies
-- Prepare for i18n translations with setup of key -> key
+- Prepare for i18n translations with initial i18next setup
+- Rendering optimizations for Extrinsic displays
 
 
 ## 0.32.1 Jul 27, 2020

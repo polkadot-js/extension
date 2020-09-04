@@ -73,7 +73,7 @@ export default function Import (): React.ReactElement {
     <>
       <HeaderWithSmallerMargin
         showBackArrow
-        text={t('Import account')}
+        text={t<string>('Import account')}
       />
       <div>
         <Address
@@ -85,7 +85,7 @@ export default function Import (): React.ReactElement {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define
         component={SeedInput}
         isFocused
-        label={t('existing 12 or 24-word mnemonic seed')}
+        label={t<string>('existing 12 or 24-word mnemonic seed')}
         onValidatedChange={_onChangeSeed}
         rowsCount={2}
         validator={isSeedValid}
@@ -104,7 +104,7 @@ export default function Import (): React.ReactElement {
               isBusy={isBusy}
               onClick={_onCreate}
             >
-              {t('Add the account with the supplied seed')}
+              {t<string>('Add the account with the supplied seed')}
             </NextStepButton>
           </ButtonArea>
         </>

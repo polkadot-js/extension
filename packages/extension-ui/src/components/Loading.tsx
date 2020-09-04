@@ -15,7 +15,7 @@ export default function Loading ({ children }: Props): React.ReactElement<Props>
 
   if (!children) {
     return (
-      <div>{t('... loading ...')}</div>
+      <div>{t<string>('... loading ...')}</div>
     );
   }
 

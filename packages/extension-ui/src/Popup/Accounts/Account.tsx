@@ -69,14 +69,14 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         className='menuItem'
         onClick={_toggleEdit}
       >
-        {t('Rename')}
+        {t<string>('Rename')}
       </Link>
       {!isExternal && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}
         >
-          {t('Derive New Account')}
+          {t<string>('Derive New Account')}
         </Link>
       )}
       <MenuDivider />
@@ -86,7 +86,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
           isDanger
           to={`/account/export/${address}`}
         >
-          {t('Export Account')}
+          {t<string>('Export Account')}
         </Link>
       )}
       <Link
@@ -94,14 +94,14 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         isDanger
         to={`/account/forget/${address}`}
       >
-        {t('Forget Account')}
+        {t<string>('Forget Account')}
       </Link>
       <MenuDivider />
       <div className='menuItem'>
         <Checkbox
           checked={!isHidden}
           className='inputItem'
-          label={t('Visible (always inject)')}
+          label={t<string>('Visible (always inject)')}
           onClick={_toggleVisibility}
         />
       </div>

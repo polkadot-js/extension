@@ -71,19 +71,19 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider />
       <MenuItem
         className='setting'
-        title={t('External QR accounts and Access')}
+        title={t<string>('External QR accounts and Access')}
       >
         <Checkbox
           checked={camera}
           className='checkbox'
-          label={t('Allow Camera Access')}
+          label={t<string>('Allow Camera Access')}
           onChange={setCamera}
         />
       </MenuItem>
       <MenuDivider />
       <MenuItem
         className='setting'
-        title={t('Display address format For')}
+        title={t<string>('Display address format For')}
       >
         <Dropdown
           className='dropdown'
@@ -101,7 +101,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
               className='openWindow'
               icon={FullScreenIcon}
               onClick={windowOpen}
-              text={t('Open extension in new window')}
+              text={t<string>('Open extension in new window')}
             />
           </MenuItem>
         </>

@@ -49,7 +49,7 @@ export default function CreateAccount (): React.ReactElement {
     <>
       <HeaderWithSteps
         step={step}
-        text={t('Create an account')}
+        text={t<string>('Create an account')}
       />
       <Loading>
         <div>

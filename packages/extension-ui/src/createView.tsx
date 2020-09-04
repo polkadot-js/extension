@@ -8,6 +8,8 @@ import { HashRouter } from 'react-router-dom';
 
 import { Fonts, View } from './components';
 
+import './i18n';
+
 export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
   const rootElement = document.getElementById(rootId);
 

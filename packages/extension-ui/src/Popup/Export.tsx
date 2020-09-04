@@ -57,17 +57,17 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
     <>
       <Header
         showBackArrow
-        text={t('Export account')}
+        text={t<string>('Export account')}
       />
       <div>
         <Address address={address}>
-          <MovedWarning danger>{t("You are exporting your account. Keep it safe and don't share it with anyone.")}</MovedWarning>
+          <MovedWarning danger>{t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}</MovedWarning>
           <ActionArea>
             <InputWithLabel
               data-export-password
               disabled={isBusy}
               isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
-              label={t('password for this account')}
+              label={t<string>('password for this account')}
               onChange={setPass}
               type='password'
             />
@@ -79,12 +79,12 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
               isDisabled={pass.length === 0}
               onClick={_onExportButtonClick}
             >
-              {t('I want to export this account')}
+              {t<string>('I want to export this account')}
             </Button>
             <CancelButton>
               <ActionText
                 onClick={_goHome}
-                text={t('Cancel')}
+                text={t<string>('Cancel')}
               />
             </CancelButton>
           </ActionArea>

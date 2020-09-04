@@ -96,7 +96,7 @@ export default function Upload (): React.ReactElement {
     <>
       <HeaderWithSmallerMargin
         showBackArrow
-        text={t('Restore from JSON')}
+        text={t<string>('Restore from JSON')}
       />
       <div>
         <div>
@@ -109,13 +109,13 @@ export default function Upload (): React.ReactElement {
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={!isFileValid}
-          label={t('backup file')}
+          label={t<string>('backup file')}
           onChange={_onChangeFile}
           withLabel
         />
         <InputWithLabel
           isError={!isPassValid}
-          label={t('Password for this file')}
+          label={t<string>('Password for this file')}
           onChange={_onChangePass}
           type='password'
         />
@@ -124,7 +124,7 @@ export default function Upload (): React.ReactElement {
           isDisabled={!isFileValid || !isPassValid}
           onClick={_onRestore}
         >
-          {t('Restore')}
+          {t<string>('Restore')}
         </Button>
       </div>
     </>

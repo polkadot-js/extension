@@ -29,7 +29,7 @@ export default function ImportQr (): React.ReactElement {
     <>
       <Header
         showBackArrow
-        text={t('Scan Address Qr')}
+        text={t<string>('Scan Address Qr')}
       />
       {!account && (
         <div>
@@ -54,7 +54,7 @@ export default function ImportQr (): React.ReactElement {
               <NextStepButton
                 onClick={_onCreate}
               >
-                {t('Add the account with identified address')}
+                {t<string>('Add the account with identified address')}
               </NextStepButton>
             </ButtonArea>
           )}

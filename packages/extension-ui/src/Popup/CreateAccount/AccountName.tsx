@@ -41,7 +41,7 @@ function AccountName ({ isBusy, onBackClick, onCreate }: Props): React.ReactElem
           isDisabled={!password || !name}
           onClick={_onCreate}
         >
-          {t('Add the account with the generated seed')}
+          {t<string>('Add the account with the generated seed')}
         </NextStepButton>
       </ButtonArea>
     </>

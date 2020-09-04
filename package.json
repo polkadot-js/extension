@@ -17,8 +17,9 @@
     "typescript": "^4.0.2"
   },
   "scripts": {
-    "build": "yarn build:code && yarn build:zip",
+    "build": "yarn build:i18n && yarn build:code && yarn build:zip",
     "build:code": "NODE_ENV=production polkadot-dev-build-ts",
+    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:release": "polkadot-ci-ghact-build",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
@@ -37,6 +38,7 @@
     "@polkadot/typegen": "^1.32.0-beta.19",
     "@types/jest": "^26.0.13",
     "copy-webpack-plugin": "^6.1.0",
+    "i18next-scanner": "^2.11.0",
     "sinon-chrome": "^3.0.1",
     "stylelint": "^13.7.0",
     "stylelint-config-recommended": "^3.0.0",

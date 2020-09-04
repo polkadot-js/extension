@@ -7,6 +7,7 @@ Contributed:
 - Include Subsocial ss58 (Thanks to https://github.com/F3Joule)
 - Add Crab network (Thanks to https://github.com/WoeOm)
 - README updates (Thanks to https://github.com/Noc2)
+- Runtime checks for web3Enable params (Thanks to https://github.com/Tbaut)
 
 Changes:
 

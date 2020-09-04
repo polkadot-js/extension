@@ -61,7 +61,7 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
       />
       <div>
         <Address address={address}>
-          <MovedWarning danger>{t('You are exporting your account. Keep it safe and don&apos;t share it with anyone.')}</MovedWarning>
+          <MovedWarning danger>{t("You are exporting your account. Keep it safe and don't share it with anyone.")}</MovedWarning>
           <ActionArea>
             <InputWithLabel
               data-export-password

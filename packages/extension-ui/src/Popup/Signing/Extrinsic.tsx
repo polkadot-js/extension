@@ -7,7 +7,7 @@ import { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces
 import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { TFunction } from 'i18next';
 import { formatNumber, bnToBn } from '@polkadot/util';
 
@@ -104,11 +104,11 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
-  const [decoded, setDecoded] = useState<Decoded>({ args: null, method: null });
 
-  useEffect((): void => {
-    setDecoded(decodeMethod(method, isDecoded, chain, specVersion));
-  }, [method, isDecoded, chain, specVersion]);
+  const decoded = useMemo(
+    () => decodeMethod(method, isDecoded, chain, specVersion),
+    [method, isDecoded, chain, specVersion]
+  );
 
   return (
     <Table

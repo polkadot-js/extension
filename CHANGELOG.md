@@ -7,6 +7,7 @@ Contributed:
 - Include Subsocial ss58 (Thanks to https://github.com/F3Joule)
 - Add Crab network (Thanks to https://github.com/WoeOm)
 - README updates (Thanks to https://github.com/Noc2)
+- Runtime checks for web3Enable params (Thanks to https://github.com/Tbaut)
 
 Changes:
 
@@ -18,7 +19,8 @@ Changes:
 - Handling signing rejections (any order) transparently
 - Small overall UI and use adjustments
 - Latest upstream polkadot-js dependencies
-- Prepare for i18n translations with setup of key -> key
+- Prepare for i18n translations with initial i18next setup
+- Rendering optimizations for Extrinsic displays
 
 
 ## 0.32.1 Jul 27, 2020

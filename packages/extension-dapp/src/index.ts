@@ -2,7 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, Unsubcall, ProviderList } from '@polkadot/extension-inject/types';
+import { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import { documentReadyPromise } from './util';
 
@@ -23,11 +24,15 @@ function throwError (method: string): never {
 }
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
-function mapAccounts (source: string, list: InjectedAccount[]): InjectedAccountWithMeta[] {
-  return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => ({
-    address,
-    meta: { genesisHash, name, source }
-  }));
+function mapAccounts (source: string, list: InjectedAccount[], ss58Prefix?: number): InjectedAccountWithMeta[] {
+  return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => {
+    const encodedAddress = encodeAddress(decodeAddress(address), ss58Prefix);
+
+    return ({
+      address: encodedAddress,
+      meta: { genesisHash, name, source }
+    });
+  });
 }
 
 // have we found a properly constructed window.injectedWeb3
@@ -91,7 +96,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
 }
 
 // retrieve all the accounts accross all providers
-export async function web3Accounts (): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ ss58Prefix } : Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }
@@ -103,7 +108,7 @@ export async function web3Accounts (): Promise<InjectedAccountWithMeta[]> {
       try {
         const list = await accounts.get();
 
-        return mapAccounts(source, list);
+        return mapAccounts(source, list, ss58Prefix);
       } catch (error) {
         // cannot handle this one
         return [];

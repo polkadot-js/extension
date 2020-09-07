@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.33.2 Sep 7, 2020
+
+- Fix zip output to correctly include all source files
+
 ## 0.33.1 Sep 6, 2020
 
 Contributed:

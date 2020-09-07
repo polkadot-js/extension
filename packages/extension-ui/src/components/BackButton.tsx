@@ -35,7 +35,7 @@ export default styled(BackButton)(({ theme }: ThemeProps) => `
   margin-right: 11px;
   width: 42px;
 
-  > .arrowLeft {
+  .arrowLeft {
     background: ${theme.backButtonTextColor};
     display: block;
     height: 12px;

@@ -67,6 +67,9 @@ function createWebpack ({ alias = {}, context }) {
       net: 'empty',
       tls: 'empty'
     },
+    optimization: {
+      occurrenceOrder: true
+    },
     output: {
       chunkFilename: '[name].js',
       filename: '[name].js',

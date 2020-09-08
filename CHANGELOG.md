@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.34.0-beta.2 Sep 8, 2020
+
+- Reproducable builds with Webpack occurence flag
+
+
 ## 0.33.2 Sep 7, 2020
 
 - Fix zip output to correctly include all source files

@@ -68,7 +68,7 @@ function createWebpack ({ alias = {}, context }) {
       tls: 'empty'
     },
     optimization: {
-      // moduleIds: 'named',
+      moduleIds: 'deterministic',
       occurrenceOrder: false
     },
     output: {

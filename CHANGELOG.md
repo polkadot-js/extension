@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.34.0-beta.2 Sep 8, 2020
+## 0.34.0-beta.3 Sep 8, 2020
 
 - Reproducable builds with Webpack occurence flag
 

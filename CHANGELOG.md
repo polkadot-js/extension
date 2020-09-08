@@ -4,7 +4,7 @@
 
 - Fix zip output to correctly include all source files
 
-## 0.33.1 Sep 6, 2020
+## 0.33.1 Sep 7, 2020
 
 Contributed:
 

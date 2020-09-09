@@ -69,7 +69,6 @@ function createWebpack ({ alias = {}, context }) {
     },
     optimization: {
       concatenateModules: false,
-      mangleExports: false,
       moduleIds: 'hashed',
       occurrenceOrder: false,
       providedExports: false,

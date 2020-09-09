@@ -52,6 +52,7 @@ function createWebpack ({ alias = {}, context }) {
             {
               loader: require.resolve('url-loader'),
               options: {
+                esModule: false,
                 limit: 10000,
                 name: 'static/[name].[ext]'
               }
@@ -69,7 +70,7 @@ function createWebpack ({ alias = {}, context }) {
     },
     optimization: {
       concatenateModules: false,
-      moduleIds: 'natural', // false, // 'hashed',
+      moduleIds: 'natural',
       occurrenceOrder: false,
       providedExports: false,
       sideEffects: false,

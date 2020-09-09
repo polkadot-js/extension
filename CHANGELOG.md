@@ -1,13 +1,22 @@
 # CHANGELOG
 
-## 0.34.0-beta.7 Sep 9, 2020
+## 0.33.3 Sep 9, 2020
 
-- Reproducable builds with Webpack optimization flags
+Contributed:
+
+- Fix back button display on create account (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Reproducible builds with Webpack optimization flags
 
 
 ## 0.33.2 Sep 7, 2020
 
+Changes:
+
 - Fix zip output to correctly include all source files
+
 
 ## 0.33.1 Sep 7, 2020
 

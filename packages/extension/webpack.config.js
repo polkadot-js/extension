@@ -73,7 +73,6 @@ function createWebpack ({ alias = {}, context }) {
       moduleIds: 'hashed',
       occurrenceOrder: false,
       providedExports: false,
-      realContentHash: true,
       sideEffects: false,
       usedExports: false
     },

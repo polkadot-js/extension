@@ -3097,7 +3097,7 @@ __metadata:
     i18next-browser-languagedetector: ^5.0.1
     react: ^16.13.1
     react-dom: ^16.13.1
-    react-dropzone: ^11.0.3
+    react-dropzone: ^11.1.0
     react-i18next: ^11.7.2
     react-is: ^16.13.1
     react-router: ^5.2.0
@@ -3496,11 +3496,11 @@ __metadata:
   linkType: hard
 
 "@types/babel__traverse@npm:*, @types/babel__traverse@npm:^7.0.6":
-  version: 7.0.13
-  resolution: "@types/babel__traverse@npm:7.0.13"
+  version: 7.0.14
+  resolution: "@types/babel__traverse@npm:7.0.14"
   dependencies:
     "@babel/types": ^7.3.0
-  checksum: 25d3cf96fcae3755d2d79ee5f696df56eba082cfc424a0b9d190dfad5c8e9167d1a4e2abbcb00bc5cd39853e4d638457caf894549ff583679dcb1b18b6a6ebc5
+  checksum: 322b1fc7dbd22c13aaef1d00fcd3569844240609c84558fff110290ad60a51d66735a1a6e122489a08250ec0076fcc6c8e7e44356f52e3fc93037de556631e82
   languageName: node
   linkType: hard
 
@@ -3774,11 +3774,11 @@ __metadata:
   linkType: hard
 
 "@types/react-native@npm:*":
-  version: 0.63.15
-  resolution: "@types/react-native@npm:0.63.15"
+  version: 0.63.16
+  resolution: "@types/react-native@npm:0.63.16"
   dependencies:
     "@types/react": "*"
-  checksum: b64148dd582ff3fc33a954d79ba9f82f48f429ffdf5d7129c604dd6ab8b055a1b0a9bd400739cf4de2d42e1ab1cf9a397a16e13ac34656f7a62fbb986425842d
+  checksum: e7bc6e52204e9fe13f950f2c5e48349115188641f70508f17aa6dd5051406dcdeee77c3a2578ef8ab38f09391d919086c27961fdbbbbc73878354b64886974f1
   languageName: node
   linkType: hard
 
@@ -5354,9 +5354,9 @@ __metadata:
   linkType: hard
 
 "attr-accept@npm:^2.0.0":
-  version: 2.2.1
-  resolution: "attr-accept@npm:2.2.1"
-  checksum: b209907bc692bc6132abbcb3038601e83e479ab4b621fecbaf2aa829b83e13fc7f1c87610c3a93afb76f09a17864cd6aa3f16cc2488c7c4af23aa37180c95db9
+  version: 2.2.2
+  resolution: "attr-accept@npm:2.2.2"
+  checksum: e9c5d3580f6cae9c5c25c5c9c8660d344dd8bed25e77df7515c046864fe1aa4bb245e743ad46f55b85443ff53c95e378b3203c3e83f2168a2557e94d0552d458
   languageName: node
   linkType: hard
 
@@ -5591,14 +5591,9 @@ __metadata:
   linkType: hard
 
 "babel-plugin-add-module-exports@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "babel-plugin-add-module-exports@npm:1.0.2"
-  dependencies:
-    chokidar: ^2.0.4
-  dependenciesMeta:
-    chokidar:
-      optional: true
-  checksum: 6fa030061bbae10ff4a15d8a6daadeef1719893f425e6bb97f0e49a04b988d8ece4c71ba1aaa2bad85fcf6ff2ab22d6c388050143dd8343a841fed910b1ed3ba
+  version: 1.0.4
+  resolution: "babel-plugin-add-module-exports@npm:1.0.4"
+  checksum: 80bd414662f53639adfccc57db750567828b5a7bd5702be2a18540f4410aae5117ed41be1a4e74ede04800dff5011eac90b347e08b1b9c3b7fbc8abba9bf12fa
   languageName: node
   linkType: hard
 
@@ -6878,9 +6873,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.0, caniuse-lite@npm:^1.0.30000844, caniuse-lite@npm:^1.0.30001109, caniuse-lite@npm:^1.0.30001124":
-  version: 1.0.30001124
-  resolution: "caniuse-lite@npm:1.0.30001124"
-  checksum: 61f208bfd7dc7fce7355392288d26180c48f095df251bd3fb94db542edfdea804cf2646f2f05c7f2b5bd613c7d935214bb0c4e257ae9508829d00644b823ceff
+  version: 1.0.30001125
+  resolution: "caniuse-lite@npm:1.0.30001125"
+  checksum: 1253f4fa1996d51c6fe4ccd659ae36a400476e9edb1427f956296f60265217b27e078f51d8820c40a8a6d7993d9530357f49ebd97be52c68ec44173814ba35fb
   languageName: node
   linkType: hard
 
@@ -7053,7 +7048,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^2.0.3, chokidar@npm:^2.0.4, chokidar@npm:^2.1.8":
+"chokidar@npm:^2.0.3, chokidar@npm:^2.1.8":
   version: 2.1.8
   resolution: "chokidar@npm:2.1.8"
   dependencies:
@@ -10422,11 +10417,11 @@ __metadata:
   linkType: hard
 
 "file-selector@npm:^0.1.12":
-  version: 0.1.12
-  resolution: "file-selector@npm:0.1.12"
+  version: 0.1.13
+  resolution: "file-selector@npm:0.1.13"
   dependencies:
-    tslib: ^1.9.0
-  checksum: b1a8287dabc8c239998ecb319c5b4eae156bdeb23130d3b5b6bed349f296d7798d0e5ef43e83dad3550aa2b1d1fd45ab7c5302fe8a9e26196676089de565f4ac
+    tslib: ^2.0.1
+  checksum: 261cda059af9e34bdc661ce4f3624afed0c6244e2c138391907b12ce06108bbbecbbbec51ae11972121654e9d9503d4e53f909c0eada8f758bbd9987226fbf73
   languageName: node
   linkType: hard
 
@@ -15941,9 +15936,9 @@ __metadata:
   linkType: hard
 
 "node-releases@npm:^1.1.60":
-  version: 1.1.60
-  resolution: "node-releases@npm:1.1.60"
-  checksum: bed3480bd1d7a9c3ad0b4acf79eceabfb14c5ba3e5d48619c8ec1fb5197fb358c9d0c117e31c48d52b7dba75b71c1371c5e67d01f55b79cbd2d7b60ca30974d1
+  version: 1.1.61
+  resolution: "node-releases@npm:1.1.61"
+  checksum: 3aab2b13f55e7a5fdabc9d3d7f211b3d4b614e50b50467d01a2554f609cabe3f655e37a04b52da05aeec2d2001e92bf10821f70b821145ffc2e11a3abd7b457e
   languageName: node
   linkType: hard
 
@@ -18261,16 +18256,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dropzone@npm:^11.0.3":
-  version: 11.0.3
-  resolution: "react-dropzone@npm:11.0.3"
+"react-dropzone@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "react-dropzone@npm:11.1.0"
   dependencies:
     attr-accept: ^2.0.0
     file-selector: ^0.1.12
     prop-types: ^15.7.2
   peerDependencies:
     react: ">= 16.8"
-  checksum: f9c445b4e79a36ae29763c408b8005f102771dd12ae68df53e4e5d60ee4d1a3681065db18db378f6dae60af9dffc978893e8bf08986a20061c8e53c5c3f07291
+  checksum: 881f5be66ef79319fd62424de3d67974586a3bd5ecd2b65e8d3b7c955a8243a28f5945b94faf7cc6ff954e884cd615649b14cb03b2894850d1492d2d02c4eec4
   languageName: node
   linkType: hard
 
@@ -19368,14 +19363,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:5.1.2, safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.0, safe-buffer@npm:^5.1.2, safe-buffer@npm:~5.1.0, safe-buffer@npm:~5.1.1":
-  version: 5.1.2
-  resolution: "safe-buffer@npm:5.1.2"
-  checksum: 2708587c1b5e70a5e420714ceb59f30f5791c6e831d39812125a008eca63a4ac18578abd020a0776ea497ff03b4543f2b2a223a7b9073bf2d6c7af9ec6829218
-  languageName: node
-  linkType: hard
-
-"safe-buffer@npm:^5.1.1, safe-buffer@npm:^5.2.0, safe-buffer@npm:~5.2.0":
+"safe-buffer@npm:^5.2.1":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
   checksum: 0bb57f0d8f9d1fa4fe35ad8a2db1f83a027d48f2822d59ede88fd5cd4ddad83c0b497213feb7a70fbf90597a70c5217f735b0eb1850df40ce9b4ae81dd22b3f9
@@ -21513,6 +21501,13 @@ __metadata:
   version: 1.13.0
   resolution: "tslib@npm:1.13.0"
   checksum: 5dc3bdaea3b67c76ef4a14c28fcb2171da7bcf292fd9c59a260098729626b1ce766c52b588f08e324ed9a0c52ea8a93a815920f980d75981abc9d850fbf310fb
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "tslib@npm:2.0.1"
+  checksum: 7b42337a07f536c9650c72471cdf51317f07eb981692e91b8979fee3f6e20136a8f047e6ecdc5f2f3201132a6cc4e0096fa3c58655eba3803bf7fe739ccd088e
   languageName: node
   linkType: hard
 

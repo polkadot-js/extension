@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.34.0-beta.5 Sep 9, 2020
+## 0.34.0-beta.6 Sep 9, 2020
 
 - Reproducable builds with Webpack optimization flags
 

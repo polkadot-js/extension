@@ -2,7 +2,7 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.33.3",
+  "version": "0.33.4",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
-    "@polkadot/dev": "^0.55.48",
+    "@polkadot/dev": "^0.55.49",
     "@polkadot/typegen": "^1.32.1",
     "@types/jest": "^26.0.13",
     "copy-webpack-plugin": "^6.1.0",

@@ -2929,9 +2929,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.55.48":
-  version: 0.55.48
-  resolution: "@polkadot/dev@npm:0.55.48"
+"@polkadot/dev@npm:^0.55.49":
+  version: 0.55.49
+  resolution: "@polkadot/dev@npm:0.55.49"
   dependencies:
     "@babel/cli": ^7.11.6
     "@babel/core": ^7.11.6
@@ -2996,7 +2996,7 @@ __metadata:
     vuepress: ^1.5.4
     webpack: ^4.44.1
     webpack-cli: ^3.3.12
-    yargs: ^15.4.1
+    yargs: ^16.0.0
   bin:
     polkadot-ci-ghact-build: scripts/polkadot-ci-ghact-build.js
     polkadot-ci-ghact-docs: scripts/polkadot-ci-ghact-docs.js
@@ -3019,17 +3019,17 @@ __metadata:
     polkadot-exec-typedoc: scripts/polkadot-exec-typedoc.js
     polkadot-exec-vuepress: scripts/polkadot-exec-vuepress.js
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.js
-  checksum: 1bfcf92c2a8856a73a8358e3d47a617b019a8b566a42f80baee578288b5f28ddac3fbf4be99c5d388075473f912e058ee57297be805e5c66d7c7c9cfc2da28f2
+  checksum: 8f844cb7fe8d8941acaf8fbc051e2a82ece7efb0b4eaf4d92d49dd532b3ed7d59f9e5089ae603af0d67fc0775ea78162660447972431d30be128248910603264
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@0.33.3, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@0.33.4, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@polkadot/api": ^1.32.1
-    "@polkadot/extension-inject": 0.33.3
+    "@polkadot/extension-inject": 0.33.4
     "@polkadot/keyring": ^3.4.1
     "@polkadot/ui-keyring": ^0.59.0-beta.2
   languageName: unknown
@@ -3050,7 +3050,7 @@ __metadata:
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.11.2
-    "@polkadot/extension-inject": 0.33.3
+    "@polkadot/extension-inject": 0.33.4
     "@polkadot/util": ^3.4.1
     "@polkadot/util-crypto": ^3.4.1
   peerDependencies:
@@ -3058,7 +3058,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@0.33.3, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@0.33.4, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -3070,13 +3070,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@0.33.3, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@0.33.4, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
     "@babel/runtime": ^7.11.2
-    "@polkadot/extension-base": 0.33.3
-    "@polkadot/extension-inject": 0.33.3
+    "@polkadot/extension-base": 0.33.4
+    "@polkadot/extension-inject": 0.33.4
     "@polkadot/keyring": ^3.4.1
     "@polkadot/react-identicon": ^0.59.0-beta.2
     "@polkadot/react-qr": ^0.59.0-beta.2
@@ -3112,10 +3112,10 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.11.2
-    "@polkadot/dev": ^0.55.48
-    "@polkadot/extension-base": 0.33.3
-    "@polkadot/extension-inject": 0.33.3
-    "@polkadot/extension-ui": 0.33.3
+    "@polkadot/dev": ^0.55.49
+    "@polkadot/extension-base": 0.33.4
+    "@polkadot/extension-inject": 0.33.4
+    "@polkadot/extension-ui": 0.33.4
     babel-loader: ^8.1.0
     extract-loader: ^5.1.0
     file-loader: ^6.1.0
@@ -7244,6 +7244,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cliui@npm:^7.0.0":
+  version: 7.0.1
+  resolution: "cliui@npm:7.0.1"
+  dependencies:
+    string-width: ^4.2.0
+    strip-ansi: ^6.0.0
+    wrap-ansi: ^7.0.0
+  checksum: 9c1433067a5860f9b8df76e5e0186a86992a180b8f8dd316357e19aa65b68d46964d448d18991fb598ab638a6c24218ce1331344fa4eec6767fcab40232b19fa
+  languageName: node
+  linkType: hard
+
 "clone-buffer@npm:^1.0.0":
   version: 1.0.0
   resolution: "clone-buffer@npm:1.0.0"
@@ -10958,7 +10969,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-caller-file@npm:^2.0.1":
+"get-caller-file@npm:^2.0.1, get-caller-file@npm:^2.0.5":
   version: 2.0.5
   resolution: "get-caller-file@npm:2.0.5"
   checksum: 9dd9e1e2591039ee4c38c897365b904f66f1e650a8c1cb7b7db8ce667fa63e88cc8b13282b74df9d93de481114b3304a0487880d31cd926dfda6efe71455855d
@@ -19293,7 +19304,7 @@ __metadata:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.11.6
-    "@polkadot/dev": ^0.55.48
+    "@polkadot/dev": ^0.55.49
     "@polkadot/typegen": ^1.32.1
     "@types/jest": ^26.0.13
     copy-webpack-plugin: ^6.1.0
@@ -23085,6 +23096,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wrap-ansi@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "wrap-ansi@npm:7.0.0"
+  dependencies:
+    ansi-styles: ^4.0.0
+    string-width: ^4.1.0
+    strip-ansi: ^6.0.0
+  checksum: 09939dd775ae565bb99a25a6c072fe3775a95fa71751b5533c94265fe986ba3e3ab071a027ab76cf26876bd9afd10ac3c2d06d7c4bcce148bf7d2d9514e3a0df
+  languageName: node
+  linkType: hard
+
 "wrappy@npm:1":
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2"
@@ -23237,6 +23259,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"y18n@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "y18n@npm:5.0.1"
+  checksum: 602e3cc9460cab50c54e44da42b7faf4521fe5e1856a98b82c41031725c439531a044cede89da53555354216902a7a218b6cf2b79e0f32b1684fa51b8d97b37e
+  languageName: node
+  linkType: hard
+
 "yaeti@npm:^0.0.6":
   version: 0.0.6
   resolution: "yaeti@npm:0.0.6"
@@ -23302,6 +23331,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yargs-parser@npm:^19.0.4":
+  version: 19.0.4
+  resolution: "yargs-parser@npm:19.0.4"
+  checksum: 69ed686f9f215b1aeccf767e6fa264e1d37b2ac9c5cf78cd55cab1afb994aa3cb8888c4e3d51c214050cdeefe133d61f4079c87f6621c13d0b7a6349b0677cb7
+  languageName: node
+  linkType: hard
+
 "yargs@npm:^13.3.2":
   version: 13.3.2
   resolution: "yargs@npm:13.3.2"
@@ -23355,6 +23391,21 @@ __metadata:
     y18n: ^4.0.0
     yargs-parser: ^18.1.2
   checksum: dbf687d6b938f01bbf11e158dde6df906282b70cd9295af0217ee8cefbd83ad09d49fa9458d0d5325b0e66f03df954a38986db96f91e5b46ccdbbaf9a0157b23
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^16.0.0":
+  version: 16.0.0
+  resolution: "yargs@npm:16.0.0"
+  dependencies:
+    cliui: ^7.0.0
+    escalade: ^3.0.2
+    get-caller-file: ^2.0.5
+    require-directory: ^2.1.1
+    string-width: ^4.2.0
+    y18n: ^5.0.1
+    yargs-parser: ^19.0.4
+  checksum: b86497a09f25593600dd3d7c8850167499128f2eaf4393f03f6e2e8dcaed5ba0d417860f0c66b4d5f0c31cec6753eb5a12c9e149b69d682d48ab385d15a955ff
   languageName: node
   linkType: hard
 

@@ -4,7 +4,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword } from '../types';
 
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -51,6 +51,26 @@ export default class Extension {
 
   private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
     keyring.addUri(suri, password, { genesisHash, name }, type);
+
+    return true;
+  }
+
+  private accountsChangePassword ({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    try {
+      if (!pair.isLocked) {
+        pair.lock();
+      }
+
+      pair.decodePkcs8(oldPass);
+    } catch (error) {
+      throw new Error('oldPass is invalid');
+    }
+
+    keyring.encryptAccount(pair, newPass);
 
     return true;
   }
@@ -424,6 +444,9 @@ export default class Extension {
 
       case 'pri(accounts.create.suri)':
         return this.accountsCreateSuri(request as RequestAccountCreateSuri);
+
+      case 'pri(accounts.changePassword)':
+        return this.accountsChangePassword(request as RequestAccountChangePassword);
 
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);

@@ -12,6 +12,10 @@ import Extension from './Extension';
 import State from './State';
 
 describe('Extension', () => {
+  let extension: Extension;
+  const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
+  const password = 'passw0rd';
+
   async function createExtension (): Promise<Extension> {
     await cryptoWaitReady();
 
@@ -20,14 +24,22 @@ describe('Extension', () => {
     return new Extension(new State());
   }
 
-  let extension: Extension;
+  const createAccount = async (): Promise<string> => {
+    await extension.handle('id', 'pri(accounts.create.suri)', {
+      name: 'parent',
+      password,
+      suri
+    }, {} as chrome.runtime.Port);
+    const { address } = await extension.handle('id', 'pri(seed.validate)', {
+      suri
+    }, {} as chrome.runtime.Port);
+
+    return address;
+  };
 
   beforeAll(async () => {
     extension = await createExtension();
   });
-
-  const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
-  const password = 'passw0rd';
 
   test('exports account from keyring', async () => {
     const { pair: { address } } = keyring.addUri(suri, password);
@@ -41,19 +53,6 @@ describe('Extension', () => {
   });
 
   describe('account derivation', () => {
-    const createAccount = async (): Promise<string> => {
-      await extension.handle('id', 'pri(accounts.create.suri)', {
-        name: 'parent',
-        password,
-        suri
-      }, {} as chrome.runtime.Port);
-      const { address } = await extension.handle('id', 'pri(seed.validate)', {
-        suri
-      }, {} as chrome.runtime.Port);
-
-      return address;
-    };
-
     let address: string;
 
     beforeEach(async () => {
@@ -109,6 +108,39 @@ describe('Extension', () => {
         suri: '//path'
       }, {} as chrome.runtime.Port);
       expect(keyring.getAccount('5FP3TT3EruYBNh8YM8yoxsreMx7uZv1J1zNX7fFhoC5enwmN')?.meta.parentAddress).toEqual(address);
+    });
+  });
+
+  describe('account management', () => {
+    let address: string;
+
+    beforeEach(async () => {
+      address = await createAccount();
+    });
+
+    test('pri(accounts.changePassword) changes account password', async () => {
+      const newPass = 'pa55word';
+      const wrongPass = 'ZZzzZZzz';
+
+      await expect(extension.handle('id', 'pri(accounts.changePassword)', {
+        address,
+        newPass,
+        oldPass: wrongPass
+      }, {} as chrome.runtime.Port)).rejects.toStrictEqual(new Error('oldPass is invalid'));
+
+      await expect(extension.handle('id', 'pri(accounts.changePassword)', {
+        address,
+        newPass,
+        oldPass: password
+      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+
+      const pair = keyring.getPair(address);
+
+      expect(pair.decodePkcs8(newPass)).toEqual(undefined);
+
+      expect(() => {
+        pair.decodePkcs8(password);
+      }).toThrowError('Unable to decode using the supplied passphrase');
     });
   });
 });

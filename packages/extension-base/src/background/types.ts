@@ -77,6 +77,7 @@ export interface RequestSignatures {
   'pri(accounts.tie)': [RequestAccountTie, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
+  'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
@@ -168,6 +169,12 @@ export interface RequestAccountCreateSuri {
   password: string;
   suri: string;
   type?: KeypairType;
+}
+
+export interface RequestAccountChangePassword {
+  address: string;
+  oldPass: string;
+  newPass: string;
 }
 
 export interface RequestAccountEdit {

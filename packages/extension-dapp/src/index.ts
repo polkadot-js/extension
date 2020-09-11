@@ -96,7 +96,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
 }
 
 // retrieve all the accounts accross all providers
-export async function web3Accounts ({ ss58Format } : Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }
@@ -127,7 +127,7 @@ export async function web3Accounts ({ ss58Format } : Web3AccountsOptions = {}): 
   return accounts;
 }
 
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format } : Web3AccountsOptions = {}): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }

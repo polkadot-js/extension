@@ -127,7 +127,7 @@ export async function web3Accounts ({ ss58Format } : Web3AccountsOptions = {}): 
   return accounts;
 }
 
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format } : Web3AccountsOptions = {}): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }
@@ -138,7 +138,7 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
     Object
       .entries(accounts)
       .reduce((result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
-        result.push(...mapAccounts(source, list));
+        result.push(...mapAccounts(source, list, ss58Format));
 
         return result;
       }, [])

@@ -106,6 +106,6 @@ export type InjectedExtension = InjectedExtensionInfo & Injected;
 
 export type InjectOptions = InjectedExtensionInfo;
 
-export interface Web3AccountsOptions{
-  ss58Prefix?: number
+export interface Web3AccountsOptions {
+  ss58Format?: number
 }

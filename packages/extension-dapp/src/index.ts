@@ -24,9 +24,9 @@ function throwError (method: string): never {
 }
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
-function mapAccounts (source: string, list: InjectedAccount[], ss58Prefix?: number): InjectedAccountWithMeta[] {
+function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
   return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => {
-    const encodedAddress = encodeAddress(decodeAddress(address), ss58Prefix);
+    const encodedAddress = encodeAddress(decodeAddress(address), ss58Format);
 
     return ({
       address: encodedAddress,
@@ -96,7 +96,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
 }
 
 // retrieve all the accounts accross all providers
-export async function web3Accounts ({ ss58Prefix } : Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ ss58Format } : Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }
@@ -108,7 +108,7 @@ export async function web3Accounts ({ ss58Prefix } : Web3AccountsOptions = {}): 
       try {
         const list = await accounts.get();
 
-        return mapAccounts(source, list, ss58Prefix);
+        return mapAccounts(source, list, ss58Format);
       } catch (error) {
         // cannot handle this one
         return [];

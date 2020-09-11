@@ -105,3 +105,7 @@ export interface InjectedWindow extends This {
 export type InjectedExtension = InjectedExtensionInfo & Injected;
 
 export type InjectOptions = InjectedExtensionInfo;
+
+export interface Web3AccountsOptions {
+  ss58Format?: number
+}

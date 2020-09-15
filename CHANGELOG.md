@@ -5,7 +5,7 @@
 Contributed:
 
 - Add support for extension change password messaging (Thanks to https://github.com/remon-nashid)
-- `web3Accounts` not allows the specification of the ss58Format (Thanks to https://github.com/Tbaut)
+- `web3Accounts` now allows the specification of the ss58Format (Thanks to https://github.com/Tbaut)
 
 Changes:
 

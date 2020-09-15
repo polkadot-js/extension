@@ -38,16 +38,16 @@ const hashes: MetadataDefBase[] = [
     ss58Format: 16
   },
   {
-    chain: 'Subsocial',
-    genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',
-    icon: 'substrate',
-    ss58Format: 28
-  },
-  {
     chain: 'Stafi',
     genesisHash: '0x290a4149f09ea0e402c74c1c7e96ae4239588577fe78932f94f5404c68243d80',
     icon: 'substrate',
     ss58Format: 20
+  },
+  {
+    chain: 'Subsocial',
+    genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',
+    icon: 'substrate',
+    ss58Format: 28
   }
 ];
 

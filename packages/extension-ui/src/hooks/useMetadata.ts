@@ -15,7 +15,10 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
     if (genesisHash) {
       getMetadata(genesisHash, isPartial)
         .then(setChain)
-        .catch(console.error);
+        .catch((error): void => {
+          console.error(error);
+          setChain(null);
+        });
     } else {
       setChain(null);
     }

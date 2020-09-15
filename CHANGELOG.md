@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.34.0-beta.x
+
+Contributed:
+
+- Add support for extension change password messaging (Thanks to https://github.com/remon-nashid)
+- `web3Accounts` not allows the specification of the ss58Format (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Support for latest Metadata v12 formats
+
+
 ## 0.33.4 Sep 9, 2020
 
 Contributed:

@@ -1,6 +1,5 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
-// This software may be modified and distributed under the terms
-// of the Apache-2.0 license. See the LICENSE file for details.
+// SPDX-License-Identifier: Apache-2.0
 
 import { Message } from '@polkadot/extension-base/types';
 import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';

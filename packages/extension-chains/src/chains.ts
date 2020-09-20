@@ -37,6 +37,12 @@ const hashes: MetadataDefBase[] = [
     ss58Format: 16
   },
   {
+    chain: 'Plasm',
+    genesisHash: '0x3e86364d4b4894021cb2a0390bcf2feb5517d5292f2de2bb9404227e908b0b8b',
+    icon: 'substrate',
+    ss58Format: 5
+  },
+  {
     chain: 'Stafi',
     genesisHash: '0x290a4149f09ea0e402c74c1c7e96ae4239588577fe78932f94f5404c68243d80',
     icon: 'substrate',

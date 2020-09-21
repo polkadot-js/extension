@@ -5,7 +5,7 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword } from '../types';
 
-import { PASSWORD_EXPIRY } from '@polkadot/extension-base/defaults';
+import { PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -311,7 +311,7 @@ export default class Extension {
     const savedExpiry = this.#cachedUnlocks[request.payload.address] || 0;
 
     if (isSavedPass) {
-      this.#cachedUnlocks[request.payload.address] = now + PASSWORD_EXPIRY;
+      this.#cachedUnlocks[request.payload.address] = now + PASSWORD_EXPIRY_MS;
     } else if (savedExpiry < now) {
       this.#cachedUnlocks[request.payload.address] = 0;
       pair.lock();

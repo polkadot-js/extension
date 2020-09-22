@@ -86,7 +86,7 @@
   "Sign the transaction": "签名此交易",
   "Sign the message": "签名此消息",
   "Scan signature via camera": "通过摄像头扫描签名",
-  "Don't ask me again for the next 15 minutes": "在接下来的15分钟内别再问我了",
+  "Don't ask me again for the next {{expiration}} minutes": "在接下来的{{expiration}}分钟内别再问我了",
   "Password for this account": "此帐户密码",
   "Welcome": "欢迎",
   "Before we start, just a couple of notes regarding use:": "在我们开始之前，只是一些关于使用的注意事项:",

@@ -86,7 +86,7 @@
   "Sign the transaction": "",
   "Sign the message": "",
   "Scan signature via camera": "",
-  "Don't ask me again for the next 15 minutes": "",
+  "Don't ask me again for the next {{expiration}} minutes": "",
   "Password for this account": "",
   "Welcome": "",
   "Before we start, just a couple of notes regarding use:": "",

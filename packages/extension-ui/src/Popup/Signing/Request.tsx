@@ -6,6 +6,7 @@ import { AccountJson, RequestSign } from '@polkadot/extension-base/background/ty
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useCallback, useContext, useState, useEffect } from 'react';
+import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
@@ -114,7 +115,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     [onAction, signId]
   );
 
-  const signButton = isLocked
+  const SignButton = () => isLocked
     ? (
       <Unlock
         buttonText={buttonText}
@@ -124,7 +125,10 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
       >
         <Checkbox
           checked={!!isSavedPass}
-          label={t<string>("Don't ask me again for the next 15 minutes")}
+          label={t<string>(
+            "Don't ask me again for the next {{expiration}} minutes",
+            { replace: { expiration: PASSWORD_EXPIRY_MIN } }
+          )}
           onChange={setIsSavedPass}
         />
       </Unlock>
@@ -167,7 +171,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
         }
         <SignArea>
-          {isFirst && !isExternal && signButton}
+          {isFirst && !isExternal && <SignButton/>}
           <CancelButton>
             <Link
               isDanger
@@ -193,7 +197,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
         />
         <VerticalSpace />
         <SignArea>
-          {!isExternal && signButton}
+          {!isExternal && <SignButton/>}
           <CancelButton>
             <Link
               isDanger

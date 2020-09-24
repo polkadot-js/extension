@@ -3,9 +3,10 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import { createAccountSuri, createSeed, flushAccountCache, getAccountCache, setAccountCache } from '@polkadot/extension-ui/messaging';
+
 import { ActionContext, Address, Loading } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';
@@ -18,9 +19,20 @@ export default function CreateAccount (): React.ReactElement {
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
 
   useEffect((): void => {
-    createSeed()
-      .then(setAccount)
-      .catch((error: Error) => console.error(error));
+    getAccountCache()
+      .then((cachedAccount) => {
+        if (cachedAccount?.address) {
+          setAccount(cachedAccount);
+        } else {
+          createSeed()
+            .then((account) => {
+              setAccount(account);
+              setAccountCache(account).catch((e) => console.error(e));
+            })
+            .catch((error: Error) => console.error(error));
+        }
+      })
+      .catch((e) => console.error(e));
   }, []);
 
   // FIXME Duplicated between here and Import.tsx
@@ -31,7 +43,10 @@ export default function CreateAccount (): React.ReactElement {
         setIsBusy(true);
 
         createAccountSuri(name, password, account.seed)
-          .then(() => onAction('/'))
+          .then(() => {
+            flushAccountCache().catch((e) => console.error(e));
+            onAction('/');
+          })
           .catch((error: Error): void => {
             setIsBusy(false);
             console.error(error);
@@ -43,10 +58,14 @@ export default function CreateAccount (): React.ReactElement {
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
+  const _onCancel = useCallback(() => flushAccountCache()
+    .catch((e) => console.error(e))
+  , []);
 
   return (
     <>
       <HeaderWithSteps
+        onCancel={_onCancel}
         step={step}
         text={t<string>('Create an account')}
       />

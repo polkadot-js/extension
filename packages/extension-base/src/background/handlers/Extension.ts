@@ -3,7 +3,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword } from '../types';
+import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword, AutoSavedAccount } from '../types';
 
 import { PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -21,6 +21,7 @@ type CachedUnlocks = Record<string, number>;
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
+const CACHE_ACCOUNT_TIMEOUT = 10 * 1000;
 
 // a global registry to use internally
 const registry = new TypeRegistry();
@@ -36,6 +37,8 @@ export default class Extension {
   readonly #cachedUnlocks: CachedUnlocks;
 
   readonly #state: State;
+
+  private cachedAccount: AutoSavedAccount | undefined;
 
   constructor (state: State) {
     this.#cachedUnlocks = {};
@@ -176,6 +179,27 @@ export default class Extension {
     });
 
     return true;
+  }
+
+  private flushAccountCache (): void {
+    console.log('flushing account cache..');
+    this.cachedAccount = undefined;
+  }
+
+  private setAccountCache (account: AutoSavedAccount): void {
+    console.log('setting cached account to', account);
+    this.cachedAccount = account;
+
+    setTimeout(() => {
+      console.log('timeout kicking in');
+      this.flushAccountCache();
+    }, CACHE_ACCOUNT_TIMEOUT);
+  }
+
+  private getAccountCache (): AutoSavedAccount | undefined {
+    console.log('returning cached account to', this.cachedAccount);
+
+    return this.cachedAccount;
   }
 
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {
@@ -437,6 +461,15 @@ export default class Extension {
 
       case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);
+
+      case 'pri(accounts.cache.flush)':
+        return this.flushAccountCache();
+
+      case 'pri(accounts.cache.get)':
+        return this.getAccountCache();
+
+      case 'pri(accounts.cache.set)':
+        return this.setAccountCache(request as AutoSavedAccount);
 
       case 'pri(accounts.create.external)':
         return this.accountsCreateExternal(request as RequestAccountCreateExternal);

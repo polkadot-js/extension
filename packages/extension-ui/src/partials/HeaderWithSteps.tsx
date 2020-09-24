@@ -11,16 +11,19 @@ import Header from './Header';
 
 interface Props extends ThemeProps {
   className?: string;
+  onCancel: () => void;
   step: number;
   text: string;
 }
 
-function HeaderWithSteps ({ className, step, text }: Props): React.ReactElement<Props> {
+function HeaderWithSteps ({ className, onCancel, step, text }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
+  // const { setAutoSavedAccount } = useContext(AutoSavedAccountRedirectContext);
 
   const _onCancel = useCallback(() => {
+    onCancel();
     onAction('/');
-  }, [onAction]);
+  }, [onAction, onCancel]);
 
   return (
     <Header

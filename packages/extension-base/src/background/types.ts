@@ -57,6 +57,16 @@ export interface MetadataRequest {
   url: string;
 }
 
+export interface AutoSavedAccount {
+  address: string;
+  seed: string;
+}
+
+export interface AutoSavedAccountRedirect {
+  account?: AutoSavedAccount
+  setAutoSavedAccount: (account?: AutoSavedAccount) => void;
+}
+
 export interface SigningRequest {
   account: AccountJson;
   id: string;
@@ -67,6 +77,9 @@ export interface SigningRequest {
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures {
   // private/internal requests, i.e. from a popup
+  'pri(accounts.cache.flush)': [undefined, void];
+  'pri(accounts.cache.get)': [undefined, AutoSavedAccount | undefined];
+  'pri(accounts.cache.set)': [AutoSavedAccount, void];
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Message } from '@polkadot/extension-base/types';
-import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, AutoSavedAccount, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -123,6 +123,18 @@ export async function createAccountSuri (name: string, password: string, suri: s
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, type });
+}
+
+export async function setAccountCache (account: AutoSavedAccount): Promise<void> {
+  return sendMessage('pri(accounts.cache.set)', account);
+}
+
+export async function getAccountCache (): Promise<AutoSavedAccount | undefined> {
+  return sendMessage('pri(accounts.cache.get)');
+}
+
+export async function flushAccountCache (): Promise<void> {
+  return sendMessage('pri(accounts.cache.flush)');
 }
 
 export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {

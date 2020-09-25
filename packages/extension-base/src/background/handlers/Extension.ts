@@ -197,8 +197,6 @@ export default class Extension {
   }
 
   private getAccountCache (): AutoSavedAccount | undefined {
-    console.log('returning cached account to', this.cachedAccount);
-
     return this.cachedAccount;
   }
 

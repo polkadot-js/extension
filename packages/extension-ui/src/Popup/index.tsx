@@ -67,10 +67,6 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  // const [abortedAccountCreation, setAbortedAccountCreation] = useState(false);
-
-  // const cachedA = await getAccountCache();
-  // const abortedAccountCreation = !!cachedA?.address;
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -107,13 +103,15 @@ export default function Popup (): React.ReactElement {
       .catch(console.error);
   }, [cameraOn]);
 
-  // useEffect(() => {
-  //   getAccountCache()
-  //     .then((cachedAccount) => setAbortedAccountCreation(!!cachedAccount?.seed))
-  //     .catch((e) => console.error(e));
-  // }, []);
-
-  // console.log('abortedAccountCreation', abortedAccountCreation);
+  useEffect(() => {
+    getAccountCache()
+      .then((cachedAccount) => {
+        if (cachedAccount?.seed) {
+          _onAction('/account/create');
+        }
+      })
+      .catch((e) => console.error(e));
+  }, []);
 
   const Root = isWelcomeDone
     ? authRequests && authRequests.length

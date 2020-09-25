@@ -182,16 +182,13 @@ export default class Extension {
   }
 
   private flushAccountCache (): void {
-    console.log('flushing account cache..');
     this.cachedAccount = undefined;
   }
 
   private setAccountCache (account: AutoSavedAccount): void {
-    console.log('setting cached account to', account);
     this.cachedAccount = account;
 
     setTimeout(() => {
-      console.log('timeout kicking in');
       this.flushAccountCache();
     }, CACHE_ACCOUNT_TIMEOUT);
   }

@@ -18,7 +18,6 @@ interface Props extends ThemeProps {
 
 function HeaderWithSteps ({ className, onCancel, step, text }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
-  // const { setAutoSavedAccount } = useContext(AutoSavedAccountRedirectContext);
 
   const _onCancel = useCallback(() => {
     onCancel

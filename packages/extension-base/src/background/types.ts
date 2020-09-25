@@ -361,3 +361,7 @@ export interface RequestJsonRestore {
 export interface ResponseJsonRestore {
   error: string | null;
 }
+
+export interface ActionOptions {
+  resetCachedAccount?: boolean;
+}

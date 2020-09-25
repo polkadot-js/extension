@@ -58,9 +58,11 @@ export default function CreateAccount (): React.ReactElement {
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
-  const _onCancel = useCallback(() => flushAccountCache()
-    .catch((e) => console.error(e))
-  , []);
+  const _onCancel = useCallback(() => {
+    flushAccountCache().catch((e) => console.error(e));
+    onAction('/', { resetCachedAccount: true });
+  }
+  , [onAction]);
 
   return (
     <>

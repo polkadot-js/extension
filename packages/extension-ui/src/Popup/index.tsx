@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import { AccountJson, AccountsContext, ActionOptions, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
@@ -67,9 +67,14 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
+  const [hasCachedAccount, setHasCachedAccount] = useState(false);
 
-  const _onAction = (to?: string): void => {
+  const _onAction = (to?: string, options?: ActionOptions): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+
+    if (options?.resetCachedAccount) {
+      setHasCachedAccount(false);
+    }
 
     if (to) {
       window.location.hash = to;
@@ -107,7 +112,8 @@ export default function Popup (): React.ReactElement {
     getAccountCache()
       .then((cachedAccount) => {
         if (cachedAccount?.seed) {
-          _onAction('/account/create');
+          setHasCachedAccount(true);
+          // _onAction('/account/create');
         }
       })
       .catch((e) => console.error(e));
@@ -120,7 +126,9 @@ export default function Popup (): React.ReactElement {
         ? Metadata
         : signRequests && signRequests.length
           ? Signing
-          : Accounts
+          : hasCachedAccount
+            ? CreateAccount
+            : Accounts
     : Welcome;
 
   return (

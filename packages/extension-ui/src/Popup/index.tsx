@@ -113,7 +113,6 @@ export default function Popup (): React.ReactElement {
       .then((cachedAccount) => {
         if (cachedAccount?.seed) {
           setHasCachedAccount(true);
-          // _onAction('/account/create');
         }
       })
       .catch((e) => console.error(e));

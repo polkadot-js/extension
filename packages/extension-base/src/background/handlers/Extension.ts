@@ -39,6 +39,7 @@ export default class Extension {
   readonly #state: State;
 
   private cachedAccount: AutoSavedAccount | undefined;
+  private cacheTimeOut: number | undefined;
 
   constructor (state: State) {
     this.#cachedUnlocks = {};
@@ -183,12 +184,13 @@ export default class Extension {
 
   private flushAccountCache (): void {
     this.cachedAccount = undefined;
+    clearTimeout(this.cacheTimeOut);
   }
 
   private setAccountCache (account: AutoSavedAccount): void {
     this.cachedAccount = account;
 
-    setTimeout(() => {
+    this.cacheTimeOut = setTimeout(() => {
       this.flushAccountCache();
     }, CACHE_ACCOUNT_TIMEOUT);
   }

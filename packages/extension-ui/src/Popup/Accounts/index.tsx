@@ -4,11 +4,11 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import AccountsTree from './AccountsTree';
-import AddAccount from './AddAccount';
 import { AccountContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
+import AccountsTree from './AccountsTree';
+import AddAccount from './AddAccount';
 
 export default function Accounts (): React.ReactElement {
   const { t } = useTranslation();

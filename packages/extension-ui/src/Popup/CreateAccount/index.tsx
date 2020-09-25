@@ -3,10 +3,9 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { createAccountSuri, createSeed, flushAccountCache, getAccountCache, setAccountCache } from '@polkadot/extension-ui/messaging';
-
 import { ActionContext, Address, Loading } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import { createAccountSuri, createSeed, flushAccountCache, getAccountCache, setAccountCache } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';

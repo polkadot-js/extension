@@ -69,7 +69,7 @@ describe('Create Account', () => {
 
     it('clicking "Cancel" redirects to main screen', () => {
       wrapper.find(Header).find(ActionText).simulate('click');
-      expect(onActionStub).toBeCalledWith('/');
+      expect(onActionStub).toBeCalledWith('/', { resetCachedAccount: true });
     });
 
     it('clicking on Next activates phase 2', () => {

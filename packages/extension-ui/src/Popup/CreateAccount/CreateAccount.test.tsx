@@ -14,6 +14,7 @@ import * as messaging from '../../messaging';
 import { Header } from '../../partials';
 import { flushAllPromises } from '../../testHelpers';
 import CreateAccount from '.';
+import { AutoSavedAccount } from '@polkadot/extension-base/background/types';
 
 configure({ adapter: new Adapter() });
 
@@ -23,6 +24,10 @@ describe('Create Account', () => {
   const exampleAccount = {
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
     seed: 'horse battery staple correct'
+  };
+  const exampleCachedAccount = {
+    address: 'Da415aGUT4UDUS7R8fto8uTAKEPELfgnm67CybGXUu8oWHv',
+    seed: 'gun december you book rice custom duty disease install blind harbor super'
   };
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountComponent = (): ReactWrapper => mount(
@@ -183,6 +188,28 @@ describe('Create Account', () => {
       await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
+    });
+  });
+
+  describe('Account gets cached and restored', () => {
+    let getAccountCache: jest.SpyInstance<Promise<AutoSavedAccount | undefined>, []>;
+    let setAccountCache: jest.SpyInstance<Promise<void>, [account: AutoSavedAccount]>;
+
+    beforeAll(() => {
+      wrapper.unmount();
+      wrapper = mountComponent();
+
+      setAccountCache = jest.spyOn(messaging, 'setAccountCache');
+      getAccountCache = jest.spyOn(messaging, 'getAccountCache').mockResolvedValue(exampleCachedAccount);
+    });
+
+    it('account gets cached', () => {
+      expect(setAccountCache).toBeCalledTimes(1);
+    });
+
+    it('account gets restored', () => {
+      expect(getAccountCache).toBeCalled();
+      expect(wrapper.find('textarea').text()).toBe(exampleCachedAccount.seed);
     });
   });
 });

@@ -3,6 +3,7 @@
 
 import { Theme, ThemeProps } from '../types';
 
+import i18next from 'i18next';
 import React, { useCallback, useContext, useState, useEffect } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
@@ -11,6 +12,7 @@ import FullScreenIcon from '../assets/fullscreen.svg';
 import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
+import create from '../util/languages';
 
 interface Option {
   text: string;
@@ -28,11 +30,12 @@ const prefixOptions = settings.availablePrefixes
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
 function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
+  const [lang, setLang] = useState(settings.i18nLang);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -49,6 +52,24 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const _onChangeTheme = useCallback(
     (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
     [setTheme]
+  );
+
+  const _onChangeLang = useCallback(
+    (value: string): void => {
+      settings.set({ i18nLang: value });
+      setLang(value);
+      // // i18n.changeLanguage(value).catch((e) => console.error(e));
+      // i18next.changeLanguage(value).catch((e) => console.error(e));
+      // // uiSettings.on('change', (settings): void => {
+      // //   i18next.changeLanguage(
+      // //     settings.i18nLang === LANGUAGE_DEFAULT
+      // //       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      // //       ? i18next.services.languageDetector.detect()
+      // //       : settings.i18nLang
+      // //   ).catch(console.error);
+      // // });
+    },
+    []
   );
 
   return (
@@ -90,6 +111,19 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           onChange={_onChangePrefix}
           options={prefixOptions}
           value={`${prefix}`}
+        />
+      </MenuItem>
+      <MenuDivider />
+      <MenuItem
+        className='setting'
+        title={t<string>('Language')}
+      >
+        <Dropdown
+          className='dropdown'
+          label=''
+          onChange={_onChangeLang}
+          options={create(t)}
+          value={lang}
         />
       </MenuItem>
       {isPopup && (

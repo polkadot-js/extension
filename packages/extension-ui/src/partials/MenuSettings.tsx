@@ -3,7 +3,6 @@
 
 import { Theme, ThemeProps } from '../types';
 
-import i18next from 'i18next';
 import React, { useCallback, useContext, useState, useEffect } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
@@ -30,12 +29,11 @@ const prefixOptions = settings.availablePrefixes
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
 function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
-  const [lang, setLang] = useState(settings.i18nLang);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -57,17 +55,6 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const _onChangeLang = useCallback(
     (value: string): void => {
       settings.set({ i18nLang: value });
-      setLang(value);
-      // // i18n.changeLanguage(value).catch((e) => console.error(e));
-      // i18next.changeLanguage(value).catch((e) => console.error(e));
-      // // uiSettings.on('change', (settings): void => {
-      // //   i18next.changeLanguage(
-      // //     settings.i18nLang === LANGUAGE_DEFAULT
-      // //       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      // //       ? i18next.services.languageDetector.detect()
-      // //       : settings.i18nLang
-      // //   ).catch(console.error);
-      // // });
     },
     []
   );
@@ -123,7 +110,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           label=''
           onChange={_onChangeLang}
           options={create(t)}
-          value={lang}
+          value={settings.i18nLang}
         />
       </MenuItem>
       {isPopup && (

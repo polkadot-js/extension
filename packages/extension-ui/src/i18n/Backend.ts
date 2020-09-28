@@ -3,7 +3,7 @@
 
 import languageCache from './cache';
 
-type Callback = (error: string | null, data: any) => void;
+type Callback = (error: string | null, data: unknown) => void;
 
 type LoadResult = [string | null, Record<string, string> | boolean];
 

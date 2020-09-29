@@ -38,8 +38,8 @@ export default class Extension {
 
   readonly #state: State;
 
-  #cachedAccount: AutoSavedAccount | undefined;
-  #cacheTimeOut: number | undefined;
+  #cachedAccount: AutoSavedAccount | undefined = undefined;
+  #cacheTimeOut: number | undefined = undefined;
 
   constructor (state: State) {
     this.#cachedUnlocks = {};
@@ -183,20 +183,20 @@ export default class Extension {
   }
 
   private flushAccountCache (): void {
-    this.cachedAccount = undefined;
-    clearTimeout(this.cacheTimeOut);
+    this.#cachedAccount = undefined;
+    clearTimeout(this.#cacheTimeOut);
   }
 
   private setAccountCache (account: AutoSavedAccount): void {
-    this.cachedAccount = account;
+    this.#cachedAccount = account;
 
-    this.cacheTimeOut = setTimeout(() => {
+    this.#cacheTimeOut = setTimeout(() => {
       this.flushAccountCache();
     }, CACHE_ACCOUNT_TIMEOUT);
   }
 
   private getAccountCache (): AutoSavedAccount | undefined {
-    return this.cachedAccount;
+    return this.#cachedAccount;
   }
 
   private metadataApprove ({ id }: RequestMetadataApprove): boolean {

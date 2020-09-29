@@ -38,8 +38,8 @@ export default class Extension {
 
   readonly #state: State;
 
-  private cachedAccount: AutoSavedAccount | undefined;
-  private cacheTimeOut: number | undefined;
+  #cachedAccount: AutoSavedAccount | undefined;
+  #cacheTimeOut: number | undefined;
 
   constructor (state: State) {
     this.#cachedUnlocks = {};

@@ -1,8 +1,6 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TFunction } from 'i18next';
-
 interface Option {
   info?: string;
   isDisabled?: boolean;
@@ -11,7 +9,7 @@ interface Option {
   value: string | number;
 }
 
-export default function create (t: TFunction): Option[] {
+export default function getLanguageOptions (): Option[] {
   return [
     // default/native
     {

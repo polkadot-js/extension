@@ -3,7 +3,7 @@
 
 import { Theme, ThemeProps } from '../types';
 
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
 
@@ -11,7 +11,7 @@ import FullScreenIcon from '../assets/fullscreen.svg';
 import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
-import create from '../util/languages';
+import getLanguageOptions from '../util/getLanguageOptions';
 
 interface Option {
   text: string;
@@ -34,6 +34,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
+  const languageOptions = useMemo(() => getLanguageOptions(), []);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -109,7 +110,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           className='dropdown'
           label=''
           onChange={_onChangeLang}
-          options={create(t)}
+          options={languageOptions}
           value={settings.i18nLang}
         />
       </MenuItem>

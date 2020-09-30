@@ -12,7 +12,7 @@ import qrIcon from '../assets/qr.svg';
 import seedIcon from '../assets/secret.svg';
 import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { jsonRestoreWindowOpen } from '../messaging';
+import { windowOpen } from '../messaging';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -20,6 +20,8 @@ interface Props extends ThemeProps {
 }
 
 const isPopup = window.innerWidth <= 480;
+const mnemonicPath = '/account/import-seed';
+const jsonPath = '/account/restore-json';
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -27,7 +29,11 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const mediaAllowed = useContext(MediaContext);
 
   const _openJson = useCallback((): void => {
-    jsonRestoreWindowOpen().catch(console.error);
+    windowOpen(jsonPath).catch(console.error);
+  }, []);
+
+  const _openMnemonic = useCallback((): void => {
+    windowOpen(mnemonicPath).catch(console.error);
   }, []);
 
   return (
@@ -47,7 +53,10 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       </MenuItem>
       <MenuDivider />
       <MenuItem className='menuItem'>
-        <Link to='/account/import-seed'>
+        <Link
+          onClick={isPopup ? _openMnemonic : undefined}
+          to={isPopup ? undefined : mnemonicPath}
+        >
           <Svg src={seedIcon} />
           <span>{t<string>('Import account from pre-existing seed')}</span>
         </Link>
@@ -55,7 +64,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link
           onClick={isPopup ? _openJson : undefined}
-          to={isPopup ? undefined : '/account/restore-json'}
+          to={isPopup ? undefined : jsonPath}
         >
           <Svg src={fileIcon} />
           <span>{t<string>('Restore account from backup JSON file')}</span>

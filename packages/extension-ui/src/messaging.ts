@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Message } from '@polkadot/extension-base/types';
-import { AccountJson, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
+import { AccountJson, AllowedPath, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -186,10 +186,6 @@ export async function validateSeed (suri: string, type?: KeypairType): Promise<{
   return sendMessage('pri(seed.validate)', { suri, type });
 }
 
-export async function windowOpen (): Promise<boolean> {
-  return sendMessage('pri(window.open)', null);
-}
-
 export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {
   return sendMessage('pri(derivation.validate)', { parentAddress, parentPassword, suri });
 }
@@ -198,8 +194,8 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
   return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
-export async function jsonRestoreWindowOpen (): Promise<boolean> {
-  return sendMessage('pri(window.open.json)', null);
+export async function windowOpen (path?: AllowedPath): Promise<boolean> {
+  return sendMessage('pri(window.open)', path);
 }
 
 export async function jsonVerifyFile (json: KeyringPair$Json): Promise<boolean> {

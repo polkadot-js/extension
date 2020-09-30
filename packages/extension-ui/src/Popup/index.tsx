@@ -26,7 +26,6 @@ import RestoreJson from './RestoreJson';
 import Metadata from './Metadata';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import { ErrorFallback } from '../components/ErrorFallback';
 
 const startSettings = uiSettings.get();
 

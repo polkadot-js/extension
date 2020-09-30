@@ -3077,7 +3077,6 @@ __metadata:
     react: ^16.13.1
     react-dom: ^16.13.1
     react-dropzone: ^11.1.0
-    react-error-boundary: ^3.0.2
     react-i18next: ^11.7.2
     react-is: ^16.13.1
     react-router: ^5.2.0
@@ -17879,17 +17878,6 @@ fsevents@^1.2.7:
   peerDependencies:
     react: ">= 16.8"
   checksum: 881f5be66ef79319fd62424de3d67974586a3bd5ecd2b65e8d3b7c955a8243a28f5945b94faf7cc6ff954e884cd615649b14cb03b2894850d1492d2d02c4eec4
-  languageName: node
-  linkType: hard
-
-"react-error-boundary@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "react-error-boundary@npm:3.0.2"
-  dependencies:
-    "@babel/runtime": ^7.11.2
-  peerDependencies:
-    react: ">=16.13.1"
-  checksum: 241a91a7db61350fcd7370e857b127ca232afb47cbc3b437b77f29277eb696785c85bf8e3d2597604ba68273125e3168783037d173cccc72fed4d2b379f6a2f8
   languageName: node
   linkType: hard
 

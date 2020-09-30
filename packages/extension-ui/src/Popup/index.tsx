@@ -5,12 +5,11 @@ import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, Signin
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { Route, Switch } from 'react-router';
 import uiSettings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
 
-import { Loading } from '../components';
+import { Loading, ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
@@ -116,7 +115,7 @@ export default function Popup (): React.ReactElement {
     : Welcome;
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary>
       <Loading>{accounts && authRequests && metaRequests && signRequests && (
         <ActionContext.Provider value={_onAction}>
           <SettingsContext.Provider value={settingsCtx}>

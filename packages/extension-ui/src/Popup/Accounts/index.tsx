@@ -14,6 +14,12 @@ export default function Accounts (): React.ReactElement {
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
 
+  // const bla = true;
+
+  // if (bla){
+  //   throw new Error('aaaaaa');
+  // }
+
   return (
     <>
       {(hierarchy.length === 0)

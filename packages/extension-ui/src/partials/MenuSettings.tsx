@@ -9,6 +9,7 @@ import settings from '@polkadot/ui-settings';
 
 import FullScreenIcon from '../assets/fullscreen.svg';
 import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
+import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
 
@@ -22,7 +23,6 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
-const isPopup = window.innerWidth <= 560;
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
@@ -33,6 +33,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
+  const { isPopup } = useIsPopup();
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -49,6 +50,11 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const _onChangeTheme = useCallback(
     (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
     [setTheme]
+  );
+
+  const _onWindowOpen = useCallback(
+    () => windowOpen('/'),
+    []
   );
 
   return (
@@ -99,7 +105,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
             <ActionText
               className='openWindow'
               icon={FullScreenIcon}
-              onClick={windowOpen}
+              onClick={_onWindowOpen}
               text={t<string>('Open extension in new window')}
             />
           </MenuItem>

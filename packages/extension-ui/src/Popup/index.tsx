@@ -5,6 +5,7 @@ import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, Signin
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Route, Switch } from 'react-router';
 import uiSettings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
@@ -26,6 +27,7 @@ import RestoreJson from './RestoreJson';
 import Metadata from './Metadata';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import { ErrorFallback } from '../components/ErrorFallback';
 
 const startSettings = uiSettings.get();
 
@@ -114,39 +116,41 @@ export default function Popup (): React.ReactElement {
     : Welcome;
 
   return (
-    <Loading>{accounts && authRequests && metaRequests && signRequests && (
-      <ActionContext.Provider value={_onAction}>
-        <SettingsContext.Provider value={settingsCtx}>
-          <AccountContext.Provider value={accountCtx}>
-            <AuthorizeReqContext.Provider value={authRequests}>
-              <MediaContext.Provider value={cameraOn && mediaAllowed}>
-                <MetadataReqContext.Provider value={metaRequests}>
-                  <SigningReqContext.Provider value={signRequests}>
-                    <ToastProvider>
-                      <Switch>
-                        <Route path='/account/create'><CreateAccount /></Route>
-                        <Route path='/account/forget/:address'><Forget /></Route>
-                        <Route path='/account/export/:address'><Export /></Route>
-                        <Route path='/account/import-qr'><ImportQr /></Route>
-                        <Route path='/account/import-seed'><ImportSeed /></Route>
-                        <Route path='/account/restore-json'><RestoreJson /></Route>
-                        <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
-                        <Route path='/account/derive/:address'><Derive /></Route>
-                        <Route
-                          exact
-                          path='/'
-                        >
-                          <Root />
-                        </Route>
-                      </Switch>
-                    </ToastProvider>
-                  </SigningReqContext.Provider>
-                </MetadataReqContext.Provider>
-              </MediaContext.Provider>
-            </AuthorizeReqContext.Provider>
-          </AccountContext.Provider>
-        </SettingsContext.Provider>
-      </ActionContext.Provider>
-    )}</Loading>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <Loading>{accounts && authRequests && metaRequests && signRequests && (
+        <ActionContext.Provider value={_onAction}>
+          <SettingsContext.Provider value={settingsCtx}>
+            <AccountContext.Provider value={accountCtx}>
+              <AuthorizeReqContext.Provider value={authRequests}>
+                <MediaContext.Provider value={cameraOn && mediaAllowed}>
+                  <MetadataReqContext.Provider value={metaRequests}>
+                    <SigningReqContext.Provider value={signRequests}>
+                      <ToastProvider>
+                        <Switch>
+                          <Route path='/account/create'><CreateAccount /></Route>
+                          <Route path='/account/forget/:address'><Forget /></Route>
+                          <Route path='/account/export/:address'><Export /></Route>
+                          <Route path='/account/import-qr'><ImportQr /></Route>
+                          <Route path='/account/import-seed'><ImportSeed /></Route>
+                          <Route path='/account/restore-json'><RestoreJson /></Route>
+                          <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
+                          <Route path='/account/derive/:address'><Derive /></Route>
+                          <Route
+                            exact
+                            path='/'
+                          >
+                            <Root />
+                          </Route>
+                        </Switch>
+                      </ToastProvider>
+                    </SigningReqContext.Provider>
+                  </MetadataReqContext.Provider>
+                </MediaContext.Provider>
+              </AuthorizeReqContext.Provider>
+            </AccountContext.Provider>
+          </SettingsContext.Provider>
+        </ActionContext.Provider>
+      )}</Loading>
+    </ErrorBoundary>
   );
 }

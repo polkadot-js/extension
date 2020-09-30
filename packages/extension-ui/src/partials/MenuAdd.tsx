@@ -26,7 +26,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
-  const { isPopup } = useIsPopup();
+  const isPopup = useIsPopup();
 
   const _openJson = useCallback((): void => {
     windowOpen(jsonPath).catch(console.error);

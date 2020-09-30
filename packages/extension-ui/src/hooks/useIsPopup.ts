@@ -3,8 +3,8 @@
 
 import { useMemo } from 'react';
 
-export default function useIsPopup (): {isPopup: boolean} {
+export default function useIsPopup (): boolean {
   return useMemo(() => {
-    return { isPopup: window.innerWidth <= 560 };
+    return window.innerWidth <= 560;
   }, []);
 }

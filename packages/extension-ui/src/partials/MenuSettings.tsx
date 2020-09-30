@@ -33,7 +33,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
-  const { isPopup } = useIsPopup();
+  const isPopup = useIsPopup();
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });

@@ -20,7 +20,6 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
-const mnemonicPath = '/account/import-seed';
 const jsonPath = '/account/restore-json';
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
@@ -31,11 +30,6 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
 
   const _openJson = useCallback((): void => {
     windowOpen(jsonPath).catch(console.error);
-  }, []);
-
-  const _openMnemonic = useCallback((): void => {
-    console.log('goooo');
-    windowOpen(mnemonicPath).catch(console.error);
   }, []);
 
   return (
@@ -55,10 +49,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       </MenuItem>
       <MenuDivider />
       <MenuItem className='menuItem'>
-        <Link
-          onClick={isPopup ? _openMnemonic : undefined}
-          to={isPopup ? undefined : mnemonicPath}
-        >
+        <Link to='/account/import-seed'>
           <Svg src={seedIcon} />
           <span>{t<string>('Import account from pre-existing seed')}</span>
         </Link>

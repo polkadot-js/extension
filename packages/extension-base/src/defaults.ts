@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const ALLOWED_PATH = ['/', '/account/restore-json', '/account/import-seed'] as const;
+const ALLOWED_PATH = ['/', '/account/restore-json'] as const;
 const PORT_CONTENT = 'content';
 const PORT_EXTENSION = 'extension';
 const PASSWORD_EXPIRY_MIN = 15;

@@ -34,7 +34,6 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   }, []);
 
   const _openMnemonic = useCallback((): void => {
-    console.log('goooo');
     windowOpen(mnemonicPath).catch(console.error);
   }, []);
 

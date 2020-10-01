@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
 import { InputWithLabel, ValidatedInput } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -14,17 +14,15 @@ interface Props {
 
 const MIN_LENGTH = 6;
 
-// FIXME i18n
-const isFirstPasswordValid = isNotShorterThan(MIN_LENGTH, 'Password is too short');
-const isSecondPasswordValid = (firstPassword: string): Validator<string> => allOf(
-  isNotShorterThan(MIN_LENGTH, 'Password is too short'),
-  isSameAs(firstPassword, 'Passwords do not match')
-);
-
 export default function Password ({ isFocussed, onChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
+  const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
+  const isSecondPasswordValid = useCallback((firstPassword: string): Validator<string> => allOf(
+    isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')),
+    isSameAs(firstPassword, t<string>('Passwords do not match'))
+  ), [t]);
 
   useEffect((): void => {
     onChange(pass1 && pass2 ? pass1 : null);

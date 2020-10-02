@@ -3,9 +3,9 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword, AutoSavedAccount } from '../types';
+import { AccountJson, AllowedPath, AuthorizeRequest, AutoSavedAccount, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword } from '../types';
 
-import { PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
+import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
@@ -398,12 +398,17 @@ export default class Extension {
     return true;
   }
 
-  private windowOpen (path = '/'): boolean {
-    console.error('open', `${chrome.extension.getURL('index.html')}#${path}`);
+  private windowOpen (path: AllowedPath): boolean {
+    const url = `${chrome.extension.getURL('index.html')}#${path}`;
 
-    chrome.tabs.create({
-      url: `${chrome.extension.getURL('index.html')}#${path}`
-    });
+    if (!ALLOWED_PATH.includes(path)) {
+      console.error('Not allowed to open the url:', url);
+
+      return false;
+    }
+
+    console.log('open', url);
+    chrome.tabs.create({ url });
 
     return true;
   }
@@ -550,10 +555,7 @@ export default class Extension {
         return this.signingSubscribe(id, port);
 
       case 'pri(window.open)':
-        return this.windowOpen();
-
-      case 'pri(window.open.json)':
-        return this.windowOpen('/account/restore-json');
+        return this.windowOpen(request as AllowedPath);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

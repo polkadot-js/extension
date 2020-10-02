@@ -3,14 +3,16 @@
 
 import { Theme, ThemeProps } from '../types';
 
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
 
 import FullScreenIcon from '../assets/fullscreen.svg';
 import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
+import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
+import getLanguageOptions from '../util/getLanguageOptions';
 
 interface Option {
   text: string;
@@ -22,7 +24,6 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
-const isPopup = window.innerWidth <= 560;
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
@@ -33,6 +34,8 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
+  const isPopup = useIsPopup();
+  const languageOptions = useMemo(() => getLanguageOptions(), []);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -49,6 +52,18 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const _onChangeTheme = useCallback(
     (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
     [setTheme]
+  );
+
+  const _onWindowOpen = useCallback(
+    () => windowOpen('/'),
+    []
+  );
+
+  const _onChangeLang = useCallback(
+    (value: string): void => {
+      settings.set({ i18nLang: value });
+    },
+    []
   );
 
   return (
@@ -92,6 +107,19 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           value={`${prefix}`}
         />
       </MenuItem>
+      <MenuDivider />
+      <MenuItem
+        className='setting'
+        title={t<string>('Language')}
+      >
+        <Dropdown
+          className='dropdown'
+          label=''
+          onChange={_onChangeLang}
+          options={languageOptions}
+          value={settings.i18nLang}
+        />
+      </MenuItem>
       {isPopup && (
         <>
           <MenuDivider />
@@ -99,7 +127,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
             <ActionText
               className='openWindow'
               icon={FullScreenIcon}
-              onClick={windowOpen}
+              onClick={_onWindowOpen}
               text={t<string>('Open extension in new window')}
             />
           </MenuItem>

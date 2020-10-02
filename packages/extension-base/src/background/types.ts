@@ -368,4 +368,3 @@ export interface ActionOptions {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
-

@@ -44,6 +44,8 @@ export default function CreateAccount (): React.ReactElement {
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
+  // throw new Error('blabla');
+
   return (
     <>
       <HeaderWithSteps

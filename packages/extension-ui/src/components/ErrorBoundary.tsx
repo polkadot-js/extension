@@ -6,6 +6,7 @@ import { WithTranslation } from 'react-i18next';
 import React from 'react';
 
 import translate from './translate';
+import { Header } from '../partials';
 
 interface Props extends WithTranslation {
   children: React.ReactNode;
@@ -53,11 +54,17 @@ class ErrorBoundary extends React.Component<Props> {
 
     return displayError
       ? (
-        <div>
-          {t<string>('Uncaught error. Something went wrong with the query and rendering of this component. {{message}}', {
-            replace: { message: displayError.message }
-          })}
-        </div>
+        <>
+          <Header
+            showBackArrow
+            text={t<string>('Error')}
+          />
+          <div>
+            {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
+              replace: { message: displayError.message }
+            })}
+          </div>
+        </>
       )
       : children;
   }

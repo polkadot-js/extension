@@ -10,6 +10,8 @@ import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyri
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { TypeRegistry } from '@polkadot/types';
 
+import { ALLOWED_PATH } from '../defaults';
+
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
 }[keyof T];
@@ -97,8 +99,7 @@ export interface RequestSignatures {
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.isLocked)': [RequestSigningIsLocked, boolean];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
-  'pri(window.open)': [null, boolean];
-  'pri(window.open.json)': [null, boolean];
+  'pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -348,3 +349,5 @@ export interface RequestJsonRestore {
 export interface ResponseJsonRestore {
   error: string | null;
 }
+
+export type AllowedPath = typeof ALLOWED_PATH[number];

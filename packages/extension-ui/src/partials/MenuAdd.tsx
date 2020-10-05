@@ -11,23 +11,25 @@ import plusIcon from '../assets/plus.svg';
 import qrIcon from '../assets/qr.svg';
 import seedIcon from '../assets/secret.svg';
 import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem, Svg } from '../components';
+import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
-import { jsonRestoreWindowOpen } from '../messaging';
+import { windowOpen } from '../messaging';
 
 interface Props extends ThemeProps {
   className?: string;
   reference: React.MutableRefObject<null>;
 }
 
-const isPopup = window.innerWidth <= 480;
+const jsonPath = '/account/restore-json';
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
+  const isPopup = useIsPopup();
 
   const _openJson = useCallback((): void => {
-    jsonRestoreWindowOpen().catch(console.error);
+    windowOpen(jsonPath).catch(console.error);
   }, []);
 
   return (
@@ -55,7 +57,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link
           onClick={isPopup ? _openJson : undefined}
-          to={isPopup ? undefined : '/account/restore-json'}
+          to={isPopup ? undefined : jsonPath}
         >
           <Svg src={fileIcon} />
           <span>{t<string>('Restore account from backup JSON file')}</span>

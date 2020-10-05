@@ -1,13 +1,15 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import i18n from 'i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import uiSettings from '@polkadot/ui-settings';
 
-i18n
-  .use(LanguageDetector)
+import Backend from './Backend';
+
+i18next
   .use(initReactI18next)
+  .use(Backend)
   .init({
     backend: {},
     debug: false,
@@ -16,6 +18,7 @@ i18n
       escapeValue: false
     },
     keySeparator: false,
+    lng: uiSettings.i18nLang,
     load: 'languageOnly',
     nsSeparator: false,
     react: {
@@ -24,6 +27,13 @@ i18n
     returnEmptyString: false,
     returnNull: false
   })
-  .catch(console.error);
+  .catch((error: Error): void =>
+    console.log('i18n: failure', error)
+  );
 
-export default i18n;
+uiSettings.on('change', (settings): void => {
+  i18next.changeLanguage(settings.i18nLang
+  ).catch(console.error);
+});
+
+export default i18next;

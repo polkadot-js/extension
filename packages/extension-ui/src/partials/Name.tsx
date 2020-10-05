@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 
 import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -16,12 +16,10 @@ interface Props {
   onChange: (name: string | null) => void;
 }
 
-// FIXME i18n
-const isNameValid = isNotShorterThan(3, 'Account name is too short');
-
 export default function Name ({ address, className, isFocused, label, onBlur, onChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
+  const isNameValid = useMemo(() => isNotShorterThan(3, t<string>('Account name is too short')), [t]);
 
   const account = accounts.find((account) => account.address === address);
   const startValue = account && account.name;

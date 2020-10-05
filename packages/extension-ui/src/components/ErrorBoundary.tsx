@@ -1,4 +1,4 @@
-// Copyright 2017-2020 @polkadot/react-components authors & contributors
+// Copyright 2019-2020 @polkadot/extension-ui authors & contributor
 // SPDX-License-Identifier: Apache-2.0
 
 import { WithTranslation } from 'react-i18next';

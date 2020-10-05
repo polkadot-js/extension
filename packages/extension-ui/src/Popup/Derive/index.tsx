@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { AccountContext, ActionContext, Address, BackButton, ButtonArea, ErrorBoundary, NextStepButton, VerticalSpace } from '../../components';
+import { AccountContext, ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps, Name, Password } from '../../partials';
@@ -72,43 +72,41 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
         step={account ? 2 : 1}
         text={t<string>('Add new account')}
       />
-      <ErrorBoundary trigger='derive'>
-        {!account && (
-          <SelectParent
-            isLocked={isLocked}
-            onDerivationConfirmed={_onDerivationConfirmed}
-            parentAddress={parentAddress}
-            parentGenesis={parentGenesis}
-          />
-        )}
-        {account && (
-          <>
-            <div>
-              <Address
-                address={account.address}
-                genesisHash={parentGenesis}
-                name={name}
-              />
-            </div>
-            <Name
-              isFocused
-              onChange={setName}
+      {!account && (
+        <SelectParent
+          isLocked={isLocked}
+          onDerivationConfirmed={_onDerivationConfirmed}
+          parentAddress={parentAddress}
+          parentGenesis={parentGenesis}
+        />
+      )}
+      {account && (
+        <>
+          <div>
+            <Address
+              address={account.address}
+              genesisHash={parentGenesis}
+              name={name}
             />
-            <Password onChange={setPassword} />
-            <VerticalSpace/>
-            <ButtonArea>
-              <BackButton onClick={_onBackClick}/>
-              <NextStepButton
-                isBusy={isBusy}
-                isDisabled={!password}
-                onClick={_onCreate}
-              >
-                {t<string>('Create derived account')}
-              </NextStepButton>
-            </ButtonArea>
-          </>
-        )}
-      </ErrorBoundary>
+          </div>
+          <Name
+            isFocused
+            onChange={setName}
+          />
+          <Password onChange={setPassword} />
+          <VerticalSpace/>
+          <ButtonArea>
+            <BackButton onClick={_onBackClick}/>
+            <NextStepButton
+              isBusy={isBusy}
+              isDisabled={!password}
+              onClick={_onCreate}
+            >
+              {t<string>('Create derived account')}
+            </NextStepButton>
+          </ButtonArea>
+        </>
+      )}
     </>
   );
 }

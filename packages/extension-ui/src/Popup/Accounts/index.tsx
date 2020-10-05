@@ -4,7 +4,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ErrorBoundary } from '../../components';
+import { AccountContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
@@ -25,16 +25,14 @@ export default function Accounts (): React.ReactElement {
               showSettings
               text={t<string>('Accounts')}
             />
-            <ErrorBoundary trigger='accounts'>
-              <AccountsArea>
-                {hierarchy.map((json, index): React.ReactNode => (
-                  <AccountsTree
-                    {...json}
-                    key={`${index}:${json.address}`}
-                  />
-                ))}
-              </AccountsArea>
-            </ErrorBoundary>
+            <AccountsArea>
+              {hierarchy.map((json, index): React.ReactNode => (
+                <AccountsTree
+                  {...json}
+                  key={`${index}:${json.address}`}
+                />
+              ))}
+            </AccountsArea>
           </>
         )
       }

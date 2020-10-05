@@ -4,7 +4,7 @@
 import React, { useContext, useState } from 'react';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Address, ErrorBoundary, NextStepButton, ButtonArea, VerticalSpace } from '../components';
+import { ActionContext, Address, NextStepButton, ButtonArea, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountExternal } from '../messaging';
 import { Header, Name } from '../partials';
@@ -30,37 +30,35 @@ export default function ImportQr (): React.ReactElement {
         showBackArrow
         text={t<string>('Scan Address Qr')}
       />
-      <ErrorBoundary trigger='import-qr'>
-        {!account && (
+      {!account && (
+        <div>
+          <QrScanAddress onScan={setAccount} />
+        </div>
+      )}
+      {account && (
+        <>
           <div>
-            <QrScanAddress onScan={setAccount} />
-          </div>
-        )}
-        {account && (
-          <>
-            <div>
-              <Address
-                {...account}
-                name={name}
-              />
-            </div>
-            <Name
-              isFocused
-              onChange={setName}
+            <Address
+              {...account}
+              name={name}
             />
-            <VerticalSpace />
-            {name && (
-              <ButtonArea>
-                <NextStepButton
-                  onClick={_onCreate}
-                >
-                  {t<string>('Add the account with identified address')}
-                </NextStepButton>
-              </ButtonArea>
-            )}
-          </>
-        )}
-      </ErrorBoundary>
+          </div>
+          <Name
+            isFocused
+            onChange={setName}
+          />
+          <VerticalSpace />
+          {name && (
+            <ButtonArea>
+              <NextStepButton
+                onClick={_onCreate}
+              >
+                {t<string>('Add the account with identified address')}
+              </NextStepButton>
+            </ButtonArea>
+          )}
+        </>
+      )}
     </>
   );
 }

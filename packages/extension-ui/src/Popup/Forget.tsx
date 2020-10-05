@@ -5,7 +5,7 @@ import React, { useCallback, useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Address, ActionText, Button, ErrorBoundary, Warning } from '../components';
+import { ActionContext, Address, Button, Warning, ActionBar, ActionText } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
@@ -35,27 +35,25 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
         showBackArrow
         text={t<string>('Forget account')}
       />
-      <ErrorBoundary trigger='forget'>
-        <div>
-          <Address address={address}>
-            <MovedWarning isDanger>{t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
-            <ActionArea>
-              <Button
-                isDanger
-                onClick={_onClick}
-              >
-                {t<string>('I want to forget this account')}
-              </Button>
-              <CancelButton>
-                <ActionText
-                  onClick={_goHome}
-                  text={t<string>('Cancel')}
-                />
-              </CancelButton>
-            </ActionArea>
-          </Address>
-        </div>
-      </ErrorBoundary>
+      <div>
+        <Address address={address}>
+          <MovedWarning isDanger>{t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
+          <ActionArea>
+            <Button
+              isDanger
+              onClick={_onClick}
+            >
+              {t<string>('I want to forget this account')}
+            </Button>
+            <CancelButton>
+              <ActionText
+                onClick={_goHome}
+                text={t<string>('Cancel')}
+              />
+            </CancelButton>
+          </ActionArea>
+        </Address>
+      </div>
     </>
   );
 }

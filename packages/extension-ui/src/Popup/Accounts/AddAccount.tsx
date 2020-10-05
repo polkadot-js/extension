@@ -6,7 +6,7 @@ import { ThemeProps } from '../../types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, ErrorBoundary } from '../../components';
+import { ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
 import AddAccountImage from './AddAccountImage';
@@ -30,16 +30,14 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
         showSettings
         text='Add Account'
       />
-      <ErrorBoundary trigger='add-accounts'>
-        <div className={className}>
-          <div className='image'>
-            <AddAccountImage onClick={_onClick}/>
-          </div>
-          <div className='no-accounts'>
-            <p>{t<string>("You currently don't have any accounts. Create your first account to get started.")}</p>
-          </div>
+      <div className={className}>
+        <div className='image'>
+          <AddAccountImage onClick={_onClick}/>
         </div>
-      </ErrorBoundary>
+        <div className='no-accounts'>
+          <p>{t<string>("You currently don't have any accounts. Create your first account to get started.")}</p>
+        </div>
+      </div>
     </>
   );
 }

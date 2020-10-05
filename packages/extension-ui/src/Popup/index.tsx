@@ -114,16 +114,16 @@ export default function Popup (): React.ReactElement {
     : Welcome;
 
   return (
-    <ErrorBoundary>
-      <Loading>{accounts && authRequests && metaRequests && signRequests && (
-        <ActionContext.Provider value={_onAction}>
-          <SettingsContext.Provider value={settingsCtx}>
-            <AccountContext.Provider value={accountCtx}>
-              <AuthorizeReqContext.Provider value={authRequests}>
-                <MediaContext.Provider value={cameraOn && mediaAllowed}>
-                  <MetadataReqContext.Provider value={metaRequests}>
-                    <SigningReqContext.Provider value={signRequests}>
-                      <ToastProvider>
+    <Loading>{accounts && authRequests && metaRequests && signRequests && (
+      <ActionContext.Provider value={_onAction}>
+        <SettingsContext.Provider value={settingsCtx}>
+          <AccountContext.Provider value={accountCtx}>
+            <AuthorizeReqContext.Provider value={authRequests}>
+              <MediaContext.Provider value={cameraOn && mediaAllowed}>
+                <MetadataReqContext.Provider value={metaRequests}>
+                  <SigningReqContext.Provider value={signRequests}>
+                    <ToastProvider>
+                      <ErrorBoundary>
                         <Switch>
                           <Route path='/account/create'><CreateAccount /></Route>
                           <Route path='/account/forget/:address'><Forget /></Route>
@@ -140,15 +140,15 @@ export default function Popup (): React.ReactElement {
                             <Root />
                           </Route>
                         </Switch>
-                      </ToastProvider>
-                    </SigningReqContext.Provider>
-                  </MetadataReqContext.Provider>
-                </MediaContext.Provider>
-              </AuthorizeReqContext.Provider>
-            </AccountContext.Provider>
-          </SettingsContext.Provider>
-        </ActionContext.Provider>
-      )}</Loading>
-    </ErrorBoundary>
+                      </ErrorBoundary>
+                    </ToastProvider>
+                  </SigningReqContext.Provider>
+                </MetadataReqContext.Provider>
+              </MediaContext.Provider>
+            </AuthorizeReqContext.Provider>
+          </AccountContext.Provider>
+        </SettingsContext.Provider>
+      </ActionContext.Provider>
+    )}</Loading>
   );
 }

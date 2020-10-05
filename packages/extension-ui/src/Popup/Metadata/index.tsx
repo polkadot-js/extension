@@ -3,7 +3,7 @@
 
 import React, { useContext } from 'react';
 
-import { ErrorBoundary, Loading, MetadataReqContext } from '../../components';
+import { Loading, MetadataReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
@@ -17,14 +17,12 @@ export default function Metadata (): React.ReactElement {
       <Header text={t<string>('Metadata')} />
       {requests[0]
         ? (
-          <ErrorBoundary trigger='metadata'>
-            <Request
-              key={requests[0].id}
-              metaId={requests[0].id}
-              request={requests[0].request}
-              url={requests[0].url}
-            />
-          </ErrorBoundary>
+          <Request
+            key={requests[0].id}
+            metaId={requests[0].id}
+            request={requests[0].request}
+            url={requests[0].url}
+          />
         )
         : <Loading />
       }

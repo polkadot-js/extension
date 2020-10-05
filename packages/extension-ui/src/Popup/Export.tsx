@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
-import { ActionBar, ActionContext, ActionText, Address, Button, ErrorBoundary, InputWithLabel, Warning } from '../components';
+import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
 import { Header } from '../partials';
@@ -58,39 +58,37 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
         showBackArrow
         text={t<string>('Export account')}
       />
-      <ErrorBoundary trigger='export'>
-        <div>
-          <Address address={address}>
-            <MovedWarning danger>{t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}</MovedWarning>
-            <ActionArea>
-              <InputWithLabel
-                data-export-password
-                disabled={isBusy}
-                isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
-                label={t<string>('password for this account')}
-                onChange={setPass}
-                type='password'
+      <div>
+        <Address address={address}>
+          <MovedWarning danger>{t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}</MovedWarning>
+          <ActionArea>
+            <InputWithLabel
+              data-export-password
+              disabled={isBusy}
+              isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
+              label={t<string>('password for this account')}
+              onChange={setPass}
+              type='password'
+            />
+            <Button
+              className='export-button'
+              data-export-button
+              isBusy={isBusy}
+              isDanger
+              isDisabled={pass.length === 0}
+              onClick={_onExportButtonClick}
+            >
+              {t<string>('I want to export this account')}
+            </Button>
+            <CancelButton>
+              <ActionText
+                onClick={_goHome}
+                text={t<string>('Cancel')}
               />
-              <Button
-                className='export-button'
-                data-export-button
-                isBusy={isBusy}
-                isDanger
-                isDisabled={pass.length === 0}
-                onClick={_onExportButtonClick}
-              >
-                {t<string>('I want to export this account')}
-              </Button>
-              <CancelButton>
-                <ActionText
-                  onClick={_goHome}
-                  text={t<string>('Cancel')}
-                />
-              </CancelButton>
-            </ActionArea>
-          </Address>
-        </div>
-      </ErrorBoundary>
+            </CancelButton>
+          </ActionArea>
+        </Address>
+      </div>
     </>
   );
 }

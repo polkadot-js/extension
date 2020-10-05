@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address, ErrorBoundary, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { AccountContext, ActionContext, Address, ButtonArea, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Header, Name, Password } from '../partials';
@@ -74,42 +74,40 @@ export default function Import (): React.ReactElement {
         showBackArrow
         text={t<string>('Import account')}
       />
-      <ErrorBoundary trigger='import-seed'>
-        <div>
-          <Address
-            address={account?.address}
-            name={name}
-          />
-        </div>
-        <ValidatedInput
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          component={SeedInput}
-          isFocused
-          label={t<string>('existing 12 or 24-word mnemonic seed')}
-          onValidatedChange={_onChangeSeed}
-          rowsCount={2}
-          validator={isSeedValid}
+      <div>
+        <Address
+          address={account?.address}
+          name={name}
         />
-        {account && (
-          <>
-            <Name onChange={setName} />
-            <Password onChange={setPassword} />
-          </>
-        )}
-        {account && name && password && (
-          <>
-            <VerticalSpace />
-            <ButtonArea>
-              <NextStepButton
-                isBusy={isBusy}
-                onClick={_onCreate}
-              >
-                {t<string>('Add the account with the supplied seed')}
-              </NextStepButton>
-            </ButtonArea>
-          </>
-        )}
-      </ErrorBoundary>
+      </div>
+      <ValidatedInput
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+        component={SeedInput}
+        isFocused
+        label={t<string>('existing 12 or 24-word mnemonic seed')}
+        onValidatedChange={_onChangeSeed}
+        rowsCount={2}
+        validator={isSeedValid}
+      />
+      {account && (
+        <>
+          <Name onChange={setName} />
+          <Password onChange={setPassword} />
+        </>
+      )}
+      {account && name && password && (
+        <>
+          <VerticalSpace />
+          <ButtonArea>
+            <NextStepButton
+              isBusy={isBusy}
+              onClick={_onCreate}
+            >
+              {t<string>('Add the account with the supplied seed')}
+            </NextStepButton>
+          </ButtonArea>
+        </>
+      )}
     </>
   );
 }

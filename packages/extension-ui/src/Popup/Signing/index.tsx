@@ -5,7 +5,7 @@ import { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { ErrorBoundary, Loading, SigningReqContext } from '../../components';
+import { Loading, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
@@ -57,16 +57,14 @@ export default function Signing (): React.ReactElement {
             />
           )}
         </Header>
-        <ErrorBoundary trigger='signing'>
-          <Request
-            account={request.account}
-            buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}
-            isFirst={requestIndex === 0}
-            request={request.request}
-            signId={request.id}
-            url={request.url}
-          />
-        </ErrorBoundary>
+        <Request
+          account={request.account}
+          buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}
+          isFirst={requestIndex === 0}
+          request={request.request}
+          signId={request.id}
+          url={request.url}
+        />
       </>
     )
     : <Loading />;

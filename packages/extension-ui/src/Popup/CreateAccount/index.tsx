@@ -3,7 +3,7 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { ActionContext, Address, Loading } from '../../components';
+import { ActionContext, Address, ErrorBoundary, Loading } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
@@ -50,31 +50,33 @@ export default function CreateAccount (): React.ReactElement {
         step={step}
         text={t<string>('Create an account')}
       />
-      <Loading>
-        <div>
-          <Address
-            address={account?.address}
-            name={name}
-          />
-        </div>
-        {account && (
-          step === 1
-            ? (
-              <Mnemonic
-                onNextStep={_onNextStep}
-                seed={account.seed}
-              />
-            )
-            : (
-              <AccountName
-                address={account.address}
-                isBusy={isBusy}
-                onBackClick={_onPreviousStep}
-                onCreate={_onCreate}
-              />
-            )
-        )}
-      </Loading>
+      <ErrorBoundary trigger='create-account'>
+        <Loading>
+          <div>
+            <Address
+              address={account?.address}
+              name={name}
+            />
+          </div>
+          {account && (
+            step === 1
+              ? (
+                <Mnemonic
+                  onNextStep={_onNextStep}
+                  seed={account.seed}
+                />
+              )
+              : (
+                <AccountName
+                  address={account.address}
+                  isBusy={isBusy}
+                  onBackClick={_onPreviousStep}
+                  onCreate={_onCreate}
+                />
+              )
+          )}
+        </Loading>
+      </ErrorBoundary>
     </>
   );
 }

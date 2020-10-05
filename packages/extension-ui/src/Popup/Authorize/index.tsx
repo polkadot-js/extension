@@ -4,7 +4,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AuthorizeReqContext } from '../../components';
+import { AuthorizeReqContext, ErrorBoundary } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
@@ -14,9 +14,9 @@ export default function Authorize (): React.ReactElement {
   const requests = useContext(AuthorizeReqContext);
 
   return (
-    <>
-      <Scroll isLastRequest={requests.length === 1}>
-        <Header text={t<string>('Authorize')} />
+    <Scroll isLastRequest={requests.length === 1}>
+      <Header text={t<string>('Authorize')} />
+      <ErrorBoundary trigger='authorize'>
         {requests.map(({ id, request, url }, index): React.ReactNode => (
           <Request
             authId={id}
@@ -26,8 +26,8 @@ export default function Authorize (): React.ReactElement {
             url={url}
           />
         ))}
-      </Scroll>
-    </>
+      </ErrorBoundary>
+    </Scroll>
   );
 }
 

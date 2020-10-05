@@ -4,7 +4,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext } from '../../components';
+import { AccountContext, ErrorBoundary } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
@@ -13,12 +13,6 @@ import AddAccount from './AddAccount';
 export default function Accounts (): React.ReactElement {
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
-
-  // const bla = true;
-
-  // if (bla){
-  //   throw new Error('aaaaaa');
-  // }
 
   return (
     <>
@@ -31,14 +25,16 @@ export default function Accounts (): React.ReactElement {
               showSettings
               text={t<string>('Accounts')}
             />
-            <AccountsArea>
-              {hierarchy.map((json, index): React.ReactNode => (
-                <AccountsTree
-                  {...json}
-                  key={`${index}:${json.address}`}
-                />
-              ))}
-            </AccountsArea>
+            <ErrorBoundary trigger='accounts'>
+              <AccountsArea>
+                {hierarchy.map((json, index): React.ReactNode => (
+                  <AccountsTree
+                    {...json}
+                    key={`${index}:${json.address}`}
+                  />
+                ))}
+              </AccountsArea>
+            </ErrorBoundary>
           </>
         )
       }

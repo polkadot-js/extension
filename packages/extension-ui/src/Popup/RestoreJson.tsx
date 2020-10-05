@@ -7,7 +7,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
+import { AccountContext, ActionContext, ErrorBoundary, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
 import { Header } from '../partials';
@@ -97,35 +97,37 @@ export default function Upload (): React.ReactElement {
         showBackArrow
         text={t<string>('Restore from JSON')}
       />
-      <div>
+      <ErrorBoundary trigger='restore-from-json'>
         <div>
-          <Address
-            address={(isFileValid && address) || null}
-            genesisHash={(isFileValid && json?.meta.genesisHash as string) || null}
-            name={(isFileValid && json?.meta.name as string) || null}
+          <div>
+            <Address
+              address={(isFileValid && address) || null}
+              genesisHash={(isFileValid && json?.meta.genesisHash as string) || null}
+              name={(isFileValid && json?.meta.name as string) || null}
+            />
+          </div>
+          <InputFileWithLabel
+            accept={acceptedFormats}
+            isError={!isFileValid}
+            label={t<string>('backup file')}
+            onChange={_onChangeFile}
+            withLabel
           />
+          <InputWithLabel
+            isError={!isPassValid}
+            label={t<string>('Password for this file')}
+            onChange={_onChangePass}
+            type='password'
+          />
+          <Button
+            isBusy={isBusy}
+            isDisabled={!isFileValid || !isPassValid}
+            onClick={_onRestore}
+          >
+            {t<string>('Restore')}
+          </Button>
         </div>
-        <InputFileWithLabel
-          accept={acceptedFormats}
-          isError={!isFileValid}
-          label={t<string>('backup file')}
-          onChange={_onChangeFile}
-          withLabel
-        />
-        <InputWithLabel
-          isError={!isPassValid}
-          label={t<string>('Password for this file')}
-          onChange={_onChangePass}
-          type='password'
-        />
-        <Button
-          isBusy={isBusy}
-          isDisabled={!isFileValid || !isPassValid}
-          onClick={_onRestore}
-        >
-          {t<string>('Restore')}
-        </Button>
-      </div>
+      </ErrorBoundary>
     </>
   );
 }

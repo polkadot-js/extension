@@ -68,6 +68,8 @@ export default function Import (): React.ReactElement {
     }
   }, [account, name, onAction, password]);
 
+  throw new Error('blabla');
+
   return (
     <>
       <HeaderWithSmallerMargin

@@ -4,13 +4,16 @@
 import { WithTranslation } from 'react-i18next';
 
 import React from 'react';
+// import styled from 'styled-components';
 
 import translate from './translate';
-import { Header } from '../partials';
+import Header from '../partials/Header';
+import ActionText from './ActionText';
+// import { ThemeProps } from '../types';
 
 interface Props extends WithTranslation {
   children: React.ReactNode;
-  doThrow?: boolean;
+  className?: string;
   error?: Error | null;
   onError?: () => void;
   trigger?: unknown;
@@ -37,14 +40,10 @@ class ErrorBoundary extends React.Component<Props> {
       : null;
   }
 
-  public componentDidCatch (error: Error): void {
-    const { doThrow, onError } = this.props;
+  public componentDidCatch (): void {
+    const { onError } = this.props;
 
     onError && onError();
-
-    if (doThrow) {
-      throw error;
-    }
   }
 
   public render (): React.ReactNode {
@@ -52,17 +51,26 @@ class ErrorBoundary extends React.Component<Props> {
     const { error } = this.state;
     const displayError = errorProps || error;
 
+    console.log('errorProps', errorProps);
+    console.log('error', error);
+
+    const _goHome = () => {
+      this.setState({ error: null, trigger: null });
+      window.location.hash = '/';
+    };
+
     return displayError
       ? (
         <>
-          <Header
-            showBackArrow
-            text={t<string>('Error')}
-          />
+          <Header text={t<string>('An error occured')} />
           <div>
             {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
               replace: { message: displayError.message }
             })}
+            <ActionText
+              onClick={_goHome}
+              text={t<string>('Cancel')}
+            />
           </div>
         </>
       )

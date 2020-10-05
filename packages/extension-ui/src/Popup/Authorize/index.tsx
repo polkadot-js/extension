@@ -17,15 +17,17 @@ export default function Authorize (): React.ReactElement {
     <Scroll isLastRequest={requests.length === 1}>
       <Header text={t<string>('Authorize')} />
       <ErrorBoundary trigger='authorize'>
-        {requests.map(({ id, request, url }, index): React.ReactNode => (
-          <Request
-            authId={id}
-            isFirst={index === 0}
-            key={id}
-            request={request}
-            url={url}
-          />
-        ))}
+        <>
+          {requests.map(({ id, request, url }, index): React.ReactNode => (
+            <Request
+              authId={id}
+              isFirst={index === 0}
+              key={id}
+              request={request}
+              url={url}
+            />
+          ))}
+        </>
       </ErrorBoundary>
     </Scroll>
   );

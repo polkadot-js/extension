@@ -3,13 +3,15 @@
 
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
+import getNetworkMap from './getNetworkMap';
+
 type ChildFilter = (account: AccountJson) => AccountWithChildren;
 
 function compareByCreationTime (a: AccountJson, b: AccountJson): number {
   return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
 }
 
-function compareByString (a?: string, b?: string): number {
+function compareByString (a?: string | null, b?: string | null): number {
   const nameA = a?.toUpperCase() || '';
   const nameB = b?.toUpperCase() || '';
 
@@ -33,7 +35,19 @@ function compareByPath (a: AccountJson, b: AccountJson): number {
   return compareByString(a.suri, b.suri);
 }
 
+function compareByNetwork (a: AccountJson, b: AccountJson): number {
+  const networkMap = getNetworkMap();
+  const networkA = networkMap.get(a?.genesisHash || '');
+  const networkB = networkMap.get(b?.genesisHash || '');
+
+  return compareByString(networkA, networkB);
+}
+
 function compareByNameThenCreation (a: AccountJson, b: AccountJson): number {
+  if (a.genesisHash !== b.genesisHash) {
+    return 0;
+  }
+
   const res = compareByName(a, b);
 
   return res === 0 ? compareByCreationTime(a, b) : res;
@@ -67,5 +81,6 @@ export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] 
       !accounts.some(({ address }) => parentAddress === address)
     )
     .map(accountWithChildren(accounts))
+    .sort(compareByNetwork)
     .sort(compareByNameThenCreation);
 }

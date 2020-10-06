@@ -4,6 +4,11 @@
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { buildHierarchy } from './buildHierarchy';
 
+const genesisExample = {
+  KUSAMA: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+  POLKADOT: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
+};
+
 const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[]): void => {
   expect(buildHierarchy(accounts)).toEqual(expected);
 };
@@ -58,6 +63,20 @@ describe('Use Account Hierarchy', () => {
         children: [acc('c', 'b')]
       }]
     }]);
+  });
+
+  test('sorts accounts by network', () => {
+    testHierarchy(
+      [{ address: 'b', genesisHash: genesisExample.KUSAMA }, { address: 'a', genesisHash: genesisExample.POLKADOT }, { address: 'c', genesisHash: genesisExample.KUSAMA }],
+      [{ address: 'b', genesisHash: genesisExample.KUSAMA }, { address: 'c', genesisHash: genesisExample.KUSAMA }, { address: 'a', genesisHash: genesisExample.POLKADOT }]
+    );
+  });
+
+  test('sorts accounts by network and name', () => {
+    testHierarchy(
+      [{ address: 'b', genesisHash: genesisExample.KUSAMA, name: 'b-last-kusama' }, { address: 'a', genesisHash: genesisExample.POLKADOT }, { address: 'c', genesisHash: genesisExample.KUSAMA, name: 'a-first-kusama' }],
+      [{ address: 'c', genesisHash: genesisExample.KUSAMA, name: 'a-first-kusama' }, { address: 'b', genesisHash: genesisExample.KUSAMA, name: 'b-last-kusama' }, { address: 'a', genesisHash: genesisExample.POLKADOT }]
+    );
   });
 
   test('sorts accounts by name and creation date', () => {

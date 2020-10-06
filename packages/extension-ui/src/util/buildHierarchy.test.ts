@@ -9,13 +9,17 @@ const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[])
 };
 
 describe('Use Account Hierarchy', () => {
-  const acc = (address: string, parentAddress?: string, whenCreated?: number): {
+  const acc = (address: string, parentAddress?: string, whenCreated?: number, name?: string, suri?: string): {
     address: string;
-    whenCreated?: number;
+    name?: string;
     parentAddress?: string;
+    suri?: string;
+    whenCreated?: number;
   } => ({
     address,
+    name,
     parentAddress,
+    suri,
     whenCreated
   });
 
@@ -56,10 +60,24 @@ describe('Use Account Hierarchy', () => {
     }]);
   });
 
-  test('sorts accounts by creation time', () => {
+  test('sorts accounts by name and creation date', () => {
     testHierarchy(
-      [acc('a', undefined, 2), acc('b', 'a', 4), acc('c', 'a', 3), acc('d', undefined, 1)],
-      [acc('d', undefined, 1), { address: 'a', children: [acc('c', 'a', 3), acc('b', 'a', 4)], whenCreated: 2 }]
+      [acc('b', undefined, 2, 'b'), acc('z', undefined, 1, 'b'), acc('a', undefined, 4, 'a')],
+      [{ address: 'a', name: 'a', whenCreated: 4 }, { address: 'z', name: 'b', whenCreated: 1 }, { address: 'b', name: 'b', whenCreated: 2 }]
+    );
+  });
+
+  test('sorts account children by name and path', () => {
+    testHierarchy(
+      [acc('a', undefined, 1, 'a'), acc('b', 'a', 1, 'b', '/2'), acc('b', 'a', 1, 'b', '/0')],
+      [{ address: 'a', children: [acc('b', 'a', 1, 'b', '/0'), acc('b', 'a', 1, 'b', '/2')], name: 'a', whenCreated: 1 }]
+    );
+  });
+
+  test('sorts accounts with children by name and creation date', () => {
+    testHierarchy(
+      [acc('b', undefined, 2, 'b'), acc('z', undefined, 1, 'b'), acc('d', 'b', 2, 'd'), acc('c', 'b', 3, 'c'), acc('a', undefined, 4, 'a')],
+      [{ address: 'a', name: 'a', whenCreated: 4 }, { address: 'z', name: 'b', whenCreated: 1 }, { address: 'b', children: [acc('c', 'b', 3, 'c'), acc('d', 'b', 2, 'd')], name: 'b', whenCreated: 2 }]
     );
   });
 

@@ -9,9 +9,9 @@ function compareByCreationTime (a: AccountJson, b: AccountJson): number {
   return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
 }
 
-function compareByNameThenTimestamp (a: AccountJson, b: AccountJson): number {
-  const nameA = a?.name?.toUpperCase() || '';
-  const nameB = b?.name?.toUpperCase() || '';
+function compareByString (a?: string, b?: string): number {
+  const nameA = a?.toUpperCase() || '';
+  const nameB = b?.toUpperCase() || '';
 
   if (nameA < nameB) {
     return -1;
@@ -21,8 +21,28 @@ function compareByNameThenTimestamp (a: AccountJson, b: AccountJson): number {
     return 1;
   }
 
-  // names are equal, compare by timestamp
-  return compareByCreationTime(a, b);
+  // names are equal
+  return 0;
+}
+
+function compareByName (a: AccountJson, b: AccountJson): number {
+  return compareByString(a.name, b.name);
+}
+
+function compareByPath (a: AccountJson, b: AccountJson): number {
+  return compareByString(a.suri, b.suri);
+}
+
+function compareByNameThenCreation (a: AccountJson, b: AccountJson): number {
+  const res = compareByName(a, b);
+
+  return res === 0 ? compareByCreationTime(a, b) : res;
+}
+
+function compareByNameThenPath (a: AccountJson, b: AccountJson): number {
+  const res = compareByName(a, b);
+
+  return res === 0 ? compareByPath(a, b) : res;
 }
 
 export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
@@ -30,7 +50,7 @@ export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
     const children = accounts
       .filter(({ parentAddress }) => account.address === parentAddress)
       .map(accountWithChildren(accounts))
-      .sort(compareByNameThenTimestamp);
+      .sort(compareByNameThenPath);
 
     return children.length === 0
       ? account
@@ -47,5 +67,5 @@ export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] 
       !accounts.some(({ address }) => parentAddress === address)
     )
     .map(accountWithChildren(accounts))
-    .sort(compareByNameThenTimestamp);
+    .sort(compareByNameThenCreation);
 }

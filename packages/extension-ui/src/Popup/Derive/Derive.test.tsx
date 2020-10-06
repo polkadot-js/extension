@@ -118,14 +118,6 @@ describe('Derive', () => {
       expect(button.prop('disabled')).not.toBe(true);
     });
 
-    it.skip('"A correct suri is suggested', async () => {
-      await type(wrapper.find('input[type="password"]'), 'pass');
-
-      const button = wrapper.find('[data-button-action="create derived account"] button');
-
-      expect(button.prop('disabled')).not.toBe(true);
-    });
-
     it('"Create derived account" is disabled when suri is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), 'pass');
       await type(wrapper.find('[data-input-suri] input'), '//');

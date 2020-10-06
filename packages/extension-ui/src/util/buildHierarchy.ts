@@ -44,6 +44,8 @@ function compareByNetwork (a: AccountJson, b: AccountJson): number {
 }
 
 function compareByNameThenCreation (a: AccountJson, b: AccountJson): number {
+  // This comparison happens after an initial sorting by network.
+  // if the 2 accounts are from different networks, don't touch their order
   if (a.genesisHash !== b.genesisHash) {
     return 0;
   }

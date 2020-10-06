@@ -9,12 +9,28 @@ function compareByCreationTime (a: AccountJson, b: AccountJson): number {
   return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
 }
 
+function compareByNameThenTimestamp (a: AccountJson, b: AccountJson): number {
+  const nameA = a?.name?.toUpperCase() || '';
+  const nameB = b?.name?.toUpperCase() || '';
+
+  if (nameA < nameB) {
+    return -1;
+  }
+
+  if (nameA > nameB) {
+    return 1;
+  }
+
+  // names are equal, compare by timestamp
+  return compareByCreationTime(a, b);
+}
+
 export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
   return (account: AccountJson): AccountWithChildren => {
     const children = accounts
       .filter(({ parentAddress }) => account.address === parentAddress)
       .map(accountWithChildren(accounts))
-      .sort(compareByCreationTime);
+      .sort(compareByNameThenTimestamp);
 
     return children.length === 0
       ? account
@@ -31,5 +47,5 @@ export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] 
       !accounts.some(({ address }) => parentAddress === address)
     )
     .map(accountWithChildren(accounts))
-    .sort(compareByCreationTime);
+    .sort(compareByNameThenTimestamp);
 }

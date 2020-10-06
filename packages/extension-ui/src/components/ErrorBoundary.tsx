@@ -36,29 +36,27 @@ class ErrorBoundary extends React.Component<Props> {
     onError && onError();
   }
 
-  public render (): React.ReactNode {
-    const { children, error: errorProps, t } = this.props;
-    const { error } = this.state;
-    const displayError = errorProps || error;
+  goHome = () => {
+    this.setState({ error: null });
+    window.location.hash = '/';
+  };
 
-    console.log('errorProps', errorProps);
+  public render (): React.ReactNode {
+    const { children, t } = this.props;
+    const { error } = this.state;
+
     console.log('error', error);
 
-    const _goHome = () => {
-      this.setState({ error: null });
-      window.location.hash = '/';
-    };
-
-    return displayError
+    return error
       ? (
         <>
           <Header text={t<string>('An error occured')} />
           <div>
             {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
-              replace: { message: displayError.message }
+              replace: { message: error.message }
             })}
             <ActionText
-              onClick={_goHome}
+              onClick={this.goHome}
               text={t<string>('Cancel')}
             />
           </div>

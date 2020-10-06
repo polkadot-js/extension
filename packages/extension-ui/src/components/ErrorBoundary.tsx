@@ -16,28 +16,18 @@ interface Props extends WithTranslation {
   className?: string;
   error?: Error | null;
   onError?: () => void;
-  trigger?: unknown;
 }
 
 interface State {
   error: Error | null;
-  prevTrigger: string | null;
 }
 
 // NOTE: This is the only way to do an error boundary, via extend
 class ErrorBoundary extends React.Component<Props> {
-  state: State = { error: null, prevTrigger: null };
+  state: State = { error: null };
 
   static getDerivedStateFromError (error: Error): Partial<State> {
     return { error };
-  }
-
-  static getDerivedStateFromProps ({ trigger }: Props, { prevTrigger }: State): State | null {
-    const newTrigger = JSON.stringify({ trigger });
-
-    return (prevTrigger !== newTrigger)
-      ? { error: null, prevTrigger: newTrigger }
-      : null;
   }
 
   public componentDidCatch (): void {
@@ -55,7 +45,7 @@ class ErrorBoundary extends React.Component<Props> {
     console.log('error', error);
 
     const _goHome = () => {
-      this.setState({ error: null, trigger: null });
+      this.setState({ error: null });
       window.location.hash = '/';
     };
 

@@ -7,7 +7,7 @@ import getNetworkMap from './getNetworkMap';
 
 type ChildFilter = (account: AccountJson) => AccountWithChildren;
 
-function compareByCreationTime (a: AccountJson, b: AccountJson): number {
+function compareByCreation (a: AccountJson, b: AccountJson): number {
   return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
 }
 
@@ -33,7 +33,13 @@ function compareByNetwork (a: AccountJson, b: AccountJson): number {
   return networkA.localeCompare(networkB);
 }
 
-function compareByNameThenCreation (a: AccountJson, b: AccountJson): number {
+function compareByPathThenCreation (a: AccountJson, b: AccountJson): number {
+  const res = compareByPath(a, b);
+
+  return res === 0 ? compareByCreation(a, b) : res;
+}
+
+function compareByNameThenPathThenCreation (a: AccountJson, b: AccountJson): number {
   // This comparison happens after an initial sorting by network.
   // if the 2 accounts are from different networks, don't touch their order
   if (a.genesisHash !== b.genesisHash) {
@@ -42,13 +48,7 @@ function compareByNameThenCreation (a: AccountJson, b: AccountJson): number {
 
   const res = compareByName(a, b);
 
-  return res === 0 ? compareByCreationTime(a, b) : res;
-}
-
-function compareByNameThenPath (a: AccountJson, b: AccountJson): number {
-  const res = compareByName(a, b);
-
-  return res === 0 ? compareByPath(a, b) : res;
+  return res === 0 ? compareByPathThenCreation(a, b) : res;
 }
 
 export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
@@ -56,7 +56,7 @@ export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
     const children = accounts
       .filter(({ parentAddress }) => account.address === parentAddress)
       .map(accountWithChildren(accounts))
-      .sort(compareByNameThenPath);
+      .sort(compareByNameThenPathThenCreation);
 
     return children.length === 0
       ? account
@@ -74,5 +74,5 @@ export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] 
     )
     .map(accountWithChildren(accounts))
     .sort(compareByNetwork)
-    .sort(compareByNameThenCreation);
+    .sort(compareByNameThenPathThenCreation);
 }

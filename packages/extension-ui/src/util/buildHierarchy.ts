@@ -11,36 +11,26 @@ function compareByCreationTime (a: AccountJson, b: AccountJson): number {
   return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
 }
 
-function compareByString (a?: string | null, b?: string | null): number {
-  const nameA = a?.toUpperCase() || '';
-  const nameB = b?.toUpperCase() || '';
-
-  if (nameA < nameB) {
-    return -1;
-  }
-
-  if (nameA > nameB) {
-    return 1;
-  }
-
-  // names are equal
-  return 0;
-}
-
 function compareByName (a: AccountJson, b: AccountJson): number {
-  return compareByString(a.name, b.name);
+  const nameA = a.name?.toUpperCase() || '';
+  const nameB = b.name?.toUpperCase() || '';
+
+  return nameA.localeCompare(nameB);
 }
 
 function compareByPath (a: AccountJson, b: AccountJson): number {
-  return compareByString(a.suri, b.suri);
+  const suriA = a.suri?.toUpperCase() || '';
+  const suriB = b.suri?.toUpperCase() || '';
+
+  return suriA.localeCompare(suriB);
 }
 
 function compareByNetwork (a: AccountJson, b: AccountJson): number {
   const networkMap = getNetworkMap();
-  const networkA = networkMap.get(a?.genesisHash || '');
-  const networkB = networkMap.get(b?.genesisHash || '');
+  const networkA = networkMap.get(a?.genesisHash || '') || '';
+  const networkB = networkMap.get(b?.genesisHash || '') || '';
 
-  return compareByString(networkA, networkB);
+  return networkA.localeCompare(networkB);
 }
 
 function compareByNameThenCreation (a: AccountJson, b: AccountJson): number {

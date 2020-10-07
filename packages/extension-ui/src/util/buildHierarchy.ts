@@ -34,9 +34,7 @@ function compareByNetwork (a: AccountJson, b: AccountJson): number {
 }
 
 function compareByPathThenCreation (a: AccountJson, b: AccountJson): number {
-  const res = compareByPath(a, b);
-
-  return res === 0 ? compareByCreation(a, b) : res;
+  return compareByPath(a, b) || compareByCreation(a, b);
 }
 
 function compareByNameThenPathThenCreation (a: AccountJson, b: AccountJson): number {
@@ -46,9 +44,7 @@ function compareByNameThenPathThenCreation (a: AccountJson, b: AccountJson): num
     return 0;
   }
 
-  const res = compareByName(a, b);
-
-  return res === 0 ? compareByPathThenCreation(a, b) : res;
+  return compareByName(a, b) || compareByPathThenCreation(a, b);
 }
 
 export function accountWithChildren (accounts: AccountJson[]): ChildFilter {

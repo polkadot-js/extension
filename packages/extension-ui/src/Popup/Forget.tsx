@@ -1,6 +1,5 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-import { AccountJson } from '@polkadot/extension-base/background/types';
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';

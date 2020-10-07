@@ -34,6 +34,7 @@ function compareByNetwork (a: AccountJson, b: AccountJson): number {
 }
 
 function compareByPathThenCreation (a: AccountJson, b: AccountJson): number {
+  // if the paths are equal, compare by creation time
   return compareByPath(a, b) || compareByCreation(a, b);
 }
 
@@ -44,6 +45,7 @@ function compareByNameThenPathThenCreation (a: AccountJson, b: AccountJson): num
     return 0;
   }
 
+  // if the names are equal, compare by path then creation time
   return compareByName(a, b) || compareByPathThenCreation(a, b);
 }
 

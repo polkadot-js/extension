@@ -30,6 +30,7 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   genesisHash?: string | null;
+  isExternal?: boolean | null;
   isHidden?: boolean;
   name?: React.ReactNode | null;
   parentName?: string | null;
@@ -71,7 +72,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, children, className, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -118,6 +119,7 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
         <Identicon
           className='identityIcon'
           iconTheme={theme}
+          isExternal={isExternal}
           onCopy={_onCopy}
           prefix={prefix}
           value={formatted || address}

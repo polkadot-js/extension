@@ -152,6 +152,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           <Address
             address={json.address}
             genesisHash={json.genesisHash}
+            isExternal={isExternal}
           />
         </div>
         {isExternal
@@ -189,7 +190,10 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     return (
       <>
         <div>
-          <Address address={raw.address} />
+          <Address
+            address={raw.address}
+            isExternal={isExternal}
+          />
         </div>
         <Bytes
           bytes={raw.data}

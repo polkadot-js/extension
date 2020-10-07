@@ -5,7 +5,7 @@ import { ThemeProps } from '../types';
 
 import React from 'react';
 import styled from 'styled-components';
-import ReactIcon from '@polkadot/react-identicon';
+import Icon from '@polkadot/react-identicon';
 
 import arrow from '../assets/arrowTopRight.svg';
 import Svg from './Svg';
@@ -22,7 +22,7 @@ interface Props {
 function Identicon ({ className, iconTheme, isExternal, onCopy, prefix, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <ReactIcon
+      <Icon
         className='icon'
         onCopy={onCopy}
         prefix={prefix}

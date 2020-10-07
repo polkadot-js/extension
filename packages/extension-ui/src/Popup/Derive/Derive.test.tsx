@@ -57,6 +57,9 @@ describe('Derive', () => {
     return { onActionStub, wrapper };
   };
 
+  let wrapper: ReactWrapper;
+  let onActionStub: jest.Mock;
+
   const uncheck = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: false } });
 
   const type = async (input: ReactWrapper, value: string): Promise<void> => {
@@ -66,52 +69,48 @@ describe('Derive', () => {
   };
 
   describe('Parent selection screen', () => {
+    beforeEach(async () => {
+      const mountedComponent = await mountComponent();
+
+      wrapper = mountedComponent.wrapper;
+      onActionStub = mountedComponent.onActionStub;
+    });
+
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === 'pass');
 
-    it('"Derive" checkbox is selected by default', async () => {
-      const { wrapper } = await mountComponent();
+    it('"Derive" checkbox is selected by default', () => {
       const checkbox = wrapper.find('input[type="checkbox"]');
 
       expect(checkbox.prop('checked')).toBe(true);
     });
 
-    it('"Create new root" button becomes visible after checkbox is unchecked', async () => {
-      const { wrapper } = await mountComponent();
-
+    it('"Create new root" button becomes visible after checkbox is unchecked', () => {
       uncheck(wrapper.find('input[type="checkbox"]'));
 
       expect(wrapper.exists('[data-button-action="create root account"]')).toBe(true);
       expect(wrapper.exists('[data-button-action="create derived account"]')).toBe(false);
     });
 
-    it('"Create new root" button redirects to /account/create', async () => {
-      const { onActionStub, wrapper } = await mountComponent();
-
+    it('"Create new root" button redirects to /account/create', () => {
       uncheck(wrapper.find('input[type="checkbox"]'));
       wrapper.find('[data-button-action="create root account"] button').simulate('click');
 
       expect(onActionStub).toBeCalledWith('/account/create');
     });
 
-    it('"Create derived account" is visible when checkbox is checked', async () => {
-      const { wrapper } = await mountComponent();
-
+    it('"Create derived account" is visible when checkbox is checked', () => {
       expect(wrapper.exists('[data-button-action="create derived account"]')).toBe(true);
       expect(wrapper.exists('[data-button-action="create root account"]')).toBe(false);
     });
 
-    it('"Create derived account" is disabled when password is incorrect', async () => {
-      const { wrapper } = await mountComponent();
-
+    it('"Create derived account" is disabled when password is incorrect', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(true);
     });
 
     it('"Create derived account" is enabled when password is correct', async () => {
-      const { wrapper } = await mountComponent();
-
       await type(wrapper.find('input[type="password"]'), 'pass');
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
@@ -120,8 +119,6 @@ describe('Derive', () => {
     });
 
     it('"Create derived account" is disabled when suri is incorrect', async () => {
-      const { wrapper } = await mountComponent();
-
       await type(wrapper.find('input[type="password"]'), 'pass');
       await type(wrapper.find('[data-input-suri] input'), '//');
 
@@ -130,23 +127,17 @@ describe('Derive', () => {
       expect(button.prop('disabled')).not.toBe(true);
     });
 
-    it('takes selected address from URL as parent account', async () => {
-      const { wrapper } = await mountComponent();
-
+    it('takes selected address from URL as parent account', () => {
       expect(wrapper.find('[data-field="name"]').first().text()).toBe('B');
     });
 
-    it('selects internal root accounts as other options', async () => {
-      const { wrapper } = await mountComponent();
-
+    it('selects internal root accounts as other options', () => {
       const options = wrapper.find('[data-parent-option] [data-field="name"]').map((el) => el.text());
 
       expect(options).toEqual(['A', 'B', 'D']);
     });
 
-    it('redirects to derive from next account when other option is selected', async () => {
-      const { onActionStub, wrapper } = await mountComponent();
-
+    it('redirects to derive from next account when other option is selected', () => {
       wrapper.find('[data-parent-option]').first().simulate('click');
 
       expect(onActionStub).toBeCalledWith(`/account/derive/${accounts[0].address}`);
@@ -154,21 +145,19 @@ describe('Derive', () => {
   });
 
   describe('Locked parent selection', () => {
-    it('checkbox does not exist', async () => {
-      const { wrapper } = await mountComponent(true);
+    beforeAll(async () => {
+      wrapper = (await mountComponent(true)).wrapper;
+    });
 
+    it('checkbox does not exist', () => {
       expect(wrapper.exists('[type="checkbox"]')).toBe(false);
     });
 
-    it('address dropdown does not exist', async () => {
-      const { wrapper } = await mountComponent(true);
-
+    it('address dropdown does not exist', () => {
       expect(wrapper.exists(AddressDropdown)).toBe(false);
     });
 
-    it('parent is taken from URL', async () => {
-      const { wrapper } = await mountComponent(true);
-
+    it('parent is taken from URL', () => {
       expect(wrapper.find('[data-field="name"]').first().text()).toBe('B');
     });
   });

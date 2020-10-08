@@ -34,6 +34,8 @@ export default function Import (): React.ReactElement {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
+  console.log('paf');
+
   useEffect((): void => {
     !accounts.length && onAction();
   }, [accounts, onAction]);
@@ -67,8 +69,6 @@ export default function Import (): React.ReactElement {
         });
     }
   }, [account, name, onAction, password]);
-
-  throw new Error('blabla');
 
   return (
     <>

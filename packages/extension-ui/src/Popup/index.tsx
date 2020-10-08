@@ -113,6 +113,8 @@ export default function Popup (): React.ReactElement {
           : Accounts
     : Welcome;
 
+  console.log('render');
+
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
       <ActionContext.Provider value={_onAction}>

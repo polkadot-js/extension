@@ -4,12 +4,12 @@
 import { WithTranslation } from 'react-i18next';
 
 import React from 'react';
-// import styled from 'styled-components';
 
-import translate from './translate';
+import ButtonArea from './ButtonArea';
+import Button from './Button';
+import VerticalSpace from './VerticalSpace';
 import Header from '../partials/Header';
-import ActionText from './ActionText';
-// import { ThemeProps } from '../types';
+import translate from './translate';
 
 interface Props extends WithTranslation {
   children: React.ReactNode;
@@ -55,11 +55,15 @@ class ErrorBoundary extends React.Component<Props> {
             {t<string>('Something went wrong with the query and rendering of this component. {{message}}', {
               replace: { message: error.message }
             })}
-            <ActionText
-              onClick={this.goHome}
-              text={t<string>('Cancel')}
-            />
           </div>
+          <VerticalSpace/>
+          <ButtonArea>
+            <Button
+              onClick={this.goHome}
+            >
+              {t<string>('Back to home')}
+            </Button>
+          </ButtonArea>
         </>
       )
       : children;

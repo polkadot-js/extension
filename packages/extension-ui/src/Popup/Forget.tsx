@@ -17,19 +17,9 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
   const isExternal = useMemo(() => {
-    let res: boolean | undefined;
+    const account = accounts.find((account) => account.address === address);
 
-    accounts.some((account) => {
-      if (account.address === address) {
-        res = account.isExternal;
-
-        return true;
-      }
-
-      return false;
-    });
-
-    return res;
+    return account?.isExternal;
   }, [accounts, address]);
 
   const _goHome = useCallback(

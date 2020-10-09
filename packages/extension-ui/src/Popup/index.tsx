@@ -71,8 +71,6 @@ export default function Popup (): React.ReactElement {
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
-    console.log('_onAction', to);
-
     if (to) {
       window.location.hash = to;
     }

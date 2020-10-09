@@ -71,6 +71,8 @@ export default function Popup (): React.ReactElement {
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
+    console.log('_onAction', to);
+
     if (to) {
       window.location.hash = to;
     }
@@ -103,17 +105,19 @@ export default function Popup (): React.ReactElement {
       .catch(console.error);
   }, [cameraOn]);
 
+  const wrapWithErrorBoundary = (component: React.ReactElement, trigger?: string) : React.ReactElement => {
+    return <ErrorBoundary trigger={trigger}>{component}</ErrorBoundary>;
+  };
+
   const Root = isWelcomeDone
     ? authRequests && authRequests.length
-      ? Authorize
+      ? wrapWithErrorBoundary(<Authorize />, 'authorize')
       : metaRequests && metaRequests.length
-        ? Metadata
+        ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
-          ? Signing
-          : Accounts
-    : Welcome;
-
-  console.log('render');
+          ? wrapWithErrorBoundary(<Signing/>, 'signing')
+          : wrapWithErrorBoundary(<Accounts/>, 'accounts')
+    : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (
@@ -125,24 +129,22 @@ export default function Popup (): React.ReactElement {
                 <MetadataReqContext.Provider value={metaRequests}>
                   <SigningReqContext.Provider value={signRequests}>
                     <ToastProvider>
-                      <ErrorBoundary>
-                        <Switch>
-                          <Route path='/account/create'><CreateAccount /></Route>
-                          <Route path='/account/forget/:address'><Forget /></Route>
-                          <Route path='/account/export/:address'><Export /></Route>
-                          <Route path='/account/import-qr'><ImportQr /></Route>
-                          <Route path='/account/import-seed'><ImportSeed /></Route>
-                          <Route path='/account/restore-json'><RestoreJson /></Route>
-                          <Route path='/account/derive/:address/locked'><Derive isLocked /></Route>
-                          <Route path='/account/derive/:address'><Derive /></Route>
-                          <Route
-                            exact
-                            path='/'
-                          >
-                            <Root />
-                          </Route>
-                        </Switch>
-                      </ErrorBoundary>
+                      <Switch>
+                        <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                        <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                        <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
+                        <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                        <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                        <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
+                        <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
+                        <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                        <Route
+                          exact
+                          path='/'
+                        >
+                          {Root}
+                        </Route>
+                      </Switch>
                     </ToastProvider>
                   </SigningReqContext.Provider>
                 </MetadataReqContext.Provider>

@@ -15,7 +15,7 @@ interface Props extends WithTranslation {
   children: React.ReactNode;
   className?: string;
   error?: Error | null;
-  onError?: () => void;
+  trigger?: string;
 }
 
 interface State {
@@ -30,10 +30,13 @@ class ErrorBoundary extends React.Component<Props> {
     return { error };
   }
 
-  public componentDidCatch (): void {
-    const { onError } = this.props;
+  componentDidUpdate (prevProps: Props) {
+    const { error } = this.state;
+    const { trigger } = this.props;
 
-    onError && onError();
+    if (error !== null && (prevProps.trigger !== trigger)) {
+      this.setState({ error: null });
+    }
   }
 
   goHome = () => {
@@ -42,10 +45,12 @@ class ErrorBoundary extends React.Component<Props> {
   };
 
   public render (): React.ReactNode {
-    const { children, t } = this.props;
+    const { children, t, trigger } = this.props;
     const { error } = this.state;
 
-    console.log('error', error);
+    if (error) {
+      console.log('trigger', trigger);
+    }
 
     return error
       ? (

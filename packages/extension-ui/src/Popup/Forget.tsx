@@ -1,11 +1,11 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address, ActionBar, ActionText, Button, Warning } from '../components';
+import { ActionContext, Address, ActionBar, ActionText, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
@@ -15,12 +15,6 @@ type Props = RouteComponentProps<{ address: string }>;
 function Forget ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const { accounts } = useContext(AccountContext);
-  const isExternal = useMemo(() => {
-    const account = accounts.find((account) => account.address === address);
-
-    return account?.isExternal;
-  }, [accounts, address]);
 
   const _goHome = useCallback(
     () => onAction('/'),
@@ -44,7 +38,6 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
       <div>
         <Address
           address={address}
-          isExternal={isExternal}
         >
           <MovedWarning isDanger>{t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
           <ActionArea>

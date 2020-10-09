@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import copyIcon from '../assets/copy.svg';
+import externalIcon from '../assets/arrowTopRight.svg';
 import hiddenIcon from '../assets/hidden.svg';
 import details from '../assets/details.svg';
 import parentArrow from '../assets/arrowParentLabel.svg';
@@ -111,7 +112,18 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
 
-  const displayedName = name || (account && account.name) || t('<unknown>');
+  const displayedName = (
+    <>
+      {(account?.isExternal || isExternal) && (
+        <Svg
+          className='externalIcon'
+          src={externalIcon}
+          title={t('external account')}
+        />
+      )}
+      {name || account?.name || t('<unknown>')}
+    </>
+  );
 
   return (
     <div className={className}>
@@ -239,6 +251,7 @@ const Settings = styled.div(({ theme }: ThemeProps) => `
     cursor: pointer;
     background: ${theme.readonlyInputBackground};
   }
+
 `);
 
 Settings.displayName = 'Details';
@@ -310,6 +323,13 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       right: 2px;
       top: -18px;
     }
+  }
+
+  .externalIcon {
+    height: 10px;
+    width: 10px;
+    margin-right: 0.5rem;
+    background: ${theme.labelColor}
   }
 
   .identityIcon {

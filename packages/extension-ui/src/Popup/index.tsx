@@ -103,9 +103,9 @@ export default function Popup (): React.ReactElement {
       .catch(console.error);
   }, [cameraOn]);
 
-  const wrapWithErrorBoundary = (component: React.ReactElement, trigger?: string) : React.ReactElement => {
+  function wrapWithErrorBoundary (component: React.ReactElement, trigger?: string): React.ReactElement {
     return <ErrorBoundary trigger={trigger}>{component}</ErrorBoundary>;
-  };
+  }
 
   const Root = isWelcomeDone
     ? authRequests && authRequests.length

@@ -251,7 +251,6 @@ const Settings = styled.div(({ theme }: ThemeProps) => `
     cursor: pointer;
     background: ${theme.readonlyInputBackground};
   }
-
 `);
 
 Settings.displayName = 'Details';

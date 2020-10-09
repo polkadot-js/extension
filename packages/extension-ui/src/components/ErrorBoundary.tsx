@@ -48,10 +48,6 @@ class ErrorBoundary extends React.Component<Props> {
     const { children, t, trigger } = this.props;
     const { error } = this.state;
 
-    if (error) {
-      console.log('trigger', trigger);
-    }
-
     return error
       ? (
         <>

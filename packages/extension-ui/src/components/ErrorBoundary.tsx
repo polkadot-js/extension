@@ -45,7 +45,7 @@ class ErrorBoundary extends React.Component<Props> {
   };
 
   public render (): React.ReactNode {
-    const { children, t, trigger } = this.props;
+    const { children, t } = this.props;
     const { error } = this.state;
 
     return error

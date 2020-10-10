@@ -5,7 +5,7 @@ import React, { useCallback, useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Button, Warning, ActionBar, ActionText } from '../components';
+import { ActionContext, Address, ActionBar, ActionText, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';

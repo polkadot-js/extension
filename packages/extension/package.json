@@ -8,7 +8,8 @@
     "@babel/runtime": "^7.11.2",
     "@polkadot/extension-base": "0.35.0-beta.12",
     "@polkadot/extension-inject": "0.35.0-beta.12",
-    "@polkadot/extension-ui": "0.35.0-beta.12"
+    "@polkadot/extension-ui": "0.35.0-beta.12",
+    "@polkadot/phishing": "^0.1.1"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.57.1",

@@ -10,7 +10,7 @@ export function injectExtension (enable: (origin: string) => Promise<Injected>, 
   // small helper with the typescript types, just cast window
   const windowInject = window as Window & InjectedWindow;
 
-  // don't clobber the existing object, we will add it it (or create as needed)
+  // don't clobber the existing object, we will add it (or create as needed)
   windowInject.injectedWeb3 = windowInject.injectedWeb3 || {};
 
   // add our enable function

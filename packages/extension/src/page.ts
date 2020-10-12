@@ -5,6 +5,7 @@ import { Message } from '@polkadot/extension-base/types';
 
 import { enable, handleResponse } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
+import retrieveCheckDeny from '@polkadot/phishing';
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -20,6 +21,11 @@ window.addEventListener('message', ({ data, source }: Message): void => {
     console.error('Missing id for response.');
   }
 });
+
+const currentUrl = window.location.host;
+const isOnDeny = await retrieveCheckDeny(currentUrl);
+
+console.log('isOnDeny', isOnDeny);
 
 injectExtension(enable, {
   name: 'polkadot-js',

@@ -4,7 +4,7 @@
 import { Message } from '@polkadot/extension-base/types';
 
 import { enable, handleResponse, redirectPhishing } from '@polkadot/extension-base/page';
-import isXmlorPdf from '@polkadot/extension-base/utils';
+import { isXmlOrPdf } from '@polkadot/extension-base/utils';
 import { injectExtension } from '@polkadot/extension-inject';
 import retrieveCheckDeny from '@polkadot/phishing';
 
@@ -28,7 +28,7 @@ const currentPathname = window.location.pathname;
 
 retrieveCheckDeny(currentUrl)
   .then((isOnDeny) => {
-    if (isOnDeny || isXmlorPdf(currentPathname)) {
+    if (isOnDeny || isXmlOrPdf(currentPathname)) {
       console.log('Phishing detected, redirecting to phishing info landing page');
       redirectPhishing().catch(console.error);
     } else {

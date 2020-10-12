@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export function isXmlOrPdf (pathname: string): boolean {
+export default function (pathname: string): boolean {
   const prohibitedFiles: RegExp[] = [
     /\.xml$/u,
     /\.pdf$/u

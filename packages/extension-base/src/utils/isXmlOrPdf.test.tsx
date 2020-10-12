@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { isXmlOrPdf } from './isXmlOrPdf';
+import { isXmlOrPdf } from './';
 
 describe.only('File extension util function', () => {
   it('returns true for a xml file', () => {

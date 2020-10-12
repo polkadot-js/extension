@@ -32,7 +32,7 @@ export default function PhishingDetected (): React.ReactElement<Props> {
       `)}
       </Note>
       <Note>
-        <Trans key='phishing.incorrect'>If you think that this website was flagged incorrectly,
+        <Trans i18nKey='phishing.incorrect'>If you think that this website was flagged incorrectly,
           <IssueLink href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</IssueLink>.
         </Trans>
       </Note>

@@ -352,7 +352,3 @@ export interface ResponseJsonRestore {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
-
-export interface RequestPhishingRedirect {
-  host: string;
-}

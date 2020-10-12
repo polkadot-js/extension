@@ -21,12 +21,12 @@ export default function PhishingDetected (): React.ReactElement<Props> {
       </Note>
       <Note>
         {t<string>(`
-          The redirection could happen for outright malicious websites or for legitimate websites that could have been compromised.
+          The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.
       `)}
       </Note>
       <Note>
         {t<string>(`
-          This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community driven, currated list.
+          This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list.
           It might be incomplete or inaccurate.
       `)}
       </Note>

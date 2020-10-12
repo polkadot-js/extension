@@ -3,7 +3,7 @@
 
 import { Message } from '@polkadot/extension-base/types';
 
-import { enable, handleResponse } from '@polkadot/extension-base/page';
+import { enable, handleResponse, redirectPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 import retrieveCheckDeny from '@polkadot/phishing';
 
@@ -23,11 +23,22 @@ window.addEventListener('message', ({ data, source }: Message): void => {
 });
 
 const currentUrl = window.location.host;
-const isOnDeny = await retrieveCheckDeny(currentUrl);
 
-console.log('isOnDeny', isOnDeny);
+retrieveCheckDeny(currentUrl)
+  .then((isOnDeny) => {
+    if (isOnDeny) {
+      console.log('Phishing detected, redirecting to phishing info landing page');
+      redirectPhishing().catch(console.error);
+    } else {
+      inject();
+    }
+  }).catch((e) => {
+    console.error(e);
+  });
 
-injectExtension(enable, {
-  name: 'polkadot-js',
-  version: process.env.PKG_VERSION as string
-});
+function inject () {
+  injectExtension(enable, {
+    name: 'polkadot-js',
+    version: process.env.PKG_VERSION as string
+  });
+}

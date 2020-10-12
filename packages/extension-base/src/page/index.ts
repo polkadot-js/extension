@@ -55,6 +55,14 @@ export async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
+// the redirection function, called by the page in case the host
+// is flagged as a phishing site.
+export async function redirectPhishing (): Promise<Injected> {
+  await sendMessage('pub(phishing.redirect)');
+
+  return new Injected(sendMessage);
+}
+
 export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: string }): void {
   const handler = handlers[data.id];
 

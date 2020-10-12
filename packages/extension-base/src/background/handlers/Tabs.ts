@@ -6,8 +6,9 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
+import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes, RequestPhishingRedirect } from '../types';
 
+import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
@@ -134,7 +135,19 @@ export default class Tabs {
     return this.#state.rpcUnsubscribe(request, port);
   }
 
+  private redirectPhishingLanding () {
+    const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}`;
+
+    chrome.tabs.update({ url });
+
+    return null;
+  }
+
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
+    if (type === 'pub(phishing.redirect)') {
+      return this.redirectPhishingLanding();
+    }
+
     if (type !== 'pub(authorize.tab)') {
       this.#state.ensureUrlAuthorized(url);
     }

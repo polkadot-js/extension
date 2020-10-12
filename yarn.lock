@@ -2075,7 +2075,7 @@ __metadata:
     "@polkadot/extension-base": 0.35.0-beta.12
     "@polkadot/extension-inject": 0.35.0-beta.12
     "@polkadot/extension-ui": 0.35.0-beta.12
-    "@polkadot/phishing": ^0.1.1
+    "@polkadot/phishing": ^0.1.2
     babel-loader: ^8.1.0
     extract-loader: ^5.1.0
     file-loader: ^6.1.0
@@ -2113,13 +2113,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "@polkadot/phishing@npm:0.1.1"
+"@polkadot/phishing@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@polkadot/phishing@npm:0.1.2"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@polkadot/x-fetch": 0.3.2
-  checksum: f3cf044e1e716fd6df980229df6e7403a399ab02d59a81dc2766d364d2aed5e8fed4d7733d9c1178554997bfed35f9e8448367a82c804169fa7034573336ff22
+  checksum: 6b5d35406284df4d33205565f214cdcc2ee5f7f1930c342183922bf5a2b16698db893994cfabe9309d6b847cad8f44548c4758a18875f9d8b557105481a9105a
   languageName: node
   linkType: hard
 

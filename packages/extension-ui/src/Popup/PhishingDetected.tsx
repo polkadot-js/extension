@@ -16,30 +16,28 @@ export default function PhishingDetected (): React.ReactElement<Props> {
     <>
       <Header text={t<string>('Phishing detected')} />
       <Note>
-        {t<string>(`This domain is currently on the Polkadot-js domain warning list. This means that based on information available to us,
-          Polkadot-js extension believes this domain could currently compromise your security and, as an added safety feature, Polkadot-js extension
-          has restricted access to the site. To override this, please read the rest of this warning for instructions on how to continue at your own risk.`)}
+        {t<string>(`You have been redirected because the Polkadot{.js} extension believes that this website could compromise the
+        security of your accounts.`)}
       </Note>
       <Note>
         {t<string>(`
-          Domains on these warning lists may include outright malicious websites and legitimate websites that have been compromised by a malicious actor.
+          The redirection could happen for outright malicious websites or for legitimate websites that could have been compromised.
       `)}
       </Note>
       <Note>
         {t<string>(`
-          Note that this warning list is compiled on a voluntary basis. This list may be inaccurate or incomplete.
-          Just because a domain does not appear on this list is not an implicit guarantee of that domain's safety.
-          As always, your transactions are your own responsibility.
+          This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community driven, currated list.
+          It might be incomplete or inaccurate.
       `)}
       </Note>
       <Note>
         {t<string>(`
-          If you think this domain is incorrectly flagged or if a blocked legitimate website has resolved its security issues,
+          If you think that this website was flagged incorrectly,
       `)}
         <IssueLink
           href='https://github.com/polkadot-js/phishing/issues/new'
         >
-          {t<string>('please file an issue')}
+          {t<string>('please open an issue by clicking here')}
         </IssueLink>.
       </Note>
     </>

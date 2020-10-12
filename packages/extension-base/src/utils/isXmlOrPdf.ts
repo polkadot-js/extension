@@ -9,7 +9,6 @@ export default function (pathname: string): boolean {
   ];
 
   return prohibitedFiles.some((file) => {
-
     if (file.test(pathname)) {
       return true;
     }

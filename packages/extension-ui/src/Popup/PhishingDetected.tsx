@@ -4,11 +4,11 @@
 import { ThemeProps as Props } from '../types';
 
 import React from 'react';
+import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
 import { Header } from '../partials';
-import { Trans } from 'react-i18next';
 
 export default function PhishingDetected (): React.ReactElement<Props> {
   const { t } = useTranslation();

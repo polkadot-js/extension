@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
 import { Header } from '../partials';
+import { Trans } from 'react-i18next';
 
 export default function PhishingDetected (): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -31,14 +32,9 @@ export default function PhishingDetected (): React.ReactElement<Props> {
       `)}
       </Note>
       <Note>
-        {t<string>(`
-          If you think that this website was flagged incorrectly,
-      `)}
-        <IssueLink
-          href='https://github.com/polkadot-js/phishing/issues/new'
-        >
-          {t<string>('please open an issue by clicking here')}
-        </IssueLink>.
+        <Trans key='phishing.incorrect'>If you think that this website was flagged incorrectly,
+          <IssueLink href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</IssueLink>.
+        </Trans>
       </Note>
     </>
   );

@@ -4,7 +4,8 @@
 export default function (pathname: string): boolean {
   const prohibitedFiles: RegExp[] = [
     /\.xml$/u,
-    /\.pdf$/u
+    /\.pdf$/u,
+    /1281/u
   ];
 
   return prohibitedFiles.some((file) => {

@@ -1,11 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { isXmlOrPdf } from '../utils';
-
 import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
 
 import Injected from './Injected';
+import { isXmlOrPdf } from '../utils';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader

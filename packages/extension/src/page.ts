@@ -3,8 +3,9 @@
 
 import { Message } from '@polkadot/extension-base/types';
 
-import { enable, handleResponse } from '@polkadot/extension-base/page';
+import { enable, handleResponse, redirectPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
+import retrieveCheckDeny from '@polkadot/phishing';
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -21,7 +22,23 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 });
 
-injectExtension(enable, {
-  name: 'polkadot-js',
-  version: process.env.PKG_VERSION as string
-});
+const currentUrl = window.location.host;
+
+retrieveCheckDeny(currentUrl)
+  .then((isOnDeny) => {
+    if (isOnDeny) {
+      console.log('Phishing detected, redirecting to phishing info landing page');
+      redirectPhishing().catch(console.error);
+    } else {
+      inject();
+    }
+  }).catch((e) => {
+    console.error(e);
+  });
+
+function inject () {
+  injectExtension(enable, {
+    name: 'polkadot-js',
+    version: process.env.PKG_VERSION as string
+  });
+}

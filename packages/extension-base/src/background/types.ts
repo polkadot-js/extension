@@ -108,6 +108,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
+  'pub(phishing.redirect)': [null, null];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.startProvider)': [string, ProviderMeta];

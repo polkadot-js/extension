@@ -6,6 +6,7 @@ import { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
+import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import uiSettings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
 
@@ -22,6 +23,7 @@ import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
+import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Metadata from './Metadata';
 import Signing from './Signing';
@@ -136,6 +138,7 @@ export default function Popup (): React.ReactElement {
                         <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
                         <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                         <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                        <Route path={PHISHING_PAGE_REDIRECT}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                         <Route
                           exact
                           path='/'

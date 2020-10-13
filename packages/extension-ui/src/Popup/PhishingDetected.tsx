@@ -37,8 +37,8 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       `)}
         </p>
         <p>
-          <Trans i18nKey='phishing.incorrect'>If you think that this website was flagged incorrectly,
-            <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
+          <Trans i18nKey='phishing.incorrect'>
+            If you think that this website was flagged incorrectly, <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
           </Trans>
         </p>
       </div>
@@ -54,7 +54,6 @@ export default styled(PhishingDetected)(({ theme }: Props) => `
 
     a {
       color: ${theme.subTextColor};
-      margin-left: 0.3rem;
     }
   }
 `);

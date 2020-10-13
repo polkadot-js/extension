@@ -11,7 +11,7 @@ import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked, updatePasswordCache } from '../../messaging';
+import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked, refreshAccountPasswordCache } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
@@ -49,7 +49,7 @@ export default function Request ({ account: { address, isExternal }, buttonText,
   const [savePass, setSavePass] = useState(false);
 
   useEffect(() => {
-    updatePasswordCache(address)
+    refreshAccountPasswordCache(address)
       .catch((e) => console.error(e));
   }, [address]);
 

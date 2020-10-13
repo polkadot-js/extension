@@ -1,6 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isXmlOrPdf } from '../utils';
+
 import { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
 
 import Injected from './Injected';
@@ -50,9 +52,15 @@ export function sendMessage<TMessageType extends MessageTypes> (message: TMessag
 
 // the enable function, called by the dapp to allow access
 export async function enable (origin: string): Promise<Injected> {
-  await sendMessage('pub(authorize.tab)', { origin });
+  const currentPathname = window.location.pathname;
 
-  return new Injected(sendMessage);
+  if (isXmlOrPdf(currentPathname)) {
+    return redirectPhishing();
+  } else {
+    await sendMessage('pub(authorize.tab)', { origin });
+
+    return new Injected(sendMessage);
+  }
 }
 
 // the redirection function, called by the page in case the host

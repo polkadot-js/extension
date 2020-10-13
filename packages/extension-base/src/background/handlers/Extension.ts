@@ -318,7 +318,9 @@ export default class Extension {
     }
 
     // if the keyring pair is locked, the password is needed
-    assert(!pair.isLocked || !!password, 'Password needed to unlock the account');
+    if (pair.isLocked && !password) {
+      reject(new Error('Password needed to unlock the account'));
+    }
 
     if (pair.isLocked) {
       pair.decodePkcs8(password);

@@ -3,7 +3,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountPasswordCacheRefresh, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
+import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -94,10 +94,8 @@ export default class Extension {
     return true;
   }
 
-  private refreshAccountPasswordCache ({ address }: RequestAccountPasswordCacheRefresh): void {
-    const pair = keyring.getPair(address);
-
-    assert(pair, 'Unable to find pair');
+  private refreshAccountPasswordCache (pair: KeyringPair): void {
+    const { address } = pair;
 
     const savedExpiry = this.#cachedUnlocks[address] || 0;
 
@@ -304,8 +302,6 @@ export default class Extension {
     const queued = this.#state.getSignRequest(id);
     const address = queued.account.address;
 
-    this.refreshAccountPasswordCache({ address });
-
     assert(queued, 'Unable to find request');
 
     const { reject, request, resolve } = queued;
@@ -316,6 +312,8 @@ export default class Extension {
 
       return false;
     }
+
+    this.refreshAccountPasswordCache(pair);
 
     // if the keyring pair is locked, the password is needed
     if (pair.isLocked && !password) {
@@ -371,12 +369,14 @@ export default class Extension {
 
     assert(queued, 'Unable to find request');
 
-    const { request } = queued;
-    const pair = keyring.getPair(request.payload.address);
+    const address = queued.request.payload.address;
+    const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
 
-    return pair.isLocked || ((this.#cachedUnlocks[request.payload.address] || 0) < Date.now());
+    this.refreshAccountPasswordCache(pair);
+
+    return pair.isLocked;
   }
 
   // FIXME This looks very much like what we have in authorization
@@ -477,9 +477,6 @@ export default class Extension {
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
-
-      case 'pri(accounts.refreshPasswordCache)':
-        return this.refreshAccountPasswordCache(request as RequestAccountPasswordCacheRefresh);
 
       case 'pri(accounts.show)':
         return this.accountsShow(request as RequestAccountShow);

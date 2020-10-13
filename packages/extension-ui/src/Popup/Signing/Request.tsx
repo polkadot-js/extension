@@ -11,7 +11,7 @@ import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked, refreshAccountPasswordCache } from '../../messaging';
+import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
@@ -39,7 +39,7 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { address, isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
@@ -47,11 +47,6 @@ export default function Request ({ account: { address, isExternal }, buttonText,
   const [isBusy, setIsBusy] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [savePass, setSavePass] = useState(false);
-
-  useEffect(() => {
-    refreshAccountPasswordCache(address)
-      .catch((e) => console.error(e));
-  }, [address]);
 
   useEffect((): void => {
     setIsLocked(null);

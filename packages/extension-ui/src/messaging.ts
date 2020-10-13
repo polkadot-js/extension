@@ -69,10 +69,6 @@ export async function editAccount (address: string, name: string): Promise<boole
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
-export async function refreshAccountPasswordCache (address: string): Promise<void> {
-  return sendMessage('pri(accounts.refreshPasswordCache)', { address });
-}
-
 export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }

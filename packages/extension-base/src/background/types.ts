@@ -224,10 +224,6 @@ export interface RequestAccountExport {
   password: string;
 }
 
-export interface RequestAccountPasswordCacheRefresh {
-  address: string;
-}
-
 export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;

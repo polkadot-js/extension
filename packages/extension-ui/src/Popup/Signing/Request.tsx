@@ -5,13 +5,13 @@ import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useContext, useState } from 'react';
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveSignPassword, approveSignSignature, cancelSignRequest, isAccountPasswordCached, isSignLocked } from '../../messaging';
+import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked, updatePasswordCache } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
@@ -47,7 +47,11 @@ export default function Request ({ account: { address, isExternal }, buttonText,
   const [isBusy, setIsBusy] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [savePass, setSavePass] = useState(false);
-  const [isPasswordCached, setIsPasswordCached] = useState(false);
+
+  useEffect(() => {
+    updatePasswordCache(address)
+      .catch((e) => console.error(e));
+  }, [address]);
 
   useEffect((): void => {
     setIsLocked(null);
@@ -74,12 +78,6 @@ export default function Request ({ account: { address, isExternal }, buttonText,
       });
     }
   }, [request]);
-
-  useEffect(() => {
-    isAccountPasswordCached(address)
-      .then(setIsPasswordCached)
-      .catch(console.error);
-  }, [address]);
 
   const _onCancel = useCallback(
     (): Promise<void> => cancelSignRequest(signId)
@@ -122,7 +120,7 @@ export default function Request ({ account: { address, isExternal }, buttonText,
     [onAction, signId]
   );
 
-  const SignButton = () => isLocked || !isPasswordCached
+  const SignButton = () => isLocked
     ? (
       <Unlock
         buttonText={buttonText}

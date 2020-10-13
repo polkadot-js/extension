@@ -74,7 +74,7 @@ export interface RequestSignatures {
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
-  'pri(accounts.passwordCached)': [RequestAccountPasswordCached, boolean];
+  'pri(accounts.passwordCacheUpdate)': [RequestAccountPasswordCacheUpdate, void];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
@@ -224,7 +224,7 @@ export interface RequestAccountExport {
   password: string;
 }
 
-export interface RequestAccountPasswordCached {
+export interface RequestAccountPasswordCacheUpdate {
   address: string;
 }
 

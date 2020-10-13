@@ -1983,13 +1983,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@0.35.0-beta.12, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@0.35.0-beta.13, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.11.2
     "@polkadot/api": ^2.1.0-beta.5
-    "@polkadot/extension-inject": 0.35.0-beta.12
+    "@polkadot/extension-inject": 0.35.0-beta.13
     "@polkadot/keyring": ^3.5.1
     "@polkadot/ui-keyring": ^0.60.0-beta.0
   languageName: unknown
@@ -2010,7 +2010,7 @@ __metadata:
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.11.2
-    "@polkadot/extension-inject": 0.35.0-beta.12
+    "@polkadot/extension-inject": 0.35.0-beta.13
     "@polkadot/util": ^3.5.1
     "@polkadot/util-crypto": ^3.5.1
   peerDependencies:
@@ -2018,7 +2018,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@0.35.0-beta.12, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@0.35.0-beta.13, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -2030,13 +2030,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@0.35.0-beta.12, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@0.35.0-beta.13, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
     "@babel/runtime": ^7.11.2
-    "@polkadot/extension-base": 0.35.0-beta.12
-    "@polkadot/extension-inject": 0.35.0-beta.12
+    "@polkadot/extension-base": 0.35.0-beta.13
+    "@polkadot/extension-inject": 0.35.0-beta.13
     "@polkadot/keyring": ^3.5.1
     "@polkadot/react-identicon": ^0.60.0-beta.0
     "@polkadot/react-qr": ^0.60.0-beta.0
@@ -2072,9 +2072,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.11.2
     "@polkadot/dev": ^0.57.1
-    "@polkadot/extension-base": 0.35.0-beta.12
-    "@polkadot/extension-inject": 0.35.0-beta.12
-    "@polkadot/extension-ui": 0.35.0-beta.12
+    "@polkadot/extension-base": 0.35.0-beta.13
+    "@polkadot/extension-inject": 0.35.0-beta.13
+    "@polkadot/extension-ui": 0.35.0-beta.13
     "@polkadot/phishing": ^0.1.2
     babel-loader: ^8.1.0
     extract-loader: ^5.1.0

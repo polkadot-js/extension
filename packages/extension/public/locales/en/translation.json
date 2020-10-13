@@ -102,5 +102,9 @@
   "An error occured": "",
   "Something went wrong with the query and rendering of this component. {{message}}": "",
   "Back to home": "",
-  "external account": ""
+  "external account": "",
+  "Phishing detected": "",
+  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the\n        security of your accounts.": "",
+  "\n          The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.\n      ": "",
+  "\n          This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list.\n          It might be incomplete or inaccurate.\n      ": ""
 }

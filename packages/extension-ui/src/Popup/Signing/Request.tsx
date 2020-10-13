@@ -11,7 +11,7 @@ import { TypeRegistry } from '@polkadot/types';
 
 import { ActionBar, ActionContext, Address, Button, ButtonArea, Checkbox, Link, VerticalSpace } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveSignPassword, approveSignSignature, cancelSignRequest, isSignLocked } from '../../messaging';
+import { approveSignPassword, approveSignSignature, cancelSignRequest, isAccountPasswordCached, isSignLocked } from '../../messaging';
 import Bytes from './Bytes';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
@@ -39,14 +39,15 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { address, isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
-  const [isSavedPass, setIsSavedPass] = useState(false);
+  const [savePass, setSavePass] = useState(false);
+  const [isPasswordCached, setIsPasswordCached] = useState(false);
 
   useEffect((): void => {
     setIsLocked(null);
@@ -74,6 +75,12 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     }
   }, [request]);
 
+  useEffect(() => {
+    isAccountPasswordCached(address)
+      .then(setIsPasswordCached)
+      .catch(console.error);
+  }, [address]);
+
   const _onCancel = useCallback(
     (): Promise<void> => cancelSignRequest(signId)
       .then(() => onAction())
@@ -82,10 +89,10 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   );
 
   const _onSign = useCallback(
-    (password: string): Promise<void> => {
+    (password?: string): Promise<void> => {
       setIsBusy(true);
 
-      return approveSignPassword(signId, password, !!(password && isSavedPass))
+      return approveSignPassword(signId, savePass, password)
         .then((): void => {
           setIsBusy(false);
           onAction();
@@ -96,11 +103,11 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           console.error(error);
         });
     },
-    [onAction, isSavedPass, signId]
+    [onAction, savePass, signId]
   );
 
   const _onSignQuick = useCallback(
-    () => _onSign(''),
+    () => _onSign(),
     [_onSign]
   );
 
@@ -115,7 +122,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     [onAction, signId]
   );
 
-  const SignButton = () => isLocked
+  const SignButton = () => isLocked || !isPasswordCached
     ? (
       <Unlock
         buttonText={buttonText}
@@ -124,12 +131,12 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
         onSign={_onSign}
       >
         <Checkbox
-          checked={!!isSavedPass}
+          checked={savePass}
           label={t<string>(
             "Don't ask me again for the next {{expiration}} minutes",
             { replace: { expiration: PASSWORD_EXPIRY_MIN } }
           )}
-          onChange={setIsSavedPass}
+          onChange={setSavePass}
         />
       </Unlock>
     )

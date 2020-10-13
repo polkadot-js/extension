@@ -74,6 +74,7 @@ export interface RequestSignatures {
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.forget)': [RequestAccountForget, boolean];
+  'pri(accounts.passwordCached)': [RequestAccountPasswordCached, boolean];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
@@ -223,6 +224,10 @@ export interface RequestAccountExport {
   password: string;
 }
 
+export interface RequestAccountPasswordCached {
+  address: string;
+}
+
 export type RequestAccountList = null;
 
 export type RequestAccountSubscribe = null;
@@ -244,8 +249,8 @@ export interface RequestRpcUnsubscribe {
 
 export interface RequestSigningApprovePassword {
   id: string;
-  isSavedPass: boolean;
-  password: string;
+  password?: string;
+  savePass: boolean;
 }
 
 export interface RequestSigningApproveSignature {

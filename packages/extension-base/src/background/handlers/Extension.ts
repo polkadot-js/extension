@@ -3,7 +3,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword } from '../types';
+import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountPasswordCached, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -92,6 +92,23 @@ export default class Extension {
     keyring.forgetAccount(address);
 
     return true;
+  }
+
+  private accountPasswordCached ({ address }: RequestAccountPasswordCached): boolean {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    const savedExpiry = this.#cachedUnlocks[address] || 0;
+
+    if (savedExpiry < Date.now()) {
+      this.#cachedUnlocks[address] = 0;
+      pair.lock();
+
+      return false;
+    } else {
+      return true;
+    }
   }
 
   private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
@@ -287,7 +304,7 @@ export default class Extension {
     };
   }
 
-  private signingApprovePassword ({ id, isSavedPass, password }: RequestSigningApprovePassword): boolean {
+  private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -301,20 +318,17 @@ export default class Extension {
       return false;
     }
 
-    const now = Date.now();
+    // if the keyring pair is locked, the password is needed
+    assert(!pair.isLocked || !!password, 'Password needed to unlock the account');
 
-    if (pair.isLocked || password) {
+    if (pair.isLocked) {
       pair.decodePkcs8(password);
     }
 
     const result = request.sign(registry, pair);
-    const savedExpiry = this.#cachedUnlocks[request.payload.address] || 0;
 
-    if (isSavedPass) {
-      this.#cachedUnlocks[request.payload.address] = now + PASSWORD_EXPIRY_MS;
-    } else if (savedExpiry < now) {
-      this.#cachedUnlocks[request.payload.address] = 0;
-      pair.lock();
+    if (savePass) {
+      this.#cachedUnlocks[request.payload.address] = Date.now() + PASSWORD_EXPIRY_MS;
     }
 
     resolve({
@@ -460,6 +474,9 @@ export default class Extension {
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
+
+      case 'pri(accounts.passwordCached)':
+        return this.accountPasswordCached(request as RequestAccountPasswordCached);
 
       case 'pri(accounts.show)':
         return this.accountsShow(request as RequestAccountShow);

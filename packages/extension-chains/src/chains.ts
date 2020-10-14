@@ -25,6 +25,12 @@ const hashes: MetadataDefBase[] = [
     ss58Format: 42
   },
   {
+    chain: 'Darwinia',
+    genesisHash: '0x729cb8f2cf428adcf81fe69610edda32c5711b2ff17de747e8604a3587021db8',
+    icon: 'substrate',
+    ss58Format: 18
+  },
+  {
     chain: 'Edgeware',
     genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
     icon: 'substrate',

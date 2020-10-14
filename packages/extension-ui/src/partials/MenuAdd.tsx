@@ -3,11 +3,12 @@
 
 import { ThemeProps } from '../types';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import fileIcon from '../assets/file-upload.svg';
-import plusIcon from '../assets/plus.svg';
 import qrIcon from '../assets/qr.svg';
 import seedIcon from '../assets/secret.svg';
 import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem, Svg } from '../components';
@@ -39,7 +40,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
     >
       <MenuItem className='menuItem'>
         <Link to={master ? `/account/derive/${master.address}` : '/account/create'}>
-          <Svg src={plusIcon} />
+          <FontAwesomeIcon icon={faPlusCircle} />
           <span>{
             master
               ? t('Create new account (root or derived)')
@@ -92,6 +93,10 @@ export default React.memo(styled(MenuAdd)`
 
     span {
       vertical-align: middle;
+    }
+
+    .svg-inline--fa {
+      margin-right: 0.3rem;
     }
   }
 `);

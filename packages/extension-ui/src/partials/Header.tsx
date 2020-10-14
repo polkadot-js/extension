@@ -60,7 +60,6 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
                 <FontAwesomeIcon
                   className='arrowLeftIcon'
                   icon={faArrowLeft}
-                  size='lg'
                 />
               </Link>
             )

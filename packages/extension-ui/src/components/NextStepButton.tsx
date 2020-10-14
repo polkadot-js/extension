@@ -3,29 +3,33 @@
 
 import { ThemeProps } from '../types';
 
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
-import arrowLeft from '../assets/arrowLeft.svg';
-import Svg from './Svg';
 import Button from './Button';
 
 type Props = React.ComponentProps<typeof Button>;
 
-export default function NextStepButton ({ children, ...props }: Props): React.ReactElement<Props> {
+function NextStepButton ({ children, ...props }: Props): React.ReactElement<Props> {
   return (
     <Button {...props}>
       {children}
-      <ArrowRight />
+      <FontAwesomeIcon
+        className='arrowRight'
+        icon={faArrowRight}
+        size='sm'
+      />
     </Button>
   );
 }
 
-const ArrowRight = styled(Svg).attrs(() => ({ src: arrowLeft }))`
-  float: right;
-  width: 12px;
-  height: 12px;
-  margin: 4px 1px 0 0;
-  transform: rotate(180deg);
-  background: ${({ theme }: ThemeProps): string => theme.buttonTextColor};
-`;
+export default styled(NextStepButton)(({ theme }: ThemeProps) => `
+  .arrowRight{
+    float: right;
+    margin-top: 4px;
+    margin-right: 1px;
+    color: ${theme.buttonTextColor};
+  }
+`);

@@ -6,8 +6,8 @@ import { ThemeProps } from '../../types';
 import React from 'react';
 import styled from 'styled-components';
 
-import ArrowLeftImage from '../../assets/arrowLeft.svg';
-import { Svg } from '../../components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
   className?: string;
@@ -15,10 +15,6 @@ interface Props {
   totalItems: number;
   onNextClick: () => void;
   onPreviousClick: () => void;
-}
-
-interface ArrowProps extends ThemeProps {
-  isActive: boolean;
 }
 
 function TransactionIndex ({ className, index, onNextClick, onPreviousClick, totalItems }: Props): React.ReactElement<Props> {
@@ -32,35 +28,22 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
         <span className='totalSteps'>/{totalItems}</span>
       </div>
       <div>
-        <ArrowLeft
-          isActive={previousClickActive}
-          onClick={(): unknown => previousClickActive && onPreviousClick()}
+        <FontAwesomeIcon
+          className={`arrowLeft ${previousClickActive ? 'active' : ''}`}
+          icon={faArrowLeft}
+          onClick={(): void => { previousClickActive && onPreviousClick(); }}
+          size='sm'
         />
-        <ArrowRight
-          isActive={nextClickActive}
-          onClick={(): unknown => nextClickActive && onNextClick()}
+        <FontAwesomeIcon
+          className={`arrowRight ${nextClickActive ? 'active' : ''}`}
+          icon={faArrowRight}
+          onClick={(): void => { nextClickActive && onNextClick(); }}
+          size='sm'
         />
       </div>
     </div>
   );
 }
-
-const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))<ArrowProps>`
-  display: inline-block;
-  background: ${({ isActive, theme }: ArrowProps): string => isActive ? theme.primaryColor : theme.iconNeutralColor};
-  cursor: ${({ isActive }): string => isActive ? 'pointer' : 'default'};
-  width: 12px;
-  height: 12px;
-`;
-
-ArrowLeft.displayName = 'ArrowLeft';
-
-const ArrowRight = styled(ArrowLeft)`
-  margin-left: 6px;
-  transform: rotate(180deg);
-`;
-
-ArrowRight.displayName = 'ArrowRight';
 
 export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
   align-items: center;
@@ -68,6 +51,20 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
   justify-content: space-between;
   flex-grow: 1;
   padding-right: 24px;
+
+  .arrowLeft, .arrowRight {
+    display: inline-block;
+    color: ${theme.iconNeutralColor};
+
+    &.active {
+      color: ${theme.primaryColor};
+      cursor: pointer;
+    }
+  }
+
+  .arrowRight {
+    margin-left: 0.5rem;
+  }
 
   .currentStep {
     color: ${theme.primaryColor};

@@ -48,12 +48,20 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [savePass, setSavePass] = useState(false);
 
-  useEffect((): void => {
+  useEffect(() => {
     setIsLocked(null);
+    let timeout: number;
 
     !isExternal && isSignLocked(signId)
-      .then((isLocked) => setIsLocked(isLocked))
+      .then(({ isLocked, remainingTime }) => {
+        setIsLocked(isLocked);
+        timeout = setTimeout(() => {
+          setIsLocked(true);
+        }, remainingTime);
+      })
       .catch((error: Error) => console.error(error));
+
+    return () => { !!timeout && clearTimeout(timeout); };
   }, [isExternal, signId]);
 
   useEffect((): void => {

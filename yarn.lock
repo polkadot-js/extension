@@ -1508,6 +1508,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fortawesome/free-regular-svg-icons@npm:^5.15.1":
+  version: 5.15.1
+  resolution: "@fortawesome/free-regular-svg-icons@npm:5.15.1"
+  dependencies:
+    "@fortawesome/fontawesome-common-types": ^0.2.32
+  checksum: 5f1c0838a36f331a040bbb2dd7b27d94ab08550c8be0ece3a855e7d83665f1179a0c794aba494ace520153589a542e97bd465b7a8e120126b85f813bf8c63e26
+  languageName: node
+  linkType: hard
+
 "@fortawesome/free-solid-svg-icons@npm:^5.15.1":
   version: 5.15.1
   resolution: "@fortawesome/free-solid-svg-icons@npm:5.15.1"
@@ -16506,6 +16515,7 @@ fsevents@^1.2.7:
   dependencies:
     "@babel/core": ^7.11.6
     "@fortawesome/fontawesome-svg-core": ^1.2.32
+    "@fortawesome/free-regular-svg-icons": ^5.15.1
     "@fortawesome/free-solid-svg-icons": ^5.15.1
     "@fortawesome/react-fontawesome": ^0.1.11
     "@polkadot/dev": ^0.57.1

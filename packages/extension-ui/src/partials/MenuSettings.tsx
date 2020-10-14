@@ -6,8 +6,8 @@ import { Theme, ThemeProps } from '../types';
 import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import settings from '@polkadot/ui-settings';
+import { faExpand } from '@fortawesome/free-solid-svg-icons';
 
-import FullScreenIcon from '../assets/fullscreen.svg';
 import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
@@ -126,7 +126,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           <MenuItem className='setting'>
             <ActionText
               className='openWindow'
-              icon={FullScreenIcon}
+              icon={faExpand}
               onClick={_onWindowOpen}
               text={t<string>('Open extension in new window')}
             />

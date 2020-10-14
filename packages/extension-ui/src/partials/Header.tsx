@@ -174,19 +174,19 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
         margin-left: 8px;
       }
     }
+  }
 
-    .plusIcon, .cogIcon {
-      color: ${theme.iconNeutralColor};
+  .plusIcon, .cogIcon {
+    color: ${theme.iconNeutralColor};
 
-      &.selected {
-        color: ${theme.primaryColor};
-      }
+    &.selected {
+      color: ${theme.primaryColor};
     }
+  }
 
-    .arrowLeftIcon {
-      color: ${theme.labelColor};
-      margin-right: 1rem;
-    }
+  .arrowLeftIcon {
+    color: ${theme.labelColor};
+    margin-right: 1rem;
   }
 
   .backlink {

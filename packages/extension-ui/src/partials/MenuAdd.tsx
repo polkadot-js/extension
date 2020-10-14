@@ -4,14 +4,11 @@
 import { ThemeProps } from '../types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faPlusCircle, faFileUpload, faKey, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import fileIcon from '../assets/file-upload.svg';
-import qrIcon from '../assets/qr.svg';
-import seedIcon from '../assets/secret.svg';
-import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem, Svg } from '../components';
+import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
@@ -51,7 +48,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuDivider />
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
-          <Svg src={seedIcon} />
+          <FontAwesomeIcon icon={faKey} />
           <span>{t<string>('Import account from pre-existing seed')}</span>
         </Link>
       </MenuItem>
@@ -60,7 +57,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           onClick={isPopup ? _openJson : undefined}
           to={isPopup ? undefined : jsonPath}
         >
-          <Svg src={fileIcon} />
+          <FontAwesomeIcon icon={faFileUpload} />
           <span>{t<string>('Restore account from backup JSON file')}</span>
         </Link>
       </MenuItem>
@@ -70,7 +67,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           isDisabled={!mediaAllowed}
           to='/account/import-qr'
         >
-          <Svg src={qrIcon} />
+          <FontAwesomeIcon icon={faQrcode} />
           <span>{t<string>('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
@@ -78,7 +75,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(MenuAdd)`
+export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
   margin-top: 50px;
   right: 50px; // 24 + 18 + 8
   user-select: none;
@@ -96,7 +93,8 @@ export default React.memo(styled(MenuAdd)`
     }
 
     .svg-inline--fa {
+      color: ${theme.labelColor};
       margin-right: 0.3rem;
     }
   }
-`);
+`));

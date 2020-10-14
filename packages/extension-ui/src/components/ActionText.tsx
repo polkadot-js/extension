@@ -40,10 +40,8 @@ export default styled(ActionText)(({ theme }: ThemeProps) => `
   .svg-inline--fa {
     color: ${theme.iconNeutralColor};
     display: inline-block;
-    height: 14px;
-    margin-right: 6px;
+    margin-right: 0.3rem;
     position: relative;
     top: 2px;
-    width: 14px;
   }
 `);

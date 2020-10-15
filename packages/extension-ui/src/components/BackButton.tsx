@@ -40,4 +40,8 @@ export default styled(BackButton)(({ theme }: ThemeProps) => `
     display: block;
     margin: auto;
   }
+
+  &:not(:disabled):hover {
+    background: ${theme.backButtonBackgroundHover};
+  }
 `);

@@ -93,7 +93,7 @@ export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
     }
 
     .svg-inline--fa {
-      color: ${theme.labelColor};
+      color: ${theme.iconNeutralColor};
       margin-right: 0.3rem;
     }
   }

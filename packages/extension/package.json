@@ -9,10 +9,10 @@
     "@polkadot/extension-base": "0.35.0-beta.15",
     "@polkadot/extension-inject": "0.35.0-beta.15",
     "@polkadot/extension-ui": "0.35.0-beta.15",
-    "@polkadot/phishing": "^0.1.2"
+    "@polkadot/phishing": "^0.1.4"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.57.1",
+    "@polkadot/dev": "^0.58.1",
     "babel-loader": "^8.1.0",
     "extract-loader": "^5.1.0",
     "file-loader": "^6.1.0",

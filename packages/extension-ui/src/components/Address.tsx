@@ -7,9 +7,9 @@ import { SettingsStruct } from '@polkadot/ui-settings/types';
 import { ThemeProps } from '../types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCopy, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';

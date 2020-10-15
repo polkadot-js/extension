@@ -6,8 +6,8 @@ import { ThemeProps } from '../types';
 import React from 'react';
 import styled from 'styled-components';
 
-import warningImageSrc from '../assets/warning.svg';
-import Svg from './Svg';
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface Props extends ThemeProps {
   children: React.ReactNode;
@@ -19,9 +19,9 @@ function Warning ({ children, className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <div>
-        <Svg
+        <FontAwesomeIcon
           className='warningImage'
-          src={warningImageSrc}
+          icon={faExclamationTriangle}
         />
       </div>
       <div>{children}</div>
@@ -38,9 +38,7 @@ export default React.memo(styled(Warning)(({ isDanger, theme }: Props) => `
   border-left: ${isDanger ? `0.25rem solid ${theme.buttonBackgroundDanger}` : ''};
 
   .warningImage {
-    width: 16px;
-    height: 14px;
     margin: 5px 10px 5px 0;
-    background: ${isDanger ? theme.iconDangerColor : theme.iconWarningColor};
+    color: ${isDanger ? theme.iconDangerColor : theme.iconWarningColor};
   }
 `));

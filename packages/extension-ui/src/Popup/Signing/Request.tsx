@@ -47,6 +47,9 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   const [isBusy, setIsBusy] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [savePass, setSavePass] = useState(false);
+  const [password, setPassword] = useState('');
+
+  console.log('error', error);
 
   useEffect(() => {
     setIsLocked(null);
@@ -55,9 +58,14 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     !isExternal && isSignLocked(signId)
       .then(({ isLocked, remainingTime }) => {
         setIsLocked(isLocked);
+        console.log('remaining time', remainingTime / 1000);
         timeout = setTimeout(() => {
           setIsLocked(true);
         }, remainingTime);
+
+        // if the account was unlocked check the remember me
+        // automatically to prolong the unlock period
+        !isLocked && setSavePass(true);
       })
       .catch((error: Error) => console.error(error));
 
@@ -90,7 +98,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   );
 
   const _onSign = useCallback(
-    (password?: string): Promise<void> => {
+    (): Promise<void> => {
       setIsBusy(true);
 
       return approveSignPassword(signId, savePass, password)
@@ -104,12 +112,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           console.error(error);
         });
     },
-    [onAction, savePass, signId]
-  );
-
-  const _onSignQuick = useCallback(
-    () => _onSign(),
-    [_onSign]
+    [onAction, password, savePass, signId]
   );
 
   const _onSignature = useCallback(
@@ -123,33 +126,45 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     [onAction, signId]
   );
 
-  const SignButton = () => isLocked
-    ? (
-      <Unlock
-        buttonText={buttonText}
-        error={error}
-        isBusy={isBusy}
-        onSign={_onSign}
-      >
-        <Checkbox
-          checked={savePass}
-          label={t<string>(
-            "Don't ask me again for the next {{expiration}} minutes",
-            { replace: { expiration: PASSWORD_EXPIRY_MIN } }
-          )}
-          onChange={setSavePass}
+  const RememberPasswordCheckbox = () => (
+    <Checkbox
+      checked={savePass}
+      label={ isLocked
+        ? t<string>(
+          'Remember my password for the next {{expiration}} minutes',
+          { replace: { expiration: PASSWORD_EXPIRY_MIN } }
+        )
+        : t<string>(
+          'Extend the period without password by {{expiration}} minutes',
+          { replace: { expiration: PASSWORD_EXPIRY_MIN } }
+        )
+      }
+      onChange={setSavePass}
+    />
+  );
+
+  const SignButton = () => (
+    <>
+      { isLocked && (
+        <Unlock
+          error={error}
+          isBusy={isBusy}
+          onSign={_onSign}
+          password={password}
+          setError={setError}
+          setPassword={setPassword}
         />
-      </Unlock>
-    )
-    : (
+      )}
+      <RememberPasswordCheckbox />
       <Button
         isBusy={isBusy}
-        isDisabled={isLocked === null}
-        onClick={_onSignQuick}
+        isDisabled={(!!isLocked && !password) || !!error}
+        onClick={_onSign}
       >
         {buttonText}
       </Button>
-    );
+    </>
+  );
 
   if (payload !== null) {
     const json = request.payload as SignerPayloadJSON;
@@ -180,7 +195,9 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
         }
         <SignArea>
-          {isFirst && !isExternal && <SignButton/>}
+          {isFirst && !isExternal && (
+            <SignButton/>
+          )}
           <CancelButton>
             <Link
               isDanger

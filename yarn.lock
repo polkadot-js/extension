@@ -2058,15 +2058,6 @@ __metadata:
     "@polkadot/extension-inject": 0.35.0-beta.15
     "@polkadot/extension-ui": 0.35.0-beta.15
     "@polkadot/phishing": ^0.1.4
-    babel-loader: ^8.1.0
-    extract-loader: ^5.1.0
-    file-loader: ^6.1.0
-    html-loader: ^1.3.1
-    sinon-chrome: ^3.0.1
-    thread-loader: ^2.1.3
-    webpack: ^4.44.2
-    webpack-cli: ^3.3.12
-    webpack-extension-manifest-plugin: ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -2663,7 +2654,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:^7.0.3, @types/json-schema@npm:^7.0.5":
+"@types/json-schema@npm:^7.0.3, @types/json-schema@npm:^7.0.5, @types/json-schema@npm:^7.0.6":
   version: 7.0.6
   resolution: "@types/json-schema@npm:7.0.6"
   checksum: 820cabe35ac915b93e38b0c01957e5c49d7d9f69251dddfbf39af0ff4fe24f6e08b39e55603e0d212dea7bcaa383b1218b58a738d1c02013dc22df06547ff238
@@ -3459,7 +3450,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^6.1.0, ajv@npm:^6.10.0, ajv@npm:^6.10.2, ajv@npm:^6.12.3, ajv@npm:^6.12.4":
+"ajv@npm:^6.1.0, ajv@npm:^6.10.0, ajv@npm:^6.10.2, ajv@npm:^6.12.3, ajv@npm:^6.12.4, ajv@npm:^6.12.5":
   version: 6.12.5
   resolution: "ajv@npm:6.12.5"
   dependencies:
@@ -11039,7 +11030,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"mime-types@npm:^2.1.12, mime-types@npm:~2.1.19":
+"mime-types@npm:^2.1.12, mime-types@npm:^2.1.27, mime-types@npm:~2.1.19":
   version: 2.1.27
   resolution: "mime-types@npm:2.1.27"
   dependencies:
@@ -13738,12 +13729,21 @@ fsevents@^1.2.7:
     "@polkadot/dev": ^0.58.1
     "@polkadot/typegen": ^2.2.2-4
     "@types/jest": ^26.0.14
+    babel-loader: ^8.1.0
     copy-webpack-plugin: ^6.2.0
+    extract-loader: ^5.1.0
+    file-loader: ^6.1.0
+    html-loader: ^1.3.1
     i18next-scanner: ^2.11.0
     sinon-chrome: ^3.0.1
     stylelint: ^13.7.2
     stylelint-config-recommended: ^3.0.0
     stylelint-config-styled-components: ^0.1.1
+    thread-loader: ^2.1.3
+    url-loader: ^4.1.0
+    webpack: ^4.44.2
+    webpack-cli: ^3.3.12
+    webpack-extension-manifest-plugin: ^0.5.0
   languageName: unknown
   linkType: soft
 
@@ -13896,6 +13896,17 @@ fsevents@^1.2.7:
     ajv: ^6.12.4
     ajv-keywords: ^3.5.2
   checksum: 3851bcc7e44a3f35d3ca96e460c598aa24cec9fe395b196395316a043dc111d25735a9a49b1a115e4b52d5ed0d8bbcfb9fe1bfd077610f192b613e020d3f3ef2
+  languageName: node
+  linkType: hard
+
+"schema-utils@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "schema-utils@npm:3.0.0"
+  dependencies:
+    "@types/json-schema": ^7.0.6
+    ajv: ^6.12.5
+    ajv-keywords: ^3.5.2
+  checksum: a084f593f222560c412a4d8f40c92386c01c1c709f27c0672c2f02927a4d4d475f57f8b8e91198d0defb452add160476a03f07a05b26200a64b5124fa874e158
   languageName: node
   linkType: hard
 
@@ -15817,6 +15828,23 @@ fsevents@^1.2.7:
   version: 0.1.0
   resolution: "urix@npm:0.1.0"
   checksum: 6bdfca4e7fb7d035537068a47a04ace1bacfa32e6b1aaf54c5a0340c83125a186d59109a19b9a3a1c1f986d3eb718b82faf9ad03d53cb99cf868068580b15b3b
+  languageName: node
+  linkType: hard
+
+"url-loader@npm:^4.1.0":
+  version: 4.1.1
+  resolution: "url-loader@npm:4.1.1"
+  dependencies:
+    loader-utils: ^2.0.0
+    mime-types: ^2.1.27
+    schema-utils: ^3.0.0
+  peerDependencies:
+    file-loader: "*"
+    webpack: ^4.0.0 || ^5.0.0
+  peerDependenciesMeta:
+    file-loader:
+      optional: true
+  checksum: 871e8c8df26a985bbc8c1fb345f26565ee920a36bd7f48bece74aa541675b1ff3583e1ca5e9338d0525fbf5e5f6de96d84d9f6e6aa76657a68a5fc13832b009f
   languageName: node
   linkType: hard
 

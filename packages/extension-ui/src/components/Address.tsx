@@ -171,7 +171,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                   : undefined
               }
             >
-              {chain.name}
+              {chain.name.replace('Relay Chain', '')}
             </div>
           )}
           <div className='addressDisplay'>

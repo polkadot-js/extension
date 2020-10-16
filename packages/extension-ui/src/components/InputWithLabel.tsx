@@ -21,9 +21,10 @@ interface Props {
   placeholder?: string;
   type?: 'text' | 'password';
   value?: string;
+  withoutMargin?: boolean;
 }
 
-function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
   const _checkEnter = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
       onEnter && event.key === 'Enter' && onEnter();
@@ -40,7 +41,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
 
   return (
     <Label
-      className={className}
+      className={`${className || ''} ${withoutMargin ? 'withoutMargin' : ''}`}
       label={label}
     >
       <Input
@@ -65,4 +66,8 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
 
 export default styled(InputWithLabel)`
   margin-bottom: 16px;
+
+  &.withoutMargin {
+    margin-bottom: 0px;
+  }
 `;

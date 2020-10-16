@@ -41,6 +41,7 @@ function Unlock ({ className, error, isBusy, onSign, password, setError, setPass
         onEnter={onSign}
         type='password'
         value={password}
+        withoutMargin={true}
       />
       {error && <div className='error'>{error}</div>}
     </div>

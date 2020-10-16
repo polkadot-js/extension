@@ -4,11 +4,13 @@
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import networks from '@polkadot/networks';
 
-const hashes: MetadataDefBase[] = networks.map((network) => ({
-  chain: network.displayName,
-  genesisHash: network.genesisHash[0] || '0x',
-  icon: network.icon,
-  ss58Format: network.prefix
-}));
+const hashes: MetadataDefBase[] = networks
+  .filter(({ genesisHash }) => !!genesisHash.length)
+  .map((network) => ({
+    chain: network.displayName,
+    genesisHash: network.genesisHash[0],
+    icon: network.icon,
+    ss58Format: network.prefix
+  }));
 
 export default hashes;

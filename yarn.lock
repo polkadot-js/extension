@@ -2095,6 +2095,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/networks@npm:^3.6.0-beta.7":
+  version: 3.6.0-beta.11
+  resolution: "@polkadot/networks@npm:3.6.0-beta.11"
+  dependencies:
+    "@babel/runtime": ^7.11.2
+  checksum: 6a0836f50a4b0ac6dac0605f5d448955d5509ea2d028b26d6695e6239e207be42329194804e7a0ba6af3cfd4df49a5e98132fc71a3c1864fd9157b43389b953b
+  languageName: node
+  linkType: hard
+
 "@polkadot/phishing@npm:^0.1.4":
   version: 0.1.6
   resolution: "@polkadot/phishing@npm:0.1.6"
@@ -13727,6 +13736,7 @@ fsevents@^1.2.7:
   dependencies:
     "@babel/core": ^7.11.6
     "@polkadot/dev": ^0.58.1
+    "@polkadot/networks": ^3.6.0-beta.7
     "@polkadot/typegen": ^2.2.2-4
     "@types/jest": ^26.0.14
     babel-loader: ^8.1.0

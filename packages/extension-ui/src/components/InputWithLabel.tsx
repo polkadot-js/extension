@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback } from 'react';
+import styled from 'styled-components';
 
 import Label from './Label';
 import { Input } from './TextInputs';
@@ -22,7 +23,7 @@ interface Props {
   value?: string;
 }
 
-function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label, onBlur, onChange, onEnter, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value }: Props): React.ReactElement<Props> {
   const _checkEnter = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
       onEnter && event.key === 'Enter' && onEnter();
@@ -62,4 +63,6 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
   );
 }
 
-export default InputWithLabel;
+export default styled(InputWithLabel)`
+  margin-bottom: 16px;
+`;

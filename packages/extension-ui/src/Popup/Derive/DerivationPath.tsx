@@ -35,9 +35,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
   return (
     <div className={className}>
       <div className='container'>
-        <div
-          className={`pathInput ${isDisabled ? 'locked' : ''}`}
-        >
+        <div className={`pathInput ${isDisabled ? 'locked' : ''}`}>
           <InputWithLabel
             data-input-suri
             disabled={isDisabled}

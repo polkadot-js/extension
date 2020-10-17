@@ -21,7 +21,7 @@ function ActionText ({ className, icon, onClick, text }: Props): React.ReactElem
       className={className}
       onClick={onClick}
     >
-      {icon && <FontAwesomeIcon icon={icon}/>}
+      {icon && <FontAwesomeIcon icon={icon} />}
       <span>{text}</span>
     </div>
   );

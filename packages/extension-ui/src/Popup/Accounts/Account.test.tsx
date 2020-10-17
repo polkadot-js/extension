@@ -30,7 +30,7 @@ describe('Account component', () => {
 
   it('shows Export option if account is not external', () => {
     wrapper = mountAccountComponent({ isExternal: false });
-    wrapper.find('Details').simulate('click');
+    wrapper.find('.settings').first().simulate('click');
 
     expect(wrapper.find('a.menuItem').length).toBe(4);
     expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
@@ -41,7 +41,7 @@ describe('Account component', () => {
 
   it('does not show Export option if account is external', () => {
     wrapper = mountAccountComponent({ isExternal: true });
-    wrapper.find('Details').simulate('click');
+    wrapper.find('.settings').first().simulate('click');
 
     expect(wrapper.find('a.menuItem').length).toBe(2);
     expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');

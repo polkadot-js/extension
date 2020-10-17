@@ -30,7 +30,7 @@ describe('Header component', () => {
     wrapper = mountHeader({ showSettings: true });
 
     expect(wrapper.find(Settings).length).toBe(0);
-    expect(wrapper.find('Gear').prop('isSelected')).toBe(false);
+    expect(wrapper.find('.cogIcon').first().hasClass('selected')).toBe(false);
   });
 
   it('highlights gear icon when settings are toggled', () => {
@@ -39,6 +39,6 @@ describe('Header component', () => {
     wrapper.find('div[data-toggle-settings]').simulate('click');
 
     expect(wrapper.find(Settings).length).toBe(1);
-    expect(wrapper.find('Gear').prop('isSelected')).toBe(true);
+    expect(wrapper.find('.cogIcon').first().hasClass('selected')).toBe(true);
   });
 });

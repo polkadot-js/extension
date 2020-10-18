@@ -6,9 +6,7 @@ export function documentReadyPromise <T> (creator: () => Promise<T>): Promise<T>
     if (document.readyState === 'complete') {
       resolve(creator());
     } else {
-      window.addEventListener('load', (): void => {
-        resolve(creator());
-      });
+      window.addEventListener('load', () => resolve(creator()));
     }
   });
 }

@@ -8,12 +8,12 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^2.2.2-11",
-    "@polkadot/keyring": "^3.6.0-beta.16",
-    "@polkadot/networks": "^3.6.0-beta.16",
-    "@polkadot/types": "^2.2.2-11",
-    "@polkadot/util": "^3.6.0-beta.16",
-    "@polkadot/util-crypto": "^3.6.0-beta.16",
+    "@polkadot/api": "^2.3.1",
+    "@polkadot/keyring": "^3.6.1",
+    "@polkadot/networks": "^3.6.1",
+    "@polkadot/types": "^2.3.1",
+    "@polkadot/util": "^3.6.1",
+    "@polkadot/util-crypto": "^3.6.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.0.2"
@@ -53,12 +53,5 @@
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "webpack-extension-manifest-plugin": "^0.5.0"
-  },
-  "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.32",
-    "@fortawesome/free-regular-svg-icons": "^5.15.1",
-    "@fortawesome/free-solid-svg-icons": "^5.15.1",
-    "@fortawesome/react-fontawesome": "^0.1.11",
-    "@polkadot/networks": "3.6.0-beta.14"
   }
 }

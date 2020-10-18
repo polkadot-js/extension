@@ -42,6 +42,19 @@ let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
 
 export { isWeb3Injected, web3EnablePromise };
 
+function getWindowExtensions (originName: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
+  return Promise.all(
+    Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
+      Promise.all([
+        Promise.resolve({ name, version }),
+        enable(originName).catch((error: Error): void => {
+          console.error(`Error initializing ${name}: ${error.message}`);
+        })
+      ])
+    )
+  );
+}
+
 // enables all the providers found on the injected window interface
 export function web3Enable (originName: string): Promise<InjectedExtension[]> {
   if (!originName) {
@@ -49,23 +62,13 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
   }
 
   web3EnablePromise = documentReadyPromise((): Promise<InjectedExtension[]> =>
-    Promise
-      .all(
-        Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> => {
-          return Promise.all([
-            Promise.resolve({ name, version }),
-            enable(originName).catch((error: Error): void => {
-              console.error(`Error initializing ${name}: ${error.message}`);
-            })
-          ]);
-        })
-      )
-      .then((values: [InjectedExtensionInfo, Injected | void][]): InjectedExtension[] =>
+    getWindowExtensions(originName)
+      .then((values): InjectedExtension[] =>
         values
-          .filter(([, ext]): boolean => !!ext)
+          .filter((value): value is [InjectedExtensionInfo, Injected] => !!value[1])
           .map(([info, ext]): InjectedExtension => {
             // if we don't have an accounts subscriber, add a single-shot version
-            if (ext && !ext.accounts.subscribe) {
+            if (!ext.accounts.subscribe) {
               ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
                 ext.accounts.get().then(cb).catch(console.error);
 
@@ -75,12 +78,10 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
               };
             }
 
-            const injected: Partial<InjectedExtension> = { ...info, ...ext };
-
-            return injected as InjectedExtension;
+            return { ...info, ...ext };
           })
       )
-      .catch((): InjectedExtension[] => [] as InjectedExtension[])
+      .catch((): InjectedExtension[] => [])
       .then((values): InjectedExtension[] => {
         const names = values.map(({ name, version }): string => `${name}/${version}`);
 

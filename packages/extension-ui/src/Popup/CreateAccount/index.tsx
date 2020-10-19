@@ -3,9 +3,9 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { ActionContext, Address, Loading } from '../../components';
+import { AccountCachedContext, ActionContext, Address, Loading } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri, createSeed, flushAccountCache, getAccountCache, setAccountCache } from '../../messaging';
+import { createAccountSuri, createSeed, flushAccountCache, setAccountCache } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';
@@ -16,23 +16,20 @@ export default function CreateAccount (): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
+  const { accountCache, resetCache } = useContext(AccountCachedContext);
 
   useEffect((): void => {
-    getAccountCache()
-      .then((cachedAccount) => {
-        if (cachedAccount?.address) {
-          setAccount(cachedAccount);
-        } else {
-          createSeed()
-            .then((account) => {
-              setAccount(account);
-              setAccountCache(account).catch((e) => console.error(e));
-            })
-            .catch((error: Error) => console.error(error));
-        }
-      })
-      .catch((e) => console.error(e));
-  }, []);
+    if (accountCache?.address) {
+      setAccount(accountCache);
+    } else {
+      createSeed()
+        .then((account) => {
+          setAccount(account);
+          setAccountCache(account).catch((e) => console.error(e));
+        })
+        .catch((error: Error) => console.error(error));
+    }
+  }, [accountCache]);
 
   // FIXME Duplicated between here and Import.tsx
   const _onCreate = useCallback(
@@ -43,7 +40,7 @@ export default function CreateAccount (): React.ReactElement {
 
         createAccountSuri(name, password, account.seed)
           .then(() => {
-            flushAccountCache().catch((e) => console.error(e));
+            resetCache();
             onAction('/');
           })
           .catch((error: Error): void => {
@@ -52,16 +49,16 @@ export default function CreateAccount (): React.ReactElement {
           });
       }
     },
-    [account, onAction]
+    [account, onAction, resetCache]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
   const _onCancel = useCallback(() => {
-    flushAccountCache().catch((e) => console.error(e));
-    onAction('/', { resetCachedAccount: true });
+    resetCache();
+    onAction('/');
   }
-  , [onAction]);
+  , [onAction, resetCache]);
 
   return (
     <>

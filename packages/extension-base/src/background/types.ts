@@ -369,8 +369,9 @@ export interface ResponseJsonRestore {
   error: string | null;
 }
 
-export interface ActionOptions {
-  resetCachedAccount?: boolean;
+export interface AccountCachedContextType {
+  accountCache: AutoSavedAccount | undefined;
+  resetCache: () => void;
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];

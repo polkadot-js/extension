@@ -1,19 +1,19 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson, AccountsContext, ActionOptions, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import { AccountCachedContextType, AccountJson, AccountsContext, AuthorizeRequest, AutoSavedAccount, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import uiSettings from '@polkadot/ui-settings';
 import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading, ErrorBoundary } from '../components';
-import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
+import { AccountCachedContext, AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getAccountCache, subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import { flushAccountCache, getAccountCache, subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
 import Accounts from './Accounts';
 import Authorize from './Authorize';
@@ -69,14 +69,22 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  const [hasCachedAccount, setHasCachedAccount] = useState(false);
+  const [accountCache, setAccountCache] = useState<AutoSavedAccount | undefined>();
 
-  const _onAction = (to?: string, options?: ActionOptions): void => {
+  useEffect(() => {
+    getAccountCache().then((account) => {
+      setAccountCache(account);
+    })
+      .catch(console.error);
+  }, []);
+
+  const resetCache = useCallback((): void => {
+    flushAccountCache().catch(console.error);
+    setAccountCache(undefined);
+  }, []);
+
+  const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
-
-    if (options?.resetCachedAccount) {
-      setHasCachedAccount(false);
-    }
 
     if (to) {
       window.location.hash = to;
@@ -110,16 +118,6 @@ export default function Popup (): React.ReactElement {
       .catch(console.error);
   }, [cameraOn]);
 
-  useEffect(() => {
-    getAccountCache()
-      .then((cachedAccount) => {
-        if (cachedAccount?.seed) {
-          setHasCachedAccount(true);
-        }
-      })
-      .catch((e) => console.error(e));
-  }, []);
-
   function wrapWithErrorBoundary (component: React.ReactElement, trigger?: string): React.ReactElement {
     return <ErrorBoundary trigger={trigger}>{component}</ErrorBoundary>;
   }
@@ -131,8 +129,8 @@ export default function Popup (): React.ReactElement {
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
           ? wrapWithErrorBoundary(<Signing/>, 'signing')
-          : hasCachedAccount
-            ? wrapWithErrorBoundary(<CreateAccount/>, 'account-creation-cached')
+          : accountCache?.address
+            ? wrapWithErrorBoundary(<CreateAccount />, 'account-creation-cache')
             : wrapWithErrorBoundary(<Accounts/>, 'accounts')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
@@ -146,23 +144,25 @@ export default function Popup (): React.ReactElement {
                 <MetadataReqContext.Provider value={metaRequests}>
                   <SigningReqContext.Provider value={signRequests}>
                     <ToastProvider>
-                      <Switch>
-                        <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
-                        <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
-                        <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
-                        <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
-                        <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
-                        <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
-                        <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
-                        <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
-                        <Route path={PHISHING_PAGE_REDIRECT}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
-                        <Route
-                          exact
-                          path='/'
-                        >
-                          {Root}
-                        </Route>
-                      </Switch>
+                      <AccountCachedContext.Provider value={{ accountCache, resetCache }}>
+                        <Switch>
+                          <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                          <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                          <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
+                          <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                          <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                          <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
+                          <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
+                          <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                          <Route path={PHISHING_PAGE_REDIRECT}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
+                          <Route
+                            exact
+                            path='/'
+                          >
+                            {Root}
+                          </Route>
+                        </Switch>
+                      </AccountCachedContext.Provider>
                     </ToastProvider>
                   </SigningReqContext.Provider>
                 </MetadataReqContext.Provider>

@@ -2019,13 +2019,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@0.35.0-beta.23, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@0.35.0-beta.24, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.12.1
     "@polkadot/api": ^2.3.1
-    "@polkadot/extension-inject": 0.35.0-beta.23
+    "@polkadot/extension-inject": 0.35.0-beta.24
     "@polkadot/keyring": ^3.6.1
     "@polkadot/ui-keyring": ^0.60.2-3
   languageName: unknown
@@ -2047,7 +2047,7 @@ __metadata:
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.12.1
-    "@polkadot/extension-inject": 0.35.0-beta.23
+    "@polkadot/extension-inject": 0.35.0-beta.24
     "@polkadot/util": ^3.6.1
     "@polkadot/util-crypto": ^3.6.1
   peerDependencies:
@@ -2055,7 +2055,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@0.35.0-beta.23, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@0.35.0-beta.24, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -2067,7 +2067,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@0.35.0-beta.23, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@0.35.0-beta.24, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -2076,8 +2076,8 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^5.15.1
     "@fortawesome/free-solid-svg-icons": ^5.15.1
     "@fortawesome/react-fontawesome": ^0.1.11
-    "@polkadot/extension-base": 0.35.0-beta.23
-    "@polkadot/extension-inject": 0.35.0-beta.23
+    "@polkadot/extension-base": 0.35.0-beta.24
+    "@polkadot/extension-inject": 0.35.0-beta.24
     "@polkadot/keyring": ^3.6.1
     "@polkadot/react-identicon": ^0.60.2-3
     "@polkadot/react-qr": ^0.60.2-3
@@ -2113,9 +2113,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.12.1
     "@polkadot/dev": ^0.58.3
-    "@polkadot/extension-base": 0.35.0-beta.23
-    "@polkadot/extension-inject": 0.35.0-beta.23
-    "@polkadot/extension-ui": 0.35.0-beta.23
+    "@polkadot/extension-base": 0.35.0-beta.24
+    "@polkadot/extension-inject": 0.35.0-beta.24
+    "@polkadot/extension-ui": 0.35.0-beta.24
     "@polkadot/phishing": ^0.1.9
   languageName: unknown
   linkType: soft

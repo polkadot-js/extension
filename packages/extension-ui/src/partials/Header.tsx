@@ -3,14 +3,13 @@
 
 import { ThemeProps } from '../types';
 
+import { faArrowLeft, faCog, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import ArrowLeftImage from '../assets/arrowLeft.svg';
-import gear from '../assets/gear.svg';
-import plus from '../assets/plus.svg';
 import logo from '../assets/pjs.svg';
-import { Link, Svg } from '../components';
+import Link from '../components/Link';
 import useOutsideClick from '../hooks/useOutsideClick';
 import MenuAdd from './MenuAdd';
 import MenuSettings from './MenuSettings';
@@ -22,10 +21,6 @@ interface Props extends ThemeProps {
   showBackArrow?: boolean;
   showSettings?: boolean;
   text?: React.ReactNode;
-}
-
-interface MenuSelectProps {
-  isSelected: boolean;
 }
 
 function Header ({ children, className, showAdd, showBackArrow, showSettings, text }: Props): React.ReactElement<Props> {
@@ -58,9 +53,15 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
         <div className='branding'>
           {showBackArrow
             ? (
-              <BackLink to='/'>
-                <ArrowLeft/>
-              </BackLink>
+              <Link
+                className='backlink'
+                to='/'
+              >
+                <FontAwesomeIcon
+                  className='arrowLeftIcon'
+                  icon={faArrowLeft}
+                />
+              </Link>
             )
             : (
               <img
@@ -77,7 +78,11 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
               className='popupToggle'
               onClick={_toggleAdd}
             >
-              <Plus isSelected={isAddOpen} />
+              <FontAwesomeIcon
+                className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
+                icon={faPlusCircle}
+                size='lg'
+              />
             </div>
           )}
           {showSettings && (
@@ -86,7 +91,11 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
               data-toggle-settings
               onClick={_toggleSettings}
             >
-              <Gear isSelected={isSettingsOpen} />
+              <FontAwesomeIcon
+                className={`cogIcon ${isSettingsOpen ? 'selected' : ''}`}
+                icon={faCog}
+                size='lg'
+              />
             </div>
           )}
         </div>
@@ -101,38 +110,6 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
     </div>
   );
 }
-
-const BackLink = styled(Link)`
-  color: ${({ theme }: ThemeProps) => theme.labelColor};
-  min-height: 52px;
-  text-decoration: underline;
-  width: min-content;
-
-  &:visited {
-    color: ${({ theme }: ThemeProps) => theme.labelColor};
-  }
-`;
-
-const ArrowLeft = styled(Svg).attrs(() => ({ src: ArrowLeftImage }))`
-  background: ${({ theme }: ThemeProps) => theme.labelColor};
-  width: 12px;
-  height: 12px;
-  margin-right: 13px;
-`;
-
-const Gear = styled(Svg).attrs(() => ({ src: gear }))<MenuSelectProps>`
-  background: ${({ isSelected, theme }: ThemeProps & MenuSelectProps): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
-  height: 22px;
-  width: 22px;
-`;
-
-Gear.displayName = 'Gear';
-
-const Plus = styled(Svg).attrs(() => ({ src: plus }))<MenuSelectProps>`
-  background: ${({ isSelected, theme }: ThemeProps & MenuSelectProps): string => isSelected ? theme.primaryColor : theme.iconNeutralColor};
-  height: 22px;
-  width: 22px;
-`;
 
 export default React.memo(styled(Header)(({ theme }: Props) => `
   max-width: 100%;
@@ -196,5 +173,30 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
         margin-left: 8px;
       }
     }
+  }
+
+  .plusIcon, .cogIcon {
+    color: ${theme.iconNeutralColor};
+
+    &.selected {
+      color: ${theme.primaryColor};
+    }
+  }
+
+  .arrowLeftIcon {
+    color: ${theme.labelColor};
+    margin-right: 1rem;
+  }
+
+  .backlink {
+    color: ${theme.labelColor};
+    min-height: 52px;
+    text-decoration: underline;
+    width: min-content;
+
+    &:visited {
+      color: ${theme.labelColor};
+    }
+
   }
 `));

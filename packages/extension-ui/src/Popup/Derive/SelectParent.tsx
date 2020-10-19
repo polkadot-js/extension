@@ -24,12 +24,11 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const { accounts, hierarchy } = useContext(AccountContext);
-  const [defaultPath] = useState(nextDerivationPath(accounts, parentAddress));
+  const defaultPath = useMemo(() => nextDerivationPath(accounts, parentAddress), [accounts, parentAddress]);
   const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
   const [shouldAccountBeDerived, setShouldAccountBeDerived] = useState(true);
-
   const passwordInputRef = useRef<HTMLDivElement>(null);
 
   const allAddresses = useMemo(

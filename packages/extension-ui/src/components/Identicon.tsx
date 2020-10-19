@@ -8,11 +8,12 @@ import styled from 'styled-components';
 import Icon from '@polkadot/react-identicon';
 
 interface Props {
-  iconTheme?: 'beachball' | 'empty' | 'jdenticon' | 'polkadot' | 'substrate';
   className?: string;
+  iconTheme?: 'beachball' | 'empty' | 'jdenticon' | 'polkadot' | 'substrate';
+  isExternal?: boolean | null;
+  onCopy?: () => void;
   prefix?: number;
   value?: string | null;
-  onCopy?: () => void;
 }
 
 function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): React.ReactElement<Props> {

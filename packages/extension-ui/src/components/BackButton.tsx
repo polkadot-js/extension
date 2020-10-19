@@ -3,12 +3,12 @@
 
 import { ThemeProps } from '../types';
 
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
-import arrowLeft from '../assets/arrowLeft.svg';
 import Button from './Button';
-import Svg from './Svg';
 
 interface Props {
   className?: string;
@@ -21,9 +21,10 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
       className={className}
       onClick={onClick}
     >
-      <Svg
+      <FontAwesomeIcon
         className='arrowLeft'
-        src={arrowLeft}
+        icon={faArrowLeft}
+        size='sm'
       />
     </Button>
   );
@@ -35,10 +36,12 @@ export default styled(BackButton)(({ theme }: ThemeProps) => `
   width: 42px;
 
   .arrowLeft {
-    background: ${theme.backButtonTextColor};
+    color: ${theme.backButtonTextColor};
     display: block;
-    height: 12px;
     margin: auto;
-    width: 12px;
+  }
+
+  &:not(:disabled):hover {
+    background: ${theme.backButtonBackgroundHover};
   }
 `);

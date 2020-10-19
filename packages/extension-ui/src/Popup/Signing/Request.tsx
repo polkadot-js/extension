@@ -5,7 +5,7 @@ import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useContext, useState } from 'react';
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 import { TypeRegistry } from '@polkadot/types';
 
@@ -46,14 +46,22 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
-  const [isSavedPass, setIsSavedPass] = useState(false);
+  const [savePass, setSavePass] = useState(false);
 
-  useEffect((): void => {
+  useEffect(() => {
     setIsLocked(null);
+    let timeout: number;
 
     !isExternal && isSignLocked(signId)
-      .then((isLocked) => setIsLocked(isLocked))
+      .then(({ isLocked, remainingTime }) => {
+        setIsLocked(isLocked);
+        timeout = setTimeout(() => {
+          setIsLocked(true);
+        }, remainingTime);
+      })
       .catch((error: Error) => console.error(error));
+
+    return () => { !!timeout && clearTimeout(timeout); };
   }, [isExternal, signId]);
 
   useEffect((): void => {
@@ -82,10 +90,10 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
   );
 
   const _onSign = useCallback(
-    (password: string): Promise<void> => {
+    (password?: string): Promise<void> => {
       setIsBusy(true);
 
-      return approveSignPassword(signId, password, !!(password && isSavedPass))
+      return approveSignPassword(signId, savePass, password)
         .then((): void => {
           setIsBusy(false);
           onAction();
@@ -96,11 +104,11 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           console.error(error);
         });
     },
-    [onAction, isSavedPass, signId]
+    [onAction, savePass, signId]
   );
 
   const _onSignQuick = useCallback(
-    () => _onSign(''),
+    () => _onSign(),
     [_onSign]
   );
 
@@ -124,12 +132,12 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
         onSign={_onSign}
       >
         <Checkbox
-          checked={!!isSavedPass}
+          checked={savePass}
           label={t<string>(
             "Don't ask me again for the next {{expiration}} minutes",
             { replace: { expiration: PASSWORD_EXPIRY_MIN } }
           )}
-          onChange={setIsSavedPass}
+          onChange={setSavePass}
         />
       </Unlock>
     )
@@ -152,6 +160,7 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           <Address
             address={json.address}
             genesisHash={json.genesisHash}
+            isExternal={isExternal}
           />
         </div>
         {isExternal
@@ -189,7 +198,10 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
     return (
       <>
         <div>
-          <Address address={raw.address} />
+          <Address
+            address={raw.address}
+            isExternal={isExternal}
+          />
         </div>
         <Bytes
           bytes={raw.data}

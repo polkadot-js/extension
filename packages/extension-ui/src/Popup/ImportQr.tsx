@@ -40,6 +40,7 @@ export default function ImportQr (): React.ReactElement {
           <div>
             <Address
               {...account}
+              isExternal={true}
               name={name}
             />
           </div>

@@ -3,8 +3,7 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AllowedPath, AuthorizeRequest, AutoSavedAccount, MessageTypes, MetadataRequest, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, ResponseSeedValidate, ResponseType, SigningRequest, RequestJsonRestore, ResponseJsonRestore, RequestAccountChangePassword } from '../types';
-
+import { AccountJson, AllowedPath, AuthorizeRequest, AutoSavedAccount, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, RequestJsonRestore, ResponseJsonRestore, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -96,6 +95,22 @@ export default class Extension {
     keyring.forgetAccount(address);
 
     return true;
+  }
+
+  private refreshAccountPasswordCache (pair: KeyringPair): number {
+    const { address } = pair;
+
+    const savedExpiry = this.#cachedUnlocks[address] || 0;
+    const remainingTime = savedExpiry - Date.now();
+
+    if (remainingTime < 0) {
+      this.#cachedUnlocks[address] = 0;
+      pair.lock();
+
+      return 0;
+    }
+
+    return remainingTime;
   }
 
   private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
@@ -308,13 +323,18 @@ export default class Extension {
     };
   }
 
-  private signingApprovePassword ({ id, isSavedPass, password }: RequestSigningApprovePassword): boolean {
+  private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { reject, request, resolve } = queued;
-    const pair = keyring.getPair(request.payload.address);
+    const pair = keyring.getPair(queued.account.address);
+
+    // unlike queued.account.address the following
+    // address is encoded with the default prefix
+    // which what is used for password caching mapping
+    const { address } = pair;
 
     if (!pair) {
       reject(new Error('Unable to find pair'));
@@ -322,19 +342,22 @@ export default class Extension {
       return false;
     }
 
-    const now = Date.now();
+    this.refreshAccountPasswordCache(pair);
 
-    if (pair.isLocked || password) {
+    // if the keyring pair is locked, the password is needed
+    if (pair.isLocked && !password) {
+      reject(new Error('Password needed to unlock the account'));
+    }
+
+    if (pair.isLocked) {
       pair.decodePkcs8(password);
     }
 
     const result = request.sign(registry, pair);
-    const savedExpiry = this.#cachedUnlocks[request.payload.address] || 0;
 
-    if (isSavedPass) {
-      this.#cachedUnlocks[request.payload.address] = now + PASSWORD_EXPIRY_MS;
-    } else if (savedExpiry < now) {
-      this.#cachedUnlocks[request.payload.address] = 0;
+    if (savePass) {
+      this.#cachedUnlocks[address] = Date.now() + PASSWORD_EXPIRY_MS;
+    } else {
       pair.lock();
     }
 
@@ -370,17 +393,22 @@ export default class Extension {
     return true;
   }
 
-  private signingIsLocked ({ id }: RequestSigningIsLocked): boolean {
+  private signingIsLocked ({ id }: RequestSigningIsLocked): ResponseSigningIsLocked {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
-    const { request } = queued;
-    const pair = keyring.getPair(request.payload.address);
+    const address = queued.request.payload.address;
+    const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
 
-    return pair.isLocked || ((this.#cachedUnlocks[request.payload.address] || 0) < Date.now());
+    const remainingTime = this.refreshAccountPasswordCache(pair);
+
+    return {
+      isLocked: pair.isLocked,
+      remainingTime
+    };
   }
 
   // FIXME This looks very much like what we have in authorization

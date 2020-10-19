@@ -6,13 +6,14 @@ import { Chain } from '@polkadot/extension-chains/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 import { ThemeProps } from '../types';
 
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { faCopy, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
+import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import copyIcon from '../assets/copy.svg';
-import hiddenIcon from '../assets/hidden.svg';
 import details from '../assets/details.svg';
 import parentArrow from '../assets/arrowParentLabel.svg';
 import { AccountContext, SettingsContext } from './contexts';
@@ -30,6 +31,7 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   genesisHash?: string | null;
+  isExternal?: boolean | null;
   isHidden?: boolean;
   name?: React.ReactNode | null;
   parentName?: string | null;
@@ -71,7 +73,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, children, className, genesisHash, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -110,7 +112,18 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
 
-  const displayedName = name || (account && account.name) || t('<unknown>');
+  const displayedName = (
+    <>
+      {(account?.isExternal || isExternal) && (
+        <FontAwesomeIcon
+          className='externalIcon'
+          icon={faExternalLinkSquareAlt}
+          title={t('external account')}
+        />
+      )}
+      {name || account?.name || t('<unknown>')}
+    </>
+  );
 
   return (
     <div className={className}>
@@ -118,6 +131,7 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
         <Identicon
           className='identityIcon'
           iconTheme={theme}
+          isExternal={isExternal}
           onCopy={_onCopy}
           prefix={prefix}
           value={formatted || address}
@@ -127,7 +141,10 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
             ? (
               <>
                 <div className='banner'>
-                  <ArrowLabel/>
+                  <Svg
+                    className='parentArrow'
+                    src={parentArrow}
+                  />
                   <div
                     className='parentName'
                     data-field='parent'
@@ -157,40 +174,50 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
                   : undefined
               }
             >
-              {chain.name}
+              {chain.name.replace('Relay Chain', '')}
             </div>
           )}
           <div className='addressDisplay'>
-            <FullAddress data-field='address'>{formatted || t('<unknown>')}</FullAddress>
+            <div
+              className='fullAddress'
+              data-field='address'
+            >
+              {formatted || t('<unknown>')}
+            </div>
             <CopyToClipboard text={(formatted && formatted) || ''} >
-              <Svg
+              <FontAwesomeIcon
+                icon={faCopy}
                 onClick={_onCopy}
-                src={copyIcon}
+                size='sm'
               />
             </CopyToClipboard>
             {isHidden && (
-              <Svg
+              <FontAwesomeIcon
                 className='hiddenIcon'
-                src={hiddenIcon}
+                icon={faEyeSlash}
+                size='sm'
               />
             )}
           </div>
         </div>
         {actions && (
           <>
-            <Settings onClick={_onClick}>
-              {showActionsMenu
-                ? <ActiveActionsIcon />
-                : <ActionsIcon />
-              }
-            </Settings>
+            <div
+              className='settings'
+              onClick={_onClick}
+            >
+              <Svg
+                className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
+                src={details}
+              />
+            </div>
             {showActionsMenu && (
-              <MovableMenu
-                isMoved={moveMenuUp}
+              <Menu
+                className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
                 reference={actionsRef}
               >
                 {actions}
-              </MovableMenu>
+              </Menu>
             )}
           </>
         )}
@@ -199,69 +226,6 @@ function Address ({ actions, address, children, className, genesisHash, isHidden
     </div>
   );
 }
-
-const FullAddress = styled.div(({ theme }: ThemeProps) => `
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: ${theme.labelColor};
-  font-size: 12px;
-  line-height: 16px;
-`);
-
-FullAddress.displayName = 'FullAddress';
-
-const Settings = styled.div(({ theme }: ThemeProps) => `
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width: 40px;
-
-  & ${Svg} {
-    width: 3px;
-    height: 19px;
-  }
-
-  &:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 25%;
-    bottom: 25%;
-    width: 1px;
-    background: ${theme.boxBorderColor};
-  }
-
-  &:hover {
-    cursor: pointer;
-    background: ${theme.readonlyInputBackground};
-  }
-`);
-
-Settings.displayName = 'Details';
-
-const ActionsIcon = styled(Svg).attrs(() => ({ src: details }))`
-  background: ${({ theme }: ThemeProps): string => theme.accountDotsIconColor};
-`;
-
-const ActiveActionsIcon = styled(Svg).attrs(() => ({ src: details }))`
-  background: ${({ theme }: ThemeProps): string => theme.primaryColor};
-`;
-
-const ArrowLabel = styled(Svg).attrs(() => ({ src: parentArrow }))`
-  background: ${({ theme }: ThemeProps): string => theme.labelColor};
-  position: absolute;
-  top: 5px;
-  width: 9px;
-  height: 9px;
-`;
-
-const MovableMenu = styled(Menu)<{ isMoved: boolean }>`
-  ${({ isMoved }): string => isMoved ? 'bottom: 0;' : 'top: 0;'}
-  margin-top: -20px;
-  right: 28px;
-`;
 
 export default styled(Address)(({ theme }: ThemeProps) => `
   background: ${theme.accountBackground};
@@ -292,13 +256,13 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     justify-content: space-between;
     position: relative;
 
-    & ${Svg} {
+    .svg-inline--fa {
       width: 14px;
       height: 14px;
       margin-right: 10px;
-      background: ${theme.accountDotsIconColor};
+      color: ${theme.accountDotsIconColor};
       &:hover {
-        background: ${theme.labelColor};
+        color: ${theme.labelColor};
         cursor: pointer;
       }
     }
@@ -308,6 +272,11 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       right: 2px;
       top: -18px;
     }
+  }
+
+  .externalIcon {
+    margin-right: 0.3rem;
+    color: ${theme.labelColor}
   }
 
   .identityIcon {
@@ -356,5 +325,66 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     padding: 0.25rem 0 0 0.8rem;
     text-overflow: ellipsis;
     width: 270px;
+  }
+
+  .fullAddress {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: ${theme.labelColor};
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .detailsIcon {
+    background: ${theme.accountDotsIconColor};
+    width: 3px;
+    height: 19px;
+
+    &.active {
+      background: ${theme.primaryColor};
+    }
+  }
+
+  .parentArrow {
+    background: ${theme.labelColor};
+    position: absolute;
+    top: 5px;
+    width: 9px;
+    height: 9px;
+  }
+
+  .movableMenu {
+    margin-top: -20px;
+    right: 28px;
+    top: 0;
+
+    &.isMoved {
+      top: auto;
+      bottom: 0;
+    }
+  }
+
+  .settings {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 40px;
+
+    &:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 25%;
+      bottom: 25%;
+      width: 1px;
+      background: ${theme.boxBorderColor};
+    }
+
+    &:hover {
+      cursor: pointer;
+      background: ${theme.readonlyInputBackground};
+    }
   }
 `);

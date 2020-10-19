@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Message } from '@polkadot/extension-base/types';
-import { AccountJson, AllowedPath, AuthorizeRequest, AutoSavedAccount, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore } from '@polkadot/extension-base/background/types';
+import { AccountJson, AllowedPath, AuthorizeRequest, AutoSavedAccount, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore, ResponseSigningIsLocked } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -101,12 +101,12 @@ export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
 }
 
-export async function isSignLocked (id: string): Promise<boolean> {
+export async function isSignLocked (id: string): Promise<ResponseSigningIsLocked> {
   return sendMessage('pri(signing.isLocked)', { id });
 }
 
-export async function approveSignPassword (id: string, password: string, isSavedPass: boolean): Promise<boolean> {
-  return sendMessage('pri(signing.approve.password)', { id, isSavedPass, password });
+export async function approveSignPassword (id: string, savePass: boolean, password?: string): Promise<boolean> {
+  return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
 export async function approveSignSignature (id: string, signature: string): Promise<boolean> {

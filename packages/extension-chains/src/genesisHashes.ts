@@ -14,7 +14,7 @@ const hashes: Option[] = [
     value: ''
   },
   ...chains.map(({ chain, genesisHash }) => ({
-    text: `${chain} (${chain.startsWith('Kusama') ? 'canary' : 'live'})`,
+    text: chain,
     value: genesisHash
   }))
 ];

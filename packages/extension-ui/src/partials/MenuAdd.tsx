@@ -3,14 +3,12 @@
 
 import { ThemeProps } from '../types';
 
+import { faPlusCircle, faFileUpload, faKey, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import fileIcon from '../assets/file-upload.svg';
-import plusIcon from '../assets/plus.svg';
-import qrIcon from '../assets/qr.svg';
-import seedIcon from '../assets/secret.svg';
-import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem, Svg } from '../components';
+import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
@@ -39,7 +37,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
     >
       <MenuItem className='menuItem'>
         <Link to={master ? `/account/derive/${master.address}` : '/account/create'}>
-          <Svg src={plusIcon} />
+          <FontAwesomeIcon icon={faPlusCircle} />
           <span>{
             master
               ? t('Create new account (root or derived)')
@@ -50,7 +48,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuDivider />
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
-          <Svg src={seedIcon} />
+          <FontAwesomeIcon icon={faKey} />
           <span>{t<string>('Import account from pre-existing seed')}</span>
         </Link>
       </MenuItem>
@@ -59,7 +57,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           onClick={isPopup ? _openJson : undefined}
           to={isPopup ? undefined : jsonPath}
         >
-          <Svg src={fileIcon} />
+          <FontAwesomeIcon icon={faFileUpload} />
           <span>{t<string>('Restore account from backup JSON file')}</span>
         </Link>
       </MenuItem>
@@ -69,7 +67,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           isDisabled={!mediaAllowed}
           to='/account/import-qr'
         >
-          <Svg src={qrIcon} />
+          <FontAwesomeIcon icon={faQrcode} />
           <span>{t<string>('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
@@ -77,7 +75,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(styled(MenuAdd)`
+export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
   margin-top: 50px;
   right: 50px; // 24 + 18 + 8
   user-select: none;
@@ -93,5 +91,10 @@ export default React.memo(styled(MenuAdd)`
     span {
       vertical-align: middle;
     }
+
+    .svg-inline--fa {
+      color: ${theme.iconNeutralColor};
+      margin-right: 0.3rem;
+    }
   }
-`);
+`));

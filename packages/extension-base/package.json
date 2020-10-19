@@ -1,14 +1,14 @@
 {
   "name": "@polkadot/extension-base",
   "description": "Functions, classes and other utilities used in @polkadot/extension",
-  "version": "0.35.0-beta.6",
+  "version": "0.35.0-beta.24",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
-    "@babel/runtime": "^7.11.2",
-    "@polkadot/api": "^1.34.0-beta.10",
-    "@polkadot/extension-inject": "0.35.0-beta.6",
-    "@polkadot/keyring": "^3.4.1",
-    "@polkadot/ui-keyring": "^0.59.0-beta.8"
+    "@babel/runtime": "^7.12.1",
+    "@polkadot/api": "^2.3.1",
+    "@polkadot/extension-inject": "0.35.0-beta.24",
+    "@polkadot/keyring": "^3.6.1",
+    "@polkadot/ui-keyring": "^0.60.2-3"
   }
 }

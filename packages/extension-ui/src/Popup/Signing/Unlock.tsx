@@ -52,6 +52,7 @@ function Unlock ({ buttonText, children, className, error, isBusy, onSign }: Pro
       {children}
       <Button
         isBusy={isBusy}
+        isDisabled={!password}
         onClick={_onClick}
       >
         {buttonText}

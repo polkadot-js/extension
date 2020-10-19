@@ -1,16 +1,16 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ThemeProps } from '../types';
 
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import React, { MouseEventHandler } from 'react';
 import styled from 'styled-components';
 
-import Svg from './Svg';
-
 interface Props {
   className?: string;
-  icon?: string;
+  icon?: IconDefinition;
   onClick: MouseEventHandler<HTMLDivElement>;
   text: string;
 }
@@ -21,7 +21,7 @@ function ActionText ({ className, icon, onClick, text }: Props): React.ReactElem
       className={className}
       onClick={onClick}
     >
-      {icon && <Svg src={icon} />}
+      {icon && <FontAwesomeIcon icon={icon} />}
       <span>{text}</span>
     </div>
   );
@@ -37,13 +37,11 @@ export default styled(ActionText)(({ theme }: ThemeProps) => `
     text-decoration-line: underline;
   }
 
-  ${Svg} {
-    background: ${theme.iconNeutralColor};
+  .svg-inline--fa {
+    color: ${theme.iconNeutralColor};
     display: inline-block;
-    height: 14px;
-    margin-right: 6px;
+    margin-right: 0.3rem;
     position: relative;
     top: 2px;
-    width: 14px;
   }
 `);

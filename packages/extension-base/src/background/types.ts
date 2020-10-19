@@ -110,7 +110,7 @@ export interface RequestSignatures {
   'pri(signing.approve.password)': [RequestSigningApprovePassword, boolean];
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
-  'pri(signing.isLocked)': [RequestSigningIsLocked, boolean];
+  'pri(signing.isLocked)': [RequestSigningIsLocked, ResponseSigningIsLocked];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   'pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
@@ -121,6 +121,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
+  'pub(phishing.redirect)': [null, null];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.startProvider)': [string, ProviderMeta];
@@ -256,8 +257,8 @@ export interface RequestRpcUnsubscribe {
 
 export interface RequestSigningApprovePassword {
   id: string;
-  isSavedPass: boolean;
-  password: string;
+  password?: string;
+  savePass: boolean;
 }
 
 export interface RequestSigningApproveSignature {
@@ -271,6 +272,11 @@ export interface RequestSigningCancel {
 
 export interface RequestSigningIsLocked {
   id: string;
+}
+
+export interface ResponseSigningIsLocked {
+  isLocked: boolean;
+  remainingTime: number;
 }
 
 export type RequestSigningSubscribe = null;

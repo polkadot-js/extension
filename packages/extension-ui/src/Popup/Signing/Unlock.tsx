@@ -1,64 +1,57 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { ThemeProps } from '@polkadot/extension-ui/types';
 
-import { Button, InputWithLabel } from '../../components';
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
+
+import { InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
-interface Props {
-  buttonText: string;
-  children?: React.ReactNode;
+interface Props extends ThemeProps {
   className?: string;
   error?: string | null;
   isBusy: boolean;
-  onSign: (password: string) => Promise<void>;
+  onSign: () => Promise<void>;
+  password: string;
+  setError: (error: string | null) => void;
+  setPassword: (password: string) => void;
 }
 
-function Unlock ({ buttonText, children, className, error, isBusy, onSign }: Props): React.ReactElement<Props> {
+function Unlock ({ className, error, isBusy, onSign, password, setError, setPassword }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [ownError, setError] = useState<string | null>();
-  const [password, setPassword] = useState('');
-
-  useEffect((): void => {
-    setError(error || null);
-  }, [error]);
 
   const _onChangePassword = useCallback(
     (password: string): void => {
       setPassword(password);
       setError(null);
     },
-    []
-  );
-
-  const _onClick = useCallback(
-    () => onSign(password),
-    [onSign, password]
+    [setError, setPassword]
   );
 
   return (
     <div className={className}>
       <InputWithLabel
         disabled={isBusy}
-        isError={!password || !!ownError}
+        isError={!password || !!error}
         isFocused
         label={t<string>('Password for this account')}
         onChange={_onChangePassword}
-        onEnter={_onClick}
+        onEnter={onSign}
         type='password'
-        withoutMargin={!!children}
+        value={password}
+        withoutMargin={true}
       />
-      {children}
-      <Button
-        isBusy={isBusy}
-        isDisabled={!password}
-        onClick={_onClick}
-      >
-        {buttonText}
-      </Button>
+      {error && <div className='error'>{error}</div>}
     </div>
   );
 }
 
-export default React.memo(Unlock);
+export default React.memo(styled(Unlock)(({ theme }: ThemeProps) => `
+  .error {
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.errorColor};
+  }
+`));

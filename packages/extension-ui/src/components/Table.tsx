@@ -31,7 +31,7 @@ export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
 
   &.isFull {
     height: 100%;
-    overflow: scroll;
+    overflow: auto;
   }
 
   td.data {

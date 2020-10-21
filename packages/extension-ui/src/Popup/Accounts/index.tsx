@@ -1,6 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ThemeProps } from '../../types';
+
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
@@ -10,7 +12,11 @@ import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
 import AddAccount from './AddAccount';
 
-export default function Accounts (): React.ReactElement {
+interface Props extends ThemeProps {
+  className?: string;
+}
+
+function Accounts ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
 
@@ -25,14 +31,14 @@ export default function Accounts (): React.ReactElement {
               showSettings
               text={t<string>('Accounts')}
             />
-            <AccountsArea>
+            <div className={className}>
               {hierarchy.map((json, index): React.ReactNode => (
                 <AccountsTree
                   {...json}
                   key={`${index}:${json.address}`}
                 />
               ))}
-            </AccountsArea>
+            </div>
           </>
         )
       }
@@ -40,7 +46,7 @@ export default function Accounts (): React.ReactElement {
   );
 }
 
-const AccountsArea = styled.div`
+export default styled(Accounts)`
   height: 100%;
   overflow-y: scroll;
   margin-top: -25px;

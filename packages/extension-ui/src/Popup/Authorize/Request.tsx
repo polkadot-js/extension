@@ -82,7 +82,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   );
 }
 
-export default styled(Request)<ThemeProps>(({ theme }: Props) => `
+export default styled(Request)(({ theme }: Props) => `
 
   .icon {
     background: ${theme.buttonBackgroundDanger};

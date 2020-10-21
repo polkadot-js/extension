@@ -18,17 +18,16 @@
 
         <style>
             @font-face {
-                font-family: "Nunito";
+                font-family: 'Nunito Sans';
                 font-style: normal;
                 font-weight: 400;
-                src: url("./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot"); /* IE9 Compat Modes */
-                src: local("Nunito Sans Regular"),
-                  local("NunitoSans-Regular"),
-                  url("./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot?#iefix") format("embedded-opentype"), /* IE6-IE8 */
-                  url("./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.woff2") format("woff2"), /* Super Modern Browsers */
-                  url("./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.woff") format("woff"), /* Modern Browsers */
-                  url("./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.ttf") format("truetype"), /* Safari, Android, iOS */
-                  url("./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.svg#NunitoSans") format("svg"); /* Legacy iOS */
+                src: url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot');
+                src: local('Nunito Sans Regular'), local('NunitoSans-Regular'),
+                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot?#iefix') format('embedded-opentype'),
+                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.woff2') format('woff2'),
+                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.woff') format('woff'),
+                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.ttf') format('truetype'),
+                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.svg#NunitoSans') format('svg');
             }
 
             * {
@@ -37,7 +36,7 @@
 
             body {
                 color: rgb(36, 37, 41);
-                font-family: Nunito, sans-serif;
+                font-family: 'Nunito Sans', sans-serif;
                 margin: 0;
             }
 
@@ -47,6 +46,7 @@
             }
 
             #header {
+                align-items: center;
                 display: flex;
                 padding-top: 1rem;
                 padding-bottom: 1rem;
@@ -54,9 +54,13 @@
                 margin: auto;
             }
 
+            #header h1 {
+                margin: 0;
+            }
+
             #logo {
                 margin-right: 1rem;
-                width: 5rem;
+                width: 2.5rem;
             }
 
             #content {
@@ -117,6 +121,7 @@
                 margin-left: -50vw;
                 margin-right: -50vw;
                 max-width: 100vw;
+                padding: 0 1.5rem;
                 position: relative;
                 right: 50%;
                 width: 100vw;
@@ -211,7 +216,7 @@
 
             <h2>More info</h2>
             <p>This extension is open source and the code is available on <a href="https://github.com/polkadot-js/extension">GitHub</a>.</p>
-            <p>For developers willing to use the accounts from the extension in a Dapp, head to the <a href="https://polkadot.js.org/docs/extension/">developer documentation</a>.</p>
+            <p>For developers wanting to use the accounts from the extension in a Dapp, head to the <a href="https://polkadot.js.org/docs/extension/">developer documentation</a>.</p>
         </div>
     </body>
 </html>

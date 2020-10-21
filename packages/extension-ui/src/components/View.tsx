@@ -4,10 +4,10 @@
 import { ThemeProps } from '../types';
 
 import React, { useState } from 'react';
-import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
+import { ThemeProvider, createGlobalStyle } from 'styled-components';
 
 // FIXME We should not import from index when this one is imported there as well
-import { AvailableThemes, chooseTheme, themes, ThemeSwitchContext } from '.';
+import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -46,26 +46,6 @@ const BodyTheme = createGlobalStyle<ThemeProps>`
     &::-webkit-scrollbar {
       display: none;
     }
-  }
-`;
-
-const Main = styled.main`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: ${({ theme }: ThemeProps): string => theme.background};
-  color: ${({ theme }: ThemeProps): string => theme.textColor};
-  font-size: ${({ theme }: ThemeProps): string => theme.fontSize};
-  line-height: ${({ theme }: ThemeProps): string => theme.lineHeight};
-  border: 1px solid ${({ theme }: ThemeProps): string => theme.inputBorderColor};
-
-  * {
-    font-family: ${({ theme }: ThemeProps): string => theme.fontFamily};
-  }
-
-  > * {
-    padding-left: 24px;
-    padding-right: 24px;
   }
 `;
 

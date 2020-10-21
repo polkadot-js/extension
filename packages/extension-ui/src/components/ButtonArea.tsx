@@ -12,11 +12,13 @@ interface Props extends ThemeProps {
   children: React.ReactNode;
 }
 
-const ButtonArea = ({ children, className }: Props) => (
-  <div className={className}>
-    {children}
-  </div>
-);
+const ButtonArea = function ({ children, className }: Props) {
+  return (
+    <div className={className}>
+      {children}
+    </div>
+  );
+};
 
 export default styled(ButtonArea)(({ theme }: ThemeProps) => `
   display: flex;

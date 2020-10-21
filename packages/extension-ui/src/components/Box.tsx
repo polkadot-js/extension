@@ -23,12 +23,12 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
 
 export default styled(Box)(({ theme }: ThemeProps) => `
   background: ${theme.readonlyInputBackground};
-  border: none;
+  border: 1px solid ${theme.inputBorderColor};
   border-radius: ${theme.borderRadius};
-  color: ${theme.textColor};
+  color: ${theme.subTextColor};
   font-family: ${theme.fontFamily};
   font-size: ${theme.fontSize};
-  margin: ${theme.boxMargin};
+  margin: 0.75rem 24px;
   padding: ${theme.boxPadding};
   position: relative;
 

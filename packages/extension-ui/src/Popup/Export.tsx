@@ -1,6 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ThemeProps } from '../types';
+
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
@@ -12,9 +14,11 @@ import styled from 'styled-components';
 
 const MIN_LENGTH = 6;
 
-type Props = RouteComponentProps<{ address: string }>;
+interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
+  className?: string;
+}
 
-function Export ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
+function Export ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -58,10 +62,15 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
         showBackArrow
         text={t<string>('Export account')}
       />
-      <div>
+      <div className={className}>
         <Address address={address}>
-          <MovedWarning danger>{t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}</MovedWarning>
-          <ActionArea>
+          <Warning
+            className='movedWarning'
+            danger
+          >
+            {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
+          </Warning>
+          <div className='actionArea'>
             <InputWithLabel
               data-export-password
               disabled={isBusy}
@@ -80,34 +89,36 @@ function Export ({ match: { params: { address } } }: Props): React.ReactElement<
             >
               {t<string>('I want to export this account')}
             </Button>
-            <CancelButton>
+            <ActionBar className='actionBar'>
               <ActionText
+                className='actionText'
                 onClick={_goHome}
                 text={t<string>('Cancel')}
               />
-            </CancelButton>
-          </ActionArea>
+            </ActionBar>
+          </div>
         </Address>
       </div>
     </>
   );
 }
 
-const MovedWarning = styled(Warning)`
-  margin-top: 8px;
-`;
-
-const ActionArea = styled.div`
-  padding: 10px 24px;
-`;
-
-const CancelButton = styled(ActionBar)`
-  margin-top: 4px;
-  text-decoration: underline;
-
-  ${ActionText} {
-    margin: auto;
+export default withRouter(styled(Export)`
+  .actionArea {
+    padding: 10px 24px;
   }
-`;
 
-export default withRouter(Export);
+  .movedWarning {
+    margin-top: 8px;
+    margin-left: 20px;
+  }
+
+  .actionBar {
+    margin-top: 4px;
+    text-decoration: underline;
+
+    .actionText {
+      margin: auto;
+    }
+  }
+`);

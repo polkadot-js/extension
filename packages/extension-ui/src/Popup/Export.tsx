@@ -66,7 +66,7 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
         <Address address={address}>
           <Warning
             className='movedWarning'
-            danger
+            isDanger
           >
             {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>
@@ -89,9 +89,9 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
             >
               {t<string>('I want to export this account')}
             </Button>
-            <ActionBar className='actionBar'>
+            <ActionBar className='withMarginTop'>
               <ActionText
-                className='actionText'
+                className='center'
                 onClick={_goHome}
                 text={t<string>('Cancel')}
               />
@@ -108,17 +108,15 @@ export default withRouter(styled(Export)`
     padding: 10px 24px;
   }
 
-  .movedWarning {
-    margin-top: 8px;
-    margin-left: 20px;
+  .center {
+    margin: auto;
   }
 
-  .actionBar {
-    margin-top: 4px;
-    text-decoration: underline;
+  .movedWarning {
+    margin-top: 8px;
+  }
 
-    .actionText {
-      margin: auto;
-    }
+  .withMarginTop {
+    margin-top: 4px;
   }
 `);

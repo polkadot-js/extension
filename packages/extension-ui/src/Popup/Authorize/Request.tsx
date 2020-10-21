@@ -12,7 +12,7 @@ import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../com
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
-interface Props {
+interface Props extends ThemeProps {
   authId: string;
   className?: string;
   isFirst: boolean;
@@ -40,8 +40,8 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   return (
     <div className={className}>
-      <RequestInfo>
-        <Info>
+      <div className='requestInfo'>
+        <div className='info'>
           <Icon
             icon='X'
             onClick={_onReject}
@@ -57,59 +57,35 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
               </a>.
             </Trans>
           </div>
-        </Info>
+        </div>
         {isFirst && (
           <>
-            <RequestWarning>{t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</RequestWarning>
-            <AcceptButton onClick={_onApprove}>{t<string>('Yes, allow this application access')}</AcceptButton>
+            <Warning className='warningMargin'>{t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</Warning>
+            <Button
+              className='acceptButton'
+              onClick={_onApprove}
+            >
+              {t<string>('Yes, allow this application access')}
+            </Button>
           </>
         )}
-        <RejectButton>
+        <ActionBar className='rejectionButton'>
           <Link
             isDanger
             onClick={_onReject}
           >
             Reject
           </Link>
-        </RejectButton>
-      </RequestInfo>
+        </ActionBar>
+      </div>
     </div>
   );
 }
 
-const RequestInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 8px;
-  background: ${({ theme }: ThemeProps): string => theme.highlightedAreaBackground};
-`;
-
-const Info = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-const AcceptButton = styled(Button)`
-  width: 90%;
-  margin: 25px auto 0;
-`;
-
-const RequestWarning = styled(Warning)`
-  margin: 24px 24px 0 1.45rem;
-`;
-
-AcceptButton.displayName = 'AcceptButton';
-
-const RejectButton = styled(ActionBar)`
-  margin: 8px 0 15px 0;
-  text-decoration: underline;
-`;
-
-export default styled(Request)`
+export default styled(Request)<ThemeProps>(({ theme }: Props) => `
 
   .icon {
-    background: ${({ theme }: ThemeProps): string => theme.buttonBackgroundDanger};
+    background: ${theme.buttonBackgroundDanger};
     color: white;
     min-width: 18px;
     width: 14px;
@@ -128,7 +104,7 @@ export default styled(Request)`
 
   .tab-name,
   .tab-url {
-    color: ${({ theme }: ThemeProps): string => theme.textColor};
+    color: ${theme.textColor};
     display: inline-block;
     max-width: 20rem;
     overflow: hidden;
@@ -137,4 +113,31 @@ export default styled(Request)`
     cursor: pointer;
     text-decoration: underline;
   }
-`;
+
+  .requestInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+    background: ${theme.highlightedAreaBackground};
+  }
+
+  .info {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .acceptButton {
+    width: 90%;
+    margin: 25px auto 0;
+  }
+
+  .warningMargin {
+    margin: 24px 24px 0 1.45rem;
+  }
+
+  .rejectionButton {
+    margin: 8px 0 15px 0;
+    text-decoration: underline;
+  }
+`);

@@ -8,7 +8,6 @@ import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import uiSettings from '@polkadot/ui-settings';
-import { setSS58Format } from '@polkadot/util-crypto';
 
 import { Loading, ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
@@ -89,7 +88,6 @@ export default function Popup (): React.ReactElement {
     uiSettings.on('change', (settings): void => {
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
-      setSS58Format(settings.prefix === -1 ? 42 : settings.prefix);
     });
 
     _onAction();

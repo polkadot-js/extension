@@ -7,7 +7,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import arrow from '../../assets/arrow-down.svg';
-import { Address, Svg } from '../../components';
+import { Address } from '../../components';
 import useOutsideClick from '../../hooks/useOutsideClick';
 
 interface Props {
@@ -36,10 +36,11 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
       >
         <Address
           address={selectedAddress}
+          className='address'
           genesisHash={selectedGenesis}
         />
       </div>
-      <HiddenOptions visible={isDropdownVisible}>
+      <div className={`dropdown ${isDropdownVisible ? 'visible' : ''}`}>
         {allAddresses.map(([address, genesisHash]) => (
           <div
             data-parent-option
@@ -48,39 +49,21 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
           >
             <Address
               address={address}
+              className='address'
               genesisHash={genesisHash}
             />
           </div>
         ))}
-      </HiddenOptions>
+      </div>
     </div>
   );
 }
-
-const HiddenOptions = styled.div<{ visible: boolean }>`
-  position: absolute;
-  visibility: ${({ visible }): string => (visible ? 'visible' : 'hidden')};
-  width: 510px;
-  z-index: 100;
-  background: ${({ theme }: ThemeProps): string => theme.bodyColor};
-  max-height: ${({ visible }): string => (visible ? '200px' : '0')};
-  overflow: scroll;
-  padding: 5px;
-  border: 1px solid ${({ theme }: ThemeProps): string => theme.boxBorderColor};
-  box-sizing: border-box;
-  border-radius: 4px;
-  margin-top: -8px;
-
-  & > div {
-    cursor: pointer;
-  }
-`;
 
 export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
   margin-bottom: 16px;
   cursor: pointer;
 
-  & > div:first-child > ${Address}::after {
+  & > div:first-child > .address::after {
     content: '';
     position: absolute;
     top: 66%;
@@ -95,7 +78,31 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     border: 1px solid ${theme.boxBorderColor};
   }
 
-  ${Address} ${Svg} {
+  .address .copyIcon {
     visibility: hidden;
+  }
+
+  .dropdown {
+    position: absolute;
+    visibility: hidden;
+    width: 510px;
+    z-index: 100;
+    background: ${theme.bodyColor};
+    max-height: 0;
+    overflow: auto;
+    padding: 5px;
+    border: 1px solid ${theme.boxBorderColor};
+    box-sizing: border-box;
+    border-radius: 4px;
+    margin-top: -8px;
+
+    &.visible{
+      visibility: visible;
+      max-height: 200px;
+    }
+
+    & > div {
+      cursor: pointer;
+    }
   }
 `);

@@ -186,6 +186,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''} >
               <FontAwesomeIcon
+                className='copyIcon'
                 icon={faCopy}
                 onClick={_onCopy}
                 size='sm'

@@ -70,8 +70,9 @@ export default function Import (): React.ReactElement {
 
   return (
     <>
-      <HeaderWithSmallerMargin
+      <Header
         showBackArrow
+        smallMargin
         text={t<string>('Import account')}
       />
       <div>
@@ -111,10 +112,6 @@ export default function Import (): React.ReactElement {
     </>
   );
 }
-
-const HeaderWithSmallerMargin = styled(Header)`
-  margin-bottom: 15px;
-`;
 
 const SeedInput = styled(TextAreaWithLabel)`
   margin-bottom: 16px;

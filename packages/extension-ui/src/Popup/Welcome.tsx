@@ -36,11 +36,11 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
           </List>
         </Box>
         <p>{t<string>('... we are not in the information collection business (even anonymized).')}</p>
-        <VerticalSpace />
-        <ButtonArea>
-          <Button onClick={_onClick}>{t<string>('Understood, let me continue')}</Button>
-        </ButtonArea>
       </div>
+      <VerticalSpace />
+      <ButtonArea>
+        <Button onClick={_onClick}>{t<string>('Understood, let me continue')}</Button>
+      </ButtonArea>
     </>
   );
 };

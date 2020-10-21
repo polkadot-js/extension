@@ -8,7 +8,7 @@ import { AccountContext, ActionContext, Address, BackButton, ButtonArea, NextSte
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
 import { HeaderWithSteps, Name, Password } from '../../partials';
-import { SelectParent } from './SelectParent';
+import SelectParent from './SelectParent';
 
 interface Props {
   isLocked?: boolean;

@@ -1,6 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ThemeProps } from '../../types';
+
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { assert } from '@polkadot/util';
@@ -12,14 +14,15 @@ import { nextDerivationPath } from '../../util/nextDerivationPath';
 import AddressDropdown from './AddressDropdown';
 import DerivationPath from './DerivationPath';
 
-interface Props {
+interface Props extends ThemeProps {
+  className?: string;
   isLocked?: boolean;
   parentAddress: string;
   parentGenesis: string | null;
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
 }
 
-export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -84,58 +87,60 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
     setParentPassword('');
     setIsProperParentPassword(false);
 
-    // eslint-disable-next-line no-unused-expressions
     passwordInputRef.current?.querySelector('input')?.focus();
   }, [_onParentPasswordEnter]);
 
   return (
     <>
-      {!isLocked && (
-        <CheckboxWithSmallerMargins
-          checked={shouldAccountBeDerived}
-          label={t<string>('Derive new account from existing')}
-          onChange={setShouldAccountBeDerived}
-        />
-      )}
-      <DisableableArea isDisabled={!shouldAccountBeDerived}>
-        {isLocked
-          ? (
-            <Address
-              address={parentAddress}
-              genesisHash={parentGenesis}
-            />
-          )
-          : (
-            <Label label={t<string>('Choose Parent Account:')}>
-              <AddressDropdown
-                allAddresses={allAddresses}
-                onSelect={_onParentChange}
-                selectedAddress={parentAddress}
-                selectedGenesis={parentGenesis}
-              />
-            </Label>
-          )
-        }
-        <div ref={passwordInputRef}>
-          <InputWithLabel
-            data-export-password
-            isError={!isProperParentPassword}
-            isFocused
-            label={t<string>('enter the password for the account you want to derive from')}
-            onChange={_onParentPasswordEnter}
-            type='password'
-            value={parentPassword}
-          />
-        </div>
-        {isProperParentPassword && (
-          <DerivationPath
-            defaultPath={defaultPath}
-            onChange={setSuriPath}
-            parentAddress={parentAddress}
-            parentPassword={parentPassword}
+      <div className={className}>
+        {!isLocked && (
+          <Checkbox
+            checked={shouldAccountBeDerived}
+            className='smallerMargin'
+            label={t<string>('Derive new account from existing')}
+            onChange={setShouldAccountBeDerived}
           />
         )}
-      </DisableableArea>
+        <div className={`disableArea ${shouldAccountBeDerived ? '' : 'disabled'}`}>
+          {isLocked
+            ? (
+              <Address
+                address={parentAddress}
+                genesisHash={parentGenesis}
+              />
+            )
+            : (
+              <Label label={t<string>('Choose Parent Account:')}>
+                <AddressDropdown
+                  allAddresses={allAddresses}
+                  onSelect={_onParentChange}
+                  selectedAddress={parentAddress}
+                  selectedGenesis={parentGenesis}
+                />
+              </Label>
+            )
+          }
+          <div ref={passwordInputRef}>
+            <InputWithLabel
+              data-export-password
+              isError={!isProperParentPassword}
+              isFocused
+              label={t<string>('enter the password for the account you want to derive from')}
+              onChange={_onParentPasswordEnter}
+              type='password'
+              value={parentPassword}
+            />
+          </div>
+          {isProperParentPassword && (
+            <DerivationPath
+              defaultPath={defaultPath}
+              onChange={setSuriPath}
+              parentAddress={parentAddress}
+              parentPassword={parentPassword}
+            />
+          )}
+        </div>
+      </div>
       <VerticalSpace/>
       <ButtonArea>
         {shouldAccountBeDerived
@@ -163,12 +168,19 @@ export function SelectParent ({ isLocked, onDerivationConfirmed, parentAddress, 
   );
 }
 
-const CheckboxWithSmallerMargins = styled(Checkbox)`
-  margin-top: 0;
-  margin-bottom: 10px;
-`;
+export default styled(SelectParent)`
 
-const DisableableArea = styled.div<{ isDisabled: boolean }>`
-  opacity: ${({ isDisabled }): string => isDisabled ? '0.2' : '1'};
-  ${({ isDisabled }): string | false => isDisabled && 'pointer-events: none'};
+  .smallerMargin {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .disableArea {
+    opacity: 1;
+
+    .disabled {
+      opacity: 0.2;
+      pointer-events: none;
+    }
+  }
 `;

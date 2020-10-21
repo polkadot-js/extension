@@ -1,7 +1,7 @@
 {
   "name": "@polkadot/extension-inject",
   "description": "A generic injector (usable to any extension), that populates the base exposed interfaces to be used by dapps.",
-  "version": "0.35.0-beta.29",
+  "version": "0.35.0-beta.30",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {

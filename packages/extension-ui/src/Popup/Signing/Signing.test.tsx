@@ -5,7 +5,7 @@ import '../../../../../__mocks__/chrome';
 
 import { SigningRequest } from '@polkadot/extension-base/background/types';
 
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { EventEmitter } from 'events';
 import React, { useState } from 'react';
@@ -21,6 +21,7 @@ import Extrinsic from './Extrinsic';
 import Qr from './Qr';
 import Signing from '.';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
 describe.skip('Signing requests', () => {

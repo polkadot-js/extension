@@ -20,7 +20,7 @@ interface Props {
   signId: string;
 }
 
-const SignArea = ({ buttonText, className, error, isExternal, isFirst, setError, signId } : Props): JSX.Element => {
+function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId } : Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');

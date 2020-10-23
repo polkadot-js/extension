@@ -50,19 +50,17 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
         onChange={setValue}
         value={value}
       />
-      {Result.isError(validationResult) && <ErrorMessage>{validationResult.error.errorDescription}</ErrorMessage>}
+      {Result.isError(validationResult) && <span className='error'>{validationResult.error.errorDescription}</span>}
     </div>
   );
 }
 
-const ErrorMessage = styled.span`
-  display: block;
-  margin-top: -10px;
-  font-size: ${({ theme }: ThemeProps): string => theme.labelFontSize};
-  line-height: ${({ theme }: ThemeProps): string => theme.labelLineHeight};
-  color: ${({ theme }: ThemeProps): string => theme.errorColor};
-`;
-
-ErrorMessage.displayName = 'ErrorMessage';
-
-export default ValidatedInput;
+export default styled(ValidatedInput)(({ theme }: ThemeProps) => `
+  .error {
+    display: block;
+    margin-top: -10px;
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.errorColor};
+  }
+`);

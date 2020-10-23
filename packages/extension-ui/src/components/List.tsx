@@ -1,11 +1,24 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import React from 'react';
+
 import { ThemeProps } from '../types';
 
 import styled from 'styled-components';
 
-export default styled.ul(({ theme }: ThemeProps) => `
+interface Props extends ThemeProps {
+  className?: string;
+  children: React.ReactNode;
+}
+
+const List = ({ children, className }: Props) => (
+  <ul className={className}>
+    {children}
+  </ul>
+);
+
+export default styled(List)(({ theme }: ThemeProps) => `
   list-style: none;
   padding-inline-start: 10px;
   padding-inline-end: 10px;

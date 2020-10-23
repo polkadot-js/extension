@@ -1,5 +1,6 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+import { ThemeProps } from '../types';
 
 import React, { useCallback, useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
@@ -10,9 +11,11 @@ import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
 
-type Props = RouteComponentProps<{ address: string }>;
+interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
+  className?: string;
+}
 
-function Forget ({ match: { params: { address } } }: Props): React.ReactElement<Props> {
+function Forget ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
@@ -35,43 +38,49 @@ function Forget ({ match: { params: { address } } }: Props): React.ReactElement<
         showBackArrow
         text={t<string>('Forget account')}
       />
-      <div>
+      <div className={className}>
         <Address address={address}>
-          <MovedWarning isDanger>{t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}</MovedWarning>
-          <ActionArea>
+          <Warning
+            className='movedWarning'
+            isDanger
+          >
+            {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
+          </Warning>
+          <div className='actionArea'>
             <Button
               isDanger
               onClick={_onClick}
             >
               {t<string>('I want to forget this account')}
             </Button>
-            <CancelButton>
+            <ActionBar className='withMarginTop'>
               <ActionText
+                className='center'
                 onClick={_goHome}
                 text={t<string>('Cancel')}
               />
-            </CancelButton>
-          </ActionArea>
+            </ActionBar>
+          </div>
         </Address>
       </div>
     </>
   );
 }
 
-const MovedWarning = styled(Warning)`
-  margin-top: 8px;
-`;
+export default withRouter(styled(Forget)`
+  .actionArea {
+    padding: 10px 24px;
+  }
 
-const ActionArea = styled.div`
-  padding: 10px 24px;
-`;
-
-const CancelButton = styled(ActionBar)`
-  margin-top: 4px;
-
-  ${ActionText} {
+  .center {
     margin: auto;
   }
-`;
 
-export default withRouter(Forget);
+  .movedWarning {
+    margin-top: 8px;
+  }
+
+  .withMarginTop {
+    margin-top: 4px;
+  }
+`);

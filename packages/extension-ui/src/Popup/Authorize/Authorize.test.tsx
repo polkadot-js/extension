@@ -47,8 +47,9 @@ describe('Authorize', () => {
       { id: '2', request: { origin: 'abc' }, url: 'http://polkadot.pl' }
     ]);
 
-    expect(wrapper.find('AcceptButton').length).toBe(1);
+    expect(wrapper.find(Request).length).toBe(2);
     expect(wrapper.find(Icon).length).toBe(2);
     expect(wrapper.find(Request).at(1).find('.tab-info').text()).toBe('An application, self-identifying as abc is requesting access from http://polkadot.pl.');
+    expect(wrapper.find('button.acceptButton').length).toBe(1);
   });
 });

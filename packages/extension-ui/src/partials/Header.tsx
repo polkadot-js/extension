@@ -20,10 +20,11 @@ interface Props extends ThemeProps {
   showAdd?: boolean;
   showBackArrow?: boolean;
   showSettings?: boolean;
+  smallMargin?: boolean;
   text?: React.ReactNode;
 }
 
-function Header ({ children, className, showAdd, showBackArrow, showSettings, text }: Props): React.ReactElement<Props> {
+function Header ({ children, className = '', showAdd, showBackArrow, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
   const addRef = useRef(null);
@@ -48,7 +49,7 @@ function Header ({ children, className, showAdd, showBackArrow, showSettings, te
   );
 
   return (
-    <div className={className}>
+    <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
       <div className='container'>
         <div className='branding'>
           {showBackArrow
@@ -197,6 +198,9 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     &:visited {
       color: ${theme.labelColor};
     }
+  }
 
+  &.smallMargin {
+    margin-bottom: 15px;
   }
 `));

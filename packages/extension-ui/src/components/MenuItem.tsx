@@ -4,9 +4,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import Title from './Title';
+import { ThemeProps } from '../types';
 
-interface Props {
+interface Props extends ThemeProps {
   children: React.ReactNode;
   className?: string;
   noBorder?: boolean;
@@ -17,23 +17,27 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
   return (
     <div className={className}>
       {title && (
-        <Title className='itemTitle'>{title}</Title>
+        <div className='itemTitle'>{title}</div>
       )}
       {children}
     </div>
   );
 }
 
-export default styled(MenuItem)`
+export default styled(MenuItem)(({ theme }: ThemeProps) => `
   min-width: 13rem;
   padding: 0 16px;
   max-width: 100%;
 
   > .itemTitle {
-    margin: 0;
-  }
-
-  &+& {
-    margin-top: 16px;
-  }
-`;
+      margin: 0;
+      width: 100%;
+      font-weight: 800;
+      font-size: 10px;
+      line-height: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: ${theme.textColor};
+      opacity: 0.65;
+    }
+`);

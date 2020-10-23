@@ -30,6 +30,8 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
   useEffect(() => {
     if (!wasMounted) {
       setWasMounted(true);
+
+      return;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises

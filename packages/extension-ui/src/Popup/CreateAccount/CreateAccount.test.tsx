@@ -85,6 +85,7 @@ describe('Create Account', () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
       await act(flushAllPromises);
+      wrapper.update();
     });
 
     it('only account name input is visible at first', () => {

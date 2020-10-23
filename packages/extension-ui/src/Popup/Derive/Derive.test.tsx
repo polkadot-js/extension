@@ -6,7 +6,7 @@ import '../../../../../__mocks__/chrome';
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
@@ -17,6 +17,7 @@ import { flushAllPromises } from '../../testHelpers';
 import AddressDropdown from './AddressDropdown';
 import Derive from '.';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
 const accounts = [

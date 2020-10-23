@@ -3,7 +3,7 @@
 
 import '../../../../../__mocks__/chrome';
 
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { MemoryRouter } from 'react-router';
 import React from 'react';
@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 import { themes, Theme } from '../../components';
 import Account from './Account';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
 describe('Account component', () => {

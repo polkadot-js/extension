@@ -38,6 +38,8 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     [authId, onAction]
   );
 
+  console.log('isFirst', isFirst);
+
   return (
     <div className={className}>
       <div className='requestInfo'>
@@ -60,6 +62,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
         </div>
         {isFirst && (
           <>
+            {console.log('hoooo')}
             <Warning className='warningMargin'>{t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</Warning>
             <Button
               className='acceptButton'

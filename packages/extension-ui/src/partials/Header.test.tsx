@@ -3,7 +3,7 @@
 
 import '../../../../__mocks__/chrome';
 
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router';
@@ -13,6 +13,7 @@ import { themes } from '../components';
 import Header from './Header';
 import Settings from './MenuSettings';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
 describe('Header component', () => {

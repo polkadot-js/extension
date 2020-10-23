@@ -6,7 +6,7 @@ import '../../../../../__mocks__/chrome';
 import { AuthorizeRequest } from '@polkadot/extension-base/background/types';
 
 import { configure, mount, ReactWrapper } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
@@ -15,6 +15,7 @@ import { Header } from '../../partials';
 import Authorize from '.';
 import Request from './Request';
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
 describe('Authorize', () => {

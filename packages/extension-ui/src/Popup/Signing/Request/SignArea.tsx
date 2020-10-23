@@ -124,7 +124,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
       </ActionBar>
     </ButtonArea>
   );
-};
+}
 
 export default styled(SignArea)`
   flex-direction: column;

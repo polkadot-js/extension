@@ -198,25 +198,16 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={faCopy}
                 onClick={_onCopy}
                 size='sm'
-                title={t('copy')}
+                title={t('copy address')}
               />
             </CopyToClipboard>
-            {isHidden
-              ? <FontAwesomeIcon
-                className='hiddenIcon'
-                icon={faEyeSlash}
-                onClick={_toggleVisibility}
-                size='sm'
-                title={t('make account visible')}
-              />
-              : <FontAwesomeIcon
-                className='visibleIcon'
-                icon={faEye}
-                onClick={_toggleVisibility}
-                size='sm'
-                title={t('make account invisible')}
-              />
-            }
+            <FontAwesomeIcon
+              className={ isHidden ? 'hiddenIcon' : 'visibleIcon'}
+              icon={isHidden ? faEyeSlash : faEye}
+              onClick={_toggleVisibility}
+              size='sm'
+              title={t('account visibility')}
+            />
           </div>
         </div>
         {actions && (

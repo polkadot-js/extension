@@ -7,7 +7,7 @@ import { SettingsStruct } from '@polkadot/ui-settings/types';
 import { ThemeProps } from '../types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { faCopy, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
+import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -23,6 +23,7 @@ import useTranslation from '../hooks/useTranslation';
 import useToast from '../hooks/useToast';
 import Identicon from './Identicon';
 import Menu from './Menu';
+import { showAccount } from '../messaging';
 import Svg from './Svg';
 
 interface Props {
@@ -111,6 +112,13 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
+  const _toggleVisibility = useCallback(
+    (): void => {
+      address && showAccount(address, isHidden || false)
+        .catch(console.error);
+    },
+    [address, isHidden]
+  );
 
   const displayedName = (
     <>
@@ -190,15 +198,25 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={faCopy}
                 onClick={_onCopy}
                 size='sm'
+                title={t('copy')}
               />
             </CopyToClipboard>
-            {isHidden && (
-              <FontAwesomeIcon
+            {isHidden
+              ? <FontAwesomeIcon
                 className='hiddenIcon'
                 icon={faEyeSlash}
+                onClick={_toggleVisibility}
                 size='sm'
+                title={t('make account visible')}
               />
-            )}
+              : <FontAwesomeIcon
+                className='visibleIcon'
+                icon={faEye}
+                onClick={_toggleVisibility}
+                size='sm'
+                title={t('make account invisible')}
+              />
+            }
           </div>
         </div>
         {actions && (
@@ -268,10 +286,17 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       }
     }
 
-    .hiddenIcon {
+    .hiddenIcon, .visibleIcon {
       position: absolute;
       right: 2px;
       top: -18px;
+    }
+
+    .hiddenIcon {
+      color: ${theme.errorColor};
+      &:hover {
+        color: ${theme.accountDotsIconColor};
+      }
     }
   }
 

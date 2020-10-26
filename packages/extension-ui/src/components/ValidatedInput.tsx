@@ -6,6 +6,7 @@ import { ThemeProps } from '../types';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
+import useIsMounted from '../hooks/useIsMounted';
 import { Result, Validator } from '../util/validators';
 
 interface BasicProps {
@@ -24,12 +25,13 @@ type Props<T extends BasicProps> = T & {
 
 function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState(defaultValue || '');
-  const [wasMounted, setWasMounted] = useState(false);
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
+  const isMounted = useIsMounted();
 
   useEffect(() => {
-    if (!wasMounted) {
-      setWasMounted(true);
+    // Do not show any error on first mount
+    if (!isMounted) {
+      return;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises

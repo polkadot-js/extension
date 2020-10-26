@@ -12,6 +12,6 @@
     "@polkadot/phishing": "^0.1.10"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.59.8"
+    "@polkadot/dev": "^0.59.9"
   }
 }

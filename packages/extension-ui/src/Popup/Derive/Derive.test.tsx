@@ -127,7 +127,7 @@ describe('Derive', () => {
       expect(wrapper.find('.error')).toHaveLength(1);
     });
 
-    it('The error disappears when typing a new password', async () => {
+    it('The error disappears when typing a new password and "Create derived account" is enabled', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
       await act(flushAllPromises);
@@ -135,6 +135,9 @@ describe('Derive', () => {
 
       await type(wrapper.find('input[type="password"]'), 'new_attempt');
 
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(false);
       expect(wrapper.find('.error')).toHaveLength(0);
     });
 

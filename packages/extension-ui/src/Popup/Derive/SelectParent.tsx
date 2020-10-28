@@ -76,6 +76,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
             setSuriPath(null);
           }
         } else {
+          setIsBusy(false);
           setIsProperParentPassword(false);
         }
       }
@@ -130,6 +131,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
               type='password'
               value={parentPassword}
             />
+            {!!parentPassword && !isProperParentPassword && <div className='error'>{t('Wrong password')}</div>}
           </div>
           {isProperParentPassword && (
             <DerivationPath
@@ -168,7 +170,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   );
 }
 
-export default styled(SelectParent)`
+export default styled(SelectParent)(({ theme }: ThemeProps) => `
 
   .smallerMargin {
     margin-top: 0;
@@ -183,4 +185,12 @@ export default styled(SelectParent)`
       pointer-events: none;
     }
   }
-`;
+
+  .error {
+    display: block;
+    margin-top: -10px;
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.errorColor};
+  }
+`);

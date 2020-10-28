@@ -105,18 +105,51 @@ describe('Derive', () => {
       expect(wrapper.exists('[data-button-action="create root account"]')).toBe(false);
     });
 
-    it('"Create derived account" is disabled when password is incorrect', () => {
+    it('No error is visible when first loading the page', () => {
+      expect(wrapper.find('.error')).toHaveLength(0);
+    });
+
+    it('"Create derived account" is disabled when password is not set', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(true);
     });
 
-    it('"Create derived account" is enabled when password is correct', async () => {
-      await type(wrapper.find('input[type="password"]'), 'pass');
+    it('"Create derived account" is disabled when password is incorrect', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).not.toBe(true);
+    });
+
+    it('An error is visible when password is incorrect', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
+      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(wrapper.find('.error')).toHaveLength(1);
+    });
+
+    it('The error disappears when typing a new password', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
+      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      await type(wrapper.find('input[type="password"]'), 'new_attempt');
+
+      expect(wrapper.find('.error')).toHaveLength(0);
+    });
+
+    it('"Create derived account" is enabled when password is set', async () => {
+      await type(wrapper.find('input[type="password"]'), 'pass');
+
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(false);
+      expect(wrapper.find('.error')).toHaveLength(0);
     });
 
     it('"Create derived account" is disabled when suri is incorrect', async () => {

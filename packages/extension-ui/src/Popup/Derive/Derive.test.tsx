@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import '../../../../../__mocks__/chrome';
+import { ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
@@ -16,7 +17,6 @@ import { buildHierarchy } from '../../util/buildHierarchy';
 import { flushAllPromises } from '../../testHelpers';
 import AddressDropdown from './AddressDropdown';
 import Derive from '.';
-import { ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
@@ -83,7 +83,6 @@ describe('Derive', () => {
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateDerivationPath').mockImplementation(async (_, path) => {
       if (path === '//') {
-        console.log('boom');
         throw new Error('wrong suri');
       }
 

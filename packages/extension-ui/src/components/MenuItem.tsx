@@ -32,7 +32,6 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .itemTitle {
       margin: 0;
       width: 100%;
-      font-weight: 400;
       font-size: 10px;
       line-height: 14px;
       letter-spacing: 0.04em;

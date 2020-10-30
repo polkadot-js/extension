@@ -28,7 +28,6 @@ export default styled(Label)(({ theme }: ThemeProps) => `
     font-size: 10px;
     line-height: 14px;
     letter-spacing: 0.04em;
-    font-weight: 400;
     opacity: 0.65;
     margin-bottom: 12px;
     text-transform: uppercase;

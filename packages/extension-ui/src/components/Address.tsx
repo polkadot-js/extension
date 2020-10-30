@@ -305,7 +305,6 @@ export default styled(Address)(({ theme }: ThemeProps) => `
 
   .name {
     font-size: 16px;
-    font-weight: 400;
     line-height: 22px;
     margin: 2px 0;
     overflow: hidden;

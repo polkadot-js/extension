@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Nunito Sans';
   font-style: normal;
-  font-weight: 200;
+  font-weight: 400;
   src: url('./NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot'); /* IE9 Compat Modes */
   src: local('Nunito Sans Regular'), local('NunitoSans-Regular'),
        url('./NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */

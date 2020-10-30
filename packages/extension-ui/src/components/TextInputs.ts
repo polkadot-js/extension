@@ -19,7 +19,6 @@ const TextInput = css(({ theme, withError }: Props) => `
   display: block;
   font-family: ${theme.fontFamily};
   font-size: ${theme.fontSize};
-  font-weight: 600;
   height: 40px;
   outline: none;
   padding: 0.5rem 0.75rem;

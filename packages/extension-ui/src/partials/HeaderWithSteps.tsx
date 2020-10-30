@@ -46,7 +46,7 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
     color: ${theme.primaryColor};
-    font-weight: 600;
+    font-weight: 400;
   }
 
   .steps {
@@ -63,6 +63,6 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
     color: ${theme.textColor};
-    font-weight: 600;
+    font-weight: 400;
   }
 `));

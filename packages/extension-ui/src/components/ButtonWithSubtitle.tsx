@@ -30,14 +30,14 @@ const StyledButton = styled(Button)`
 
   p {
     margin: 0;
-    font-weight: 800;
+    font-weight: 400;
     font-size: 15px;
     line-height: 20px;
   }
 
   span {
     display: block;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 12px;
     line-height: 16px;
   }

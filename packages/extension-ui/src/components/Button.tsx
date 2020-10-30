@@ -55,7 +55,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   border-radius: ${theme.borderRadius};
   color: ${theme.buttonTextColor};
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 400;
   line-height: 20px;
   padding: 0 1rem;
   position: relative;

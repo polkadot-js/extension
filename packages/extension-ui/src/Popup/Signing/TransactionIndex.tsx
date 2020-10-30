@@ -70,7 +70,6 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
     color: ${theme.primaryColor};
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
-    font-weight: 600;
     margin-left: 10px;
   }
 
@@ -78,6 +77,5 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
     color: ${theme.textColor};
-    font-weight: 600;
   }
 `);

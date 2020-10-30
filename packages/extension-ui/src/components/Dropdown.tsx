@@ -75,7 +75,6 @@ export default React.memo(styled(Dropdown)(({ isError, theme }: Props) => `
     display: block;
     font-family: ${theme.fontFamily};
     font-size: ${theme.fontSize};
-    font-weight: 600;
     padding: 0.5rem 0.75rem;
     width: 100%;
     cursor: pointer;

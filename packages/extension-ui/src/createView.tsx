@@ -5,7 +5,7 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
-import { Fonts, View } from './components';
+import { View } from './components';
 
 import './i18n/i18n';
 
@@ -18,7 +18,6 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
 
   ReactDOM.render(
     <Suspense fallback='...'>
-      <Fonts />
       <View>
         <HashRouter>
           <Entry />

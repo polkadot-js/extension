@@ -46,10 +46,6 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
     margin: 8px;
   }
 
-  span {
-    font-weight: 600;
-  }
-
   .checkbox {
     opacity: 0;
     width: 0;

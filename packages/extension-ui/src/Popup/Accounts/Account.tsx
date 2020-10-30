@@ -161,7 +161,6 @@ export default styled(Account)`
   .menuItem {
     border-radius: 8px;
     display: block;
-    font-weight: 600;
     font-size: 15px;
     line-height: 20px;
     margin: 0;

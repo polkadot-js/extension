@@ -97,7 +97,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider />
       <MenuItem
         className='setting'
-        title={t<string>('Display address format For')}
+        title={t<string>('Display address format for')}
       >
         <Dropdown
           className='dropdown'

@@ -22,19 +22,13 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       <Header text={t<string>('Phishing detected')} />
       <div className={className}>
         <p>
-          {t<string>(`You have been redirected because the Polkadot{.js} extension believes that this website could compromise the
-        security of your accounts.`)}
+          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts.')}
         </p>
         <p>
-          {t<string>(`
-          The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.
-      `)}
+          {t<string>('The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.')}
         </p>
         <p>
-          {t<string>(`
-          This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list.
-          It might be incomplete or inaccurate.
-      `)}
+          {t<string>('This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list. \n It might be incomplete or inaccurate.')}
         </p>
         <p>
           <Trans i18nKey='phishing.incorrect'>

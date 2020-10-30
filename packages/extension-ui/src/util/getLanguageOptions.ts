@@ -19,6 +19,10 @@ export default function getLanguageOptions (): Option[] {
     {
       text: '汉语',
       value: 'zh'
+    },
+    {
+      text: 'Français',
+      value: 'fr'
     }
   ];
 }

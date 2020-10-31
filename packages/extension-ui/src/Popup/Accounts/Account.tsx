@@ -7,9 +7,9 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import genesisOptions from '@polkadot/extension-chains/genesisHashes';
 
-import { ActionContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components';
+import { ActionContext, Address, Dropdown, Link, MenuDivider } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { editAccount, showAccount, tieAccount } from '../../messaging';
+import { editAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
 
 interface Props extends AccountJson {
@@ -54,14 +54,6 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
     [editedName, address, _toggleEdit, onAction]
   );
 
-  const _toggleVisibility = useCallback(
-    (): void => {
-      showAccount(address, isHidden || false)
-        .catch(console.error);
-    },
-    [address, isHidden]
-  );
-
   const _actions = useMemo(() => (
     <>
       <Link
@@ -97,14 +89,6 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       </Link>
       <MenuDivider />
       <div className='menuItem'>
-        <Checkbox
-          checked={!isHidden}
-          className='inputItem'
-          label={t<string>('Visible (always inject)')}
-          onClick={_toggleVisibility}
-        />
-      </div>
-      <div className='menuItem'>
         <Dropdown
           className='inputItem'
           label=''
@@ -114,7 +98,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         />
       </div>
     </>
-  ), [_onChangeGenesis, _toggleEdit, _toggleVisibility, address, genesisHash, isExternal, isHidden, t]);
+  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, t]);
 
   return (
     <div className={className}>

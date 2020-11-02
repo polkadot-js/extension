@@ -17,7 +17,8 @@
   "content_scripts": [{
     "js": ["content.js"],
     "matches": ["http://*/*", "https://*/*"],
-    "run_at": "document_start"
+    "run_at": "document_start",
+    "all_frames": true
   }],
   "icons": {
     "16": "images/icon-16.png",

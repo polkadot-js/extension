@@ -9,6 +9,9 @@ jobs:
     name: ${{ matrix.step }}
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12
     - uses: actions/checkout@v2
     - name: ${{ matrix.step }}
       run: |

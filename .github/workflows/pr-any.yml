@@ -12,5 +12,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: ${{ matrix.step }}
       run: |
+        nvm install
         yarn install --immutable | grep -v 'YN0013'
         yarn ${{ matrix.step }}

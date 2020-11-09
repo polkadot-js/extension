@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
-    "@polkadot/dev": "^0.59.20",
+    "@polkadot/dev": "^0.59.21",
     "@types/jest": "^26.0.15",
     "babel-loader": "^8.1.0",
     "browser-resolve": "^2.0.0",

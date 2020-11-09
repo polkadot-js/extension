@@ -1982,9 +1982,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.59.20":
-  version: 0.59.20
-  resolution: "@polkadot/dev@npm:0.59.20"
+"@polkadot/dev@npm:^0.59.21":
+  version: 0.59.21
+  resolution: "@polkadot/dev@npm:0.59.21"
   dependencies:
     "@babel/cli": ^7.12.1
     "@babel/core": ^7.12.3
@@ -2070,7 +2070,7 @@ __metadata:
     polkadot-exec-typedoc: scripts/polkadot-exec-typedoc.js
     polkadot-exec-vuepress: scripts/polkadot-exec-vuepress.js
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.js
-  checksum: 4d589615cc8bc2d1b302113d734e4f0a22ae8fb86f202648cb4b4a3780022fd7dab1d04ce85c5e8040849878c0372fbf19578ed6cf5cf95589054bda475fbc9b
+  checksum: c853d9077c256e68074fc2c08ff8e7e140f01e547e71a8021c71373c3b0fedf7a0e013e9e91eef463f3be60031ca5a1e5c7b490740d5eba5cc5e96b337369a2f
   languageName: node
   linkType: hard
 
@@ -2168,11 +2168,11 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.12.1
-    "@polkadot/dev": ^0.59.20
+    "@polkadot/dev": ^0.59.21
     "@polkadot/extension-base": ^0.35.0-beta.42
     "@polkadot/extension-inject": ^0.35.0-beta.42
     "@polkadot/extension-ui": ^0.35.0-beta.42
-    "@polkadot/phishing": ^0.1.12
+    "@polkadot/phishing": ^0.1.14
   languageName: unknown
   linkType: soft
 
@@ -2213,13 +2213,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.1.12":
-  version: 0.1.12
-  resolution: "@polkadot/phishing@npm:0.1.12"
+"@polkadot/phishing@npm:^0.1.14":
+  version: 0.1.14
+  resolution: "@polkadot/phishing@npm:0.1.14"
   dependencies:
     "@babel/runtime": ^7.12.1
-    "@polkadot/x-fetch": ^4.0.0-3
-  checksum: d94570e1ff08ba7b612336264374067ffe676cdbd4e60ba0ef7a482aab923c324c6255eebec8490fcda78b3e03d83d8049095aad432f6ca0c5df3585823f1eab
+    "@polkadot/x-fetch": ^4.0.1
+  checksum: de3fd192fe4c6925f2e83af65f4505f4eb47be2fe63379bd91100d46c28b71c562eeac93884b11f1dd42de02798250385f4be2ea188e9bdee8eac647cde15c04
   languageName: node
   linkType: hard
 
@@ -2433,7 +2433,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/x-fetch@npm:^4.0.0-3, @polkadot/x-fetch@npm:^4.0.1":
+"@polkadot/x-fetch@npm:^4.0.1":
   version: 4.0.1
   resolution: "@polkadot/x-fetch@npm:4.0.1"
   dependencies:
@@ -13918,7 +13918,7 @@ fsevents@^1.2.7:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.12.3
-    "@polkadot/dev": ^0.59.20
+    "@polkadot/dev": ^0.59.21
     "@types/jest": ^26.0.15
     babel-loader: ^8.1.0
     browser-resolve: ^2.0.0

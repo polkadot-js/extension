@@ -9,9 +9,9 @@
     "@polkadot/extension-base": "^0.35.0-beta.44",
     "@polkadot/extension-inject": "^0.35.0-beta.44",
     "@polkadot/extension-ui": "^0.35.0-beta.44",
-    "@polkadot/phishing": "^0.1.15"
+    "@polkadot/phishing": "^0.1.16"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.59.21"
+    "@polkadot/dev": "^0.59.22"
   }
 }

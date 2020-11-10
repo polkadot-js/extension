@@ -35,6 +35,11 @@ function createWebpack ({ alias = {}, context }) {
     module: {
       rules: [
         {
+          include: /node_modules/,
+          test: /\.mjs$/,
+          type: 'javascript/auto'
+        },
+        {
           exclude: /(node_modules)/,
           test: /\.(js|ts|tsx)$/,
           use: [

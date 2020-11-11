@@ -5,7 +5,7 @@ import { Message } from '@polkadot/extension-base/types';
 
 import { enable, handleResponse, redirectPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
-import retrieveCheckDeny from '@polkadot/phishing';
+import { checkIfDenied } from '@polkadot/phishing';
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -24,7 +24,7 @@ window.addEventListener('message', ({ data, source }: Message): void => {
 
 const currentUrl = window.location.host;
 
-retrieveCheckDeny(currentUrl)
+checkIfDenied(currentUrl)
   .then((isOnDeny) => {
     if (isOnDeny) {
       console.log('Phishing detected, redirecting to phishing info landing page');

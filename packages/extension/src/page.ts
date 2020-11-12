@@ -32,8 +32,10 @@ checkIfDenied(currentUrl)
     } else {
       inject();
     }
-  }).catch((e) => {
-    console.error(e);
+  })
+  .catch((error): void => {
+    console.warn(`Unable to retrieve phishing list: ${(error as Error).message}`);
+    inject();
   });
 
 function inject () {

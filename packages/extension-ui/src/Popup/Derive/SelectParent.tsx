@@ -73,6 +73,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
             assert(account, 'Unable to derive');
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {
+            setIsBusy(false);
             setSuriPath(null);
           }
         } else {
@@ -134,12 +135,16 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
             {!!parentPassword && !isProperParentPassword && <div className='error'>{t('Wrong password')}</div>}
           </div>
           {isProperParentPassword && (
-            <DerivationPath
-              defaultPath={defaultPath}
-              onChange={setSuriPath}
-              parentAddress={parentAddress}
-              parentPassword={parentPassword}
-            />
+            <>
+              <DerivationPath
+                defaultPath={defaultPath}
+                isError={!suriPath}
+                onChange={setSuriPath}
+                parentAddress={parentAddress}
+                parentPassword={parentPassword}
+              />
+              {!suriPath && <div className='error'>{t('Incorrect derivation path')}</div>}
+            </>
           )}
         </div>
       </div>

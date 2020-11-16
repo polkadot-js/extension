@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import '../../../../../__mocks__/chrome';
+import { ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router';
@@ -79,6 +80,14 @@ describe('Derive', () => {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === 'pass');
+    // eslint-disable-next-line @typescript-eslint/require-await
+    jest.spyOn(messaging, 'validateDerivationPath').mockImplementation(async (_, path) => {
+      if (path === '//') {
+        throw new Error('wrong suri');
+      }
+
+      return {} as ResponseDeriveValidate;
+    });
 
     it('"Derive" checkbox is selected by default', () => {
       const checkbox = wrapper.find('input[type="checkbox"]');
@@ -150,13 +159,31 @@ describe('Derive', () => {
       expect(wrapper.find('.error')).toHaveLength(0);
     });
 
-    it('"Create derived account" is disabled when suri is incorrect', async () => {
+    it('An error is visible and "Create derived account" is disabled when suri is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), 'pass');
       await type(wrapper.find('[data-input-suri] input'), '//');
+      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
-      expect(button.prop('disabled')).not.toBe(true);
+      expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('.error')).toHaveLength(1);
+    });
+
+    it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
+      await type(wrapper.find('input[type="password"]'), 'pass');
+      await type(wrapper.find('[data-input-suri] input'), '//');
+      wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+      await type(wrapper.find('[data-input-suri] input'), 'new');
+
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(false);
+      expect(wrapper.find('.error')).toHaveLength(0);
     });
 
     it('takes selected address from URL as parent account', () => {

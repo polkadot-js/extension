@@ -14,7 +14,7 @@
   "Attach external QR-signer account": "",
   "External QR accounts and Access": "",
   "Allow Camera Access": "",
-  "Display address format For": "",
+  "Display address format for": "",
   "Language": "",
   "Open extension in new window": "",
   "Account name is too short": "",
@@ -104,9 +104,11 @@
   "Back to home": "",
   "external account": "",
   "Phishing detected": "",
-  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the\n        security of your accounts.": "",
-  "\n          The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.\n      ": "",
-  "\n          This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list.\n          It might be incomplete or inaccurate.\n      ": "",
   "Remember my password for the next {{expiration}} minutes": "",
-  "Extend the period without password by {{expiration}} minutes": ""
+  "Extend the period without password by {{expiration}} minutes": "",
+  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts.": "",
+  "The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.": "",
+  "This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list. \n It might be incomplete or inaccurate.": "",
+  "copy address": "",
+  "account visibility": ""
 }

@@ -4,7 +4,8 @@
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { Chain } from './types';
 
-import { Metadata, TypeRegistry } from '@polkadot/types';
+import { Metadata } from '@polkadot/metadata';
+import { TypeRegistry } from '@polkadot/types';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`

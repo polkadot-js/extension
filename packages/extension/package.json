@@ -1,17 +1,17 @@
 {
   "name": "@polkadot/extension",
   "description": "A sample signer extension for the @polkadot/api",
-  "version": "0.35.0-beta.37",
+  "version": "0.35.0-beta.48",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
     "@babel/runtime": "^7.12.1",
-    "@polkadot/extension-base": "^0.35.0-beta.37",
-    "@polkadot/extension-inject": "^0.35.0-beta.37",
-    "@polkadot/extension-ui": "^0.35.0-beta.37",
-    "@polkadot/phishing": "^0.1.10"
+    "@polkadot/extension-base": "^0.35.0-beta.48",
+    "@polkadot/extension-inject": "^0.35.0-beta.48",
+    "@polkadot/extension-ui": "^0.35.0-beta.48",
+    "@polkadot/phishing": "^0.2.1"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.59.9"
+    "@polkadot/dev": "^0.60.1"
   }
 }

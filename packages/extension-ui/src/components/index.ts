@@ -12,7 +12,6 @@ export { default as ButtonWithSubtitle } from './ButtonWithSubtitle';
 export { default as Checkbox } from './Checkbox';
 export { default as Dropdown } from './Dropdown';
 export { default as ErrorBoundary } from './ErrorBoundary';
-export { default as Fonts } from './Fonts';
 export { default as Icon } from './Icon';
 export { default as Identicon } from './Identicon';
 export { default as InputWithLabel } from './InputWithLabel';

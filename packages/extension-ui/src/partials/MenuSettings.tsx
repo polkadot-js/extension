@@ -97,7 +97,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider />
       <MenuItem
         className='setting'
-        title={t<string>('Display address format For')}
+        title={t<string>('Display address format for')}
       >
         <Dropdown
           className='dropdown'
@@ -146,7 +146,6 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
     span {
       color: ${theme.textColor};
       font-size: ${theme.fontSize};
-      font-weight: 600;
       line-height: ${theme.lineHeight};
       text-decoration: none;
     }
@@ -164,7 +163,6 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       color: ${theme.textColor};
       line-height: 20px;
       font-size: 15px;
-      font-weight: 600;
       margin-bottom: 0;
 
       label {

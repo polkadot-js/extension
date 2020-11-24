@@ -115,7 +115,7 @@ describe('Derive', () => {
     });
 
     it('No error is visible when first loading the page', () => {
-      expect(wrapper.find('.error')).toHaveLength(0);
+      expect(wrapper.find('Warning')).toHaveLength(0);
     });
 
     it('"Create derived account" is disabled when password is not set', () => {
@@ -133,7 +133,8 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(true);
-      expect(wrapper.find('.error')).toHaveLength(1);
+      expect(wrapper.find('.warning-message')).toHaveLength(1);
+      expect(wrapper.find('.warning-message').first().text()).toEqual('Wrong password');
     });
 
     it('The error disappears when typing a new password and "Create derived account" is enabled', async () => {
@@ -147,7 +148,7 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('.error')).toHaveLength(0);
+      expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
     it('"Create derived account" is enabled when password is set', async () => {
@@ -156,7 +157,7 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('.error')).toHaveLength(0);
+      expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
     it('An error is visible and "Create derived account" is disabled when suri is incorrect', async () => {
@@ -169,7 +170,8 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(true);
-      expect(wrapper.find('.error')).toHaveLength(1);
+      expect(wrapper.find('.warning-message')).toHaveLength(1);
+      expect(wrapper.find('.warning-message').first().text()).toEqual('Incorrect derivation path');
     });
 
     it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
@@ -183,7 +185,7 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(false);
-      expect(wrapper.find('.error')).toHaveLength(0);
+      expect(wrapper.find('Warning')).toHaveLength(0);
     });
 
     it('takes selected address from URL as parent account', () => {

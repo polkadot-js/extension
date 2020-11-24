@@ -23,7 +23,7 @@ function Warning ({ children, className = '', isBelowInput, isDanger }: Props): 
         className='warningImage'
         icon={faExclamationTriangle}
       />
-      <div className='message'>{children}</div>
+      <div className='warning-message'>{children}</div>
     </div>
   );
 }
@@ -50,7 +50,7 @@ export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) =>
     border-left-color: ${theme.buttonBackgroundDanger};
   }
 
-  .message {
+  .warning-message {
     display: flex;
     align-items: center;
   }

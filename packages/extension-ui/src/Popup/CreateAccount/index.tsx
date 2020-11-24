@@ -52,10 +52,7 @@ export default function CreateAccount (): React.ReactElement {
       />
       <Loading>
         <div>
-          <Address
-            address={account?.address}
-            name={name}
-          />
+          <Address address={account?.address} />
         </div>
         {account && (
           step === 1

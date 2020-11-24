@@ -150,8 +150,14 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
                 parentAddress={parentAddress}
                 parentPassword={parentPassword}
               />
-              {!suriPath && <Warning isBelowInput
-                isDanger>{t('Incorrect derivation path')}</Warning>}
+              {!suriPath && (
+                <Warning
+                  isBelowInput
+                  isDanger
+                >
+                  {t('Incorrect derivation path')}
+                </Warning>
+              )}
             </>
           )}
         </div>

@@ -43,11 +43,10 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
 
   const _saveChanges = useCallback(
     (): void => {
-      if (editedName && editedName !== name) {
+      editedName &&
         editAccount(address, editedName)
           .then(() => onAction())
           .catch(console.error);
-      }
 
       _toggleEdit();
     },

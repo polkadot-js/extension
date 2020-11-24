@@ -28,11 +28,19 @@ interface Props {
 function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
   const [isCapsLock, setIsCapsLock] = useState(false);
 
-  const _checkEnter = useCallback(
+  const _checkKey = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
       onEnter && event.key === 'Enter' && onEnter();
+
+      if (type === 'password') {
+        if (event.getModifierState('CapsLock')) {
+          setIsCapsLock(true);
+        } else {
+          setIsCapsLock(false);
+        }
+      }
     },
-    [onEnter]
+    [onEnter, type]
   );
 
   const _onChange = useCallback(
@@ -40,19 +48,6 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
       onChange && onChange(value);
     },
     [onChange]
-  );
-
-  const onKeyDown = useCallback(
-    (keyEvent: React.KeyboardEvent<HTMLInputElement>) => {
-      if (type === 'password') {
-        if (keyEvent.getModifierState('CapsLock')) {
-          setIsCapsLock(true);
-        } else {
-          setIsCapsLock(false);
-        }
-      }
-    },
-    [type]
   );
 
   return (
@@ -68,8 +63,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         disabled={disabled}
         onBlur={onBlur}
         onChange={_onChange}
-        onKeyDown={onKeyDown}
-        onKeyPress={_checkEnter}
+        onKeyPress={_checkKey}
         placeholder={placeholder}
         readOnly={isReadOnly}
         spellCheck={false}

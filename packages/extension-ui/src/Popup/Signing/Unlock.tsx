@@ -45,7 +45,9 @@ function Unlock ({ className, error, isBusy, onSign, password, setError, setPass
       {error && (
         <Warning
           isBelowInput
-          isDanger>{error}
+          isDanger
+        >
+          {error}
         </Warning>
       )}
     </div>

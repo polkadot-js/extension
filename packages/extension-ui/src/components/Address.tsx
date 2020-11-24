@@ -203,7 +203,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             </CopyToClipboard>
             {actions && (
               <FontAwesomeIcon
-                className={ isHidden ? 'hiddenIcon' : 'visibleIcon'}
+                className={isHidden ? 'hiddenIcon' : 'visibleIcon'}
                 icon={isHidden ? faEyeSlash : faEye}
                 onClick={_toggleVisibility}
                 size='sm'

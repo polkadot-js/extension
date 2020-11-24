@@ -110,5 +110,7 @@
   "The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.": "",
   "This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list. \n It might be incomplete or inaccurate.": "",
   "copy address": "",
-  "account visibility": ""
+  "account visibility": "",
+  "Wrong password": "",
+  "Incorrect derivation path": ""
 }

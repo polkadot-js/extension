@@ -63,7 +63,7 @@ const WINDOW_OPTS = {
   left: 150,
   top: 150,
   type: 'popup',
-  url: chrome.extension.getURL('index.html'),
+  url: chrome.extension.getURL('notification.html'),
   width: 560
 };
 

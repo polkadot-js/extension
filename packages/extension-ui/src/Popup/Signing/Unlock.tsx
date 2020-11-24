@@ -4,9 +4,8 @@
 import { ThemeProps } from '@polkadot/extension-ui/types';
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
 
-import { InputWithLabel } from '../../components';
+import { InputWithLabel, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
@@ -43,15 +42,14 @@ function Unlock ({ className, error, isBusy, onSign, password, setError, setPass
         value={password}
         withoutMargin={true}
       />
-      {error && <div className='error'>{error}</div>}
+      {error && (
+        <Warning
+          isBelowInput
+          isDanger>{error}
+        </Warning>
+      )}
     </div>
   );
 }
 
-export default React.memo(styled(Unlock)(({ theme }: ThemeProps) => `
-  .error {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.errorColor};
-  }
-`));
+export default React.memo(Unlock);

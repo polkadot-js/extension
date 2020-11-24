@@ -64,10 +64,7 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
       />
       <div className={className}>
         <Address address={address}>
-          <Warning
-            className='movedWarning'
-            isDanger
-          >
+          <Warning className='movedWarning'>
             {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>
           <div className='actionArea'>

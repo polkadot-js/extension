@@ -11,9 +11,9 @@ interface Props extends ThemeProps {
 
 const TextInput = css(({ theme, withError }: Props) => `
   background: ${theme.inputBackground};
-  border-color: ${withError ? theme.errorBorderColor : theme.inputBorderColor};
   border-radius: ${theme.borderRadius};
   border: 1px solid ${theme.inputBorderColor};
+  border-color: ${withError ? theme.errorBorderColor : theme.inputBorderColor};
   box-sizing: border-box;
   color: ${withError ? theme.errorColor : theme.textColor};
   display: block;

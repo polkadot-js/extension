@@ -60,7 +60,9 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
         </div>
         {isFirst && (
           <>
-            <Warning className='warningMargin'>{t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}</Warning>
+            <Warning className='warningMargin'>
+              {t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}
+            </Warning>
             <Button
               className='acceptButton'
               onClick={_onApprove}

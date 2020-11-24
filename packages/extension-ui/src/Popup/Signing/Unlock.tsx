@@ -1,14 +1,12 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps } from '@polkadot/extension-ui/types';
-
 import React, { useCallback } from 'react';
 
 import { InputWithLabel, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   error?: string | null;
   isBusy: boolean;

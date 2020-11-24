@@ -73,9 +73,11 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
             assert(account, 'Unable to derive');
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {
+            setIsBusy(false);
             setSuriPath(null);
           }
         } else {
+          setIsBusy(false);
           setIsProperParentPassword(false);
         }
       }
@@ -130,14 +132,19 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
               type='password'
               value={parentPassword}
             />
+            {!!parentPassword && !isProperParentPassword && <div className='error'>{t('Wrong password')}</div>}
           </div>
           {isProperParentPassword && (
-            <DerivationPath
-              defaultPath={defaultPath}
-              onChange={setSuriPath}
-              parentAddress={parentAddress}
-              parentPassword={parentPassword}
-            />
+            <>
+              <DerivationPath
+                defaultPath={defaultPath}
+                isError={!suriPath}
+                onChange={setSuriPath}
+                parentAddress={parentAddress}
+                parentPassword={parentPassword}
+              />
+              {!suriPath && <div className='error'>{t('Incorrect derivation path')}</div>}
+            </>
           )}
         </div>
       </div>
@@ -168,7 +175,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   );
 }
 
-export default styled(SelectParent)`
+export default styled(SelectParent)(({ theme }: ThemeProps) => `
 
   .smallerMargin {
     margin-top: 0;
@@ -183,4 +190,12 @@ export default styled(SelectParent)`
       pointer-events: none;
     }
   }
-`;
+
+  .error {
+    display: block;
+    margin-top: -10px;
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+    color: ${theme.errorColor};
+  }
+`);

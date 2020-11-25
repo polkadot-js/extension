@@ -71,7 +71,9 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
         </tr>
       </Table>
       <div className='requestInfo'>
-        <Warning className='requestWarning'>{t<string>('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}</Warning>
+        <Warning className='requestWarning'>
+          {t<string>('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}
+        </Warning>
         <Button
           className='btnAccept'
           onClick={_onApprove}

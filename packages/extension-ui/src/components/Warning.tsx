@@ -12,30 +12,48 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 interface Props extends ThemeProps {
   children: React.ReactNode;
   className?: string;
+  isBelowInput?: boolean;
   isDanger?: boolean;
 }
 
-function Warning ({ children, className }: Props): React.ReactElement<Props> {
+function Warning ({ children, className = '', isBelowInput, isDanger }: Props): React.ReactElement<Props> {
   return (
-    <div className={className}>
-      <div>
-        <FontAwesomeIcon
-          className='warningImage'
-          icon={faExclamationTriangle}
-        />
-      </div>
-      <div>{children}</div>
+    <div className={`${className} ${isDanger ? 'danger' : ''} ${isBelowInput ? 'belowInput' : ''}`}>
+      <FontAwesomeIcon
+        className='warningImage'
+        icon={faExclamationTriangle}
+      />
+      <div className='warning-message'>{children}</div>
     </div>
   );
 }
 
-export default React.memo(styled(Warning)(({ isDanger, theme }: Props) => `
+export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) => `
   display: flex;
   flex-direction: row;
-  padding-left: ${isDanger ? '18px' : ''};
+  padding-left: 18px;
   color: ${theme.subTextColor};
   margin-right: 20px;
-  border-left: ${isDanger ? `0.25rem solid ${theme.buttonBackgroundDanger}` : ''};
+  margin-top: 6px;
+  border-left: ${`0.25rem solid ${theme.iconWarningColor}`};
+
+  &.belowInput {
+    font-size: ${theme.labelFontSize};
+    line-height: ${theme.labelLineHeight};
+
+    &.danger {
+      margin-top: -10px;
+    }
+  }
+
+  &.danger {
+    border-left-color: ${theme.buttonBackgroundDanger};
+  }
+
+  .warning-message {
+    display: flex;
+    align-items: center;
+  }
 
   .warningImage {
     margin: 5px 10px 5px 0;

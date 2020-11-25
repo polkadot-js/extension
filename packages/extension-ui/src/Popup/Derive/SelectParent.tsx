@@ -7,7 +7,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import styled from 'styled-components';
 import { assert } from '@polkadot/util';
 
-import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace } from '../../components';
+import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -132,7 +132,14 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
               type='password'
               value={parentPassword}
             />
-            {!!parentPassword && !isProperParentPassword && <div className='error'>{t('Wrong password')}</div>}
+            {!!parentPassword && !isProperParentPassword && (
+              <Warning
+                isBelowInput
+                isDanger
+              >
+                {t('Wrong password')}
+              </Warning>
+            )}
           </div>
           {isProperParentPassword && (
             <>
@@ -143,7 +150,14 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
                 parentAddress={parentAddress}
                 parentPassword={parentPassword}
               />
-              {!suriPath && <div className='error'>{t('Incorrect derivation path')}</div>}
+              {!suriPath && (
+                <Warning
+                  isBelowInput
+                  isDanger
+                >
+                  {t('Incorrect derivation path')}
+                </Warning>
+              )}
             </>
           )}
         </div>
@@ -175,8 +189,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   );
 }
 
-export default styled(SelectParent)(({ theme }: ThemeProps) => `
-
+export default styled(SelectParent)`
   .smallerMargin {
     margin-top: 0;
     margin-bottom: 10px;
@@ -190,12 +203,4 @@ export default styled(SelectParent)(({ theme }: ThemeProps) => `
       pointer-events: none;
     }
   }
-
-  .error {
-    display: block;
-    margin-top: -10px;
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.errorColor};
-  }
-`);
+`;

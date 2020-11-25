@@ -40,10 +40,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
       />
       <div className={className}>
         <Address address={address}>
-          <Warning
-            className='movedWarning'
-            isDanger
-          >
+          <Warning className='movedWarning'>
             {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
           </Warning>
           <div className='actionArea'>

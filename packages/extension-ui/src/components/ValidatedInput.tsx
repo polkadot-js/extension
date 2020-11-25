@@ -1,13 +1,11 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ThemeProps } from '../types';
-
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 
 import useIsMounted from '../hooks/useIsMounted';
 import { Result, Validator } from '../util/validators';
+import Warning from './Warning';
 
 interface BasicProps {
   isError?: boolean;
@@ -52,17 +50,16 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
         onChange={setValue}
         value={value}
       />
-      {Result.isError(validationResult) && <span className='error'>{validationResult.error.errorDescription}</span>}
+      {Result.isError(validationResult) && (
+        <Warning
+          isBelowInput
+          isDanger
+        >
+          {validationResult.error.errorDescription}
+        </Warning>
+      )}
     </div>
   );
 }
 
-export default styled(ValidatedInput)(({ theme }: ThemeProps) => `
-  .error {
-    display: block;
-    margin-top: -10px;
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.errorColor};
-  }
-`);
+export default ValidatedInput;

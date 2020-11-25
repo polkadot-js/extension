@@ -42,6 +42,12 @@ describe('Create Account', () => {
     wrapper.update();
   };
 
+  const capsLockOn = async (input: ReactWrapper): Promise<void> => {
+    input.simulate('keyPress', { getModifierState: () => true });
+    await act(flushAllPromises);
+    wrapper.update();
+  };
+
   const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
   const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
   const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
@@ -120,6 +126,13 @@ describe('Create Account', () => {
       expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
+    });
+
+    it('password with caps lock should show a warning', async () => {
+      await enterName('abc').then(password('abcde'));
+      await capsLockOn(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input));
+
+      expect(wrapper.find('.warning-message').first().text()).toBe('Warning: Caps lock is on');
     });
 
     it('password shorter than 6 characters should be not valid', async () => {

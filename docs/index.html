@@ -1,223 +1,210 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Polkadot-js extension, manage accounts for substrate based chains</title>
-        <meta
-            name="description"
-            content="This browser extension for Polkadot, Kusama or any other substrate-base blockchain allows to keep all your accounts in one place while being able to interract with any website or application that support it."
+  <head>
+    <title>Polkadot-js extension, manage accounts for substrate based chains</title>
+    <meta
+      name="description"
+      content="This browser extension for Polkadot, Kusama or any other substrate-base blockchain allows to keep all your accounts in one place while being able to interact with any website or application that support it."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content="Polkadot-js extension, manage accounts for substrate based chains" />
+    <meta property="og:url" content="https://polkadot-js.github.io/extension" />
+    <meta property="og:image" content="./logo.jpg" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:description"
+      content="This browser extension for Polkadot, Kusama or any other substrate-base blockchain allows to keep all your accounts in one place while being able to interract with any website or application that support it."
+    />
+    <link rel="shortcut icon" href="favicon.ico">
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        color: rgb(36, 37, 41);
+        font-family: "-apple-system", BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        margin: 0;
+      }
+
+      #headerWrapper {
+        background: rgb(239, 239, 239) none repeat scroll 0% 0%;
+        display: flex;
+      }
+
+      #header {
+        align-items: center;
+        display: flex;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        max-width: 800px;
+        margin: auto;
+      }
+
+      #header h1 {
+        margin: 0;
+        font-weight: 400;
+      }
+
+      #logo {
+        margin-right: 1rem;
+        width: 2.5rem;
+      }
+
+      #content {
+        max-width: 800px;
+        margin: auto;
+        margin-top: 2rem;
+      }
+
+      #downloadContainer {
+        text-align: center;
+        max-width: 80%;
+        margin: auto;
+        margin-bottom: 3rem;
+        margin-top: 2rem;
+      }
+
+      a {
+        color: rgb(227, 126, 6);
+      }
+
+      a.button {
+        display: inline-block;
+        background-color: rgb(227, 126, 6);
+        height: 48px;
+        box-sizing: border-box;
+        border: medium none;
+        border-radius: 4px;
+        color: rgb(255, 255, 255);
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 20px;
+        padding: 0px 1rem;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      a.button:hover {
+        background: rgb(237, 147, 41) none repeat scroll 0% 0%;
+      }
+
+      .insideButton {
+        display: flex;
+        height: 100%;
+      }
+
+      .buttonText {
+        align-self: center;
+      }
+
+      .svg-inline {
+        width: 1.5rem;
+        margin-right: 0.3rem;
+      }
+
+      .fullWidth {
+        left: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        max-width: 100vw;
+        padding: 0 1.5rem;
+        position: relative;
+        right: 50%;
+        width: 100vw;
+      }
+
+      @media only screen and (min-width: 1900px) {
+        .fullWidth {
+          margin-left: -40vw;
+          margin-right: -40vw;
+          max-width: 80vw;
+          right: 40%;
+          width: 80vw;
+        }
+      }
+
+      @media only screen and (max-width: 800px) {
+        /* For tablets: */
+        #logo {
+          width: 4rem;
+        }
+
+        #header {
+          font-size: small;
+        }
+
+        #content {
+          padding-right: 1rem;
+          padding-left: 1rem;
+        }
+      }
+
+      @media only screen and (max-width: 500px) {
+        /* For mobile phones: */
+        #logo {
+          width: 3rem;
+        }
+
+        #header {
+          font-size: x-small;
+        }
+        .menu,
+        .main,
+        .right {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="headerWrapper">
+      <div id="header">
+        <img
+          id="logo"
+          src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjE1IDE1IDE0MCAxNDAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDE3MCAxNzA7em9vbTogMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+LmJnMHtmaWxsOiNGRjhDMDB9IC5zdDB7ZmlsbDojRkZGRkZGfTwvc3R5bGU+PGc+PGNpcmNsZSBjbGFzcz0iYmcwIiBjeD0iODUiIGN5PSI4NSIgcj0iNzAiPjwvY2lyY2xlPjxnPjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04NSwzNC43Yy0yMC44LDAtMzcuOCwxNi45LTM3LjgsMzcuOGMwLDQuMiwwLjcsOC4zLDIsMTIuM2MwLjksMi43LDMuOSw0LjIsNi43LDMuM2MyLjctMC45LDQuMi0zLjksMy4zLTYuNyBjLTEuMS0zLjEtMS42LTYuNC0xLjUtOS43QzU4LjEsNTcuNiw2OS41LDQ2LDgzLjYsNDUuM2MxNS43LTAuOCwyOC43LDExLjcsMjguNywyNy4yYzAsMTQuNS0xMS40LDI2LjQtMjUuNywyNy4yIGMwLDAtNS4zLDAuMy03LjksMC43Yy0xLjMsMC4yLTIuMywwLjQtMywwLjVjLTAuMywwLjEtMC42LTAuMi0wLjUtMC41bDAuOS00LjRMODEsNzMuNGMwLjYtMi44LTEuMi01LjYtNC02LjIgYy0yLjgtMC42LTUuNiwxLjItNi4yLDRjMCwwLTExLjgsNTUtMTEuOSw1NS42Yy0wLjYsMi44LDEuMiw1LjYsNCw2LjJjMi44LDAuNiw1LjYtMS4yLDYuMi00YzAuMS0wLjYsMS43LTcuOSwxLjctNy45IGMxLjItNS42LDUuOC05LjcsMTEuMi0xMC40YzEuMi0wLjIsNS45LTAuNSw1LjktMC41YzE5LjUtMS41LDM0LjktMTcuOCwzNC45LTM3LjdDMTIyLjgsNTEuNiwxMDUuOCwzNC43LDg1LDM0Ljd6IE04Ny43LDEyMS43IGMtMy40LTAuNy02LjgsMS40LTcuNSw0LjljLTAuNywzLjQsMS40LDYuOCw0LjksNy41YzMuNCwwLjcsNi44LTEuNCw3LjUtNC45QzkzLjMsMTI1LjcsOTEuMiwxMjIuNCw4Ny43LDEyMS43eiI+PC9wYXRoPjwvZz48L2c+PC9zdmc+Cg=="
         />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta property="og:title" content="Polkadot-js extension, manage accounts for substrate based chains" />
-        <meta property="og:url" content="https://polkadot-js.github.io/extension" />
-        <meta property="og:image" content="./logo.jpg" />
-        <meta property="og:type" content="website" />
-        <meta
-            property="og:description"
-            content="This browser extension for Polkadot, Kusama or any other substrate-base blockchain allows to keep all your accounts in one place while being able to interract with any website or application that support it."
-        />
-        <link rel="shortcut icon" href="favicon.ico">
-        <style>
-            @font-face {
-                font-family: 'Nunito Sans';
-                font-style: normal;
-                font-weight: 400;
-                src: url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot');
-                src: local('Nunito Sans Regular'), local('NunitoSans-Regular'),
-                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.eot?#iefix') format('embedded-opentype'),
-                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.woff2') format('woff2'),
-                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.woff') format('woff'),
-                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.ttf') format('truetype'),
-                url('./fonts/NunitoSans/nunito-sans-v6-vietnamese_latin-ext_latin-regular.svg#NunitoSans') format('svg');
-            }
+        <h1>Polkadot{.js} extension</h1>
+      </div>
+    </div>
+    <div id="content">
+      <img class="fullWidth" src="./extension-overview.png" />
+      <p>
+        This browser extension does one thing: it manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions,
+        e.g send funds.
+      </p>
 
-            * {
-                box-sizing: border-box;
-            }
+      <div id="downloadContainer">
+        <a class="button" href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">
+          <div class="insideButton">
+            <svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="chrome" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="svg-inline">
+              <path
+                fill="currentColor"
+                d="M131.5 217.5L55.1 100.1c47.6-59.2 119-91.8 192-92.1 42.3-.3 85.5 10.5 124.8 33.2 43.4 25.2 76.4 61.4 97.4 103L264 133.4c-58.1-3.4-113.4 29.3-132.5 84.1zm32.9 38.5c0 46.2 37.4 83.6 83.6 83.6s83.6-37.4 83.6-83.6-37.4-83.6-83.6-83.6-83.6 37.3-83.6 83.6zm314.9-89.2L339.6 174c37.9 44.3 38.5 108.2 6.6 157.2L234.1 503.6c46.5 2.5 94.4-7.7 137.8-32.9 107.4-62 150.9-192 107.4-303.9zM133.7 303.6L40.4 120.1C14.9 159.1 0 205.9 0 256c0 124 90.8 226.7 209.5 244.9l63.7-124.8c-57.6 10.8-113.2-20.8-139.5-72.5z"
+                class=""
+              ></path>
+            </svg>
+            <span class="buttonText">Download for Chrome</span>
+          </div>
+        </a>
+        <a class="button" href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">
+          <div class="insideButton">
+            <svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="firefox" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline">
+              <path
+                fill="currentColor"
+                d="M503.52,241.48c-.12-1.56-.24-3.12-.24-4.68v-.12l-.36-4.68v-.12a245.86,245.86,0,0,0-7.32-41.15c0-.12,0-.12-.12-.24l-1.08-4c-.12-.24-.12-.48-.24-.6-.36-1.2-.72-2.52-1.08-3.72-.12-.24-.12-.6-.24-.84-.36-1.2-.72-2.4-1.08-3.48-.12-.36-.24-.6-.36-1-.36-1.2-.72-2.28-1.2-3.48l-.36-1.08c-.36-1.08-.84-2.28-1.2-3.36a8.27,8.27,0,0,0-.36-1c-.48-1.08-.84-2.28-1.32-3.36-.12-.24-.24-.6-.36-.84-.48-1.2-1-2.28-1.44-3.48,0-.12-.12-.24-.12-.36-1.56-3.84-3.24-7.68-5-11.4l-.36-.72c-.48-1-.84-1.8-1.32-2.64-.24-.48-.48-1.08-.72-1.56-.36-.84-.84-1.56-1.2-2.4-.36-.6-.6-1.2-1-1.8s-.84-1.44-1.2-2.28c-.36-.6-.72-1.32-1.08-1.92s-.84-1.44-1.2-2.16a18.07,18.07,0,0,0-1.2-2c-.36-.72-.84-1.32-1.2-2s-.84-1.32-1.2-2-.84-1.32-1.2-1.92-.84-1.44-1.32-2.16a15.63,15.63,0,0,0-1.2-1.8L463.2,119a15.63,15.63,0,0,0-1.2-1.8c-.48-.72-1.08-1.56-1.56-2.28-.36-.48-.72-1.08-1.08-1.56l-1.8-2.52c-.36-.48-.6-.84-1-1.32-1-1.32-1.8-2.52-2.76-3.72a248.76,248.76,0,0,0-23.51-26.64A186.82,186.82,0,0,0,412,62.46c-4-3.48-8.16-6.72-12.48-9.84a162.49,162.49,0,0,0-24.6-15.12c-2.4-1.32-4.8-2.52-7.2-3.72a254,254,0,0,0-55.43-19.56c-1.92-.36-3.84-.84-5.64-1.2h-.12c-1-.12-1.8-.36-2.76-.48a236.35,236.35,0,0,0-38-4H255.14a234.62,234.62,0,0,0-45.48,5c-33.59,7.08-63.23,21.24-82.91,39-1.08,1-1.92,1.68-2.4,2.16l-.48.48H124l-.12.12.12-.12a.12.12,0,0,0,.12-.12l-.12.12a.42.42,0,0,1,.24-.12c14.64-8.76,34.92-16,49.44-19.56l5.88-1.44c.36-.12.84-.12,1.2-.24,1.68-.36,3.36-.72,5.16-1.08.24,0,.6-.12.84-.12C250.94,20.94,319.34,40.14,367,85.61a171.49,171.49,0,0,1,26.88,32.76c30.36,49.2,27.48,111.11,3.84,147.59-34.44,53-111.35,71.27-159,24.84a84.19,84.19,0,0,1-25.56-59,74.05,74.05,0,0,1,6.24-31c1.68-3.84,13.08-25.67,18.24-24.59-13.08-2.76-37.55,2.64-54.71,28.19-15.36,22.92-14.52,58.2-5,83.28a132.85,132.85,0,0,1-12.12-39.24c-12.24-82.55,43.31-153,94.31-170.51-27.48-24-96.47-22.31-147.71,15.36-29.88,22-51.23,53.16-62.51,90.36,1.68-20.88,9.6-52.08,25.8-83.88-17.16,8.88-39,37-49.8,62.88-15.6,37.43-21,82.19-16.08,124.79.36,3.24.72,6.36,1.08,9.6,19.92,117.11,122,206.38,244.78,206.38C392.77,503.42,504,392.19,504,255,503.88,250.48,503.76,245.92,503.52,241.48Z"
+                class=""
+              ></path>
+            </svg>
+            <span class="buttonText">Download for Firefox</span>
+          </div>
+        </a>
+      </div>
 
-            body {
-                color: rgb(36, 37, 41);
-                font-family: 'Nunito Sans', sans-serif;
-                margin: 0;
-            }
-
-            #headerWrapper {
-                background: rgb(239, 239, 239) none repeat scroll 0% 0%;
-                display: flex;
-            }
-
-            #header {
-                align-items: center;
-                display: flex;
-                padding-top: 1rem;
-                padding-bottom: 1rem;
-                max-width: 800px;
-                margin: auto;
-            }
-
-            #header h1 {
-                margin: 0;
-                font-weight: 400;
-            }
-
-            #logo {
-                margin-right: 1rem;
-                width: 2.5rem;
-            }
-
-            #content {
-                max-width: 800px;
-                margin: auto;
-                margin-top: 2rem;
-            }
-
-            #downloadContainer {
-                text-align: center;
-                max-width: 80%;
-                margin: auto;
-                margin-bottom: 3rem;
-                margin-top: 2rem;
-            }
-
-            a {
-                color: rgb(227, 126, 6);
-            }
-
-            a.button {
-                display: inline-block;
-                background-color: rgb(227, 126, 6);
-                height: 48px;
-                box-sizing: border-box;
-                border: medium none;
-                border-radius: 4px;
-                color: rgb(255, 255, 255);
-                font-size: 15px;
-                font-weight: 800;
-                line-height: 20px;
-                padding: 0px 1rem;
-                position: relative;
-                text-align: center;
-                text-decoration: none;
-            }
-
-            a.button:hover {
-                background: rgb(237, 147, 41) none repeat scroll 0% 0%;
-            }
-
-            .insideButton {
-                display: flex;
-                height: 100%;
-            }
-
-            .buttonText {
-                align-self: center;
-            }
-
-            .svg-inline {
-                width: 1.5rem;
-                margin-right: 0.3rem;
-            }
-
-            .fullWidth {
-                left: 50%;
-                margin-left: -50vw;
-                margin-right: -50vw;
-                max-width: 100vw;
-                padding: 0 1.5rem;
-                position: relative;
-                right: 50%;
-                width: 100vw;
-            }
-
-            @media only screen and (min-width: 1900px) {
-                .fullWidth {
-                    margin-left: -40vw;
-                    margin-right: -40vw;
-                    max-width: 80vw;
-                    right: 40%;
-                    width: 80vw;
-                }
-            }
-
-            @media only screen and (max-width: 800px) {
-                /* For tablets: */
-                #logo {
-                    width: 4rem;
-                }
-
-                #header {
-                    font-size: small;
-                }
-
-                #content {
-                    padding-right: 1rem;
-                    padding-left: 1rem;
-                }
-            }
-
-            @media only screen and (max-width: 500px) {
-                /* For mobile phones: */
-                #logo {
-                    width: 3rem;
-                }
-
-                #header {
-                    font-size: x-small;
-                }
-                .menu,
-                .main,
-                .right {
-                    width: 100%;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div id="headerWrapper">
-            <div id="header">
-                <img
-                    id="logo"
-                    src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjE1IDE1IDE0MCAxNDAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDE3MCAxNzA7em9vbTogMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+LmJnMHtmaWxsOiNGRjhDMDB9IC5zdDB7ZmlsbDojRkZGRkZGfTwvc3R5bGU+PGc+PGNpcmNsZSBjbGFzcz0iYmcwIiBjeD0iODUiIGN5PSI4NSIgcj0iNzAiPjwvY2lyY2xlPjxnPjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04NSwzNC43Yy0yMC44LDAtMzcuOCwxNi45LTM3LjgsMzcuOGMwLDQuMiwwLjcsOC4zLDIsMTIuM2MwLjksMi43LDMuOSw0LjIsNi43LDMuM2MyLjctMC45LDQuMi0zLjksMy4zLTYuNyBjLTEuMS0zLjEtMS42LTYuNC0xLjUtOS43QzU4LjEsNTcuNiw2OS41LDQ2LDgzLjYsNDUuM2MxNS43LTAuOCwyOC43LDExLjcsMjguNywyNy4yYzAsMTQuNS0xMS40LDI2LjQtMjUuNywyNy4yIGMwLDAtNS4zLDAuMy03LjksMC43Yy0xLjMsMC4yLTIuMywwLjQtMywwLjVjLTAuMywwLjEtMC42LTAuMi0wLjUtMC41bDAuOS00LjRMODEsNzMuNGMwLjYtMi44LTEuMi01LjYtNC02LjIgYy0yLjgtMC42LTUuNiwxLjItNi4yLDRjMCwwLTExLjgsNTUtMTEuOSw1NS42Yy0wLjYsMi44LDEuMiw1LjYsNCw2LjJjMi44LDAuNiw1LjYtMS4yLDYuMi00YzAuMS0wLjYsMS43LTcuOSwxLjctNy45IGMxLjItNS42LDUuOC05LjcsMTEuMi0xMC40YzEuMi0wLjIsNS45LTAuNSw1LjktMC41YzE5LjUtMS41LDM0LjktMTcuOCwzNC45LTM3LjdDMTIyLjgsNTEuNiwxMDUuOCwzNC43LDg1LDM0Ljd6IE04Ny43LDEyMS43IGMtMy40LTAuNy02LjgsMS40LTcuNSw0LjljLTAuNywzLjQsMS40LDYuOCw0LjksNy41YzMuNCwwLjcsNi44LTEuNCw3LjUtNC45QzkzLjMsMTI1LjcsOTEuMiwxMjIuNCw4Ny43LDEyMS43eiI+PC9wYXRoPjwvZz48L2c+PC9zdmc+Cg=="
-                />
-                <h1>Polkadot{.js} extension</h1>
-            </div>
-        </div>
-        <div id="content">
-            <img class="fullWidth" src="./extension-overview.png" />
-            <p>
-                This browser extension does one thing: it manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions,
-                e.g send funds.
-            </p>
-
-            <div id="downloadContainer">
-                <a class="button" href="https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd">
-                    <div class="insideButton">
-                        <svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="chrome" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="svg-inline">
-                            <path
-                                fill="currentColor"
-                                d="M131.5 217.5L55.1 100.1c47.6-59.2 119-91.8 192-92.1 42.3-.3 85.5 10.5 124.8 33.2 43.4 25.2 76.4 61.4 97.4 103L264 133.4c-58.1-3.4-113.4 29.3-132.5 84.1zm32.9 38.5c0 46.2 37.4 83.6 83.6 83.6s83.6-37.4 83.6-83.6-37.4-83.6-83.6-83.6-83.6 37.3-83.6 83.6zm314.9-89.2L339.6 174c37.9 44.3 38.5 108.2 6.6 157.2L234.1 503.6c46.5 2.5 94.4-7.7 137.8-32.9 107.4-62 150.9-192 107.4-303.9zM133.7 303.6L40.4 120.1C14.9 159.1 0 205.9 0 256c0 124 90.8 226.7 209.5 244.9l63.7-124.8c-57.6 10.8-113.2-20.8-139.5-72.5z"
-                                class=""
-                            ></path>
-                        </svg>
-                        <span class="buttonText">Download for Chrome</span>
-                    </div>
-                </a>
-                <a class="button" href="https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/">
-                    <div class="insideButton">
-                        <svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="firefox" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline">
-                            <path
-                                fill="currentColor"
-                                d="M503.52,241.48c-.12-1.56-.24-3.12-.24-4.68v-.12l-.36-4.68v-.12a245.86,245.86,0,0,0-7.32-41.15c0-.12,0-.12-.12-.24l-1.08-4c-.12-.24-.12-.48-.24-.6-.36-1.2-.72-2.52-1.08-3.72-.12-.24-.12-.6-.24-.84-.36-1.2-.72-2.4-1.08-3.48-.12-.36-.24-.6-.36-1-.36-1.2-.72-2.28-1.2-3.48l-.36-1.08c-.36-1.08-.84-2.28-1.2-3.36a8.27,8.27,0,0,0-.36-1c-.48-1.08-.84-2.28-1.32-3.36-.12-.24-.24-.6-.36-.84-.48-1.2-1-2.28-1.44-3.48,0-.12-.12-.24-.12-.36-1.56-3.84-3.24-7.68-5-11.4l-.36-.72c-.48-1-.84-1.8-1.32-2.64-.24-.48-.48-1.08-.72-1.56-.36-.84-.84-1.56-1.2-2.4-.36-.6-.6-1.2-1-1.8s-.84-1.44-1.2-2.28c-.36-.6-.72-1.32-1.08-1.92s-.84-1.44-1.2-2.16a18.07,18.07,0,0,0-1.2-2c-.36-.72-.84-1.32-1.2-2s-.84-1.32-1.2-2-.84-1.32-1.2-1.92-.84-1.44-1.32-2.16a15.63,15.63,0,0,0-1.2-1.8L463.2,119a15.63,15.63,0,0,0-1.2-1.8c-.48-.72-1.08-1.56-1.56-2.28-.36-.48-.72-1.08-1.08-1.56l-1.8-2.52c-.36-.48-.6-.84-1-1.32-1-1.32-1.8-2.52-2.76-3.72a248.76,248.76,0,0,0-23.51-26.64A186.82,186.82,0,0,0,412,62.46c-4-3.48-8.16-6.72-12.48-9.84a162.49,162.49,0,0,0-24.6-15.12c-2.4-1.32-4.8-2.52-7.2-3.72a254,254,0,0,0-55.43-19.56c-1.92-.36-3.84-.84-5.64-1.2h-.12c-1-.12-1.8-.36-2.76-.48a236.35,236.35,0,0,0-38-4H255.14a234.62,234.62,0,0,0-45.48,5c-33.59,7.08-63.23,21.24-82.91,39-1.08,1-1.92,1.68-2.4,2.16l-.48.48H124l-.12.12.12-.12a.12.12,0,0,0,.12-.12l-.12.12a.42.42,0,0,1,.24-.12c14.64-8.76,34.92-16,49.44-19.56l5.88-1.44c.36-.12.84-.12,1.2-.24,1.68-.36,3.36-.72,5.16-1.08.24,0,.6-.12.84-.12C250.94,20.94,319.34,40.14,367,85.61a171.49,171.49,0,0,1,26.88,32.76c30.36,49.2,27.48,111.11,3.84,147.59-34.44,53-111.35,71.27-159,24.84a84.19,84.19,0,0,1-25.56-59,74.05,74.05,0,0,1,6.24-31c1.68-3.84,13.08-25.67,18.24-24.59-13.08-2.76-37.55,2.64-54.71,28.19-15.36,22.92-14.52,58.2-5,83.28a132.85,132.85,0,0,1-12.12-39.24c-12.24-82.55,43.31-153,94.31-170.51-27.48-24-96.47-22.31-147.71,15.36-29.88,22-51.23,53.16-62.51,90.36,1.68-20.88,9.6-52.08,25.8-83.88-17.16,8.88-39,37-49.8,62.88-15.6,37.43-21,82.19-16.08,124.79.36,3.24.72,6.36,1.08,9.6,19.92,117.11,122,206.38,244.78,206.38C392.77,503.42,504,392.19,504,255,503.88,250.48,503.76,245.92,503.52,241.48Z"
-                                class=""
-                            ></path>
-                        </svg>
-                        <span class="buttonText">Download for Firefox</span>
-                    </div>
-                </a>
-            </div>
-
-            <h2>More info</h2>
-            <p>This extension is open source and the code is available on <a href="https://github.com/polkadot-js/extension">GitHub</a>.</p>
-            <p>For developers wanting to use the accounts from the extension in a Dapp, head to the <a href="https://polkadot.js.org/docs/extension/">developer documentation</a>.</p>
-        </div>
-    </body>
+      <h2>More info</h2>
+      <p>This extension is open source and the code is available on <a href="https://github.com/polkadot-js/extension">GitHub</a>.</p>
+      <p>For developers wanting to use the accounts from the extension in a Dapp, head to the <a href="https://polkadot.js.org/docs/extension/">developer documentation</a>.</p>
+    </div>
+  </body>
 </html>

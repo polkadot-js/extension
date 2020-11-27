@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## 0.35.0-beta.x
+
+Contributed:
+
+- Add i18n French (Thanks to https://github.com/Tbaut)
+- Add a caps-lock warning for passwords (Thanks to https://github.com/Tbaut)
+- Unify warning/error messages between components (Thanks to https://github.com/Tbaut)
+- Adjust notification window for cross-platform consistency (Thanks to https://github.com/Tbaut)
+- Set account visibility directly from icon click (Thanks to https://github.com/Tbaut)
+- Don't indicate name errors before any value is entered (Thanks to https://github.com/Tbaut)
+- Swap icons to the Font Awesome (instead of built-in) (Thanks to https://github.com/Tbaut)
+- Use `@polkadot/networks` for known ss58 formats/genesis (Thanks to https://github.com/Tbaut)
+- Add phishing site detection and redirection (Thanks to https://github.com/Tbaut)
+- Add indicator icon for external accounts (Thanks to https://github.com/Tbaut)
+- Add error boundaries across all UI components (Thanks to https://github.com/Tbaut)
+- Group accounts by network, sort by name & path (Thanks to https://github.com/Tbaut)
+- Fix derive suggestions to update when switching root (Thanks to https://github.com/Tbaut)
+- Adjust window opening logic to be generic (Thanks to https://github.com/Tbaut)
+- Add i18n language selection dropdown (Thanks to https://github.com/Tbaut)
+- Adjust password expiry to extend timeperiod (Thanks to https://github.com/Tbaut)
+- Rework password caching for security & robustness (Thanks to https://github.com/Tbaut)
+- Share password expiry length between back/front-ends (Thanks to https://github.com/Tbaut)
+- Cleanup all global styles and usage (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Adjust web3Enable for better on-load detection
+- Support for all latest Substrate/Polkadot types
+
+
 ## 0.34.1 Sep 15, 2020
 
 Contributed:

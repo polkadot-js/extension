@@ -26,16 +26,16 @@ interface Props {
   url: string;
 }
 
-function displayDecodeVersion (message: string, chain: Chain | null, specVersion: BN): string {
-  return `${message}: chain=${chain?.name || '<unknown>'}, specVersion=${chain?.specVersion.toString() || '<unknown>'} (request specVersion=${specVersion.toString()})`;
+function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
+  return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
 }
 
-function decodeMethod (data: string, chain: Chain | null, specVersion: BN): Decoded {
+function decodeMethod (data: string, chain: Chain, specVersion: BN): Decoded {
   let args: AnyJson | null = null;
   let method: Call | null = null;
 
   try {
-    if (chain && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
+    if (specVersion.eqn(chain.specVersion)) {
       method = chain.registry.createType('Call', data);
       args = (method.toHuman() as { args: AnyJson }).args;
     } else {
@@ -112,7 +112,9 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
   const specVersion = useRef(bnToBn(hexSpec)).current;
 
   const decoded = useMemo(
-    () => decodeMethod(method, chain, specVersion),
+    () => chain && chain.hasMetadata
+      ? decodeMethod(method, chain, specVersion)
+      : { args: null, method: null },
     [method, chain, specVersion]
   );
 

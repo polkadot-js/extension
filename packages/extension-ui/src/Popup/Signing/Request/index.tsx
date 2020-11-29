@@ -92,7 +92,6 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
           : (
             <Extrinsic
-              isDecoded={true}
               payload={payload}
               request={json}
               url={url}

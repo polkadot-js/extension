@@ -31,24 +31,26 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     registry.register(types);
   }
 
-  const isUnknown = genesisHash === '0x';
-
   registry.setChainProperties(registry.createType('ChainProperties', {
     ss58Format,
     tokenDecimals,
     tokenSymbol
   }));
 
-  const metadata = metaCalls && !isPartial
-    ? new Metadata(registry, Buffer.from(metaCalls, 'base64'))
-    : null;
+  const isUnknown = genesisHash === '0x';
+  let hasMetadata = false;
+
+  if (metaCalls && !isPartial) {
+    hasMetadata = true;
+    registry.setMetadata(new Metadata(registry, Buffer.from(metaCalls, 'base64')));
+  }
 
   const result = {
     definition,
     genesisHash: isUnknown
       ? undefined
       : genesisHash,
-    hasMetadata: !!metadata,
+    hasMetadata,
     icon: icon || 'substrate',
     isUnknown,
     name: chain,

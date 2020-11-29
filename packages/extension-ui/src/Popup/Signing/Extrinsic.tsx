@@ -21,22 +21,29 @@ interface Decoded {
 
 interface Props {
   className?: string;
-  isDecoded: boolean;
   payload: ExtrinsicPayload;
   request: SignerPayloadJSON;
   url: string;
 }
 
-function decodeMethod (data: string, isDecoded: boolean, chain: Chain | null, specVersion: BN): Decoded {
+function displayDecodeVersion (message: string, chain: Chain | null, specVersion: BN): string {
+  return `${message}: chain=${chain?.name || '<unknown>'}, specVersion=${chain?.specVersion.toString() || '<unknown>'} (request specVersion=${specVersion.toString()})`;
+}
+
+function decodeMethod (data: string, chain: Chain | null, specVersion: BN): Decoded {
   let args: AnyJson | null = null;
   let method: Call | null = null;
 
   try {
-    if (isDecoded && chain && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
+    if (chain && chain.hasMetadata && specVersion.eqn(chain.specVersion)) {
       method = chain.registry.createType('Call', data);
       args = (method.toHuman() as { args: AnyJson }).args;
+    } else {
+      console.log(displayDecodeVersion('Outdated metadata to decode', chain, specVersion));
     }
   } catch (error) {
+    console.error(`${displayDecodeVersion('Error decoding method', chain, specVersion)}:: ${(error as Error).message}`);
+
     args = null;
     method = null;
   }
@@ -99,14 +106,14 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunct
   });
 }
 
-function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
+function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
 
   const decoded = useMemo(
-    () => decodeMethod(method, isDecoded, chain, specVersion),
-    [method, isDecoded, chain, specVersion]
+    () => decodeMethod(method, chain, specVersion),
+    [method, chain, specVersion]
   );
 
   return (
@@ -138,7 +145,7 @@ function Extrinsic ({ className, isDecoded, payload: { era, nonce, tip }, reques
       )}
       {renderMethod(method, decoded, t)}
       <tr>
-        <td className='label'>lifetime</td>
+        <td className='label'>{t<string>('lifetime')}</td>
         <td className='data'>{mortalityAsString(era, blockNumber, t)}</td>
       </tr>
     </Table>

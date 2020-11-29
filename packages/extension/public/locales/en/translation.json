@@ -112,5 +112,6 @@
   "copy address": "",
   "account visibility": "",
   "Wrong password": "",
-  "Incorrect derivation path": ""
+  "Incorrect derivation path": "",
+  "lifetime": ""
 }

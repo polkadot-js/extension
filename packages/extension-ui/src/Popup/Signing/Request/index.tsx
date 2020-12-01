@@ -3,10 +3,10 @@
 
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
-import type { TypeRegistry } from '@polkadot/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useCallback, useEffect, useContext, useState } from 'react';
+import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, Address, VerticalSpace } from '../../../components';
 import { approveSignSignature } from '../../../messaging';

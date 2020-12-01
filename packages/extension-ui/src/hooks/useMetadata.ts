@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Chain } from '@polkadot/extension-chains/types';
+import type { Chain } from '@polkadot/extension-chains/types';
 
 import { useEffect, useState } from 'react';
 

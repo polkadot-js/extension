@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Message } from '@polkadot/extension-base/types';
+import type { Message } from '@polkadot/extension-base/types';
 
 import { enable, handleResponse, redirectPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';

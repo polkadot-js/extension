@@ -1,9 +1,9 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Chain } from '@polkadot/extension-chains/types';
-import { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
+import type { Chain } from '@polkadot/extension-chains/types';
+import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
+import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
 import React, { useMemo, useRef } from 'react';

@@ -7,7 +7,7 @@
 /* eslint-disable react/jsx-sort-props */
 /* eslint-disable react/jsx-max-props-per-line */
 
-import { ThemeProps } from '../../types';
+import type { ThemeProps } from '../../types';
 
 import React from 'react';
 import styled from 'styled-components';

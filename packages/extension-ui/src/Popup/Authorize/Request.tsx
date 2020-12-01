@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
-import { ThemeProps } from '../../types';
+import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
+import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext } from 'react';
 import { Trans } from 'react-i18next';

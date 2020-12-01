@@ -1,9 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { KeyringPair } from '@polkadot/keyring/types';
-import { RequestSign } from './types';
-import { SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeyringPair } from '@polkadot/keyring/types';
+import type { SignerPayloadRaw } from '@polkadot/types/types';
+import type { RequestSign } from './types';
+
 import { u8aToHex, hexToU8a } from '@polkadot/util';
 import { TypeRegistry } from '@polkadot/types';
 

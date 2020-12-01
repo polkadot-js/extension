@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import { ThemeProps } from '../types';
+import type { ThemeProps } from '../types';
 
 import styled from 'styled-components';
 

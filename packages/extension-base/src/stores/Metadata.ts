@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef } from '@polkadot/extension-inject/types';
 
 import BaseStore from './Base';
 

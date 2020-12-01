@@ -1,12 +1,12 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import PostMessageProvider from './PostMessageProvider';
-import { Injected } from '@polkadot/extension-inject/types';
-import { SendRequest } from './types';
+import type { Injected } from '@polkadot/extension-inject/types';
+import type { SendRequest } from './types';
 
 import Accounts from './Accounts';
 import Metadata from './Metadata';
+import PostMessageProvider from './PostMessageProvider';
 import Signer from './Signer';
 
 export default class implements Injected {

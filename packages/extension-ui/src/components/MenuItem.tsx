@@ -4,7 +4,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { ThemeProps } from '../types';
+import type { ThemeProps } from '../types';
 
 interface Props extends ThemeProps {
   children: React.ReactNode;

@@ -1,8 +1,9 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
+
 import React from 'react';
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import Account from './Account';
 
 interface Props extends AccountWithChildren {

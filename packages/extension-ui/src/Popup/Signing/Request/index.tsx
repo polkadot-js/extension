@@ -1,10 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
-import { TypeRegistry } from '@polkadot/types';
-import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
+import type { TypeRegistry } from '@polkadot/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 import React, { useCallback, useEffect, useContext, useState } from 'react';
 

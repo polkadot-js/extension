@@ -1,10 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { Chain } from '@polkadot/extension-chains/types';
-import { SettingsStruct } from '@polkadot/ui-settings/types';
-import { ThemeProps } from '../types';
+import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
+import type { Chain } from '@polkadot/extension-chains/types';
+import type { SettingsStruct } from '@polkadot/ui-settings/types';
+import type { ThemeProps } from '../types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';

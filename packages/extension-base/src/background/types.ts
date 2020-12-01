@@ -361,4 +361,5 @@ export interface ResponseJsonGetAccountInfo {
   address: string;
   name: string;
   genesisHash: string;
+  type: KeypairType;
 }

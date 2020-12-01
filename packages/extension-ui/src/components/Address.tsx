@@ -4,6 +4,7 @@
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
+import { IconTheme } from '@polkadot/react-identicon/types';
 import { ThemeProps } from '../types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -32,6 +33,7 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   genesisHash?: string | null;
+  isEthereum?: boolean | null;
   isExternal?: boolean | null;
   isHidden?: boolean;
   name?: React.ReactNode | null;
@@ -74,7 +76,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isEthereum, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -84,6 +86,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
+  const _isEthereum = isEthereum;
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
@@ -109,7 +112,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     setShowActionsMenu(false);
   }, [toggleActions]);
 
-  const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
+  const theme = (
+    chain?.icon
+      ? chain.icon
+      : _isEthereum
+        ? 'ethereum'
+        : 'polkadot'
+  ) as IconTheme;
+
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
   const _toggleVisibility = useCallback(
@@ -319,6 +329,11 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     align-items: center;
     height: 72px;
     border-radius: 4px;
+  }
+
+  img {
+    max-width: 50px;
+    max-height: 50px;
   }
 
   .name {

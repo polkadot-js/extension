@@ -252,12 +252,13 @@ export default class Extension {
 
   private jsonGetAccountInfo (json: KeyringPair$Json): ResponseJsonGetAccountInfo {
     try {
-      const pair = keyring.createFromJson(json);
+      const { address, meta: { genesisHash, name }, type } = keyring.createFromJson(json);
 
       return {
-        address: pair.address,
-        genesisHash: pair.meta.genesisHash,
-        name: pair.meta.name
+        address,
+        genesisHash,
+        name,
+        type
       } as ResponseJsonGetAccountInfo;
     } catch (e) {
       console.error(e);

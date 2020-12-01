@@ -24,7 +24,7 @@ function Upload ({ className } : Props): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const [{ address, genesisHash, name }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '' });
+  const [{ address, genesisHash, name, type }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '' });
   const [password, setPassword] = useState<string>('');
   const [isFileError, setFileError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
@@ -95,6 +95,7 @@ function Upload ({ className } : Props): React.ReactElement {
           <Address
             address={address}
             genesisHash={genesisHash}
+            isEthereum={type === 'ethereum'}
             name={name}
           />
         </div>

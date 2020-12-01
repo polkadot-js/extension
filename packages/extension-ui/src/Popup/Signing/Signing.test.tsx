@@ -24,7 +24,7 @@ import Signing from '.';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-describe.skip('Signing requests', () => {
+describe('Signing requests', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
   let signRequests: SigningRequest[] = [];
@@ -112,8 +112,8 @@ describe.skip('Signing requests', () => {
     await mountComponent();
   });
 
-  describe('Switching between requests', () => {
-    it('initially first request should be shown', () => {
+  describe.only('Switching between requests', () => {
+    it.only('initially first request should be shown', () => {
       expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
@@ -218,6 +218,17 @@ describe.skip('Signing requests', () => {
       wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
       wrapper.find(Button).find('button').simulate('click');
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, 'hunter1');
+    });
+
+    it('shows an error when the password is wrong', () => {
+      jest.spyOn(messaging, 'approveSignPassword').mockImplementation(() => {
+        throw new Error();
+      });
+      // await act(flushAllPromises);
+      // wrapper.update();
+      wrapper.find(Input).simulate('change', { target: { value: 'anything' } });
+      wrapper.find(Button).find('button').simulate('click');
+      expect(wrapper.find('.warning-message').first().text()).toBe('Unable to decode using the supplied passphrase');
     });
 
     it('when last request has been removed/cancelled, shows the previous one', () => {

@@ -4,6 +4,7 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import useTranslation from '../hooks/useTranslation';
 import Label from './Label';
 import { Input } from './TextInputs';
 import Warning from './Warning';
@@ -27,6 +28,7 @@ interface Props {
 
 function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
   const [isCapsLock, setIsCapsLock] = useState(false);
+  const { t } = useTranslation();
 
   const _checkKey = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -72,7 +74,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         withError={isError}
       />
       { isCapsLock && (
-        <Warning isBelowInput >Warning: Caps lock is on</Warning>
+        <Warning isBelowInput>{t<string>('Warning: Caps lock is on')}</Warning>
       )}
     </Label>
   );
@@ -84,7 +86,7 @@ export default styled(InputWithLabel)`
   &.withoutMargin {
     margin-bottom: 0px;
 
-   + .error {
+   + .danger {
       margin-top: 6px;
     }
   }

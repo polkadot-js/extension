@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MetadataDef } from '@polkadot/extension-inject/types';
-import { ThemeProps } from '../../types';
+import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';

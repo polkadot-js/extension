@@ -3,7 +3,7 @@
 
 import '../../../../../__mocks__/chrome';
 
-import { AuthorizeRequest } from '@polkadot/extension-base/background/types';
+import type { AuthorizeRequest } from '@polkadot/extension-base/background/types';
 
 import { configure, mount, ReactWrapper } from 'enzyme';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';

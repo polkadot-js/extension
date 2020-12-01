@@ -1,12 +1,12 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
-import { KeyringPair } from '@polkadot/keyring/types';
-import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { KeyringPair } from '@polkadot/keyring/types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import keyring from '@polkadot/ui-keyring';

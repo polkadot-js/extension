@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransportRequestMessage, MessageTypes } from '../types';
+import type { TransportRequestMessage, MessageTypes } from '../types';
 
 import { assert } from '@polkadot/util';
 

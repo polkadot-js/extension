@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import '../../../../../__mocks__/chrome';
-import { ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
+
+import type { ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
 import { MemoryRouter, Route } from 'react-router';

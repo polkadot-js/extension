@@ -84,9 +84,8 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
-  'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
-  'pri(json.verify.file)': [RequestJsonRestore, boolean];
-  'pri(json.verify.password)': [string, boolean];
+  'pri(json.restore)': [RequestJsonRestore, void];
+  'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
@@ -348,7 +347,7 @@ export interface RequestSign {
 }
 
 export interface RequestJsonRestore {
-  json: KeyringPair$Json;
+  file: KeyringPair$Json;
   password: string;
 }
 
@@ -357,3 +356,9 @@ export interface ResponseJsonRestore {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
+
+export interface ResponseJsonGetAccountInfo {
+  address: string;
+  name: string;
+  genesisHash: string;
+}

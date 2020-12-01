@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Message } from '@polkadot/extension-base/types';
-import { AccountJson, AllowedPath, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseJsonRestore, ResponseSigningIsLocked } from '@polkadot/extension-base/background/types';
+import { AccountJson, AllowedPath, AuthorizeRequest, SigningRequest, RequestTypes, MessageTypes, ResponseTypes, SeedLengths, SubscriptionMessageTypes, MetadataRequest, MessageTypesWithNullRequest, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions, ResponseDeriveValidate, ResponseSigningIsLocked, ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -198,14 +198,10 @@ export async function windowOpen (path: AllowedPath): Promise<boolean> {
   return sendMessage('pri(window.open)', path);
 }
 
-export async function jsonVerifyFile (json: KeyringPair$Json): Promise<boolean> {
-  return sendMessage('pri(json.verify.file)', { json, password: '' });
+export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<ResponseJsonGetAccountInfo> {
+  return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonVerifyPassword (password: string): Promise<boolean> {
-  return sendMessage('pri(json.verify.password)', password);
-}
-
-export async function jsonRestore (json: KeyringPair$Json, password: string): Promise<ResponseJsonRestore> {
-  return sendMessage('pri(json.restore)', { json, password });
+export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
+  return sendMessage('pri(json.restore)', { file, password });
 }

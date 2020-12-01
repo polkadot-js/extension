@@ -3,15 +3,15 @@
 
 import { MetadataDef } from '@polkadot/extension-inject/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, RequestJsonRestore, ResponseJsonRestore, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, ResponseDeriveValidate, RequestMetadataApprove, RequestMetadataReject, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestSeedCreate, RequestTypes, ResponseAccountExport, RequestAccountForget, ResponseSeedCreate, RequestSeedValidate, RequestDeriveValidate, RequestJsonRestore, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest, ResponseJsonGetAccountInfo } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { TypeRegistry } from '@polkadot/types';
-import { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
-import { assert, isHex, isObject } from '@polkadot/util';
+import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import State from './State';
@@ -242,39 +242,27 @@ export default class Extension {
     return true;
   }
 
-  private jsonRestore ({ json, password }: RequestJsonRestore): ResponseJsonRestore {
+  private jsonRestore ({ file, password }: RequestJsonRestore): void {
     try {
-      const pair = keyring.restoreAccount(json, password);
-
-      if (pair) {
-        return { error: null };
-      }
+      keyring.restoreAccount(file, password);
     } catch (error) {
-      return { error: (error as Error).message };
+      throw new Error((error as Error).message);
     }
-
-    return { error: 'Could not restore account.' };
   }
 
-  private jsonVerifyFile ({ json }: RequestJsonRestore): boolean {
+  private jsonGetAccountInfo (json: KeyringPair$Json): ResponseJsonGetAccountInfo {
     try {
-      const publicKey = keyring.decodeAddress(json.address, true);
-      const isFileValid = publicKey.length === 32 && !!json.encoded && isObject(json.meta) && (
-        Array.isArray(json.encoding.content)
-          ? json.encoding.content[0] === 'pkcs8'
-          : json.encoding.content === 'pkcs8'
-      );
+      const pair = keyring.createFromJson(json);
 
-      return isFileValid;
-    } catch (error) {
-      console.error(error);
+      return {
+        address: pair.address,
+        genesisHash: pair.meta.genesisHash,
+        name: pair.meta.name
+      } as ResponseJsonGetAccountInfo;
+    } catch (e) {
+      console.error(e);
+      throw new Error((e as Error).message);
     }
-
-    return false;
-  }
-
-  private jsonVerifyPassword (password: string): boolean {
-    return keyring.isPassValid(password);
   }
 
   private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
@@ -526,11 +514,8 @@ export default class Extension {
       case 'pri(json.restore)':
         return this.jsonRestore(request as RequestJsonRestore);
 
-      case 'pri(json.verify.file)':
-        return this.jsonVerifyFile(request as RequestJsonRestore);
-
-      case 'pri(json.verify.password)':
-        return this.jsonVerifyPassword(request as string);
+      case 'pri(json.account.info)':
+        return this.jsonGetAccountInfo(request as KeyringPair$Json);
 
       case 'pri(seed.create)':
         return this.seedCreate(request as RequestSeedCreate);

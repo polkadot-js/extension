@@ -7,120 +7,129 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address } from '../components';
+import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { jsonRestore, jsonVerifyPassword, jsonVerifyFile } from '../messaging';
+import { jsonRestore, jsonGetAccountInfo } from '../messaging';
 import { Header } from '../partials';
-
-interface FileState {
-  address: string | null;
-  isFileValid: boolean;
-  json: KeyringPair$Json | null;
-}
-
-// FIXME We want to display the decodeError
-interface PassState {
-  decodeError?: string | null;
-  isPassValid: boolean;
-  password: string;
-}
+import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
-async function parseFile (file: Uint8Array): Promise<FileState> {
-  try {
-    const json = JSON.parse(u8aToString(file)) as KeyringPair$Json;
-    const isFileValid = await jsonVerifyFile(json);
-    const address = json.address;
-
-    return { address, isFileValid, json };
-  } catch (error) {
-    console.error(error);
-  }
-
-  return { address: null, isFileValid: false, json: null };
+interface Props {
+  className?: string;
 }
 
-export default function Upload (): React.ReactElement {
+function Upload ({ className } : Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const [{ address, isFileValid, json }, setJson] = useState<FileState>({ address: null, isFileValid: false, json: null });
-  const [{ isPassValid, password }, setPass] = useState<PassState>({ isPassValid: false, password: '' });
+  const [{ address, genesisHash, name }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '' });
+  const [password, setPassword] = useState<string>('');
+  const [isFileError, setFileError] = useState(false);
+  const [isPasswordError, setIsPasswordError] = useState(false);
+  // don't use the info from the file directly
+  // rather use what comes from the background from jsonGetAccountInfo
+  const [file, setFile] = useState<KeyringPair$Json|undefined>(undefined);
 
   useEffect((): void => {
     !accounts.length && onAction();
   }, [accounts, onAction]);
 
   const _onChangePass = useCallback(
-    (password: string): void => {
-      jsonVerifyPassword(password)
-        .then((isPassValid) => setPass({ isPassValid, password }))
-        .catch(console.error);
+    (pass: string): void => {
+      setPassword(pass);
+      setIsPasswordError(false);
     }, []
   );
 
   const _onChangeFile = useCallback(
     (file: Uint8Array): void => {
-      parseFile(file)
-        .then(setJson)
-        .catch(console.error);
+      let json: KeyringPair$Json | undefined;
+
+      try {
+        json = JSON.parse(u8aToString(file)) as KeyringPair$Json;
+        setFile(json);
+      } catch (e) {
+        console.error(e);
+        setFileError(true);
+      }
+
+      json && jsonGetAccountInfo(json)
+        .then((accountInfo : ResponseJsonGetAccountInfo) => setAccountInfo(accountInfo))
+        .catch((e) => {
+          setFileError(true);
+          console.error(e);
+        });
     }, []
   );
 
   const _onRestore = useCallback(
     (): void => {
-      if (!json || !password) {
+      if (!file || !password) {
         return;
       }
 
       setIsBusy(true);
 
-      jsonRestore(json, password)
-        .then(({ error }): void => {
-          if (error) {
-            setIsBusy(false);
-            setPass(({ password }) => ({ decodeError: error, isPassValid: false, password }));
-          } else {
-            onAction('/');
-          }
-        })
-        .catch(console.error);
+      jsonRestore(file, password)
+        .then(() => { onAction('/'); })
+        .catch((e) => {
+          console.error(e);
+          setIsBusy(false);
+          setIsPasswordError(true);
+        });
     },
-    [json, onAction, password]
+    [file, onAction, password]
   );
 
   return (
     <>
-      <HeaderWithSmallerMargin
+      <Header
         showBackArrow
+        smallMargin
         text={t<string>('Restore from JSON')}
       />
-      <div>
+      <div className={className}>
         <div>
           <Address
-            address={(isFileValid && address) || null}
-            genesisHash={(isFileValid && json?.meta.genesisHash as string) || null}
-            name={(isFileValid && json?.meta.name as string) || null}
+            address={address}
+            genesisHash={genesisHash}
+            name={name}
           />
         </div>
         <InputFileWithLabel
           accept={acceptedFormats}
-          isError={!isFileValid}
+          isError={isFileError}
           label={t<string>('backup file')}
           onChange={_onChangeFile}
           withLabel
         />
+        {isFileError && (
+          <Warning
+            isDanger
+          >
+            {t<string>('Invalid Json file')}
+          </Warning>
+        )}
         <InputWithLabel
-          isError={!isPassValid}
+          isError={isPasswordError}
           label={t<string>('Password for this file')}
           onChange={_onChangePass}
           type='password'
         />
+        {isPasswordError && (
+          <Warning
+            isBelowInput
+            isDanger
+          >
+            {t<string>('Unable to decode using the supplied passphrase')}
+          </Warning>
+        )}
         <Button
+          className='restoreButton'
           isBusy={isBusy}
-          isDisabled={!isFileValid || !isPassValid}
+          isDisabled={isFileError || isPasswordError}
           onClick={_onRestore}
         >
           {t<string>('Restore')}
@@ -130,6 +139,8 @@ export default function Upload (): React.ReactElement {
   );
 }
 
-const HeaderWithSmallerMargin = styled(Header)`
-  margin-bottom: 15px;
+export default styled(Upload)`
+  .restoreButton {
+    margin-top: 6px;
+  }
 `;

@@ -45,11 +45,11 @@ interface Props {
 interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
-  prefix: number;
+  prefix?: number;
 }
 
 // find an account in our list
-function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
+function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
   return accounts.find(({ address }): boolean =>
@@ -57,14 +57,31 @@ function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJs
   ) || null;
 }
 
+// find an account in our list
+function findEthAccount (accounts: AccountJson[], ethAddress: string): AccountJson | null {
+  return accounts.find(({ address }): boolean =>
+    address === ethAddress
+  ) || null;
+}
+
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
+function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct, isEthereum?: boolean | null): Recoded {
+  let account: AccountJson | null = null;
+  let prefix: number | null = null;
+
+  if (isEthereum || chain?.icon === 'ethereum') {
+    return {
+      account: findEthAccount(accounts, address),
+      formatted: address
+    };
+  }
+
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
-  const account = findAccount(accounts, publicKey);
-  const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
+  account = findSubstrateAccount(accounts, publicKey);
+  prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
 
   // always allow the actual settings to override the display
   return {
@@ -92,9 +109,9 @@ function Address ({ actions, address, children, className, genesisHash, isEthere
 
   useEffect((): void => {
     address && setRecoded(
-      recodeAddress(address, accounts, chain, settings)
+      recodeAddress(address, accounts, chain, settings, _isEthereum)
     );
-  }, [accounts, address, chain, settings]);
+  }, [_isEthereum, accounts, address, chain, settings]);
 
   useEffect(() => {
     if (!showActionsMenu) {

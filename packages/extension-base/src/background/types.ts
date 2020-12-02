@@ -35,6 +35,7 @@ export interface AccountJson extends KeyringPair$Meta {
   name?: string;
   parentAddress?: string;
   suri?: string;
+  type?: KeypairType;
   whenCreated?: number;
 }
 

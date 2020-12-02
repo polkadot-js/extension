@@ -22,12 +22,13 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
+function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri, type }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | null>(null);
 
+  console.log('account type', address, type);
   const _onChangeGenesis = useCallback(
     (genesisHash?: string | null): void => {
       tieAccount(address, genesisHash || null)
@@ -106,6 +107,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         address={address}
         className='address'
         genesisHash={genesisHash}
+        isEthereum={type === 'ethereum'}
         isExternal={isExternal}
         isHidden={isHidden}
         name={editedName}

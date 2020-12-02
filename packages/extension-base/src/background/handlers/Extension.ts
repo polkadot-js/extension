@@ -26,10 +26,16 @@ const SEED_LENGTHS = [12, 15, 18, 21, 24];
 const registry = new TypeRegistry();
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json: { address, meta } }): AccountJson => ({
-    address,
-    ...meta
+  const res = Object.values(accounts).map(({ json }): AccountJson => ({
+    address: json.address,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    type: (json as any).encoding?.content?.[1],
+    ...json.meta
   }));
+
+  console.log('res', res);
+
+  return res;
 }
 
 export default class Extension {

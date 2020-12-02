@@ -1763,6 +1763,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/devices@npm:^5.34.0":
+  version: 5.34.0
+  resolution: "@ledgerhq/devices@npm:5.34.0"
+  dependencies:
+    "@ledgerhq/errors": ^5.34.0
+    "@ledgerhq/logs": ^5.30.0
+    rxjs: ^6.6.3
+  checksum: ef143d42c203904a1bfc1a92b59ca000ac36203c7f2cb59d27ba32d4cc685e7009c24506d6e7b5821fd8178ebb435b510420660a909fbbf9c735d26e9fcee2e2
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/errors@npm:^5.30.0":
   version: 5.30.0
   resolution: "@ledgerhq/errors@npm:5.30.0"
@@ -1770,32 +1781,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport-node-hid-noevents@npm:^5.31.1":
-  version: 5.31.1
-  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:5.31.1"
-  dependencies:
-    "@ledgerhq/devices": ^5.30.0
-    "@ledgerhq/errors": ^5.30.0
-    "@ledgerhq/hw-transport": ^5.30.0
-    "@ledgerhq/logs": ^5.30.0
-    node-hid: 1.3.0
-  checksum: 1b1937e0218f760a62bdc14533855b4fdebd929e650f5a063d0f29207d43cb3b5b59c9c159db15e7ca74077a56efdf5f96ebec3e46ff41dcd90a4669818b87c8
+"@ledgerhq/errors@npm:^5.34.0":
+  version: 5.34.0
+  resolution: "@ledgerhq/errors@npm:5.34.0"
+  checksum: 8d1309690ec5b2cf0fcdc69bd89f4b597fa9b98037a7fb18857468ac68713c809deb952d9fc4c59ba69145863f7974de4bff8777c4a65d8991a4a03109fe31ca
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport-node-hid-singleton@npm:^5.30.0":
-  version: 5.31.1
-  resolution: "@ledgerhq/hw-transport-node-hid-singleton@npm:5.31.1"
+"@ledgerhq/hw-transport-node-hid-noevents@npm:^5.34.0":
+  version: 5.34.0
+  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:5.34.0"
   dependencies:
-    "@ledgerhq/devices": ^5.30.0
-    "@ledgerhq/errors": ^5.30.0
-    "@ledgerhq/hw-transport": ^5.30.0
-    "@ledgerhq/hw-transport-node-hid-noevents": ^5.31.1
+    "@ledgerhq/devices": ^5.34.0
+    "@ledgerhq/errors": ^5.34.0
+    "@ledgerhq/hw-transport": ^5.34.0
+    "@ledgerhq/logs": ^5.30.0
+    node-hid: 2.0.0-0
+  checksum: 9b7b4bc5e11021f1a6076a8664f70bf3452a80b6d9086eb50916e15e6ef4e0d52c27483b09b0424bd8f7ac092147b713aedd657dab1d71137d008ca083777b07
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-node-hid-singleton@npm:^5.31.1":
+  version: 5.34.0
+  resolution: "@ledgerhq/hw-transport-node-hid-singleton@npm:5.34.0"
+  dependencies:
+    "@ledgerhq/devices": ^5.34.0
+    "@ledgerhq/errors": ^5.34.0
+    "@ledgerhq/hw-transport": ^5.34.0
+    "@ledgerhq/hw-transport-node-hid-noevents": ^5.34.0
     "@ledgerhq/logs": ^5.30.0
     lodash: ^4.17.20
-    node-hid: 1.3.0
+    node-hid: 2.0.0-0
     usb-detection: ^4.10.0
-  checksum: 1cf9b4d1832aca821325d9fe30faddf024531f51ab67f362d58cd1bc2bb7fda8e59e1ebaa4cd449d3378a162ea195a08fa46f2cf12365ea79dd4c9e1a0ee9f79
+  checksum: 0de3d0e010f12f8f5739a44e2c1667d09e03349e6f2d863478cc435b41acc40bffc5c0827695ba9a2b9673618a4b90a89dd9c740db1e12091bce09457faea264
   languageName: node
   linkType: hard
 
@@ -1819,6 +1837,17 @@ __metadata:
     "@ledgerhq/errors": ^5.30.0
     events: ^3.2.0
   checksum: 2f08214f27ce555ed4a235c90e54174dd56db98d4c135bbd75ef5ad6ab388a5b3863dd775e1e406dd59160b917cc146e8e85f7a25c47f01be4eea50896d7f8ea
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport@npm:^5.34.0":
+  version: 5.34.0
+  resolution: "@ledgerhq/hw-transport@npm:5.34.0"
+  dependencies:
+    "@ledgerhq/devices": ^5.34.0
+    "@ledgerhq/errors": ^5.34.0
+    events: ^3.2.0
+  checksum: ee698afde8541cf656c6ae95bb9b850a15b660c309414257f4461d611d66f873879f19d0cfff9cf6b7d8d43c3a5dcac31e9133164f958bce5a687244221705f0
   languageName: node
   linkType: hard
 
@@ -2022,7 +2051,7 @@ __metadata:
     "@polkadot/api": ^2.8.3-5
     "@polkadot/extension-inject": ^0.35.1
     "@polkadot/keyring": ^4.2.1
-    "@polkadot/ui-keyring": ^0.62.2-15
+    "@polkadot/ui-keyring": ^0.62.2-19
   languageName: unknown
   linkType: soft
 
@@ -2130,31 +2159,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ledger-transports@npm:0.62.2-15":
-  version: 0.62.2-15
-  resolution: "@polkadot/ledger-transports@npm:0.62.2-15"
+"@polkadot/ledger-transports@npm:0.62.2-19":
+  version: 0.62.2-19
+  resolution: "@polkadot/ledger-transports@npm:0.62.2-19"
   dependencies:
     "@babel/runtime": ^7.12.5
-    "@ledgerhq/hw-transport-node-hid-singleton": ^5.30.0
+    "@ledgerhq/hw-transport-node-hid-singleton": ^5.31.1
     "@ledgerhq/hw-transport-webusb": ^5.30.0
   dependenciesMeta:
     "@ledgerhq/hw-transport-node-hid-singleton":
       optional: true
-  checksum: 4f6593d4f1a3395a55e972519187993699b4467fcaab3ea14542016f50b9008a46d647076981c8af63789111a371e2f736a09fa54da6d86934bca39fec31d911
+  checksum: 8c7110c6dc4f5e7781d5d1bc1feeb8b376780dfb0b9f584ceb18adc49e10adbd82e30e93fa39fd2c1f01167c0de631173e548fdc9f06d38ee4d57c9051296b21
   languageName: node
   linkType: hard
 
-"@polkadot/ledger@npm:^0.62.2-15":
-  version: 0.62.2-15
-  resolution: "@polkadot/ledger@npm:0.62.2-15"
+"@polkadot/ledger@npm:^0.62.2-19":
+  version: 0.62.2-19
+  resolution: "@polkadot/ledger@npm:0.62.2-19"
   dependencies:
     "@babel/runtime": ^7.12.5
-    "@polkadot/ledger-transports": 0.62.2-15
+    "@polkadot/ledger-transports": 0.62.2-19
     "@polkadot/util": ^4.2.1
     "@zondax/ledger-polkadot": ^0.11.0
   peerDependencies:
     "@polkadot/util": "*"
-  checksum: 8ad5eb7e00120055568ea09caeb4bc01abe1de04f6444bca2bd726efa81e522fca1e98d8149ff8a26273003c97c1188d05ac61a58a0927b3ee64dac354180db7
+  checksum: 07612065afe6e91d3b8e5011d46b7026b808f9339e884cc91a4e2192eae7e8011c42ec4e7b35fb90e9217c79c4963588e1f12efa6b988916722c5f0196bf77e3
   languageName: node
   linkType: hard
 
@@ -2297,14 +2326,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^0.62.2-15":
-  version: 0.62.2-15
-  resolution: "@polkadot/ui-keyring@npm:0.62.2-15"
+"@polkadot/ui-keyring@npm:^0.62.2-19":
+  version: 0.62.2-19
+  resolution: "@polkadot/ui-keyring@npm:0.62.2-19"
   dependencies:
     "@babel/runtime": ^7.12.5
     "@polkadot/keyring": ^4.2.1
-    "@polkadot/ledger": ^0.62.2-15
-    "@polkadot/ui-settings": 0.62.2-15
+    "@polkadot/ledger": ^0.62.2-19
+    "@polkadot/ui-settings": 0.62.2-19
     "@polkadot/util": ^4.2.1
     mkdirp: ^1.0.4
     rxjs: ^6.6.3
@@ -2313,7 +2342,7 @@ __metadata:
     "@polkadot/keyring": "*"
     "@polkadot/ui-settings": "*"
     "@polkadot/util": "*"
-  checksum: fafaaffe60d8d3d74ff3e50f4dcf7607aa54500bdd9924303d0297c6754ba2151952d7d6d0e6a48aec12bd2a0774c820adf445f435bb6e00804f86dfee755b33
+  checksum: 14380b031110329e9bfcd9cecb37019f630c9d41e26877d1502ac4b23581d34ff6d5586a264087c90e08efcc377499d3954837132c278dd9834ae30be70d395d
   languageName: node
   linkType: hard
 
@@ -2330,6 +2359,22 @@ __metadata:
     "@polkadot/networks": "*"
     "@polkadot/util": "*"
   checksum: 391762807d88d44e19c7bc78e7ef2718487bb9bcbf084d8f1beb23923aabce1391c77bcb1f5fc897e545503b13ced541748f56ccd86fad27dd7242af39156133
+  languageName: node
+  linkType: hard
+
+"@polkadot/ui-settings@npm:0.62.2-19":
+  version: 0.62.2-19
+  resolution: "@polkadot/ui-settings@npm:0.62.2-19"
+  dependencies:
+    "@babel/runtime": ^7.12.5
+    "@polkadot/networks": ^4.2.1
+    "@polkadot/util": ^4.2.1
+    eventemitter3: ^4.0.7
+    store: ^2.0.12
+  peerDependencies:
+    "@polkadot/networks": "*"
+    "@polkadot/util": "*"
+  checksum: d5f14b012a00d416abcdbec9642ae851e2f47f13f71bc56cbadcdf9f7933e9a80f6a6002f58f39e45cb8792d6ca584461173b30d3cfe46bc080471ea478b07ac
   languageName: node
   linkType: hard
 
@@ -11411,7 +11456,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.12.1, nan@npm:^2.13.2, nan@npm:^2.14.0":
+"nan@npm:^2.12.1, nan@npm:^2.13.2":
   version: 2.14.2
   resolution: "nan@npm:2.14.2"
   dependencies:
@@ -11529,12 +11574,21 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"node-abi@npm:^2.18.0, node-abi@npm:^2.7.0":
+"node-abi@npm:^2.7.0":
   version: 2.19.1
   resolution: "node-abi@npm:2.19.1"
   dependencies:
     semver: ^5.4.1
   checksum: 3dc98098e2fb61068e52f751e6d07d8bba6d042dc1e7986ff182e71c7aba2a86466135e603941ff33525e85a57ee93f44b4ed5498637261ed11000639e2720e7
+  languageName: node
+  linkType: hard
+
+"node-addon-api@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "node-addon-api@npm:3.0.2"
+  dependencies:
+    node-gyp: latest
+  checksum: 7f401e4ad9ed75cea9ba8590da8048b37e99531e8d8b46b941e6c951ca1cf8e0db29f31ddf25d3e87c13cb6653c06e0db72c05ef50eff9db3529cd929ae69747
   languageName: node
   linkType: hard
 
@@ -11576,18 +11630,17 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"node-hid@npm:1.3.0":
-  version: 1.3.0
-  resolution: "node-hid@npm:1.3.0"
+"node-hid@npm:2.0.0-0":
+  version: 2.0.0-0
+  resolution: "node-hid@npm:2.0.0-0"
   dependencies:
     bindings: ^1.5.0
-    nan: ^2.14.0
-    node-abi: ^2.18.0
+    node-addon-api: ^3.0.2
     node-gyp: latest
-    prebuild-install: ^5.3.4
+    prebuild-install: ^6.0.0
   bin:
     hid-showdevices: src/show-devices.js
-  checksum: eab0be9a9fa3d2a843eb900e22b1c2287a41e542e02c788e27916b90d70dfc9883e4722bb5e2d150a0e03f400aadd5b611fbfafa13dc68991d8264f4fad663c1
+  checksum: f077445e596a011c92c13beba3ce3c740893ac7deb68eb8daf12894ca47c35350fdf7497b885d71319707c7f0054a9fd3149387f319ca599c7e1421054fb97d8
   languageName: node
   linkType: hard
 
@@ -12600,7 +12653,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^5.3.4, prebuild-install@npm:^5.3.5":
+"prebuild-install@npm:^5.3.5":
   version: 5.3.6
   resolution: "prebuild-install@npm:5.3.6"
   dependencies:
@@ -12622,6 +12675,31 @@ fsevents@^1.2.7:
   bin:
     prebuild-install: bin.js
   checksum: 81ff157668dc26349e1f8076fce0ba990f45481e39a64645efad60c9ae2d61e73e3c420d56f5f38fbe6dc3275e8e27067d2613d941c778f41658a6110e544130
+  languageName: node
+  linkType: hard
+
+"prebuild-install@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "prebuild-install@npm:6.0.0"
+  dependencies:
+    detect-libc: ^1.0.3
+    expand-template: ^2.0.3
+    github-from-package: 0.0.0
+    minimist: ^1.2.3
+    mkdirp-classic: ^0.5.3
+    napi-build-utils: ^1.0.1
+    node-abi: ^2.7.0
+    noop-logger: ^0.1.1
+    npmlog: ^4.0.1
+    pump: ^3.0.0
+    rc: ^1.2.7
+    simple-get: ^3.0.3
+    tar-fs: ^2.0.0
+    tunnel-agent: ^0.6.0
+    which-pm-runs: ^1.0.0
+  bin:
+    prebuild-install: ./bin.js
+  checksum: 02db5ebaf2c45996a5005928996ffcd2cf13ed5daf10386b3b4fc0ea51d27c4d045fa21acaf4359c07474773bed1d4e4f55f8a33b2efb24339566497cbe7d223
   languageName: node
   linkType: hard
 

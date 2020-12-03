@@ -89,7 +89,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -107,13 +107,13 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       return;
     }
 
-    const recoded = type === 'ethereum' || isHex(address)
+    const recoded = givenType === 'ethereum' || isHex(address)
       ? { account: findAccountByAddress(accounts, address), formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
 
     console.log('recoded', recoded);
     setRecoded(recoded || defaultRecoded);
-  }, [accounts, address, chain, settings, type]);
+  }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {
     if (!showActionsMenu) {

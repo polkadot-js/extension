@@ -103,12 +103,17 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
-    const recoded = isHex(address)
-      ? { account: findAccountByAddress(accounts, address), formatted: address, type: 'ethereum' } as Recoded
-      : address && recodeAddress(address, accounts, chain, settings);
+    if (!address) {
+      return;
+    }
 
-    address && setRecoded(recoded || defaultRecoded);
-  }, [accounts, address, chain, settings]);
+    const recoded = type === 'ethereum' || isHex(address)
+      ? { account: findAccountByAddress(accounts, address), formatted: address, type: 'ethereum' } as Recoded
+      : recodeAddress(address, accounts, chain, settings);
+
+    console.log('recoded', recoded);
+    setRecoded(recoded || defaultRecoded);
+  }, [accounts, address, chain, settings, type]);
 
   useEffect(() => {
     if (!showActionsMenu) {

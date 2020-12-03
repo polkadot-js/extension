@@ -114,5 +114,7 @@
   "Wrong password": "",
   "Incorrect derivation path": "",
   "lifetime": "",
-  "Warning: Caps lock is on": ""
+  "Warning: Caps lock is on": "",
+  "Invalid Json file": "",
+  "Unable to decode using the supplied passphrase": ""
 }

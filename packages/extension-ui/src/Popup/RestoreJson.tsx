@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import type { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -11,7 +12,7 @@ import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Butt
 import useTranslation from '../hooks/useTranslation';
 import { jsonRestore, jsonGetAccountInfo } from '../messaging';
 import { Header } from '../partials';
-import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
+import { DEFAULT_TYPE } from '../util/defaultType';
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
@@ -24,7 +25,7 @@ function Upload ({ className } : Props): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const [{ address, genesisHash, name, type }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '', type: 'sr25519' });
+  const [{ address, genesisHash, name, type }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '', type: DEFAULT_TYPE });
   const [password, setPassword] = useState<string>('');
   const [isFileError, setFileError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
@@ -95,8 +96,8 @@ function Upload ({ className } : Props): React.ReactElement {
           <Address
             address={address}
             genesisHash={genesisHash}
-            isEthereum={type === 'ethereum'}
             name={name}
+            type={type}
           />
         </div>
         <InputFileWithLabel

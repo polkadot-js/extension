@@ -28,7 +28,6 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | null>(null);
 
-  console.log('account type', address, type);
   const _onChangeGenesis = useCallback(
     (genesisHash?: string | null): void => {
       tieAccount(address, genesisHash || null)
@@ -62,7 +61,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       >
         {t<string>('Rename')}
       </Link>
-      {!isExternal && (
+      {!isExternal && type !== 'ethereum' && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}
@@ -98,7 +97,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         />
       </div>
     </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, t]);
+  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, t, type]);
 
   return (
     <div className={className}>
@@ -107,7 +106,6 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         address={address}
         className='address'
         genesisHash={genesisHash}
-        isEthereum={type === 'ethereum'}
         isExternal={isExternal}
         isHidden={isHidden}
         name={editedName}

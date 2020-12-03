@@ -3,10 +3,12 @@
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import type { Chain } from '@polkadot/extension-chains/types';
-import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
+import type { SettingsStruct } from '@polkadot/ui-settings/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
+import { isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
@@ -22,6 +24,7 @@ import useOutsideClick from '../hooks/useOutsideClick';
 import useMetadata from '../hooks/useMetadata';
 import useTranslation from '../hooks/useTranslation';
 import useToast from '../hooks/useToast';
+import { DEFAULT_TYPE } from '../util/defaultType';
 import Identicon from './Identicon';
 import Menu from './Menu';
 import { showAccount } from '../messaging';
@@ -33,19 +36,20 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   genesisHash?: string | null;
-  isEthereum?: boolean | null;
   isExternal?: boolean | null;
   isHidden?: boolean;
   name?: React.ReactNode | null;
   parentName?: string | null;
   suri?: string;
   toggleActions?: number;
+  type?: KeypairType;
 }
 
 interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
   prefix?: number;
+  type: KeypairType;
 }
 
 // find an account in our list
@@ -58,60 +62,53 @@ function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): 
 }
 
 // find an account in our list
-function findEthAccount (accounts: AccountJson[], ethAddress: string): AccountJson | null {
+function findAccountByAddress (accounts: AccountJson[], _address: string): AccountJson | null {
   return accounts.find(({ address }): boolean =>
-    address === ethAddress
+    address === _address
   ) || null;
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct, isEthereum?: boolean | null): Recoded {
-  let account: AccountJson | null = null;
-  let prefix: number | null = null;
-
-  if (isEthereum || chain?.icon === 'ethereum') {
-    return {
-      account: findEthAccount(accounts, address),
-      formatted: address
-    };
-  }
-
+function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
-  account = findSubstrateAccount(accounts, publicKey);
-  prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
+  const account = findSubstrateAccount(accounts, publicKey);
+  const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
 
   // always allow the actual settings to override the display
   return {
     account,
     formatted: encodeAddress(publicKey, prefix),
-    prefix
+    prefix,
+    type: account?.type || DEFAULT_TYPE
   };
 }
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
+const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isEthereum, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const chain = useMetadata(genesisHash, true);
-  const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
+  const [{ account, formatted, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
-  const _isEthereum = isEthereum;
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
-    address && setRecoded(
-      recodeAddress(address, accounts, chain, settings, _isEthereum)
-    );
-  }, [_isEthereum, accounts, address, chain, settings]);
+    const recoded = isHex(address)
+      ? { account: findAccountByAddress(accounts, address), formatted: address, type: 'ethereum' } as Recoded
+      : address && recodeAddress(address, accounts, chain, settings);
+
+    address && setRecoded(recoded || defaultRecoded);
+  }, [accounts, address, chain, settings]);
 
   useEffect(() => {
     if (!showActionsMenu) {
@@ -132,7 +129,7 @@ function Address ({ actions, address, children, className, genesisHash, isEthere
   const theme = (
     chain?.icon
       ? chain.icon
-      : _isEthereum
+      : type === 'ethereum'
         ? 'ethereum'
         : 'polkadot'
   ) as IconTheme;
@@ -217,7 +214,7 @@ function Address ({ actions, address, children, className, genesisHash, isEthere
               className='fullAddress'
               data-field='address'
             >
-              {formatted || t('<unknown>')}
+              {formatted || address || t('<unknown>')}
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''} >
               <FontAwesomeIcon

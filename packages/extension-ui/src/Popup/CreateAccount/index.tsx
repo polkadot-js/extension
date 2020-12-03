@@ -7,6 +7,7 @@ import { ActionContext, Address, Loading } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
+import { DEFAULT_TYPE } from '../../util/defaultType';
 import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';
 
@@ -16,12 +17,13 @@ export default function CreateAccount (): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
+  const type = DEFAULT_TYPE;
 
   useEffect((): void => {
-    createSeed()
+    createSeed(undefined, type)
       .then(setAccount)
       .catch((error: Error) => console.error(error));
-  }, []);
+  }, [type]);
 
   // FIXME Duplicated between here and Import.tsx
   const _onCreate = useCallback(

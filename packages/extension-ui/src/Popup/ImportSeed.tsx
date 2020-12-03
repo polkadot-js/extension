@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, NextStepButton, TextAreaWithLabel, ValidatedInput, VerticalSpace } from '../components';
+import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, NextStepButton, TextAreaWithLabel, ValidatedInput } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { Header, Name, Password } from '../partials';
@@ -25,6 +25,13 @@ const isSeedValid = allOf(
   isNotShorterThan(1, 'Seed is empty'),
   validate
 );
+
+const SeedInput = styled(TextAreaWithLabel)`
+  margin-bottom: 16px;
+  textarea {
+    height: unset;
+  }
+`;
 
 function Import ({ className } : {className?: string}): React.ReactElement {
   const { t } = useTranslation();
@@ -127,13 +134,6 @@ function Import ({ className } : {className?: string}): React.ReactElement {
     </>
   );
 }
-
-const SeedInput = styled(TextAreaWithLabel)`
-  margin-bottom: 16px;
-  textarea {
-    height: unset;
-  }
-`;
 
 export default styled(Import)`
   height: 100%;

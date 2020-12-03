@@ -1,9 +1,9 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { ActionContext, Address, Checkbox, Loading } from '../../components';
+import { ActionContext, Address, Loading } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
@@ -17,12 +17,7 @@ export default function CreateAccount (): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
-  const [isEthereum, setIsEthereum] = useState(false);
-  const type = useMemo(() =>
-    isEthereum
-      ? 'ethereum'
-      : DEFAULT_TYPE,
-  [isEthereum]);
+  const type = DEFAULT_TYPE;
 
   useEffect((): void => {
     createSeed(undefined, type)
@@ -37,7 +32,7 @@ export default function CreateAccount (): React.ReactElement {
       if (name && password && account) {
         setIsBusy(true);
 
-        createAccountSuri(name, password, account.seed, type)
+        createAccountSuri(name, password, account.seed)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
             setIsBusy(false);
@@ -45,7 +40,7 @@ export default function CreateAccount (): React.ReactElement {
           });
       }
     },
-    [account, onAction, type]
+    [account, onAction]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
@@ -59,15 +54,7 @@ export default function CreateAccount (): React.ReactElement {
       />
       <Loading>
         <div>
-          <Address
-            address={account?.address}
-            type={type}
-          />
-          <Checkbox
-            checked={isEthereum}
-            label={t<string>('Ethereum account')}
-            onChange={setIsEthereum}
-          />
+          <Address address={account?.address} />
         </div>
         {account && (
           step === 1

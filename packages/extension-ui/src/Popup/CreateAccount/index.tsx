@@ -59,7 +59,10 @@ export default function CreateAccount (): React.ReactElement {
       />
       <Loading>
         <div>
-          <Address address={account?.address}/>
+          <Address
+            address={account?.address}
+            type={type}
+          />
           <Checkbox
             checked={isEthereum}
             label={t<string>('Ethereum account')}

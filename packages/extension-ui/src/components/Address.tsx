@@ -8,7 +8,6 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
-import { isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
@@ -107,11 +106,11 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       return;
     }
 
-    const recoded = givenType === 'ethereum' || isHex(address)
-      ? { account: findAccountByAddress(accounts, address), formatted: address, type: 'ethereum' } as Recoded
+    const accountByAddress = findAccountByAddress(accounts, address);
+    const recoded = (accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
+      ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
 
-    console.log('recoded', recoded);
     setRecoded(recoded || defaultRecoded);
   }, [accounts, address, chain, givenType, settings]);
 

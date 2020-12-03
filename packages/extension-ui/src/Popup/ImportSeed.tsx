@@ -48,8 +48,6 @@ function Import ({ className } : {className?: string}): React.ReactElement {
       : DEFAULT_TYPE,
   [isEthereum]);
 
-  console.log('type', type);
-
   useEffect((): void => {
     !accounts.length && onAction();
   }, [accounts, onAction]);

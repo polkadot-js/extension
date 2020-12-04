@@ -4,7 +4,6 @@
 import type { ResponseTypes, TransportRequestMessage, TransportResponseMessage, MessageTypes, RequestTypes, MessageTypesWithNullRequest, SubscriptionMessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithSubscriptions } from '../background/types';
 
 import Injected from './Injected';
-import { isXmlOrPdf } from '../utils';
 
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
@@ -51,23 +50,16 @@ export function sendMessage<TMessageType extends MessageTypes> (message: TMessag
 
 // the enable function, called by the dapp to allow access
 export async function enable (origin: string): Promise<Injected> {
-  const currentPathname = window.location.pathname;
-
-  if (isXmlOrPdf(currentPathname)) {
-    return redirectPhishing();
-  } else {
-    await sendMessage('pub(authorize.tab)', { origin });
-
-    return new Injected(sendMessage);
-  }
-}
-
-// the redirection function, called by the page in case the host
-// is flagged as a phishing site.
-export async function redirectPhishing (): Promise<Injected> {
-  await sendMessage('pub(phishing.redirect)');
+  await sendMessage('pub(authorize.tab)', { origin });
 
   return new Injected(sendMessage);
+}
+
+// check if the host of this page is part of the phishing list
+export async function redirectIfPhishing (): Promise<boolean> {
+  const res = await sendMessage('pub(phishing.redirectIfDenied)');
+
+  return res;
 }
 
 export function handleResponse<TMessageType extends MessageTypes> (data: TransportResponseMessage<TMessageType> & { subscription?: string }): void {

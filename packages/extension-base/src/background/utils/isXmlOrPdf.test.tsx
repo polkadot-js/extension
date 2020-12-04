@@ -19,5 +19,6 @@ describe.only('File extension util function', () => {
   it('returns false for any other path', () => {
     expect(isXmlOrPdf('/some-pdf')).toBe(false);
     expect(isXmlOrPdf('/some-xml')).toBe(false);
+    expect(isXmlOrPdf('https://app.subsocial.network/@mapleleavesa')).toBe(false);
   });
 });

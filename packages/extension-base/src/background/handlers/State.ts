@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ProviderMeta, MetadataDef } from '@polkadot/extension-inject/types';
+import type { HostList } from '@polkadot/phishing/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest, RequestRpcUnsubscribe } from '../types';
 
-import { BehaviorSubject } from 'rxjs';
 import { knownMetadata, addMetadata } from '@polkadot/extension-chains';
 import chrome from '@polkadot/extension-inject/chrome';
+import { retrieveHostList } from '@polkadot/phishing';
 import { assert } from '@polkadot/util';
+import { BehaviorSubject } from 'rxjs';
 
 import { MetadataStore } from '../../stores';
 
@@ -67,6 +69,9 @@ const WINDOW_OPTS = {
   width: 560
 };
 
+// cache the list for 1h
+const CACHE_TIMEOUT = 1 * 60 * 60 * 1000;
+
 function getId (): string {
   return `${Date.now()}.${++idCounter}`;
 }
@@ -95,6 +100,9 @@ export default class State {
   public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
+
+  #phishingListCacheEnd = 0;
+  #phishingList : HostList = { allow: [], deny: [] };
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
@@ -314,6 +322,24 @@ export default class State {
     return this.#authRequests[id];
   }
 
+  public async getPhishingList (): Promise<HostList> {
+    const now = Date.now();
+
+    if (now > this.#phishingListCacheEnd) {
+      // get new list
+      this.setNewCacheEnd(now);
+      const freshList = await retrieveHostList();
+
+      this.#phishingList = freshList;
+
+      return freshList;
+    } else {
+      // use cached list
+
+      return this.#phishingList;
+    }
+  }
+
   public getMetaRequest (id: string): MetaRequest {
     return this.#metaRequests[id];
   }
@@ -394,6 +420,10 @@ export default class State {
     this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
+  }
+
+  private setNewCacheEnd (now: number): void {
+    this.#phishingListCacheEnd = now + CACHE_TIMEOUT;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

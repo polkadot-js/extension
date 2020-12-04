@@ -18,7 +18,6 @@ import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
-import { isXmlOrPdf } from '../utils';
 
 function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
   return Object
@@ -146,12 +145,6 @@ export default class Tabs {
   }
 
   private async redirectIfPhishing (url: string): Promise<boolean> {
-    const isUnwantedFile = isXmlOrPdf(url);
-
-    if (isUnwantedFile) {
-      this.redirectPhishingLanding();
-    }
-
     const { deny } = await this.#state.getPhishingList();
 
     const isInDenyList = checkHost(deny, url);

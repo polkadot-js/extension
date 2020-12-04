@@ -55,7 +55,7 @@ export async function enable (origin: string): Promise<Injected> {
   return new Injected(sendMessage);
 }
 
-// check if the host of this page is part of the phishing list
+// redirect the use if this page is considered as phishing, otherwise return false
 export async function redirectIfPhishing (): Promise<boolean> {
   const res = await sendMessage('pub(phishing.redirectIfDenied)');
 

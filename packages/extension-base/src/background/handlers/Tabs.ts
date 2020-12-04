@@ -9,7 +9,7 @@ import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
-import { checkHost } from '@polkadot/phishing';
+import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
 import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
@@ -145,9 +145,7 @@ export default class Tabs {
   }
 
   private async redirectIfPhishing (url: string): Promise<boolean> {
-    const { deny } = await this.#state.getPhishingList();
-
-    const isInDenyList = checkHost(deny, url);
+    const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
       this.redirectPhishingLanding();

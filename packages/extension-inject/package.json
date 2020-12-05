@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.126",
-    "@types/firefox-webext-browser": "^78.0.1"
+    "@types/firefox-webext-browser": "^82.0.0"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

@@ -248,28 +248,39 @@ describe('Signing requests', () => {
       signRequests = [{
         account: {
           address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
+          genesisHash: null,
           isExternal: true,
-          name: 'external'
+          isHidden: false,
+          name: 'Dave account on Signer ',
+          whenCreated: 1602085704296
         },
-        id: '1574174306604.76',
+        id: '1607357806151.5',
         request: {
           payload: {
             address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
-            blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
-            blockNumber: '0x00000000003d8e9d',
-            era: '0xd501',
-            genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-            method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
-            nonce: '0x0000000000000000',
-            signedExtensions: [],
-            specVersion: '0x00000070',
+            blockHash: '0xd2f2dfb56c16af1d0faf5b454153d3199aeb6647537f4161c26a34541c591ec8',
+            blockNumber: '0x00340171',
+            era: '0x1503',
+            genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+            method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+            nonce: '0x00000000',
+            signedExtensions: [
+              'CheckSpecVersion',
+              'CheckTxVersion',
+              'CheckGenesis',
+              'CheckMortality',
+              'CheckNonce',
+              'CheckWeight',
+              'ChargeTransactionPayment'
+            ],
+            specVersion: '0x0000002d',
             tip: '0x00000000000000000000000000000000',
-            transactionVersion: '0x00000000',
-            version: 1
+            transactionVersion: '0x00000003',
+            version: 4
           },
           sign: jest.fn()
         },
-        url: 'polkadot.js'
+        url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts'
       }];
       await mountComponent();
       expect(wrapper.find(Extrinsic)).toHaveLength(0);
@@ -306,7 +317,7 @@ describe('Signing requests', () => {
   });
 
   describe('Submitting', () => {
-    it('passes request id to cancel call', () => {
+    it.only('passes request id to cancel call', () => {
       wrapper.find('CancelButton').find('a').simulate('click');
       expect(messaging.cancelSignRequest).toBeCalledWith(signRequests[0].id);
     });

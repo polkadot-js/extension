@@ -5,6 +5,7 @@ import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
+
 import { assert } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';

@@ -5,17 +5,17 @@ import '../../../../../__mocks__/chrome';
 
 import type { ResponseDeriveValidate } from '@polkadot/extension-base/background/types';
 
-import React from 'react';
-import { MemoryRouter, Route } from 'react-router';
-import { configure, mount, ReactWrapper } from 'enzyme';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { configure, mount, ReactWrapper } from 'enzyme';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
 import { AccountContext, ActionContext, themes } from '../../components';
 import * as messaging from '../../messaging';
-import { buildHierarchy } from '../../util/buildHierarchy';
 import { flushAllPromises } from '../../testHelpers';
+import { buildHierarchy } from '../../util/buildHierarchy';
 import AddressDropdown from './AddressDropdown';
 import Derive from '.';
 

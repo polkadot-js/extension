@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDefBase } from '@polkadot/extension-inject/types';
+
 import networks from '@polkadot/networks';
 
 const hashes: MetadataDefBase[] = networks

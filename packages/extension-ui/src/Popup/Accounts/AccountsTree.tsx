@@ -4,6 +4,7 @@
 import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
 
 import React from 'react';
+
 import Account from './Account';
 
 interface Props extends AccountWithChildren {

@@ -6,7 +6,6 @@ import type { Chain } from '@polkadot/extension-chains/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { ThemeProps } from '../types';
 
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,16 +13,18 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import details from '../assets/details.svg';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+
 import parentArrow from '../assets/arrowParentLabel.svg';
-import { AccountContext, SettingsContext } from './contexts';
-import useOutsideClick from '../hooks/useOutsideClick';
+import details from '../assets/details.svg';
 import useMetadata from '../hooks/useMetadata';
-import useTranslation from '../hooks/useTranslation';
+import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
+import useTranslation from '../hooks/useTranslation';
+import { showAccount } from '../messaging';
+import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
-import { showAccount } from '../messaging';
 import Svg from './Svg';
 
 interface Props {

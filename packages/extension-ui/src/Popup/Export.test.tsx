@@ -3,17 +3,17 @@
 
 import '../../../../__mocks__/chrome';
 
-import { act } from 'react-dom/test-utils';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
-import { MemoryRouter, Route } from 'react-router';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
 import { Button, themes } from '../components';
-import Export from './Export';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
+import Export from './Export';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });

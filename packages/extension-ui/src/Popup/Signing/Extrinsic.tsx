@@ -112,9 +112,6 @@ function Extrinsic ({ className, payload, request: { blockNumber, genesisHash, m
   const specVersion = useRef(bnToBn(hexSpec)).current;
   const { era, nonce, tip } = payload;
 
-  console.log('-------->payload', payload);
-  console.log('era', era);
-
   const decoded = useMemo(
     () => chain && chain.hasMetadata
       ? decodeMethod(method, chain, specVersion)

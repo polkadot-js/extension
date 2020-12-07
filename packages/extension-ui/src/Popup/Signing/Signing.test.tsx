@@ -56,6 +56,8 @@ describe('Signing requests', () => {
     wrapper.update();
   };
 
+  const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
+
   beforeEach(async () => {
     jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
     jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
@@ -143,70 +145,6 @@ describe('Signing requests', () => {
     await mountComponent();
   });
 
-  // beforeEach(async () => {
-  //   jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
-  //   jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
-  //   signRequests = [{ // 0.031415926500000 DOT -> 5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5
-  //     account: {
-  //       address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-  //       genesisHash: null,
-  //       isHidden: false,
-  //       name: 'acc1',
-  //       parentAddress: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
-  //       suri: '//0',
-  //       whenCreated: 1602001346486
-  //     },
-  //     id: '1574174715509.78',
-  //     request: {
-  //       payload: {
-  //         address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-  //         blockHash: '0xc288fbc472dab27d13ce58212eeb1243f460c5b0f9a65e9de97cbbf9bc761cb0',
-  //         blockNumber: '0x00000000003d8c4a',
-  //         era: '0xa500',
-  //         genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-  //         method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
-  //         nonce: '0x0000000000000000',
-  //         signedExtensions: [],
-  //         specVersion: '0x0000002d',
-  //         tip: '0x00000000000000000000000000000000',
-  //         transactionVersion: '0x00000003',
-  //         version: 4
-  //       },
-  //       sign: jest.fn()
-  //     },
-  //     url: 'polkadot.js'
-  //   }, { // 10000000000 nDOT -> 5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj
-  //     account: {
-  //       address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-  //       genesisHash: null,
-  //       isHidden: false,
-  //       name: 'acc2',
-  //       whenCreated: 1602001346486
-  //     },
-  //     id: '1574174306604.76',
-  //     request: {
-  //       payload: {
-  //         address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-  //         blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
-  //         blockNumber: '0x00000000003d8e9d',
-  //         era: '0xd501',
-  //         genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-  //         method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
-  //         nonce: '0x0000000000000000',
-  //         signedExtensions: [],
-  //         specVersion: '0x0000002d',
-  //         tip: '0x00000000000000000000000000000000',
-  //         transactionVersion: '0x00000003',
-  //         version: 4
-  //       },
-  //       sign: jest.fn()
-  //     },
-  //     url: 'polkadot.js'
-  //   }];
-  //   onActionStub = jest.fn();
-  //   await mountComponent();
-  // });
-
   describe('Switching between requests', () => {
     it('initially first request should be shown', () => {
       expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
@@ -290,57 +228,70 @@ describe('Signing requests', () => {
 
   describe('Request rendering', () => {
     it('correctly displays request 1', () => {
-      expect(wrapper.find(Address).find('FullAddress').text()).toBe('5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5');
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[0].account.address);
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
-        'polkadot.js',
-        'Alexander',
-        '112',
-        '0',
-        'balances.transfer',
-        `{
-  "dest": "5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5",
-  "value": 31415926500000
-}`,
-        ' Transfer some liquid free balance to another account.   `transfer` will set the `FreeBalance` of the sender and receiver.  It will decrease the total issuance of the system by the `TransferFee`.  If the sender\'s account is below the existential deposit as a result  of the transfer, the account will be reaped.   The dispatch origin for this call must be `Signed` by the transactor.',
-        'mortal, valid from #4,033,610 to #4,033,674'
+        'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
+        '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+        '45',
+        '3',
+        '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+        'mortal, valid from {{birth}} to {{death}}'
       ]);
     });
 
     it('correctly displays request 2', () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
-      expect(wrapper.find(Address).find('FullAddress').text()).toBe('5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
-      expect(wrapper.find(Extrinsic).find('td.data').at(5).text()).toBe(`{
-  "dest": "5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj",
-  "value": 10000000000
-}`);
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe('5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
+      expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
+        'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
+        '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+        '45',
+        '3',
+        '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+        'mortal, valid from {{birth}} to {{death}}'
+      ]);
     });
   });
 
   describe('Submitting', () => {
-    it.only('passes request id to cancel call', () => {
-      wrapper.find('CancelButton').find('a').simulate('click');
+    it('passes request id to cancel call', () => {
+      wrapper.find('.cancelButton').find('a').simulate('click');
       expect(messaging.cancelSignRequest).toBeCalledWith(signRequests[0].id);
     });
 
-    it('passes request id and password to approve call', () => {
+    it('passes request id and password to approve call', async () => {
       wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
       wrapper.find(Button).find('button').simulate('click');
-      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, 'hunter1');
+      await act(flushAllPromises);
+      wrapper.update();
+      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, false, 'hunter1');
     });
 
-    it('shows an error when the password is wrong', () => {
-      jest.spyOn(messaging, 'approveSignPassword').mockImplementation(() => {
-        throw new Error();
+    it('asks the background to cache the password when the relevant checkbox is checked', async () => {
+      check(wrapper.find('input[type="checkbox"]'));
+      wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
+      wrapper.find(Button).find('button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, true, 'hunter1');
+    });
+
+    it('shows an error when the password is wrong', async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
+      jest.spyOn(messaging, 'approveSignPassword').mockImplementation(async () => {
+        throw new Error('Unable to decode using the supplied passphrase');
       });
-      // await act(flushAllPromises);
-      // wrapper.update();
+      await act(flushAllPromises);
+      wrapper.update();
       wrapper.find(Input).simulate('change', { target: { value: 'anything' } });
       wrapper.find(Button).find('button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
       expect(wrapper.find('.warning-message').first().text()).toBe('Unable to decode using the supplied passphrase');
     });
 
     it('when last request has been removed/cancelled, shows the previous one', () => {
-      wrapper.find('ArrowRight').simulate('click');
+      wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
       act(() => {
         emitter.emit('request', [signRequests[0]]);
       });

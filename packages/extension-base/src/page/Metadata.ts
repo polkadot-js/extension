@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { InjectedMetadata, InjectedMetadataKnown, MetadataDef } from '@polkadot/extension-inject/types';
-import { SendRequest } from './types';
+import type { InjectedMetadata, InjectedMetadataKnown, MetadataDef } from '@polkadot/extension-inject/types';
+import type { SendRequest } from './types';
 
 // External to class, this.# is not private enough (yet)
 let sendRequest: SendRequest;

@@ -1,11 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Message } from '@polkadot/extension-base/types';
+import type { Message } from '@polkadot/extension-base/types';
 
-import { enable, handleResponse, redirectPhishing } from '@polkadot/extension-base/page';
+import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
-import { checkIfDenied } from '@polkadot/phishing';
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -22,21 +21,14 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 });
 
-const currentUrl = window.location.host;
-
-checkIfDenied(currentUrl)
-  .then((isOnDeny) => {
-    if (isOnDeny) {
-      console.log('Phishing detected, redirecting to phishing info landing page');
-      redirectPhishing().catch(console.error);
-    } else {
-      inject();
-    }
-  })
-  .catch((error): void => {
-    console.warn(`Unable to retrieve phishing list: ${(error as Error).message}`);
+redirectIfPhishing().then((gotRedirected) => {
+  if (!gotRedirected) {
     inject();
-  });
+  }
+}).catch((e) => {
+  console.warn(`Unable to determine if the site is in the phishing list: ${(e as Error).message}`);
+  inject();
+});
 
 function inject () {
   injectExtension(enable, {

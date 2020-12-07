@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Theme, ThemeProps } from '../types';
+import type { Theme, ThemeProps } from '../types';
 
 import settings from '@polkadot/ui-settings';
 import { faExpand } from '@fortawesome/free-solid-svg-icons';

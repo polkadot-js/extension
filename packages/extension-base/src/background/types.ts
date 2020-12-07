@@ -3,11 +3,12 @@
 
 /* eslint-disable no-use-before-define */
 
-import { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
-import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import { KeypairType } from '@polkadot/util-crypto/types';
-import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
@@ -84,9 +85,8 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
-  'pri(json.restore)': [RequestJsonRestore, ResponseJsonRestore];
-  'pri(json.verify.file)': [RequestJsonRestore, boolean];
-  'pri(json.verify.password)': [string, boolean];
+  'pri(json.restore)': [RequestJsonRestore, void];
+  'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
@@ -108,7 +108,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
-  'pub(phishing.redirect)': [null, null];
+  'pub(phishing.redirectIfDenied)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.startProvider)': [string, ProviderMeta];
@@ -348,7 +348,7 @@ export interface RequestSign {
 }
 
 export interface RequestJsonRestore {
-  json: KeyringPair$Json;
+  file: KeyringPair$Json;
   password: string;
 }
 
@@ -357,3 +357,9 @@ export interface ResponseJsonRestore {
 }
 
 export type AllowedPath = typeof ALLOWED_PATH[number];
+
+export interface ResponseJsonGetAccountInfo {
+  address: string;
+  name: string;
+  genesisHash: string;
+}

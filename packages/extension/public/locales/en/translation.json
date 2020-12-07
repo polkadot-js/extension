@@ -113,5 +113,8 @@
   "account visibility": "",
   "Wrong password": "",
   "Incorrect derivation path": "",
-  "lifetime": ""
+  "lifetime": "",
+  "Warning: Caps lock is on": "",
+  "Invalid Json file": "",
+  "Unable to decode using the supplied passphrase": ""
 }

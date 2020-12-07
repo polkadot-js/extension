@@ -1,9 +1,9 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
-import { SettingsStruct } from '@polkadot/ui-settings/types';
-import { AvailableThemes } from './themes';
+import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { SettingsStruct } from '@polkadot/ui-settings/types';
+import type { AvailableThemes } from './themes';
 
 import React from 'react';
 import settings from '@polkadot/ui-settings';

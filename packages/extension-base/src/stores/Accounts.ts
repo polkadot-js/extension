@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { KeyringStore, KeyringJson } from '@polkadot/ui-keyring/types';
+import type { KeyringStore, KeyringJson } from '@polkadot/ui-keyring/types';
 
 import BaseStore from './Base';
 

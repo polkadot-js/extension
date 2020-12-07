@@ -5,6 +5,7 @@
 
 import type { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
+import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';

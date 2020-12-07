@@ -16,6 +16,7 @@ export default function Signing (): React.ReactElement {
   const requests = useContext(SigningReqContext);
   const [requestIndex, setRequestIndex] = useState(0);
 
+  console.log('request', requests);
   const _onNextClick = useCallback(
     () => setRequestIndex((requestIndex) => requestIndex + 1),
     []

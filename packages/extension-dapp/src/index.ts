@@ -4,6 +4,7 @@
 import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import initCompat from './compat';
 
 import { documentReadyPromise } from './util';
 
@@ -44,6 +45,7 @@ let web3EnablePromise: Promise<InjectedExtension[]> | null = null;
 export { isWeb3Injected, web3EnablePromise };
 
 function getWindowExtensions (originName: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
+  
   return Promise.all(
     Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
       Promise.all([
@@ -63,7 +65,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
   }
 
   web3EnablePromise = documentReadyPromise((): Promise<InjectedExtension[]> =>
-    getWindowExtensions(originName)
+  initCompat ().then(()=>getWindowExtensions(originName)
       .then((values): InjectedExtension[] =>
         values
           .filter((value): value is [InjectedExtensionInfo, Injected] => !!value[1])
@@ -91,7 +93,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
 
         return values;
       })
-  );
+  ));
 
   return web3EnablePromise;
 }

@@ -14,6 +14,7 @@
     "web3": "^1.3.0"
   },
   "peerDependencies": {
-    "@polkadot/api": "*"
+    "@polkadot/api": "*",
+    "web3": "^1.3.0"
   }
 }

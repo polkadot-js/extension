@@ -50,8 +50,8 @@ interface Web3Window extends InjectedWindow {
 
 // transfor the Web3 accounts into a simple address/name array
 function transformAccounts(accounts: string[]): InjectedAccount[] {
-  return accounts.map((acc) => {
-    return { address: acc };
+  return accounts.map((acc,i) => {
+    return { address: acc, name:'MetaMask Address #'+i };
   });
 }
 
@@ -75,6 +75,8 @@ function injectWeb3(win: Web3Window): void {
         return {
           accounts: {
             get: async (): Promise<InjectedAccount[]> => {
+                console.log('fetching accounts')
+                console.log(await win.web3.eth.getAccounts())
               return transformAccounts(await win.web3.eth.getAccounts());
             },
             subscribe: (cb: (accounts: InjectedAccount[]) => void): (() => void) => {
@@ -102,8 +104,10 @@ function injectWeb3(win: Web3Window): void {
 // returns the SingleSource instance, as per
 // https://github.com/cennznet/singlesource-extension/blob/f7cb35b54e820bf46339f6b88ffede1b8e140de0/react-example/src/App.js#L19
 export default function initWeb3Source(): Promise<boolean> {
+    console.log('initWeb3Source')
   return new Promise((resolve): void => {
-    window.addEventListener("load", (): void => {
+      //console.log('listening')
+    //window.addEventListener("load", (): void => {
       console.log("loading web3");
       const win = window as Window & Web3Window;
 
@@ -113,6 +117,6 @@ export default function initWeb3Source(): Promise<boolean> {
       } else {
         resolve(false);
       }
-    });
+    //});
   });
 }

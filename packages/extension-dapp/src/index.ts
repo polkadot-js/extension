@@ -27,7 +27,7 @@ function throwError (method: string): never {
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
 function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
   return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => {
-    const encodedAddress = encodeAddress(decodeAddress(address), ss58Format);
+    const encodedAddress = address.length==42? address :encodeAddress(decodeAddress(address), ss58Format);
 
     return ({
       address: encodedAddress,
@@ -110,6 +110,7 @@ export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): P
     injected.map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
       try {
         const list = await accounts.get();
+        console.log('web3Accounts call res',list)
 
         return mapAccounts(source, list, ss58Format);
       } catch (error) {

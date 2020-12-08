@@ -3,12 +3,13 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import settings from '@polkadot/ui-settings';
 import { faExpand } from '@fortawesome/free-solid-svg-icons';
-import React, { useCallback, useContext, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, ThemeSwitchContext, themes } from '../components';
+import settings from '@polkadot/ui-settings';
+
+import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';

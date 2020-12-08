@@ -6,6 +6,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { AvailableThemes } from './themes';
 
 import React from 'react';
+
 import settings from '@polkadot/ui-settings';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

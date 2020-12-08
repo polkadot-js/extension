@@ -1,15 +1,14 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributor
 // SPDX-License-Identifier: Apache-2.0
 
+import React from 'react';
 import { WithTranslation } from 'react-i18next';
 
-import React from 'react';
-
-import ButtonArea from './ButtonArea';
-import Button from './Button';
-import VerticalSpace from './VerticalSpace';
 import Header from '../partials/Header';
+import Button from './Button';
+import ButtonArea from './ButtonArea';
 import translate from './translate';
+import VerticalSpace from './VerticalSpace';
 
 interface Props extends WithTranslation {
   children: React.ReactNode;

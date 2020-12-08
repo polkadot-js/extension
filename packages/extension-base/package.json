@@ -1,17 +1,17 @@
 {
   "name": "@polkadot/extension-base",
   "description": "Functions, classes and other utilities used in @polkadot/extension",
-  "version": "0.35.2-4",
+  "version": "0.35.2-5",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.12.5",
-    "@polkadot/api": "^2.9.1",
-    "@polkadot/extension-inject": "^0.35.2-4",
+    "@polkadot/api": "^2.10.1",
+    "@polkadot/extension-inject": "^0.35.2-5",
     "@polkadot/keyring": "^4.2.1",
-    "@polkadot/phishing": "^0.2.6",
-    "@polkadot/ui-keyring": "^0.62.2-17"
+    "@polkadot/phishing": "^0.2.7",
+    "@polkadot/ui-keyring": "^0.62.2-20"
   }
 }

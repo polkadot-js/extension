@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext, useState } from 'react';
+
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Address, NextStepButton, ButtonArea, VerticalSpace } from '../components';
+import { ActionContext, Address, ButtonArea, NextStepButton, VerticalSpace } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountExternal } from '../messaging';
 import { Header, Name } from '../partials';

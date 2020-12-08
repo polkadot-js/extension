@@ -5,13 +5,14 @@ import type { KeyringPair$Json } from '@polkadot/keyring/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, ActionContext, InputWithLabel, InputFileWithLabel, Button, Address, Warning } from '../components';
+import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { jsonRestore, jsonGetAccountInfo } from '../messaging';
+import { jsonGetAccountInfo, jsonRestore } from '../messaging';
 import { Header } from '../partials';
-import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 

@@ -6,6 +6,7 @@ import type { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
 import { Button } from '../../components';

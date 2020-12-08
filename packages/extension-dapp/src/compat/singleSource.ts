@@ -74,6 +74,7 @@ function injectSingleSource (win: SingleWindow): void {
 export default function initSingleSource (): Promise<boolean> {
   return new Promise((resolve): void => {
     window.addEventListener('load', (): void => {
+      console.log('loading singlesource')
       const win = window as Window & SingleWindow;
 
       if (win.SingleSource) {

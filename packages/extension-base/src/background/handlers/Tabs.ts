@@ -11,7 +11,7 @@ import type { MessageTypes, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubsc
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
-import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
+import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
 import RequestBytesSign from '../RequestBytesSign';

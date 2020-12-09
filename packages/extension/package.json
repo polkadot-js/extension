@@ -11,6 +11,6 @@
     "@polkadot/extension-ui": "^0.35.2-5"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.60.12"
+    "@polkadot/dev": "^0.60.13"
   }
 }

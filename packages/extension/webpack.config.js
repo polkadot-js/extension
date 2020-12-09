@@ -6,6 +6,7 @@ const webpack = require('webpack');
 
 const CopyPlugin = require('copy-webpack-plugin');
 const ManifestPlugin = require('webpack-extension-manifest-plugin');
+const babelOptions = require('@polkadot/dev/config/babel-config-esm.cjs');
 
 const pkgJson = require('./package.json');
 const manifest = require('./manifest.json');
@@ -17,6 +18,13 @@ const packages = [
   'extension-inject',
   'extension-ui'
 ];
+
+const lastBabel = babelOptions.plugins[babelOptions.plugins.length - 1];
+
+// remove the resolve plugin, this is gret for libs - not so much for webpack
+if (Array.isArray(lastBabel) && lastBabel[0].includes('extension-resolver')) {
+  babelOptions.plugins.pop();
+}
 
 function createWebpack ({ alias = {}, context }) {
   const ENV = process.env.NODE_ENV || 'development';
@@ -35,18 +43,13 @@ function createWebpack ({ alias = {}, context }) {
     module: {
       rules: [
         {
-          include: /node_modules/,
-          test: /\.mjs$/,
-          type: 'javascript/auto'
-        },
-        {
           exclude: /(node_modules)/,
           test: /\.(js|ts|tsx)$/,
           use: [
             require.resolve('thread-loader'),
             {
               loader: require.resolve('babel-loader'),
-              options: require('@polkadot/dev/config/babel-config-cjs.cjs')
+              options: babelOptions
             }
           ]
         },

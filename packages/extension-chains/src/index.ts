@@ -1,19 +1,13 @@
 // Copyright 2019-2020 @polkadot/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef } from '@polkadot/extension-inject/esm/types';
 import type { Chain } from './types';
 
-import { Metadata } from '@polkadot/metadata';
-import { TypeRegistry } from '@polkadot/types';
+import { Metadata } from '@polkadot/metadata/esm';
+import { TypeRegistry } from '@polkadot/types/esm';
 
-// imports chain details, generally metadata. For the generation of these,
-// inside the api, run `yarn chain:info --ws <url>`
-// import kusama from './kusama';
-
-const definitions = new Map<string, MetadataDef>(
-  // [kusama].map((def) => [def.genesisHash, def])
-);
+const definitions = new Map<string, MetadataDef>();
 
 const expanded = new Map<string, Chain>();
 
@@ -45,7 +39,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     registry.setMetadata(new Metadata(registry, Buffer.from(metaCalls, 'base64')));
   }
 
-  const result = {
+  const result: Chain = {
     definition,
     genesisHash: isUnknown
       ? undefined

@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import type { Chain } from '@polkadot/extension-chains/types';
+import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/esm/background/types';
+import type { Chain } from '@polkadot/extension-chains/esm/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { ThemeProps } from '../types';
 
@@ -13,7 +13,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto/esm';
 
 import parentArrow from '../assets/arrowParentLabel.svg';
 import details from '../assets/details.svg';

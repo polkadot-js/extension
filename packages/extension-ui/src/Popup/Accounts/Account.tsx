@@ -1,12 +1,12 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson } from '@polkadot/extension-base/background/types';
+import type { AccountJson } from '@polkadot/extension-base/esm/background/types';
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import genesisOptions from '@polkadot/extension-chains/genesisHashes';
+import genesisOptions from '@polkadot/extension-chains/esm/genesisHashes';
 
 import { ActionContext, Address, Dropdown, Link, MenuDivider } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

@@ -7,7 +7,7 @@ import React, { createRef, useCallback, useState } from 'react';
 import Dropzone, { DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
 
-import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
+import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util/esm';
 
 import useTranslation from '../hooks/useTranslation';
 import Label from './Label';

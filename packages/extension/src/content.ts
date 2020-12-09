@@ -1,10 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Message } from '@polkadot/extension-base/types';
+import type { Message } from '@polkadot/extension-base/esm/types';
 
-import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
-import chrome from '@polkadot/extension-inject/chrome';
+import { PORT_CONTENT } from '@polkadot/extension-base/esm/defaults';
+import chrome from '@polkadot/extension-inject/esm/chrome';
 
 // connect to the extension
 const port = chrome.runtime.connect({ name: PORT_CONTENT });

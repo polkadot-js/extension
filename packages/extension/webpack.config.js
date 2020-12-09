@@ -118,6 +118,7 @@ function createWebpack ({ alias = {}, context }) {
 
 module.exports = createWebpack({
   alias: packages.reduce((alias, pkg) => {
+    alias[`@polkadot/${pkg}/esm`] = path.resolve(__dirname, `../${pkg}/src`);
     alias[`@polkadot/${pkg}`] = path.resolve(__dirname, `../${pkg}/src`);
 
     return alias;

@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import type { SignerPayloadJSON } from '@polkadot/types/types';
+import type { ExtrinsicPayload } from '@polkadot/types/esm/interfaces';
+import type { SignerPayloadJSON } from '@polkadot/types/esm/types';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';

@@ -3,7 +3,7 @@
 
 import type { MessageTypes, TransportRequestMessage } from '../types';
 
-import { assert } from '@polkadot/util';
+import { assert } from '@polkadot/util/esm';
 
 import { PORT_EXTENSION } from '../../defaults';
 import Extension from './Extension';

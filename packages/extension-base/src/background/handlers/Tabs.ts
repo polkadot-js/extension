@@ -1,18 +1,18 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
-import type { KeyringPair } from '@polkadot/keyring/types';
-import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/esm/types';
+import type { KeyringPair } from '@polkadot/keyring/esm/types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/esm/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/esm/types';
+import type { SubjectInfo } from '@polkadot/ui-keyring/esm/observable/types';
 import type { MessageTypes, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
 
-import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
-import { checkIfDenied } from '@polkadot/phishing';
-import keyring from '@polkadot/ui-keyring';
-import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { assert } from '@polkadot/util';
+import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/esm/defaults';
+import { checkIfDenied } from '@polkadot/phishing/esm';
+import { keyring } from '@polkadot/ui-keyring/esm';
+import { accounts as accountsObservable } from '@polkadot/ui-keyring/esm/observable/accounts';
+import { assert } from '@polkadot/util/esm';
 
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';

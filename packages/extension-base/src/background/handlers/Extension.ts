@@ -1,18 +1,18 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { MetadataDef } from '@polkadot/extension-inject/esm/types';
+import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/esm/types';
+import type { SubjectInfo } from '@polkadot/ui-keyring/esm/observable/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
-import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
-import chrome from '@polkadot/extension-inject/chrome';
-import { TypeRegistry } from '@polkadot/types';
-import keyring from '@polkadot/ui-keyring';
-import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { assert, isHex } from '@polkadot/util';
-import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/esm/defaults';
+import chrome from '@polkadot/extension-inject/esm/chrome';
+import { TypeRegistry } from '@polkadot/types/esm';
+import { keyring } from '@polkadot/ui-keyring/esm';
+import { accounts as accountsObservable } from '@polkadot/ui-keyring/esm/observable/accounts';
+import { assert, isHex } from '@polkadot/util/esm';
+import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto/esm';
 
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';

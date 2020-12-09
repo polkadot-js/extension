@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { Registry } from '@polkadot/types/types';
+import type { MetadataDef } from '@polkadot/extension-inject/esm/types';
+import type { TypeRegistry } from '@polkadot/types/esm';
 
 export interface Chain {
   definition: MetadataDef;
@@ -11,7 +11,7 @@ export interface Chain {
   icon: string;
   isUnknown?: boolean;
   name: string;
-  registry: Registry;
+  registry: TypeRegistry;
   specVersion: number;
   ss58Format: number;
   tokenDecimals: number;

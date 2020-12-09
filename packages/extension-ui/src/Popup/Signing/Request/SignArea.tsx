@@ -4,7 +4,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
+import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/esm/defaults';
 
 import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';

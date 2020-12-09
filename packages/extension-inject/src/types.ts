@@ -1,8 +1,8 @@
 // Copyright 2019-2020 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Signer as InjectedSigner } from '@polkadot/api/types';
-import type { ProviderInterface } from '@polkadot/rpc-provider/types';
+import type { Signer as InjectedSigner } from '@polkadot/api/esm/types';
+import type { ProviderInterface } from '@polkadot/rpc-provider/esm/types';
 
 // eslint-disable-next-line no-undef
 type This = typeof globalThis;

@@ -1,15 +1,15 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Chain } from '@polkadot/extension-chains/types';
-import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
-import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
+import type { Chain } from '@polkadot/extension-chains/esm/types';
+import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/esm/interfaces';
+import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/esm/types';
 
 import BN from 'bn.js';
 import { TFunction } from 'i18next';
 import React, { useMemo, useRef } from 'react';
 
-import { bnToBn, formatNumber } from '@polkadot/util';
+import { bnToBn, formatNumber } from '@polkadot/util/esm';
 
 import { Table } from '../../components';
 import useMetadata from '../../hooks/useMetadata';

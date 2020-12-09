@@ -3,13 +3,13 @@
 
 // Runs in the extension background, handling all keyring access
 
-import handlers from '@polkadot/extension-base/background/handlers';
-import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import { AccountsStore } from '@polkadot/extension-base/stores';
-import chrome from '@polkadot/extension-inject/chrome';
-import keyring from '@polkadot/ui-keyring';
-import { assert } from '@polkadot/util';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import handlers from '@polkadot/extension-base/esm/background/handlers';
+import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/esm/defaults';
+import { AccountsStore } from '@polkadot/extension-base/esm/stores';
+import chrome from '@polkadot/extension-inject/esm/chrome';
+import { keyring } from '@polkadot/ui-keyring/esm';
+import { assert } from '@polkadot/util/esm';
+import { cryptoWaitReady } from '@polkadot/util-crypto/esm';
 
 // setup the notification (same a FF default background, white text)
 chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' });

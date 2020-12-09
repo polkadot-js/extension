@@ -3,13 +3,13 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
-import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/esm/types';
+import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/esm/types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/esm/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/esm/types';
+import type { KeypairType } from '@polkadot/util-crypto/esm/types';
 
-import { TypeRegistry } from '@polkadot/types';
+import { TypeRegistry } from '@polkadot/types/esm';
 
 import { ALLOWED_PATH } from '../defaults';
 

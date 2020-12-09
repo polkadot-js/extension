@@ -1,10 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Message } from '@polkadot/extension-base/types';
+import type { Message } from '@polkadot/extension-base/esm/types';
 
-import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
-import { injectExtension } from '@polkadot/extension-inject';
+import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/esm/page';
+import { injectExtension } from '@polkadot/extension-inject/esm';
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {

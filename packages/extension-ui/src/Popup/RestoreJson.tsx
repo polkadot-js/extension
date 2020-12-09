@@ -1,13 +1,13 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import type { KeyringPair$Json } from '@polkadot/keyring/esm/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
-import { u8aToString } from '@polkadot/util';
+import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/esm/background/types';
+import { u8aToString } from '@polkadot/util/esm';
 
 import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';

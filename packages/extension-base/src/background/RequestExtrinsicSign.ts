@@ -1,11 +1,11 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { KeyringPair } from '@polkadot/keyring/types';
-import type { SignerPayloadJSON } from '@polkadot/types/types';
+import type { KeyringPair } from '@polkadot/keyring/esm/types';
+import type { SignerPayloadJSON } from '@polkadot/types/esm/types';
 import type { RequestSign } from './types';
 
-import { TypeRegistry } from '@polkadot/types';
+import { TypeRegistry } from '@polkadot/types/esm';
 
 export default class RequestExtrinsicSign implements RequestSign {
   public readonly payload: SignerPayloadJSON;

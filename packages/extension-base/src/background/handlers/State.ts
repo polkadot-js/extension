@@ -1,15 +1,15 @@
 // Copyright 2019-2020 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
-import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
+import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/esm/types';
+import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/esm/types';
 import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
-import chrome from '@polkadot/extension-inject/chrome';
-import { assert } from '@polkadot/util';
+import { addMetadata, knownMetadata } from '@polkadot/extension-chains/esm';
+import chrome from '@polkadot/extension-inject/esm/chrome';
+import { assert } from '@polkadot/util/esm';
 
 import { MetadataStore } from '../../stores';
 

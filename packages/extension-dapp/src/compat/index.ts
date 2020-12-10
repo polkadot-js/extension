@@ -6,7 +6,8 @@ import web3Source from './Web3Source';
 
 // initialize all the compatibility engines
 export default function initCompat (): Promise<boolean> {
-  console.log('init compat')
+  console.log('init compat');
+
   return Promise.all([
     singleSource(),
     web3Source()

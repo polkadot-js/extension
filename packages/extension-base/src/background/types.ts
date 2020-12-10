@@ -102,6 +102,7 @@ export interface RequestSignatures {
   'pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
+  'pub(accounts.listAll)': [RequestAccountList, [KeypairType, InjectedAccount][]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];

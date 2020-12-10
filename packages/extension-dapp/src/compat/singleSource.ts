@@ -4,6 +4,8 @@
 import type { Signer } from '@polkadot/api/types';
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 
+import { KeypairType } from '@polkadot/util-crypto/types';
+
 // RxJs interface, only the bare-bones of what we need here
 interface Subscriber<T> {
   subscribe: (cb: (value: T) => void) => {

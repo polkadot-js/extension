@@ -5,7 +5,8 @@ import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta 
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { MessageTypes, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
@@ -19,14 +20,25 @@ import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
+function getSortedAccounts (accounts: SubjectInfo): SingleAddress[] {
   return Object
     .values(accounts)
     .filter(({ json: { meta: { isHidden } } }) => !isHidden)
-    .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
+    .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0));
+}
+
+function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
+  return getSortedAccounts(accounts)
     .map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
       address, genesisHash, name
     }));
+}
+
+function transformAllAccounts (accounts: SubjectInfo): [KeypairType, InjectedAccount][] {
+  return getSortedAccounts(accounts)
+    .map(({ json: { address, meta: { genesisHash, name } }, type }) => ([
+      type as KeypairType, { address, genesisHash, name }
+    ]));
 }
 
 export default class Tabs {
@@ -43,6 +55,11 @@ export default class Tabs {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private accountsList (url: string): InjectedAccount[] {
     return transformAccounts(accountsObservable.subject.getValue());
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private accountsAllList (url: string): [KeypairType, InjectedAccount][] {
+    return transformAllAccounts(accountsObservable.subject.getValue());
   }
 
   // FIXME This looks very much like what we have in Extension
@@ -169,6 +186,9 @@ export default class Tabs {
 
       case 'pub(accounts.list)':
         return this.accountsList(url);
+
+      case 'pub(accounts.listAll)':
+        return this.accountsAllList(url);
 
       case 'pub(accounts.subscribe)':
         return this.accountsSubscribe(url, id, port);

@@ -19,18 +19,17 @@ import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-function transformAccounts (accounts: SubjectInfo, withTypes = false): InjectedAccount[] {
+function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAccount[] {
   return Object
     .values(accounts)
     .filter(({ json: { meta: { isHidden } } }) => !isHidden)
+    .filter(({ type }) => anyType ? true : type && ['ed25519', 'sr25519', 'ecdsa'].includes(type))
     .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
     .map(({ json: { address, meta: { genesisHash, name } }, type }): InjectedAccount => ({
       address,
       genesisHash,
       name,
-      type: withTypes
-        ? type
-        : undefined
+      type
     }));
 }
 
@@ -46,8 +45,8 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string, { withTypes }: RequestAccountList): InjectedAccount[] {
-    return transformAccounts(accountsObservable.subject.getValue(), withTypes);
+  private accountsList (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
+    return transformAccounts(accountsObservable.subject.getValue(), anyType);
   }
 
   // FIXME This looks very much like what we have in Extension

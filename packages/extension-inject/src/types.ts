@@ -27,7 +27,7 @@ export interface InjectedAccountWithMeta {
 }
 
 export interface InjectedAccounts {
-  get: (withTypes?: boolean) => Promise<InjectedAccount[]>;
+  get: (anyType?: boolean) => Promise<InjectedAccount[]>;
   subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>) => Unsubcall;
 }
 

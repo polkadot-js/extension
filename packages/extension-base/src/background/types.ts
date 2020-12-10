@@ -224,7 +224,7 @@ export interface RequestAccountExport {
 }
 
 export interface RequestAccountList {
-  withTypes?: boolean;
+  anyType?: boolean;
 }
 
 export type RequestAccountSubscribe = null;

@@ -6,10 +6,11 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
+
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import uiSettings from '@polkadot/ui-settings';
 
-import { Loading, ErrorBoundary } from '../components';
+import { ErrorBoundary, Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
@@ -22,9 +23,9 @@ import Export from './Export';
 import Forget from './Forget';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
+import Metadata from './Metadata';
 import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
-import Metadata from './Metadata';
 import Signing from './Signing';
 import Welcome from './Welcome';
 

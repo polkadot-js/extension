@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { InputWithLabel, Button } from '../../components';
+import { Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps{

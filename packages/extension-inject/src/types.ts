@@ -3,6 +3,7 @@
 
 import type { Signer as InjectedSigner, Signer } from '@polkadot/api/types';
 import type { ProviderInterface } from '@polkadot/rpc-provider/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 
 // eslint-disable-next-line no-undef
 type This = typeof globalThis;
@@ -13,6 +14,7 @@ export interface InjectedAccount {
   address: string;
   genesisHash?: string | null;
   name?: string;
+  type?: KeypairType;
 }
 
 export interface InjectedAccountWithMeta {
@@ -26,7 +28,7 @@ export interface InjectedAccountWithMeta {
 }
 
 export interface InjectedAccounts {
-  get: () => Promise<InjectedAccount[]>;
+  get: (anyType?: boolean) => Promise<InjectedAccount[]>;
   subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>) => Unsubcall;
 }
 

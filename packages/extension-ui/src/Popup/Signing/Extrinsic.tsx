@@ -6,9 +6,10 @@ import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/inter
 import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
 
 import BN from 'bn.js';
-import React, { useMemo, useRef } from 'react';
 import { TFunction } from 'i18next';
-import { formatNumber, bnToBn } from '@polkadot/util';
+import React, { useMemo, useRef } from 'react';
+
+import { bnToBn, formatNumber } from '@polkadot/util';
 
 import { Table } from '../../components';
 import useMetadata from '../../hooks/useMetadata';

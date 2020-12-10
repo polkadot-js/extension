@@ -3,11 +3,11 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
-import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
 
@@ -223,7 +223,9 @@ export interface RequestAccountExport {
   password: string;
 }
 
-export type RequestAccountList = null;
+export interface RequestAccountList {
+  anyType?: boolean;
+}
 
 export type RequestAccountSubscribe = null;
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedAccounts, InjectedAccount, Unsubcall } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedAccounts, Unsubcall } from '@polkadot/extension-inject/types';
 import type { SendRequest } from './types';
 
 // External to class, this.# is not private enough (yet)
@@ -12,8 +12,8 @@ export default class Accounts implements InjectedAccounts {
     sendRequest = _sendRequest;
   }
 
-  public get (): Promise<InjectedAccount[]> {
-    return sendRequest('pub(accounts.list)');
+  public get (anyType?: boolean): Promise<InjectedAccount[]> {
+    return sendRequest('pub(accounts.list)', { anyType });
   }
 
   public subscribe (cb: (accounts: InjectedAccount[]) => unknown): Unsubcall {

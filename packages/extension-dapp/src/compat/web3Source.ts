@@ -8,41 +8,9 @@ import Web3 from 'web3';
 
 import { SignerPayloadJSON, SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
 
-// RxJs interface, only the bare-bones of what we need here
-// interface Subscriber<T> {
-//   subscribe: (
-//     cb: (value: T) => void
-//   ) => {
-//     unsubscribe(): void;
-//   };
-// }
+import { TypeRegistry } from '@polkadot/types/create';
 
-// interface SingleSourceAccount {
-//   address: string;
-//   assets: { assetId: number }[];
-//   name: string;
-// }
-
-// interface SingleSource {
-//   accounts$: Subscriber<SingleSourceAccount[]>;
-//   environment$: string[];
-//   signer: Signer;
-// }
-
-// interface SingleWindow extends InjectedWindow {
-//   SingleSource: SingleSource;
-// }
-// interface SingleSourceAccount {
-//     address: string;
-//     assets: { assetId: number }[];
-//     name: string;
-//   }
-
-//   interface SingleSource {
-//     accounts$: Subscriber<SingleSourceAccount[]>;
-//     environment$: string[];
-//     signer: Signer;
-//   }
+const registry = new TypeRegistry();
 
 interface Web3Window extends InjectedWindow {
   web3: Web3;
@@ -99,12 +67,12 @@ function injectWeb3 (win: Web3Window): void {
         signer: {
           signPayload: async (payload: SignerPayloadJSON) : Promise<SignerResult> => {
             console.log('signPayload');
+            const raw = registry.createType('ExtrinsicPayload', payload).toString();
 
-            return { id: 0, signature: await win.web3.eth.sign(JSON.stringify(payload), payload.address) };
+            return { id: 0, signature: await win.web3.eth.sign(raw, payload.address) };
           },
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
             console.log('signature', await win.web3.eth.sign(raw.data, raw.address));
-
             return { id: 0, signature: await win.web3.eth.sign(raw.data, raw.address) };
           }
         }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //import type { Signer } from "@polkadot/api/types";
-import { SignerPayloadRaw, SignerResult } from "@polkadot/types/types";
+import { SignerPayloadRaw, SignerResult, SignerPayloadJSON } from "@polkadot/types/types";
 import type { Injected, InjectedAccount, InjectedWindow } from "@polkadot/extension-inject/types";
 import Web3 from "web3";
 
@@ -90,7 +90,12 @@ function injectWeb3(win: Web3Window): void {
             },
           },
           signer: {
+            signPayload:async (payload: SignerPayloadJSON) : Promise<SignerResult>=>{
+              console.log('signPayload')
+              return {id:0,signature:await win.web3.eth.sign(JSON.stringify(payload), payload.address)}
+            },
             signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
+              console.log('signature',await win.web3.eth.sign(raw.data, raw.address) )
               return { id: 0, signature: await win.web3.eth.sign(raw.data, raw.address) };
             },
           },

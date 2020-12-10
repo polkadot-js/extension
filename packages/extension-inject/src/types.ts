@@ -14,6 +14,7 @@ export interface InjectedAccount {
   address: string;
   genesisHash?: string | null;
   name?: string;
+  type?: KeypairType;
 }
 
 export interface InjectedAccountWithMeta {
@@ -26,9 +27,7 @@ export interface InjectedAccountWithMeta {
 }
 
 export interface InjectedAccounts {
-  getAll: () => Promise<[KeypairType, InjectedAccount][]>
-  /** @deprecated - use `getAll` */
-  get: () => Promise<InjectedAccount[]>;
+  get: (withTypes?: boolean) => Promise<InjectedAccount[]>;
   subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>) => Unsubcall;
 }
 

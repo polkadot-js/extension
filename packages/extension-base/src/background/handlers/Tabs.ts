@@ -5,9 +5,8 @@ import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta 
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import type { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { MessageTypes, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
+import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { checkIfDenied } from '@polkadot/phishing';
@@ -20,25 +19,19 @@ import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-function getSortedAccounts (accounts: SubjectInfo): SingleAddress[] {
+function transformAccounts (accounts: SubjectInfo, withTypes = false): InjectedAccount[] {
   return Object
     .values(accounts)
     .filter(({ json: { meta: { isHidden } } }) => !isHidden)
-    .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0));
-}
-
-function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
-  return getSortedAccounts(accounts)
-    .map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
-      address, genesisHash, name
+    .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
+    .map(({ json: { address, meta: { genesisHash, name } }, type }): InjectedAccount => ({
+      address,
+      genesisHash,
+      name,
+      type: withTypes
+        ? type
+        : undefined
     }));
-}
-
-function transformAllAccounts (accounts: SubjectInfo): [KeypairType, InjectedAccount][] {
-  return getSortedAccounts(accounts)
-    .map(({ json: { address, meta: { genesisHash, name } }, type }) => ([
-      type as KeypairType, { address, genesisHash, name }
-    ]));
 }
 
 export default class Tabs {
@@ -53,13 +46,8 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string): InjectedAccount[] {
-    return transformAccounts(accountsObservable.subject.getValue());
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsAllList (url: string): [KeypairType, InjectedAccount][] {
-    return transformAllAccounts(accountsObservable.subject.getValue());
+  private accountsList (url: string, { withTypes }: RequestAccountList): InjectedAccount[] {
+    return transformAccounts(accountsObservable.subject.getValue(), withTypes);
   }
 
   // FIXME This looks very much like what we have in Extension
@@ -185,10 +173,7 @@ export default class Tabs {
         return this.authorize(url, request as RequestAuthorizeTab);
 
       case 'pub(accounts.list)':
-        return this.accountsList(url);
-
-      case 'pub(accounts.listAll)':
-        return this.accountsAllList(url);
+        return this.accountsList(url, request as RequestAccountList);
 
       case 'pub(accounts.subscribe)':
         return this.accountsSubscribe(url, id, port);

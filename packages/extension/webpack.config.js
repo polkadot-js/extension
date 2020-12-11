@@ -91,7 +91,7 @@ module.exports = {
         }
       }
     })
-  ].filter((entry) => entry),
+  ],
   resolve: {
     alias: packages.reduce((alias, pkg) => {
       alias[`@polkadot/${pkg}`] = path.resolve(__dirname, `../${pkg}/src`);

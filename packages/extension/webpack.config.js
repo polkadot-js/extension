@@ -41,7 +41,7 @@ module.exports = {
         use: [
           {
             loader: require.resolve('babel-loader'),
-            options: require('@polkadot/dev/config/babel-config-cjs.cjs')
+            options: require('@polkadot/dev/config/babel-config-webpack.cjs')
           }
         ]
       },
@@ -93,11 +93,9 @@ module.exports = {
     })
   ],
   resolve: {
-    alias: packages.reduce((alias, pkg) => {
-      alias[`@polkadot/${pkg}`] = path.resolve(__dirname, `../${pkg}/src`);
-
-      return alias;
-    }, {}),
+    alias: packages.reduce((a, p) => ({ ...a, [`@polkadot/${p}`]: path.resolve(__dirname, `../${p}/src`) }), {
+      'react/jsx-runtime': require.resolve('react/jsx-runtime')
+    }),
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     fallback: {
       crypto: require.resolve('crypto-browserify'),

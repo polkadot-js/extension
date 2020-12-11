@@ -18,12 +18,6 @@ const packages = [
   'extension-ui'
 ];
 
-const alias = packages.reduce((alias, pkg) => {
-  alias[`@polkadot/${pkg}`] = path.resolve(__dirname, `../${pkg}/src`);
-
-  return alias;
-}, {});
-
 module.exports = {
   context: __dirname,
   devtool: false,
@@ -66,9 +60,6 @@ module.exports = {
       }
     ]
   },
-  optimization: {
-    moduleIds: 'deterministic'
-  },
   output: {
     chunkFilename: '[name].js',
     filename: '[name].js',
@@ -102,7 +93,11 @@ module.exports = {
     })
   ].filter((entry) => entry),
   resolve: {
-    alias,
+    alias: packages.reduce((alias, pkg) => {
+      alias[`@polkadot/${pkg}`] = path.resolve(__dirname, `../${pkg}/src`);
+
+      return alias;
+    }, {}),
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     fallback: {
       crypto: require.resolve('crypto-browserify'),

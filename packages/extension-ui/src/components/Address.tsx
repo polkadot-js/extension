@@ -44,6 +44,7 @@ interface Props {
 interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
+  genesisHash?: string | null;
   prefix: number;
 }
 
@@ -69,6 +70,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   return {
     account,
     formatted: encodeAddress(publicKey, prefix),
+    genesisHash: account?.genesisHash,
     prefix
   };
 }
@@ -79,8 +81,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
-  const chain = useMetadata(genesisHash, true);
-  const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
+  const [{ account, formatted, genesisHash: recodedGenesis, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
+  const chain = useMetadata(genesisHash || recodedGenesis, true);
+
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);

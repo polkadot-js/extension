@@ -66,30 +66,18 @@ module.exports = {
       }
     ]
   },
-  // node: {
-  //   child_process: 'empty',
-  //   dgram: 'empty',
-  //   fs: 'empty',
-  //   net: 'empty',
-  //   tls: 'empty'
-  // },
-  // optimization: {
-  //   concatenateModules: false,
-  //   moduleIds: 'natural',
-  //   occurrenceOrder: false,
-  //   providedExports: false,
-  //   sideEffects: false,
-  //   usedExports: false
-  // },
+  optimization: {
+    moduleIds: 'deterministic'
+  },
   output: {
     chunkFilename: '[name].js',
     filename: '[name].js',
     globalObject: '(typeof self !== \'undefined\' ? self : this)',
     path: path.join(__dirname, 'build')
   },
-  // performance: {
-  //   hints: false
-  // },
+  performance: {
+    hints: false
+  },
   plugins: [
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],

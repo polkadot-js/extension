@@ -15,10 +15,10 @@ import { ThemeProvider } from 'styled-components';
 import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';
 import { flushAllPromises } from '../../testHelpers';
-import TransactionIndex from './TransactionIndex';
-import Request from './Request';
 import Extrinsic from './Extrinsic';
 import Qr from './Qr';
+import Request from './Request';
+import TransactionIndex from './TransactionIndex';
 import Signing from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call

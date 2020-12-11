@@ -3,11 +3,11 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, MetadataDef, ProviderList, ProviderMeta, InjectedMetadataKnown } from '@polkadot/extension-inject/types';
-import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
 
@@ -109,7 +109,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
-  'pub(phishing.redirect)': [null, null];
+  'pub(phishing.redirectIfDenied)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
   'pub(rpc.send)': [RequestRpcSend, JsonRpcResponse];
   'pub(rpc.startProvider)': [string, ProviderMeta];
@@ -224,7 +224,9 @@ export interface RequestAccountExport {
   password: string;
 }
 
-export type RequestAccountList = null;
+export interface RequestAccountList {
+  anyType?: boolean;
+}
 
 export type RequestAccountSubscribe = null;
 

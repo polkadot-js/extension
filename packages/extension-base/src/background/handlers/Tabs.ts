@@ -6,11 +6,12 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { RequestAuthorizeTab, ResponseSigning, RequestTypes, ResponseTypes, MessageTypes, ResponseRpcListProviders, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, SubscriptionMessageTypes } from '../types';
+import type { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
+import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
-import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
+import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
 import RequestBytesSign from '../RequestBytesSign';
@@ -18,13 +19,17 @@ import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
-function transformAccounts (accounts: SubjectInfo): InjectedAccount[] {
+function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAccount[] {
   return Object
     .values(accounts)
     .filter(({ json: { meta: { isHidden } } }) => !isHidden)
+    .filter(({ type }) => anyType ? true : type && ['ed25519', 'sr25519', 'ecdsa'].includes(type))
     .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
-    .map(({ json: { address, meta: { genesisHash, name } } }): InjectedAccount => ({
-      address, genesisHash, name
+    .map(({ json: { address, meta: { genesisHash, name } }, type }): InjectedAccount => ({
+      address,
+      genesisHash,
+      name,
+      type
     }));
 }
 
@@ -40,8 +45,8 @@ export default class Tabs {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string): InjectedAccount[] {
-    return transformAccounts(accountsObservable.subject.getValue());
+  private accountsList (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
+    return transformAccounts(accountsObservable.subject.getValue(), anyType);
   }
 
   // FIXME This looks very much like what we have in Extension
@@ -143,9 +148,19 @@ export default class Tabs {
     return null;
   }
 
+  private async redirectIfPhishing (url: string): Promise<boolean> {
+    const isInDenyList = await checkIfDenied(url);
+
+    if (isInDenyList) {
+      this.redirectPhishingLanding();
+    }
+
+    return false;
+  }
+
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
-    if (type === 'pub(phishing.redirect)') {
-      return this.redirectPhishingLanding();
+    if (type === 'pub(phishing.redirectIfDenied)') {
+      return this.redirectIfPhishing(url);
     }
 
     if (type !== 'pub(authorize.tab)') {
@@ -157,7 +172,7 @@ export default class Tabs {
         return this.authorize(url, request as RequestAuthorizeTab);
 
       case 'pub(accounts.list)':
-        return this.accountsList(url);
+        return this.accountsList(url, request as RequestAccountList);
 
       case 'pub(accounts.subscribe)':
         return this.accountsSubscribe(url, id, port);

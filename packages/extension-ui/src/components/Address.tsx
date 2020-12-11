@@ -8,7 +8,6 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,17 +15,19 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import details from '../assets/details.svg';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+
 import parentArrow from '../assets/arrowParentLabel.svg';
-import { AccountContext, SettingsContext } from './contexts';
-import useOutsideClick from '../hooks/useOutsideClick';
+import details from '../assets/details.svg';
 import useMetadata from '../hooks/useMetadata';
-import useTranslation from '../hooks/useTranslation';
+import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
+import useTranslation from '../hooks/useTranslation';
+import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
+import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
-import { showAccount } from '../messaging';
 import Svg from './Svg';
 
 interface Props {
@@ -47,6 +48,7 @@ interface Props {
 interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
+  genesisHash?: string | null;
   prefix?: number;
   type: KeypairType;
 }
@@ -80,6 +82,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   return {
     account,
     formatted: encodeAddress(publicKey, prefix),
+    genesisHash: account?.genesisHash,
     prefix,
     type: account?.type || DEFAULT_TYPE
   };
@@ -92,8 +95,8 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
-  const chain = useMetadata(genesisHash, true);
-  const [{ account, formatted, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
+  const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
+  const chain = useMetadata(genesisHash || recodedGenesis, true);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);

@@ -1,12 +1,13 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
 import type { ThemeProps } from '../types';
 
 import React, { useCallback, useContext } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionContext, Address, ActionBar, ActionText, Button, Warning } from '../components';
+import { ActionBar, ActionContext, ActionText, Address, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';

@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
-import { Button } from '.';
 import styled from 'styled-components';
+
+import { Button } from '.';
 
 interface ButtonWithSubtitleProps {
   title: string;

@@ -3,13 +3,13 @@
 
 import '../../../../../__mocks__/chrome';
 
-import { configure, mount, ReactWrapper } from 'enzyme';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import { configure, mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, ActionText, Button, themes, Input, InputWithLabel } from '../../components';
+import { ActionContext, ActionText, Button, Input, InputWithLabel, themes } from '../../components';
 import * as messaging from '../../messaging';
 import { Header } from '../../partials';
 import { flushAllPromises } from '../../testHelpers';

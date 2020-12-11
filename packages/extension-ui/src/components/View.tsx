@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../types';
 
 import React, { useState } from 'react';
-import { ThemeProvider, createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 // FIXME We should not import from index when this one is imported there as well
 import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '.';

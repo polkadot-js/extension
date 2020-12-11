@@ -4,8 +4,8 @@
 import type { ThemeProps } from '../types';
 
 import React from 'react';
-import styled from 'styled-components';
 import { Link as RouterLink } from 'react-router-dom';
+import styled from 'styled-components';
 
 interface Props {
   children?: React.ReactNode;

@@ -1,13 +1,14 @@
 // Copyright 2019-2020 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ProviderList, ProviderMeta, InjectedProvider } from '@polkadot/extension-inject/types';
+import type { InjectedProvider, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 import type { AnyFunction } from '@polkadot/types/types';
 import type { SendRequest } from './types';
 
-import { isUndefined, logger } from '@polkadot/util';
 import EventEmitter from 'eventemitter3';
+
+import { isUndefined, logger } from '@polkadot/util';
 
 const l = logger('PostMessageProvider');
 

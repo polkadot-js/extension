@@ -3,7 +3,7 @@
 
 import { useTranslation as useTranslationBase, UseTranslationResponse, withTranslation } from 'react-i18next';
 
-export function useTranslation (): UseTranslationResponse {
+export function useTranslation (): UseTranslationResponse<string> {
   return useTranslationBase();
 }
 

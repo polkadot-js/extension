@@ -8,15 +8,15 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^2.10.2-15",
-    "@polkadot/keyring": "^4.2.2-16",
-    "@polkadot/networks": "^4.2.2-16",
-    "@polkadot/types": "^2.10.2-15",
-    "@polkadot/util": "^4.2.2-16",
-    "@polkadot/util-crypto": "^4.2.2-16",
+    "@polkadot/api": "^2.10.2-16",
+    "@polkadot/keyring": "^4.2.2-19",
+    "@polkadot/networks": "^4.2.2-19",
+    "@polkadot/types": "^2.10.2-16",
+    "@polkadot/util": "^4.2.2-19",
+    "@polkadot/util-crypto": "^4.2.2-19",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.1.2"
+    "typescript": "^4.1.3"
   },
   "scripts": {
     "build": "yarn build:i18n && yarn build:code && yarn build:zip",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
-    "@polkadot/dev": "^0.60.29",
+    "@polkadot/dev": "^0.61.2",
     "@types/jest": "^26.0.19",
     "i18next-scanner": "^2.11.0",
     "sinon-chrome": "^3.0.1",

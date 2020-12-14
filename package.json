@@ -32,7 +32,7 @@
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
     "test": "polkadot-dev-run-test",
-    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.extension.js --watch"
+    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.js --watch"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

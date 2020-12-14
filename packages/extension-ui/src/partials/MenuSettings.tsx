@@ -3,13 +3,13 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faExpand } from '@fortawesome/free-solid-svg-icons';
+import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
+import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
@@ -37,6 +37,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const setTheme = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
+  const onAction = useContext(ActionContext);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -67,6 +68,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     []
   );
 
+  const _goToAuthList = useCallback(
+    () => {
+      onAction('auth-list');
+    }, [onAction]
+  );
+
   return (
     <Menu
       className={className}
@@ -84,6 +91,15 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
         />
       </MenuItem>
       <MenuDivider />
+      <MenuItem className='setting'>
+        <ActionText
+          className='openWindow'
+          icon={faTasks}
+          onClick={_goToAuthList}
+          text={t<string>('Manage website access')}
+        />
+      </MenuItem>
+      <MenuDivider/>
       <MenuItem
         className='setting'
         title={t<string>('External QR accounts and Access')}

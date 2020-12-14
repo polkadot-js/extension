@@ -25,13 +25,15 @@ interface AuthRequest extends Resolver<boolean> {
   url: string;
 }
 
-type AuthUrls = Record<string, {
+export type AuthUrls = Record<string, AuthUrlInfo>;
+
+export interface AuthUrlInfo {
   count: number;
   id: string;
   isAllowed: boolean;
   origin: string;
   url: string;
-}>;
+}
 
 interface MetaRequest extends Resolver<boolean> {
   id: string;
@@ -137,6 +139,10 @@ export default class State {
     return Object
       .values(this.#signRequests)
       .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
+  }
+
+  public get authUrls (): AuthUrls {
+    return this.#authUrls;
   }
 
   private popupClose (): void {
@@ -264,7 +270,10 @@ export default class State {
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
+    console.log('this.#authUrls', this.#authUrls);
+
     if (this.#authUrls[idStr]) {
+      console.log('on connait');
       assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return false;

@@ -22,7 +22,6 @@ module.exports = (entry, alias = {}) => ({
   context: __dirname,
   devtool: false,
   entry,
-  mode: 'production',
   module: {
     rules: [
       {

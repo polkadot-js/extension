@@ -103,6 +103,12 @@ describe('Derive', () => {
       expect(wrapper.exists('[data-button-action="create derived account"]')).toBe(false);
     });
 
+    it('Password entry is hidden after checkbox is unchecked', () => {
+      uncheck(wrapper.find('input[type="checkbox"]'));
+
+      expect(wrapper.exists('input[type="password"]')).toBe(false);
+    });
+
     it('"Create new root" button redirects to /account/create', () => {
       uncheck(wrapper.find('input[type="checkbox"]'));
       wrapper.find('[data-button-action="create root account"] button').simulate('click');

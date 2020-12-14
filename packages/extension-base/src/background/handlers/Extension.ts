@@ -451,6 +451,10 @@ export default class Extension {
     return true;
   }
 
+  private toggleAuthorization (url: string):boolean {
+    return this.#state.toggleAuthorization(url);
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -463,6 +467,9 @@ export default class Extension {
 
       case 'pri(authorize.reject)':
         return this.authorizeReject(request as RequestAuthorizeReject);
+
+      case 'pri(authorize.toggle)':
+        return this.toggleAuthorization(request as string);
 
       case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);

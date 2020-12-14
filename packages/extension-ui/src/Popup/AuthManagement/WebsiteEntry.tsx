@@ -3,10 +3,11 @@
 
 import type { ThemeProps } from '../../types';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
+import { toggleAuthorization } from '@polkadot/extension-ui/messaging';
 
 import useTranslation from '../../hooks/useTranslation';
 
@@ -19,11 +20,18 @@ interface Props extends ThemeProps {
 function WebsiteEntry ({ className, info, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
+  const switchAccess = useCallback(() => {
+    toggleAuthorization(url).then((newState) => {
+      console.log(newState);
+    }).catch(console.error);
+  }, [url]);
+
   return (
 
     <div className={className}>
       <div className='url'>{url}</div>
-      <div className='info'>{info.isAllowed ? t<string>('allowed') : t<string>('stopped')}</div>
+      <div className='info'
+        onClick={switchAccess}>{info.isAllowed ? t<string>('allowed') : t<string>('stopped')}</div>
     </div>
   );
 }

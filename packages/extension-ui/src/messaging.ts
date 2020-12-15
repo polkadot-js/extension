@@ -8,7 +8,6 @@ import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
 import allChains from '@polkadot/extension-chains/chains';

@@ -112,7 +112,6 @@ export default class State {
     const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
-    console.log('previous', previousAuth);
     this.#authUrls = previousAuth;
   }
 
@@ -274,7 +273,6 @@ export default class State {
     const newAllowState = !entry.isAllowed;
 
     this.#authUrls[url].isAllowed = newAllowState;
-    console.log('switched to', newAllowState);
 
     return this.#authUrls;
   }
@@ -296,8 +294,6 @@ export default class State {
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     const idStr = this.stripUrl(url);
-
-    console.log('this.#authUrls', this.#authUrls);
 
     if (this.#authUrls[idStr]) {
       // this url was seen in the past

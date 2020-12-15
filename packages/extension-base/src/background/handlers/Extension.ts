@@ -14,7 +14,7 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import State, { AuthUrls } from './State';
+import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 type CachedUnlocks = Record<string, number>;

@@ -6,10 +6,11 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
+import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
+import { Input } from '@polkadot/extension-ui/components/TextInputs';
 
 import useTranslation from '../../hooks/useTranslation';
-import { getAuthList } from '../../messaging';
+import { getAuthList, toggleAuthorization } from '../../messaging';
 import { Header } from '../../partials';
 import WebsiteEntry from './WebsiteEntry';
 
@@ -19,32 +20,61 @@ interface Props extends ThemeProps {
 
 function AuthManagement ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [authList, setAuthList] = useState<[string, AuthUrlInfo][] | null>(null);
+  const [authList, setAuthList] = useState<AuthUrls | null>(null);
+  const [filter, setFilter] = useState('');
 
   useEffect(() => {
     getAuthList().then(
-      ({ list }) => setAuthList(Object.entries(list))
+      ({ list }) => setAuthList(list)
     ).catch((e) => console.error(e)
     );
+  }, []);
+
+  const _onChangeFilter = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(event.target.value);
+  }, []);
+
+  const toggleAuth = useCallback((url: string) => {
+    toggleAuthorization(url).then(({ list }) => {
+      setAuthList(list);
+    }).catch(console.error);
   }, []);
 
   return (
     <>
       <Header
         showBackArrow
+        smallMargin
         text={t<string>('Manage Website Access')}
       />
       <div className={className}>
-        { !authList?.length
+        {!authList || !Object.entries(authList)?.length
           ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-          : authList.map(
-            ([url, info]: [string, AuthUrlInfo]) =>
-              <WebsiteEntry
-                info={info}
-                key={url}
-                url={url}
+          : <>
+            <div className='filter'>
+              <Input
+                autoCapitalize='off'
+                autoCorrect='off'
+                autoFocus
+                onChange={_onChangeFilter}
+                placeholder={t<string>('website.com')}
+                spellCheck={false}
+                type='text'
+                value={filter}
               />
-          )}
+            </div>
+            {Object.entries(authList)
+              .filter(([url]:[string, AuthUrlInfo]) => url.includes(filter))
+              .map(
+                ([url, info]: [string, AuthUrlInfo]) =>
+                  <WebsiteEntry
+                    info={info}
+                    key={url}
+                    toggleAuth={toggleAuth}
+                    url={url}
+                  />
+              )}
+          </>}
       </div>
     </>
   );
@@ -53,5 +83,10 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
 export default styled(AuthManagement)`
   .empty-list {
     text-align: center;
+  }
+
+  .filter {
+    margin-left: -1rem;
+    margin-right: -1rem;
   }
 `;

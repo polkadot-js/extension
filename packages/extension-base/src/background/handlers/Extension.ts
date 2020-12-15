@@ -451,8 +451,8 @@ export default class Extension {
     return true;
   }
 
-  private toggleAuthorization (url: string):boolean {
-    return this.#state.toggleAuthorization(url);
+  private toggleAuthorization (url: string):ResponseAuthorizeList {
+    return { list: this.#state.toggleAuthorization(url) };
   }
 
   // Weird thought, the eslint override is not needed in Tabs

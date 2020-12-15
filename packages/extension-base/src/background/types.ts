@@ -82,10 +82,10 @@ export interface RequestSignatures {
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
-  'pri(authorize.toggle)': [string, boolean];
+  'pri(authorize.list)': [null, ResponseAuthorizeList];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
-  'pri(authorize.list)': [null, ResponseAuthorizeList];
+  'pri(authorize.toggle)': [string, ResponseAuthorizeList];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];

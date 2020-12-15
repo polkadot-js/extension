@@ -266,7 +266,7 @@ export default class State {
     }
   }
 
-  public toggleAuthorization (url: string): boolean {
+  public toggleAuthorization (url: string): AuthUrls {
     const entry = this.#authUrls[url];
 
     assert(entry, `The source ${url} is not known`);
@@ -276,7 +276,7 @@ export default class State {
     this.#authUrls[url].isAllowed = newAllowState;
     console.log('switched to', newAllowState);
 
-    return newAllowState;
+    return this.#authUrls;
   }
 
   private updateIconAuth (shouldClose?: boolean): void {

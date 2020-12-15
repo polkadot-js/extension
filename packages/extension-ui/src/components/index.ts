@@ -14,6 +14,7 @@ export { default as Dropdown } from './Dropdown';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Icon } from './Icon';
 export { default as Identicon } from './Identicon';
+export { default as InputFilter } from './InputFilter';
 export { default as InputWithLabel } from './InputWithLabel';
 export { default as InputFileWithLabel } from './InputFileWithLabel';
 export { default as Label } from './Label';

@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
+import { InputFilter } from '@polkadot/extension-ui/components';
 import { Input } from '@polkadot/extension-ui/components/TextInputs';
 
 import useTranslation from '../../hooks/useTranslation';
@@ -30,8 +31,8 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const _onChangeFilter = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(event.target.value);
+  const _onChangeFilter = useCallback((filter: string) => {
+    setFilter(filter);
   }, []);
 
   const toggleAuth = useCallback((url: string) => {
@@ -47,46 +48,41 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
         smallMargin
         text={t<string>('Manage Website Access')}
       />
-      <div className={className}>
-        {!authList || !Object.entries(authList)?.length
-          ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-          : <>
-            <div className='filter'>
-              <Input
-                autoCapitalize='off'
-                autoCorrect='off'
-                autoFocus
-                onChange={_onChangeFilter}
-                placeholder={t<string>('website.com')}
-                spellCheck={false}
-                type='text'
-                value={filter}
-              />
-            </div>
-            {Object.entries(authList)
-              .filter(([url]:[string, AuthUrlInfo]) => url.includes(filter))
-              .map(
-                ([url, info]: [string, AuthUrlInfo]) =>
-                  <WebsiteEntry
-                    info={info}
-                    key={url}
-                    toggleAuth={toggleAuth}
-                    url={url}
-                  />
-              )}
-          </>}
-      </div>
+      <>
+        <InputFilter
+          onChange={_onChangeFilter}
+          placeholder={t<string>('website.com')}
+          value={filter}
+        />
+        <div className={className}>
+          {!authList || !Object.entries(authList)?.length
+            ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
+            : <>
+              <div className='website-list'>
+                {Object.entries(authList)
+                  .filter(([url]:[string, AuthUrlInfo]) => url.includes(filter))
+                  .map(
+                    ([url, info]: [string, AuthUrlInfo]) =>
+                      <WebsiteEntry
+                        info={info}
+                        key={url}
+                        toggleAuth={toggleAuth}
+                        url={url}
+                      />
+                  )}
+              </div>
+            </>}
+        </div>
+      </>
     </>
   );
 }
 
 export default styled(AuthManagement)`
+  height: 100%;
+  overflow-y: auto;
+
   .empty-list {
     text-align: center;
-  }
-
-  .filter {
-    margin-left: -1rem;
-    margin-right: -1rem;
   }
 `;

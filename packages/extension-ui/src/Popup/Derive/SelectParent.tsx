@@ -123,41 +123,45 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
               </Label>
             )
           }
-          <div ref={passwordInputRef}>
-            <InputWithLabel
-              data-export-password
-              isError={!isProperParentPassword}
-              isFocused
-              label={t<string>('enter the password for the account you want to derive from')}
-              onChange={_onParentPasswordEnter}
-              type='password'
-              value={parentPassword}
-            />
-            {!!parentPassword && !isProperParentPassword && (
-              <Warning
-                isBelowInput
-                isDanger
-              >
-                {t('Wrong password')}
-              </Warning>
-            )}
-          </div>
-          {isProperParentPassword && (
+          {shouldAccountBeDerived && (
             <>
-              <DerivationPath
-                defaultPath={defaultPath}
-                isError={!suriPath}
-                onChange={setSuriPath}
-                parentAddress={parentAddress}
-                parentPassword={parentPassword}
-              />
-              {!suriPath && (
-                <Warning
-                  isBelowInput
-                  isDanger
-                >
-                  {t('Incorrect derivation path')}
-                </Warning>
+              <div ref={passwordInputRef}>
+                <InputWithLabel
+                  data-export-password
+                  isError={!isProperParentPassword}
+                  isFocused
+                  label={t<string>('enter the password for the account you want to derive from')}
+                  onChange={_onParentPasswordEnter}
+                  type='password'
+                  value={parentPassword}
+                />
+                {!!parentPassword && !isProperParentPassword && (
+                  <Warning
+                    isBelowInput
+                    isDanger
+                  >
+                    {t('Wrong password')}
+                  </Warning>
+                )}
+              </div>
+              {isProperParentPassword && (
+                <>
+                  <DerivationPath
+                    defaultPath={defaultPath}
+                    isError={!suriPath}
+                    onChange={setSuriPath}
+                    parentAddress={parentAddress}
+                    parentPassword={parentPassword}
+                  />
+                  {!suriPath && (
+                    <Warning
+                      isBelowInput
+                      isDanger
+                    >
+                      {t('Incorrect derivation path')}
+                    </Warning>
+                  )}
+                </>
               )}
             </>
           )}

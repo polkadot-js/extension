@@ -10,7 +10,7 @@ import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defau
 import chrome from '@polkadot/extension-inject/chrome';
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
-import accountsObservable from '@polkadot/ui-keyring/observable/accounts';
+import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 

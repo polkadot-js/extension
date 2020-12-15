@@ -223,7 +223,9 @@ export interface RequestAccountExport {
   password: string;
 }
 
-export type RequestAccountList = null;
+export interface RequestAccountList {
+  anyType?: boolean;
+}
 
 export type RequestAccountSubscribe = null;
 

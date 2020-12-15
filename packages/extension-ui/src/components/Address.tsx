@@ -35,7 +35,7 @@ interface Props {
   genesisHash?: string | null;
   isExternal?: boolean | null;
   isHidden?: boolean;
-  name?: React.ReactNode | null;
+  name?: string | null;
   parentName?: string | null;
   suri?: string;
   toggleActions?: number;
@@ -44,6 +44,7 @@ interface Props {
 interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
+  genesisHash?: string | null;
   prefix: number;
 }
 
@@ -69,6 +70,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   return {
     account,
     formatted: encodeAddress(publicKey, prefix),
+    genesisHash: account?.genesisHash,
     prefix
   };
 }
@@ -79,8 +81,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
-  const chain = useMetadata(genesisHash, true);
-  const [{ account, formatted, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
+  const [{ account, formatted, genesisHash: recodedGenesis, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
+  const chain = useMetadata(genesisHash || recodedGenesis, true);
+
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -121,18 +124,23 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     [address, isHidden]
   );
 
-  const displayedName = (
-    <>
-      {(account?.isExternal || isExternal) && (
-        <FontAwesomeIcon
-          className='externalIcon'
-          icon={faExternalLinkSquareAlt}
-          title={t('external account')}
-        />
-      )}
-      {name || account?.name || t('<unknown>')}
-    </>
-  );
+  const Name = () => {
+    const displayName = name || account?.name || t('<unknown>');
+
+    return (
+      <>
+        {(account?.isExternal || isExternal) && (
+          <FontAwesomeIcon
+            className='externalIcon'
+            icon={faExternalLinkSquareAlt}
+            title={t('external account')}
+          />
+        )}
+        <span title={displayName}>{displayName}</span>
+      </>);
+  };
+
+  const parentNameSuri = `${parentName || ''}  ${suri || ''}`;
 
   return (
     <div className={className}>
@@ -157,11 +165,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                   <div
                     className='parentName'
                     data-field='parent'
+                    title = {parentNameSuri}
                   >
-                    {parentName}&nbsp;&nbsp;{suri || ''}
+                    {parentNameSuri}
                   </div>
                 </div>
-                <div className='name displaced'>{displayedName}</div>
+                <div className='name displaced'>
+                  <Name/>
+                </div>
               </>
             )
             : (
@@ -169,7 +180,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 className='name'
                 data-field='name'
               >
-                {displayedName}
+                <Name/>
               </div>
             )
           }
@@ -329,6 +340,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     overflow: hidden;
     text-overflow: ellipsis;
     width: 300px;
+    white-space: nowrap;
 
     &.displaced {
       padding-top: 10px;
@@ -343,6 +355,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     padding: 0.25rem 0 0 0.8rem;
     text-overflow: ellipsis;
     width: 270px;
+    white-space: nowrap;
   }
 
   .fullAddress {

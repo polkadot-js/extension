@@ -12,8 +12,8 @@ export default class Accounts implements InjectedAccounts {
     sendRequest = _sendRequest;
   }
 
-  public get (): Promise<InjectedAccount[]> {
-    return sendRequest('pub(accounts.list)');
+  public get (anyType?: boolean): Promise<InjectedAccount[]> {
+    return sendRequest('pub(accounts.list)', { anyType });
   }
 
   public subscribe (cb: (accounts: InjectedAccount[]) => unknown): Unsubcall {

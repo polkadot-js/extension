@@ -8,7 +8,6 @@ import styled from 'styled-components';
 
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { InputFilter } from '@polkadot/extension-ui/components';
-import { Input } from '@polkadot/extension-ui/components/TextInputs';
 
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, toggleAuthorization } from '../../messaging';

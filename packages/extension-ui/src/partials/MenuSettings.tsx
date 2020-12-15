@@ -93,7 +93,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider />
       <MenuItem className='setting'>
         <ActionText
-          className='openWindow'
+          className='manageWebsiteAccess'
           icon={faTasks}
           onClick={_goToAuthList}
           text={t<string>('Manage website access')}
@@ -159,12 +159,13 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
   right: 24px;
   user-select: none;
 
-  .openWindow {
+  .openWindow, .manageWebsiteAccess{
     span {
       color: ${theme.textColor};
       font-size: ${theme.fontSize};
       line-height: ${theme.lineHeight};
       text-decoration: none;
+      vertical-align: middle;
     }
 
     ${Svg} {

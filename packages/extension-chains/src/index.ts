@@ -42,7 +42,9 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
 
   if (metaCalls && !isPartial) {
     hasMetadata = true;
-    registry.setMetadata(new Metadata(registry, Buffer.from(metaCalls, 'base64')));
+    const meta64 = Buffer.from(metaCalls, 'base64');
+
+    registry.setMetadata(new Metadata(registry, meta64));
   }
 
   const result = {

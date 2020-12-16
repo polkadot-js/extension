@@ -1,9 +1,7 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Chain } from '@polkadot/extension-chains/types';
 import { MetadataDef } from '@polkadot/extension-inject/types';
-import { TypeRegistry } from '@polkadot/types';
 
 export const westendMetadata = {
   chain: 'Westend',
@@ -19,6 +17,14 @@ export const westendMetadata = {
     Address: 'AccountId',
     Keys: 'SessionKeys5',
     LookupSource: 'AccountId',
-    ProxyType: {}
+    ProxyType: {
+      _enum: [
+        'Any',
+        'NonTransfer',
+        'Staking',
+        'Unused',
+        'IdentityJudgement'
+      ] as unknown
+    }
   }
 } as MetadataDef;

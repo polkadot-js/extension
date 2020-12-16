@@ -13,6 +13,9 @@ import { metadataExpand } from '@polkadot/extension-chains';
 import allChains from '@polkadot/extension-chains/chains';
 import chrome from '@polkadot/extension-inject/chrome';
 
+import { westendMetadata } from './Popup/Signing/metadataMock';
+import { getSavedMeta, setSavedMeta } from './MetadataCache';
+
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (data: any) => void;
@@ -23,7 +26,6 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
@@ -125,16 +127,17 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
   if (!genesisHash) {
     return null;
   }
 
-  let request = metadataGets.get(genesisHash);
+  let request = getSavedMeta(genesisHash);
 
   if (!request) {
     request = sendMessage('pri(metadata.get)', genesisHash || null);
-    metadataGets.set(genesisHash, request);
+    setSavedMeta(genesisHash, request);
   }
 
   const def = await request;

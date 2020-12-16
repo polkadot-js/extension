@@ -14,8 +14,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';
+import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';
 import Extrinsic from './Extrinsic';
+import { westendMetadata } from './metadataMock';
 import Qr from './Qr';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
@@ -62,6 +64,20 @@ describe('Signing requests', () => {
     jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
     jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
     jest.spyOn(messaging, 'isSignLocked').mockResolvedValue({ isLocked: true, remainingTime: 0 });
+    // eslint-disable-next-line @typescript-eslint/require-await
+    jest.spyOn(MetadataCache, 'getSavedMeta').mockImplementation(async () => {
+      console.log('--->> got it');
+
+      return westendMetadata;
+    });
+    // jest.spyOn(messaging, 'getMetaCall').mockImplementation(async (genesisHash: string) => {
+    //   const metadata = westendMetadata;
+    //   const chain = metadataExpand(metadata.definition);
+
+    //   console.log('chain', JSON.stringify(chain, null, 4));
+
+    //   return chain;
+    // });
 
     signRequests = [
       {
@@ -227,12 +243,12 @@ describe('Signing requests', () => {
   });
 
   describe('Request rendering', () => {
-    it('correctly displays request 1', () => {
+    it.only('correctly displays request 1', () => {
       expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[0].account.address);
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
         '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-        '45',
+        'Westend',
         '3',
         '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
         'mortal, valid from {{birth}} to {{death}}'
@@ -245,7 +261,7 @@ describe('Signing requests', () => {
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
         '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-        '45',
+        'Westend',
         '3',
         '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
         'mortal, valid from {{birth}} to {{death}}'

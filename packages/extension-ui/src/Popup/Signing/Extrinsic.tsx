@@ -110,14 +110,20 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunct
 function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
+
+  console.log('chain 2', chain);
   const specVersion = useRef(bnToBn(hexSpec)).current;
 
+  console.log('specVersion', specVersion);
+  console.log('chain && chain.hasMetadata', chain && chain.hasMetadata);
   const decoded = useMemo(
     () => chain && chain.hasMetadata
       ? decodeMethod(method, chain, specVersion)
       : { args: null, method: null },
     [method, chain, specVersion]
   );
+
+  console.log('decoded', decoded);
 
   return (
     <Table

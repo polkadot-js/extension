@@ -116,5 +116,11 @@
   "lifetime": "",
   "Warning: Caps lock is on": "",
   "Invalid Json file": "",
-  "Unable to decode using the supplied passphrase": ""
+  "Unable to decode using the supplied passphrase": "",
+  "Manage website access": "",
+  "Manage Website Access": "",
+  "example.com": "",
+  "No website request yet!": "",
+  "allowed": "",
+  "denied": ""
 }

@@ -24,9 +24,9 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    getAuthList().then(
-      ({ list }) => setAuthList(list)
-    ).catch((e) => console.error(e)
+    getAuthList()
+      .then(({ list }) => setAuthList(list))
+      .catch((e) => console.error(e));
     );
   }, []);
 
@@ -35,9 +35,9 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
   }, []);
 
   const toggleAuth = useCallback((url: string) => {
-    toggleAuthorization(url).then(({ list }) => {
-      setAuthList(list);
-    }).catch(console.error);
+    toggleAuthorization(url)
+      .then(({ list }) => setAuthList(list))
+      .catch(console.error);
   }, []);
 
   return (
@@ -50,7 +50,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
       <>
         <InputFilter
           onChange={_onChangeFilter}
-          placeholder={t<string>('website.com')}
+          placeholder={t<string>('example.com')}
           value={filter}
         />
         <div className={className}>

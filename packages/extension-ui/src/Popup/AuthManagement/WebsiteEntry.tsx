@@ -26,9 +26,8 @@ function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.
   }, [toggleAuth, url]);
 
   return (
-
     <div className={`${className} ${info.isAllowed ? 'allowed' : 'denied'}`}>
-      <div className={'url'}>
+      <div className='url'>
         {url}
       </div>
       <Switch

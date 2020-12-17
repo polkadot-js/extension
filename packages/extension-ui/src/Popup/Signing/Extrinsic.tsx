@@ -111,7 +111,6 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
-
   const decoded = useMemo(
     () => chain && chain.hasMetadata
       ? decodeMethod(method, chain, specVersion)

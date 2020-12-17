@@ -6,6 +6,7 @@ import type { Chain } from './types';
 
 import { Metadata } from '@polkadot/metadata';
 import { TypeRegistry } from '@polkadot/types';
+import { base64Decode } from '@polkadot/util-crypto';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
@@ -42,9 +43,8 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
 
   if (metaCalls && !isPartial) {
     hasMetadata = true;
-    const meta64 = Buffer.from(metaCalls, 'base64');
 
-    registry.setMetadata(new Metadata(registry, meta64));
+    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)));
   }
 
   const result = {

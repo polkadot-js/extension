@@ -30,6 +30,13 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
     [onAction]
   );
 
+  const onPassChange = useCallback(
+    (password: string) => {
+      setPass(password);
+      setError('');
+    }
+    , []);
+
   const _onExportButtonClick = useCallback(
     (): void => {
       setIsBusy(true);
@@ -71,7 +78,7 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
               disabled={isBusy}
               isError={pass.length < MIN_LENGTH || !!error}
               label={t<string>('password for this account')}
-              onChange={setPass}
+              onChange={onPassChange}
               type='password'
             />
             {error && (
@@ -87,7 +94,7 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
               data-export-button
               isBusy={isBusy}
               isDanger
-              isDisabled={pass.length === 0}
+              isDisabled={pass.length === 0 || !!error}
               onClick={_onExportButtonClick}
             >
               {t<string>('I want to export this account')}

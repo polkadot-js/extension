@@ -125,7 +125,6 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
   if (!genesisHash) {
     return null;

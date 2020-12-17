@@ -18,18 +18,20 @@ function InputFilter ({ className, onChange, placeholder, value } : Props) {
     onChange(event.target.value);
   }, [onChange]);
 
-  return <div className={className}>
-    <Input
-      autoCapitalize='off'
-      autoCorrect='off'
-      autoFocus
-      onChange={onChangeFilter}
-      placeholder={placeholder}
-      spellCheck={false}
-      type='text'
-      value={value}
-    />
-  </div>;
+  return (
+    <div className={className}>
+      <Input
+        autoCapitalize='off'
+        autoCorrect='off'
+        autoFocus
+        onChange={onChangeFilter}
+        placeholder={placeholder}
+        spellCheck={false}
+        type='text'
+        value={value}
+      />
+    </div>
+  );
 }
 
 export default styled(InputFilter)`

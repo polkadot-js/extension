@@ -51,6 +51,22 @@ describe('Export component', () => {
     expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
   });
 
+  it('shows an error is the password is wrong', async () => {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    jest.spyOn(messaging, 'exportAccount').mockImplementation(async () => {
+      throw new Error('Unable to decode using the supplied passphrase');
+    });
+    enterPassword();
+    wrapper.find('[data-export-button] button').simulate('click');
+    await act(flushAllPromises);
+    wrapper.update();
+
+    // the first message is "You are exporting your account. Keep it safe and don't share it with anyone."
+    expect(wrapper.find('.warning-message').at(1).text()).toBe('Unable to decode using the supplied passphrase');
+    expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(true);
+  });
+
   it('button is enabled after password is typed', async () => {
     enterPassword();
     await act(flushAllPromises);

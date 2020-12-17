@@ -23,7 +23,7 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
-  const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
+  const [error, setError] = useState('');
 
   const _goHome = useCallback(
     () => onAction('/'),
@@ -47,10 +47,8 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
         })
         .catch((error: Error) => {
           console.error(error);
-
+          setError(error.message);
           setIsBusy(false);
-          setWrongPasswordHighlight(true);
-          setTimeout(() => setWrongPasswordHighlight(false), 100);
         });
     },
     [address, onAction, pass]
@@ -71,11 +69,19 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
             <InputWithLabel
               data-export-password
               disabled={isBusy}
-              isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
+              isError={pass.length < MIN_LENGTH || !!error}
               label={t<string>('password for this account')}
               onChange={setPass}
               type='password'
             />
+            {error && (
+              <Warning
+                isBelowInput
+                isDanger
+              >
+                {error}
+              </Warning>
+            )}
             <Button
               className='export-button'
               data-export-button
@@ -107,6 +113,10 @@ export default withRouter(styled(Export)`
 
   .center {
     margin: auto;
+  }
+
+  .export-button {
+    margin-top: 6px;
   }
 
   .movedWarning {

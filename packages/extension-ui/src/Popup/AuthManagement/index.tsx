@@ -27,7 +27,6 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
     getAuthList()
       .then(({ list }) => setAuthList(list))
       .catch((e) => console.error(e));
-    );
   }, []);
 
   const _onChangeFilter = useCallback((filter: string) => {
@@ -54,23 +53,25 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
           value={filter}
         />
         <div className={className}>
-          {!authList || !Object.entries(authList)?.length
-            ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-            : <>
-              <div className='website-list'>
-                {Object.entries(authList)
-                  .filter(([url]:[string, AuthUrlInfo]) => url.includes(filter))
-                  .map(
-                    ([url, info]: [string, AuthUrlInfo]) =>
-                      <WebsiteEntry
-                        info={info}
-                        key={url}
-                        toggleAuth={toggleAuth}
-                        url={url}
-                      />
-                  )}
-              </div>
-            </>}
+          {
+            !authList || !Object.entries(authList)?.length
+              ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
+              : <>
+                <div className='website-list'>
+                  {Object.entries(authList)
+                    .filter(([url]:[string, AuthUrlInfo]) => url.includes(filter))
+                    .map(
+                      ([url, info]: [string, AuthUrlInfo]) =>
+                        <WebsiteEntry
+                          info={info}
+                          key={url}
+                          toggleAuth={toggleAuth}
+                          url={url}
+                        />
+                    )}
+                </div>
+              </>
+          }
         </div>
       </>
     </>

@@ -14,8 +14,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';
+import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';
 import Extrinsic from './Extrinsic';
+import { westendMetadata } from './metadataMock';
 import Qr from './Qr';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
@@ -62,6 +64,7 @@ describe('Signing requests', () => {
     jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
     jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
     jest.spyOn(messaging, 'isSignLocked').mockResolvedValue({ isLocked: true, remainingTime: 0 });
+    jest.spyOn(MetadataCache, 'getSavedMeta').mockResolvedValue(westendMetadata);
 
     signRequests = [
       {
@@ -69,7 +72,7 @@ describe('Signing requests', () => {
           address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
           genesisHash: null,
           isHidden: false,
-          name: 'Alice derived',
+          name: 'acc1',
           parentAddress: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
           suri: '//0',
           whenCreated: 1602001346486
@@ -104,23 +107,22 @@ describe('Signing requests', () => {
       },
       {
         account: {
-          address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
+          address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
           genesisHash: null,
           isHidden: false,
-          name: 'Alice derived',
-          parentAddress: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+          name: 'acc 2',
           suri: '//0',
           whenCreated: 1602001346486
         },
         id: '1607356155395.3',
         request: {
           payload: {
-            address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-            blockHash: '0xa541b33cbe0c1c9a80edf91c3be1c87be14050634e7daff85cb9b8dd29f0a3ec',
-            blockNumber: '0x0034005f',
-            era: '0xf501',
+            address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+            blockHash: '0xcf69b7935b785f90b22d2b36f2227132ef9c5dd33db1dbac9ecdafac05bf9476',
+            blockNumber: '0x0036269a',
+            era: '0xa501',
             genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-            method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+            method: '0x0400cc4e0e2848c488896dd0a24f153070e85e3c83f6199cfc942ab6de29c56c2d7b0700d0ed902e',
             nonce: '0x00000003',
             signedExtensions: [
               'CheckSpecVersion',
@@ -138,7 +140,7 @@ describe('Signing requests', () => {
           },
           sign: jest.fn()
         },
-        url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts'
+        url: 'https://polkadot.js.org/apps'
       }
     ];
     onActionStub = jest.fn();
@@ -231,23 +233,31 @@ describe('Signing requests', () => {
       expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[0].account.address);
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
-        '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+        'Westend',
         '45',
         '3',
-        '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+        `balances.transferKeepAlive(dest, value)[
+  "5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7",
+  "123.0000 WND"
+]`,
+        'Same as the [`transfer`] call, but with a check that the transfer will not kill the origin account.',
         'mortal, valid from {{birth}} to {{death}}'
       ]);
     });
 
     it('correctly displays request 2', () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
-      expect(wrapper.find(Address).find('.fullAddress').text()).toBe('5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[1].account.address);
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
-        'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
-        '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+        'https://polkadot.js.org/apps',
+        'Westend',
         '45',
         '3',
-        '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+        `balances.transfer(dest, value)[
+  "5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q",
+  "200.0000 mWND"
+]`,
+        'Transfer some liquid free balance to another account.',
         'mortal, valid from {{birth}} to {{death}}'
       ]);
     });

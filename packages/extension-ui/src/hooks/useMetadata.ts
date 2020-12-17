@@ -13,7 +13,10 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
   useEffect((): void => {
     if (genesisHash) {
       getMetadata(genesisHash, isPartial)
-        .then(setChain)
+        .then((chain) => {
+          // console.log('setChain', JSON.stringify(chain));
+          setChain(chain);
+        })
         .catch((error): void => {
           console.error(error);
           setChain(null);

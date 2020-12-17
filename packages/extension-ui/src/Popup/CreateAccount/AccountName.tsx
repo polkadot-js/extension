@@ -25,10 +25,10 @@ function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): R
     [name, password, onCreate]
   );
 
-  const _onNameChange = (name: string | null) => {
+  const _onNameChange = useCallback((name: string | null) => {
     onNameChange(name || '');
     setName(name);
-  };
+  }, [onNameChange]);
 
   return (
     <>

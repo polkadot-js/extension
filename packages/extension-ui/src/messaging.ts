@@ -4,7 +4,6 @@
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
-import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -12,6 +11,8 @@ import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
 import allChains from '@polkadot/extension-chains/chains';
 import chrome from '@polkadot/extension-inject/chrome';
+
+import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +24,6 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
@@ -130,11 +130,11 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
     return null;
   }
 
-  let request = metadataGets.get(genesisHash);
+  let request = getSavedMeta(genesisHash);
 
   if (!request) {
     request = sendMessage('pri(metadata.get)', genesisHash || null);
-    metadataGets.set(genesisHash, request);
+    setSavedMeta(genesisHash, request);
   }
 
   const def = await request;

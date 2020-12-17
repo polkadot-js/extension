@@ -1,7 +1,7 @@
 {
   "name": "@polkadot/extension-ui",
   "description": "A sample signer extension for the @polkadot/api",
-  "version": "0.35.2-15",
+  "version": "0.35.2-16",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "dependencies": {
@@ -10,8 +10,8 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.1",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@fortawesome/react-fontawesome": "^0.1.13",
-    "@polkadot/extension-base": "^0.35.2-15",
-    "@polkadot/extension-inject": "^0.35.2-15",
+    "@polkadot/extension-base": "^0.35.2-16",
+    "@polkadot/extension-inject": "^0.35.2-16",
     "@polkadot/keyring": "^5.0.2-7",
     "@polkadot/react-identicon": "^0.63.2-2",
     "@polkadot/react-qr": "^0.63.2-2",

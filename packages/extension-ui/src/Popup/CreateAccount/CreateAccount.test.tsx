@@ -120,6 +120,13 @@ describe('Create Account', () => {
       expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(true);
     });
 
+    it('after typing 3 characters into name input, the name is reflected in the account card', async () => {
+      const NAME = 'abc';
+
+      await enterName(NAME);
+      expect(wrapper.find('[data-field="name"]').first().text()).toBe(NAME);
+    });
+
     it('after typing 3 characters into name input, first password input is visible', async () => {
       await enterName('abc');
       expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).first().prop('withError')).toBe(false);

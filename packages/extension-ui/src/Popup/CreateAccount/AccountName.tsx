@@ -12,9 +12,10 @@ interface Props {
   isBusy: boolean;
   onBackClick: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
+  onNameChange: (name: string) => void;
 }
 
-function AccountName ({ isBusy, onBackClick, onCreate }: Props): React.ReactElement<Props> {
+function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -24,11 +25,16 @@ function AccountName ({ isBusy, onBackClick, onCreate }: Props): React.ReactElem
     [name, password, onCreate]
   );
 
+  const _onNameChange = useCallback((name: string | null) => {
+    onNameChange(name || '');
+    setName(name);
+  }, [onNameChange]);
+
   return (
     <>
       <Name
         isFocused
-        onChange={setName}
+        onChange={_onNameChange}
       />
       <Password onChange={setPassword} />
       <VerticalSpace />

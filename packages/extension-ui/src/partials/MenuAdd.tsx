@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -36,16 +36,23 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       reference={reference}
     >
       <MenuItem className='menuItem'>
-        <Link to={master ? `/account/derive/${master.address}` : '/account/create'}>
+        <Link to={'/account/create'}>
           <FontAwesomeIcon icon={faPlusCircle} />
-          <span>{
-            master
-              ? t('Create new account (root or derived)')
-              : t('Create new account')
-          }</span>
+          <span>{ t('Create new account')}</span>
         </Link>
       </MenuItem>
       <MenuDivider />
+      {!!master && (
+        <>
+          <MenuItem className='menuItem'>
+            <Link to={`/account/derive/${master.address}`}>
+              <FontAwesomeIcon icon={faCodeBranch} />
+              <span>{t('Derive from an account')}</span>
+            </Link>
+          </MenuItem>
+          <MenuDivider />
+        </>
+      )}
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
           <FontAwesomeIcon icon={faKey} />

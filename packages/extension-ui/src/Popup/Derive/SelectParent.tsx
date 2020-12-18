@@ -96,15 +96,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   return (
     <>
       <div className={className}>
-        {!isLocked && (
-          <Checkbox
-            checked={shouldAccountBeDerived}
-            className='smallerMargin'
-            label={t<string>('Derive new account from existing')}
-            onChange={setShouldAccountBeDerived}
-          />
-        )}
-        <div className={`disableArea ${shouldAccountBeDerived ? '' : 'disabled'}`}>
+        <div className=''>
           {isLocked
             ? (
               <Address
@@ -169,43 +161,18 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
       </div>
       <VerticalSpace/>
       <ButtonArea>
-        {shouldAccountBeDerived
-          ? (
-            <NextStepButton
-              data-button-action='create derived account'
-              isBusy={isBusy}
-              isDisabled={!isProperParentPassword || !suriPath}
-              onClick={_onSubmit}
-            >
-              {t<string>('Create a derived account')}
-            </NextStepButton>
-          )
-          : (
-            <NextStepButton
-              data-button-action='create root account'
-              onClick={_goCreate}
-            >
-              {t<string>('Create account from new seed')}
-            </NextStepButton>
-          )
-        }
+        <NextStepButton
+          data-button-action='create derived account'
+          isBusy={isBusy}
+          isDisabled={!isProperParentPassword || !suriPath}
+          onClick={_onSubmit}
+        >
+          {t<string>('Create a derived account')}
+        </NextStepButton>
       </ButtonArea>
     </>
   );
 }
 
 export default styled(SelectParent)`
-  .smallerMargin {
-    margin-top: 0;
-    margin-bottom: 10px;
-  }
-
-  .disableArea {
-    opacity: 1;
-
-    .disabled {
-      opacity: 0.2;
-      pointer-events: none;
-    }
-  }
 `;

@@ -23,12 +23,19 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
-  const [wrongPasswordHighlight, setWrongPasswordHighlight] = useState(false);
+  const [error, setError] = useState('');
 
   const _goHome = useCallback(
     () => onAction('/'),
     [onAction]
   );
+
+  const onPassChange = useCallback(
+    (password: string) => {
+      setPass(password);
+      setError('');
+    }
+    , []);
 
   const _onExportButtonClick = useCallback(
     (): void => {
@@ -47,10 +54,8 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
         })
         .catch((error: Error) => {
           console.error(error);
-
+          setError(error.message);
           setIsBusy(false);
-          setWrongPasswordHighlight(true);
-          setTimeout(() => setWrongPasswordHighlight(false), 100);
         });
     },
     [address, onAction, pass]
@@ -71,17 +76,25 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
             <InputWithLabel
               data-export-password
               disabled={isBusy}
-              isError={pass.length < MIN_LENGTH || wrongPasswordHighlight}
+              isError={pass.length < MIN_LENGTH || !!error}
               label={t<string>('password for this account')}
-              onChange={setPass}
+              onChange={onPassChange}
               type='password'
             />
+            {error && (
+              <Warning
+                isBelowInput
+                isDanger
+              >
+                {error}
+              </Warning>
+            )}
             <Button
               className='export-button'
               data-export-button
               isBusy={isBusy}
               isDanger
-              isDisabled={pass.length === 0}
+              isDisabled={pass.length === 0 || !!error}
               onClick={_onExportButtonClick}
             >
               {t<string>('I want to export this account')}
@@ -107,6 +120,10 @@ export default withRouter(styled(Export)`
 
   .center {
     margin: auto;
+  }
+
+  .export-button {
+    margin-top: 6px;
   }
 
   .movedWarning {

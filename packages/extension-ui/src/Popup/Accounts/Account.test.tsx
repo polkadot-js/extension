@@ -30,7 +30,7 @@ describe('Account component', () => {
     </MemoryRouter>);
 
   it('shows Export option if account is not external', () => {
-    wrapper = mountAccountComponent({ isExternal: false });
+    wrapper = mountAccountComponent({ isExternal: false, type: 'ed25519' });
     wrapper.find('.settings').first().simulate('click');
 
     expect(wrapper.find('a.menuItem').length).toBe(4);
@@ -41,7 +41,16 @@ describe('Account component', () => {
   });
 
   it('does not show Export option if account is external', () => {
-    wrapper = mountAccountComponent({ isExternal: true });
+    wrapper = mountAccountComponent({ isExternal: true, type: 'ed25519' });
+    wrapper.find('.settings').first().simulate('click');
+
+    expect(wrapper.find('a.menuItem').length).toBe(2);
+    expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
+    expect(wrapper.find('a.menuItem').at(1).text()).toBe('Forget Account');
+  });
+
+  it('does not show Export option if account is ethereum type', () => {
+    wrapper = mountAccountComponent({ isExternal: true, type: 'ethereum' });
     wrapper.find('.settings').first().simulate('click');
 
     expect(wrapper.find('a.menuItem').length).toBe(2);

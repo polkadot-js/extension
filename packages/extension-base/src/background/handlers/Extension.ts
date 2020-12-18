@@ -26,9 +26,10 @@ const SEED_LENGTHS = [12, 15, 18, 21, 24];
 const registry = new TypeRegistry();
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json: { address, meta } }): AccountJson => ({
+  return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
     address,
-    ...meta
+    ...meta,
+    type
   }));
 }
 
@@ -256,12 +257,13 @@ export default class Extension {
 
   private jsonGetAccountInfo (json: KeyringPair$Json): ResponseJsonGetAccountInfo {
     try {
-      const pair = keyring.createFromJson(json);
+      const { address, meta: { genesisHash, name }, type } = keyring.createFromJson(json);
 
       return {
-        address: pair.address,
-        genesisHash: pair.meta.genesisHash,
-        name: pair.meta.name
+        address,
+        genesisHash,
+        name,
+        type
       } as ResponseJsonGetAccountInfo;
     } catch (e) {
       console.error(e);

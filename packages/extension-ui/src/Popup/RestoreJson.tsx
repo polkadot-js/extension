@@ -1,18 +1,19 @@
 // Copyright 2019-2020 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { jsonGetAccountInfo, jsonRestore } from '../messaging';
 import { Header } from '../partials';
+import { DEFAULT_TYPE } from '../util/defaultType';
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
@@ -25,7 +26,7 @@ function Upload ({ className } : Props): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const [{ address, genesisHash, name }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '' });
+  const [{ address, genesisHash, name, type }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '', type: DEFAULT_TYPE });
   const [password, setPassword] = useState<string>('');
   const [isFileError, setFileError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
@@ -97,6 +98,7 @@ function Upload ({ className } : Props): React.ReactElement {
             address={address}
             genesisHash={genesisHash}
             name={name}
+            type={type}
           />
         </div>
         <InputFileWithLabel

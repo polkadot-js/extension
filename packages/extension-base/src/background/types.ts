@@ -36,6 +36,7 @@ export interface AccountJson extends KeyringPair$Meta {
   name?: string;
   parentAddress?: string;
   suri?: string;
+  type?: KeypairType;
   whenCreated?: number;
 }
 
@@ -367,6 +368,7 @@ export interface ResponseJsonGetAccountInfo {
   address: string;
   name: string;
   genesisHash: string;
+  type: KeypairType;
 }
 
 export interface ResponseAuthorizeList {

@@ -23,7 +23,7 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri }: Props): React.ReactElement<Props> {
+function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri, type }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
@@ -62,7 +62,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       >
         {t<string>('Rename')}
       </Link>
-      {!isExternal && (
+      {!isExternal && type !== 'ethereum' && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}
@@ -98,7 +98,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
         />
       </div>
     </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, t]);
+  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, t, type]);
 
   return (
     <div className={className}>

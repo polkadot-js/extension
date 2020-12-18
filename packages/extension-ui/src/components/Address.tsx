@@ -3,7 +3,9 @@
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import type { Chain } from '@polkadot/extension-chains/types';
+import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
@@ -22,6 +24,7 @@ import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
+import { DEFAULT_TYPE } from '../util/defaultType';
 import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
@@ -39,21 +42,30 @@ interface Props {
   parentName?: string | null;
   suri?: string;
   toggleActions?: number;
+  type?: KeypairType;
 }
 
 interface Recoded {
   account: AccountJson | null;
   formatted: string | null;
   genesisHash?: string | null;
-  prefix: number;
+  prefix?: number;
+  type: KeypairType;
 }
 
 // find an account in our list
-function findAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
+function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
   return accounts.find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
+  ) || null;
+}
+
+// find an account in our list
+function findAccountByAddress (accounts: AccountJson[], _address: string): AccountJson | null {
+  return accounts.find(({ address }): boolean =>
+    address === _address
   ) || null;
 }
 
@@ -63,7 +75,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
-  const account = findAccount(accounts, publicKey);
+  const account = findSubstrateAccount(accounts, publicKey);
   const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
 
   // always allow the actual settings to override the display
@@ -71,19 +83,20 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
     account,
     formatted: encodeAddress(publicKey, prefix),
     genesisHash: account?.genesisHash,
-    prefix
+    prefix,
+    type: account?.type || DEFAULT_TYPE
   };
 }
 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
+const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
-  const [{ account, formatted, genesisHash: recodedGenesis, prefix }, setRecoded] = useState<Recoded>({ account: null, formatted: null, prefix: 42 });
+  const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
-
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -92,10 +105,17 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
-    address && setRecoded(
-      recodeAddress(address, accounts, chain, settings)
-    );
-  }, [accounts, address, chain, settings]);
+    if (!address) {
+      return;
+    }
+
+    const accountByAddress = findAccountByAddress(accounts, address);
+    const recoded = (accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
+      ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
+      : recodeAddress(address, accounts, chain, settings);
+
+    setRecoded(recoded || defaultRecoded);
+  }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {
     if (!showActionsMenu) {
@@ -113,7 +133,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     setShowActionsMenu(false);
   }, [toggleActions]);
 
-  const theme = ((chain && chain.icon) || 'polkadot') as 'polkadot';
+  const theme = (
+    chain?.icon
+      ? chain.icon
+      : type === 'ethereum'
+        ? 'ethereum'
+        : 'polkadot'
+  ) as IconTheme;
+
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
   const _toggleVisibility = useCallback(
@@ -202,7 +229,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               className='fullAddress'
               data-field='address'
             >
-              {formatted || t('<unknown>')}
+              {formatted || address || t('<unknown>')}
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''} >
               <FontAwesomeIcon
@@ -331,6 +358,12 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     align-items: center;
     height: 72px;
     border-radius: 4px;
+  }
+
+  img {
+    max-width: 50px;
+    max-height: 50px;
+    border-radius: 50%;
   }
 
   .name {

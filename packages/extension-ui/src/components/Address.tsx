@@ -363,6 +363,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   img {
     max-width: 50px;
     max-height: 50px;
+    border-radius: 50%;
   }
 
   .name {

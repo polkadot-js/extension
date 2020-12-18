@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
+import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary, Loading } from '../components';
@@ -51,7 +52,7 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
 
 function initAccountContext (accounts: AccountJson[]): AccountsContext {
   const hierarchy = buildHierarchy(accounts);
-  const master = hierarchy.find(({ isExternal, type }) => !isExternal && type && ['ed25519', 'sr25519', 'ecdsa'].includes(type));
+  const master = hierarchy.find(({ isExternal, type }) => !isExternal && canDerive(type));
 
   return {
     accounts,

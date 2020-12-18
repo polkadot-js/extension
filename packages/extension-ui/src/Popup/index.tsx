@@ -51,7 +51,7 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
 
 function initAccountContext (accounts: AccountJson[]): AccountsContext {
   const hierarchy = buildHierarchy(accounts);
-  const master = hierarchy.find((account) => !account.isExternal && account.type !== 'ethereum');
+  const master = hierarchy.find(({ isExternal, type }) => !isExternal && type && ['ed25519', 'sr25519', 'ecdsa'].includes(type));
 
   return {
     accounts,

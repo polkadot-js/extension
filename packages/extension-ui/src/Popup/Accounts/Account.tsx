@@ -62,7 +62,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       >
         {t<string>('Rename')}
       </Link>
-      {!isExternal && type !== 'ethereum' && (
+      {!isExternal && type && ['ed25519', 'sr25519', 'ecdsa'].includes(type) && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}

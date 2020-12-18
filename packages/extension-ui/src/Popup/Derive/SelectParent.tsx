@@ -38,7 +38,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const allAddresses = useMemo(
     () => hierarchy
       .filter(({ isExternal }) => !isExternal)
-      .filter(({ type }) => type !== 'ethereum')
+      .filter(({ type }) => type && ['ed25519', 'sr25519', 'ecdsa'].includes(type))
       .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
   );

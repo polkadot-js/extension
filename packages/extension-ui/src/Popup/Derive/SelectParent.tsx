@@ -43,8 +43,6 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
     [hierarchy]
   );
 
-  console.log('allAddrfes', allAddresses);
-
   const _goCreate = useCallback(
     () => onAction('/account/create'),
     [onAction]

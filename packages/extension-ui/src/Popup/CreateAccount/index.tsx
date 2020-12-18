@@ -18,6 +18,7 @@ export default function CreateAccount (): React.ReactElement {
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const type = DEFAULT_TYPE;
+  const [name, setName] = useState('');
 
   useEffect((): void => {
     createSeed(undefined, type)
@@ -54,7 +55,10 @@ export default function CreateAccount (): React.ReactElement {
       />
       <Loading>
         <div>
-          <Address address={account?.address} />
+          <Address
+            address={account?.address}
+            name={name}
+          />
         </div>
         {account && (
           step === 1
@@ -70,6 +74,7 @@ export default function CreateAccount (): React.ReactElement {
                 isBusy={isBusy}
                 onBackClick={_onPreviousStep}
                 onCreate={_onCreate}
+                onNameChange={setName}
               />
             )
         )}

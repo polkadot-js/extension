@@ -38,9 +38,12 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const allAddresses = useMemo(
     () => hierarchy
       .filter(({ isExternal }) => !isExternal)
+      .filter(({ type }) => type !== 'ethereum')
       .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
   );
+
+  console.log('allAddrfes', allAddresses);
 
   const _goCreate = useCallback(
     () => onAction('/account/create'),

@@ -51,7 +51,7 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
 
 function initAccountContext (accounts: AccountJson[]): AccountsContext {
   const hierarchy = buildHierarchy(accounts);
-  const master = hierarchy.find((account) => !account.isExternal);
+  const master = hierarchy.find((account) => !account.isExternal && account.type !== 'ethereum');
 
   return {
     accounts,

@@ -30,7 +30,7 @@ describe('Account component', () => {
     </MemoryRouter>);
 
   it('shows Export option if account is not external', () => {
-    wrapper = mountAccountComponent({ isExternal: false });
+    wrapper = mountAccountComponent({ isExternal: false, type: 'ed25519' });
     wrapper.find('.settings').first().simulate('click');
 
     expect(wrapper.find('a.menuItem').length).toBe(4);
@@ -41,11 +41,21 @@ describe('Account component', () => {
   });
 
   it('does not show Export option if account is external', () => {
-    wrapper = mountAccountComponent({ isExternal: true });
+    wrapper = mountAccountComponent({ isExternal: true, type: 'ed25519' });
     wrapper.find('.settings').first().simulate('click');
 
     expect(wrapper.find('a.menuItem').length).toBe(2);
     expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
     expect(wrapper.find('a.menuItem').at(1).text()).toBe('Forget Account');
+  });
+
+  it('does not show Derive option if account is of ethereum type', () => {
+    wrapper = mountAccountComponent({ isExternal: false, type: 'ethereum' });
+    wrapper.find('.settings').first().simulate('click');
+
+    expect(wrapper.find('a.menuItem').length).toBe(3);
+    expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
+    expect(wrapper.find('a.menuItem').at(1).text()).toBe('Export Account');
+    expect(wrapper.find('a.menuItem').at(2).text()).toBe('Forget Account');
   });
 });

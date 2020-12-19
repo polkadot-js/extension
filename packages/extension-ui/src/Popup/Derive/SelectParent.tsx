@@ -6,6 +6,7 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import { canDerive } from '@polkadot/extension-base/utils';
 import { assert } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
@@ -38,6 +39,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const allAddresses = useMemo(
     () => hierarchy
       .filter(({ isExternal }) => !isExternal)
+      .filter(({ type }) => canDerive(type))
       .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
   );

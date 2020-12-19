@@ -6,6 +6,7 @@ import type { AccountJson } from '@polkadot/extension-base/background/types';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { canDerive } from '@polkadot/extension-base/utils';
 import genesisOptions from '@polkadot/extension-chains/genesisHashes';
 
 import { ActionContext, Address, Dropdown, Link, MenuDivider } from '../../components';
@@ -62,7 +63,7 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       >
         {t<string>('Rename')}
       </Link>
-      {!isExternal && type !== 'ethereum' && (
+      {!isExternal && canDerive(type) && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}

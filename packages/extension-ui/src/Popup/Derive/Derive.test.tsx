@@ -27,6 +27,7 @@ const accounts = [
   { address: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', name: 'B', type: 'sr25519' },
   { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', name: 'BB', parentAddress: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', type: 'sr25519' },
   { address: '5GhGENSJBWQZ8d8mARKgqEkiAxiW3hHeznQDW2iG4XzNieb6', isExternal: true, name: 'C', type: 'sr25519' },
+  { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', name: 'Ethereum', type: 'ethereum' },
   { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', isExternal: false, name: 'D', type: 'sr25519' },
   { address: '5HRKYp5anSNGtqC7cq9ftiaq4y8Mk7uHk7keaXUrQwZqDWLJ', name: 'DD', parentAddress: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', type: 'sr25519' }
 ] as AccountJson[];
@@ -63,8 +64,6 @@ describe('Derive', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
 
-  const uncheck = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: false } });
-
   const type = async (input: ReactWrapper, value: string): Promise<void> => {
     input.simulate('change', { target: { value } });
     await act(flushAllPromises);
@@ -90,48 +89,25 @@ describe('Derive', () => {
       return {} as ResponseDeriveValidate;
     });
 
-    it('"Derive" checkbox is selected by default', () => {
-      const checkbox = wrapper.find('input[type="checkbox"]');
+    it('Button is disabled and password field visible', () => {
+      const button = wrapper.find('[data-button-action="create derived account"] button');
 
-      expect(checkbox.prop('checked')).toBe(true);
+      expect(button.exists()).toBe(true);
+      expect(button.prop('disabled')).toBe(true);
     });
 
-    it('"Create new root" button becomes visible after checkbox is unchecked', () => {
-      uncheck(wrapper.find('input[type="checkbox"]'));
+    it('Password field is visible and not in error state', () => {
+      const passwordField = wrapper.find('[data-input-password]').first();
 
-      expect(wrapper.exists('[data-button-action="create root account"]')).toBe(true);
-      expect(wrapper.exists('[data-button-action="create derived account"]')).toBe(false);
-    });
-
-    it('Password entry is hidden after checkbox is unchecked', () => {
-      uncheck(wrapper.find('input[type="checkbox"]'));
-
-      expect(wrapper.exists('input[type="password"]')).toBe(false);
-    });
-
-    it('"Create new root" button redirects to /account/create', () => {
-      uncheck(wrapper.find('input[type="checkbox"]'));
-      wrapper.find('[data-button-action="create root account"] button').simulate('click');
-
-      expect(onActionStub).toBeCalledWith('/account/create');
-    });
-
-    it('"Create derived account" is visible when checkbox is checked', () => {
-      expect(wrapper.exists('[data-button-action="create derived account"]')).toBe(true);
-      expect(wrapper.exists('[data-button-action="create root account"]')).toBe(false);
+      expect(passwordField.exists()).toBe(true);
+      expect(passwordField.prop('isError')).toBe(false);
     });
 
     it('No error is visible when first loading the page', () => {
       expect(wrapper.find('Warning')).toHaveLength(0);
     });
 
-    it('"Create derived account" is disabled when password is not set', () => {
-      const button = wrapper.find('[data-button-action="create derived account"] button');
-
-      expect(button.prop('disabled')).toBe(true);
-    });
-
-    it('An error is visible and "Create derived account" is disabled when password is incorrect', async () => {
+    it('An error is visible, input higlighted and the button disabled when password is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
       await act(flushAllPromises);
@@ -140,6 +116,7 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('[data-input-password]').first().prop('isError')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
       expect(wrapper.find('.warning-message').first().text()).toEqual('Wrong password');
     });
@@ -155,10 +132,11 @@ describe('Derive', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.prop('disabled')).toBe(false);
+      expect(wrapper.find('[data-input-password]').first().prop('isError')).toBe(false);
       expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
-    it('"Create derived account" is enabled when password is set', async () => {
+    it('Button is enabled when password is set', async () => {
       await type(wrapper.find('input[type="password"]'), 'pass');
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
@@ -167,7 +145,7 @@ describe('Derive', () => {
       expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
-    it('An error is visible and "Create derived account" is disabled when suri is incorrect', async () => {
+    it('An error is visible and the button is disabled when suri is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), 'pass');
       await type(wrapper.find('[data-input-suri] input'), '//');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
@@ -199,7 +177,7 @@ describe('Derive', () => {
       expect(wrapper.find('[data-field="name"]').first().text()).toBe('B');
     });
 
-    it('selects internal root accounts as other options', () => {
+    it('selects internal root accounts as other options, no external and no Ethereum account', () => {
       const options = wrapper.find('[data-parent-option] [data-field="name"]').map((el) => el.text());
 
       expect(options).toEqual(['A', 'B', 'D']);
@@ -215,10 +193,6 @@ describe('Derive', () => {
   describe('Locked parent selection', () => {
     beforeAll(async () => {
       wrapper = (await mountComponent(true)).wrapper;
-    });
-
-    it('checkbox does not exist', () => {
-      expect(wrapper.exists('[type="checkbox"]')).toBe(false);
     });
 
     it('address dropdown does not exist', () => {

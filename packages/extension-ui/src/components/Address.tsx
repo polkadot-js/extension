@@ -30,7 +30,7 @@ import Identicon from './Identicon';
 import Menu from './Menu';
 import Svg from './Svg';
 
-interface Props {
+export interface Props {
   actions?: React.ReactNode;
   address?: string | null;
   children?: React.ReactNode;

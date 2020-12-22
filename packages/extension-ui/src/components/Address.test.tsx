@@ -168,16 +168,6 @@ const genericTestSuite = (account: AccountTestJson) => {
 // };
 
 describe('Address', () => {
-  // const uncheck = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: false } });
-
-  // const type = async (input: ReactWrapper, value: string): Promise<void> => {
-  //   input.simulate('change', { target: { value } });
-  //   await act(flushAllPromises);
-  //   input.update();
-  // };
-
-  // genericTestSuite(accounts[4]);
-
   accounts.forEach((account) => {
     genericTestSuite(account);
   });

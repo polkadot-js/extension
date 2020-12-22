@@ -18,7 +18,7 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 ![interface screenshots](docs/extension-overview.png)
 
 ## Documentation and examples
-Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent question in the [Polkadot-js extension docuementation](polkadot.js.org/docs/extension/)
+Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension docuementation](https://polkadot.js.org/docs/extension/)
 
 ## Development version
 

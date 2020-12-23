@@ -13,10 +13,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
+import allChains from '@polkadot/extension-chains/chains';
+import { Chain } from '@polkadot/extension-chains/types';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import defaultSettings from '@polkadot/ui-settings';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
+import * as useMetadata from '../hooks/useMetadata';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
 import { buildHierarchy } from '../util/buildHierarchy';
@@ -31,37 +34,38 @@ interface AccountTestJson extends AccountJson {
   expectedIconTheme: IconTheme
 }
 
-interface TestAccountidentifier {
-  name: string;
-  type: KeypairType;
+interface AccountTestGenesisJson extends AccountTestJson {
+  expectedEncodedAddress: string;
+  expectedNetworkLabel: string;
+  genesisHash: string;
 }
 
 const accounts = [
   { address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ', expectedIconTheme: 'polkadot', name: 'ECDSA Account', type: 'ecdsa' },
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', expectedIconTheme: 'polkadot', name: 'Ed Account', type: 'ed25519' },
-  { address: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' },
+  { address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' },
   { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', expectedIconTheme: 'ethereum', name: 'Ethereum', type: 'ethereum' },
-  { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', expectedIconTheme: 'polkadot', name: 'Child Account', parentAddress: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', type: 'sr25519' },
+  { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', expectedIconTheme: 'polkadot', name: 'Child Account', parentAddress: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', type: 'sr25519' },
   { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' }
 ] as AccountTestJson[];
 
-const mountComponent = async (props: Props, settings: Partial<SettingsStruct> = {}): Promise<{
+const mountComponent = async (addressComponentProps: Props, contextAccounts: AccountJson[], settings: Partial<SettingsStruct> = {}): Promise<{
   wrapper: ReactWrapper;
 }> => {
   const actionStub = jest.fn();
-  const { actions = actionStub } = props;
+  const { actions = actionStub } = addressComponentProps;
   const newSettings = { ...defaultSettings.get(), ...settings };
 
   const wrapper = mount(
     // <SettingsContext.Provider value={newSettings}>
     <AccountContext.Provider value={{
-      accounts: accounts,
-      hierarchy: buildHierarchy(accounts)
+      accounts: contextAccounts,
+      hierarchy: buildHierarchy(contextAccounts)
     }}>
       <ThemeProvider theme={themes.dark}>
         <Address
           actions={actions}
-          {...props}
+          {...addressComponentProps}
         />
       </ThemeProvider>
     </AccountContext.Provider>
@@ -69,35 +73,33 @@ const mountComponent = async (props: Props, settings: Partial<SettingsStruct> = 
   );
 
   await act(flushAllPromises);
+  wrapper.update();
 
   return { wrapper };
 };
 
-const genericTestSuite = (account: AccountTestJson) => {
+const genericTestSuite = (account: AccountTestJson, withAccountInContext = true) => {
   let wrapper: ReactWrapper;
-  const { address, expectedIconTheme } = account;
-  const contextAccount = accounts.find((account) => account.address === address);
+  const { address, expectedIconTheme, name = '', type = DEFAULT_TYPE } = account;
 
-  // if the account is in the context the expected attributes are retrieved from there.
-  // the Address component will only get to know about the address
-  // otherwise the account props will show more.
-  const expectedAttributes = {
-    name: contextAccount?.name || account.name || '<unknown>',
-    type: contextAccount?.type || account.type || DEFAULT_TYPE
-  };
-
-  describe(`Displays an account from its address (${expectedAttributes.name}) - ${expectedAttributes.type}`, () => {
+  describe(`Account ${withAccountInContext ? 'in context from address' : 'from props'} (${name}) - ${type}`, () => {
     beforeEach(async () => {
-      const mountedComponent = contextAccount
-        ? await mountComponent({ address })
-        : await mountComponent(account);
+      // the address component can query info about the account from the account context
+      // in this case, the account's address (any encoding) should suffice
+      // In case the account is not in the context, then more info are needed as props
+      // to display accurately
+      const mountedComponent = withAccountInContext
+        // only the address is passed as props, the full acount info are loaded in the context
+        ? await mountComponent({ address }, [{ ...account }])
+        // the context is empty, all account's info are passed as props to the Address component
+        : await mountComponent(account, []);
 
       wrapper = mountedComponent.wrapper;
     });
 
     it('shows the account address and name', () => {
       expect(wrapper.find('[data-field="address"]').text()).toEqual(address);
-      expect(wrapper.find('Name span').text()).toEqual(expectedAttributes.name);
+      expect(wrapper.find('Name span').text()).toEqual(name);
     });
 
     it(`shows a ${expectedIconTheme} identicon`, () => {
@@ -110,7 +112,7 @@ const genericTestSuite = (account: AccountTestJson) => {
       expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(address);
     });
 
-    it('can hide the account', () => {
+    it('has the account visiblity icon', () => {
       expect(wrapper.find('FontAwesomeIcon.visibleIcon')).toHaveLength(1);
     });
 
@@ -130,9 +132,9 @@ const genericTestSuite = (account: AccountTestJson) => {
     it('can show the account if hidden', async () => {
       const additionalProps = { isHidden: true };
 
-      const mountedHiddenComponent = contextAccount
-        ? await mountComponent({ address, ...additionalProps })
-        : await mountComponent({ ...account, ...additionalProps });
+      const mountedHiddenComponent = withAccountInContext
+        ? await mountComponent({ address, ...additionalProps }, accounts)
+        : await mountComponent({ ...account, ...additionalProps }, []);
 
       const wrapperHidden = mountedHiddenComponent.wrapper;
 
@@ -155,9 +157,9 @@ const genericTestSuite = (account: AccountTestJson) => {
     it('has no account hidding and settings button if no action is provided', async () => {
       const additionalProps = { actions: null };
 
-      const mountedComponentWithoutAction = contextAccount
-        ? await mountComponent({ address, ...additionalProps })
-        : await mountComponent({ ...account, ...additionalProps });
+      const mountedComponentWithoutAction = withAccountInContext
+        ? await mountComponent({ address, ...additionalProps }, accounts)
+        : await mountComponent({ ...account, ...additionalProps }, []);
 
       wrapper = mountedComponentWithoutAction.wrapper;
 
@@ -165,28 +167,86 @@ const genericTestSuite = (account: AccountTestJson) => {
     });
   });
 };
-// };
+
+const genesisHashTestSuite = (account: AccountTestGenesisJson, withAccountInContext = true) => {
+  const { address, expectedEncodedAddress, expectedIconTheme, expectedNetworkLabel } = account;
+
+  describe(`Account ${withAccountInContext ? 'in context from address' : 'from props'} with ${expectedNetworkLabel} genesiHash`, () => {
+    let wrapper: ReactWrapper;
+
+    beforeEach(async () => {
+      // the address component can query info about the account from the account context
+      // in this case, the account's address (any encoding) should suffice
+      // In case the account is not in the context, then more info are needed as props
+      // to display accurately
+      const mountedComponent = withAccountInContext
+        // only the address is passed as props, the full acount info are loaded in the context
+        ? await mountComponent({ address }, [{ ...account }])
+        // the context is empty, all account's info are passed as props to the Address component
+        : await mountComponent(account, []);
+
+      wrapper = mountedComponent.wrapper;
+    });
+
+    it('shows the account address correctly encoded', () => {
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(expectedEncodedAddress);
+    });
+
+    it(`shows a ${expectedIconTheme} identicon`, () => {
+      expect(wrapper.find('Identicon').first().prop('iconTheme')).toEqual(expectedIconTheme);
+    });
+
+    it('Copy buttons contain the encoded address', () => {
+      // the first CopyToClipboard is from the identicon, the second from the copy button
+      expect(wrapper.find('CopyToClipboard').at(0).prop('text')).toEqual(expectedEncodedAddress);
+      expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(expectedEncodedAddress);
+    });
+
+    it('Network label shows the correct network', () => {
+      expect(wrapper.find('[data-field="chain"]').text()).toEqual(expectedNetworkLabel);
+    });
+  });
+};
 
 describe('Address', () => {
   accounts.forEach((account) => {
     genericTestSuite(account);
+    genericTestSuite(account, false);
   });
 
-  const accountNotInContext = {
-    address: '5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7',
+  // account with Polkadot genesis Hash
+  const polkadotGenesisHashAccount: AccountTestGenesisJson = {
+    ...accounts[2],
+    expectedEncodedAddress: '15csxS8s2AqrX1etYMMspzF6V7hM56KEjUqfjJvWHP7YWkoF',
     expectedIconTheme: 'polkadot',
-    name: 'Not in context',
-    type: 'sr25519'
-  } as AccountTestJson;
+    expectedNetworkLabel: 'Polkadot',
+    genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
+  };
 
-  genericTestSuite(accountNotInContext);
+  genesisHashTestSuite(polkadotGenesisHashAccount);
+  genesisHashTestSuite(polkadotGenesisHashAccount, false);
 
-  const EthereumAccountNotInContext = {
-    address: '0x4F4e24A11185565D483Ea1CFac1d3B96Fb7df684',
-    expectedIconTheme: 'ethereum',
-    name: 'Ethereum not in context',
-    type: 'ethereum'
-  } as AccountTestJson;
+  // account with Kusama genesis Hash
+  const kusamaGenesisHashAccount: AccountTestGenesisJson = {
+    ...accounts[2],
+    expectedEncodedAddress: 'HCCURDfnkbJq8TpMR7vanmwn5ywBTaH7MwvxgD7D6JX5QhT',
+    expectedIconTheme: 'polkadot',
+    expectedNetworkLabel: 'Kusama',
+    genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe'
+  };
 
-  genericTestSuite(EthereumAccountNotInContext);
+  genesisHashTestSuite(kusamaGenesisHashAccount);
+  genesisHashTestSuite(kusamaGenesisHashAccount, false);
+
+  // account with Edgeware genesis Hash
+  const edgwareGenesisHashAccount: AccountTestGenesisJson = {
+    ...accounts[2],
+    expectedEncodedAddress: 'n8VmNvgiCxwcRV8t5X3UJ751WhQTNit44ib36RcXNGxUv9u',
+    expectedIconTheme: 'substrate',
+    expectedNetworkLabel: 'Edgeware',
+    genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b'
+  };
+
+  genesisHashTestSuite(edgwareGenesisHashAccount);
+  genesisHashTestSuite(edgwareGenesisHashAccount, false);
 });

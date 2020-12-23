@@ -46,8 +46,8 @@ const accounts = [
 ] as AccountTestJson[];
 
 // With Westend genesis Hash
-// This account isn't part of the generic test because Westend isn't a built in netwokr
-// The label would only be displayed if the corresponding metadata are known
+// This account isn't part of the generic test because Westend isn't a built in network
+// The network would only be displayed if the corresponding metadata are known
 const westEndAccount = {
   address: 'Cs2LLqQ6DSRx8UPdVp6jny4DvwNqziBSowSu5Nb1u3R6Z7X',
   expectedEncodedAddress: '5CMQg2VXTrRWCUewro13qqc45Lf93KtzzS6hWR6dY6pvMZNF',

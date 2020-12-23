@@ -30,7 +30,7 @@ import Identicon from './Identicon';
 import Menu from './Menu';
 import Svg from './Svg';
 
-interface Props {
+export interface Props {
   actions?: React.ReactNode;
   address?: string | null;
   children?: React.ReactNode;
@@ -221,7 +221,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                   : undefined
               }
             >
-              {chain.name.replace('Relay Chain', '')}
+              {chain.name.replace(' Relay Chain', '')}
             </div>
           )}
           <div className='addressDisplay'>

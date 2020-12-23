@@ -69,7 +69,7 @@ const accountsWithGenesisHash = [
     genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
     type: 'sr25519'
   }
-]as AccountTestGenesisJson[];
+] as AccountTestGenesisJson[];
 
 const mountComponent = async (addressComponentProps: AddressComponentProps, contextAccounts: AccountJson[]): Promise<{
   wrapper: ReactWrapper;
@@ -114,7 +114,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
   const { address, expectedIconTheme, name = '', type = DEFAULT_TYPE } = account;
 
   describe(`Account ${withAccountsInContext ? 'in context from address' : 'from props'} (${name}) - ${type}`, () => {
-    beforeEach(async () => {
+    beforeAll(async () => {
       wrapper = await getWrapper(account, accounts, withAccountsInContext);
     });
 
@@ -195,7 +195,7 @@ const genesisHashTestSuite = (account: AccountTestGenesisJson, withAccountsInCon
   describe(`Account ${withAccountsInContext ? 'in context from address' : 'from props'} with ${expectedNetworkLabel} genesiHash`, () => {
     let wrapper: ReactWrapper;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       wrapper = await getWrapper(account, accountsWithGenesisHash, withAccountsInContext);
     });
 

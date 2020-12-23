@@ -14,9 +14,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as messaging from '../messaging';
+import * as MetadataCache from '../MetadataCache';
+import { westendMetadata } from '../Popup/Signing/metadataMock';
 import { flushAllPromises } from '../testHelpers';
 import { buildHierarchy } from '../util/buildHierarchy';
 import { DEFAULT_TYPE } from '../util/defaultType';
+import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, Address } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
@@ -32,14 +35,28 @@ interface AccountTestGenesisJson extends AccountTestJson {
   genesisHash: string;
 }
 
+const externalAccount = { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' } as AccountJson;
+
 const accounts = [
   { address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ', expectedIconTheme: 'polkadot', name: 'ECDSA Account', type: 'ecdsa' },
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', expectedIconTheme: 'polkadot', name: 'Ed Account', type: 'ed25519' },
   { address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' },
   { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', expectedIconTheme: 'ethereum', name: 'Ethereum', type: 'ethereum' },
-  { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', expectedIconTheme: 'polkadot', name: 'Child Account', parentAddress: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', type: 'sr25519' },
-  { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' }
+  { ...externalAccount }
 ] as AccountTestJson[];
+
+// With Westend genesis Hash
+// This account isn't part of the generic test because Westend isn't a built in netwokr
+// The label would only be displayed if the corresponding metadata are known
+const westEndAccount = {
+  address: 'Cs2LLqQ6DSRx8UPdVp6jny4DvwNqziBSowSu5Nb1u3R6Z7X',
+  expectedEncodedAddress: '5CMQg2VXTrRWCUewro13qqc45Lf93KtzzS6hWR6dY6pvMZNF',
+  expectedIconTheme: 'polkadot',
+  expectedNetworkLabel: 'Westend',
+  genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+  name: 'acc',
+  type: 'ed25519'
+} as AccountTestGenesisJson;
 
 const accountsWithGenesisHash = [
   // with Polkadot genesis Hash
@@ -234,11 +251,58 @@ describe('Address', () => {
     let wrapper: ReactWrapper;
 
     beforeAll(async () => {
-      wrapper = await getWrapper(accounts[5], [], false);
+      wrapper = await getWrapper(externalAccount, [], false);
     });
 
     it('has an icon in front of its name', () => {
       expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
+    });
+  });
+
+  describe('Encoding and label based on Metadata', () => {
+    let wrapper: ReactWrapper;
+
+    beforeAll(async () => {
+      jest.spyOn(MetadataCache, 'getSavedMeta').mockResolvedValue(westendMetadata);
+
+      wrapper = await getWrapper(westEndAccount, [], false);
+    });
+
+    it('shows westend label with the correct color', () => {
+      const bannerChain = wrapper.find('[data-field="chain"]');
+
+      expect(bannerChain.text()).toEqual(westendMetadata.chain);
+      expect(bannerChain.prop('style')?.backgroundColor).toEqual(westendMetadata.color);
+    });
+
+    it('shows the account correctly reencoded', () => {
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(westEndAccount.expectedEncodedAddress);
+    });
+  });
+
+  describe('Derived accounts', () => {
+    let wrapper: ReactWrapper;
+    const childAccount = {
+      address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+      name: 'Luke',
+      parentName: 'Dark Vador',
+      suri: '//42',
+      type: 'sr25519'
+    } as AccountJson;
+
+    beforeAll(async () => {
+      wrapper = await getWrapper(childAccount, [], false);
+    });
+
+    it('shows the child\'s account address and name', () => {
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(childAccount.address);
+      expect(wrapper.find('Name span').text()).toEqual(childAccount.name);
+    });
+
+    it('shows the parent account and suri', () => {
+      const expectedParentNameSuri = getParentNameSuri(childAccount.parentName as string, childAccount.suri);
+
+      expect(wrapper.find('.parentName').text()).toEqual(expectedParentNameSuri);
     });
   });
 });

@@ -79,6 +79,12 @@ describe('Create Account', () => {
       expect(onActionStub).toBeCalledWith('/');
     });
 
+    it('checking the checkbox enables the Next button', () => {
+      check(wrapper.find('input[type="checkbox"]'));
+
+      expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    });
+
     it('clicking on Next activates phase 2', () => {
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
@@ -151,14 +157,14 @@ describe('Create Account', () => {
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
-    it('submit button is not visible until both passwords are equal', async () => {
+    it('submit button is not enabled until both passwords are equal', async () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdeg'));
       expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match');
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(true);
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
-    it('submit button is visible when both passwords are equal', async () => {
+    it('submit button is enabled when both passwords are equal', async () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
       expect(wrapper.find('.warning-message')).toHaveLength(0);
       expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(false);
@@ -189,19 +195,19 @@ describe('Create Account', () => {
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
-    it('first password changes - button is not disabled', async () => {
+    it('first password changes - button is disabled', async () => {
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
       expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match');
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
     });
 
-    it('first password changes, then second changes too - button is visible', async () => {
+    it('first password changes, then second changes too - button is enabled', async () => {
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
       await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
     });
 
-    it('second password changes, then first changes too - button is visible', async () => {
+    it('second password changes, then first changes too - button is enabled', async () => {
       await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
       await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
       expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);

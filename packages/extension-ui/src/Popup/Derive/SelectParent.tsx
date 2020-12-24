@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { canDerive } from '@polkadot/extension-base/utils';
 import { assert } from '@polkadot/util';
 
-import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
+import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -33,7 +33,6 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
-  const [shouldAccountBeDerived, setShouldAccountBeDerived] = useState(true);
   const passwordInputRef = useRef<HTMLDivElement>(null);
 
   const allAddresses = useMemo(
@@ -42,11 +41,6 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
       .filter(({ type }) => canDerive(type))
       .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
-  );
-
-  const _goCreate = useCallback(
-    () => onAction('/account/create'),
-    [onAction]
   );
 
   const _onParentPasswordEnter = useCallback(
@@ -98,15 +92,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   return (
     <>
       <div className={className}>
-        {!isLocked && (
-          <Checkbox
-            checked={shouldAccountBeDerived}
-            className='smallerMargin'
-            label={t<string>('Derive new account from existing')}
-            onChange={setShouldAccountBeDerived}
-          />
-        )}
-        <div className={`disableArea ${shouldAccountBeDerived ? '' : 'disabled'}`}>
+        <div className=''>
           {isLocked
             ? (
               <Address
@@ -125,45 +111,41 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
               </Label>
             )
           }
-          {shouldAccountBeDerived && (
+          <div ref={passwordInputRef}>
+            <InputWithLabel
+              data-input-password
+              isError={!!parentPassword && !isProperParentPassword}
+              isFocused
+              label={t<string>('enter the password for the account you want to derive from')}
+              onChange={_onParentPasswordEnter}
+              type='password'
+              value={parentPassword}
+            />
+            {!!parentPassword && !isProperParentPassword && (
+              <Warning
+                isBelowInput
+                isDanger
+              >
+                {t('Wrong password')}
+              </Warning>
+            )}
+          </div>
+          {isProperParentPassword && (
             <>
-              <div ref={passwordInputRef}>
-                <InputWithLabel
-                  data-export-password
-                  isError={!isProperParentPassword}
-                  isFocused
-                  label={t<string>('enter the password for the account you want to derive from')}
-                  onChange={_onParentPasswordEnter}
-                  type='password'
-                  value={parentPassword}
-                />
-                {!!parentPassword && !isProperParentPassword && (
-                  <Warning
-                    isBelowInput
-                    isDanger
-                  >
-                    {t('Wrong password')}
-                  </Warning>
-                )}
-              </div>
-              {isProperParentPassword && (
-                <>
-                  <DerivationPath
-                    defaultPath={defaultPath}
-                    isError={!suriPath}
-                    onChange={setSuriPath}
-                    parentAddress={parentAddress}
-                    parentPassword={parentPassword}
-                  />
-                  {!suriPath && (
-                    <Warning
-                      isBelowInput
-                      isDanger
-                    >
-                      {t('Incorrect derivation path')}
-                    </Warning>
-                  )}
-                </>
+              <DerivationPath
+                defaultPath={defaultPath}
+                isError={!suriPath}
+                onChange={setSuriPath}
+                parentAddress={parentAddress}
+                parentPassword={parentPassword}
+              />
+              {!suriPath && (
+                <Warning
+                  isBelowInput
+                  isDanger
+                >
+                  {t('Incorrect derivation path')}
+                </Warning>
               )}
             </>
           )}
@@ -171,43 +153,18 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
       </div>
       <VerticalSpace/>
       <ButtonArea>
-        {shouldAccountBeDerived
-          ? (
-            <NextStepButton
-              data-button-action='create derived account'
-              isBusy={isBusy}
-              isDisabled={!isProperParentPassword || !suriPath}
-              onClick={_onSubmit}
-            >
-              {t<string>('Create a derived account')}
-            </NextStepButton>
-          )
-          : (
-            <NextStepButton
-              data-button-action='create root account'
-              onClick={_goCreate}
-            >
-              {t<string>('Create account from new seed')}
-            </NextStepButton>
-          )
-        }
+        <NextStepButton
+          data-button-action='create derived account'
+          isBusy={isBusy}
+          isDisabled={!isProperParentPassword || !suriPath}
+          onClick={_onSubmit}
+        >
+          {t<string>('Create a derived account')}
+        </NextStepButton>
       </ButtonArea>
     </>
   );
 }
 
 export default styled(SelectParent)`
-  .smallerMargin {
-    margin-top: 0;
-    margin-bottom: 10px;
-  }
-
-  .disableArea {
-    opacity: 1;
-
-    .disabled {
-      opacity: 0.2;
-      pointer-events: none;
-    }
-  }
 `;

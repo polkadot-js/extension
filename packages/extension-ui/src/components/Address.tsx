@@ -25,6 +25,7 @@ import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
+import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
@@ -167,7 +168,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       </>);
   };
 
-  const parentNameSuri = `${parentName || ''}  ${suri || ''}`;
+  const parentNameSuri = getParentNameSuri(parentName, suri);
 
   return (
     <div className={className}>

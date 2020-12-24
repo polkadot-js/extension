@@ -108,5 +108,21 @@
     "Extend the period without password by {{expiration}} minutes": "Retenir le mot de passe pour {{expiration}} minutes",
     "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts.": "Vous avez été redirigé, car l'extension Polkadot{.js} estime que ce site Web pourrait compromettre la sécurité de vos comptes.",
     "The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.": "La redirection peut également se produire sur un site Web malveillant ou sur un site Web légitime qui a été compromis et signalé.",
-    "This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list.\n It might be incomplete or inaccurate.": "Cette redirection est basée sur une liste de sites Web accessibles à l'adresse https://github.com/polkadot-js/phishing. Notez qu'il s'agit d'une liste maintenue par la communauté.\n Elle peut être incomplète ou inexacte."
+    "This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list.\n It might be incomplete or inaccurate.": "Cette redirection est basée sur une liste de sites Web accessibles à l'adresse https://github.com/polkadot-js/phishing. Notez qu'il s'agit d'une liste maintenue par la communauté.\n Elle peut être incomplète ou inexacte.",
+    "copy address": "copier l'adresse",
+    "account visibility": "visibilité du compte",
+    "Wrong password": "Mot de passe incorrecte",
+    "Incorrect derivation path": "Chemin de dérivation incorrecte",
+    "lifetime": "validité",
+    "Warning: Caps lock is on": "Attention, touche Maj active",
+    "Invalid Json file": "Fichier JSON invalide",
+    "Unable to decode using the supplied passphrase": "Impossible de débloquer le compte avec ce mot de passe",
+    "Manage Website Access": "Gérer l'accès des site webs",
+    "example.com": "exemple.com",
+    "No website request yet!": "Aucun site n'a demandé l'accès",
+    "allowed": "autorisé",
+    "denied": "refusé",
+    "Derive from an account": "Dériver depuis un compte existant",
+    "Dark": "Sombre",
+    "Light": "Clair"
   }

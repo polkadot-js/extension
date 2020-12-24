@@ -85,9 +85,9 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       >
         <Switch
           checked={themeContext.id === themes.dark.id}
-          checkedLabel='Dark'
+          checkedLabel={t<string>('Dark')}
           onChange={_onChangeTheme}
-          uncheckedLabel='Light'
+          uncheckedLabel={t<string>('Light')}
         />
       </MenuItem>
       <MenuDivider />
@@ -96,7 +96,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           className='manageWebsiteAccess'
           icon={faTasks}
           onClick={_goToAuthList}
-          text={t<string>('Manage website access')}
+          text={t<string>('Manage Website Access')}
         />
       </MenuItem>
       <MenuDivider/>

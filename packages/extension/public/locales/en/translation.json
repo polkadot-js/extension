@@ -117,11 +117,12 @@
   "Warning: Caps lock is on": "",
   "Invalid Json file": "",
   "Unable to decode using the supplied passphrase": "",
-  "Manage website access": "",
   "Manage Website Access": "",
   "example.com": "",
   "No website request yet!": "",
   "allowed": "",
   "denied": "",
-  "Derive from an account": ""
+  "Derive from an account": "",
+  "Dark": "",
+  "Light": ""
 }

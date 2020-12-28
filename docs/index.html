@@ -206,5 +206,10 @@
       <p>This extension is open source and the code is available on <a href="https://github.com/polkadot-js/extension">GitHub</a>.</p>
       <p>For developers wanting to use the accounts from the extension in a Dapp, head to the <a href="https://polkadot.js.org/docs/extension/">developer documentation</a>.</p>
     </div>
+    <script>
+      if (window.self !== window.top) {
+        window.top.location.href = window.location.href;
+      }
+    </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-chains authors & contributors
+// Copyright 2019-2021 @polkadot/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import chains from './chains';

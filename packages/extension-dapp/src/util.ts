@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-dapp authors & contributors
+// Copyright 2019-2021 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export function documentReadyPromise <T> (creator: () => Promise<T>): Promise<T> {

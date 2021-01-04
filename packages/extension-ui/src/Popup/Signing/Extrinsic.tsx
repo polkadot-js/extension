@@ -68,7 +68,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
         <td className='label'>{t<string>('method')}</td>
         <td className='data'>
           <details>
-            <summary>{method.sectionName}.{method.methodName}{
+            <summary>{method.section}.{method.method}{
               method.meta
                 ? `(${method.meta.args.map(({ name }) => name).join(', ')})`
                 : ''

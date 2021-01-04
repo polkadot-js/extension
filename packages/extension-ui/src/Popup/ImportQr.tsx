@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 
 import { QrScanAddress } from '@polkadot/react-qr';
 
@@ -10,13 +10,23 @@ import useTranslation from '../hooks/useTranslation';
 import { createAccountExternal } from '../messaging';
 import { Header, Name } from '../partials';
 
+interface QrAccount {
+  content: string;
+  genesisHash: string;
+  name?: string;
+}
+
 export default function ImportQr (): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const [account, setAccount] = useState<null | { content: string; genesisHash: string }>(null);
+  const [account, setAccount] = useState<QrAccount | null>(null);
   const [name, setName] = useState<string | null>(null);
 
-  // FIXME Duplicated between here and Create.tsx
+  const _setAccount = useCallback((qrAccount: QrAccount) => {
+    setAccount(qrAccount);
+    setName(qrAccount?.name || null);
+  }, []);
+
   const _onCreate = (): void => {
     if (account && name) {
       createAccountExternal(name, account.content, account.genesisHash)
@@ -33,7 +43,7 @@ export default function ImportQr (): React.ReactElement {
       />
       {!account && (
         <div>
-          <QrScanAddress onScan={setAccount} />
+          <QrScanAddress onScan={_setAccount} />
         </div>
       )}
       {account && (
@@ -41,6 +51,7 @@ export default function ImportQr (): React.ReactElement {
           <div>
             <Address
               {...account}
+              address={account.content}
               isExternal={true}
               name={name}
             />
@@ -48,6 +59,7 @@ export default function ImportQr (): React.ReactElement {
           <Name
             isFocused
             onChange={setName}
+            value={name || ''}
           />
           <VerticalSpace />
           {name && (

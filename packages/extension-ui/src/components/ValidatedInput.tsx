@@ -27,6 +27,12 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
   const isMounted = useIsMounted();
 
   useEffect(() => {
+    if (defaultValue) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue]);
+
+  useEffect(() => {
     // Do not show any error on first mount
     if (!isMounted) {
       return;

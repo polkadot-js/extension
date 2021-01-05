@@ -23,6 +23,7 @@ export default function ImportQr (): React.ReactElement {
   const [name, setName] = useState<string | null>(null);
 
   const _setAccount = useCallback((qrAccount: QrAccount) => {
+    console.log('Qraccount', qrAccount);
     setAccount(qrAccount);
     setName(qrAccount?.name || null);
   }, []);
@@ -62,15 +63,14 @@ export default function ImportQr (): React.ReactElement {
             value={name || ''}
           />
           <VerticalSpace />
-          {name && (
-            <ButtonArea>
-              <NextStepButton
-                onClick={_onCreate}
-              >
-                {t<string>('Add the account with identified address')}
-              </NextStepButton>
-            </ButtonArea>
-          )}
+          <ButtonArea>
+            <NextStepButton
+              isDisabled={!name}
+              onClick={_onCreate}
+            >
+              {t<string>('Add the account with identified address')}
+            </NextStepButton>
+          </ButtonArea>
         </>
       )}
     </>

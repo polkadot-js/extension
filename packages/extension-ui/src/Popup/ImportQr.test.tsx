@@ -18,6 +18,12 @@ import ImportQr from './ImportQr';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
+const typeName = async (wrapper: ReactWrapper, value:string) => {
+  wrapper.find('input').first().simulate('change', { target: { value } });
+  await act(flushAllPromises);
+  wrapper.update();
+};
+
 describe('ImportQr component', () => {
   let wrapper: ReactWrapper;
 
@@ -46,25 +52,21 @@ describe('ImportQr component', () => {
   });
 
   it('Error is displayed and button is disabled with a short name', async () => {
-    wrapper.find('input').first().simulate('change', { target: { value: 'a' } });
-    await act(flushAllPromises);
-    wrapper.update();
+    await typeName(wrapper, 'a');
 
     expect(wrapper.find('.warning-message').first().text()).toBe('Account name is too short');
     expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
   });
 
-  it('Error is not displayed and button enabled with a long name', async () => {
-    wrapper.find('input').first().simulate('change', { target: { value: 'a' } });
-    await act(flushAllPromises);
-    wrapper.update();
+  it('has no error message and button enabled with a long name', async () => {
+    const longName = 'aaa';
 
-    wrapper.find('input').first().simulate('change', { target: { value: 'aaa' } });
-    await act(flushAllPromises);
-    wrapper.update();
+    await typeName(wrapper, 'a');
+    await typeName(wrapper, longName);
+
     expect(wrapper.find('.warning-message')).toHaveLength(0);
     expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
-    expect(wrapper.find('Name span').text()).toEqual('aaa');
+    expect(wrapper.find('Name span').text()).toEqual(longName);
   });
 
   it('shows the external name in the input field', () => {

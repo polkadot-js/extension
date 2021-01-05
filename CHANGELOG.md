@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.36.1 Jan 4, 2021
+## 0.36.1 Jan 5, 2021
 
 Contributed:
 

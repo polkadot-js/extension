@@ -2,7 +2,7 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.35.2-29",
+  "version": "0.36.0",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -23,7 +23,7 @@
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:release": "polkadot-ci-ghact-build",
-    "build:ui": "cd packages/extension && yarn webpack --config webpack.extension.js --mode production",
+    "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.js --mode production",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .babelrc.js .editorconfig .eslintignore .eslintrc.js babel.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.js lerna.json LICENSE package.json README.md tsconfig.json yarn.lock",

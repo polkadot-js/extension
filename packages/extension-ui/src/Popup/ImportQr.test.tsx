@@ -41,17 +41,29 @@ describe('ImportQr component', () => {
     wrapper.update();
   });
 
-  it('shows the address component as external with correct name and address', () => {
-    expect(wrapper.find('Name span').text()).toEqual(mockedAccount.name);
-    expect(wrapper.find('[data-field="address"]').text()).toEqual(mockedAccount.content);
-    expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
+  describe('Address component', () => {
+    it('shows account as external', () => {
+      expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
+    });
+
+    it('shows the correct name', () => {
+      expect(wrapper.find('Name span').text()).toEqual(mockedAccount.name);
+    });
+
+    it('shows the correct address', () => {
+      expect(wrapper.find('[data-field="address"]').text()).toEqual(mockedAccount.content);
+    });
+
+    it('shows the correct banner', () => {
+      expect(wrapper.find('[data-field="chain"]').text()).toEqual(mockedAccount.expectedBannerChain);
+    });
   });
 
-  it('button is enabled', () => {
+  it('has the button enabled', () => {
     expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
   });
 
-  it('Error is displayed and button is disabled with a short name', async () => {
+  it('displays and error and the button is disabled with a short name', async () => {
     await typeName(wrapper, 'a');
 
     expect(wrapper.find('.warning-message').first().text()).toBe('Account name is too short');

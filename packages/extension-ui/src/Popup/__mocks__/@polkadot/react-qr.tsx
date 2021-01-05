@@ -17,8 +17,10 @@ interface Props {
   size?: string | number;
   style?: React.CSSProperties;
 }
+
 export const mockedAccount = {
   content: '12bxf6QJS5hMJgwbJMDjFot1sq93EvgQwyuPWENr9SzJfxtN',
+  expectedBannerChain: 'Polkadot',
   genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
   isAddress: true,
   name: 'My Polkadot Account'

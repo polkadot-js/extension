@@ -41,7 +41,7 @@ function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.
   );
 }
 
-export default styled(WebsiteEntry)`
+export default styled(WebsiteEntry)(({ theme }: Props) => `
   display: flex;
   align-items: center;
 
@@ -51,8 +51,7 @@ export default styled(WebsiteEntry)`
 
   &.denied {
     .slider::before {
-        opacity: 0.4;
-        background-color: rgb(36, 37, 41);
+        background-color: ${theme.backButtonBackground};
       }
   }
-`;
+`);

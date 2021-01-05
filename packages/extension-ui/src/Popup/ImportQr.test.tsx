@@ -21,7 +21,7 @@ configure({ adapter: new Adapter() });
 describe('ImportQr component', () => {
   let wrapper: ReactWrapper;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.mock('@polkadot/react-qr');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -30,9 +30,12 @@ describe('ImportQr component', () => {
         <ImportQr />
       </MemoryRouter>
     );
+
+    await act(flushAllPromises);
+    wrapper.update();
   });
 
-  it('shows the correct address component with name address and external', () => {
+  it('shows the address component as external with correct name and address', () => {
     expect(wrapper.find('Name span').text()).toEqual(mockedAccount.name);
     expect(wrapper.find('[data-field="address"]').text()).toEqual(mockedAccount.content);
     expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
@@ -42,12 +45,26 @@ describe('ImportQr component', () => {
     expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
   });
 
-  it('button is disabled if wrong name', async () => {
+  it('Error is displayed and button is disabled with a short name', async () => {
     wrapper.find('input').first().simulate('change', { target: { value: 'a' } });
     await act(flushAllPromises);
     wrapper.update();
 
+    expect(wrapper.find('.warning-message').first().text()).toBe('Account name is too short');
     expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
+  });
+
+  it('Error is not displayed and button enabled with a long name', async () => {
+    wrapper.find('input').first().simulate('change', { target: { value: 'a' } });
+    await act(flushAllPromises);
+    wrapper.update();
+
+    wrapper.find('input').first().simulate('change', { target: { value: 'aaa' } });
+    await act(flushAllPromises);
+    wrapper.update();
+    expect(wrapper.find('.warning-message')).toHaveLength(0);
+    expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    expect(wrapper.find('Name span').text()).toEqual('aaa');
   });
 
   it('shows the external name in the input field', () => {

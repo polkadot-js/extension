@@ -23,7 +23,6 @@ export default function ImportQr (): React.ReactElement {
   const [name, setName] = useState<string | null>(null);
 
   const _setAccount = useCallback((qrAccount: QrAccount) => {
-    console.log('Qraccount', qrAccount);
     setAccount(qrAccount);
     setName(qrAccount?.name || null);
   }, []);

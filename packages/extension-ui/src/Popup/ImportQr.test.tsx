@@ -48,14 +48,8 @@ const typeName = async (wrapper: ReactWrapper, value:string) => {
 
 jest.mock('@polkadot/react-qr', () => {
   return {
-    // eslint-disable-next-line react/display-name
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     QrScanAddress: ({ onScan }: QrScanAddressProps): null => {
-      // we can't use useEffect here
-      // the timeout prevents a test warning "Cannot update a component (`ImportQr`) while rendering a different component (`QrScanAddress`)."
-      setTimeout(() => {
-        onScan(mockedAccount);
-      }, 0);
-
       return null;
     }
   };
@@ -72,6 +66,10 @@ describe('ImportQr component', () => {
       </MemoryRouter>
     );
 
+    act(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+      (wrapper.find('QrScanAddress').first().prop('onScan') as unknown as QrScanAddressProps['onScan'])(mockedAccount);
+    });
     await act(flushAllPromises);
     wrapper.update();
   });

@@ -61,6 +61,8 @@ describe('Signing requests', () => {
   const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
 
   beforeEach(async () => {
+    jest.dontMock('@polkadot/react-qr');
+    jest.resetModules();
     jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
     jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
     jest.spyOn(messaging, 'isSignLocked').mockResolvedValue({ isLocked: true, remainingTime: 0 });

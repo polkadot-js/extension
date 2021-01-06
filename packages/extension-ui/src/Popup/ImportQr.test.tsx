@@ -9,10 +9,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
+import { mockedAccount } from '../../../../__mocks__/@polkadot/react-qr';
 import { Button } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
-import { mockedAccount } from './__mocks__/@polkadot/react-qr';
 import ImportQr from './ImportQr';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
@@ -28,7 +28,7 @@ describe('ImportQr component', () => {
   let wrapper: ReactWrapper;
 
   beforeEach(async () => {
-    jest.mock('@polkadot/react-qr');
+    jest.doMock('@polkadot/react-qr');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(

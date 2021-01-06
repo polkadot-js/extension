@@ -4,6 +4,7 @@
 const config = require('@polkadot/dev/config/jest.cjs');
 
 module.exports = Object.assign({}, config, {
+  automock: false,
   browser: true,
   clearMocks: true, // Automatically clear mock calls and instances between every test
   moduleNameMapper: {

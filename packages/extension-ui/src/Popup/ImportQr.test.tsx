@@ -9,11 +9,33 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
-import { mockedAccount } from '../../../../__mocks__/@polkadot/react-qr';
 import { Button } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
 import ImportQr from './ImportQr';
+
+const mockedAccount = {
+  content: '12bxf6QJS5hMJgwbJMDjFot1sq93EvgQwyuPWENr9SzJfxtN',
+  expectedBannerChain: 'Polkadot',
+  genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
+  isAddress: true,
+  name: 'My Polkadot Account'
+};
+
+interface ScanType {
+  isAddress: boolean;
+  content: string;
+  genesisHash: string;
+  name?: string;
+}
+
+interface QrScanAddressProps {
+  className?: string;
+  onError?: (error: Error) => void;
+  onScan: (scanned: ScanType) => void;
+  size?: string | number;
+  style?: React.CSSProperties;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
@@ -24,12 +46,25 @@ const typeName = async (wrapper: ReactWrapper, value:string) => {
   wrapper.update();
 };
 
+jest.mock('@polkadot/react-qr', () => {
+  return {
+    // eslint-disable-next-line react/display-name
+    QrScanAddress: ({ onScan }: QrScanAddressProps): null => {
+      // we can't use useEffect here
+      // the timeout prevents a test warning "Cannot update a component (`ImportQr`) while rendering a different component (`QrScanAddress`)."
+      setTimeout(() => {
+        onScan(mockedAccount);
+      }, 0);
+
+      return null;
+    }
+  };
+});
+
 describe('ImportQr component', () => {
   let wrapper: ReactWrapper;
 
   beforeEach(async () => {
-    jest.doMock('@polkadot/react-qr');
-
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(
       <MemoryRouter>

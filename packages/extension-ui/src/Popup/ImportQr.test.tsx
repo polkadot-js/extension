@@ -55,32 +55,8 @@ jest.mock('@polkadot/react-qr', () => {
   };
 });
 
-// jest.mock('react-i18next');
-// jest.mock('react-i18next', () => ({
-//   __esModule: true,
-//   default: 'withTranslation',
-//   useTranslation: () => {
-//     return {
-//       i18n: {
-//         changeLanguage: () => new Promise(() => { /**/ })
-//       },
-//       t: (str: string) => str
-//     };
-//   },
-//   withTranslation: () => (Component: React.ReactElement) => {
-//     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-//     Component.props = { ...Component.props, t: () => '' };
-
-//     return Component;
-//   }
-// }));
-
 describe('ImportQr component', () => {
   let wrapper: ReactWrapper;
-
-  // beforeAll(async () => {
-  //   await i18next.changeLanguage('en');
-  // });
 
   beforeEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

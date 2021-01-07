@@ -93,7 +93,7 @@ describe('ImportQr component', () => {
   });
 
   it('has the button enabled', () => {
-    expect(wrapper.find('Button button').prop('disabled')).toBeFalsy();
+    expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
   });
 
   it('displays and error and the button is disabled with a short name', async () => {

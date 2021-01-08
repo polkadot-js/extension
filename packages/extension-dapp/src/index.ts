@@ -4,6 +4,7 @@
 import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+import { u8aEq } from '@polkadot/util';
 
 import { documentReadyPromise } from './util';
 
@@ -178,13 +179,17 @@ export async function web3FromSource (source: string): Promise<InjectedExtension
 }
 
 // find a specific provider based on an address
-export async function web3FromAddress (address: string, { ss58Format }: Web3AccountsOptions = {}): Promise<InjectedExtension> {
+export async function web3FromAddress (address: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {
     return throwError('web3FromAddress');
   }
 
-  const accounts = await web3Accounts({ ss58Format });
-  const found = address && accounts.find((account): boolean => account.address === address);
+  const accounts = await web3Accounts();
+
+  let found: InjectedAccountWithMeta | undefined;
+  if (address) {
+    found = accounts.find((account) => u8aEq(decodeAddress(address), decodeAddress(account.address)));
+  }
 
   if (!found) {
     throw new Error(`web3FromAddress: Unable to find injected ${address}`);

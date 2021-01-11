@@ -62,15 +62,14 @@ export default function ImportQr (): React.ReactElement {
             value={name || ''}
           />
           <VerticalSpace />
-          {name && (
-            <ButtonArea>
-              <NextStepButton
-                onClick={_onCreate}
-              >
-                {t<string>('Add the account with identified address')}
-              </NextStepButton>
-            </ButtonArea>
-          )}
+          <ButtonArea>
+            <NextStepButton
+              isDisabled={!name}
+              onClick={_onCreate}
+            >
+              {t<string>('Add the account with identified address')}
+            </NextStepButton>
+          </ButtonArea>
         </>
       )}
     </>

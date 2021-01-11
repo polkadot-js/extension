@@ -8,23 +8,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { keyExtractSuri } from '@polkadot/util-crypto';
-
 import { AccountContext, ActionContext, Address, BackButton, ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { HeaderWithSteps, Name, Password } from '../partials';
-
-async function isSuriValid (suri: string): Promise<boolean> {
-  try {
-    keyExtractSuri(suri);
-    await validateSeed(suri);
-
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 interface Props {
   className? : string;
@@ -50,31 +37,27 @@ function Import ({ className }: Props): React.ReactElement {
   }, [accounts, onAction]);
 
   useEffect(() => {
-    validateSeed(suri).then((newAccount) => {
-      setAccount(newAccount);
-    }).catch((e) => {
-      setAccount(null);
-      console.error(e);
-    });
-  }, [suri]);
-
-  useEffect(() => {
     // No need to validate an empty seed
     // we have a dedicated error for this
     if (!seed) {
+      setAccount(null);
+
       return;
     }
 
-    isSuriValid(suri).then((isValid) => {
-      if (isValid) {
+    validateSeed(suri).then((newAccount) => {
+      if (newAccount) {
         setError('');
-      } else {
-        setError(path
-          ? t<string>('Invalid mnemonic seed or derivation path')
-          : t<string>('Invalid mnemonic seed')
-        );
+        setAccount(newAccount);
       }
-    }).catch(console.error);
+    }).catch((e) => {
+      setAccount(null);
+      setError(path
+        ? t<string>('Invalid mnemonic seed or derivation path')
+        : t<string>('Invalid mnemonic seed')
+      );
+      console.error(e);
+    });
   }, [t, seed, suri, path]);
 
   const _onCreate = useCallback((): void => {
@@ -173,7 +156,7 @@ function Import ({ className }: Props): React.ReactElement {
         {!step1 && <BackButton onClick={_onBackClick}/>}
         <NextStepButton
           isBusy={isBusy}
-          isDisabled={!account || error}
+          isDisabled={!account || !!error}
           onClick={_onNextStep}
         >
           {

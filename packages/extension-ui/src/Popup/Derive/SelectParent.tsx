@@ -1,10 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
-
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
 import { assert } from '@polkadot/util';
@@ -16,7 +13,7 @@ import { nextDerivationPath } from '../../util/nextDerivationPath';
 import AddressDropdown from './AddressDropdown';
 import DerivationPath from './DerivationPath';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   isLocked?: boolean;
   parentAddress: string;
@@ -24,7 +21,7 @@ interface Props extends ThemeProps {
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
 }
 
-function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+export default function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -165,6 +162,3 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
     </>
   );
 }
-
-export default styled(SelectParent)`
-`;

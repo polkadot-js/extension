@@ -1,6 +1,8 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { keyExtractSuri } from '@polkadot/util-crypto';
+
 interface InputError {
   errorDescription: string;
 }

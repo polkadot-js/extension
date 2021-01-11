@@ -4,6 +4,7 @@
 import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+
 import { u8aEq } from '@polkadot/util';
 
 import { documentReadyPromise } from './util';
@@ -185,8 +186,8 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   }
 
   const accounts = await web3Accounts();
-
   let found: InjectedAccountWithMeta | undefined;
+
   if (address) {
     found = accounts.find((account) => u8aEq(decodeAddress(address), decodeAddress(account.address)));
   }

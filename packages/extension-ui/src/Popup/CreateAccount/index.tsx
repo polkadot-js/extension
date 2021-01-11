@@ -4,11 +4,11 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { ActionContext, Address, Loading } from '../../components';
+import AccountNamePasswordCreate from '../../components/AccountNamePasswordCreate';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
-import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';
 
 export default function CreateAccount (): React.ReactElement {
@@ -69,7 +69,7 @@ export default function CreateAccount (): React.ReactElement {
               />
             )
             : (
-              <AccountName
+              <AccountNamePasswordCreate
                 address={account.address}
                 isBusy={isBusy}
                 onBackClick={_onPreviousStep}

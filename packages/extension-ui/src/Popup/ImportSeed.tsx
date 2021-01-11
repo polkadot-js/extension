@@ -9,9 +9,10 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Address, BackButton, ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../components';
+import AccountName from '../components/AccountNamePasswordCreate';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountSuri, validateSeed } from '../messaging';
-import { HeaderWithSteps, Name, Password } from '../partials';
+import { HeaderWithSteps } from '../partials';
 
 interface Props {
   className? : string;
@@ -24,7 +25,6 @@ function Import ({ className }: Props): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
   const [name, setName] = useState<string | null>(null);
-  const [password, setPassword] = useState<string | null>(null);
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [step1, setStep1] = useState(true);
@@ -58,7 +58,7 @@ function Import ({ className }: Props): React.ReactElement {
     });
   }, [t, seed, path]);
 
-  const _onCreate = useCallback((): void => {
+  const _onCreate = useCallback((name: string, password: string): void => {
     // this should always be the case
     if (name && password && account) {
       setIsBusy(true);
@@ -70,14 +70,12 @@ function Import ({ className }: Props): React.ReactElement {
           console.error(error);
         });
     }
-  }, [account, name, onAction, password]);
+  }, [account, onAction]);
 
   const _onNextStep = useCallback(() => {
-    step1
-      ? setStep1(false)
-      : _onCreate();
+    setStep1(false);
   },
-  [_onCreate, step1]
+  []
   );
 
   const _onBackClick = useCallback(() => {
@@ -101,69 +99,74 @@ function Import ({ className }: Props): React.ReactElement {
         />
       </div>
       {step1
-        ? <div className={className}>
-          <TextAreaWithLabel
-            className='seedInput'
-            isError={!!error}
-            isFocused
-            label={t<string>('existing 12 or 24-word mnemonic seed')}
-            onChange={setSeed}
-            rowsCount={2}
-            value={seed || undefined}
-          />
-          {!!error && !seed && (
-            <Warning
-              className='seedError'
-              isBelowInput
-              isDanger
-            >
-              {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
-            </Warning>
-          )}
-          <div
-            className='advancedToggle'
-            onClick={_onToggleAdvanced}
-          >
-            <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight}/>
-            <span>{t<string>('advanced')}</span>
-          </div>
-          { advanced && (
-            <InputWithLabel
-              isError={!!path && !!error}
-              label={t<string>('derivation path')}
-              onChange={setPath}
-              value={path || undefined}
+        ? <>
+          <div className={className}>
+            <TextAreaWithLabel
+              className='seedInput'
+              isError={!!error}
+              isFocused
+              label={t<string>('existing 12 or 24-word mnemonic seed')}
+              onChange={setSeed}
+              rowsCount={2}
+              value={seed || ''}
             />
-          )}
-          {!!error && !!seed && (
-            <Warning
-              isDanger
+            {!!error && !seed && (
+              <Warning
+                className='seedError'
+                isBelowInput
+                isDanger
+              >
+                {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
+              </Warning>
+            )}
+            <div
+              className='advancedToggle'
+              onClick={_onToggleAdvanced}
             >
-              {error}
-            </Warning>
-          )}
-        </div>
-        : <>
-          <Name onChange={setName} />
-          <Password onChange={setPassword} />
+              <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight}/>
+              <span>{t<string>('advanced')}</span>
+            </div>
+            { advanced && (
+              <InputWithLabel
+                className='derivationPath'
+                isError={!!path && !!error}
+                label={t<string>('derivation path')}
+                onChange={setPath}
+                value={path || ''}
+              />
+            )}
+            {!!error && !!seed && (
+              <Warning
+                isDanger
+              >
+                {error}
+              </Warning>
+            )}
+          </div>
+          <VerticalSpace />
+          <ButtonArea>
+            {!step1 && <BackButton onClick={_onBackClick}/>}
+            <NextStepButton
+              isBusy={isBusy}
+              isDisabled={!account || !!error}
+              onClick={_onNextStep}
+            >
+              {t<string>('Next')}
+            </NextStepButton>
+          </ButtonArea>
         </>
+        : <AccountName
+          address={account?.address || ''}
+          isBusy={isBusy}
+          onBackClick={_onBackClick}
+          onCreate={_onCreate}
+          onNameChange={setName}
+
+          // : t<string>('Add the account with the supplied seed')
+
+        />
 
       }
-      <VerticalSpace />
-      <ButtonArea>
-        {!step1 && <BackButton onClick={_onBackClick}/>}
-        <NextStepButton
-          isBusy={isBusy}
-          isDisabled={!account || !!error}
-          onClick={_onNextStep}
-        >
-          {
-            step1
-              ? t<string>('Next')
-              : t<string>('Add the account with the supplied seed')
-          }
-        </NextStepButton>
-      </ButtonArea>
     </>
   );
 }

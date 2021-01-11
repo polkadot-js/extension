@@ -3,9 +3,9 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Name, Password } from '../../partials';
+import useTranslation from '../hooks/useTranslation';
+import { Name, Password } from '../partials';
+import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '.';
 
 interface Props {
   address: string;

@@ -5,7 +5,7 @@ import type { ThemeProps } from '../types';
 
 import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { AccountContext, ActionContext, Address, BackButton, ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../components';
@@ -30,7 +30,6 @@ function Import ({ className }: Props): React.ReactElement {
   const [step1, setStep1] = useState(true);
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
-  const suri = useMemo(() => `${seed || ''}${path || ''}`, [path, seed]);
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -45,20 +44,19 @@ function Import ({ className }: Props): React.ReactElement {
       return;
     }
 
+    const suri = `${seed || ''}${path || ''}`;
+
     validateSeed(suri).then((newAccount) => {
-      if (newAccount) {
-        setError('');
-        setAccount(newAccount);
-      }
-    }).catch((e) => {
+      setError('');
+      setAccount(newAccount);
+    }).catch(() => {
       setAccount(null);
       setError(path
         ? t<string>('Invalid mnemonic seed or derivation path')
         : t<string>('Invalid mnemonic seed')
       );
-      console.error(e);
     });
-  }, [t, seed, suri, path]);
+  }, [t, seed, path]);
 
   const _onCreate = useCallback((): void => {
     // this should always be the case

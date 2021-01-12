@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import '../../../../__mocks__/chrome';
+import '../../../../../__mocks__/chrome';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
@@ -9,10 +9,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
-import { ActionContext, Button, Warning } from '../components';
-import * as messaging from '../messaging';
-import { flushAllPromises } from '../testHelpers';
-import ImportSeed from './ImportSeed';
+import { ActionContext, Button, Warning } from '../../components';
+import * as messaging from '../../messaging';
+import { flushAllPromises } from '../../testHelpers';
+import ImportSeed from './';
 
 const account = {
   derivation: '/1',
@@ -153,8 +153,11 @@ describe('ImportSeed', () => {
     });
 
     describe('Phase 2', () => {
+      const suri = `${account.seed}${account.derivation}`;
+
       beforeEach(async () => {
         jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
+        jest.spyOn(messaging, 'validateSeed').mockResolvedValue({ address: account.expectedAddressWithDerivation, suri });
 
         await typeSeed(wrapper, account.seed);
         wrapper.find('.advancedToggle').simulate('click');
@@ -166,10 +169,6 @@ describe('ImportSeed', () => {
       });
 
       it('saves account with provided name and password', async () => {
-        const suri = `${account.seed}${account.derivation}`;
-
-        jest.spyOn(messaging, 'validateSeed').mockResolvedValue({ address: account.expectedAddressWithDerivation, suri });
-
         await enterName(account.name).then(password(account.password)).then(repeat(account.password));
         wrapper.find('[data-button-action="add new root"] button').simulate('click');
         await act(flushAllPromises);

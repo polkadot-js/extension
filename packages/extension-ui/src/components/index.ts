@@ -1,6 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export { default as AccountNamePasswordCreation } from './AccountNamePasswordCreation';
 export { default as ActionBar } from './ActionBar';
 export { default as ActionText } from './ActionText';
 export { default as Address } from './Address';

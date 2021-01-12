@@ -3,20 +3,18 @@
 
 import React, { useCallback, useState } from 'react';
 
-import useTranslation from '../hooks/useTranslation';
 import { Name, Password } from '../partials';
 import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '.';
 
 interface Props {
-  address: string;
+  buttonLabel: string;
   isBusy: boolean;
   onBackClick: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
 }
 
-function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
@@ -46,11 +44,11 @@ function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): R
           isDisabled={!password || !name}
           onClick={_onCreate}
         >
-          {t<string>('Add the account with the generated seed')}
+          {buttonLabel}
         </NextStepButton>
       </ButtonArea>
     </>
   );
 }
 
-export default React.memo(AccountName);
+export default React.memo(AccountNamePasswordCreation);

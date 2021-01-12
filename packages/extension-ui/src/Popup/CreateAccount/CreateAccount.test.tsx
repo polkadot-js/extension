@@ -100,77 +100,6 @@ describe('Create Account', () => {
       wrapper.update();
     });
 
-    it('only account name input is visible at first', () => {
-      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input)).toHaveLength(1);
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('input should not be highlighted as error until first interaction', () => {
-      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(false);
-    });
-
-    it('after typing less than 3 characters into name input, password input is not visible', async () => {
-      await enterName('ab');
-      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(true);
-      expect(wrapper.find('.warning-message').first().text()).toBe('Account name is too short');
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('input should keep showing error when something has been typed but then erased', async () => {
-      await enterName('ab');
-      await enterName('');
-      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).prop('withError')).toBe(true);
-    });
-
-    it('after typing 3 characters into name input, the name is reflected in the account card', async () => {
-      const NAME = 'abc';
-
-      await enterName(NAME);
-      expect(wrapper.find('[data-field="name"]').first().text()).toBe(NAME);
-    });
-
-    it('after typing 3 characters into name input, first password input is visible', async () => {
-      await enterName('abc');
-      expect(wrapper.find(InputWithLabel).find('[data-input-name]').find(Input).first().prop('withError')).toBe(false);
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('password with caps lock should show a warning', async () => {
-      await enterName('abc').then(password('abcde'));
-      await capsLockOn(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input));
-
-      expect(wrapper.find('.warning-message').first().text()).toBe('Warning: Caps lock is on');
-    });
-
-    it('password shorter than 6 characters should be not valid', async () => {
-      await enterName('abc').then(password('abcde'));
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input).prop('withError')).toBe(true);
-      expect(wrapper.find('.warning-message').text()).toBe('Password is too short');
-      expect(wrapper.find(InputWithLabel).find('[data-input-password]').find(Input)).toHaveLength(1);
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('submit button is not enabled until both passwords are equal', async () => {
-      await enterName('abc').then(password('abcdef')).then(repeat('abcdeg'));
-      expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match');
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(true);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('submit button is enabled when both passwords are equal', async () => {
-      await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
-      expect(wrapper.find('.warning-message')).toHaveLength(0);
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]').find(Input).prop('withError')).toBe(false);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
-    });
-
     it('saves account with provided name and password', async () => {
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
       wrapper.find('[data-button-action="add new root"] button').simulate('click');
@@ -178,39 +107,6 @@ describe('Create Account', () => {
 
       expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed);
       expect(onActionStub).toBeCalledWith('/');
-    });
-  });
-
-  describe('Both passwords are equal, but then', () => {
-    beforeEach(async () => {
-      check(wrapper.find('input[type="checkbox"]'));
-      wrapper.find('button').simulate('click');
-      await act(flushAllPromises);
-      await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
-    });
-
-    it('first password input is cleared - second one disappears and button get disabled', async () => {
-      await type(wrapper.find('input[type="password"]').first(), '');
-      expect(wrapper.find(InputWithLabel).find('[data-input-repeat-password]')).toHaveLength(0);
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('first password changes - button is disabled', async () => {
-      await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
-      expect(wrapper.find('.warning-message').text()).toBe('Passwords do not match');
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(true);
-    });
-
-    it('first password changes, then second changes too - button is enabled', async () => {
-      await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
-      await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
-    });
-
-    it('second password changes, then first changes too - button is enabled', async () => {
-      await type(wrapper.find('input[type="password"]').last(), 'aaaaaa');
-      await type(wrapper.find('input[type="password"]').first(), 'aaaaaa');
-      expect(wrapper.find('[data-button-action="add new root"] button').prop('disabled')).toBe(false);
     });
   });
 });

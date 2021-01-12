@@ -54,6 +54,7 @@ function ImportSeed (): React.ReactElement {
       </div>
       {step1
         ? <SeedAndPath
+          address={account?.address}
           onAccountChange={setAccount}
           onNextStep={_onNextStep}
         />

@@ -107,7 +107,7 @@ function ImportSeed ({ address, className, onAccountChange, onNextStep }: Props)
       <VerticalSpace />
       <ButtonArea>
         <NextStepButton
-          isDisabled={!!address || !!error}
+          isDisabled={!address || !!error}
           onClick={onNextStep}
         >
           {t<string>('Next')}

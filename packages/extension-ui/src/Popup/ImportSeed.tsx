@@ -18,7 +18,7 @@ interface Props {
   className? : string;
 }
 
-function Import ({ className }: Props): React.ReactElement {
+function ImportSeed ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -167,7 +167,7 @@ function Import ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Import)(({ theme }: ThemeProps) => `
+export default styled(ImportSeed)(({ theme }: ThemeProps) => `
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;

@@ -19,14 +19,14 @@ interface AccountInfo {
 }
 
 interface Props {
-  address?: string;
   className? : string;
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
 }
 
-function ImportSeed ({ address, className, onAccountChange, onNextStep }: Props): React.ReactElement {
+function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [advanced, setAdvances] = useState(false);
@@ -45,8 +45,10 @@ function ImportSeed ({ address, className, onAccountChange, onNextStep }: Props)
 
     validateSeed(suri).then((newAccount) => {
       setError('');
+      setAddress(newAccount.address);
       onAccountChange(newAccount);
     }).catch(() => {
+      setAddress('');
       onAccountChange(null);
       setError(path
         ? t<string>('Invalid mnemonic seed or derivation path')

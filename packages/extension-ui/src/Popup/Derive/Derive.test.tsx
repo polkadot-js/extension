@@ -22,9 +22,14 @@ import Derive from '.';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
+const parentPassword = 'pass';
+const westendGenesis = '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e';
+const defaultDerivation = '//0';
+const derivedAddress = '5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7';
+
 const accounts = [
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', name: 'A', type: 'sr25519' },
-  { address: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', name: 'B', type: 'sr25519' },
+  { address: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', genesisHash: westendGenesis, name: 'B', type: 'sr25519' },
   { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', name: 'BB', parentAddress: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', type: 'sr25519' },
   { address: '5GhGENSJBWQZ8d8mARKgqEkiAxiW3hHeznQDW2iG4XzNieb6', isExternal: true, name: 'C', type: 'sr25519' },
   { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', name: 'Ethereum', type: 'ethereum' },
@@ -70,6 +75,10 @@ describe('Derive', () => {
     input.update();
   };
 
+  const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
+  const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
+  const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
+
   describe('Parent selection screen', () => {
     beforeEach(async () => {
       const mountedComponent = await mountComponent();
@@ -79,14 +88,14 @@ describe('Derive', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === 'pass');
+    jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === parentPassword);
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateDerivationPath').mockImplementation(async (_, path) => {
       if (path === '//') {
         throw new Error('wrong suri');
       }
 
-      return {} as ResponseDeriveValidate;
+      return { address: derivedAddress, suri: defaultDerivation } as ResponseDeriveValidate;
     });
 
     it('Button is disabled and password field visible', () => {
@@ -137,7 +146,7 @@ describe('Derive', () => {
     });
 
     it('Button is enabled when password is set', async () => {
-      await type(wrapper.find('input[type="password"]'), 'pass');
+      await type(wrapper.find('input[type="password"]'), parentPassword);
 
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
@@ -146,7 +155,7 @@ describe('Derive', () => {
     });
 
     it('An error is visible and the button is disabled when suri is incorrect', async () => {
-      await type(wrapper.find('input[type="password"]'), 'pass');
+      await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
       await act(flushAllPromises);
@@ -160,7 +169,7 @@ describe('Derive', () => {
     });
 
     it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
-      await type(wrapper.find('input[type="password"]'), 'pass');
+      await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
       await act(flushAllPromises);
@@ -192,7 +201,10 @@ describe('Derive', () => {
 
   describe('Locked parent selection', () => {
     beforeAll(async () => {
-      wrapper = (await mountComponent(true)).wrapper;
+      const mountedComponent = (await mountComponent(true));
+
+      wrapper = mountedComponent.wrapper;
+      onActionStub = mountedComponent.onActionStub;
     });
 
     it('address dropdown does not exist', () => {
@@ -201,6 +213,30 @@ describe('Derive', () => {
 
     it('parent is taken from URL', () => {
       expect(wrapper.find('[data-field="name"]').first().text()).toBe('B');
+    });
+
+    describe('Second phase', () => {
+      it('correctly creates the derived account', async () => {
+        const newAccount = {
+          name: 'newName',
+          password: 'somePassword'
+        };
+        const deriveMock = jest.spyOn(messaging, 'deriveAccount');
+
+        await type(wrapper.find('input[type="password"]'), parentPassword);
+        wrapper.find('[data-button-action="create derived account"] button').simulate('click');
+        await act(flushAllPromises);
+        wrapper.update();
+        await enterName(newAccount.name).then(password(newAccount.password)).then(repeat(newAccount.password));
+        await act(flushAllPromises);
+        wrapper.update();
+        wrapper.find('[data-button-action="add new root"] button').simulate('click');
+        await act(flushAllPromises);
+        wrapper.update();
+
+        expect(deriveMock).toBeCalledWith(accounts[1].address, defaultDerivation, parentPassword, newAccount.name, newAccount.password, westendGenesis);
+        expect(onActionStub).toBeCalledWith('/');
+      });
     });
   });
 });

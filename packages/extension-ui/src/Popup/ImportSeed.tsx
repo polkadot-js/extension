@@ -8,8 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address, BackButton, ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../components';
-import AccountName from '../components/AccountNamePasswordCreate';
+import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../components';
+import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountSuri, validateSeed } from '../messaging';
 import { HeaderWithSteps } from '../partials';
@@ -145,7 +145,6 @@ function Import ({ className }: Props): React.ReactElement {
           </div>
           <VerticalSpace />
           <ButtonArea>
-            {!step1 && <BackButton onClick={_onBackClick}/>}
             <NextStepButton
               isBusy={isBusy}
               isDisabled={!account || !!error}
@@ -155,15 +154,12 @@ function Import ({ className }: Props): React.ReactElement {
             </NextStepButton>
           </ButtonArea>
         </>
-        : <AccountName
-          address={account?.address || ''}
+        : <AccountNamePasswordCreation
+          buttonLabel={t<string>('Add the account with the supplied seed')}
           isBusy={isBusy}
           onBackClick={_onBackClick}
           onCreate={_onCreate}
           onNameChange={setName}
-
-          // : t<string>('Add the account with the supplied seed')
-
         />
 
       }

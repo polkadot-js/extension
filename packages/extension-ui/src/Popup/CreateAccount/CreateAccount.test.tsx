@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, ActionText, Button, Input, InputWithLabel, themes } from '../../components';
+import { ActionContext, ActionText, Button, themes } from '../../components';
 import * as messaging from '../../messaging';
 import { Header } from '../../partials';
 import { flushAllPromises } from '../../testHelpers';
@@ -38,12 +38,6 @@ describe('Create Account', () => {
 
   const type = async (input: ReactWrapper, value: string): Promise<void> => {
     input.simulate('change', { target: { value } });
-    await act(flushAllPromises);
-    wrapper.update();
-  };
-
-  const capsLockOn = async (input: ReactWrapper): Promise<void> => {
-    input.simulate('keyPress', { getModifierState: () => true });
     await act(flushAllPromises);
     wrapper.update();
   };

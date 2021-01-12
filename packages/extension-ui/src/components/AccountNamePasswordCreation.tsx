@@ -23,10 +23,22 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
     [name, password, onCreate]
   );
 
-  const _onNameChange = useCallback((name: string | null) => {
-    onNameChange(name || '');
-    setName(name);
-  }, [onNameChange]);
+  const _onNameChange = useCallback(
+    (name: string | null) => {
+      onNameChange(name || '');
+      setName(name);
+    },
+    [onNameChange]
+  );
+
+  const _onBackClick = useCallback(
+    () => {
+      _onNameChange(null);
+      setPassword(null);
+      onBackClick();
+    },
+    [_onNameChange, onBackClick]
+  );
 
   return (
     <>
@@ -37,7 +49,7 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
       <Password onChange={setPassword} />
       <VerticalSpace />
       <ButtonArea>
-        <BackButton onClick={onBackClick} />
+        <BackButton onClick={_onBackClick} />
         <NextStepButton
           data-button-action='add new root'
           isBusy={isBusy}

@@ -124,5 +124,11 @@
   "denied": "",
   "Derive from an account": "",
   "Dark": "",
-  "Light": ""
+  "Light": "",
+  "Invalid mnemonic seed or derivation path": "",
+  "Invalid mnemonic seed": "",
+  "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "",
+  "advanced": "",
+  "derivation path": "",
+  "Next": ""
 }

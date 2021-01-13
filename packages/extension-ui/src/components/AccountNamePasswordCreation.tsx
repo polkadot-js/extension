@@ -3,20 +3,18 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
-import useTranslation from '../../hooks/useTranslation';
-import { Name, Password } from '../../partials';
+import { Name, Password } from '../partials';
+import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '.';
 
 interface Props {
-  address: string;
+  buttonLabel: string;
   isBusy: boolean;
   onBackClick: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
 }
 
-function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
@@ -25,10 +23,22 @@ function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): R
     [name, password, onCreate]
   );
 
-  const _onNameChange = useCallback((name: string | null) => {
-    onNameChange(name || '');
-    setName(name);
-  }, [onNameChange]);
+  const _onNameChange = useCallback(
+    (name: string | null) => {
+      onNameChange(name || '');
+      setName(name);
+    },
+    [onNameChange]
+  );
+
+  const _onBackClick = useCallback(
+    () => {
+      _onNameChange(null);
+      setPassword(null);
+      onBackClick();
+    },
+    [_onNameChange, onBackClick]
+  );
 
   return (
     <>
@@ -39,18 +49,18 @@ function AccountName ({ isBusy, onBackClick, onCreate, onNameChange }: Props): R
       <Password onChange={setPassword} />
       <VerticalSpace />
       <ButtonArea>
-        <BackButton onClick={onBackClick} />
+        <BackButton onClick={_onBackClick} />
         <NextStepButton
           data-button-action='add new root'
           isBusy={isBusy}
           isDisabled={!password || !name}
           onClick={_onCreate}
         >
-          {t<string>('Add the account with the generated seed')}
+          {buttonLabel}
         </NextStepButton>
       </ButtonArea>
     </>
   );
 }
 
-export default React.memo(AccountName);
+export default React.memo(AccountNamePasswordCreation);

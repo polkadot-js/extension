@@ -4,11 +4,11 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { ActionContext, Address, Loading } from '../../components';
+import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
-import AccountName from './AccountName';
 import Mnemonic from './Mnemonic';
 
 export default function CreateAccount (): React.ReactElement {
@@ -26,7 +26,6 @@ export default function CreateAccount (): React.ReactElement {
       .catch((error: Error) => console.error(error));
   }, [type]);
 
-  // FIXME Duplicated between here and Import.tsx
   const _onCreate = useCallback(
     (name: string, password: string): void => {
       // this should always be the case
@@ -69,8 +68,8 @@ export default function CreateAccount (): React.ReactElement {
               />
             )
             : (
-              <AccountName
-                address={account.address}
+              <AccountNamePasswordCreation
+                buttonLabel={t<string>('Add the account with the generated seed')}
                 isBusy={isBusy}
                 onBackClick={_onPreviousStep}
                 onCreate={_onCreate}

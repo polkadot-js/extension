@@ -107,6 +107,8 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
   useEffect((): void => {
     if (!address) {
+      setRecoded(defaultRecoded);
+
       return;
     }
 

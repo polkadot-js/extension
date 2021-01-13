@@ -189,6 +189,7 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
 
   if (address) {
     const accountU8a = decodeAddress(address);
+
     found = accounts.find((account): boolean => u8aEq(decodeAddress(account.address), accountU8a));
   }
 

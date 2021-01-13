@@ -188,7 +188,9 @@ export async function web3FromAddress (address: string): Promise<InjectedExtensi
   let found: InjectedAccountWithMeta | undefined;
 
   if (address) {
-    found = accounts.find((account): boolean => u8aEq(decodeAddress(account.address), decodeAddress(address)));
+    const accountU8a = decodeAddress(address);
+    
+    found = accounts.find((account): boolean => u8aEq(decodeAddress(account.address), accountU8a));
   }
 
   if (!found) {

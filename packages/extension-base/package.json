@@ -8,10 +8,10 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.12.5",
-    "@polkadot/api": "^3.3.1",
+    "@polkadot/api": "^3.4.1",
     "@polkadot/extension-inject": "^0.36.2-5",
     "@polkadot/keyring": "^5.2.3",
-    "@polkadot/phishing": "^0.3.7",
+    "@polkadot/phishing": "^0.3.14",
     "@polkadot/ui-keyring": "^0.65.2-0"
   }
 }

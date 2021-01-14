@@ -31,7 +31,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
   useEffect(() => {
     setIsLocked(null);
-    let timeout: number;
+    let timeout: NodeJS.Timeout;
 
     !isExternal && isSignLocked(signId)
       .then(({ isLocked, remainingTime }) => {

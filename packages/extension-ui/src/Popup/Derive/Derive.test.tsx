@@ -33,19 +33,19 @@ const accounts = [
   { address: '5D2TPhGEy2FhznvzaNYW9AkuMBbg3cyRemnPsBvBY4ZhkZXA', name: 'BB', parentAddress: '5GYmFzQCuC5u3tQNiMZNbFGakrz3Jq31NmMg4D2QAkSoQ2g5', type: 'sr25519' },
   { address: '5GhGENSJBWQZ8d8mARKgqEkiAxiW3hHeznQDW2iG4XzNieb6', isExternal: true, name: 'C', type: 'sr25519' },
   { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', name: 'Ethereum', type: 'ethereum' },
-  { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', isExternal: false, name: 'D', type: 'sr25519' },
-  { address: '5HRKYp5anSNGtqC7cq9ftiaq4y8Mk7uHk7keaXUrQwZqDWLJ', name: 'DD', parentAddress: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', type: 'sr25519' }
+  { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', isExternal: false, name: 'D', type: 'ed25519' },
+  { address: '5HRKYp5anSNGtqC7cq9ftiaq4y8Mk7uHk7keaXUrQwZqDWLJ', name: 'DD', parentAddress: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', type: 'ed25519' }
 ] as AccountJson[];
 
 describe('Derive', () => {
-  const mountComponent = async (locked = false): Promise<{
+  const mountComponent = async (locked = false, account = 1): Promise<{
     wrapper: ReactWrapper;
     onActionStub: jest.Mock;
   }> => {
     const onActionStub = jest.fn();
 
     const wrapper = mount(
-      <MemoryRouter initialEntries={ [`/account/derive/${accounts[1].address}`] }>
+      <MemoryRouter initialEntries={ [`/account/derive/${accounts[account].address}`] }>
         <ActionContext.Provider value={onActionStub}>
           <AccountContext.Provider value={{
             accounts: accounts,
@@ -98,11 +98,12 @@ describe('Derive', () => {
       return { address: derivedAddress, suri: defaultDerivation } as ResponseDeriveValidate;
     });
 
-    it('Button is disabled and password field visible', () => {
+    it('Button is disabled and password field visible, path field is hidden', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.exists()).toBe(true);
       expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('.pathInput').exists()).toBe(false);
     });
 
     it('Password field is visible and not in error state', () => {
@@ -154,6 +155,30 @@ describe('Derive', () => {
       expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
+    it('Derivation path gets visible, is set and locked', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
+
+      expect(wrapper.find('.pathInput.locked input').prop('disabled')).toBe(true);
+      expect(wrapper.find('.pathInput.locked input').prop('value')).toBe('//1');
+    });
+
+    it('Derivation path can be unlocked', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
+      wrapper.find('FontAwesomeIcon.lockIcon').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(wrapper.find('.pathInput').exists()).toBe(true);
+      expect(wrapper.find('.pathInput input').prop('disabled')).toBe(false);
+    });
+
+    it('Derivation path placeholder contains //hard/soft', async () => {
+      await type(wrapper.find('input[type="password"]'), parentPassword);
+      const pathInput = wrapper.find('[data-input-suri] input');
+
+      expect(pathInput.first().prop('placeholder')).toEqual('//hard/soft');
+    });
+
     it('An error is visible and the button is disabled when suri is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//');
@@ -165,7 +190,29 @@ describe('Derive', () => {
 
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
-      expect(wrapper.find('.warning-message').first().text()).toEqual('Incorrect derivation path');
+      expect(wrapper.find('.warning-message').first().text()).toEqual('Invalid derivation path');
+    });
+
+    it('An error is visible and the button is disabled when suri contains `///`', async () => {
+      await type(wrapper.find('input[type="password"]'), parentPassword);
+      await type(wrapper.find('[data-input-suri] input'), '///');
+
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('.warning-message')).toHaveLength(1);
+      // eslint-disable-next-line quotes
+      expect(wrapper.find('.warning-message').first().text()).toEqual("`///password` not supported for derivation");
+    });
+
+    it('No error is shown when suri contains soft derivation `/` with sr25519', async () => {
+      await type(wrapper.find('input[type="password"]'), parentPassword);
+      await type(wrapper.find('[data-input-suri] input'), '//somehard/soft');
+
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(false);
+      expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
     it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
@@ -228,8 +275,6 @@ describe('Derive', () => {
         await act(flushAllPromises);
         wrapper.update();
         await enterName(newAccount.name).then(password(newAccount.password)).then(repeat(newAccount.password));
-        await act(flushAllPromises);
-        wrapper.update();
         wrapper.find('[data-button-action="add new root"] button').simulate('click');
         await act(flushAllPromises);
         wrapper.update();
@@ -237,6 +282,35 @@ describe('Derive', () => {
         expect(deriveMock).toBeCalledWith(accounts[1].address, defaultDerivation, parentPassword, newAccount.name, newAccount.password, westendGenesis);
         expect(onActionStub).toBeCalledWith('/');
       });
+    });
+  });
+
+  describe('Ed25519 Parent', () => {
+    beforeEach(async () => {
+      const mountedComponent = await mountComponent(false, 5);
+
+      wrapper = mountedComponent.wrapper;
+      onActionStub = mountedComponent.onActionStub;
+      await type(wrapper.find('input[type="password"]'), parentPassword);
+    });
+
+    it('Derivation path placeholder only contains //hard', () => {
+      const pathInput = wrapper.find('[data-input-suri] input');
+
+      expect(pathInput.first().prop('placeholder')).toEqual('//hard');
+    });
+
+    it('An error is shown when suri contains soft derivation `/` with ed25519', async () => {
+      const pathInput = wrapper.find('[data-input-suri] input');
+
+      await type(pathInput, '//somehard/soft');
+
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('[data-input-suri]').first().prop('isError')).toBe(true);
+      expect(wrapper.find('.warning-message')).toHaveLength(1);
+      expect(wrapper.find('.warning-message').first().text()).toEqual('Soft derivation is only allowed for sr25519 accounts');
     });
   });
 });

@@ -18,9 +18,10 @@ interface Props extends ThemeProps{
   onChange: (suri: string) => void;
   parentAddress: string;
   parentPassword: string;
+  withSoftPath: boolean;
 }
 
-function DerivationPath ({ className, defaultPath, isError, onChange }: Props): React.ReactElement<Props> {
+function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPath }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [path, setPath] = useState<string>(defaultPath);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -46,7 +47,10 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
                 : t('Derivation Path')
             }
             onChange={_onChange}
-            placeholder={t<string>('//hard/soft')}
+            placeholder={withSoftPath
+              ? t<string>('//hard/soft')
+              : t<string>('//hard')
+            }
             value={path}
           />
         </div>

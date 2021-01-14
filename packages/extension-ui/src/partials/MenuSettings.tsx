@@ -33,7 +33,7 @@ const prefixOptions = settings.availablePrefixes
 function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
-  const [ledger, setLedger] = useState(settings.ledgerConn === 'on');
+  const [ledger, setLedger] = useState(settings.ledgerConn === 'webusb');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
@@ -47,7 +47,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   }, [camera]);
 
   useEffect(() => {
-    settings.set({ ledgerConn: ledger ? 'on' : 'off' });
+    settings.set({ ledgerConn: ledger ? 'webusb' : 'none' });
   }, [ledger]);
 
   const _onChangePrefix = useCallback(

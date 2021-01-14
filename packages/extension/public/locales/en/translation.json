@@ -130,5 +130,9 @@
   "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "",
   "advanced": "",
   "derivation path": "",
-  "Next": ""
+  "Next": "",
+  "//hard": "",
+  "`///password` not supported for derivation": "",
+  "Soft derivation is only allowed for sr25519 accounts": "",
+  "Invalid derivation path": ""
 }

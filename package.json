@@ -39,13 +39,13 @@
     "@babel/core": "^7.12.10",
     "@polkadot/dev": "^0.61.24",
     "@types/jest": "^26.0.20",
-    "i18next-scanner": "^2.11.0",
+    "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",
     "stylelint": "^13.8.0",
     "stylelint-config-recommended": "^3.0.0",
     "stylelint-config-styled-components": "^0.1.1"
   },
   "dependencies": {
-    "fflate": "^0.4.8"
+    "fflate": "^0.5.3"
   }
 }

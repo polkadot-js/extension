@@ -30,7 +30,15 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
   const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
+  const [isValidPath, setIsValidPath] = useState(true);
   const passwordInputRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // forbid to use password
+    if (suriPath?.includes('///')) {
+      setIsValidPath(false);
+    }
+  }, [suriPath]);
 
   const allAddresses = useMemo(
     () => hierarchy
@@ -44,6 +52,14 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
     (parentPassword: string): void => {
       setParentPassword(parentPassword);
       setIsProperParentPassword(!!parentPassword);
+    },
+    []
+  );
+
+  const _onSuriPathChange = useCallback(
+    (path: string): void => {
+      setSuriPath(path);
+      setIsValidPath(true);
     },
     []
   );
@@ -131,17 +147,20 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
             <>
               <DerivationPath
                 defaultPath={defaultPath}
-                isError={!suriPath}
-                onChange={setSuriPath}
+                isError={!suriPath || !isValidPath}
+                onChange={_onSuriPathChange}
                 parentAddress={parentAddress}
                 parentPassword={parentPassword}
               />
-              {!suriPath && (
+              {(!suriPath || !isValidPath) && (
                 <Warning
                   isBelowInput
                   isDanger
                 >
-                  {t('Incorrect derivation path')}
+                  {!suriPath
+                    ? t('Incorrect derivation path')
+                    : t('`///password` not supported for derivation')
+                  }
                 </Warning>
               )}
             </>
@@ -153,7 +172,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
         <NextStepButton
           data-button-action='create derived account'
           isBusy={isBusy}
-          isDisabled={!isProperParentPassword || !suriPath}
+          isDisabled={!isProperParentPassword || !suriPath || !isValidPath}
           onClick={_onSubmit}
         >
           {t<string>('Create a derived account')}

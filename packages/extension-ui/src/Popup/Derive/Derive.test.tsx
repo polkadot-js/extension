@@ -98,11 +98,12 @@ describe('Derive', () => {
       return { address: derivedAddress, suri: defaultDerivation } as ResponseDeriveValidate;
     });
 
-    it('Button is disabled and password field visible', () => {
+    it('Button is disabled and password field visible, path field is hidden', () => {
       const button = wrapper.find('[data-button-action="create derived account"] button');
 
       expect(button.exists()).toBe(true);
       expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('.pathInput').exists()).toBe(false);
     });
 
     it('Password field is visible and not in error state', () => {
@@ -154,6 +155,23 @@ describe('Derive', () => {
       expect(wrapper.find('.warning-message')).toHaveLength(0);
     });
 
+    it('Derivation path gets visible, is set and locked', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
+
+      expect(wrapper.find('.pathInput.locked input').prop('disabled')).toBe(true);
+      expect(wrapper.find('.pathInput.locked input').prop('value')).toBe('//1');
+    });
+
+    it('Derivation path can be unlocked', async () => {
+      await type(wrapper.find('input[type="password"]'), 'wrong_pass');
+      wrapper.find('FontAwesomeIcon.lockIcon').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(wrapper.find('.pathInput').exists()).toBe(true);
+      expect(wrapper.find('.pathInput input').prop('disabled')).toBe(false);
+    });
+
     it('An error is visible and the button is disabled when suri is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), parentPassword);
       await type(wrapper.find('[data-input-suri] input'), '//');
@@ -166,6 +184,18 @@ describe('Derive', () => {
       expect(button.prop('disabled')).toBe(true);
       expect(wrapper.find('.warning-message')).toHaveLength(1);
       expect(wrapper.find('.warning-message').first().text()).toEqual('Incorrect derivation path');
+    });
+
+    it('An error is visible and the button is disabled when suri contains `///`', async () => {
+      await type(wrapper.find('input[type="password"]'), parentPassword);
+      await type(wrapper.find('[data-input-suri] input'), '///');
+
+      const button = wrapper.find('[data-button-action="create derived account"] button');
+
+      expect(button.prop('disabled')).toBe(true);
+      expect(wrapper.find('.warning-message')).toHaveLength(1);
+      // eslint-disable-next-line quotes
+      expect(wrapper.find('.warning-message').first().text()).toEqual("`///password` not supported for derivation");
     });
 
     it('The error disappears and "Create derived account" is enabled when typing a new suri', async () => {
@@ -228,8 +258,6 @@ describe('Derive', () => {
         await act(flushAllPromises);
         wrapper.update();
         await enterName(newAccount.name).then(password(newAccount.password)).then(repeat(newAccount.password));
-        await act(flushAllPromises);
-        wrapper.update();
         wrapper.find('[data-button-action="add new root"] button').simulate('click');
         await act(flushAllPromises);
         wrapper.update();

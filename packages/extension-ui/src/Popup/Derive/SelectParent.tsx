@@ -34,7 +34,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
   const passwordInputRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // forbid the use of password since Keyring ignored it
+    // forbid the use of password since Keyring ignores it
     if (suriPath?.includes('///')) {
       setIsValidPath(false);
     }

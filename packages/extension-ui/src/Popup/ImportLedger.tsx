@@ -23,7 +23,7 @@ interface NetworkOption {
 }
 
 const AVAIL: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
-const KUSAMA_GENESIS: string = ledgerChains[0].genesisHash[0];
+const KUSAMA_GENESIS: string = ledgerChains[1].genesisHash[0];
 
 interface Props extends ThemeProps {
   className?: string;
@@ -51,7 +51,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
         setAddress(address);
       }).catch((e: Error) => {
         setIsBusy(false);
-        const errorMessage = e.message.includes('unkown')
+        const errorMessage = e.message.includes('26628')
           ? t<string>(
             'Is your ledger locked? Error from ledger: {{errorMessage}}',
             { replace: { errorMessage: e.message } }

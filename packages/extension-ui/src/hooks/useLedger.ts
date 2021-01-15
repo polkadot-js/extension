@@ -3,14 +3,13 @@
 
 import type { LedgerTypes } from '@polkadot/hw-ledger/types';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import networks from '@polkadot/networks';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-// import { useApi } from './useApi';
+import ledgerChains from '../util/legerChains';
 
 interface StateBase {
   isLedgerCapable: boolean;
@@ -26,12 +25,11 @@ interface State extends StateBase {
 //   isLedgerEnabled: false
 // };
 
-const ledgerChains = networks.filter((network) => network.hasLedgerSupport);
-
-// const hasWebUsb = !!(window as unknown as { USB?: unknown }).USB;
 let ledger: Ledger | null = null;
 
 function retrieveLedger (genesis: string): Ledger {
+  console.log('with', genesis);
+
   if (!ledger) {
     const def = ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
 
@@ -58,8 +56,5 @@ export function useLedger (): State {
     []
   );
 
-  return useMemo(
-    () => ({ ...getState(), getLedger }),
-    [getLedger]
-  );
+  return ({ ...getState(), getLedger });
 }

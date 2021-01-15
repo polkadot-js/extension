@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
@@ -10,6 +11,7 @@ import styled from 'styled-components';
 
 import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
+import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
 
@@ -24,6 +26,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
+  const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const isPopup = useIsPopup();
 
   const _openJson = useCallback((): void => {
@@ -72,12 +75,31 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link
           isDisabled={!mediaAllowed}
+          title={ !mediaAllowed
+            ? t<string>('Camera access must be first enabled in the settings')
+            : ''
+          }
           to='/account/import-qr'
         >
           <FontAwesomeIcon icon={faQrcode} />
           <span>{t<string>('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
+      {isLedgerCapable && (
+        <MenuItem className='menuItem ledger'>
+          <Link
+            isDisabled={!isLedgerEnabled}
+            title={ !isLedgerEnabled
+              ? t<string>('Ledger must be first enabled in the settings')
+              : ''
+            }
+            to='/account/import-ledger'
+          >
+            <FontAwesomeIcon icon={faUsb}/>
+            <span>{t<string>('Attach ledger account')}</span>
+          </Link>
+        </MenuItem>
+      )}
     </Menu>
   );
 }
@@ -102,6 +124,7 @@ export default React.memo(styled(MenuAdd)(({ theme }: Props) => `
     .svg-inline--fa {
       color: ${theme.iconNeutralColor};
       margin-right: 0.3rem;
+      width: 0.875em;
     }
   }
 `));

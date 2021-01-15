@@ -113,14 +113,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       >
         <Checkbox
           checked={camera}
-          className='checkbox'
+          className='checkbox camera'
           label={t<string>('Allow QR Camera Access')}
           onChange={setCamera}
         />
         { isLedgerCapable && (
           <Checkbox
             checked={ledger}
-            className='checkbox'
+            className='checkbox ledger'
             label={t<string>('Allow Ledger Access')}
             onChange={setLedger}
           />
@@ -197,6 +197,10 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       line-height: 20px;
       font-size: 15px;
       margin-bottom: 0;
+
+      &.ledger {
+        margin-top: 0.2rem;
+      }
 
       label {
         color: ${theme.textColor};

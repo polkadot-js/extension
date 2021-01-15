@@ -1,12 +1,12 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import type { ApiPromise } from '@polkadot/api';
+import type { LedgerTypes } from '@polkadot/hw-ledger/types';
 
 import { useCallback, useMemo } from 'react';
 
-import { Ledger } from '@polkadot/ledger';
-// import networks from '@polkadot/networks';
+import { Ledger } from '@polkadot/hw-ledger';
+import networks from '@polkadot/networks';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
@@ -18,55 +18,48 @@ interface StateBase {
 }
 
 interface State extends StateBase {
-  getLedger: () => Ledger;
+  getLedger: (genesis: string) => Ledger;
 }
 
-const EMPTY_STATE: StateBase = {
-  isLedgerCapable: false,
-  isLedgerEnabled: false
-};
+// const EMPTY_STATE: StateBase = {
+//   isLedgerCapable: false,
+//   isLedgerEnabled: false
+// };
 
-const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
-
-// const ledgerChains = networks.filter((network) => network.hasLedgerSupport === true
+const ledgerChains = networks.filter((network) => network.hasLedgerSupport);
 
 // const hasWebUsb = !!(window as unknown as { USB?: unknown }).USB;
-// let ledger: Ledger | null = null;
-// const ledgerChains = networks.filter((network) => network.hasLedgerSupport === true);
+let ledger: Ledger | null = null;
 
-// function retrieveLedger (api: ApiPromise): Ledger {
-//   if (!ledger) {
-//     const def = ledgerChains.find(({ genesisHash }) => genesisHash[0] === api.genesisHash.toHex());
+function retrieveLedger (genesis: string): Ledger {
+  if (!ledger) {
+    const def = ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
 
-//     assert(def, `Unable to find supported chain for ${api.genesisHash.toHex()}`);
+    assert(def, `Unable to find supported chain for ${genesis}`);
 
-//     ledger = new Ledger(uiSettings.ledgerConn as 'u2f', def.network);
-//   }
+    ledger = new Ledger(uiSettings.ledgerConn as LedgerTypes, def.network);
+  }
 
-//   return ledger;
-// }
+  return ledger;
+}
 
-// function getState (api: ApiPromise): StateBase {
-//   const isLedgerCapable = hasWebUsb && ledgerChains.map(({ genesisHash }) => genesisHash[0]).includes(api.genesisHash.toHex());
+function getState (): StateBase {
+  const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
-//   return {
-//     isLedgerCapable,
-//     isLedgerEnabled: isLedgerCapable && uiSettings.ledgerConn !== 'none'
-//   };
-// }
+  return {
+    isLedgerCapable,
+    isLedgerEnabled: isLedgerCapable && uiSettings.ledgerConn !== 'none'
+  };
+}
 
 export function useLedger (): State {
-  // const { api, isApiReady } = useApi();
+  const getLedger = useCallback(
+    (genesis: string) => retrieveLedger(genesis),
+    []
+  );
 
-  // const getLedger = useCallback(
-  //   () => retrieveLedger(api),
-  //   [api]
-  // );
-
-  // return useMemo(
-  //   () => ({ ...(isApiReady ? getState(api) : EMPTY_STATE), getLedger }),
-  //   [api, getLedger, isApiReady]
-  // );
-
-  return { getLedger: () => { return {} as Ledger; }, isLedgerCapable, isLedgerEnabled: false };
+  return useMemo(
+    () => ({ ...getState(), getLedger }),
+    [getLedger]
+  );
 }

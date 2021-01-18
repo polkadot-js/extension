@@ -111,6 +111,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
         <Address
           address={address}
           genesisHash={genesis}
+          isExternal
           name={name}
         />
         <Dropdown

@@ -50,7 +50,7 @@ export default class Extension {
   }
 
   private accountsCreateHardware ({ accountIndex, address, addressOffset, genesisHash, hardwareType, name }: RequestAccountCreateHardware): boolean {
-    keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, name });
+    keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name });
 
     return true;
   }

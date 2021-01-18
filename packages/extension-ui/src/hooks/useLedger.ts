@@ -20,16 +20,9 @@ interface State extends StateBase {
   getLedger: (genesis: string) => Ledger;
 }
 
-// const EMPTY_STATE: StateBase = {
-//   isLedgerCapable: false,
-//   isLedgerEnabled: false
-// };
-
 let ledger: Ledger | null = null;
 
 function retrieveLedger (genesis: string): Ledger {
-  console.log('with', genesis);
-
   if (!ledger) {
     const def = ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
 

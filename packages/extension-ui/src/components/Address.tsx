@@ -8,6 +8,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
+import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,6 +39,7 @@ export interface Props {
   className?: string;
   genesisHash?: string | null;
   isExternal?: boolean | null;
+  isHardware?: boolean | null;
   isHidden?: boolean;
   name?: string | null;
   parentName?: string | null;
@@ -92,7 +94,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -160,11 +162,18 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     return (
       <>
         {(account?.isExternal || isExternal) && (
-          <FontAwesomeIcon
-            className='externalIcon'
-            icon={faExternalLinkSquareAlt}
-            title={t('external account')}
-          />
+          account?.isHardware || isHardware
+            ? <FontAwesomeIcon
+              className='hardwareIcon'
+              icon={faUsb}
+              rotation={270}
+              title={t('hardware wallet account')}
+            />
+            : <FontAwesomeIcon
+              className='externalIcon'
+              icon={faExternalLinkSquareAlt}
+              title={t('external account')}
+            />
         )}
         <span title={displayName}>{displayName}</span>
       </>);
@@ -335,9 +344,10 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     }
   }
 
-  .externalIcon {
+  .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
-    color: ${theme.labelColor}
+    color: ${theme.labelColor};
+    width: 0.875em;
   }
 
   .identityIcon {

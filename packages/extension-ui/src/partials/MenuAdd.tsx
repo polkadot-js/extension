@@ -95,7 +95,10 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
             }
             to='/account/import-ledger'
           >
-            <FontAwesomeIcon icon={faUsb}/>
+            <FontAwesomeIcon
+              icon={faUsb}
+              rotation={270}
+            />
             <span>{t<string>('Attach ledger account')}</span>
           </Link>
         </MenuItem>

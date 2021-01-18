@@ -62,7 +62,7 @@ describe('Account component', () => {
     expect(wrapper.find('.genesisSelection').exists()).toBe(true);
   });
 
-  it('does not show genesis dash selection dropsown if account is hardware', () => {
+  it('does not show genesis hash selection dropsown if account is hardware', () => {
     wrapper = mountAccountComponent({ isExternal: true, isHardware: true });
     wrapper.find('.settings').first().simulate('click');
 

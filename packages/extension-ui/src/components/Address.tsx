@@ -157,12 +157,15 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 
   const Name = () => {
-    const displayName = name || account?.name || t('<unknown>');
+    const accountName = name || account?.name;
+    const displayName = accountName || t('<unknown>');
+
+    console.log('isH', isHardware, account?.isHardware);
 
     return (
       <>
-        {(account?.isExternal || isExternal) && (
-          account?.isHardware || isHardware
+        {!!accountName && (account?.isExternal || isExternal) && (
+          (account?.isHardware || isHardware)
             ? <FontAwesomeIcon
               className='hardwareIcon'
               icon={faUsb}

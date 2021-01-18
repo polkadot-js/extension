@@ -20,16 +20,14 @@ interface State extends StateBase {
   getLedger: (genesis: string) => Ledger;
 }
 
-let ledger: Ledger | null = null;
-
 function retrieveLedger (genesis: string): Ledger {
-  if (!ledger) {
-    const def = ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
+  let ledger: Ledger | null = null;
 
-    assert(def, `Unable to find supported chain for ${genesis}`);
+  const def = ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
 
-    ledger = new Ledger(uiSettings.ledgerConn as LedgerTypes, def.network);
-  }
+  assert(def, `Unable to find supported chain for ${genesis}`);
+
+  ledger = new Ledger(uiSettings.ledgerConn as LedgerTypes, def.network);
 
   return ledger;
 }

@@ -83,6 +83,10 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     top: 0;
   }
 
+  svg {
+    margin-right: 0.3rem;
+  }
+
   &.isBusy {
     background: rgba(96,96,96,0.15);
 

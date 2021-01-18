@@ -1,6 +1,8 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faSync } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -19,11 +21,10 @@ interface AccOption {
 
 interface NetworkOption {
   text: string;
-  value: string;
+  value: string | null;
 }
 
 const AVAIL: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
-const KUSAMA_GENESIS: string = ledgerChains[1].genesisHash[0];
 
 interface Props extends ThemeProps {
   className?: string;
@@ -37,35 +38,63 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [addressOffset, setAddressOffset] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
-  const [genesis, setGenesis] = useState(KUSAMA_GENESIS);
+  const [genesis, setGenesis] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [refreshLock, setRefreshLock] = useState(false);
   const onAction = useContext(ActionContext);
   const name = useMemo(() => `ledger ${accountIndex}/${addressOffset}`, [accountIndex, addressOffset]);
+  const ledger = useMemo(() => {
+    setIsLocked(false);
+    setRefreshLock(false);
 
+    // this trick allows to refresh the ledger on demand
+    // when it is shown as locked and the user has actually
+    // unlocked it, which we can't know.
+    if (refreshLock || genesis) {
+      return genesis && getLedger(genesis);
+    }
+
+    return null;
+  }, [genesis, getLedger, refreshLock]);
+
+  console.log('ledger', ledger);
   useEffect(() => {
+    if (!ledger) {
+      setAddress(null);
+
+      return;
+    }
+
     setIsBusy(true);
+    setError(null);
+    setWarning(null);
 
     // I don't get how this is possible, but sometimes addIndex was a string...
-    getLedger(genesis).getAddress(false, Number(accountIndex), Number(addressOffset))
-      .then(({ address }) => {
+    ledger.getAddress(false, Number(accountIndex), Number(addressOffset))
+      .then((res) => {
+        console.log('restult', res);
         setIsBusy(false);
-        setAddress(address);
+        setAddress(res.address);
       }).catch((e: Error) => {
         setIsBusy(false);
-        const errorMessage = e.message.includes('26628')
-          ? t<string>(
-            'Is your ledger locked? Error from ledger: {{errorMessage}}',
-            { replace: { errorMessage: e.message } }
-          )
-          : t<string>(
-            'Ledger device error: {{errorMessage}}',
-            { replace: { errorMessage: e.message } }
-          );
 
-        setError(errorMessage);
+        const warningMessage = e.message.includes('App does not seem to be open')
+          ? t<string>('Did you select the network corresponding to the ledger app?')
+          : e.message.includes('Code: 26628')
+            ? t<string>('Is your ledger locked?')
+            : null;
+
+        setIsLocked(true);
+        setWarning(warningMessage);
+        setError(t<string>(
+          'Ledger device error: {{errorMessage}}',
+          { replace: { errorMessage: e.message } }
+        ));
         console.error(e);
         setAddress(null);
       });
-  }, [accountIndex, addressOffset, genesis, getLedger, t]);
+  }, [accountIndex, addressOffset, genesis, getLedger, ledger, t]);
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),
@@ -77,15 +106,20 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     value
   })));
 
-  const networkOps = useRef(ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
-    text: displayName,
-    value: genesisHash[0]
-  })));
+  const networkOps = useRef(
+    [{
+      text: 'Select network',
+      value: ''
+    },
+    ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
+      text: displayName,
+      value: genesisHash[0]
+    }))]
+  );
 
   const _onSave = useCallback(
     () => {
-      if (address) {
-        setError(null);
+      if (address && genesis) {
         setIsBusy(true);
 
         createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
@@ -101,6 +135,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     [accountIndex, address, addressOffset, genesis, name, onAction]
   );
 
+  const _onRefresh = useCallback(() => {
+    setRefreshLock(true);
+  }, []);
+
   return (
     <>
       <Header
@@ -112,7 +150,8 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           address={address}
           genesisHash={genesis}
           isExternal
-          name={name}
+          isHardware
+          name={address ? name : ''}
         />
         <Dropdown
           className='network'
@@ -121,20 +160,29 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           options={networkOps.current}
           value={genesis}
         />
-        <Dropdown
-          className='accountType'
-          label={t<string>('account type')}
-          onChange={setAccountIndex}
-          options={accOps.current}
-          value={accountIndex}
-        />
-        <Dropdown
-          className='accountIndex'
-          label={t<string>('address index')}
-          onChange={setAddressOffset}
-          options={addOps.current}
-          value={addressOffset}
-        />
+        {genesis && address && !error && (
+          <>
+            <Dropdown
+              className='accountType'
+              label={t<string>('account type')}
+              onChange={setAccountIndex}
+              options={accOps.current}
+              value={accountIndex}
+            />
+            <Dropdown
+              className='accountIndex'
+              label={t<string>('address index')}
+              onChange={setAddressOffset}
+              options={addOps.current}
+              value={addressOffset}
+            />
+          </>
+        )}
+        {!!warning && (
+          <Warning>
+            {warning}
+          </Warning>
+        )}
         {!!error && (
           <Warning
             isDanger
@@ -145,17 +193,32 @@ function ImportLedger ({ className }: Props): React.ReactElement {
       </div>
       <VerticalSpace/>
       <ButtonArea>
-        <Button
-          isBusy={isBusy}
-          isDisabled={!address}
-          onClick={_onSave}
-        >
-          {t<string>('Import Account')}
-        </Button>
+        {isLocked
+          ? (<Button
+            isBusy={isBusy}
+            onClick={_onRefresh}
+          >
+            <FontAwesomeIcon
+              icon={faSync}
+            />
+            {t<string>('Refresh')}
+          </Button>
+          )
+          : (<Button
+            isBusy={isBusy}
+            isDisabled={!!error || !address || !genesis}
+            onClick={_onSave}
+          >
+            {t<string>('Import Account')}
+          </Button>)
+        }
       </ButtonArea>
     </>
   );
 }
 
 export default styled(ImportLedger)`
+  .refreshIcon {
+    margin-right: 0.3rem;
+  }
 `;

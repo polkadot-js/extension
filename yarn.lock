@@ -1915,7 +1915,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@^0.36.2-5, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@^0.36.2-5, @polkadot/extension-base@^0.36.2-6, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
@@ -1952,7 +1952,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@^0.36.2-5, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@^0.36.2-5, @polkadot/extension-inject@^0.36.2-6, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -1964,7 +1964,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@^0.36.2-5, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@^0.36.2-6, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -2014,9 +2014,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.12.5
     "@polkadot/dev": ^0.61.24
-    "@polkadot/extension-base": ^0.36.2-5
-    "@polkadot/extension-inject": ^0.36.2-5
-    "@polkadot/extension-ui": ^0.36.2-5
+    "@polkadot/extension-base": ^0.36.2-6
+    "@polkadot/extension-inject": ^0.36.2-6
+    "@polkadot/extension-ui": ^0.36.2-6
     babel-loader: ^8.2.2
     browser-resolve: ^2.0.0
     buffer: ^6.0.3
@@ -6494,10 +6494,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-to-chromium@npm:^1.3.47, electron-to-chromium@npm:^1.3.634":
+"electron-to-chromium@npm:^1.3.47":
   version: 1.3.640
   resolution: "electron-to-chromium@npm:1.3.640"
   checksum: 75f9763f6f694e38b73eb69983dc16431e28e6d39b1fd91a4eb22419c04d37675f0b162ba47fac3cdcfe7a21b8cce3cf5baba58f657bcb1ddf15aa892d136ac9
+  languageName: node
+  linkType: hard
+
+"electron-to-chromium@npm:^1.3.634":
+  version: 1.3.639
+  resolution: "electron-to-chromium@npm:1.3.639"
+  checksum: bf8b79e55d50ddcd55b029feb161a56250f3a8980b5c11b47055fd983b9306ad8c69c0501eef9317e0e03f8c5d69fecb97338c08df8c9456953f5741646794c1
   languageName: node
   linkType: hard
 

@@ -13,6 +13,7 @@ import { ActionContext, Address, VerticalSpace } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
+import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
 
@@ -100,17 +101,23 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
             />
           )
         }
+        {isHardware && (
+          <LedgerSign
+            accountIndex={accountIndex as number || 0}
+            addressOffset={addressOffset as number || 0}
+            error={error}
+            genesisHash={json.genesisHash}
+            onSignature={_onSignature}
+            payload={payload}
+            setError={setError}
+          />
+        )}
         <SignArea
-          accountIndex={accountIndex as number || 0}
-          addressOffset={addressOffset as number || 0}
           buttonText={buttonText}
           error={error}
-          genesisHash={json.genesisHash}
           isExternal={isExternal}
           isFirst={isFirst}
-          isHardware={isHardware}
           onSignature={_onSignature}
-          payload={payload}
           setError={setError}
           signId={signId}
         />

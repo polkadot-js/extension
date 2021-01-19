@@ -109,6 +109,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
           isExternal={isExternal}
           isFirst={isFirst}
           isHardware={isHardware}
+          onSignature={_onSignature}
           payload={payload}
           setError={setError}
           signId={signId}

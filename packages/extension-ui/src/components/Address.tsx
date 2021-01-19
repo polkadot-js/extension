@@ -160,8 +160,6 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     const accountName = name || account?.name;
     const displayName = accountName || t('<unknown>');
 
-    console.log('isH', isHardware, account?.isHardware);
-
     return (
       <>
         {!!accountName && (account?.isExternal || isExternal) && (

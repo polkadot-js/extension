@@ -25,12 +25,13 @@ interface Props {
   isExternal?: boolean;
   isFirst: boolean;
   isHardware?: boolean;
+  onSignature?: ({ signature }: { signature: string }) => void;
   payload?: ExtrinsicPayload;
   setError: (value: string | null) => void;
   signId: string;
 }
 
-function SignArea ({ accountIndex, addressOffset, buttonText, className, error, genesisHash, isExternal, isFirst, isHardware, payload, setError, signId } : Props): JSX.Element {
+function SignArea ({ accountIndex, addressOffset, buttonText, className, error, genesisHash, isExternal, isFirst, isHardware, onSignature, payload, setError, signId } : Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -78,32 +79,20 @@ function SignArea ({ accountIndex, addressOffset, buttonText, className, error, 
 
   const _onSignLedger = useCallback(
     (ledger: Ledger): void => {
-      if (!payload) {
+      if (!payload || !onSignature) {
         return;
       }
 
       setIsBusy(true);
-      ledger.sign(payload.toU8a(), accountIndex, addressOffset)
-        .then(({ signature }) => {
-          console.log('signature', signature);
+      ledger.sign(payload.toU8a(true), Number(accountIndex), Number(addressOffset))
+        .then((signature) => {
+          onSignature(signature);
         }).catch((e: Error) => {
           setError(e.message);
           setIsBusy(false);
-          console.error('oops', e);
         });
-
-      // return approveSignPassword(signId, savePass, password)
-      //   .then((): void => {
-      //     setIsBusy(false);
-      //     onAction();
-      //   })
-      //   .catch((error: Error): void => {
-      //     setIsBusy(false);
-      //     setError(error.message);
-      //     console.error(error);
-      //   });
     },
-    [accountIndex, addressOffset, payload, setError]
+    [accountIndex, addressOffset, onSignature, payload, setError]
   );
 
   const _onCancel = useCallback(

@@ -58,7 +58,6 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     return null;
   }, [genesis, getLedger, refreshLock]);
 
-  console.log('ledger', ledger);
   useEffect(() => {
     if (!ledger) {
       setAddress(null);

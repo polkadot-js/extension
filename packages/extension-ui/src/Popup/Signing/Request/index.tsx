@@ -37,7 +37,7 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { isExternal }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
@@ -81,9 +81,10 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
             address={json.address}
             genesisHash={json.genesisHash}
             isExternal={isExternal}
+            isHardware={isHardware}
           />
         </div>
-        {isExternal
+        {isExternal && !isHardware
           ? (
             <Qr
               onSignature={_onSignature}
@@ -100,10 +101,15 @@ export default function Request ({ account: { isExternal }, buttonText, isFirst,
           )
         }
         <SignArea
+          accountIndex={accountIndex as number || 0}
+          addressOffset={addressOffset as number || 0}
           buttonText={buttonText}
           error={error}
+          genesisHash={json.genesisHash}
           isExternal={isExternal}
           isFirst={isFirst}
+          isHardware={isHardware}
+          payload={payload}
           setError={setError}
           signId={signId}
         />

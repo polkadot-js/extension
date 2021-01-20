@@ -102,17 +102,19 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         setIsLoading(false);
         const { network } = getNetwork(genesis) || { network: 'unknown network' };
 
-        const warningMessage = e.message.includes('App does not seem to be open')
-          ? t<string>('No {{network}} app open on the ledger.', { replace: { network } })
-          : e.message.includes('Code: 26628')
-            ? t<string>('Is your ledger locked?')
-            : null;
+        const warningMessage = e.message.includes('Code: 26628')
+          ? t<string>('Is your ledger locked?')
+          : null;
+
+        const errorMessage = e.message.includes('App does not seem to be open')
+          ? t<string>('App "{{network}}" does not seem to be open', { replace: { network } })
+          : e.message;
 
         setIsLocked(true);
         setWarning(warningMessage);
         setError(t<string>(
           'Ledger device error: {{errorMessage}}',
-          { replace: { errorMessage: e.message } }
+          { replace: { errorMessage } }
         ));
         console.error(e);
         setAddress(null);

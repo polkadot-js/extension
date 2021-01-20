@@ -29,9 +29,14 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const isPopup = useIsPopup();
 
-  const _openJson = useCallback((): void => {
-    windowOpen(jsonPath).catch(console.error);
-  }, []);
+  const _openJson = useCallback(
+    () => windowOpen(jsonPath)
+    , []);
+
+  const _onOpenLedgerConnect = useCallback(
+    () => windowOpen('/account/import-ledger'),
+    []
+  );
 
   return (
     <Menu
@@ -85,12 +90,12 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           <span>{t<string>('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
-      {isLedgerCapable && (
+      { isLedgerEnabled && (
         <MenuItem className='menuItem ledger'>
           <Link
-            isDisabled={!isLedgerEnabled}
-            title={ !isLedgerEnabled
-              ? t<string>('Ledger must be first enabled in the settings')
+            isDisabled={!isLedgerCapable}
+            title={ !isLedgerCapable
+              ? t<string>('Ledger devices can only be connected with Chrome browser')
               : ''
             }
             to='/account/import-ledger'
@@ -99,7 +104,25 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
               icon={faUsb}
               rotation={270}
             />
-            <span>{t<string>('Attach ledger account')}</span>
+            <span>{ t<string>('Attach ledger account')}</span>
+          </Link>
+        </MenuItem>
+      )}
+      { !isLedgerEnabled && (
+        <MenuItem className='menuItem ledger'>
+          <Link
+            isDisabled={!isLedgerCapable}
+            onClick={_onOpenLedgerConnect}
+            title={ !isLedgerCapable
+              ? t<string>('Ledger devices can only be connected with Chrome browser')
+              : ''
+            }
+          >
+            <FontAwesomeIcon
+              icon={faUsb}
+              rotation={270}
+            />
+            <span>{ t<string>('Connect Ledger device')}</span>
           </Link>
         </MenuItem>
       )}

@@ -3,8 +3,10 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
+
+import settings from '@polkadot/ui-settings';
 
 import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components';
 import { useLedger } from '../hooks/useLedger';
@@ -40,6 +42,12 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const name = useMemo(() => `ledger ${accountIndex}/${addressOffset}`, [accountIndex, addressOffset]);
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
+
+  useEffect(() => {
+    if (address) {
+      settings.set({ ledgerConn: 'webusb' });
+    }
+  }, [address]);
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),

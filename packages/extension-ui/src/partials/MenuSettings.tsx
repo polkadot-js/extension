@@ -11,7 +11,6 @@ import settings from '@polkadot/ui-settings';
 
 import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
-import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
 import getLanguageOptions from '../util/getLanguageOptions';
@@ -33,22 +32,22 @@ const prefixOptions = settings.availablePrefixes
 function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
-  const [ledger, setLedger] = useState(settings.ledgerConn === 'webusb');
+  // const [ledger, setLedger] = useState(settings.ledgerConn === 'webusb');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
   const onAction = useContext(ActionContext);
-  const { isLedgerCapable } = useLedger();
+  // const { isLedgerCapable } = useLedger();
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
   }, [camera]);
 
-  useEffect(() => {
-    settings.set({ ledgerConn: ledger ? 'webusb' : 'none' });
-  }, [ledger]);
+  // useEffect(() => {
+  //   settings.set({ ledgerConn: ledger ? 'webusb' : 'none' });
+  // }, [ledger]);
 
   const _onChangePrefix = useCallback(
     (value: string): void => {
@@ -117,14 +116,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           label={t<string>('Allow QR Camera Access')}
           onChange={setCamera}
         />
-        { isLedgerCapable && (
+        {/* { isLedgerCapable && (
           <Checkbox
             checked={ledger}
             className='checkbox ledger'
             label={t<string>('Allow Ledger Access')}
             onChange={setLedger}
           />
-        )}
+        )} */}
       </MenuItem>
       <MenuDivider />
       <MenuItem

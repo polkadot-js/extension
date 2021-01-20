@@ -1,8 +1,6 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { LedgerTypes } from '@polkadot/hw-ledger/types';
-
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
@@ -37,11 +35,15 @@ function getNetwork (genesis: string): Network | undefined {
 function retrieveLedger (genesis: string): Ledger {
   let ledger: Ledger | null = null;
 
+  const { isLedgerCapable } = getState();
+
+  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supporter');
+
   const def = getNetwork(genesis);
 
   assert(def, `Unable to find supported chain for ${genesis}`);
 
-  ledger = new Ledger(uiSettings.ledgerConn as LedgerTypes, def.network);
+  ledger = new Ledger('webusb', def.network);
 
   return ledger;
 }
@@ -92,7 +94,7 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
     setError(null);
     setWarning(null);
 
-    // but sometimes addIndex was a string...
+    // sometimes, somehow addIndex is perceived as a string
     ledger.getAddress(false, Number(accountIndex), Number(addressOffset))
       .then((res) => {
         console.log('restult', res);

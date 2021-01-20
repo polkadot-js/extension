@@ -21,6 +21,7 @@ interface Props extends ThemeProps {
 }
 
 const jsonPath = '/account/restore-json';
+const ledgerPath = '/account/import-ledger';
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
     , []);
 
   const _onOpenLedgerConnect = useCallback(
-    () => windowOpen('/account/import-ledger'),
+    () => windowOpen(ledgerPath),
     []
   );
 
@@ -90,15 +91,12 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           <span>{t<string>('Attach external QR-signer account')}</span>
         </Link>
       </MenuItem>
-      { isLedgerEnabled && (
-        <MenuItem className='menuItem ledger'>
-          <Link
+      <MenuItem className='menuItem ledger'>
+        { isLedgerEnabled
+          ? <Link
             isDisabled={!isLedgerCapable}
-            title={ !isLedgerCapable
-              ? t<string>('Ledger devices can only be connected with Chrome browser')
-              : ''
-            }
-            to='/account/import-ledger'
+            title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
+            to={ledgerPath}
           >
             <FontAwesomeIcon
               icon={faUsb}
@@ -106,26 +104,15 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
             />
             <span>{ t<string>('Attach ledger account')}</span>
           </Link>
-        </MenuItem>
-      )}
-      { !isLedgerEnabled && (
-        <MenuItem className='menuItem ledger'>
-          <Link
-            isDisabled={!isLedgerCapable}
-            onClick={_onOpenLedgerConnect}
-            title={ !isLedgerCapable
-              ? t<string>('Ledger devices can only be connected with Chrome browser')
-              : ''
-            }
-          >
+          : <Link onClick={_onOpenLedgerConnect}>
             <FontAwesomeIcon
               icon={faUsb}
               rotation={270}
             />
             <span>{ t<string>('Connect Ledger device')}</span>
           </Link>
-        </MenuItem>
-      )}
+        }
+      </MenuItem>
     </Menu>
   );
 }

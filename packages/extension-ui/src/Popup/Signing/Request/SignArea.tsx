@@ -17,7 +17,6 @@ interface Props {
   error: string | null;
   isExternal?: boolean;
   isFirst: boolean;
-  onSignature?: ({ signature }: { signature: string }) => void;
   setError: (value: string | null) => void;
   signId: string;
 }

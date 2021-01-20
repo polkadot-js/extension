@@ -3,7 +3,7 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components';
@@ -32,68 +32,14 @@ interface Props extends ThemeProps {
 
 function ImportLedger ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const { getLedger } = useLedger();
-  const [address, setAddress] = useState<string | null>(null);
   const [accountIndex, setAccountIndex] = useState<number>(0);
   const [addressOffset, setAddressOffset] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<string | null>(null);
-  const [warning, setWarning] = useState<string | null>(null);
-  const [isLocked, setIsLocked] = useState(false);
-  const [refreshLock, setRefreshLock] = useState(false);
   const onAction = useContext(ActionContext);
   const name = useMemo(() => `ledger ${accountIndex}/${addressOffset}`, [accountIndex, addressOffset]);
-  const ledger = useMemo(() => {
-    setIsLocked(false);
-    setRefreshLock(false);
-
-    // this trick allows to refresh the ledger on demand
-    // when it is shown as locked and the user has actually
-    // unlocked it, which we can't know.
-    if (refreshLock || genesis) {
-      return genesis && getLedger(genesis);
-    }
-
-    return null;
-  }, [genesis, getLedger, refreshLock]);
-
-  useEffect(() => {
-    if (!ledger) {
-      setAddress(null);
-
-      return;
-    }
-
-    setIsBusy(true);
-    setError(null);
-    setWarning(null);
-
-    // I don't get how this is possible, but sometimes addIndex was a string...
-    ledger.getAddress(false, Number(accountIndex), Number(addressOffset))
-      .then((res) => {
-        console.log('restult', res);
-        setIsBusy(false);
-        setAddress(res.address);
-      }).catch((e: Error) => {
-        setIsBusy(false);
-
-        const warningMessage = e.message.includes('App does not seem to be open')
-          ? t<string>('Did you select the network corresponding to the ledger app?')
-          : e.message.includes('Code: 26628')
-            ? t<string>('Is your ledger locked?')
-            : null;
-
-        setIsLocked(true);
-        setWarning(warningMessage);
-        setError(t<string>(
-          'Ledger device error: {{errorMessage}}',
-          { replace: { errorMessage: e.message } }
-        ));
-        console.error(e);
-        setAddress(null);
-      });
-  }, [accountIndex, addressOffset, genesis, getLedger, ledger, t]);
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),
@@ -134,10 +80,6 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     [accountIndex, address, addressOffset, genesis, name, onAction]
   );
 
-  const _onRefresh = useCallback(() => {
-    setRefreshLock(true);
-  }, []);
-
   return (
     <>
       <Header
@@ -159,7 +101,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           options={networkOps.current}
           value={genesis}
         />
-        {genesis && address && !error && (
+        {genesis && address && !ledgerError && (
           <>
             <Dropdown
               className='accountType'
@@ -177,25 +119,25 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             />
           </>
         )}
-        {!!warning && (
+        {!!ledgerWarning && (
           <Warning>
-            {warning}
+            {ledgerWarning}
           </Warning>
         )}
-        {!!error && (
+        {(!!error || !!ledgerError) && (
           <Warning
             isDanger
           >
-            {error}
+            {error || ledgerError}
           </Warning>
         )}
       </div>
       <VerticalSpace/>
       <ButtonArea>
-        {isLocked
+        {ledgerLocked
           ? (<Button
-            isBusy={isBusy}
-            onClick={_onRefresh}
+            isBusy={ledgerLoading || isBusy}
+            onClick={refresh}
           >
             <FontAwesomeIcon
               icon={faSync}
@@ -204,8 +146,8 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           </Button>
           )
           : (<Button
-            isBusy={isBusy}
-            isDisabled={!!error || !address || !genesis}
+            isBusy={ledgerLoading || isBusy}
+            isDisabled={!!error || !!ledgerError || !address || !genesis}
             onClick={_onSave}
           >
             {t<string>('Import Account')}

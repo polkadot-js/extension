@@ -97,7 +97,6 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
     // sometimes, somehow addIndex is perceived as a string
     ledger.getAddress(false, Number(accountIndex), Number(addressOffset))
       .then((res) => {
-        console.log('restult', res);
         setIsLoading(false);
         setAddress(res.address);
       }).catch((e: Error) => {
@@ -115,13 +114,14 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         setIsLocked(true);
         setWarning(warningMessage);
         setError(t<string>(
-          'Ledger device error: {{errorMessage}}',
+          'Ledger error: {{errorMessage}}',
           { replace: { errorMessage } }
         ));
         console.error(e);
         setAddress(null);
       });
-  }, [accountIndex, addressOffset, genesis, ledger, t]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountIndex, addressOffset, genesis, ledger]);
 
   const refresh = useCallback(() => {
     setRefreshLock(true);

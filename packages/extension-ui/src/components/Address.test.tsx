@@ -36,13 +36,24 @@ interface AccountTestGenesisJson extends AccountTestJson {
 }
 
 const externalAccount = { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' } as AccountJson;
+const hardwareAccount = {
+  address: 'HDE6uFdw53SwUyfKSsjwZNmS2sziWMPuY6uJhGHcFzLYRaJ',
+  expectedIconTheme: 'polkadot',
+  // Kusama genesis hash
+  genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+  isExternal: true,
+  isHardware: true,
+  name: 'Hardware Account',
+  type: 'sr25519'
+} as AccountJson;
 
 const accounts = [
   { address: '5HSDXAC3qEMkSzZK377sTD1zJhjaPiX5tNWppHx2RQMYkjaJ', expectedIconTheme: 'polkadot', name: 'ECDSA Account', type: 'ecdsa' },
   { address: '5FjgD3Ns2UpnHJPVeRViMhCttuemaRXEqaD8V5z4vxcsUByA', expectedIconTheme: 'polkadot', name: 'Ed Account', type: 'ed25519' },
   { address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q', expectedIconTheme: 'polkadot', name: 'Parent Sr Account', type: 'sr25519' },
   { address: '0xd5D81CD4236a43F48A983fc5B895975c511f634D', expectedIconTheme: 'ethereum', name: 'Ethereum', type: 'ethereum' },
-  { ...externalAccount }
+  { ...externalAccount },
+  { ...hardwareAccount }
 ] as AccountTestJson[];
 
 // With Westend genesis Hash
@@ -256,6 +267,18 @@ describe('Address', () => {
 
     it('has an icon in front of its name', () => {
       expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
+    });
+  });
+
+  describe('Hardware wallet account', () => {
+    let wrapper: ReactWrapper;
+
+    beforeAll(async () => {
+      wrapper = await getWrapper(hardwareAccount, [], false);
+    });
+
+    it('has a usb icon in front of its name', () => {
+      expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="usb"]').exists()).toBe(true);
     });
   });
 

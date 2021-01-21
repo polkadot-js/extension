@@ -24,7 +24,7 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHidden, parentName, suri, type }: Props): React.ReactElement<Props> {
+function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, parentName, suri, type }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
@@ -88,18 +88,22 @@ function Account ({ address, className, genesisHash, isExternal, isHidden, paren
       >
         {t<string>('Forget Account')}
       </Link>
-      <MenuDivider />
-      <div className='menuItem'>
-        <Dropdown
-          className='inputItem'
-          label=''
-          onChange={_onChangeGenesis}
-          options={genesisOptions}
-          value={genesisHash || ''}
-        />
-      </div>
+      {!isHardware && (
+        <>
+          <MenuDivider />
+          <div className='menuItem'>
+            <Dropdown
+              className='genesisSelection'
+              label=''
+              onChange={_onChangeGenesis}
+              options={genesisOptions}
+              value={genesisHash || ''}
+            />
+          </div>
+        </>
+      )}
     </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, t, type]);
+  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, isHardware, t, type]);
 
   return (
     <div className={className}>
@@ -152,7 +156,7 @@ export default styled(Account)`
     min-width: 13rem;
     padding: 4px 16px;
 
-    .inputItem {
+    .genesisSelection {
       margin: 0;
     }
   }

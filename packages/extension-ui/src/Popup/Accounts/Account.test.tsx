@@ -38,6 +38,7 @@ describe('Account component', () => {
     expect(wrapper.find('a.menuItem').at(1).text()).toBe('Derive New Account');
     expect(wrapper.find('a.menuItem').at(2).text()).toBe('Export Account');
     expect(wrapper.find('a.menuItem').at(3).text()).toBe('Forget Account');
+    expect(wrapper.find('.genesisSelection').exists()).toBe(true);
   });
 
   it('does not show Export option if account is external', () => {
@@ -47,6 +48,7 @@ describe('Account component', () => {
     expect(wrapper.find('a.menuItem').length).toBe(2);
     expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
     expect(wrapper.find('a.menuItem').at(1).text()).toBe('Forget Account');
+    expect(wrapper.find('.genesisSelection').exists()).toBe(true);
   });
 
   it('does not show Derive option if account is of ethereum type', () => {
@@ -57,5 +59,16 @@ describe('Account component', () => {
     expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
     expect(wrapper.find('a.menuItem').at(1).text()).toBe('Export Account');
     expect(wrapper.find('a.menuItem').at(2).text()).toBe('Forget Account');
+    expect(wrapper.find('.genesisSelection').exists()).toBe(true);
+  });
+
+  it('does not show genesis hash selection dropsown if account is hardware', () => {
+    wrapper = mountAccountComponent({ isExternal: true, isHardware: true });
+    wrapper.find('.settings').first().simulate('click');
+
+    expect(wrapper.find('a.menuItem').length).toBe(2);
+    expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
+    expect(wrapper.find('a.menuItem').at(1).text()).toBe('Forget Account');
+    expect(wrapper.find('.genesisSelection').exists()).toBe(false);
   });
 });

@@ -102,12 +102,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider/>
       <MenuItem
         className='setting'
-        title={t<string>('External QR accounts and Access')}
+        title={t<string>('External accounts and Access')}
       >
         <Checkbox
           checked={camera}
-          className='checkbox'
-          label={t<string>('Allow Camera Access')}
+          className='checkbox camera'
+          label={t<string>('Allow QR Camera Access')}
           onChange={setCamera}
         />
       </MenuItem>
@@ -182,6 +182,10 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       line-height: 20px;
       font-size: 15px;
       margin-bottom: 0;
+
+      &.ledger {
+        margin-top: 0.2rem;
+      }
 
       label {
         color: ${theme.textColor};

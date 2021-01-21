@@ -151,9 +151,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             isBusy={ledgerLoading || isBusy}
             onClick={refresh}
           >
-            <FontAwesomeIcon
-              icon={faSync}
-            />
+            <FontAwesomeIcon icon={faSync} />
             {t<string>('Refresh')}
           </Button>
           )

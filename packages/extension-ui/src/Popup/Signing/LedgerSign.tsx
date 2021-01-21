@@ -71,20 +71,22 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         </Warning>
       )}
       {ledgerLocked
-        ? (<Button
-          isBusy={isBusy || ledgerLoading}
-          onClick={_onRefresh}
-        >
-          <FontAwesomeIcon icon={faSync} />
-          {t<string>('Refresh')}
-        </Button>
+        ? (
+          <Button
+            isBusy={isBusy || ledgerLoading}
+            onClick={_onRefresh}
+          >
+            <FontAwesomeIcon icon={faSync} />
+            {t<string>('Refresh')}
+          </Button>
         )
         : (<Button
           isBusy={isBusy || ledgerLoading}
           onClick={_onSignLedger}
         >
           {t<string>('Sign on Ledger')}
-        </Button>)
+        </Button>
+        )
       }
     </div>
 

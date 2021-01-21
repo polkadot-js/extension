@@ -53,8 +53,8 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         setError(e.message);
         setIsBusy(false);
       });
-  },
-  [accountIndex, addressOffset, ledger, onSignature, payload, setError]
+    },
+    [accountIndex, addressOffset, ledger, onSignature, payload, setError]
   );
 
   return (
@@ -65,9 +65,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         </Warning>
       )}
       {error && (
-        <Warning
-          isDanger
-        >
+        <Warning isDanger>
           {error}
         </Warning>
       )}
@@ -76,9 +74,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           isBusy={isBusy || ledgerLoading}
           onClick={_onRefresh}
         >
-          <FontAwesomeIcon
-            icon={faSync}
-          />
+          <FontAwesomeIcon icon={faSync} />
           {t<string>('Refresh')}
         </Button>
         )

@@ -37,7 +37,7 @@ function retrieveLedger (genesis: string): Ledger {
 
   const { isLedgerCapable } = getState();
 
-  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supporter');
+  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
 
   const def = getNetwork(genesis);
 
@@ -120,6 +120,8 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         console.error(e);
         setAddress(null);
       });
+  // If the dependency array is exhaustive, with t, the translation function, it
+  // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountIndex, addressOffset, genesis, ledger]);
 

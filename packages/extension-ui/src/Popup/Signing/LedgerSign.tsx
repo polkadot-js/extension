@@ -39,20 +39,21 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
     setError(null);
   }, [refresh, setError]);
 
-  const _onSignLedger = useCallback((): void => {
-    if (!ledger || !payload || !onSignature) {
-      return;
-    }
+  const _onSignLedger = useCallback(
+    (): void => {
+      if (!ledger || !payload || !onSignature) {
+        return;
+      }
 
-    setError(null);
-    setIsBusy(true);
-    ledger.sign(payload.toU8a(true), Number(accountIndex), Number(addressOffset))
-      .then((signature) => {
-        onSignature(signature);
-      }).catch((e: Error) => {
-        setError(e.message);
-        setIsBusy(false);
-      });
+      setError(null);
+      setIsBusy(true);
+      ledger.sign(payload.toU8a(true), accountIndex, addressOffset)
+        .then((signature) => {
+          onSignature(signature);
+        }).catch((e: Error) => {
+          setError(e.message);
+          setIsBusy(false);
+        });
     },
     [accountIndex, addressOffset, ledger, onSignature, payload, setError]
   );

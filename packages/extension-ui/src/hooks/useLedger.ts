@@ -94,8 +94,7 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
     setError(null);
     setWarning(null);
 
-    // sometimes, somehow addIndex is perceived as a string
-    ledger.getAddress(false, Number(accountIndex), Number(addressOffset))
+    ledger.getAddress(false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);

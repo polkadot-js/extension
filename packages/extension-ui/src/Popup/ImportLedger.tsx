@@ -88,6 +88,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     [accountIndex, address, addressOffset, genesis, name, onAction]
   );
 
+  // select element is returning a string
+  const _onSetAccountIndex = useCallback((value: number) => setAccountIndex(Number(value)), []);
+  const _onSetAddressOffset = useCallback((value: number) => setAddressOffset(Number(value)), []);
+
   return (
     <>
       <Header
@@ -114,14 +118,14 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             <Dropdown
               className='accountType'
               label={t<string>('account type')}
-              onChange={setAccountIndex}
+              onChange={_onSetAccountIndex}
               options={accOps.current}
               value={accountIndex}
             />
             <Dropdown
               className='accountIndex'
               label={t<string>('address index')}
-              onChange={setAddressOffset}
+              onChange={_onSetAddressOffset}
               options={addOps.current}
               value={addressOffset}
             />

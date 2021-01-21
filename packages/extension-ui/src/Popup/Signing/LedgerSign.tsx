@@ -80,12 +80,13 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
             {t<string>('Refresh')}
           </Button>
         )
-        : (<Button
-          isBusy={isBusy || ledgerLoading}
-          onClick={_onSignLedger}
-        >
-          {t<string>('Sign on Ledger')}
-        </Button>
+        : (
+          <Button
+            isBusy={isBusy || ledgerLoading}
+            onClick={_onSignLedger}
+          >
+            {t<string>('Sign on Ledger')}
+          </Button>
         )
       }
     </div>

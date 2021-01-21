@@ -147,21 +147,24 @@ function ImportLedger ({ className }: Props): React.ReactElement {
       <VerticalSpace/>
       <ButtonArea>
         {ledgerLocked
-          ? (<Button
-            isBusy={ledgerLoading || isBusy}
-            onClick={refresh}
-          >
-            <FontAwesomeIcon icon={faSync} />
-            {t<string>('Refresh')}
-          </Button>
+          ? (
+            <Button
+              isBusy={ledgerLoading || isBusy}
+              onClick={refresh}
+            >
+              <FontAwesomeIcon icon={faSync} />
+              {t<string>('Refresh')}
+            </Button>
           )
-          : (<Button
-            isBusy={ledgerLoading || isBusy}
-            isDisabled={!!error || !!ledgerError || !address || !genesis}
-            onClick={_onSave}
-          >
-            {t<string>('Import Account')}
-          </Button>)
+          : (
+            <Button
+              isBusy={ledgerLoading || isBusy}
+              isDisabled={!!error || !!ledgerError || !address || !genesis}
+              onClick={_onSave}
+            >
+              {t<string>('Import Account')}
+            </Button>
+          )
         }
       </ButtonArea>
     </>

@@ -92,7 +92,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
         </Link>
       </MenuItem>
       <MenuItem className='menuItem ledger'>
-        { isLedgerEnabled
+        {isLedgerEnabled
           ? <Link
             isDisabled={!isLedgerCapable}
             title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}

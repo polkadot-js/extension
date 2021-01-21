@@ -134,5 +134,22 @@
   "//hard": "",
   "`///password` not supported for derivation": "",
   "Soft derivation is only allowed for sr25519 accounts": "",
-  "Invalid derivation path": ""
+  "Invalid derivation path": "",
+  "hardware wallet account": "",
+  "Camera access must be first enabled in the settings": "",
+  "Ledger devices can only be connected with Chrome browser": "",
+  "Attach ledger account": "",
+  "Connect Ledger device": "",
+  "External accounts and Access": "",
+  "Allow QR Camera Access": "",
+  "Add Account": "",
+  "Account type {{index}}": "",
+  "Address index {{index}}": "",
+  "Import Ledger Account": "",
+  "Network": "",
+  "account type": "",
+  "address index": "",
+  "Refresh": "",
+  "Import Account": "",
+  "Sign on Ledger": ""
 }

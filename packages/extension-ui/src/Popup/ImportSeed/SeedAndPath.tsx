@@ -45,7 +45,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep }: Props): React.
     validateSeed(suri).then((newAccount) => {
       setError('');
       setAddress(newAccount.address);
-      onAccountChange({ ...newAccount });
+      onAccountChange(newAccount);
     }).catch(() => {
       setAddress('');
       onAccountChange(null);

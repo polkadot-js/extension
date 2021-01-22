@@ -135,7 +135,7 @@ export default styled(ImportSeed)(({ theme }: ThemeProps) => `
     text-transform: uppercase;
 
     > span {
-      font-size: 10px;
+      font-size: ${theme.inputLabelFontSize};
       margin-left: .5rem;
       vertical-align: middle;
     }

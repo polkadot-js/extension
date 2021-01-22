@@ -32,7 +32,7 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .itemTitle {
       margin: 0;
       width: 100%;
-      font-size: 10px;
+      font-size: ${theme.inputLabelFontSize};
       line-height: 14px;
       letter-spacing: 0.04em;
       text-transform: uppercase;

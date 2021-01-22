@@ -25,7 +25,7 @@ export default styled(Label)(({ theme }: ThemeProps) => `
   color: ${theme.textColor};
 
   label {
-    font-size: 10px;
+    font-size: ${theme.inputLabelFontSize};
     line-height: 14px;
     letter-spacing: 0.04em;
     opacity: 0.65;

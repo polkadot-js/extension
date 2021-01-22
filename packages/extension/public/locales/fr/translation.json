@@ -152,5 +152,6 @@
   "Refresh": "Rafraichir",
   "Import Account": "Importer",
   "Sign on Ledger": "Signer sur Ledger",
-  "Allow use on any chain": "Toutes les blockchains"
+  "Allow use on any chain": "Toutes les blockchains",
+  "Select network": "Sélectionner un réseau"
 }

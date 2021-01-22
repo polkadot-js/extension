@@ -75,7 +75,7 @@ describe('ImportSeed', () => {
       expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
     });
 
-    it('shows the expected account when correct seed is typed and next step button is enabled', async () => {
+    it.only('shows the expected account when correct seed is typed and next step button is enabled', async () => {
       jest.spyOn(messaging, 'validateSeed').mockResolvedValue({ address: account.expectedAddress, suri: account.seed });
       await typeSeed(wrapper, account.seed);
 
@@ -174,7 +174,7 @@ describe('ImportSeed', () => {
         await act(flushAllPromises);
         wrapper.update();
 
-        expect(messaging.createAccountSuri).toBeCalledWith(account.name, account.password, suri);
+        expect(messaging.createAccountSuri).toBeCalledWith(account.name, account.password, suri, undefined, undefined);
         expect(onActionStub).toBeCalledWith('/');
       });
     });

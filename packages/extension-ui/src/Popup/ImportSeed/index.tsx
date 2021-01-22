@@ -12,7 +12,7 @@ import SeedAndPath from './SeedAndPath';
 
 export interface AccountInfo {
   address: string;
-  genesis: string;
+  genesis?: string;
   suri: string;
 }
 

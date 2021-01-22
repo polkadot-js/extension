@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
+import type { AccountInfo } from '.';
 
 import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,7 +14,6 @@ import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
-import { AccountInfo } from '.';
 
 interface Props {
   className? : string;
@@ -21,7 +21,7 @@ interface Props {
   onAccountChange: (account: AccountInfo | null) => void;
 }
 
-function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.ReactElement {
+function SeedAndPath ({ className, onAccountChange, onNextStep }: Props): React.ReactElement {
   const { t } = useTranslation();
   const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
@@ -45,7 +45,7 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
     validateSeed(suri).then((newAccount) => {
       setError('');
       setAddress(newAccount.address);
-      onAccountChange({ ...newAccount, genesis });
+      onAccountChange({ ...newAccount });
     }).catch(() => {
       setAddress('');
       onAccountChange(null);
@@ -125,7 +125,7 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
   );
 }
 
-export default styled(ImportSeed)(({ theme }: ThemeProps) => `
+export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;

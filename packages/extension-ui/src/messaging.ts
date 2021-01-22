@@ -9,9 +9,9 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
-import allChains from '@polkadot/extension-chains/chains';
 import chrome from '@polkadot/extension-inject/chrome';
 
+import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
@@ -121,8 +121,8 @@ export async function createAccountHardware (address: string, hardwareType: stri
   return sendMessage('pri(accounts.create.hardware)', { accountIndex, address, addressOffset, genesisHash, hardwareType, name });
 }
 
-export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {
-  return sendMessage('pri(accounts.create.suri)', { name, password, suri, type });
+export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {

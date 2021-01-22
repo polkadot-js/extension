@@ -10,13 +10,10 @@ import styled from 'styled-components';
 
 import { validateSeed } from '@polkadot/extension-ui/messaging';
 
-import { ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
+import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
-
-interface AccountInfo {
-  address: string;
-  suri: string;
-}
+import { AccountInfo } from '.';
 
 interface Props {
   className? : string;
@@ -26,11 +23,13 @@ interface Props {
 
 function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
+  const [genesis, setGenesis] = useState('');
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -46,7 +45,7 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
     validateSeed(suri).then((newAccount) => {
       setError('');
       setAddress(newAccount.address);
-      onAccountChange(newAccount);
+      onAccountChange({ ...newAccount, genesis });
     }).catch(() => {
       setAddress('');
       onAccountChange(null);
@@ -55,7 +54,7 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
         : t<string>('Invalid mnemonic seed')
       );
     });
-  }, [t, seed, path, onAccountChange]);
+  }, [t, seed, path, onAccountChange, genesis]);
 
   const _onToggleAdvanced = useCallback(() => {
     setAdvances(!advanced);
@@ -82,6 +81,13 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
             {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
           </Warning>
         )}
+        <Dropdown
+          className='genesisSelection'
+          label={t<string>('Network')}
+          onChange={setGenesis}
+          options={genesisOptions}
+          value={genesis}
+        />
         <div
           className='advancedToggle'
           onClick={_onToggleAdvanced}
@@ -133,6 +139,10 @@ export default styled(ImportSeed)(({ theme }: ThemeProps) => `
       margin-left: .5rem;
       vertical-align: middle;
     }
+  }
+
+  .genesisSelection {
+    margin-bottom: 1rem;
   }
 
   .seedInput {

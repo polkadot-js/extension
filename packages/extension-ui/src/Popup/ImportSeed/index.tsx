@@ -10,12 +10,18 @@ import { createAccountSuri } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import SeedAndPath from './SeedAndPath';
 
+export interface AccountInfo {
+  address: string;
+  genesis: string;
+  suri: string;
+}
+
 function ImportSeed (): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const [account, setAccount] = useState<null | { address: string; suri: string }>(null);
+  const [account, setAccount] = useState<AccountInfo | null>(null);
   const [name, setName] = useState<string | null>(null);
   const [step1, setStep1] = useState(true);
 
@@ -28,7 +34,7 @@ function ImportSeed (): React.ReactElement {
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuri(name, password, account.suri)
+      createAccountSuri(name, password, account.suri, undefined, account.genesis)
         .then(() => onAction('/'))
         .catch((error): void => {
           setIsBusy(false);
@@ -49,6 +55,7 @@ function ImportSeed (): React.ReactElement {
       <div>
         <Address
           address={account?.address}
+          genesisHash={account?.genesis}
           name={name}
         />
       </div>

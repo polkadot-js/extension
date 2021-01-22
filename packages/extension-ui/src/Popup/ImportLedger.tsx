@@ -61,7 +61,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const networkOps = useRef(
     [{
-      text: 'Select network',
+      text: t('Select network'),
       value: ''
     },
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({

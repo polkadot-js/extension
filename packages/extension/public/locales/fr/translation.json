@@ -151,5 +151,6 @@
   "address index": "numéro d'adresse",
   "Refresh": "Rafraichir",
   "Import Account": "Importer",
-  "Sign on Ledger": "Signer sur Ledger"
+  "Sign on Ledger": "Signer sur Ledger",
+  "Allow use on any chain": "Toutes les blockchains"
 }

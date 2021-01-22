@@ -129,7 +129,7 @@ export default styled(ImportSeed)(({ theme }: ThemeProps) => `
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;
-    line-height: 14px;
+    line-height: ${theme.lineHeight};
     letter-spacing: 0.04em;
     opacity: 0.65;
     text-transform: uppercase;
@@ -142,11 +142,11 @@ export default styled(ImportSeed)(({ theme }: ThemeProps) => `
   }
 
   .genesisSelection {
-    margin-bottom: 1rem;
+    margin-bottom: ${theme.fontSize};
   }
 
   .seedInput {
-    margin-bottom: 16px;
+    margin-bottom: ${theme.fontSize};
     textarea {
       height: unset;
     }

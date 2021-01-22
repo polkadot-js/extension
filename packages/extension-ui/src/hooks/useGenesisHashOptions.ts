@@ -16,7 +16,7 @@ export default function (): Option[] {
 
   const hashes = useMemo(() => [
     {
-      text: t<string>('Allow use on any chain'),
+      text: t('Allow use on any chain'),
       value: ''
     },
     ...chains.map(({ chain, genesisHash }) => ({

@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from 'react';
+import { useRef } from 'react';
 
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
@@ -14,7 +14,7 @@ interface Option {
 export default function (): Option[] {
   const { t } = useTranslation();
 
-  const hashes = useMemo(() => [
+  const { current: hashes } = useRef([
     {
       text: t('Allow use on any chain'),
       value: ''
@@ -23,7 +23,7 @@ export default function (): Option[] {
       text: chain,
       value: genesisHash
     }))
-  ], [t]);
+  ]);
 
   return hashes;
 }

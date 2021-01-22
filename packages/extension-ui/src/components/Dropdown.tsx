@@ -58,7 +58,7 @@ function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChang
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, theme }: Props) => `
+export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
   position: relative;
 
   select {
@@ -88,7 +88,7 @@ export default React.memo(styled(Dropdown)(({ isError, theme }: Props) => `
   label::after {
     content: '';
     position: absolute;
-    top: 50%;
+    top: ${label ? 'calc(50% + 14px)' : '50%'};
     transform: translateY(-50%);
     right: 12px;
     width: 8px;

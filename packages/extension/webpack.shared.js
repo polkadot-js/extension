@@ -25,13 +25,8 @@ module.exports = (entry, alias = {}) => ({
   module: {
     rules: [
       {
-        include: /node_modules/,
-        test: /\.mjs$/,
-        type: 'javascript/auto'
-      },
-      {
         exclude: /(node_modules)/,
-        test: /\.(js|ts|tsx)$/,
+        test: /\.(js|mjs|ts|tsx)$/,
         use: [
           {
             loader: require.resolve('babel-loader'),

@@ -42,9 +42,12 @@ function SeedAndPath ({ className, onAccountChange, onNextStep }: Props): React.
 
     const suri = `${seed || ''}${path || ''}`;
 
-    validateSeed(suri).then((newAccount) => {
+    validateSeed(suri).then((validatedAccount) => {
       setError('');
-      setAddress(newAccount.address);
+      setAddress(validatedAccount.address);
+      // a spread operator here breaks tests, using Object.assign as a workaround
+      const newAccount: AccountInfo = Object.assign(validatedAccount, { genesis });
+
       onAccountChange(newAccount);
     }).catch(() => {
       setAddress('');

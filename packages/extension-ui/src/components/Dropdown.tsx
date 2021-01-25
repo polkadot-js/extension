@@ -17,6 +17,7 @@ interface DropdownOption {
 interface Props extends ThemeProps {
   className?: string;
   defaultValue?: string | null;
+  isDisabled?: boolean
   isError?: boolean;
   isFocussed?: boolean;
   label: string;
@@ -26,7 +27,7 @@ interface Props extends ThemeProps {
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -40,6 +41,7 @@ function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChang
         <select
           autoFocus={isFocussed}
           defaultValue={defaultValue || undefined}
+          disabled={isDisabled}
           onBlur={onBlur}
           onChange={_onChange}
           value={value}

@@ -10,7 +10,6 @@ import { base64Decode } from '@polkadot/util-crypto';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
-// import kusama from './kusama';
 
 const definitions = new Map<string, MetadataDef>(
   // [kusama].map((def) => [def.genesisHash, def])

@@ -396,7 +396,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
 
   .parentName {
     color: ${theme.labelColor};
-    font-size: 10px;
+    font-size: ${theme.inputLabelFontSize};
     line-height: 14px;
     overflow: hidden;
     padding: 0.25rem 0 0 0.8rem;

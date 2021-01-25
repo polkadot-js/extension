@@ -32,6 +32,7 @@ const darkTheme = {
   identiconBackground: '#F4F5F8',
   inputBackground: '#111218',
   inputBorderColor: '#43444B',
+  inputLabelFontSize: '10px',
   labelColor: '#9F9E99',
   labelFontSize: '13px',
   labelLineHeight: '18px',

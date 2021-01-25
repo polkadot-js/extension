@@ -7,9 +7,9 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
-import genesisOptions from '@polkadot/extension-chains/genesisHashes';
 
 import { ActionContext, Address, Dropdown, Link, MenuDivider } from '../../components';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { editAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
@@ -29,6 +29,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   const onAction = useContext(ActionContext);
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | null>(null);
+  const genesisOptions = useGenesisHashOptions();
 
   const _onChangeGenesis = useCallback(
     (genesisHash?: string | null): void => {
@@ -103,7 +104,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         </>
       )}
     </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, isExternal, isHardware, t, type]);
+  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, genesisOptions, isExternal, isHardware, t, type]);
 
   return (
     <div className={className}>

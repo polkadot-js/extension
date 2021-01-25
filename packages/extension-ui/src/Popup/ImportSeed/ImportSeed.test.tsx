@@ -174,7 +174,7 @@ describe('ImportSeed', () => {
         await act(flushAllPromises);
         wrapper.update();
 
-        expect(messaging.createAccountSuri).toBeCalledWith(account.name, account.password, suri);
+        expect(messaging.createAccountSuri).toBeCalledWith(account.name, account.password, suri, undefined, '');
         expect(onActionStub).toBeCalledWith('/');
       });
     });

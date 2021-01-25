@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
+import type { AccountInfo } from '.';
 
 import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,13 +11,9 @@ import styled from 'styled-components';
 
 import { validateSeed } from '@polkadot/extension-ui/messaging';
 
-import { ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
+import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
-
-interface AccountInfo {
-  address: string;
-  suri: string;
-}
 
 interface Props {
   className? : string;
@@ -24,13 +21,15 @@ interface Props {
   onAccountChange: (account: AccountInfo | null) => void;
 }
 
-function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.ReactElement {
+function SeedAndPath ({ className, onAccountChange, onNextStep }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
+  const [genesis, setGenesis] = useState('');
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -43,9 +42,12 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
 
     const suri = `${seed || ''}${path || ''}`;
 
-    validateSeed(suri).then((newAccount) => {
+    validateSeed(suri).then((validatedAccount) => {
       setError('');
-      setAddress(newAccount.address);
+      setAddress(validatedAccount.address);
+      // a spread operator here breaks tests, using Object.assign as a workaround
+      const newAccount: AccountInfo = Object.assign(validatedAccount, { genesis });
+
       onAccountChange(newAccount);
     }).catch(() => {
       setAddress('');
@@ -55,7 +57,7 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
         : t<string>('Invalid mnemonic seed')
       );
     });
-  }, [t, seed, path, onAccountChange]);
+  }, [t, seed, path, onAccountChange, genesis]);
 
   const _onToggleAdvanced = useCallback(() => {
     setAdvances(!advanced);
@@ -82,6 +84,13 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
             {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
           </Warning>
         )}
+        <Dropdown
+          className='genesisSelection'
+          label={t<string>('Network')}
+          onChange={setGenesis}
+          options={genesisOptions}
+          value={genesis}
+        />
         <div
           className='advancedToggle'
           onClick={_onToggleAdvanced}
@@ -119,24 +128,28 @@ function ImportSeed ({ className, onAccountChange, onNextStep }: Props): React.R
   );
 }
 
-export default styled(ImportSeed)(({ theme }: ThemeProps) => `
+export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;
-    line-height: 14px;
+    line-height: ${theme.lineHeight};
     letter-spacing: 0.04em;
     opacity: 0.65;
     text-transform: uppercase;
 
     > span {
-      font-size: 10px;
+      font-size: ${theme.inputLabelFontSize};
       margin-left: .5rem;
       vertical-align: middle;
     }
   }
 
+  .genesisSelection {
+    margin-bottom: ${theme.fontSize};
+  }
+
   .seedInput {
-    margin-bottom: 16px;
+    margin-bottom: ${theme.fontSize};
     textarea {
       height: unset;
     }

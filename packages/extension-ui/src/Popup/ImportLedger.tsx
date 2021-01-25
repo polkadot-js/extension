@@ -3,7 +3,7 @@
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
@@ -12,7 +12,7 @@ import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Wa
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountHardware } from '../messaging';
-import { Header } from '../partials';
+import { Header, Name } from '../partials';
 import { ThemeProps } from '../types';
 import ledgerChains from '../util/legerChains';
 
@@ -40,7 +40,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<string | null>(null);
   const onAction = useContext(ActionContext);
-  const name = useMemo(() => `ledger ${accountIndex}/${addressOffset}`, [accountIndex, addressOffset]);
+  const [name, setName] = useState<string | null>(null);
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const _onSave = useCallback(
     () => {
-      if (address && genesis) {
+      if (address && genesis && name) {
         setIsBusy(true);
 
         createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
@@ -104,7 +104,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           genesisHash={genesis}
           isExternal
           isHardware
-          name={address ? name : ''}
+          name={name}
         />
         <Dropdown
           className='network'
@@ -113,10 +113,17 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           options={networkOps.current}
           value={genesis}
         />
-        {genesis && address && !ledgerError && (
+        { !!genesis && !!address && !ledgerError && (
+          <Name
+            onChange={setName}
+            value={name || ''}
+          />
+        )}
+        { !!name && (
           <>
             <Dropdown
               className='accountType'
+              isDisabled={ledgerLoading}
               label={t<string>('account type')}
               onChange={_onSetAccountIndex}
               options={accOps.current}
@@ -124,6 +131,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             />
             <Dropdown
               className='accountIndex'
+              isDisabled={ledgerLoading}
               label={t<string>('address index')}
               onChange={_onSetAddressOffset}
               options={addOps.current}

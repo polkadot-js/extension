@@ -10,6 +10,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
 import chrome from '@polkadot/extension-inject/chrome';
+import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -127,6 +128,10 @@ export async function createAccountSuri (name: string, password: string, suri: s
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, type });
+}
+
+export async function getAllMetatdata () : Promise<MetadataDef[]> {
+  return sendMessage('pri(metadata.list)');
 }
 
 export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {

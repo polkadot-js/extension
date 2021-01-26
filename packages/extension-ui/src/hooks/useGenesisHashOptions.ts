@@ -1,8 +1,9 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
+import { getAllMetatdata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
 
@@ -13,8 +14,17 @@ interface Option {
 
 export default function (): Option[] {
   const { t } = useTranslation();
+  const [metadataChains, setMetadatachains] = useState<Option[]>([]);
 
-  const { current: hashes } = useRef([
+  useEffect(() => {
+    getAllMetatdata().then((metadataDefs) => {
+      const res = metadataDefs.map((metadata) => ({ text: metadata.chain, value: metadata.genesisHash }));
+
+      setMetadatachains(res);
+    }).catch(console.error);
+  }, []);
+
+  const hashes = useMemo(() => [
     {
       text: t('Allow use on any chain'),
       value: ''
@@ -22,8 +32,9 @@ export default function (): Option[] {
     ...chains.map(({ chain, genesisHash }) => ({
       text: chain,
       value: genesisHash
-    }))
-  ]);
+    })),
+    ...metadataChains.filter(({ value }) => !chains.find(({ genesisHash }) => genesisHash === value))
+  ], [metadataChains, t]);
 
   return hashes;
 }

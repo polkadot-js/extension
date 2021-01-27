@@ -14,7 +14,7 @@ interface Props {
   label?: string;
   onBlur?: () => void;
   onChange: (name: string | null) => void;
-  value?: string;
+  value?: string | null;
 }
 
 export default function Name ({ address, className, isFocused, label, onBlur, onChange, value }: Props): React.ReactElement<Props> {
@@ -34,6 +34,7 @@ export default function Name ({ address, className, isFocused, label, onBlur, on
       isFocused={isFocused}
       label={label || t<string>('A descriptive name for your account')}
       onBlur={onBlur}
+      onEnter={onBlur}
       onValidatedChange={onChange}
       type='text'
       validator={isNameValid}

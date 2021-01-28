@@ -32,8 +32,16 @@ export default function (): Option[] {
     ...chains.map(({ chain, genesisHash }) => ({
       text: chain,
       value: genesisHash
-    })),
-    ...metadataChains.filter(({ value }) => !chains.find(({ genesisHash }) => genesisHash === value))
+    }))
+      .concat(
+      // get any chain present in the metadata and not already part of chains
+        ...metadataChains.filter(
+          ({ value }) => {
+            return !chains.find(
+              ({ genesisHash }) => genesisHash === value);
+          }
+        ))
+      .sort((a, b) => a.text.localeCompare(b.text))
   ], [metadataChains, t]);
 
   return hashes;

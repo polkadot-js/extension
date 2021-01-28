@@ -5,7 +5,7 @@ import type { ThemeProps } from '../../types';
 
 import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Button, InputWithLabel } from '../../components';
@@ -25,6 +25,10 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
   const { t } = useTranslation();
   const [path, setPath] = useState<string>(defaultPath);
   const [isDisabled, setIsDisabled] = useState(true);
+
+  useEffect(() => {
+    setPath(defaultPath);
+  }, [defaultPath]);
 
   const _onExpand = useCallback(() => setIsDisabled(!isDisabled), [isDisabled]);
 

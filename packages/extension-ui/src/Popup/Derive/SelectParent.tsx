@@ -40,6 +40,11 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
     return parent?.type === 'sr25519';
   }, [accounts, parentAddress]);
 
+  // reset the password field if the parent address changes
+  useEffect(() => {
+    setParentPassword('');
+  }, [parentAddress]);
+
   useEffect(() => {
     // forbid the use of password since Keyring ignores it
     if (suriPath?.includes('///')) {

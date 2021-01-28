@@ -26,6 +26,8 @@ const account = {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
+jest.spyOn(messaging, 'getAllMetatdata').mockResolvedValue([]);
+
 const typeSeed = async (wrapper: ReactWrapper, value: string) => {
   wrapper.find('textarea').first().simulate('change', { target: { value } });
   await act(flushAllPromises);
@@ -86,7 +88,9 @@ describe('ImportSeed', () => {
     });
 
     it('shows an error when incorrect seed is typed and next step button is enabled', async () => {
-    // eslint-disable-next-line @typescript-eslint/require-await
+      // silencing the following expected console.error
+      console.error = jest.fn();
+      // eslint-disable-next-line @typescript-eslint/require-await
       jest.spyOn(messaging, 'validateSeed').mockImplementation(async () => {
         throw new Error('Some test error message');
       });
@@ -124,6 +128,9 @@ describe('ImportSeed', () => {
     it('shows an error when derivation path is incorrect and next step button is disabled', async () => {
       const wrongPath = 'wrong';
       const suri = `${account.seed}${wrongPath}`;
+
+      // silencing the following expected console.error
+      console.error = jest.fn();
       // eslint-disable-next-line @typescript-eslint/require-await
       const validateCall = jest.spyOn(messaging, 'validateSeed').mockImplementation(async () => {
         throw new Error('Some test error message');

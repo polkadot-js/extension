@@ -153,31 +153,40 @@ describe('Signing requests', () => {
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
 
-    it('only the right arrow should be active on first screen', () => {
+    it('only the right arrow should be active on first screen', async () => {
       expect(wrapper.find('FontAwesomeIcon.arrowLeft')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowLeft.active')).toHaveLength(0);
       expect(wrapper.find('FontAwesomeIcon.arrowRight.active')).toHaveLength(1);
       wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
     });
 
-    it('should display second request after clicking right arrow', () => {
+    it('should display second request after clicking right arrow', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[1].id);
     });
 
-    it('only the left should be active on second screen', () => {
+    it('only the left should be active on second screen', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find('FontAwesomeIcon.arrowLeft.active')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowRight')).toHaveLength(1);
       expect(wrapper.find('FontAwesomeIcon.arrowRight.active')).toHaveLength(0);
       expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
     });
 
-    it('should display previous request after the left arrow has been clicked', () => {
+    it('should display previous request after the left arrow has been clicked', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
       wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
@@ -245,8 +254,10 @@ describe('Signing requests', () => {
       ]);
     });
 
-    it('correctly displays request 2', () => {
+    it('correctly displays request 2', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[1].account.address);
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
         'https://polkadot.js.org/apps',
@@ -264,48 +275,66 @@ describe('Signing requests', () => {
   });
 
   describe('Submitting', () => {
-    it('passes request id to cancel call', () => {
+    it('passes request id to cancel call', async () => {
       wrapper.find('.cancelButton').find('a').simulate('click');
+      await act(flushAllPromises);
+
       expect(messaging.cancelSignRequest).toBeCalledWith(signRequests[0].id);
     });
 
     it('passes request id and password to approve call', async () => {
       wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
+      await act(flushAllPromises);
+
       wrapper.find(Button).find('button').simulate('click');
       await act(flushAllPromises);
       wrapper.update();
+
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, false, 'hunter1');
     });
 
     it('asks the background to cache the password when the relevant checkbox is checked', async () => {
       check(wrapper.find('input[type="checkbox"]'));
+      await act(flushAllPromises);
+
       wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
+      await act(flushAllPromises);
+
       wrapper.find(Button).find('button').simulate('click');
       await act(flushAllPromises);
       wrapper.update();
+
       expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, true, 'hunter1');
     });
 
     it('shows an error when the password is wrong', async () => {
+      // silencing the following expected console.error
+      console.error = jest.fn();
       // eslint-disable-next-line @typescript-eslint/require-await
       jest.spyOn(messaging, 'approveSignPassword').mockImplementation(async () => {
         throw new Error('Unable to decode using the supplied passphrase');
       });
-      await act(flushAllPromises);
-      wrapper.update();
+
       wrapper.find(Input).simulate('change', { target: { value: 'anything' } });
+      await act(flushAllPromises);
+
       wrapper.find(Button).find('button').simulate('click');
       await act(flushAllPromises);
       wrapper.update();
+
       expect(wrapper.find('.warning-message').first().text()).toBe('Unable to decode using the supplied passphrase');
     });
 
-    it('when last request has been removed/cancelled, shows the previous one', () => {
+    it('when last request has been removed/cancelled, shows the previous one', async () => {
       wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
       act(() => {
         emitter.emit('request', [signRequests[0]]);
       });
+      await act(flushAllPromises);
       wrapper.update();
+
       expect(wrapper.find(TransactionIndex)).toHaveLength(0);
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });

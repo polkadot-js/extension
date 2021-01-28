@@ -4,7 +4,6 @@
 const config = require('@polkadot/dev/config/jest.cjs');
 
 module.exports = Object.assign({}, config, {
-  browser: true,
   moduleNameMapper: {
     '@polkadot/extension-(base|chains|dapp|inject|ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
     // eslint-disable-next-line sort-keys

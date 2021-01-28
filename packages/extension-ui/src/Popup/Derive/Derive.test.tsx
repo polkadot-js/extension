@@ -89,6 +89,8 @@ describe('Derive', () => {
 
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateAccount').mockImplementation(async (_, pass: string) => pass === parentPassword);
+    // silencing the following expected console.error
+    console.error = jest.fn();
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'validateDerivationPath').mockImplementation(async (_, path) => {
       if (path === '//') {

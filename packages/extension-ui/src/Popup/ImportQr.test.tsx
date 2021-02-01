@@ -76,7 +76,7 @@ describe('ImportQr component', () => {
 
   describe('Address component', () => {
     it('shows account as external', () => {
-      expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
+      expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="qrcode"]').exists()).toBe(true);
     });
 
     it('shows the correct name', () => {

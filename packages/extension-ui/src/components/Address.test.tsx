@@ -266,7 +266,7 @@ describe('Address', () => {
     });
 
     it('has an icon in front of its name', () => {
-      expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="external-link-square-alt"]').exists()).toBe(true);
+      expect(wrapper.find('Name').find('FontAwesomeIcon [data-icon="qrcode"]').exists()).toBe(true);
     });
   });
 

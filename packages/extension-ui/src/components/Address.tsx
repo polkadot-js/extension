@@ -346,11 +346,8 @@ export default styled(Address)(({ theme }: ThemeProps) => `
 
   .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
-    width: 0.875em;
     color: ${theme.labelColor};
-  }
-
-  .hardwareIcon {
+    width: 0.875em;
   }
 
   .identityIcon {

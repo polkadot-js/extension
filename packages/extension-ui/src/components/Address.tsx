@@ -10,7 +10,7 @@ import type { ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
-import { faExternalLinkSquareAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch, faExternalLinkSquareAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -18,7 +18,6 @@ import styled from 'styled-components';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import parentArrow from '../assets/arrowParentLabel.svg';
 import details from '../assets/details.svg';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
@@ -172,7 +171,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             />
             : <FontAwesomeIcon
               className='externalIcon'
-              icon={faExternalLinkSquareAlt}
+              icon={faQrcode}
               title={t('external account')}
             />
         )}
@@ -198,9 +197,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             ? (
               <>
                 <div className='banner'>
-                  <Svg
-                    className='parentArrow'
-                    src={parentArrow}
+                  <FontAwesomeIcon
+                    className='deriveIcon'
+                    icon={faCodeBranch}
                   />
                   <div
                     className='parentName'
@@ -347,8 +346,11 @@ export default styled(Address)(({ theme }: ThemeProps) => `
 
   .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
-    color: ${theme.labelColor};
     width: 0.875em;
+    color: ${theme.labelColor};
+  }
+
+  .hardwareIcon {
   }
 
   .identityIcon {
@@ -423,8 +425,8 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     }
   }
 
-  .parentArrow {
-    background: ${theme.labelColor};
+  .deriveIcon {
+    color: ${theme.labelColor};
     position: absolute;
     top: 5px;
     width: 9px;

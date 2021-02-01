@@ -94,12 +94,18 @@ describe('Create Account', () => {
       wrapper.update();
     });
 
-    it('saves account with provided name and password', async () => {
+    it('saves account with provided network, name and password', async () => {
+      const kusamaGenesis = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe';
+
+      wrapper.find('select').simulate('change', { target: { value: kusamaGenesis } });
+      await act(flushAllPromises);
+      wrapper.update();
+
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
       wrapper.find('[data-button-action="add new root"] button').simulate('click');
       await act(flushAllPromises);
 
-      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed);
+      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, undefined, kusamaGenesis);
       expect(onActionStub).toBeCalledWith('/');
     });
   });

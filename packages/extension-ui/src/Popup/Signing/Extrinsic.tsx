@@ -11,7 +11,7 @@ import React, { useMemo, useRef } from 'react';
 
 import { bnToBn, formatNumber } from '@polkadot/util';
 
-import { Table } from '../../components';
+import { Identicon, Table } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -26,6 +26,8 @@ interface Props {
   request: SignerPayloadJSON;
   url: string;
 }
+
+const ADDRESS_TYPE = 'LookupSource';
 
 function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
   return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
@@ -52,7 +54,7 @@ function decodeMethod (data: string, chain: Chain, specVersion: BN): Decoded {
   return { args, method };
 }
 
-function renderMethod (data: string, { args, method }: Decoded, t: TFunction): React.ReactNode {
+function Method ({ data, decoded: { args, method }, t }: { data: string, decoded: Decoded, t: TFunction }): React.ReactElement {
   if (!args || !method) {
     return (
       <tr>
@@ -66,26 +68,48 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
     <>
       <tr>
         <td className='label'>{t<string>('method')}</td>
-        <td className='data'>
-          <details>
-            <summary>{method.section}.{method.method}{
-              method.meta
-                ? `(${method.meta.args.map(({ name }) => name).join(', ')})`
-                : ''
-            }</summary>
-            <pre>{JSON.stringify(args, null, 2)}</pre>
-          </details>
-        </td>
+        <td className='data'>{method.section}.{method.method}</td>
       </tr>
       {method.meta && (
-        <tr>
-          <td className='label'>{t<string>('info')}</td>
-          <td className='data'>
-            <details>
-              <summary>{method.meta.documentation.map((d) => d.toString().trim()).join(' ')}</summary>
-            </details>
-          </td>
-        </tr>
+        <>
+          {console.log(JSON.stringify(args, null, 2))}
+          {method.meta.args.map((arg, index) => (
+            <tr key={index}>
+              <td className='label'>{arg.name}</td>
+              <td className='data'>
+                {
+                  arg.type.toHuman() === ADDRESS_TYPE
+                    ? (
+                      <>
+                        <Identicon
+                          className='identityIcon'
+                          iconTheme='polkadot'
+                          theme='polkadot'
+                          value={args[index].Id}
+                        />
+                        {args[index].Id}
+                      </>
+                    )
+                    : JSON.stringify(args[index], null, 2)
+                }
+              </td>
+              {console.log('arg', arg.toHuman(), arg.type.toHuman())}
+            </tr>
+          ))}
+          {/* {`(${method.meta.args.map(({ name }) => name).join(', ')})`
+                : ''
+            }
+            {JSON.stringify(args, null, 2)}</pre>
+        </td>} */}
+          <tr>
+            <td className='label'>{t<string>('info')}</td>
+            <td className='data'>
+              <details>
+                <summary>{method.meta.documentation.map((d) => d.toString().trim()).join(' ')}</summary>
+              </details>
+            </td>
+          </tr>
+        </>
       )}
     </>
   );
@@ -123,6 +147,11 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       className={className}
       isFull
     >
+      <Method
+        data={method}
+        decoded={decoded}
+        t={t}
+      />
       <tr>
         <td className='label'>{t<string>('from')}</td>
         <td className='data'>{url}</td>
@@ -145,7 +174,6 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
           <td className='data'>{formatNumber(tip)}</td>
         </tr>
       )}
-      {renderMethod(method, decoded, t)}
       <tr>
         <td className='label'>{t<string>('lifetime')}</td>
         <td className='data'>{mortalityAsString(era, blockNumber, t)}</td>

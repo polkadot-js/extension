@@ -40,6 +40,7 @@ export interface Props {
   isExternal?: boolean | null;
   isHardware?: boolean | null;
   isHidden?: boolean;
+  isSmall?: boolean;
   name?: string | null;
   parentName?: string | null;
   suri?: string;
@@ -93,7 +94,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, children, className = '', genesisHash, isExternal, isHardware, isHidden, isSmall, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -182,7 +183,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
   return (
-    <div className={className}>
+    <div className={`${className} ${isSmall ? 'addressSmall' : ''}`}>
       <div className='infoRow'>
         <Identicon
           className='identityIcon'
@@ -243,15 +244,17 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             >
               {formatted || address || t('<unknown>')}
             </div>
-            <CopyToClipboard text={(formatted && formatted) || ''} >
-              <FontAwesomeIcon
-                className='copyIcon'
-                icon={faCopy}
-                onClick={_onCopy}
-                size='sm'
-                title={t('copy address')}
-              />
-            </CopyToClipboard>
+            {!isSmall && (
+              <CopyToClipboard text={(formatted && formatted) || ''} >
+                <FontAwesomeIcon
+                  className='copyIcon'
+                  icon={faCopy}
+                  onClick={_onCopy}
+                  size='sm'
+                  title={t('copy address')}
+                />
+              </CopyToClipboard>
+            )}
             {actions && (
               <FontAwesomeIcon
                 className={isHidden ? 'hiddenIcon' : 'visibleIcon'}
@@ -464,4 +467,24 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       background: ${theme.readonlyInputBackground};
     }
   }
+
+  &.addressSmall {
+    background: none;
+    border: none;
+
+    .identityIcon {
+      margin-left: 5px;
+      margin-right: 5px;
+
+      & svg {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    .infoRow {
+      height: 50px;
+    }
+  }
+
 `);

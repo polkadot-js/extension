@@ -11,7 +11,7 @@ import React, { useMemo, useRef } from 'react';
 
 import { bnToBn, formatNumber } from '@polkadot/util';
 
-import { Identicon, Table } from '../../components';
+import { Address, Table } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 
@@ -27,7 +27,7 @@ interface Props {
   url: string;
 }
 
-const ADDRESS_TYPE = 'LookupSource';
+const ADDRESS_TYPE = ['AccountId', 'LookupSource'];
 
 function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
   return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
@@ -78,29 +78,19 @@ function Method ({ data, decoded: { args, method }, t }: { data: string, decoded
               <td className='label'>{arg.name}</td>
               <td className='data'>
                 {
-                  arg.type.toHuman() === ADDRESS_TYPE
+                  ADDRESS_TYPE.includes(arg.type.toHuman())
                     ? (
-                      <>
-                        <Identicon
-                          className='identityIcon'
-                          iconTheme='polkadot'
-                          theme='polkadot'
-                          value={args[index].Id}
-                        />
-                        {args[index].Id}
-                      </>
+                      <Address
+                        address={args[index].Id || args[index]}
+                        isSmall={true}
+                      />
                     )
-                    : JSON.stringify(args[index], null, 2)
+                    : <pre>{JSON.stringify(args[index], null, 2)}</pre>
                 }
               </td>
               {console.log('arg', arg.toHuman(), arg.type.toHuman())}
             </tr>
           ))}
-          {/* {`(${method.meta.args.map(({ name }) => name).join(', ')})`
-                : ''
-            }
-            {JSON.stringify(args, null, 2)}</pre>
-        </td>} */}
           <tr>
             <td className='label'>{t<string>('info')}</td>
             <td className='data'>

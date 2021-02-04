@@ -14,6 +14,7 @@ import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { composeInitialProps } from 'react-i18next/*';
 import styled from 'styled-components';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -158,7 +159,8 @@ function Address ({ actions, address, children, className = '', genesisHash, isE
 
   const Name = () => {
     const accountName = name || account?.name;
-    const displayName = accountName || t('<unknown>');
+
+    console.log('accountName', accountName, accountName || !isSmall);
 
     return (
       <>
@@ -176,7 +178,7 @@ function Address ({ actions, address, children, className = '', genesisHash, isE
               title={t('external account')}
             />
         )}
-        <span title={displayName}>{displayName}</span>
+        {(accountName || !isSmall) && <span title={accountName}>{accountName || t('<unknown>')}</span>}
       </>);
   };
 

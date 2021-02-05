@@ -27,7 +27,9 @@ interface Props {
   url: string;
 }
 
-const ADDRESS_TYPE = ['AccountId', 'LookupSource'];
+const ADDRESS_TYPE = ['AccountId', 'AuthorityId', 'LookupSource'] as const;
+
+type AddressType = typeof ADDRESS_TYPE[number];
 
 function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
   return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
@@ -54,7 +56,18 @@ function decodeMethod (data: string, chain: Chain, specVersion: BN): Decoded {
   return { args, method };
 }
 
-function Method ({ data, decoded: { args, method }, t }: { data: string, decoded: Decoded, t: TFunction }): React.ReactElement {
+function showAddress (type: AddressType, data: unknown, chain: Chain): React.ReactElement {
+  const arg = chain.registry.createType(type, data);
+
+  console.log('arg as string', arg.toString());
+
+  return <Address
+    address={arg.toString()}
+    isSmall={true}
+  />;
+}
+
+function Method ({ chain, data, decoded: { args, method }, t }: { chain: Chain | null, data: string, decoded: Decoded, t: TFunction }): React.ReactElement {
   if (!args || !method) {
     return (
       <tr>
@@ -72,23 +85,18 @@ function Method ({ data, decoded: { args, method }, t }: { data: string, decoded
       </tr>
       {method.meta && (
         <>
-          {console.log(JSON.stringify(args, null, 2))}
+          {/* {console.log(JSON.stringify(args, null, 2))} */}
           {method.meta.args.map((arg, index) => (
             <tr key={index}>
               <td className='label'>{arg.name}</td>
               <td className='data'>
                 {
-                  ADDRESS_TYPE.includes(arg.type.toHuman())
-                    ? (
-                      <Address
-                        address={args[index].Id || args[index]}
-                        isSmall={true}
-                      />
-                    )
+                  chain && ADDRESS_TYPE.includes(arg.type.toHuman() as AddressType)
+                    ? showAddress(arg.type.toHuman() as AddressType, args[index], chain)
                     : <pre>{JSON.stringify(args[index], null, 2)}</pre>
                 }
               </td>
-              {console.log('arg', arg.toHuman(), arg.type.toHuman())}
+              {/* {console.log('arg', arg.toHuman(), arg.type.toHuman())} */}
             </tr>
           ))}
           <tr>
@@ -138,6 +146,7 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       isFull
     >
       <Method
+        chain={chain}
         data={method}
         decoded={decoded}
         t={t}

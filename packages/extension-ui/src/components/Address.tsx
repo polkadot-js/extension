@@ -160,8 +160,6 @@ function Address ({ actions, address, children, className = '', genesisHash, isE
   const Name = () => {
     const accountName = name || account?.name;
 
-    console.log('accountName', accountName, accountName || !isSmall);
-
     return (
       <>
         {!!accountName && (account?.isExternal || isExternal) && (

@@ -7,10 +7,10 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.12.5"
+    "@babel/runtime": "^7.12.13"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.128",
+    "@types/chrome": "^0.0.129",
     "@types/firefox-webext-browser": "^82.0.0"
   },
   "peerDependencies": {

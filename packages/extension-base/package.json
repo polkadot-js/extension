@@ -7,11 +7,11 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.12.5",
-    "@polkadot/api": "^3.6.3",
+    "@babel/runtime": "^7.12.13",
+    "@polkadot/api": "^3.8.2-0",
     "@polkadot/extension-inject": "^0.36.2-17",
-    "@polkadot/keyring": "^5.4.4",
-    "@polkadot/phishing": "^0.4.9",
-    "@polkadot/ui-keyring": "0.66.4-0"
+    "@polkadot/keyring": "^5.6.2",
+    "@polkadot/phishing": "^0.4.27",
+    "@polkadot/ui-keyring": "0.69.1"
   }
 }

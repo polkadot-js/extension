@@ -145,7 +145,13 @@ export default class Tabs {
     const encodedWebsite = encodeURIComponent(phishingWebsite);
     const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
-    chrome.tabs.update({ url });
+    chrome.tabs.query({ active: true, currentWindow: true, windowType: 'normal' }, (tabs) => {
+      const currentTabId = tabs[0].id;
+
+      currentTabId && chrome.tabs.remove(currentTabId, () => {
+        chrome.tabs.create({ active: true, url });
+      });
+    });
 
     return null;
   }

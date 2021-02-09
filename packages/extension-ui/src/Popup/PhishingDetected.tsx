@@ -5,6 +5,7 @@ import type { ThemeProps } from '../types';
 
 import React from 'react';
 import { Trans } from 'react-i18next';
+import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
@@ -14,25 +15,28 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+interface WebsiteState {
+  website: string;
+}
+
 function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { website } = useParams<WebsiteState>();
+  const decodedWebsite = decodeURIComponent(website);
 
   return (
     <>
       <Header text={t<string>('Phishing detected')} />
       <div className={className}>
         <p>
-          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts.')}
+          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
         </p>
-        <p>
-          {t<string>('The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.')}
-        </p>
-        <p>
-          {t<string>('This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list. \n It might be incomplete or inaccurate.')}
+        <p className='websiteAddress'>
+          {decodedWebsite}
         </p>
         <p>
           <Trans i18nKey='phishing.incorrect'>
-            If you think that this website was flagged incorrectly, <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
+            Note that this  website was reported on a community-driven, curated list. It might be incomplete or inaccurate. If you think that this website was flagged incorrectly, <a href='https://github.com/polkadot-js/phishing/issues/new'>please open an issue by clicking here</a>.
           </Trans>
         </p>
       </div>
@@ -48,6 +52,11 @@ export default styled(PhishingDetected)(({ theme }: Props) => `
 
     a {
       color: ${theme.subTextColor};
+    }
+
+    &.websiteAddress {
+      font-size: 1.3rem;
+      text-align: center;
     }
   }
 `);

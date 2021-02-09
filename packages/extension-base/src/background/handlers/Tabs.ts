@@ -141,8 +141,9 @@ export default class Tabs {
     return this.#state.rpcUnsubscribe(request, port);
   }
 
-  private redirectPhishingLanding () {
-    const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}`;
+  private redirectPhishingLanding (phishingWebsite: string) {
+    const encodedWebsite = encodeURIComponent(phishingWebsite);
+    const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
     chrome.tabs.update({ url });
 
@@ -153,7 +154,7 @@ export default class Tabs {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
-      this.redirectPhishingLanding();
+      this.redirectPhishingLanding(url);
     }
 
     return false;

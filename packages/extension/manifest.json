@@ -5,7 +5,7 @@
   "name": "polkadot{.js} extension",
   "short_name": "polkadot{.js}",
   "manifest_version": 2,
-  "permissions": ["storage"],
+  "permissions": ["storage", "tabs"],
   "background": {
     "scripts": ["background.js"],
     "persistent": true

@@ -13,7 +13,7 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { assert } from '@polkadot/util';
+import { assert, isNumber } from '@polkadot/util';
 
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
@@ -141,13 +141,16 @@ export default class Tabs {
     return this.#state.rpcUnsubscribe(request, port);
   }
 
-  private redirectPhishingLanding (phishingWebsite: string) {
+  private redirectPhishingLanding (phishingWebsite: string): void {
     const encodedWebsite = encodeURIComponent(phishingWebsite);
     const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
-    chrome.tabs.update({ url });
-
-    return null;
+    chrome.tabs.query({ url: phishingWebsite }, (tabs) => {
+      tabs
+        .map(({ id }) => id)
+        .filter((id): id is number => isNumber(id))
+        .forEach((id) => chrome.tabs.update(id, { url }));
+    });
   }
 
   private async redirectIfPhishing (url: string): Promise<boolean> {
@@ -155,6 +158,8 @@ export default class Tabs {
 
     if (isInDenyList) {
       this.redirectPhishingLanding(url);
+
+      return true;
     }
 
     return false;

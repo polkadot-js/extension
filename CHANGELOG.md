@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.37.1 Feb 10, 2021
+
+Contributed:
+
+- Ensure accounts check against raw public keys (Thanks to https://github.com/yuzhiyou1990)
+- Add support for Ledger devices (Thanks to https://github.com/Tbaut)
+- Add network selectors on the creation of all accounts (Thanks to https://github.com/Tbaut)
+- Add explicit derivation field on seed imports (Thanks to https://github.com/Tbaut)
+- Adjust slider color for dark theme (Thanks to https://github.com/Tbaut)
+- Expand and cleanup tests (Thanks to https://github.com/Tbaut)
+- Allow custom chains to be selected as tie-to chains (Thanks to https://github.com/Tbaut)
+- Various UI adjustments for consistency (Thanks to https://github.com/Tbaut)
+- Update i18n fr (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Support for latest JS APIs
+- Adjust phishing detection to check newly opened tabs
+
+
 ## 0.36.1 Jan 5, 2021
 
 Contributed:

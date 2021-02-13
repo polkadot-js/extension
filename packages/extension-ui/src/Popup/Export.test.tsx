@@ -52,6 +52,8 @@ describe('Export component', () => {
   });
 
   it('shows an error if the password is wrong', async () => {
+    // silencing the following expected console.error
+    console.error = jest.fn();
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'exportAccount').mockImplementation(async () => {
       throw new Error('Unable to decode using the supplied passphrase');
@@ -68,6 +70,8 @@ describe('Export component', () => {
   });
 
   it('shows no error when typing again after a wrong password', async () => {
+    // silencing the following expected console.error
+    console.error = jest.fn();
     // eslint-disable-next-line @typescript-eslint/require-await
     jest.spyOn(messaging, 'exportAccount').mockImplementation(async () => {
       throw new Error('Unable to decode using the supplied passphrase');

@@ -6,7 +6,7 @@
 
 Contributed:
 
-- Adjust tests to ge rid of warnings (Thanks to https://github.com/Tbaut)
+- Adjust tests to get rid of warnings (Thanks to https://github.com/Tbaut)
 
 Changes:
 

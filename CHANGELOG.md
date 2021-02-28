@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.37.2 Feb 10, 2021
+## 0.37.2 Feb 28, 2021
 
 **Important** Not published to the stored, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
 

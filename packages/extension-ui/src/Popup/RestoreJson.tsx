@@ -21,7 +21,7 @@ interface Props {
   className?: string;
 }
 
-function Upload ({ className } : Props): React.ReactElement {
+function Upload ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -58,7 +58,7 @@ function Upload ({ className } : Props): React.ReactElement {
       }
 
       json && jsonGetAccountInfo(json)
-        .then((accountInfo : ResponseJsonGetAccountInfo) => setAccountInfo(accountInfo))
+        .then((accountInfo: ResponseJsonGetAccountInfo) => setAccountInfo(accountInfo))
         .catch((e) => {
           setFileError(true);
           console.error(e);

@@ -59,7 +59,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
               : <>
                 <div className='website-list'>
                   {Object.entries(authList)
-                    .filter(([url]:[string, AuthUrlInfo]) => url.includes(filter))
+                    .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
                     .map(
                       ([url, info]: [string, AuthUrlInfo]) =>
                         <WebsiteEntry

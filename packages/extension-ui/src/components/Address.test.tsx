@@ -123,7 +123,7 @@ const mountComponent = async (addressComponentProps: AddressComponentProps, cont
   return { wrapper };
 };
 
-const getWrapper = async (account: AccountJson, contextAccounts : AccountJson[], withAccountsInContext: boolean) => {
+const getWrapper = async (account: AccountJson, contextAccounts: AccountJson[], withAccountsInContext: boolean) => {
   // the address component can query info about the account from the account context
   // in this case, the account's address (any encoding) should suffice
   // In case the account is not in the context, then more info are needed as props

@@ -130,7 +130,7 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-export async function getAllMetatdata () : Promise<MetadataDef[]> {
+export async function getAllMetatdata (): Promise<MetadataDef[]> {
   return sendMessage('pri(metadata.list)');
 }
 

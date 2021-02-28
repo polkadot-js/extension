@@ -459,7 +459,7 @@ export default class Extension {
     return true;
   }
 
-  private toggleAuthorization (url: string):ResponseAuthorizeList {
+  private toggleAuthorization (url: string): ResponseAuthorizeList {
     return { list: this.#state.toggleAuthorization(url) };
   }
 

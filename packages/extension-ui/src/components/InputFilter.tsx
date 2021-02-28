@@ -13,7 +13,7 @@ interface Props {
   value: string;
 }
 
-function InputFilter ({ className, onChange, placeholder, value } : Props) {
+function InputFilter ({ className, onChange, placeholder, value }: Props) {
   const onChangeFilter = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
   }, [onChange]);

@@ -8,7 +8,7 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.13.8",
-    "@polkadot/networks": "^5.9.2"
+    "@polkadot/networks": "^5.9.3-0"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

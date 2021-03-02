@@ -8,3 +8,10 @@ export { Theme };
 export interface ThemeProps {
   theme: Theme;
 }
+
+export interface Contracts {
+  name?: string;
+  address?: string;
+  memo?: string;
+  type?: string;
+}

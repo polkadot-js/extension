@@ -3,6 +3,7 @@
 
 import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
+import type { Contracts } from '../types';
 import type { AvailableThemes } from './themes';
 
 import React from 'react';
@@ -21,6 +22,7 @@ const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string) => void})>({ show: noop });
+const ContactContext = React.createContext<Contracts>({});
 
 export {
   AccountContext,
@@ -31,5 +33,6 @@ export {
   SettingsContext,
   SigningReqContext,
   ThemeSwitchContext,
-  ToastContext
+  ToastContext,
+  ContactContext
 };

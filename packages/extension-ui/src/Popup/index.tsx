@@ -16,9 +16,12 @@ import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, Metad
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
+import AddContact from './Contacts/AddContact';
+import EditContact from './Contacts/EditContact';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
+import Contacts from './Contacts';
 import CreateAccount from './CreateAccount';
 import Derive from './Derive';
 import Export from './Export';
@@ -133,6 +136,9 @@ export default function Popup (): React.ReactElement {
                     <ToastProvider>
                       <Switch>
                         <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                        <Route path='/contacts'>{wrapWithErrorBoundary(<Contacts />, 'contacts')}</Route>
+                        <Route path='/add-contact'>{wrapWithErrorBoundary(<AddContact />, 'add-contact')}</Route>
+                        <Route path='/edit-contact'>{wrapWithErrorBoundary(<EditContact />, 'edit-contact')}</Route>
                         <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
                         <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                         <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>

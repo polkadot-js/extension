@@ -3,7 +3,7 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -74,6 +74,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     }, [onAction]
   );
 
+  const _goToAddressBook = useCallback(
+    () => {
+      onAction('contacts');
+    }, [onAction]
+  );
+
   return (
     <Menu
       className={className}
@@ -97,6 +103,15 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           icon={faTasks}
           onClick={_goToAuthList}
           text={t<string>('Manage Website Access')}
+        />
+      </MenuItem>
+      <MenuDivider/>
+      <MenuItem className='setting'>
+        <ActionText
+          className='manageWebsiteAccess'
+          icon={faAddressBook}
+          onClick={_goToAddressBook}
+          text={t<string>('Address Book')}
         />
       </MenuItem>
       <MenuDivider/>

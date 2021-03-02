@@ -82,6 +82,10 @@ export async function exportAccount (address: string, password: string): Promise
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
+export async function exportAccounts (addresses: string[]): Promise<{ exportedJson: string }> {
+  return sendMessage('pri(accounts.batchExport)', { addresses });
+}
+
 export async function validateAccount (address: string, password: string): Promise<boolean> {
   return sendMessage('pri(accounts.validate)', { address, password });
 }

@@ -9,11 +9,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
+import { AccountContext, Button, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
-import { windowOpen } from '../messaging';
+import { windowOpen, exportAccounts } from '../messaging';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -25,7 +25,7 @@ const ledgerPath = '/account/import-ledger';
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { master } = useContext(AccountContext);
+  const { accounts, master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
   const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const isPopup = useIsPopup();
@@ -37,6 +37,20 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const _onOpenLedgerConnect = useCallback(
     () => windowOpen(ledgerPath),
     []
+  );
+
+  const _onExportAllClick = useCallback(
+    () => {
+      exportAccounts(accounts.map((account) => account.address))
+        .then(({ exportedJson }) => {
+          const element = document.createElement('a');
+
+          element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
+          element.download = `batch_exported_account_${Date.now()}.json`;
+          element.click();
+        });
+    },
+    [accounts]
   );
 
   return (
@@ -62,6 +76,13 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           <MenuDivider />
         </>
       )}
+      <MenuItem className='menuItem'>
+        <Button
+          onClick={_onExportAllClick}
+        >
+          {t<string>('Export all accounts')}
+        </Button>
+      </MenuItem>
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
           <FontAwesomeIcon icon={faKey} />

@@ -12,9 +12,10 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary, Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeReqContext, ContactsContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import { Contract } from '../types';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AddContact from './Contacts/AddContact';
 import EditContact from './Contacts/EditContact';
@@ -75,6 +76,7 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
+  const [contactsCtx, setContactsCtx] = useState<Contract[]>([]);
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -133,30 +135,32 @@ export default function Popup (): React.ReactElement {
               <MediaContext.Provider value={cameraOn && mediaAllowed}>
                 <MetadataReqContext.Provider value={metaRequests}>
                   <SigningReqContext.Provider value={signRequests}>
-                    <ToastProvider>
-                      <Switch>
-                        <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
-                        <Route path='/contacts'>{wrapWithErrorBoundary(<Contacts />, 'contacts')}</Route>
-                        <Route path='/add-contact'>{wrapWithErrorBoundary(<AddContact />, 'add-contact')}</Route>
-                        <Route path='/edit-contact'>{wrapWithErrorBoundary(<EditContact />, 'edit-contact')}</Route>
-                        <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
-                        <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
-                        <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
-                        <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
-                        <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
-                        <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
-                        <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
-                        <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
-                        <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
-                        <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
-                        <Route
-                          exact
-                          path='/'
-                        >
-                          {Root}
-                        </Route>
-                      </Switch>
-                    </ToastProvider>
+                    <ContactsContext.Provider value={contactsCtx}>
+                      <ToastProvider>
+                        <Switch>
+                          <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                          <Route path='/contacts'>{wrapWithErrorBoundary(<Contacts />, 'contacts')}</Route>
+                          <Route path='/add-contact'>{wrapWithErrorBoundary(<AddContact />, 'add-contact')}</Route>
+                          <Route path='/edit-contact'>{wrapWithErrorBoundary(<EditContact />, 'edit-contact')}</Route>
+                          <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                          <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                          <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
+                          <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
+                          <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                          <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                          <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
+                          <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
+                          <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                          <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
+                          <Route
+                            exact
+                            path='/'
+                          >
+                            {Root}
+                          </Route>
+                        </Switch>
+                      </ToastProvider>
+                    </ContactsContext.Provider>
                   </SigningReqContext.Provider>
                 </MetadataReqContext.Provider>
               </MediaContext.Provider>

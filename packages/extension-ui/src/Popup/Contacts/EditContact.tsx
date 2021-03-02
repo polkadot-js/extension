@@ -3,11 +3,11 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, ActionText, Button } from '../../components';
+import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 
@@ -19,10 +19,30 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
+  const [name, setName] = useState<string | null>(null);
+  const [memo, setMemo] = useState<string | null>(null);
+
+  const onNameChanged = (inputName: string) => {
+    setName(inputName);
+  };
+
+  const onMemoChanged = (inputMemo: string) => {
+    setMemo(inputMemo);
+  };
+
+  const _saveContact = () => {
+    console.log('name: ', name);
+    console.log('memo: ', memo);
+  };
+
   const _goToContacts = useCallback(
     () => onAction('/contacts'),
     [onAction]
   );
+
+  const _toggleDelete = () => {
+    console.log('_toggleDelete');
+  };
 
   return (
     <>
@@ -30,32 +50,38 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
         backTo='/contacts'
         showBackArrow
         showContactDelete
+        smallMargin
         text={t<string>('Edit Contact')}
+        toggleDelete={_toggleDelete}
       />
 
       <div className={className}>
-        <div className='field'>
+        <div>
           <text>Name</text>
-          <input type='text'></input>
+          <InputWithLabel
+            onChange={onNameChanged}></InputWithLabel>
         </div>
 
-        <div className='field'>
+        <div>
           <text>Address</text>
-          <input type='text'></input>
+          <InputWithLabel
+            disabled
+            value='5G9m5GUdXbdK6Yi78hV9pEuX66Fm3bpDeU3YvGF4od6pix6A'></InputWithLabel>
         </div>
 
-        <div className='field'>
+        <div>
           <text>Memo</text>
-          <input type='text'></input>
+          <InputWithLabel
+            onChange={onMemoChanged}></InputWithLabel>
         </div>
 
         <Button
-          onClick={_goToContacts}
-          style={{ marginTop: 20 }}
+          className='save-button'
+          onClick={_saveContact}
         >
           {t<string>('Save')}
         </Button>
-        <ActionBar style={{ marginTop: 6 }}>
+        <ActionBar className='cancel-action'>
           <ActionText
             onClick={_goToContacts}
             style={{ margin: 'auto' }}
@@ -67,7 +93,7 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(EditContact)(({ theme }: Props) => `
+export default styled(EditContact)(() => `
   display: flex;
   flex-direction: column;
 
@@ -76,7 +102,11 @@ export default styled(EditContact)(({ theme }: Props) => `
     flex-direction: column;
   }
 
-  .field {
+  .save-button {
     margin-top: 20px;
+  }
+
+  .cancel-action {
+    margin-top: 6px;
   }
 `);

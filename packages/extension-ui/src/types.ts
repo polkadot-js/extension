@@ -9,7 +9,7 @@ export interface ThemeProps {
   theme: Theme;
 }
 
-export interface Contracts {
+export interface Contract {
   name?: string;
   address?: string;
   memo?: string;

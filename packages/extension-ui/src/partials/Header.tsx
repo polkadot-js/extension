@@ -26,9 +26,10 @@ interface Props extends ThemeProps {
   smallMargin?: boolean;
   text?: React.ReactNode;
   backTo?: string;
+  toggleDelete?: () => null;
 }
 
-function Header ({ backTo = '/', children, className = '', showAdd, showBackArrow, showContactAdd, showContactDelete, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
+function Header ({ backTo = '/', children, className = '', showAdd, showBackArrow, showContactAdd, showContactDelete, showSettings, smallMargin = false, text, toggleDelete }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
 
   const [isAddOpen, setShowAdd] = useState(false);
@@ -104,7 +105,7 @@ function Header ({ backTo = '/', children, className = '', showAdd, showBackArro
             showContactDelete && (
               <div
                 className='popupToggle'
-                onClick={_goToAddContact}
+                onClick={toggleDelete}
               >
                 <FontAwesomeIcon
                   className={`plusIcon ${isAddOpen ? 'selected' : ''}`}

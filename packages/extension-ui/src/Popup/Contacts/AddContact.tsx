@@ -3,11 +3,11 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, ActionText, Button, Dropdown } from '../../components';
+import { ActionBar, ActionContext, ActionText, Button, Dropdown, InputWithLabel } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
@@ -20,6 +20,32 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const genesisOptions = useGenesisHashOptions();
+
+  const [name, setName] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
+  const [memo, setMemo] = useState<string | null>(null);
+
+  const onNameChanged = (inputName: string) => {
+    setName(inputName);
+  };
+
+  const onAddressChanged = (inputAddress: string) => {
+    setAddress(inputAddress);
+  };
+
+  const onMemoChanged = (inputMemo: string) => {
+    setMemo(inputMemo);
+  };
+
+  const _onChangeGenesis = (selectedGenesis: string) => {
+    console.log('selectedGenesis: ', selectedGenesis);
+  };
+
+  const _saveContact = () => {
+    console.log('name: ', name);
+    console.log('address: ', address);
+    console.log('memo: ', memo);
+  };
 
   const _goToContacts = useCallback(
     () => onAction('/contacts'),
@@ -36,30 +62,31 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
       />
 
       <div className={className}>
-        <div className='field'>
-          <text>Name:</text>
-          <input type='text'></input>
+        <div>
+          <text>Name</text>
+          <InputWithLabel
+            onChange={onNameChanged}></InputWithLabel>
         </div>
 
-        <div className='field'>
-          <text>Address:</text>
-          <input type='text'></input>
+        <div>
+          <text>Address</text>
+          <InputWithLabel
+            onChange={onAddressChanged}></InputWithLabel>
         </div>
 
-        <div className='field'>
-          <text>Memo:</text>
-          <input type='text'></input>
+        <div>
+          <text>Memo</text>
+          <InputWithLabel
+            onChange={onMemoChanged}></InputWithLabel>
         </div>
 
-        <div className='field'>
-          <div>
-            <text>Network</text>
-          </div>
+        <div>
+          <text>Network</text>
           <div className='menuItem'>
             <Dropdown
               className='genesisSelection'
               label=''
-              // onChange={_onChangeGenesis}
+              onChange={_onChangeGenesis}
               options={genesisOptions}
               value={''}
             />
@@ -67,12 +94,12 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <Button
-          onClick={_goToContacts}
-          style={{ marginTop: 20 }}
+          className='save-button'
+          onClick={_saveContact}
         >
           {t<string>('Save')}
         </Button>
-        <ActionBar style={{ marginTop: 6 }}>
+        <ActionBar className='cancel-action'>
           <ActionText
             onClick={_goToContacts}
             style={{ margin: 'auto' }}
@@ -84,7 +111,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(AddContact)(({ theme }: Props) => `
+export default styled(AddContact)(() => `
   display: flex;
   flex-direction: column;
 
@@ -93,7 +120,11 @@ export default styled(AddContact)(({ theme }: Props) => `
     flex-direction: column;
   }
 
-  .field {
+  .save-button {
     margin-top: 20px;
+  }
+
+  .cancel-action {
+    margin-top: 6px;
   }
 `);

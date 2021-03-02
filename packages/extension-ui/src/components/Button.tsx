@@ -10,8 +10,6 @@ import Spinner from './Spinner';
 
 interface Props extends ThemeProps {
   className?: string;
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  style?: object;
   children?: React.ReactNode;
   isBusy?: boolean;
   isDanger?: boolean;
@@ -20,7 +18,7 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-function Button ({ children, className = '', isBusy, isDisabled, onClick, style, to }: Props): React.ReactElement<Props> {
+function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
   const _onClick = (): void => {
     if (isBusy || isDisabled) {
       return;
@@ -38,7 +36,6 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, style,
       className={`${className}${(isDisabled || isBusy) ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
-      style={style}
     >
       <div className='children'>{children}</div>
       <div className='disabledOverlay' />

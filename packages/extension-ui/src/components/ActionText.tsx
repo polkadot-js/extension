@@ -13,15 +13,13 @@ interface Props {
   icon?: IconDefinition;
   onClick: MouseEventHandler<HTMLDivElement>;
   text: string;
-  style?: object;
 }
 
-function ActionText ({ className, icon, onClick, style, text }: Props): React.ReactElement<Props> {
+function ActionText ({ className, icon, onClick, text }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}
       onClick={onClick}
-      style={style}
     >
       {icon && <FontAwesomeIcon icon={icon} />}
       <span>{text}</span>

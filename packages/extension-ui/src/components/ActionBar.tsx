@@ -7,13 +7,11 @@ import styled from 'styled-components';
 interface Props {
   children: React.ReactNode;
   className?: string;
-  style?: object;
 }
 
-function ActionBar ({ children, className, style }: Props): React.ReactElement<Props> {
+function ActionBar ({ children, className }: Props): React.ReactElement<Props> {
   return (
-    <div className={className}
-      style={style}>
+    <div className={className}>
       {children}
     </div>
   );

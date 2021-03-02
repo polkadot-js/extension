@@ -102,7 +102,6 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         <ActionBar className='cancel-action'>
           <ActionText
             onClick={_goToContacts}
-            style={{ margin: 'auto' }}
             text={t<string>('Cancel')}
           />
         </ActionBar>
@@ -126,5 +125,6 @@ export default styled(AddContact)(() => `
 
   .cancel-action {
     margin-top: 6px;
+    margin: auto;
   }
 `);

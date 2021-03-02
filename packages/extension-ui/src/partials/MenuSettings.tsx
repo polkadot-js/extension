@@ -74,7 +74,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     }, [onAction]
   );
 
-  const _goToAddressBook = useCallback(
+  const _goToContacts = useCallback(
     () => {
       onAction('contacts');
     }, [onAction]
@@ -110,8 +110,8 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
         <ActionText
           className='manageWebsiteAccess'
           icon={faAddressBook}
-          onClick={_goToAddressBook}
-          text={t<string>('Address Book')}
+          onClick={_goToContacts}
+          text={t<string>('Contacts')}
         />
       </MenuItem>
       <MenuDivider/>

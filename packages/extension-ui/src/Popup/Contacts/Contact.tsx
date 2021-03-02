@@ -40,6 +40,15 @@ function Contact ({ className = '' }: Props): React.ReactElement<Props> {
           </div>
 
         </div>
+
+        <div
+          className='banner chain'
+          data-field='chain'
+          style={{ backgroundColor: 'rgb(255, 125, 1)' }}
+        >
+          {'Kusama'}
+        </div>
+
         <div onClick={_goToContactEdit}>
           <Svg
             className='edit'
@@ -96,6 +105,22 @@ export default styled(Contact)(({ theme }: Props) => `
     & svg {
       width: 50px;
       height: 50px;
+    }
+  }
+
+  .banner {
+    font-size: 12px;
+    line-height: 16px;
+    position: absolute;
+    top: 0;
+
+    &.chain {
+      background: ${theme.primaryColor};
+      border-radius: 0 0 0 10px;
+      color: white;
+      padding: 0.1rem 0.5rem 0.1rem 0.75rem;
+      right: 0;
+      z-index: 1;
     }
   }
 `);

@@ -4,12 +4,12 @@
 import type { ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, Button, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
+import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
@@ -77,11 +77,10 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
         </>
       )}
       <MenuItem className='menuItem'>
-        <Button
-          onClick={_onExportAllClick}
-        >
-          {t<string>('Export all accounts')}
-        </Button>
+        <Link onClick={_onExportAllClick}>
+          <FontAwesomeIcon icon={faFileExport} />
+          <span>{t<string>('Export all accounts')}</span>
+        </Link>
       </MenuItem>
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>

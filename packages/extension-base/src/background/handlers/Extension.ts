@@ -263,7 +263,7 @@ export default class Extension {
 
   private jsonRestore ({ file, password }: RequestJsonRestore): void {
     try {
-      keyring.restoreAccount(file, password);
+      keyring.restoreAccount(file as any, password);
     } catch (error) {
       throw new Error((error as Error).message);
     }

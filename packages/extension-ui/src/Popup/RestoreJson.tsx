@@ -26,13 +26,14 @@ function Upload ({ className }: Props): React.ReactElement {
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
-  const [{ address, genesisHash, name, type }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '', type: DEFAULT_TYPE });
+  // const [{ address, genesisHash, name, type }, setAccountInfo] = useState<ResponseJsonGetAccountInfo>({ address: '', genesisHash: '', name: '', type: DEFAULT_TYPE });
+  const [accountsInfo, setAccountsInfo] = useState<ResponseJsonGetAccountInfo[]>([]);
   const [password, setPassword] = useState<string>('');
   const [isFileError, setFileError] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
   // don't use the info from the file directly
   // rather use what comes from the background from jsonGetAccountInfo
-  const [file, setFile] = useState<KeyringPair$Json|undefined>(undefined);
+  const [file, setFile] = useState<KeyringPair$Json | KeyringPair$Json[] | undefined>(undefined);
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -47,22 +48,35 @@ function Upload ({ className }: Props): React.ReactElement {
 
   const _onChangeFile = useCallback(
     (file: Uint8Array): void => {
-      let json: KeyringPair$Json | undefined;
+      let json: KeyringPair$Json | KeyringPair$Json[] | undefined;
 
       try {
-        json = JSON.parse(u8aToString(file)) as KeyringPair$Json;
+        json = JSON.parse(u8aToString(file));
         setFile(json);
       } catch (e) {
         console.error(e);
         setFileError(true);
       }
 
-      json && jsonGetAccountInfo(json)
-        .then((accountInfo: ResponseJsonGetAccountInfo) => setAccountInfo(accountInfo))
-        .catch((e) => {
-          setFileError(true);
-          console.error(e);
+      // json && jsonGetAccountInfo(json)
+      //   .then((accountInfo: ResponseJsonGetAccountInfo) => setAccountInfo(accountInfo))
+      //   .catch((e) => {
+      //     setFileError(true);
+      //     console.error(e);
+      //   });
+
+      if (json) {
+        json = ([] as KeyringPair$Json[]).concat(json);
+
+        json.forEach((pair) => {
+          jsonGetAccountInfo(pair)
+            .then((accountInfo) => setAccountsInfo((old) => [...old, accountInfo]))
+            .catch((e) => {
+              setFileError(true);
+              console.error(e);
+            });
         });
+      }
     }, []
   );
 
@@ -93,14 +107,24 @@ function Upload ({ className }: Props): React.ReactElement {
         text={t<string>('Restore from JSON')}
       />
       <div className={className}>
-        <div>
+        {/* <div>
           <Address
             address={address}
             genesisHash={genesisHash}
             name={name}
             type={type}
           />
-        </div>
+        </div> */}
+        {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }) => (
+          <div>
+            <Address
+              address={address}
+              genesisHash={genesisHash}
+              name={name}
+              type={type}
+            />
+          </div>
+        ))}
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={isFileError}

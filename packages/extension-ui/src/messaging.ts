@@ -223,6 +223,6 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
+export async function jsonRestore (file: KeyringPair$Json | KeyringPair$Json[], password: string): Promise<void> {
   return sendMessage('pri(json.restore)', { file, password });
 }

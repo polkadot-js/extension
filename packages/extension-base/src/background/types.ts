@@ -370,7 +370,7 @@ export interface RequestSign {
 }
 
 export interface RequestJsonRestore {
-  file: KeyringPair$Json;
+  file: KeyringPair$Json | KeyringPair$Json[];
   password: string;
 }
 

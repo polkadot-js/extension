@@ -18,5 +18,6 @@ module.exports = Object.assign({}, config, {
     '<rootDir>/packages/extension-dapp/build',
     '<rootDir>/packages/extension-inject/build',
     '<rootDir>/packages/extension-ui/build'
-  ]
+  ],
+  transformIgnorePatterns: ['/node_modules/(?!@polkadot|@babel/runtime/helpers/esm/|rxjs/_esm5)']
 });

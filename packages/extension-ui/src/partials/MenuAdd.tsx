@@ -13,7 +13,7 @@ import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from 
 import useIsPopup from '../hooks/useIsPopup';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
-import { windowOpen, exportAccounts } from '../messaging';
+import { exportAccounts, windowOpen } from '../messaging';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -40,7 +40,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   );
 
   const _onExportAllClick = useCallback(
-    () => {
+    (): void => {
       exportAccounts(accounts.map((account) => account.address))
         .then(({ exportedJson }) => {
           const element = document.createElement('a');
@@ -48,6 +48,9 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
           element.download = `batch_exported_account_${Date.now()}.json`;
           element.click();
+        })
+        .catch((e) => {
+          console.log(e);
         });
     },
     [accounts]

@@ -53,7 +53,7 @@ function Upload ({ className }: Props): React.ReactElement {
       let json: KeyringPair$Json | KeyringPair$Json[] | undefined;
 
       try {
-        json = JSON.parse(u8aToString(file));
+        json = JSON.parse(u8aToString(file)) as KeyringPair$Json | KeyringPair$Json[];
         json = json && ([] as KeyringPair$Json[]).concat(json);
         setFile(json);
       } catch (e) {
@@ -101,15 +101,14 @@ function Upload ({ className }: Props): React.ReactElement {
         text={t<string>('Restore from JSON')}
       />
       <div className={className}>
-        {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }) => (
-          <div>
-            <Address
-              address={address}
-              genesisHash={genesisHash}
-              name={name}
-              type={type}
-            />
-          </div>
+        {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
+          <Address
+            address={address}
+            genesisHash={genesisHash}
+            key={`${index}:${address}`}
+            name={name}
+            type={type}
+          />
         ))}
         <InputFileWithLabel
           accept={acceptedFormats}

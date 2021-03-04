@@ -9,9 +9,11 @@ export interface ThemeProps {
   theme: Theme;
 }
 
-export interface Contract {
-  name?: string;
-  address?: string;
-  memo?: string;
-  type?: string;
+export interface Contact {
+  address: string;
+  meta: {
+    name?: string;
+    memo?: string;
+    network?: string;
+  }
 }

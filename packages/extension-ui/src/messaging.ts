@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, ContactJson, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestContactList, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -221,4 +221,12 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
 
 export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
   return sendMessage('pri(json.restore)', { file, password });
+}
+
+export async function addContact (address: string, memo: string, name: string, network: string): Promise<boolean> {
+  return sendMessage('pri(contact.add)', { address, memo, name, network });
+}
+
+export async function subscribeContacts (cb: (contacts: ContactJson[]) => void): Promise<boolean> {
+  return sendMessage('pri(contact.subscribe)', null, cb);
 }

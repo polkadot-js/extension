@@ -4,13 +4,14 @@
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, ContactJson, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestContactAdd, RequestContactList, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
+import { contacts as contactsObservable } from '@polkadot/ui-keyring/observable/contacts';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
@@ -30,6 +31,15 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
     address,
     ...meta,
     type
+  }));
+}
+
+function transformContacts (contacts: SubjectInfo): ContactJson[] {
+  console.log('transformContacts contacts: ', contacts);
+
+  return Object.values(contacts).map(({ json: { address, meta } }): ContactJson => ({
+    address,
+    ...meta
   }));
 }
 
@@ -463,6 +473,26 @@ export default class Extension {
     return { list: this.#state.toggleAuthorization(url) };
   }
 
+  private addContact ({ address, memo, name, network }: RequestContactAdd): boolean {
+    const contact = keyring.saveContact(address, { memo, name, network });
+
+    return true;
+  }
+
+  private contactsSubscribe (id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(contacts.subscribe)'>(id, port);
+    const subscription = contactsObservable.subject.subscribe((contacts: SubjectInfo): void =>
+      cb(transformContacts(contacts))
+    );
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -565,6 +595,12 @@ export default class Extension {
 
       case 'pri(window.open)':
         return this.windowOpen(request as AllowedPath);
+
+      case 'pri(contact.add)':
+        return this.addContact(request as RequestContactAdd);
+
+      case 'pri(contact.subscribe)':
+        return this.contactsSubscribe(id, port);
 
       default:
         throw new Error(`Unable to handle message of type ${type}`);

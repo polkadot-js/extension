@@ -4733,6 +4733,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-x@npm:^3.0.2":
+  version: 3.0.8
+  resolution: "base-x@npm:3.0.8::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Fbase-x%2Fdownload%2Fbase-x-3.0.8.tgz"
+  dependencies:
+    safe-buffer: ^5.0.1
+  checksum: 9e5832ab00f4413d63f8227901c18b2a9db5f379525f70b627e6e284007dc5e7940a765ef4ab03974b4c14a664153208758656ebb86979451d1995d13e3fa29b
+  languageName: node
+  linkType: hard
+
 "base-x@npm:^3.0.8":
   version: 3.0.8
   resolution: "base-x@npm:3.0.8"
@@ -5020,6 +5029,15 @@ __metadata:
   bin:
     browserslist: cli.js
   checksum: dfab0d3c3d9a3517cf3f8a274bc4e8245f3a02c1a5ae2a0e01498273d363952d11ee09fdce3b0ce551f6cab9d619ed2d9facf7b6471c9190df949a5ad39665c5
+  languageName: node
+  linkType: hard
+
+"bs58@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "bs58@npm:4.0.1::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Fbs58%2Fdownload%2Fbs58-4.0.1.tgz"
+  dependencies:
+    base-x: ^3.0.2
+  checksum: 0da897a0e527b31ec0fd7ce4d84a86278196acb4fa4f5010dce38a7b83b8b0bbe26909843878c2aa32bdbe00b93a68408d42c74a1cfaa05ca64f29bd5dff4187
   languageName: node
   linkType: hard
 
@@ -13413,6 +13431,7 @@ __metadata:
     "@babel/core": ^7.12.13
     "@polkadot/dev": ^0.61.25
     "@types/jest": ^26.0.20
+    bs58: ^4.0.1
     i18next-scanner: ^3.0.0
     sinon-chrome: ^3.0.1
     stylelint: ^13.9.0

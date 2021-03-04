@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, ContactJson, ContactsContext, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
@@ -12,10 +12,9 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary, Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeReqContext, ContactsContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeReqContext, ContactContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
-import { Contract } from '../types';
+import { subscribeAccounts, subscribeAuthorizeRequests, subscribeContacts, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AddContact from './Contacts/AddContact';
 import EditContact from './Contacts/EditContact';
@@ -66,6 +65,12 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
+function initContactContext (contacts: ContactJson[]): ContactsContext {
+  return {
+    contacts
+  };
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -76,7 +81,8 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  const [contactsCtx, setContactsCtx] = useState<Contract[]>([]);
+  const [contacts, setContacts] = useState<null | ContactJson[]>(null);
+  const [contactsCtx, setContactsCtx] = useState<ContactsContext>({ contacts: [] });
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -89,6 +95,7 @@ export default function Popup (): React.ReactElement {
   useEffect((): void => {
     Promise.all([
       subscribeAccounts(setAccounts),
+      subscribeContacts(setContacts),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests)
@@ -105,6 +112,10 @@ export default function Popup (): React.ReactElement {
   useEffect((): void => {
     setAccountCtx(initAccountContext(accounts || []));
   }, [accounts]);
+
+  useEffect((): void => {
+    setContactsCtx(initContactContext(contacts || []));
+  }, [contacts]);
 
   useEffect((): void => {
     requestMediaAccess(cameraOn)
@@ -135,7 +146,7 @@ export default function Popup (): React.ReactElement {
               <MediaContext.Provider value={cameraOn && mediaAllowed}>
                 <MetadataReqContext.Provider value={metaRequests}>
                   <SigningReqContext.Provider value={signRequests}>
-                    <ContactsContext.Provider value={contactsCtx}>
+                    <ContactContext.Provider value={contactsCtx}>
                       <ToastProvider>
                         <Switch>
                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
@@ -160,7 +171,7 @@ export default function Popup (): React.ReactElement {
                           </Route>
                         </Switch>
                       </ToastProvider>
-                    </ContactsContext.Provider>
+                    </ContactContext.Provider>
                   </SigningReqContext.Provider>
                 </MetadataReqContext.Provider>
               </MediaContext.Provider>

@@ -3,14 +3,32 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, ActionText, Button, Dropdown, InputWithLabel } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import { addContact } from '../../messaging';
 import { Header } from '../../partials';
+import chains from '../../util/chains';
+
+const bs58 = require('bs58');
+
+function getAddressPrefix (address: string): number {
+  const bytes = bs58.decode(address);
+  const hex = bytes.toString('hex');
+  const prefix = `${hex[0]}${hex[1]}`;
+
+  return parseInt(prefix, 16);
+}
+
+interface Chain {
+  chain: string;
+  genesisHash?: string;
+  icon: string;
+  ss58Format: number;
+}
 
 interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
   className?: string;
@@ -19,11 +37,21 @@ interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
 function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const genesisOptions = useGenesisHashOptions();
 
   const [name, setName] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [memo, setMemo] = useState<string | null>(null);
+  const [network, setNetwork] = useState<string>('Unknow');
+  const [allChains, setAllChains] = useState<Chain[]>([]);
+
+  useEffect(() => {
+    setAllChains([{
+      chain: 'Allow user on any chain',
+      genesisHash: '',
+      icon: 'substrate',
+      ss58Format: 42
+    }, ...chains]);
+  }, []);
 
   const onNameChanged = (inputName: string) => {
     setName(inputName);
@@ -33,19 +61,25 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
     setAddress(inputAddress);
   };
 
+  const onAddressBlur = () => {
+    const prefix = getAddressPrefix(address);
+    const chain = allChains.find((chain) => chain.ss58Format === prefix);
+
+    setNetwork(chain?.chain);
+  };
+
   const onMemoChanged = (inputMemo: string) => {
     setMemo(inputMemo);
   };
 
-  const _onChangeGenesis = (selectedGenesis: string) => {
-    console.log('selectedGenesis: ', selectedGenesis);
-  };
-
-  const _saveContact = () => {
-    console.log('name: ', name);
-    console.log('address: ', address);
-    console.log('memo: ', memo);
-  };
+  const _saveContact = useCallback(
+    (): void => {
+      addContact &&
+      addContact(address, memo, name, '')
+        .catch(console.error);
+    },
+    [addContact, address, memo, name]
+  );
 
   const _goToContacts = useCallback(
     () => onAction('/contacts'),
@@ -71,6 +105,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         <div>
           <text>Address</text>
           <InputWithLabel
+            onBlur={onAddressBlur}
             onChange={onAddressChanged}></InputWithLabel>
         </div>
 
@@ -82,15 +117,9 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
 
         <div>
           <text>Network</text>
-          <div className='menuItem'>
-            <Dropdown
-              className='genesisSelection'
-              label=''
-              onChange={_onChangeGenesis}
-              options={genesisOptions}
-              value={''}
-            />
-          </div>
+          <InputWithLabel
+            disabled
+            value={network}></InputWithLabel>
         </div>
 
         <Button

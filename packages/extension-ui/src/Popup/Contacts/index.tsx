@@ -3,8 +3,10 @@
 
 import type { ThemeProps } from '../../types';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
+
+import { ContactContext } from '@polkadot/extension-ui/components';
 
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
@@ -16,6 +18,7 @@ interface Props extends ThemeProps {
 
 function Contacts ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { contacts } = useContext(ContactContext);
 
   return (
     <>
@@ -27,9 +30,11 @@ function Contacts ({ className }: Props): React.ReactElement<Props> {
       />
       <>
         <div className={className}>
-          <Contact></Contact>
-          <Contact></Contact>
-          <Contact></Contact>
+          {
+            contacts.map((contact) => {
+              return <Contact contact={contact} />;
+            })
+          }
         </div>
       </>
     </>

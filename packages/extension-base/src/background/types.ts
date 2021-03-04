@@ -10,6 +10,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
+import { KeyringAddress } from '@polkadot/ui-keyring/types';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
@@ -41,6 +42,13 @@ export interface AccountJson extends KeyringPair$Meta {
   whenCreated?: number;
 }
 
+export interface ContactJson extends KeyringPair$Meta {
+  address: string;
+  name: string;
+  memo: string;
+  network: string;
+}
+
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
@@ -49,6 +57,10 @@ export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
+}
+
+export type ContactsContext = {
+  contacts: ContactJson[];
 }
 
 export interface AuthorizeRequest {
@@ -106,6 +118,8 @@ export interface RequestSignatures {
   'pri(signing.isLocked)': [RequestSigningIsLocked, ResponseSigningIsLocked];
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   'pri(window.open)': [AllowedPath, boolean];
+  'pri(contact.add)': [RequestContactAdd, boolean];
+  'pri(contact.subscribe)': [RequestAccountSubscribe, boolean, ContactJson[]];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
@@ -384,4 +398,15 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
+}
+
+export interface RequestContactAdd {
+  address: string;
+  memo: string;
+  name: string;
+  network: string;
+}
+
+export interface RequestContactList {
+  list: [],
 }

@@ -1,9 +1,8 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountsContext, AuthorizeRequest, ContactsContext, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
-import type { Contract } from '../types';
 import type { AvailableThemes } from './themes';
 
 import React from 'react';
@@ -22,7 +21,7 @@ const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
 const ToastContext = React.createContext<({show: (message: string) => void})>({ show: noop });
-const ContactsContext = React.createContext<Contract[]>([]);
+const ContactContext = React.createContext<ContactsContext>({ contacts: [] });
 
 export {
   AccountContext,
@@ -34,5 +33,5 @@ export {
   SigningReqContext,
   ThemeSwitchContext,
   ToastContext,
-  ContactsContext
+  ContactContext
 };

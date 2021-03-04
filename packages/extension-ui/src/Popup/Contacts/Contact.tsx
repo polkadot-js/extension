@@ -3,8 +3,10 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+import { ContactJson } from '@polkadot/extension-base/background/types';
 
 import EditIcon from '../../assets/edit.svg';
 import { ActionContext, Identicon, Svg } from '../../components';
@@ -12,9 +14,10 @@ import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
   className?: string;
+  contact: ContactJson;
 }
 
-function Contact ({ className = '' }: Props): React.ReactElement<Props> {
+function Contact ({ className = '', contact }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
@@ -29,14 +32,14 @@ function Contact ({ className = '' }: Props): React.ReactElement<Props> {
       <div className='infoRow'>
         <Identicon
           className='identityIcon'
-          value={'5G9m5GUdXbdK6Yi78hV9pEuX66Fm3bpDeU3YvGF4od6pix6A'}
+          value={contact.address}
         />
         <div>
           <div>
-            <text className={'nickname'}>Alice Marble</text>
+            <text className={'nickname'}>{contact.name}</text>
           </div>
           <div className='fullAddress'>
-            <text>5G9m5GUdXbdK6Yi78hV9pEuX66Fm3bpDeU3YvGF4od6pix6A</text>
+            <text>{contact.address}</text>
           </div>
 
         </div>
@@ -46,7 +49,7 @@ function Contact ({ className = '' }: Props): React.ReactElement<Props> {
           data-field='chain'
           style={{ backgroundColor: 'rgb(255, 125, 1)' }}
         >
-          {'Kusama'}
+          {contact.network}
         </div>
 
         <div onClick={_goToContactEdit}>

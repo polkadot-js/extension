@@ -24,7 +24,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     return cached;
   }
 
-  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
+  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types, userExtensions } = definition;
   const registry = new TypeRegistry();
 
   if (!isPartial) {
@@ -40,10 +40,12 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
   const isUnknown = genesisHash === '0x';
   let hasMetadata = false;
 
+  const signedExtensions = metaCalls ? new Metadata(registry, base64Decode(metaCalls)).asLatest.extrinsic.signedExtensions.toJSON() as string[] : undefined;
+
   if (metaCalls && !isPartial) {
     hasMetadata = true;
 
-    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)));
+    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)), signedExtensions, userExtensions);
   }
 
   const result = {

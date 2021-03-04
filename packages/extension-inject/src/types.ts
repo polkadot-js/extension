@@ -4,6 +4,7 @@
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import type { ProviderInterface } from '@polkadot/rpc-provider/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 
 // eslint-disable-next-line no-undef
 type This = typeof globalThis;
@@ -62,6 +63,7 @@ export interface MetadataDef extends MetadataDefBase {
   tokenSymbol: string;
   types: Record<string, Record<string, string> | string>;
   metaCalls?: string;
+  userExtensions?: ExtDef;
 }
 
 export interface InjectedMetadataKnown {

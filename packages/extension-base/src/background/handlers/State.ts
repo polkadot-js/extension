@@ -239,7 +239,7 @@ export default class State {
   }
 
   private stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:')), `Invalid url ${url}, expected to start with http: or https:`);
+    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');
 

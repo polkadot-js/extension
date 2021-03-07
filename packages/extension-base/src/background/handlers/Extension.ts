@@ -4,7 +4,7 @@
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -98,7 +98,7 @@ export default class Extension {
   private async accountsBatchExport ({ addresses }: RequestAccountBatchExport): Promise<ResponseAccountExport> {
     return {
       exportedJson: JSON.stringify(
-        await keyring.backupAccounts(addresses.map((address) => keyring.getPair(address)))
+        await keyring.backupAccounts(addresses)
       )
     };
   }
@@ -262,6 +262,14 @@ export default class Extension {
   }
 
   private jsonRestore ({ file, password }: RequestJsonRestore): void {
+    try {
+      keyring.restoreAccount(file, password);
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  }
+
+  private batchRestore ({ file }: RequestBatchRestore): void {
     try {
       keyring.restoreAccounts(file);
     } catch (error) {
@@ -549,6 +557,9 @@ export default class Extension {
 
       case 'pri(json.restore)':
         return this.jsonRestore(request as RequestJsonRestore);
+
+      case 'pri(json.batchRestore)':
+        return this.batchRestore(request as RequestBatchRestore);
 
       case 'pri(json.account.info)':
         return this.jsonGetAccountInfo(request as KeyringPair$Json);

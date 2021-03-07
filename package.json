@@ -13,7 +13,7 @@
     "@polkadot/networks": "^6.0.1-5",
     "@polkadot/types": "^4.0.1-4",
     "@polkadot/util": "^6.0.1-5",
-    "@polkadot/util-crypto": "^6.0.1-5",
+    "@polkadot/util-crypto": "^6.0.2",
     "@polkadot/x-fetch": "^6.0.1-5",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",

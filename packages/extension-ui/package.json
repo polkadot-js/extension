@@ -20,7 +20,7 @@
     "@polkadot/react-identicon": "^0.70.2-2",
     "@polkadot/react-qr": "^0.70.2-2",
     "@polkadot/util": "^6.0.1-5",
-    "@polkadot/util-crypto": "^6.0.1-5",
+    "@polkadot/util-crypto": "6.0.2",
     "i18next": "^19.9.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

@@ -7,6 +7,7 @@ import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList,
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
@@ -93,6 +94,7 @@ export interface RequestSignatures {
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
+  'pri(json.batchRestore)': [RequestBatchRestore, void];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
@@ -370,8 +372,12 @@ export interface RequestSign {
 }
 
 export interface RequestJsonRestore {
-  file: KeyringPair$Json[];
+  file: KeyringPair$Json;
   password: string;
+}
+
+export interface RequestBatchRestore {
+  file: KeyringPairs$Json
 }
 
 export interface ResponseJsonRestore {

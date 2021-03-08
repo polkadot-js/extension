@@ -20,7 +20,6 @@ export default function (): Option[] {
 
   useEffect(() => {
     getAllMetatdata().then((metadataDefs) => {
-      console.log('useGenesis metadataDefs: ', metadataDefs);
       const res = metadataDefs.map((metadata) => ({ text: metadata.chain, value: metadata.genesisHash }));
 
       setMetadatachains(res);

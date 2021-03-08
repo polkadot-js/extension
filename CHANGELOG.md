@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.37.3 Mar 8, 2021
+## 0.37.3-x
 
 **Important** In the 6.0 version the default package type has been changed to ESM modules by default.
 **Important** Not published to the stored, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`

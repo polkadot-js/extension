@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { ContactContext } from '@polkadot/extension-ui/components';
+import { ContactsContext } from '@polkadot/extension-ui/components';
 
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
 
 function Contacts ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { contacts } = useContext(ContactContext);
+  const contacts = useContext(ContactsContext);
 
   return (
     <>

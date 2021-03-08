@@ -7655,6 +7655,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"filter-obj@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "filter-obj@npm:1.1.0::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Ffilter-obj%2Fdownload%2Ffilter-obj-1.1.0.tgz"
+  checksum: 1049ac0c306198edf2c090375f7a80545a01e798b4996dbde13398a263cd923b5eb8a240dfadb03260621249a404a686e1a55980c6e59af70ee3880323998703
+  languageName: node
+  linkType: hard
+
 "find-babel-config@npm:^1.2.0":
   version: 1.2.0
   resolution: "find-babel-config@npm:1.2.0"
@@ -12583,6 +12590,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"query-string@npm:^6.14.1":
+  version: 6.14.1
+  resolution: "query-string@npm:6.14.1::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Fquery-string%2Fdownload%2Fquery-string-6.14.1.tgz"
+  dependencies:
+    decode-uri-component: ^0.2.0
+    filter-obj: ^1.1.0
+    split-on-first: ^1.0.0
+    strict-uri-encode: ^2.0.0
+  checksum: 5d651ac420f5298baf00bb71228ffac32ed342c09836a7d2b1df3cdc7870313339cf6927827370c654cf73571bd639af497a0d9ef677a3a11b7396de2f761aa4
+  languageName: node
+  linkType: hard
+
 "quick-lru@npm:^4.0.1":
   version: 4.0.1
   resolution: "quick-lru@npm:4.0.1"
@@ -13433,7 +13452,9 @@ __metadata:
     "@types/jest": ^26.0.20
     bs58: ^4.0.1
     i18next-scanner: ^3.0.0
+    query-string: ^6.14.1
     sinon-chrome: ^3.0.1
+    store: ^2.0.12
     stylelint: ^13.9.0
     stylelint-config-recommended: ^3.0.0
     stylelint-config-styled-components: ^0.1.1
@@ -14055,6 +14076,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"split-on-first@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "split-on-first@npm:1.1.0::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Fsplit-on-first%2Fdownload%2Fsplit-on-first-1.1.0.tgz"
+  checksum: 2ef26fee62665be9547e8035734b856e658b08fd13e70271a2f258147f29d1f18e12b5cb7f7670d83e113c172a9c5fe3d87d9d7c02a1d3d57824818d75d942ab
+  languageName: node
+  linkType: hard
+
 "split-string@npm:^3.0.1, split-string@npm:^3.0.2":
   version: 3.1.0
   resolution: "split-string@npm:3.1.0"
@@ -14146,6 +14174,13 @@ __metadata:
   version: 1.1.0
   resolution: "strict-uri-encode@npm:1.1.0"
   checksum: 6c80f6998a45414d7c124772383cc10ce7bd22586af80762407cded1569666564fb8c0a4c9c997ac39a1116d46dfffc5d57135e759a0acb66a4da1191f5a3a4a
+  languageName: node
+  linkType: hard
+
+"strict-uri-encode@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "strict-uri-encode@npm:2.0.0::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Fstrict-uri-encode%2Fdownload%2Fstrict-uri-encode-2.0.0.tgz"
+  checksum: 775012e88b9d8dff939d514bf376d615a15e8228a5dd587a94ac3c71fce41aa3635cd808aa796e2c1cd33f3f2fe2fbf89b74ee18a504a1905efa1854311e04bb
   languageName: node
   linkType: hard
 

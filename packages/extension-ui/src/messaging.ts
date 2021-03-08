@@ -222,11 +222,3 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
 export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
   return sendMessage('pri(json.restore)', { file, password });
 }
-
-export async function addContact (address: string, memo: string, name: string, network: string): Promise<boolean> {
-  return sendMessage('pri(contact.add)', { address, memo, name, network });
-}
-
-export async function subscribeContacts (cb: (contacts: ContactJson[]) => void): Promise<boolean> {
-  return sendMessage('pri(contact.subscribe)', null, cb);
-}

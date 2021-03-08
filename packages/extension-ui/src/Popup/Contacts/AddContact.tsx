@@ -5,6 +5,7 @@ import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
+import store from 'store';
 import styled from 'styled-components';
 
 import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
@@ -74,11 +75,12 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
 
   const _saveContact = useCallback(
     (): void => {
-      addContact &&
-      addContact(address, memo, name, '')
-        .catch(console.error);
+      const contacts = store.get('contacts') || [];
+
+      store.set('contacts', [...contacts, { address, id: Date.now(), memo, name, network }]);
+      _goToContacts();
     },
-    [addContact, address, memo, name]
+    [address, memo, name, network]
   );
 
   const _goToContacts = useCallback(

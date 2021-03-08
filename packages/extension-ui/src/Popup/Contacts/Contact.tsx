@@ -1,20 +1,18 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
-
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import queryString from 'query-string';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ContactJson } from '@polkadot/extension-base/background/types';
+import { ContactProps } from '@polkadot/extension-ui/types';
 
 import EditIcon from '../../assets/edit.svg';
 import { ActionContext, Identicon, Svg } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
-interface Props extends ThemeProps {
+interface Props extends ContactProps {
   className?: string;
-  contact: ContactJson;
 }
 
 function Contact ({ className = '', contact }: Props): React.ReactElement<Props> {
@@ -23,7 +21,9 @@ function Contact ({ className = '', contact }: Props): React.ReactElement<Props>
 
   const _goToContactEdit = useCallback(
     () => {
-      onAction('edit-contact');
+      const stringified = queryString.stringifyUrl({ url: 'edit-contact', query: { ...contact } });
+
+      onAction(stringified);
     }, [onAction]
   );
 

@@ -3,8 +3,10 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useState } from 'react';
+import queryString from 'query-string';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
+import store from 'store';
 import styled from 'styled-components';
 
 import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
@@ -19,10 +21,29 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
+  const [contactId, setContactId] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
   const [memo, setMemo] = useState<string | null>(null);
 
+  useEffect(() => {
+    console.log('window.location.hash: ', window.location.hash);
+    const params = window.location.hash.split('?');
+    const contact = queryString.parse(params[1]);
+
+    console.log('contact: ', contact);
+    setContactId(contact.id);
+    setName(contact.name);
+    setMemo(contact.memo);
+    setAddress(contact.address);
+  }, []);
+
+  const onAddressChanged = (inputAddress: string) => {
+    setAddress(inputAddress);
+  };
+
   const onNameChanged = (inputName: string) => {
+    console.log('inputName: ', inputName);
     setName(inputName);
   };
 
@@ -30,10 +51,29 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
     setMemo(inputMemo);
   };
 
-  const _saveContact = () => {
-    console.log('name: ', name);
-    console.log('memo: ', memo);
-  };
+  const _saveContact = useCallback(
+    (): void => {
+      const contacts = store.get('contacts') || [];
+      const newContacts = contacts.map((item) => {
+        if (String(item.id) === String(contactId)) {
+          return {
+            id: contactId,
+            address,
+            memo,
+            name,
+            network: item.network
+          };
+        }
+
+        return item;
+      });
+
+      console.log('newContacts: ', newContacts);
+      store.set('contacts', newContacts);
+      _goToContacts();
+    },
+    [address, memo, name]
+  );
 
   const _goToContacts = useCallback(
     () => onAction('/contacts'),
@@ -42,6 +82,11 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
 
   const _toggleDelete = () => {
     console.log('_toggleDelete');
+    const contacts = store.get('contacts') || [];
+    const newContacts = contacts.filter((item) => String(item.id) !== String(contactId));
+
+    store.set('contacts', newContacts);
+    _goToContacts();
   };
 
   return (
@@ -59,20 +104,22 @@ function EditContact ({ className = '' }: Props): React.ReactElement<Props> {
         <div>
           <text>Name</text>
           <InputWithLabel
-            onChange={onNameChanged}></InputWithLabel>
+            onChange={onNameChanged}
+            value={name}></InputWithLabel>
         </div>
 
         <div>
           <text>Address</text>
           <InputWithLabel
-            disabled
-            value='5G9m5GUdXbdK6Yi78hV9pEuX66Fm3bpDeU3YvGF4od6pix6A'></InputWithLabel>
+            onChange={onAddressChanged}
+            value={address}></InputWithLabel>
         </div>
 
         <div>
           <text>Memo</text>
           <InputWithLabel
-            onChange={onMemoChanged}></InputWithLabel>
+            onChange={onMemoChanged}
+            value={memo}></InputWithLabel>
         </div>
 
         <Button

@@ -13,6 +13,6 @@
     "@polkadot/extension-inject": "^0.37.3-4",
     "@polkadot/keyring": "^6.0.5",
     "@polkadot/phishing": "^0.6.17",
-    "@polkadot/ui-keyring": "^0.71.2"
+    "@polkadot/ui-keyring": "^0.71.3"
   }
 }

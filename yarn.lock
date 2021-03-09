@@ -10520,6 +10520,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash@npm:^4.17.21":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21::__archiveUrl=https%3A%2F%2Fregistry.npm.taobao.org%2Flodash%2Fdownload%2Flodash-4.17.21.tgz"
+  checksum: 4983720b9abca930a4a46f18db163d7dad8dd00dbed6db0cc7b499b33b717cce69f80928b27bbb1ff2cbd3b19d251ee90669a8b5ea466072ca81c2ebe91e7468
+  languageName: node
+  linkType: hard
+
 "log-driver@npm:^1.2.7":
   version: 1.2.7
   resolution: "log-driver@npm:1.2.7"
@@ -13452,6 +13459,7 @@ __metadata:
     "@types/jest": ^26.0.20
     bs58: ^4.0.1
     i18next-scanner: ^3.0.0
+    lodash: ^4.17.21
     query-string: ^6.14.1
     sinon-chrome: ^3.0.1
     store: ^2.0.12

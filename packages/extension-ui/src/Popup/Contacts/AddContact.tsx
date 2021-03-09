@@ -3,14 +3,18 @@
 
 import type { ThemeProps } from '../../types';
 
+import queryString from 'query-string';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
-import store from 'store';
 import styled from 'styled-components';
+
+import { Contact } from '@polkadot/extension-base/background/types';
+import { ContactsStore } from '@polkadot/extension-base/stores';
+import { decodeAddress, encodeAddress } from '@polkadot/keyring';
+import { hexToU8a, isHex } from '@polkadot/util';
 
 import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { addContact } from '../../messaging';
 import { Header } from '../../partials';
 import chains from '../../util/chains';
 
@@ -22,6 +26,20 @@ function getAddressPrefix (address: string): number {
   const prefix = `${hex[0]}${hex[1]}`;
 
   return parseInt(prefix, 16);
+}
+
+function isValidAddressPolkadotAddress (address: string): boolean {
+  try {
+    encodeAddress(
+      isHex(address)
+        ? hexToU8a(address)
+        : decodeAddress(address)
+    );
+
+    return true;
+  } catch (error) {
+    return false;
+  }
 }
 
 interface Chain {
@@ -39,10 +57,13 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
-  const [name, setName] = useState<string | null>(null);
-  const [address, setAddress] = useState<string | null>(null);
-  const [memo, setMemo] = useState<string | null>(null);
+  const [contactId, setContactId] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [address, setAddress] = useState<string>('');
+  const [memo, setMemo] = useState<string>('');
   const [network, setNetwork] = useState<string>('Unknow');
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
   const [allChains, setAllChains] = useState<Chain[]>([]);
 
   useEffect(() => {
@@ -54,6 +75,18 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
     }, ...chains]);
   }, []);
 
+  useEffect(() => {
+    const path = window.location.hash.split('?');
+    const params = queryString.parse(path[1]);
+
+    setContactId(params.id);
+    setName(params.name);
+    setMemo(params.memo);
+    setAddress(params.address);
+    setNetwork(params.network);
+    setIsEdit(params.isEdit);
+  }, []);
+
   const onNameChanged = (inputName: string) => {
     setName(inputName);
   };
@@ -63,10 +96,17 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   };
 
   const onAddressBlur = () => {
-    const prefix = getAddressPrefix(address);
-    const chain = allChains.find((chain) => chain.ss58Format === prefix);
+    const isValidAddress = isValidAddressPolkadotAddress(address);
 
-    setNetwork(chain?.chain);
+    if (isValidAddress) {
+      const prefix = getAddressPrefix(address);
+      const chain = allChains.find((chain) => chain.ss58Format === prefix);
+
+      setNetwork(chain?.chain);
+      setError('');
+    } else {
+      setError('Is invalid address');
+    }
   };
 
   const onMemoChanged = (inputMemo: string) => {
@@ -75,13 +115,35 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
 
   const _saveContact = useCallback(
     (): void => {
-      const contacts = store.get('contacts') || [];
+      const contact: Contact = {
+        address,
+        id: contactId || Date.now().toString(),
+        memo,
+        name,
+        network
+      };
 
-      store.set('contacts', [...contacts, { address, id: Date.now(), memo, name, network }]);
+      ContactsStore.insert(contact);
+
       _goToContacts();
     },
     [address, memo, name, network]
   );
+
+  const _toggleDelete = () => {
+    console.log('_toggleDelete');
+    const contact: Contact = {
+      address,
+      id: contactId || Date.now().toString(),
+      memo,
+      name,
+      network
+    };
+
+    ContactsStore.delete(contact);
+
+    _goToContacts();
+  };
 
   const _goToContacts = useCallback(
     () => onAction('/contacts'),
@@ -93,28 +155,34 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
       <Header
         backTo='/contacts'
         showBackArrow
+        showContactDelete={isEdit}
         smallMargin
         text={t<string>('New Contact')}
+        toggleDelete={_toggleDelete}
       />
 
       <div className={className}>
         <div>
           <text>Name</text>
           <InputWithLabel
-            onChange={onNameChanged}></InputWithLabel>
+            onChange={onNameChanged}
+            value={name}></InputWithLabel>
         </div>
 
         <div>
           <text>Address</text>
           <InputWithLabel
             onBlur={onAddressBlur}
-            onChange={onAddressChanged}></InputWithLabel>
+            onChange={onAddressChanged}
+            value={address}></InputWithLabel>
+          {error && <text className='error-address'>{error}</text>}
         </div>
 
         <div>
           <text>Memo</text>
           <InputWithLabel
-            onChange={onMemoChanged}></InputWithLabel>
+            onChange={onMemoChanged}
+            value={memo}></InputWithLabel>
         </div>
 
         <div>
@@ -125,7 +193,8 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <Button
-          className='save-button'
+          className={`${address && name && memo && !error ? 'save-button' : 'disable-save-button'}`}
+          isDisabled={!(address && name && memo && !error)}
           onClick={_saveContact}
         >
           {t<string>('Save')}
@@ -150,8 +219,17 @@ export default styled(AddContact)(() => `
     flex-direction: column;
   }
 
+  .error-address {
+    color: red;
+  }
+
   .save-button {
     margin-top: 20px;
+  }
+
+  .disable-save-button {
+    margin-top: 20px;
+    background: gray !important;
   }
 
   .cancel-action {

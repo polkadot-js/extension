@@ -1,14 +1,14 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, Contact, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
-import store from 'store';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
+import { ContactsStore } from '@polkadot/extension-base/stores';
 import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
@@ -18,7 +18,6 @@ import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AddContact from './Contacts/AddContact';
-import EditContact from './Contacts/EditContact';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
@@ -76,7 +75,7 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  const [contacts, setContacts] = useState<[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -107,7 +106,7 @@ export default function Popup (): React.ReactElement {
   }, [accounts]);
 
   useEffect((): void => {
-    setContacts(store.get('contacts') || contacts || []);
+    setContacts(ContactsStore.get());
   }, []);
 
   useEffect((): void => {
@@ -145,7 +144,6 @@ export default function Popup (): React.ReactElement {
                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                           <Route path='/contacts'>{wrapWithErrorBoundary(<Contacts />, 'contacts')}</Route>
                           <Route path='/add-contact'>{wrapWithErrorBoundary(<AddContact />, 'add-contact')}</Route>
-                          <Route path='/edit-contact'>{wrapWithErrorBoundary(<EditContact />, 'edit-contact')}</Route>
                           <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
                           <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                           <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>

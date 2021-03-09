@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "bs58": "^4.0.1",
+    "lodash": "^4.17.21",
     "query-string": "^6.14.1",
     "store": "^2.0.12"
   }

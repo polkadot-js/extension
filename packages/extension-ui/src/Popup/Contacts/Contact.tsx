@@ -21,7 +21,7 @@ function Contact ({ className = '', contact }: Props): React.ReactElement<Props>
 
   const _goToContactEdit = useCallback(
     () => {
-      const stringified = queryString.stringifyUrl({ url: 'edit-contact', query: { ...contact } });
+      const stringified = queryString.stringifyUrl({ url: 'add-contact?', query: { ...contact, isEdit: true } });
 
       onAction(stringified);
     }, [onAction]

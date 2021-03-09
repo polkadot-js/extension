@@ -8,6 +8,6 @@ module.exports = createConfig(
     extension: './src/extension.ts'
   },
   {
-    '@polkadot/wasm-crypto-wasm': require.resolve('@polkadot/wasm-crypto-wasm/empty')
+    '@polkadot/wasm-crypto-wasm/data.js': require.resolve('@polkadot/wasm-crypto-wasm/empty')
   }
 );

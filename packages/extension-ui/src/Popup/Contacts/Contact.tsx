@@ -9,6 +9,7 @@ import { ContactProps } from '@polkadot/extension-ui/types';
 
 import EditIcon from '../../assets/edit.svg';
 import { ActionContext, Identicon, Svg } from '../../components';
+import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ContactProps {
@@ -18,6 +19,7 @@ interface Props extends ContactProps {
 function Contact ({ className = '', contact }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const { show } = useToast();
 
   const _goToContactEdit = useCallback(
     () => {
@@ -27,11 +29,14 @@ function Contact ({ className = '', contact }: Props): React.ReactElement<Props>
     }, [onAction]
   );
 
+  const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
+
   return (
     <div className={className}>
       <div className='infoRow'>
         <Identicon
           className='identityIcon'
+          onCopy={_onCopy}
           value={contact.address}
         />
         <div>
@@ -90,6 +95,7 @@ export default styled(Contact)(({ theme }: Props) => `
     bottom: 20px;
     width: 20px;
     height: 20px;
+    cursor: pointer;
   }
 
   .infoRow {

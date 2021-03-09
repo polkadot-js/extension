@@ -55,7 +55,7 @@ function Upload ({ className }: Props): React.ReactElement {
       let json: KeyringPair$Json | KeyringPairs$Json | undefined;
 
       try {
-        json = JSON.parse(u8aToString(file)) as KeyringPair$Json;
+        json = JSON.parse(u8aToString(file)) as KeyringPair$Json | KeyringPairs$Json;
         setFile(json);
       } catch (e) {
         console.error(e);
@@ -68,8 +68,12 @@ function Upload ({ className }: Props): React.ReactElement {
 
       if (isKeyringPairs$Json(json)) {
         setRequirePassword(false);
-        json.metas.forEach((accountInfo) => {
-          setAccountsInfo((old) => [...old, accountInfo as ResponseJsonGetAccountInfo]);
+        json.accounts.forEach((account) => {
+          setAccountsInfo((old) => [...old, {
+            address: account.address,
+            genesisHash: account.meta.genesisHash,
+            name: account.meta.name
+          } as ResponseJsonGetAccountInfo]);
         });
       } else {
         setRequirePassword(true);

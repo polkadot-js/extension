@@ -98,6 +98,11 @@ export default function Popup (): React.ReactElement {
       setCameraOn(settings.camera === 'on');
     });
 
+    ContactsStore.on('change', (newContacts): void => {
+      console.log('newContacts: ', newContacts);
+      setContacts(newContacts);
+    });
+
     _onAction();
   }, []);
 

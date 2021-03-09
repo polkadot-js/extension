@@ -99,7 +99,6 @@ export default function Popup (): React.ReactElement {
     });
 
     ContactsStore.on('change', (newContacts): void => {
-      console.log('newContacts: ', newContacts);
       setContacts(newContacts);
     });
 

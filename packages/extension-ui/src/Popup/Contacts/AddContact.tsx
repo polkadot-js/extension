@@ -131,7 +131,6 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   );
 
   const _toggleDelete = () => {
-    console.log('_toggleDelete');
     const contact: Contact = {
       address,
       id: contactId || Date.now().toString(),

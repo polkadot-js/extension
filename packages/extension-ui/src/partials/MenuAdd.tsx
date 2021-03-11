@@ -13,7 +13,7 @@ import { AccountContext, Link, MediaContext, Menu, MenuDivider, MenuItem } from 
 import useIsPopup from '../hooks/useIsPopup';
 import { useLedger } from '../hooks/useLedger';
 import useTranslation from '../hooks/useTranslation';
-import { exportAccounts, windowOpen } from '../messaging';
+import { windowOpen } from '../messaging';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -25,7 +25,7 @@ const ledgerPath = '/account/import-ledger';
 
 function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { accounts, master } = useContext(AccountContext);
+  const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
   const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const isPopup = useIsPopup();
@@ -37,23 +37,6 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const _onOpenLedgerConnect = useCallback(
     () => windowOpen(ledgerPath),
     []
-  );
-
-  const _onExportAllClick = useCallback(
-    (): void => {
-      exportAccounts(accounts.map((account) => account.address))
-        .then(({ exportedJson }) => {
-          const element = document.createElement('a');
-
-          element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
-          element.download = `batch_exported_account_${Date.now()}.json`;
-          element.click();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    [accounts]
   );
 
   return (
@@ -80,7 +63,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
         </>
       )}
       <MenuItem className='menuItem'>
-        <Link onClick={_onExportAllClick}>
+        <Link to={'/account/export-all'}>
           <FontAwesomeIcon icon={faFileExport} />
           <span>{t<string>('Export all accounts')}</span>
         </Link>

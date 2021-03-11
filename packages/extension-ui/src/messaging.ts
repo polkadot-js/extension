@@ -83,8 +83,8 @@ export async function exportAccount (address: string, password: string): Promise
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
-export async function exportAccounts (addresses: string[]): Promise<{ exportedJson: string }> {
-  return sendMessage('pri(accounts.batchExport)', { addresses });
+export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: string }> {
+  return sendMessage('pri(accounts.batchExport)', { addresses, password });
 }
 
 export async function validateAccount (address: string, password: string): Promise<boolean> {
@@ -228,6 +228,6 @@ export async function jsonRestore (file: KeyringPair$Json, password: string): Pr
   return sendMessage('pri(json.restore)', { file, password });
 }
 
-export async function batchRestore (file: KeyringPairs$Json): Promise<void> {
-  return sendMessage('pri(json.batchRestore)', { file });
+export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password });
 }

@@ -95,10 +95,10 @@ export default class Extension {
     return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password)) };
   }
 
-  private async accountsBatchExport ({ addresses }: RequestAccountBatchExport): Promise<ResponseAccountExport> {
+  private async accountsBatchExport ({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountExport> {
     return {
       exportedJson: JSON.stringify(
-        await keyring.backupAccounts(addresses)
+        await keyring.backupAccounts(addresses, password)
       )
     };
   }
@@ -269,9 +269,9 @@ export default class Extension {
     }
   }
 
-  private batchRestore ({ file }: RequestBatchRestore): void {
+  private batchRestore ({ file, password }: RequestBatchRestore): void {
     try {
-      keyring.restoreAccounts(file);
+      keyring.restoreAccounts(file, password);
     } catch (error) {
       throw new Error((error as Error).message);
     }

@@ -243,6 +243,7 @@ export interface RequestAccountExport {
 
 export interface RequestAccountBatchExport {
   addresses: string[];
+  password: string;
 }
 
 export interface RequestAccountList {
@@ -377,7 +378,8 @@ export interface RequestJsonRestore {
 }
 
 export interface RequestBatchRestore {
-  file: KeyringPairs$Json
+  file: KeyringPairs$Json;
+  password: string;
 }
 
 export interface ResponseJsonRestore {

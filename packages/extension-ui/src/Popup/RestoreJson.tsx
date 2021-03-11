@@ -67,7 +67,7 @@ function Upload ({ className }: Props): React.ReactElement {
       }
 
       if (isKeyringPairs$Json(json)) {
-        setRequirePassword(false);
+        setRequirePassword(true);
         json.accounts.forEach((account) => {
           setAccountsInfo((old) => [...old, {
             address: account.address,
@@ -99,7 +99,7 @@ function Upload ({ className }: Props): React.ReactElement {
 
       setIsBusy(true);
 
-      (isKeyringPairs$Json(file) ? batchRestore(file) : jsonRestore(file, password))
+      (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
         .then(() => { onAction('/'); })
         .catch((e) => {
           console.error(e);

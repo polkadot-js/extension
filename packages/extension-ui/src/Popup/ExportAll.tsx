@@ -93,7 +93,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
             isDisabled={pass.length === 0 || !!error}
             onClick={_onExportAllButtonClick}
           >
-            {t<string>('I want to export this account')}
+            {t<string>('I want to export all my accounts')}
           </Button>
           <ActionBar className='withMarginTop'>
             <ActionText

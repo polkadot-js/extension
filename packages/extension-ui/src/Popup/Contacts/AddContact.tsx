@@ -20,6 +20,14 @@ import chains from '../../util/chains';
 
 const bs58 = require('bs58');
 
+/**
+ * Get address prefix
+ * Polkadot: 0
+ * Kusama: 2
+ * Substrate: 42
+ * others: ...
+ * @param address
+ */
 function getAddressPrefix (address: string): number {
   const bytes = bs58.decode(address);
   const hex = bytes.toString('hex');
@@ -28,6 +36,10 @@ function getAddressPrefix (address: string): number {
   return parseInt(prefix, 16);
 }
 
+/**
+ * Check address is valid address
+ * @param address
+ */
 function isValidAddressPolkadotAddress (address: string): boolean {
   try {
     encodeAddress(

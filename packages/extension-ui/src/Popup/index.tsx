@@ -66,6 +66,16 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
+/**
+ * Format contacts struct:
+ * [{ id: '', address: '', name: '', note: '', network: '' }, ...]
+ * =>
+ * {
+ *    'A': [{ id: '', address: '', name: '', note: '', network: '' }, ...],
+ *    'B': [{ id: '', address: '', name: '', note: '', network: '' }, ...],
+ * }
+ *  */
+
 function initContacts (contacts: Contact[]): GroupedContacts {
   const sortedContacts = _.sortBy(contacts, ['address', 'id']);
   const groupedContacts = {};

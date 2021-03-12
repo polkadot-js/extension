@@ -60,7 +60,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const [contactId, setContactId] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [address, setAddress] = useState<string>('');
-  const [memo, setMemo] = useState<string>('');
+  const [note, setNote] = useState<string>('');
   const [network, setNetwork] = useState<string>('Unknow');
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -81,7 +81,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
 
     setContactId(params.id);
     setName(params.name);
-    setMemo(params.memo);
+    setNote(params.note);
     setAddress(params.address);
     setNetwork(params.network);
     setIsEdit(params.isEdit);
@@ -105,12 +105,12 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
       setNetwork(chain?.chain);
       setError('');
     } else {
-      setError('Is invalid address');
+      setError('Invalid address');
     }
   };
 
-  const onMemoChanged = (inputMemo: string) => {
-    setMemo(inputMemo);
+  const onNoteChanged = (inputNote: string) => {
+    setNote(inputNote);
   };
 
   const _saveContact = useCallback(
@@ -118,7 +118,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
       const contact: Contact = {
         address,
         id: contactId || Date.now().toString(),
-        memo,
+        note,
         name,
         network
       };
@@ -127,14 +127,14 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
 
       _goToContacts();
     },
-    [address, memo, name, network]
+    [address, note, name, network]
   );
 
   const _toggleDelete = () => {
     const contact: Contact = {
       address,
       id: contactId || Date.now().toString(),
-      memo,
+      note,
       name,
       network
     };
@@ -169,31 +169,31 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <div>
-          <text>Address</text>
+          <text>Address{error && <text className='error-address'>{` (${error})`}</text>}</text>
           <InputWithLabel
             onBlur={onAddressBlur}
             onChange={onAddressChanged}
             value={address}></InputWithLabel>
-          {error && <text className='error-address'>{error}</text>}
         </div>
 
         <div>
-          <text>Memo</text>
+          <text>Note(Optional)</text>
           <InputWithLabel
-            onChange={onMemoChanged}
-            value={memo}></InputWithLabel>
+            onChange={onNoteChanged}
+            value={note}></InputWithLabel>
         </div>
 
         <div>
           <text>Network</text>
           <InputWithLabel
             disabled
+            textInputClassName='network'
             value={network}></InputWithLabel>
         </div>
 
         <Button
-          className={`${address && name && memo && !error ? 'save-button' : 'disable-save-button'}`}
-          isDisabled={!(address && name && memo && !error)}
+          className={`${address && name && !error ? 'save-button' : 'disable-save-button'}`}
+          isDisabled={!(address && name && !error)}
           onClick={_saveContact}
         >
           {t<string>('Save')}
@@ -234,5 +234,9 @@ export default styled(AddContact)(() => `
   .cancel-action {
     margin-top: 6px;
     margin: auto;
+  }
+
+  .network {
+    border: 0;
   }
 `);

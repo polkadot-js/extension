@@ -46,7 +46,9 @@ function Contact ({ className = '', contact }: Props): React.ReactElement<Props>
           <div className='fullAddress'>
             <text>{contact.address}</text>
           </div>
-
+          <div className='fullAddress'>
+            <text>Note: {contact.note}</text>
+          </div>
         </div>
 
         <div
@@ -78,6 +80,8 @@ export default styled(Contact)(({ theme }: Props) => `
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 4px;
+  margin-left: 24px;
+  margin-right: 24px;
   margin-bottom: 8px;
   position: relative;
 

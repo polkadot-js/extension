@@ -1,9 +1,10 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, Contact, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, Contact, GroupedContacts, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
+import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
@@ -65,6 +66,23 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
+function initContacts (contacts: Contact[]): GroupedContacts {
+  const sortedContacts = _.sortBy(contacts, ['address', 'id']);
+  const groupedContacts = {};
+
+  _.forEach(sortedContacts, (contact) => {
+    const key = contact.address[0];
+
+    if (Object.prototype.hasOwnProperty.call(groupedContacts, key)) {
+      groupedContacts[key].push(contact);
+    } else {
+      groupedContacts[key] = [contact];
+    }
+  });
+
+  return groupedContacts as GroupedContacts;
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -75,7 +93,7 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<GroupedContacts>({});
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -99,7 +117,7 @@ export default function Popup (): React.ReactElement {
     });
 
     ContactsStore.on('change', (newContacts): void => {
-      setContacts(newContacts);
+      setContacts(initContacts(newContacts));
     });
 
     _onAction();
@@ -110,7 +128,8 @@ export default function Popup (): React.ReactElement {
   }, [accounts]);
 
   useEffect((): void => {
-    setContacts(ContactsStore.get());
+    // initContacts(ContactsStore.get());
+    setContacts(initContacts(ContactsStore.get()));
   }, []);
 
   useEffect((): void => {

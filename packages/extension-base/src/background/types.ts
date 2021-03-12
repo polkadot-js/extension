@@ -44,9 +44,13 @@ export interface AccountJson extends KeyringPair$Meta {
 export interface Contact {
   id: string;
   address: string;
-  memo: string;
+  note: string;
   name: string;
   network: string;
+}
+
+export interface GroupedContacts {
+  [index: string]: Contact[];
 }
 
 export type AccountWithChildren = AccountJson & {

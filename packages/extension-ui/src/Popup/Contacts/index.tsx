@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
+import _ from 'lodash';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
@@ -18,7 +19,21 @@ interface Props extends ThemeProps {
 
 function Contacts ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const contacts = useContext(ContactsContext);
+  const groupedContacts = useContext(ContactsContext);
+
+  const getContactsView = () => {
+    const views = [];
+
+    _.forEach(groupedContacts, (contacts, key) => {
+      views.push(<div className='navbar'>{key}</div>);
+
+      _.forEach(contacts, (contact) => {
+        views.push(<Contact contact={contact} />);
+      });
+    });
+
+    return views;
+  };
 
   return (
     <>
@@ -30,11 +45,7 @@ function Contacts ({ className }: Props): React.ReactElement<Props> {
       />
       <>
         <div className={className}>
-          {
-            contacts.map((contact) => {
-              return <Contact contact={contact} />;
-            })
-          }
+          {getContactsView()}
         </div>
       </>
     </>
@@ -45,4 +56,14 @@ export default styled(Contacts)`
   height: 100%;
   overflow-y: auto;
   flex-direction: 'column';
+  padding-left: 0px;
+  padding-right: 0px;
+
+  .navbar {
+    background: rgb(221, 225, 235);
+    font-size: 16px;
+    padding: 4px;
+    padding-left: 10px;
+    font-weight: bold;
+  }
 `;

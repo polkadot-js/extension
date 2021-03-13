@@ -13455,6 +13455,7 @@ __metadata:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.12.13
+    "@polkadot/api": ^4.0.3
     "@polkadot/dev": ^0.61.25
     "@types/jest": ^26.0.20
     bs58: ^4.0.1

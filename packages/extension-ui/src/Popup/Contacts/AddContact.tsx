@@ -3,15 +3,17 @@
 
 import type { ThemeProps } from '../../types';
 
+import _ from 'lodash';
 import queryString from 'query-string';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
-import { Contact } from '@polkadot/extension-base/background/types';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { Contact, Identity } from '@polkadot/extension-base/background/types';
 import { ContactsStore } from '@polkadot/extension-base/stores';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
-import { hexToU8a, isHex } from '@polkadot/util';
+import { hexToString, hexToU8a, isHex } from '@polkadot/util';
 
 import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
@@ -54,6 +56,35 @@ function isValidAddressPolkadotAddress (address: string): boolean {
   }
 }
 
+function formatIdentity (identity: Record<string, string>): Identity {
+  if (_.isEmpty(identity)) {
+    return {
+      isBad: true,
+      isGood: false,
+      info: {}
+    } as Identity;
+  }
+
+  const { info, judgements } = identity;
+  const isKnownGood = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Known Good'));
+  const isReasonable = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Reasonable'));
+  const isLowQuality = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Low Qualit'));
+  const isErroneous = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Erroneous'));
+
+  return {
+    isBad: isLowQuality || isErroneous,
+    isGood: isKnownGood || isReasonable,
+    info: {
+      Display: info.display.Raw ? hexToString(info.display.Raw) : '',
+      Legal: info.legal.Raw ? hexToString(info.legal.Raw) : '',
+      Email: info.email.Raw ? hexToString(info.email.Raw) : '',
+      Web: info.web.Raw ? hexToString(info.web.Raw) : '',
+      Twitter: info.twitter.Raw ? hexToString(info.twitter.Raw) : '',
+      Riot: info.riot.Raw ? hexToString(info.riot.Raw) : ''
+    }
+  } as Identity;
+}
+
 interface Chain {
   chain: string;
   genesisHash?: string;
@@ -65,18 +96,52 @@ interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
   className?: string;
 }
 
+const ChainsEndPoint = {
+  0: 'wss://rpc.polkadot.io',
+  2: 'wss://kusama-rpc.polkadot.io',
+  5: 'wss://rpc.plasmnet.io/',
+  7: 'wss://mainnet4.edgewa.re',
+  12: '',
+  16: 'wss://rpc.kulupu.corepaper.org/ws',
+  20: 'wss://mainnet-rpc.stafi.io',
+  22: 'wss://mainnet-node.dock.io',
+  28: 'wss://rpc.subsocial.network'
+};
+
 function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
+  const emptyIdentity: Identity = { isBad: true, isGood: false, info: {} };
+
   const [contactId, setContactId] = useState<string>('');
   const [name, setName] = useState<string>('');
+  const [previousAddress, setPreviousAddress] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [network, setNetwork] = useState<string>('Unknow');
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [tips, setTips] = useState<string>('');
   const [allChains, setAllChains] = useState<Chain[]>([]);
+  const [identity, setIdentity] = useState<Identity>(emptyIdentity);
+
+  // Get identity from the specific chain state and then update the identity infomation
+  async function updateIdentity (endpoint: string): Promise<void> {
+    if (endpoint) {
+      setTips('Getting identity info from the chain state...');
+      const wsProvider = new WsProvider(endpoint);
+      const api = await ApiPromise.create({ provider: wsProvider });
+      const identity = await api.query.identity.identityOf(address);
+      const formatedIdentity = formatIdentity(identity.toJSON());
+
+      setIdentity(formatedIdentity);
+    } else {
+      setIdentity(emptyIdentity);
+    }
+
+    setTips('');
+  }
 
   useEffect(() => {
     setAllChains([{
@@ -91,12 +156,16 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
     const path = window.location.hash.split('?');
     const params = queryString.parse(path[1]);
 
-    setContactId(params.id);
-    setName(params.name);
-    setNote(params.note);
-    setAddress(params.address);
-    setNetwork(params.network);
-    setIsEdit(params.isEdit);
+    if (!_.isEmpty(params)) {
+      setContactId(params.id);
+      setName(params.name);
+      setNote(params.note);
+      setPreviousAddress(params.address);
+      setAddress(params.address);
+      setNetwork(params.network);
+      setIsEdit(params.isEdit);
+      setIdentity(JSON.parse(params.identity));
+    }
   }, []);
 
   const onNameChanged = (inputName: string) => {
@@ -107,17 +176,27 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
     setAddress(inputAddress);
   };
 
+  /**
+   * Check the address network when address text input blur
+   */
   const onAddressBlur = () => {
-    const isValidAddress = isValidAddressPolkadotAddress(address);
+    // Compare previous address with current address. If address has no changes, do not need to update the infomation.
+    if (previousAddress !== address) {
+      setIdentity(emptyIdentity);
+      setPreviousAddress(address);
+      const isValidAddress = isValidAddressPolkadotAddress(address);
 
-    if (isValidAddress) {
-      const prefix = getAddressPrefix(address);
-      const chain = allChains.find((chain) => chain.ss58Format === prefix);
+      if (isValidAddress) {
+        const prefix = getAddressPrefix(address);
+        const chain = allChains.find((chain) => chain.ss58Format === prefix);
+        const endpoint = ChainsEndPoint[prefix] || '';
 
-      setNetwork(chain?.chain);
-      setError('');
-    } else {
-      setError('Invalid address');
+        setNetwork(chain?.chain);
+        setError('');
+        updateIdentity(endpoint);
+      } else {
+        setError('Invalid address');
+      }
     }
   };
 
@@ -132,14 +211,15 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         id: contactId || Date.now().toString(),
         note,
         name,
-        network
+        network,
+        identity
       };
 
       ContactsStore.insert(contact);
 
       _goToContacts();
     },
-    [address, note, name, network]
+    [address, note, name, network, identity]
   );
 
   const _toggleDelete = () => {
@@ -148,7 +228,8 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
       id: contactId || Date.now().toString(),
       note,
       name,
-      network
+      network,
+      identity
     };
 
     ContactsStore.delete(contact);
@@ -181,7 +262,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <div>
-          <text>Address{error && <text className='error-address'>{` (${error})`}</text>}</text>
+          <text>Address{error && <text className='error-address'>{` (${error})`}</text>}{tips && <text className='tips'>{` (${tips})`}</text>}</text>
           <InputWithLabel
             onBlur={onAddressBlur}
             onChange={onAddressChanged}
@@ -199,23 +280,43 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
           <text>Network</text>
           <InputWithLabel
             disabled
-            textInputClassName='network'
+            textInputClassName='input-disabled'
             value={network}></InputWithLabel>
         </div>
 
-        <Button
-          className={`${address && name && !error ? 'save-button' : 'disable-save-button'}`}
-          isDisabled={!(address && name && !error)}
-          onClick={_saveContact}
-        >
-          {t<string>('Save')}
-        </Button>
-        <ActionBar className='cancel-action'>
-          <ActionText
-            onClick={_goToContacts}
-            text={t<string>('Cancel')}
-          />
-        </ActionBar>
+        {
+          identity && !identity.isBad && identity.isGood && (
+            _.map(identity.info, (value, key) => {
+              if (!value) { return null; }
+
+              return (
+                <div>
+                  <text>{key}</text>
+                  <InputWithLabel
+                    disabled
+                    textInputClassName='input-disabled'
+                    value={value}></InputWithLabel>
+                </div>
+              );
+            })
+          )
+        }
+
+        <div>
+          <Button
+            className={`${address && name && !error && !tips ? 'save-button' : 'disable-save-button'}`}
+            isDisabled={!(address && name && !error && !tips)}
+            onClick={_saveContact}
+          >
+            {t<string>('Save')}
+          </Button>
+          <ActionBar className='cancel-action'>
+            <ActionText
+              onClick={_goToContacts}
+              text={t<string>('Cancel')}
+            />
+          </ActionBar>
+        </div>
       </div>
     </>
   );
@@ -224,6 +325,8 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
 export default styled(AddContact)(() => `
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
 
   div {
     display: flex;
@@ -234,21 +337,28 @@ export default styled(AddContact)(() => `
     color: red;
   }
 
+  .tips {
+    color: rgb(159, 158, 153);
+  }
+
   .save-button {
     margin-top: 20px;
+    margin-bottom: 10px;
   }
 
   .disable-save-button {
     margin-top: 20px;
+    margin-bottom: 10px;
     background: gray !important;
   }
 
   .cancel-action {
     margin-top: 6px;
+    margin-bottom: 6px;
     margin: auto;
   }
 
-  .network {
+  .input-disabled {
     border: 0;
   }
 `);

@@ -47,6 +47,7 @@
     "stylelint-config-styled-components": "^0.1.1"
   },
   "dependencies": {
+    "@polkadot/api": "^4.0.3",
     "bs58": "^4.0.1",
     "eventemitter3": "^4.0.7",
     "lodash": "^4.17.21",

@@ -12,5 +12,6 @@ export interface ThemeProps {
 }
 
 export interface ContactProps extends ThemeProps {
-  contact: Contact
+  contact: Contact;
+  canEdit?: boolean;
 }

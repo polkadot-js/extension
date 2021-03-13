@@ -16,7 +16,7 @@ interface Props extends ContactProps {
   className?: string;
 }
 
-function Contact ({ className = '', contact }: Props): React.ReactElement<Props> {
+function Contact ({ canEdit = false, className = '', contact }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { show } = useToast();
@@ -59,12 +59,16 @@ function Contact ({ className = '', contact }: Props): React.ReactElement<Props>
           {contact.network}
         </div>
 
-        <div onClick={_goToContactEdit}>
-          <Svg
-            className='edit'
-            src={EditIcon}
-          />
-        </div>
+        {
+          canEdit && (
+            <div onClick={_goToContactEdit}>
+              <Svg
+                className='edit'
+                src={EditIcon}
+              />
+            </div>
+          )
+        }
       </div>
     </div>
   );

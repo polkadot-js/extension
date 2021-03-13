@@ -47,9 +47,9 @@ const ContactsStore = {
     this.emitter.emit('change', newContacts);
   },
 
-  delete (contact: Contact): void {
+  delete (contactId: string): void {
     const contacts = this.get();
-    const newContacts = contacts.filter((item) => item.id !== contact.id);
+    const newContacts = contacts.filter((item) => item.id !== contactId);
 
     this.set(newContacts);
     this.emitter.emit('change', newContacts);

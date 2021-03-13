@@ -28,7 +28,8 @@ function Contacts ({ className }: Props): React.ReactElement<Props> {
       views.push(<div className='navbar'>{key}</div>);
 
       _.forEach(contacts, (contact) => {
-        views.push(<Contact contact={contact} />);
+        views.push(<Contact canEdit
+          contact={contact}/>);
       });
     });
 

@@ -92,7 +92,7 @@ interface Chain {
   ss58Format: number;
 }
 
-interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
+interface Props extends ThemeProps {
   className?: string;
 }
 
@@ -222,20 +222,23 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
     [address, note, name, network, identity]
   );
 
-  const _toggleDelete = () => {
-    const contact: Contact = {
-      address,
-      id: contactId || Date.now().toString(),
-      note,
-      name,
-      network,
-      identity
-    };
+  const _goToDelete = useCallback(
+    () => {
+      const contact: Contact = {
+        address,
+        id: contactId || Date.now().toString(),
+        note,
+        name,
+        network,
+        identity
+      };
 
-    ContactsStore.delete(contact);
+      const stringified = queryString.stringifyUrl({ url: 'delete-contact?', query: { contact: JSON.stringify(contact) } });
 
-    _goToContacts();
-  };
+      onAction(stringified);
+    },
+    [address, note, name, network, identity]
+  );
 
   const _goToContacts = useCallback(
     () => onAction('/contacts'),
@@ -250,7 +253,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         showContactDelete={isEdit}
         smallMargin
         text={t<string>('New Contact')}
-        toggleDelete={_toggleDelete}
+        toggleDelete={_goToDelete}
       />
 
       <div className={className}>

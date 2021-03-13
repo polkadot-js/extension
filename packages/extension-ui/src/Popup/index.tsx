@@ -78,11 +78,11 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
  *  */
 
 function initContacts (contacts: Contact[]): GroupedContacts {
-  const sortedContacts = _.sortBy(contacts, ['name', 'id']);
+  const sortedContacts = _.sortBy(contacts, [(item) => item.name.toUpperCase(), 'id']);
   const groupedContacts = {};
 
   _.forEach(sortedContacts, (contact) => {
-    const key = contact.name[0];
+    const key = contact.name.toUpperCase()[0];
 
     if (Object.prototype.hasOwnProperty.call(groupedContacts, key)) {
       groupedContacts[key].push(contact);

@@ -52,7 +52,7 @@ function Contacts ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Contacts)`
+export default styled(Contacts)(({ theme }: Props) => `
   height: 100%;
   overflow-y: auto;
   flex-direction: 'column';
@@ -60,10 +60,10 @@ export default styled(Contacts)`
   padding-right: 0px;
 
   .navbar {
-    background: rgb(221, 225, 235);
+    background: ${theme.groupBackround};
     font-size: 16px;
     padding: 4px;
     padding-left: 10px;
     font-weight: bold;
   }
-`;
+`);

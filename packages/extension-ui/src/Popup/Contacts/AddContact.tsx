@@ -56,6 +56,10 @@ function isValidAddressPolkadotAddress (address: string): boolean {
   }
 }
 
+/**
+ * format the identity response to identity object: { isBad, isGood, info... }
+ * @param identity
+ */
 function formatIdentity (identity: Record<string, string>): Identity {
   if (_.isEmpty(identity)) {
     return {
@@ -96,6 +100,11 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
+/**
+ *  The chain's endpoint list.
+ *  [prefix]: [endpoint]
+ *  endpoint is '' means that I did not find the endpoint in the Polkadot-js webapp's config file.
+ *  */
 const ChainsEndPoint = {
   0: 'wss://rpc.polkadot.io',
   2: 'wss://kusama-rpc.polkadot.io',

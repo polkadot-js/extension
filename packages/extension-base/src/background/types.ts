@@ -42,7 +42,7 @@ export interface AccountJson extends KeyringPair$Meta {
 }
 
 export interface Identity {
-  isBad?: boolean;
+  isBad?: boolean; // If isBad if true, means the identity is not available, so no need to show the identity info.
   isGood?: boolean;
   info: {
     display?: string;

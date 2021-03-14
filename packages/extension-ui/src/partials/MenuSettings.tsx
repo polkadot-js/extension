@@ -211,7 +211,7 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
   }
 
   .contactsSvg {
-    background: rgb(129, 138, 161) !important;
+    background: ${theme.contactsBackgroun} !important;
   }
 
   > .setting {

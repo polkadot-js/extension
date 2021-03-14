@@ -9,6 +9,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
+import ContactsIcon from '../assets/contacts.svg';
 import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
@@ -108,8 +109,15 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuDivider/>
       <MenuItem className='setting'>
         <ActionText
-          className='manageWebsiteAccess'
-          icon={faAddressBook}
+          className='manageWebsiteAccess contacts'
+          customIcon={(
+            <div className='contactsIcon'>
+              <Svg
+                className='contactsSvg'
+                src={ContactsIcon}
+              />
+            </div>
+          )}
           onClick={_goToContacts}
           text={t<string>('Contacts')}
         />
@@ -189,6 +197,21 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       top: 4px;
       width: 20px;
     }
+  }
+
+  .contacts {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .contactsIcon {
+    display: flex;
+    align-items: center;
+    margin-right: 3px;
+  }
+
+  .contactsSvg {
+    background: rgb(129, 138, 161) !important;
   }
 
   > .setting {

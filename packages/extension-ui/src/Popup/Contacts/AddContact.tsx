@@ -106,15 +106,15 @@ interface Props extends ThemeProps {
  *  endpoint is '' means that I did not find the endpoint in the Polkadot-js webapp's config file.
  *  */
 const ChainsEndPoint = {
-  0: 'wss://rpc.polkadot.io',
-  2: 'wss://kusama-rpc.polkadot.io',
-  5: 'wss://rpc.plasmnet.io/',
-  7: 'wss://mainnet4.edgewa.re',
+  0: 'wss://rpc.polkadot.io', // polkadot mainnet
+  2: 'wss://kusama-rpc.polkadot.io', // kusama mainnet
+  5: 'wss://rpc.plasmnet.io/', // plasm mainnet
+  7: 'wss://mainnet4.edgewa.re', // edgeware mainnet
   12: '',
-  16: 'wss://rpc.kulupu.corepaper.org/ws',
-  20: 'wss://mainnet-rpc.stafi.io',
-  22: 'wss://mainnet-node.dock.io',
-  28: 'wss://rpc.subsocial.network'
+  16: 'wss://rpc.kulupu.corepaper.org/ws', // kulupu mainnet
+  20: 'wss://mainnet-rpc.stafi.io', // stafi mainnet
+  22: 'wss://mainnet-node.dock.io', // dock mainnet
+  28: 'wss://rpc.subsocial.network' // subsocial mainnet
 };
 
 function AddContact ({ className = '' }: Props): React.ReactElement<Props> {

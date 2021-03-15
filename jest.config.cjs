@@ -3,7 +3,8 @@
 
 const config = require('@polkadot/dev/config/jest.cjs');
 
-module.exports = Object.assign({}, config, {
+module.exports = {
+  ...config,
   moduleNameMapper: {
     '@polkadot/extension-(base|chains|dapp|inject|ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
     // eslint-disable-next-line sort-keys
@@ -19,5 +20,5 @@ module.exports = Object.assign({}, config, {
     '<rootDir>/packages/extension-inject/build',
     '<rootDir>/packages/extension-ui/build'
   ],
-  transformIgnorePatterns: ['/node_modules/(?!@polkadot|@babel/runtime/helpers/esm/|rxjs/_esm5)']
-});
+  transformIgnorePatterns: ['/node_modules/(?!(@polkadot|@babel/runtime/helpers/esm/))']
+};

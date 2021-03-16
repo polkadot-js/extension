@@ -44,6 +44,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     hasMetadata = true;
     const metadata = new Metadata(registry, base64Decode(metaCalls));
     const signedExtensions = metadata.asLatest.extrinsic.signedExtensions.toJSON() as string[];
+
     registry.setMetadata(metadata, signedExtensions, userExtensions);
   }
 

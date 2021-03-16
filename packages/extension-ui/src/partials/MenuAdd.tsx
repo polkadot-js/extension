@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../types';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
@@ -62,6 +62,12 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           <MenuDivider />
         </>
       )}
+      <MenuItem className='menuItem'>
+        <Link to={'/account/export-all'}>
+          <FontAwesomeIcon icon={faFileExport} />
+          <span>{t<string>('Export all accounts')}</span>
+        </Link>
+      </MenuItem>
       <MenuItem className='menuItem'>
         <Link to='/account/import-seed'>
           <FontAwesomeIcon icon={faKey} />

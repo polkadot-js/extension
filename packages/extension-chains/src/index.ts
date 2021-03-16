@@ -40,12 +40,11 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
   const isUnknown = genesisHash === '0x';
   let hasMetadata = false;
 
-  const signedExtensions = metaCalls ? new Metadata(registry, base64Decode(metaCalls)).asLatest.extrinsic.signedExtensions.toJSON() as string[] : undefined;
-
   if (metaCalls && !isPartial) {
     hasMetadata = true;
-
-    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)), signedExtensions, userExtensions);
+    const metadata = new Metadata(registry, base64Decode(metaCalls));
+    const signedExtensions = metadata.asLatest.extrinsic.signedExtensions.toJSON() as string[];
+    registry.setMetadata(metadata, signedExtensions, userExtensions);
   }
 
   const result = {

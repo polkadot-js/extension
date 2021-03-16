@@ -154,5 +154,9 @@
   "Sign on Ledger": "",
   "Allow use on any chain": "",
   "Select network": "",
-  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.": ""
+  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.": "",
+  "Export all accounts": "",
+  "All account": "",
+  "password for encrypting all accounts": "",
+  "I want to export all my accounts": ""
 }

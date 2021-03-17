@@ -344,7 +344,7 @@ export default class Extension {
         meta.genesisHash === (request.payload as SignerPayloadJSON).genesisHash);
 
       // set the registry before calling the sign function
-      registry.setSignedExtensions((request.payload as SignerPayloadJSON).signedExtensions, currentMetadata?.userExtensions);
+      registry.setSignedExtensions((request.payload).signedExtensions, currentMetadata?.userExtensions);
 
       if (currentMetadata) {
         registry.register(currentMetadata?.types);

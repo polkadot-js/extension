@@ -100,23 +100,6 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-/**
- *  The chain's endpoint list.
- *  [prefix]: [endpoint]
- *  endpoint is '' means that I did not find the endpoint in the Polkadot-js webapp's config file.
- *  */
-const ChainsEndPoint = {
-  0: 'wss://rpc.polkadot.io', // polkadot mainnet
-  2: 'wss://kusama-rpc.polkadot.io', // kusama mainnet
-  5: 'wss://rpc.plasmnet.io/', // plasm mainnet
-  7: 'wss://mainnet4.edgewa.re', // edgeware mainnet
-  12: '',
-  16: 'wss://rpc.kulupu.corepaper.org/ws', // kulupu mainnet
-  20: 'wss://mainnet-rpc.stafi.io', // stafi mainnet
-  22: 'wss://mainnet-node.dock.io', // dock mainnet
-  28: 'wss://rpc.subsocial.network' // subsocial mainnet
-};
-
 function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -131,26 +114,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const [network, setNetwork] = useState<string>('Unknow');
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [tips, setTips] = useState<string>('');
   const [allChains, setAllChains] = useState<Chain[]>([]);
-  const [identity, setIdentity] = useState<Identity>(emptyIdentity);
-
-  // Get identity from the specific chain state and then update the identity infomation
-  async function updateIdentity (endpoint: string): Promise<void> {
-    if (endpoint) {
-      setTips('Getting identity info from the chain state...');
-      const wsProvider = new WsProvider(endpoint);
-      const api = await ApiPromise.create({ provider: wsProvider });
-      const identity = await api.query.identity.identityOf(address);
-      const formatedIdentity = formatIdentity(identity.toJSON());
-
-      setIdentity(formatedIdentity);
-    } else {
-      setIdentity(emptyIdentity);
-    }
-
-    setTips('');
-  }
 
   useEffect(() => {
     setAllChains([{
@@ -173,7 +137,6 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
       setAddress(params.address);
       setNetwork(params.network);
       setIsEdit(params.isEdit);
-      setIdentity(JSON.parse(params.identity));
     }
   }, []);
 
@@ -189,23 +152,16 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
    * Check the address network when address text input blur
    */
   const onAddressBlur = () => {
-    // Compare previous address with current address. If address has no changes, do not need to update the infomation.
-    if (previousAddress !== address) {
-      setIdentity(emptyIdentity);
-      setPreviousAddress(address);
-      const isValidAddress = isValidAddressPolkadotAddress(address);
+    const isValidAddress = isValidAddressPolkadotAddress(address);
 
-      if (isValidAddress) {
-        const prefix = getAddressPrefix(address);
-        const chain = allChains.find((chain) => chain.ss58Format === prefix);
-        const endpoint = ChainsEndPoint[prefix] || '';
+    if (isValidAddress) {
+      const prefix = getAddressPrefix(address);
+      const chain = allChains.find((chain) => chain.ss58Format === prefix);
 
-        setNetwork(chain?.chain);
-        setError('');
-        updateIdentity(endpoint);
-      } else {
-        setError('Invalid address');
-      }
+      setNetwork(chain?.chain);
+      setError('');
+    } else {
+      setError('Invalid address');
     }
   };
 
@@ -220,15 +176,14 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         id: contactId || Date.now().toString(),
         note,
         name,
-        network,
-        identity
+        network
       };
 
       ContactsStore.insert(contact);
 
       _goToContacts();
     },
-    [address, note, name, network, identity]
+    [address, note, name, network]
   );
 
   const _goToDelete = useCallback(
@@ -238,15 +193,14 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         id: contactId || Date.now().toString(),
         note,
         name,
-        network,
-        identity
+        network
       };
 
       const stringified = queryString.stringifyUrl({ url: 'delete-contact?', query: { contact: JSON.stringify(contact) } });
 
       onAction(stringified);
     },
-    [address, note, name, network, identity]
+    [address, note, name, network]
   );
 
   const _goToContacts = useCallback(
@@ -296,28 +250,10 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
             value={network}></InputWithLabel>
         </div>
 
-        {
-          identity && !identity.isBad && identity.isGood && (
-            _.map(identity.info, (value, key) => {
-              if (!value) { return null; }
-
-              return (
-                <div>
-                  <text>{key}</text>
-                  <InputWithLabel
-                    disabled
-                    textInputClassName='input-disabled'
-                    value={value}></InputWithLabel>
-                </div>
-              );
-            })
-          )
-        }
-
         <div>
           <Button
-            className={`${address && name && !error && !tips ? 'save-button' : 'disable-save-button'}`}
-            isDisabled={!(address && name && !error && !tips)}
+            className={`${address && name && !error ? 'save-button' : 'disable-save-button'}`}
+            isDisabled={!(address && name && !error)}
             onClick={_saveContact}
           >
             {t<string>('Save')}

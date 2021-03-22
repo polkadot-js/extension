@@ -2070,13 +2070,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@^0.37.3-8, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@^0.37.3-9, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.13.10
     "@polkadot/api": ^4.1.1
-    "@polkadot/extension-inject": ^0.37.3-8
+    "@polkadot/extension-inject": ^0.37.3-9
     "@polkadot/keyring": ^6.0.5
     "@polkadot/phishing": ^0.6.23
     "@polkadot/ui-keyring": ^0.72.1
@@ -2099,7 +2099,7 @@ __metadata:
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.13.10
-    "@polkadot/extension-inject": ^0.37.3-8
+    "@polkadot/extension-inject": ^0.37.3-9
     "@polkadot/util": ^6.0.5
     "@polkadot/util-crypto": ^6.0.5
   peerDependencies:
@@ -2109,7 +2109,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@^0.37.3-8, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@^0.37.3-9, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -2121,7 +2121,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@^0.37.3-8, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@^0.37.3-9, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -2131,8 +2131,8 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^5.15.2
     "@fortawesome/free-solid-svg-icons": ^5.15.2
     "@fortawesome/react-fontawesome": ^0.1.14
-    "@polkadot/extension-base": ^0.37.3-8
-    "@polkadot/extension-inject": ^0.37.3-8
+    "@polkadot/extension-base": ^0.37.3-9
+    "@polkadot/extension-inject": ^0.37.3-9
     "@polkadot/hw-ledger": ^6.0.5
     "@polkadot/keyring": ^6.0.5
     "@polkadot/networks": ^6.0.5
@@ -2171,9 +2171,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.13.10
     "@polkadot/dev": ^0.62.5
-    "@polkadot/extension-base": ^0.37.3-8
-    "@polkadot/extension-inject": ^0.37.3-8
-    "@polkadot/extension-ui": ^0.37.3-8
+    "@polkadot/extension-base": ^0.37.3-9
+    "@polkadot/extension-inject": ^0.37.3-9
+    "@polkadot/extension-ui": ^0.37.3-9
     babel-loader: ^8.2.2
     browser-resolve: ^2.0.0
     buffer: ^6.0.3

@@ -338,13 +338,14 @@ export default class Extension {
       pair.decodePkcs8(password);
     }
 
-    if (isJsonPayload(request.payload)) {
+    const { payload } = request;
+
+    if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
       const currentMetadata = this.#state.knownMetadata.find((meta: MetadataDef) =>
-        meta.genesisHash === (request.payload as SignerPayloadJSON).genesisHash);
-
+        meta.genesisHash === payload.genesisHash);
       // set the registry before calling the sign function
-      registry.setSignedExtensions((request.payload).signedExtensions, currentMetadata?.userExtensions);
+      registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
 
       if (currentMetadata) {
         registry.register(currentMetadata?.types);

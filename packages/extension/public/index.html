@@ -4,9 +4,27 @@
     <meta charset="utf-8">
     <title>polkadot{.js}</title>
     <link href="fonts/fonts.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        height: 600px;
+        margin: 0;
+        overflow-x: hidden;
+        text-align: center;
+      }
+
+      div#root {
+        box-sizing: border-box;
+        height: calc(100vh - 2px);
+        margin: 0 auto;
+        max-width: 100%;
+        padding: 0;
+        text-align: left;
+        width: 560px;
+      }
+    </style>
   </head>
-  <body style="height: 600px; margin:0; overflow-x:hidden; text-align:center">
-    <div id="root" style="box-sizing:border-box; margin:0 auto; padding:0; text-align:left; width:560px; height: calc(100vh - 2px); max-width: 100%;"></div>
+  <body>
+    <div id="root"></div>
     <script src='./extension.js'></script>
   </body>
 </html>

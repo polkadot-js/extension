@@ -24,7 +24,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     return cached;
   }
 
-  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
+  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types, userExtensions } = definition;
   const registry = new TypeRegistry();
 
   if (!isPartial) {
@@ -43,7 +43,10 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
   if (metaCalls && !isPartial) {
     hasMetadata = true;
 
-    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)));
+    const metadata = new Metadata(registry, base64Decode(metaCalls));
+    const signedExtensions = metadata.asLatest.extrinsic.signedExtensions.toJSON() as string[];
+
+    registry.setMetadata(metadata, signedExtensions, userExtensions);
   }
 
   const result = {

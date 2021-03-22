@@ -40,7 +40,7 @@ interface QrScanAddressProps {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-const typeName = async (wrapper: ReactWrapper, value:string) => {
+const typeName = async (wrapper: ReactWrapper, value: string) => {
   wrapper.find('input').first().simulate('change', { target: { value } });
   await act(flushAllPromises);
   wrapper.update();

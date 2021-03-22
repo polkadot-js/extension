@@ -5,6 +5,7 @@ import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageT
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
@@ -82,6 +83,10 @@ export async function exportAccount (address: string, password: string): Promise
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
+export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: string }> {
+  return sendMessage('pri(accounts.batchExport)', { addresses, password });
+}
+
 export async function validateAccount (address: string, password: string): Promise<boolean> {
   return sendMessage('pri(accounts.validate)', { address, password });
 }
@@ -130,7 +135,7 @@ export async function createSeed (length?: SeedLengths, type?: KeypairType): Pro
   return sendMessage('pri(seed.create)', { length, type });
 }
 
-export async function getAllMetatdata () : Promise<MetadataDef[]> {
+export async function getAllMetatdata (): Promise<MetadataDef[]> {
   return sendMessage('pri(metadata.list)');
 }
 
@@ -221,4 +226,8 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
 
 export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
   return sendMessage('pri(json.restore)', { file, password });
+}
+
+export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password });
 }

@@ -27,6 +27,7 @@ import Contacts from './Contacts';
 import CreateAccount from './CreateAccount';
 import Derive from './Derive';
 import Export from './Export';
+import ExportAll from './ExportAll';
 import Forget from './Forget';
 import ImportLedger from './ImportLedger';
 import ImportQr from './ImportQr';

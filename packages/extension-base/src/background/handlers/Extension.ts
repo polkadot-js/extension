@@ -344,6 +344,7 @@ export default class Extension {
       // Get the metadata for the genesisHash
       const currentMetadata = this.#state.knownMetadata.find((meta: MetadataDef) =>
         meta.genesisHash === payload.genesisHash);
+
       // set the registry before calling the sign function
       registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
 

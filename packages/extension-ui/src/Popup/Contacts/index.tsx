@@ -3,7 +3,6 @@
 
 import type { ThemeProps } from '../../types';
 
-import _ from 'lodash';
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
@@ -19,15 +18,19 @@ interface Props extends ThemeProps {
 
 function Contacts ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const groupedContacts = useContext(ContactsContext);
+  const groupedContacts = useContext(ContactsContext) || [];
 
   const getContactsView = () => {
     const views = [];
 
-    _.forEach(groupedContacts, (contacts, key) => {
+    let keys = Object.keys(groupedContacts);
+
+    keys = keys.sort();
+
+    keys.forEach((key) => {
       views.push(<div className='navbar'>{key}</div>);
 
-      _.forEach(contacts, (contact) => {
+      groupedContacts[key].forEach((contact) => {
         views.push(<Contact canEdit
           contact={contact}/>);
       });

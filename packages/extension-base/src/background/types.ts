@@ -42,26 +42,12 @@ export interface AccountJson extends KeyringPair$Meta {
   whenCreated?: number;
 }
 
-export interface Identity {
-  isBad?: boolean; // If isBad if true, means the identity is not available, so no need to show the identity info.
-  isGood?: boolean;
-  info: {
-    display?: string;
-    legal?: string;
-    email?: string;
-    web?: string;
-    twitter?: string;
-    riot?: string;
-  }
-}
-
 export interface Contact {
   id: string;
   address: string;
   note: string;
   name: string;
   network: string;
-  identity?: Identity;
 }
 
 export interface GroupedContacts {

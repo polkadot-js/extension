@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import EventEmitter from 'eventemitter3';
-import _ from 'lodash';
 import store from 'store';
 
 import { Contact } from '../background/types';
@@ -26,7 +25,7 @@ const ContactsStore = {
   insert (contact?: Contact): void {
     const contacts = this.get();
     let newContacts = [];
-    const existContact = _.find(contacts, (item) => item.id === contact.id);
+    const existContact = contacts.find((item) => item.id === contact.id);
 
     // If exist, change the contact values
     if (existContact) {

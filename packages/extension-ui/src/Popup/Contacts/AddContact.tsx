@@ -3,17 +3,15 @@
 
 import type { ThemeProps } from '../../types';
 
-import _ from 'lodash';
 import queryString from 'query-string';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { Contact, Identity } from '@polkadot/extension-base/background/types';
+import { Contact } from '@polkadot/extension-base/background/types';
 import { ContactsStore } from '@polkadot/extension-base/stores';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
-import { hexToString, hexToU8a, isHex } from '@polkadot/util';
+import { hexToU8a, isHex } from '@polkadot/util';
 
 import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
@@ -56,39 +54,6 @@ function isValidAddressPolkadotAddress (address: string): boolean {
   }
 }
 
-/**
- * format the identity response to identity object: { isBad, isGood, info... }
- * @param identity
- */
-function formatIdentity (identity: Record<string, string>): Identity {
-  if (_.isEmpty(identity)) {
-    return {
-      isBad: true,
-      isGood: false,
-      info: {}
-    } as Identity;
-  }
-
-  const { info, judgements } = identity;
-  const isKnownGood = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Known Good'));
-  const isReasonable = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Reasonable'));
-  const isLowQuality = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Low Qualit'));
-  const isErroneous = judgements.some(([, judgement]) => Object.prototype.hasOwnProperty.call(judgement, 'Erroneous'));
-
-  return {
-    isBad: isLowQuality || isErroneous,
-    isGood: isKnownGood || isReasonable,
-    info: {
-      Display: info.display.Raw ? hexToString(info.display.Raw) : '',
-      Legal: info.legal.Raw ? hexToString(info.legal.Raw) : '',
-      Email: info.email.Raw ? hexToString(info.email.Raw) : '',
-      Web: info.web.Raw ? hexToString(info.web.Raw) : '',
-      Twitter: info.twitter.Raw ? hexToString(info.twitter.Raw) : '',
-      Riot: info.riot.Raw ? hexToString(info.riot.Raw) : ''
-    }
-  } as Identity;
-}
-
 interface Chain {
   chain: string;
   genesisHash?: string;
@@ -104,11 +69,8 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
-  const emptyIdentity: Identity = { isBad: true, isGood: false, info: {} };
-
   const [contactId, setContactId] = useState<string>('');
   const [name, setName] = useState<string>('');
-  const [previousAddress, setPreviousAddress] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [note, setNote] = useState<string>('');
   const [network, setNetwork] = useState<string>('Unknow');
@@ -129,11 +91,10 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
     const path = window.location.hash.split('?');
     const params = queryString.parse(path[1]);
 
-    if (!_.isEmpty(params)) {
+    if (params && params.id) {
       setContactId(params.id);
       setName(params.name);
       setNote(params.note);
-      setPreviousAddress(params.address);
       setAddress(params.address);
       setNetwork(params.network);
       setIsEdit(params.isEdit);
@@ -215,7 +176,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         showBackArrow
         showContactDelete={isEdit}
         smallMargin
-        text={t<string>('New Contact')}
+        text={isEdit ? t<string>('Edit Contact') : t<string>('New Contact')}
         toggleDelete={_goToDelete}
       />
 
@@ -228,7 +189,7 @@ function AddContact ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <div>
-          <text>Address{error && <text className='error-address'>{` (${error})`}</text>}{tips && <text className='tips'>{` (${tips})`}</text>}</text>
+          <text>Address{error && <text className='error-address'>{` (${error})`}</text>}</text>
           <InputWithLabel
             onBlur={onAddressBlur}
             onChange={onAddressChanged}
@@ -283,10 +244,6 @@ export default styled(AddContact)(() => `
 
   .error-address {
     color: red;
-  }
-
-  .tips {
-    color: rgb(159, 158, 153);
   }
 
   .save-button {

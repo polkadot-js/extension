@@ -3,7 +3,6 @@
 
 import type { ThemeProps } from '../../types';
 
-import _ from 'lodash';
 import queryString from 'query-string';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -31,9 +30,9 @@ function Delete ({ className }: Props): React.ReactElement<Props> {
     const path = window.location.hash.split('?');
     const params = queryString.parse(path[1]);
 
-    if (!_.isEmpty(params)) {
+    if (params && params.contact) {
       const contact = JSON.parse(params.contact) as Contact;
-      const stringified = queryString.stringifyUrl({ url: 'add-contact?', query: { ...contact, identity: JSON.stringify(contact.identity), isEdit: true } });
+      const stringified = queryString.stringifyUrl({ url: 'add-contact?', query: { ...contact, isEdit: true } });
 
       console.log('contact: ', contact);
       setBackUrl(stringified);

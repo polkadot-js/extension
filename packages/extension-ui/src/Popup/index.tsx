@@ -4,7 +4,6 @@
 import type { AccountJson, AccountsContext, AuthorizeRequest, Contact, GroupedContacts, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
@@ -79,10 +78,16 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
  *  */
 
 function initContacts (contacts: Contact[]): GroupedContacts {
-  const sortedContacts = _.sortBy(contacts, [(item) => item.name.toUpperCase(), 'id']);
+  const sortedContacts = contacts.sort(function (a, b) {
+    if (a.name.toLocaleLowerCase() === b.name.toLocaleLowerCase()) {
+      return a.id - b.id;
+    }
+
+    return a.name.toLocaleLowerCase() - b.name.toLocaleLowerCase();
+  });
   const groupedContacts = {};
 
-  _.forEach(sortedContacts, (contact) => {
+  sortedContacts.forEach((contact) => {
     const key = contact.name.toUpperCase()[0];
 
     if (Object.prototype.hasOwnProperty.call(groupedContacts, key)) {

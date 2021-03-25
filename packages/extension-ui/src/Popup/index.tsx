@@ -78,13 +78,15 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
  *  */
 
 function initContacts (contacts: Contact[]): GroupedContacts {
-  const sortedContacts = contacts.sort(function (a, b) {
-    if (a.name.toLocaleLowerCase() === b.name.toLocaleLowerCase()) {
-      return a.id - b.id;
-    }
+  const sortedContacts = contacts
+    ? contacts.sort(function (a, b) {
+      if (a.name.toLocaleLowerCase() === b.name.toLocaleLowerCase()) {
+        return a.id - b.id;
+      }
 
-    return a.name.toLocaleLowerCase() - b.name.toLocaleLowerCase();
-  });
+      return a.name.toLocaleLowerCase() - b.name.toLocaleLowerCase();
+    })
+    : [];
   const groupedContacts = {};
 
   sortedContacts.forEach((contact) => {

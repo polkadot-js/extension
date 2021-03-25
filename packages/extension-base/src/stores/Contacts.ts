@@ -25,7 +25,7 @@ const ContactsStore = {
   insert (contact?: Contact): void {
     const contacts = this.get();
     let newContacts = [];
-    const existContact = contacts.find((item) => item.id === contact.id);
+    const existContact = contacts ? contacts.find((item) => item.id === contact.id) : [];
 
     // If exist, change the contact values
     if (existContact) {

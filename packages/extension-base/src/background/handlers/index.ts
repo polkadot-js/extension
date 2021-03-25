@@ -14,8 +14,8 @@ const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
-export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port): void {
-  const isExtension = port.name === PORT_EXTENSION;
+export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
+  const isExtension = port.name === extensionPortName;
   const sender = port.sender as chrome.runtime.MessageSender;
   const from = isExtension
     ? 'extension'

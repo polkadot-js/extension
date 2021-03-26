@@ -295,6 +295,12 @@ export default class State {
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
+    // Do not enqueue duplicate authorization requests.
+    const isDuplicate = Object.values(this.#authRequests)
+      .some((request) => request.idStr === idStr);
+
+    assert(!isDuplicate, `The source ${url} has a pending authorization request`);
+
     if (this.#authUrls[idStr]) {
       // this url was seen in the past
       assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);

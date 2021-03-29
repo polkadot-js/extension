@@ -13470,8 +13470,8 @@ __metadata:
     lodash: ^4.17.21
     query-string: ^6.14.1
     sinon-chrome: ^3.0.1
-    stylelint: ^13.9.0
-    stylelint-config-recommended: ^3.0.0
+    stylelint: ^13.12.0
+    stylelint-config-recommended: ^4.0.0
     stylelint-config-styled-components: ^0.1.1
   languageName: unknown
   linkType: soft

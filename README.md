@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/polkadot-js/extension)
+
 [![polkadotjs](https://img.shields.io/badge/polkadot-js-orange?style=flat-square)](https://polkadot.js.org)
 ![license](https://img.shields.io/badge/License-Apache%202.0-blue?logo=apache&style=flat-square)
 [![npm](https://img.shields.io/npm/v/@polkadot/extension?logo=npm&style=flat-square)](https://www.npmjs.com/package/@polkadot/extension)

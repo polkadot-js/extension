@@ -3,12 +3,13 @@
 
 import type { ThemeProps } from '../types';
 
-import { faArrowLeft, faCog, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faCog, faPlusCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import logo from '../assets/pjs.svg';
+import { ActionContext } from '../components';
 import Link from '../components/Link';
 import useOutsideClick from '../hooks/useOutsideClick';
 import MenuAdd from './MenuAdd';
@@ -19,12 +20,18 @@ interface Props extends ThemeProps {
   className?: string;
   showAdd?: boolean;
   showBackArrow?: boolean;
+  showContactAdd?: boolean;
+  showContactDelete?: boolean;
   showSettings?: boolean;
   smallMargin?: boolean;
   text?: React.ReactNode;
+  backTo?: string;
+  toggleDelete?: () => null;
 }
 
-function Header ({ children, className = '', showAdd, showBackArrow, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
+function Header ({ backTo = '/', children, className = '', showAdd, showBackArrow, showContactAdd, showContactDelete, showSettings, smallMargin = false, text, toggleDelete }: Props): React.ReactElement<Props> {
+  const onAction = useContext(ActionContext);
+
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
   const addRef = useRef(null);
@@ -48,6 +55,12 @@ function Header ({ children, className = '', showAdd, showBackArrow, showSetting
     []
   );
 
+  const _goToAddContact = useCallback(
+    () => {
+      onAction('add-contact');
+    }, [onAction]
+  );
+
   return (
     <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
       <div className='container'>
@@ -56,7 +69,7 @@ function Header ({ children, className = '', showAdd, showBackArrow, showSetting
             ? (
               <Link
                 className='backlink'
-                to='/'
+                to={backTo}
               >
                 <FontAwesomeIcon
                   className='arrowLeftIcon'
@@ -74,6 +87,34 @@ function Header ({ children, className = '', showAdd, showBackArrow, showSetting
           <span className='logoText'>{text || 'polkadot{.js}'}</span>
         </div>
         <div className='popupMenus'>
+          {
+            showContactAdd && (
+              <div
+                className='popupToggle'
+                onClick={_goToAddContact}
+              >
+                <FontAwesomeIcon
+                  className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
+                  icon={faPlusCircle}
+                  size='lg'
+                />
+              </div>
+            )
+          }
+          {
+            showContactDelete && (
+              <div
+                className='popupToggle'
+                onClick={toggleDelete}
+              >
+                <FontAwesomeIcon
+                  className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
+                  icon={faTrashAlt}
+                  size='lg'
+                />
+              </div>
+            )
+          }
           {showAdd && (
             <div
               className='popupToggle'

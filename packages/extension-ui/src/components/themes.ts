@@ -43,7 +43,9 @@ const darkTheme = {
   readonlyInputBackground: '#1A1B20',
   subTextColor: '#DDD',
   textColor: '#FFFFFF',
-  textColorDanger: '#FF8686'
+  textColorDanger: '#FF8686',
+  groupBackround: '#FF7D01',
+  contactsBackgroun: 'rgb(123, 123, 123)'
 };
 
 export declare type Theme = typeof darkTheme;
@@ -73,7 +75,9 @@ const lightTheme: Theme = {
   readonlyInputBackground: '#FFF',
   subTextColor: '#454545',
   textColor: '#242529',
-  textColorDanger: '#F24A4A'
+  textColorDanger: '#F24A4A',
+  groupBackround: 'rgb(221, 225, 235)',
+  contactsBackgroun: 'rgb(129, 138, 161)'
 };
 
 export const themes = {

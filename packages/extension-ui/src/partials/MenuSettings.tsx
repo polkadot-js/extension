@@ -3,12 +3,13 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
+import ContactsIcon from '../assets/contacts.svg';
 import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
@@ -74,6 +75,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     }, [onAction]
   );
 
+  const _goToContacts = useCallback(
+    () => {
+      onAction('contacts');
+    }, [onAction]
+  );
+
   return (
     <Menu
       className={className}
@@ -97,6 +104,22 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           icon={faTasks}
           onClick={_goToAuthList}
           text={t<string>('Manage Website Access')}
+        />
+      </MenuItem>
+      <MenuDivider/>
+      <MenuItem className='setting'>
+        <ActionText
+          className='manageWebsiteAccess contacts'
+          customIcon={(
+            <div className='contactsIcon'>
+              <Svg
+                className='contactsSvg'
+                src={ContactsIcon}
+              />
+            </div>
+          )}
+          onClick={_goToContacts}
+          text={t<string>('Contacts')}
         />
       </MenuItem>
       <MenuDivider/>
@@ -174,6 +197,21 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       top: 4px;
       width: 20px;
     }
+  }
+
+  .contacts {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .contactsIcon {
+    display: flex;
+    align-items: center;
+    margin-right: 3px;
+  }
+
+  .contactsSvg {
+    background: ${theme.contactsBackgroun} !important;
   }
 
   > .setting {

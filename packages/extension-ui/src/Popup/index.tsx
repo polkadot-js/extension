@@ -1,24 +1,28 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, Contact, GroupedContacts, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
+import { ContactsStore } from '@polkadot/extension-base/stores';
 import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary, Loading } from '../components';
-import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
+import { AccountContext, ActionContext, AuthorizeReqContext, ContactsContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { buildHierarchy } from '../util/buildHierarchy';
+import AddContact from './Contacts/AddContact';
+import Delete from './Contacts/Delete';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
+import Contacts from './Contacts';
 import CreateAccount from './CreateAccount';
 import Derive from './Derive';
 import Export from './Export';
@@ -63,6 +67,41 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
+/**
+ * Format contacts struct:
+ * [{ id: '', address: '', name: '', note: '', network: '' }, ...]
+ * =>
+ * {
+ *    'A': [{ id: '', address: '', name: '', note: '', network: '' }, ...],
+ *    'B': [{ id: '', address: '', name: '', note: '', network: '' }, ...],
+ * }
+ *  */
+
+function initContacts (contacts: Contact[]): GroupedContacts {
+  const sortedContacts = contacts
+    ? contacts.sort(function (a, b) {
+      if (a.name.toLocaleLowerCase() === b.name.toLocaleLowerCase()) {
+        return a.id - b.id;
+      }
+
+      return a.name.toLocaleLowerCase() - b.name.toLocaleLowerCase();
+    })
+    : [];
+  const groupedContacts = {};
+
+  sortedContacts.forEach((contact) => {
+    const key = contact.name.toUpperCase()[0];
+
+    if (Object.prototype.hasOwnProperty.call(groupedContacts, key)) {
+      groupedContacts[key].push(contact);
+    } else {
+      groupedContacts[key] = [contact];
+    }
+  });
+
+  return groupedContacts as GroupedContacts;
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -73,6 +112,7 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
+  const [contacts, setContacts] = useState<GroupedContacts>({});
 
   const _onAction = (to?: string): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -95,12 +135,21 @@ export default function Popup (): React.ReactElement {
       setCameraOn(settings.camera === 'on');
     });
 
+    ContactsStore.on('change', (newContacts): void => {
+      setContacts(initContacts(newContacts));
+    });
+
     _onAction();
   }, []);
 
   useEffect((): void => {
     setAccountCtx(initAccountContext(accounts || []));
   }, [accounts]);
+
+  useEffect((): void => {
+    // initContacts(ContactsStore.get());
+    setContacts(initContacts(ContactsStore.get()));
+  }, []);
 
   useEffect((): void => {
     requestMediaAccess(cameraOn)
@@ -131,28 +180,32 @@ export default function Popup (): React.ReactElement {
               <MediaContext.Provider value={cameraOn && mediaAllowed}>
                 <MetadataReqContext.Provider value={metaRequests}>
                   <SigningReqContext.Provider value={signRequests}>
-                    <ToastProvider>
-                      <Switch>
-                        <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
-                        <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
-                        <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
-                        <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
-                        <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route>
-                        <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
-                        <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
-                        <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
-                        <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
-                        <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
-                        <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
-                        <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
-                        <Route
-                          exact
-                          path='/'
-                        >
-                          {Root}
-                        </Route>
-                      </Switch>
-                    </ToastProvider>
+                    <ContactsContext.Provider value={contacts}>
+                      <ToastProvider>
+                        <Switch>
+                          <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                          <Route path='/contacts'>{wrapWithErrorBoundary(<Contacts />, 'contacts')}</Route>
+                          <Route path='/add-contact'>{wrapWithErrorBoundary(<AddContact />, 'add-contact')}</Route>
+                          <Route path='/delete-contact'>{wrapWithErrorBoundary(<Delete />, 'delete-contact')}</Route>
+                          <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
+                          <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
+                          <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
+                          <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
+                          <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
+                          <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                          <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
+                          <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
+                          <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                          <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
+                          <Route
+                            exact
+                            path='/'
+                          >
+                            {Root}
+                          </Route>
+                        </Switch>
+                      </ToastProvider>
+                    </ContactsContext.Provider>
                   </SigningReqContext.Provider>
                 </MetadataReqContext.Provider>
               </MediaContext.Provider>

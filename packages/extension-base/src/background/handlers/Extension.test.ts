@@ -69,8 +69,8 @@ describe('Extension', () => {
       password
     }, {} as chrome.runtime.Port);
 
-    expect(result.exportedJson).toContain(address);
-    expect(result.exportedJson).toContain('"encoded"');
+    expect(result.exportedJson.address).toBe(address);
+    expect(result.exportedJson.encoded).toBeDefined();
   });
 
   describe('account derivation', () => {

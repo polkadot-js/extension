@@ -29,7 +29,7 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: ({ meta: { name: 'account_name' } }) as unknown as KeyringPair$Json });
+    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(

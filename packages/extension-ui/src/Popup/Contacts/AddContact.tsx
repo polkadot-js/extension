@@ -12,13 +12,12 @@ import { Contact } from '@polkadot/extension-base/background/types';
 import { ContactsStore } from '@polkadot/extension-base/stores';
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { hexToU8a, isHex } from '@polkadot/util';
+import { base64Decode, checkAddressChecksum } from '@polkadot/util-crypto';
 
 import { ActionBar, ActionContext, ActionText, Button, InputWithLabel } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import chains from '../../util/chains';
-
-const bs58 = require('bs58');
 
 /**
  * Get address prefix
@@ -29,11 +28,11 @@ const bs58 = require('bs58');
  * @param address
  */
 function getAddressPrefix (address: string): number {
-  const bytes = bs58.decode(address);
-  const hex = bytes.toString('hex');
-  const prefix = `${hex[0]}${hex[1]}`;
-
-  return parseInt(prefix, 16);
+  try {
+    return checkAddressChecksum(base64Decode(address))[3];
+  } catch {
+    return -1;
+  }
 }
 
 /**

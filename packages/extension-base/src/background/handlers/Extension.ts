@@ -3,6 +3,7 @@
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
@@ -31,6 +32,10 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
     ...meta,
     type
   }));
+}
+
+function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
+  return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
 
 export default class Extension {
@@ -347,6 +352,21 @@ export default class Extension {
 
     if (pair.isLocked) {
       pair.decodePkcs8(password);
+    }
+
+    const { payload } = request;
+
+    if (isJsonPayload(payload)) {
+      // Get the metadata for the genesisHash
+      const currentMetadata = this.#state.knownMetadata.find((meta: MetadataDef) =>
+        meta.genesisHash === payload.genesisHash);
+
+      // set the registry before calling the sign function
+      registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
+
+      if (currentMetadata) {
+        registry.register(currentMetadata?.types);
+      }
     }
 
     const result = request.sign(registry, pair);

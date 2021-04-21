@@ -79,11 +79,11 @@ export async function tieAccount (address: string, genesisHash: string | null): 
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }
 
-export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
+export async function exportAccount (address: string, password: string): Promise<{ exportedJson: KeyringPair$Json }> {
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
-export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: string }> {
+export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
   return sendMessage('pri(accounts.batchExport)', { addresses, password });
 }
 

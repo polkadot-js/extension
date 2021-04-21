@@ -79,7 +79,7 @@ export interface RequestSignatures {
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
-  'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountExport]
+  'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
   'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
@@ -352,7 +352,11 @@ export interface ResponseSeedValidate {
 }
 
 export interface ResponseAccountExport {
-  exportedJson: string;
+  exportedJson: KeyringPair$Json;
+}
+
+export interface ResponseAccountsExport {
+  exportedJson: KeyringPairs$Json;
 }
 
 export type ResponseRpcListProviders = ProviderList;

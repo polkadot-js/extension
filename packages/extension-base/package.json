@@ -9,10 +9,10 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.13.10",
-    "@polkadot/api": "^4.4.1",
+    "@polkadot/api": "^4.6.3-8",
     "@polkadot/extension-inject": "^0.37.3-15",
-    "@polkadot/keyring": "^6.0.5",
-    "@polkadot/phishing": "^0.6.72",
-    "@polkadot/ui-keyring": "^0.72.1"
+    "@polkadot/keyring": "^6.2.2-7",
+    "@polkadot/phishing": "^0.6.104",
+    "@polkadot/ui-keyring": "^0.74.2-0"
   }
 }

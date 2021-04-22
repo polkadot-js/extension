@@ -16,7 +16,7 @@ import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
-  className? : string;
+  className?: string;
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
 }

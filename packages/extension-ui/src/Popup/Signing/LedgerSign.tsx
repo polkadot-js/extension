@@ -14,7 +14,7 @@ import useTranslation from '../../hooks/useTranslation';
 
 interface Props {
   accountIndex?: number;
-  addressOffset? : number;
+  addressOffset?: number;
   className?: string;
   error: string | null;
   genesisHash?: string;

@@ -57,7 +57,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:7.13.16, @babel/core@npm:>=7.9.0, @babel/core@npm:^7.1.0, @babel/core@npm:^7.13.14, @babel/core@npm:^7.13.16, @babel/core@npm:^7.7.5":
+"@babel/core@npm:7.13.16, @babel/core@npm:>=7.9.0, @babel/core@npm:^7.1.0, @babel/core@npm:^7.13.16, @babel/core@npm:^7.7.5":
   version: 7.13.16
   resolution: "@babel/core@npm:7.13.16"
   dependencies:
@@ -2080,11 +2080,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
-    "@babel/runtime": ^7.13.10
+    "@babel/runtime": ^7.13.17
     "@polkadot/api": ^4.6.3-8
     "@polkadot/extension-inject": ^0.37.3-15
     "@polkadot/keyring": ^6.2.2-7
-    "@polkadot/phishing": ^0.6.104
+    "@polkadot/phishing": ^0.6.105
     "@polkadot/ui-keyring": ^0.74.2-0
   languageName: unknown
   linkType: soft
@@ -2093,7 +2093,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
-    "@babel/runtime": ^7.13.10
+    "@babel/runtime": ^7.13.17
     "@polkadot/networks": ^6.2.2-7
   peerDependencies:
     "@polkadot/api": "*"
@@ -2104,7 +2104,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
-    "@babel/runtime": ^7.13.10
+    "@babel/runtime": ^7.13.17
     "@polkadot/extension-inject": ^0.37.3-15
     "@polkadot/util": ^6.2.2-7
     "@polkadot/util-crypto": ^6.2.2-7
@@ -2119,8 +2119,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
-    "@babel/runtime": ^7.13.10
-    "@types/chrome": ^0.0.134
+    "@babel/runtime": ^7.13.17
+    "@types/chrome": ^0.0.135
     "@types/firefox-webext-browser": ^82.0.0
   peerDependencies:
     "@polkadot/api": "*"
@@ -2131,7 +2131,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
-    "@babel/runtime": ^7.13.10
+    "@babel/runtime": ^7.13.17
     "@fortawesome/fontawesome-svg-core": ^1.2.35
     "@fortawesome/free-brands-svg-icons": ^5.15.3
     "@fortawesome/free-regular-svg-icons": ^5.15.3
@@ -2156,7 +2156,7 @@ __metadata:
     "@types/react-router-dom": ^5.1.7
     "@types/sinon-chrome": ^2.2.10
     "@types/styled-components": ^5.1.9
-    "@wojtekmaj/enzyme-adapter-react-17": ^0.6.0
+    "@wojtekmaj/enzyme-adapter-react-17": ^0.6.1
     enzyme: ^3.11.0
     enzyme-adapter-react-16: ^1.15.6
     file-saver: ^2.0.5
@@ -2164,7 +2164,7 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-dropzone: ^11.3.2
-    react-i18next: ^11.8.12
+    react-i18next: ^11.8.13
     react-is: ^17.0.2
     react-router: ^5.2.0
     react-router-dom: ^5.2.0
@@ -2177,7 +2177,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
-    "@babel/runtime": ^7.13.10
+    "@babel/runtime": ^7.13.17
     "@polkadot/dev": ^0.62.9
     "@polkadot/extension-base": ^0.37.3-15
     "@polkadot/extension-inject": ^0.37.3-15
@@ -2193,9 +2193,9 @@ __metadata:
     path-browserify: ^1.0.1
     process: ^0.11.10
     stream-browserify: ^3.0.0
-    thread-loader: ^3.0.1
+    thread-loader: ^3.0.3
     url-loader: ^4.1.1
-    webpack: ^5.31.0
+    webpack: ^5.35.0
     webpack-cli: ^4.6.0
     webpack-extension-manifest-plugin: ^0.7.0
   languageName: unknown
@@ -2290,7 +2290,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.6.104":
+"@polkadot/phishing@npm:^0.6.105":
   version: 0.6.105
   resolution: "@polkadot/phishing@npm:0.6.105"
   dependencies:
@@ -2768,13 +2768,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:*, @types/chrome@npm:^0.0.134":
-  version: 0.0.134
-  resolution: "@types/chrome@npm:0.0.134"
+"@types/chrome@npm:*, @types/chrome@npm:^0.0.135":
+  version: 0.0.135
+  resolution: "@types/chrome@npm:0.0.135"
   dependencies:
     "@types/filesystem": "*"
     "@types/har-format": "*"
-  checksum: f84d0833e259bec5fd650becc9d4b2cbf3faf54481f6fc5505f92902bf571d0ea0ef724f28ea6b8ea9d370eba6a8ea726695f0124966c63ab3ff0c044de02f98
+  checksum: 0619796ce1a174d807d82c412f4c988447d3b3f4195a993dd88166864ed568623e8bad9f7aaae96c99b2cefcf9532ead978ae36ade21dc6dfd8435a34db277ec
   languageName: node
   linkType: hard
 
@@ -2817,10 +2817,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:*, @types/estree@npm:^0.0.46":
-  version: 0.0.46
-  resolution: "@types/estree@npm:0.0.46"
-  checksum: 69fcf647706f5b6a475ec2f9aacf73b40866f577eef6c6f33de95cc3b4897381c2a8257646f13cd5d91fffc5debfe6289b6864ba29ad349ae68703f8b993c9f6
+"@types/estree@npm:*, @types/estree@npm:^0.0.47":
+  version: 0.0.47
+  resolution: "@types/estree@npm:0.0.47"
+  checksum: 28cba548c7b61855f4ff0c20146512e71fb578253e3cb24baf1acf660c626a8a271f99848e8a8c4e0e87f177cfce28e8d1fcecb65a4aad4a92ba48fd73179289
   languageName: node
   linkType: hard
 
@@ -3458,9 +3458,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wojtekmaj/enzyme-adapter-react-17@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "@wojtekmaj/enzyme-adapter-react-17@npm:0.6.0"
+"@wojtekmaj/enzyme-adapter-react-17@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "@wojtekmaj/enzyme-adapter-react-17@npm:0.6.1"
   dependencies:
     "@wojtekmaj/enzyme-adapter-utils": ^0.1.0
     enzyme-shallow-equal: ^1.0.0
@@ -3474,7 +3474,7 @@ __metadata:
     enzyme: ^3.0.0
     react: ^17.0.0-0
     react-dom: ^17.0.0-0
-  checksum: 5aa055cd9d29dc39537ce05120d5dc7362a4318034486533cb7fc430ca9e2c91dad57764d403b1d1fa20aff9abb41743b2e87e0622590b792712b199c476ae17
+  checksum: 5ffce75cd5ecdf7074060a374cefb586f8dc07808768cf0163b67462d20e9f784b3a65b0e27ea93953ced3af37182779c7847608e6d3933726d53e7fd7d34fa5
   languageName: node
   linkType: hard
 
@@ -6842,13 +6842,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"enhanced-resolve@npm:^5.3.2, enhanced-resolve@npm:^5.7.0":
-  version: 5.7.0
-  resolution: "enhanced-resolve@npm:5.7.0"
+"enhanced-resolve@npm:^5.3.2, enhanced-resolve@npm:^5.8.0":
+  version: 5.8.0
+  resolution: "enhanced-resolve@npm:5.8.0"
   dependencies:
     graceful-fs: ^4.2.4
     tapable: ^2.2.0
-  checksum: 545cfa659e9cdccf1240bccbbd1791db7ec589979d71b35df5aeaf872dd8d13fab379ad73fa960f4cb32963b85492792c0fb0866f484043740014824ae6088b9
+  checksum: a3e1131c9ba0dd6f8276f068ddac4e6469d824ee8132f748e2734722b9f25360f4cb5a7fbec1cab8cd56815a6762e0bb1b8d088cbdf2a276d30d573ac5528bbb
   languageName: node
   linkType: hard
 
@@ -8773,12 +8773,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html-parse-stringify2@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "html-parse-stringify2@npm:2.0.1"
+"html-parse-stringify@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "html-parse-stringify@npm:3.0.0"
   dependencies:
-    void-elements: ^2.0.1
-  checksum: 71159c76d54e7e8c1dad808b7ed3f3410e7846b496e3910f0c14f78ade875477b3f6b320ee1259ba5a7689a7ba61bee0b23f9f50ae1d33189de73bf436fb2a52
+    void-elements: 3.1.0
+  checksum: bf35f8560cd90b872b8c68484824d3de4e2e838eb8f4e532f7393d5a8f8a64ddf9093111b77178d7097db31485c3b73f05a01fdbc94f64a746b175f002bbbf17
   languageName: node
   linkType: hard
 
@@ -12790,16 +12790,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^11.8.12":
-  version: 11.8.12
-  resolution: "react-i18next@npm:11.8.12"
+"react-i18next@npm:^11.8.13":
+  version: 11.8.13
+  resolution: "react-i18next@npm:11.8.13"
   dependencies:
     "@babel/runtime": ^7.13.6
-    html-parse-stringify2: ^2.0.1
+    html-parse-stringify: ^3.0.0
   peerDependencies:
     i18next: ">= 19.0.0"
     react: ">= 16.8.0"
-  checksum: dfb947c8ece979b9007b0c49fd5014c442ac3a60230487b71e1a2f438c88ad77f59bc5a2860a741f5f8086bad37289bbee31de4e3f8c482ca12e97f638530b10
+  checksum: 6ff531811ae872a52f97dc852aef5fd69a8cce1f63a6a9163f2b84b1f7395b15ab9cf62829450689e69e6edad4c672ed2f18f68d444d0ec752010f79cb265f37
   languageName: node
   linkType: hard
 
@@ -13551,7 +13551,7 @@ resolve@^2.0.0-next.3:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@babel/core": ^7.13.14
+    "@babel/core": ^7.13.16
     "@polkadot/dev": ^0.62.9
     "@types/jest": ^26.0.22
     i18next-scanner: ^3.0.0
@@ -14816,16 +14816,18 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"thread-loader@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "thread-loader@npm:3.0.1"
+"thread-loader@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "thread-loader@npm:3.0.3"
   dependencies:
+    json-parse-better-errors: ^1.0.2
     loader-runner: ^4.1.0
     loader-utils: ^2.0.0
     neo-async: ^2.6.2
+    schema-utils: ^3.0.0
   peerDependencies:
     webpack: ^4.27.0 || ^5.0.0
-  checksum: ad595a661115f29e44ea99661a428e70870e7f868c23f0b38963863a693cabb5fa16946bdbc58fa0dd12030e79d61fe06ab99bf4ccac9c174f9c731adac800b4
+  checksum: eea7ed65c4e191bdf526f69879ce51a6368733bdcfd6901cece07c30b72bcead541f6f89cbb4720227b0176db272326469f2b5c77580b27ea691aa87e9b39924
   languageName: node
   linkType: hard
 
@@ -15653,10 +15655,10 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"void-elements@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "void-elements@npm:2.0.1"
-  checksum: 768d7e08534922455d0e87c66426123920f4d26d88e9c3dc430469e4ce1c11920ca8e2aea7794e52916524d55c3c7820efc20d3f5ce6b749036d989adef1cdd9
+"void-elements@npm:3.1.0":
+  version: 3.1.0
+  resolution: "void-elements@npm:3.1.0"
+  checksum: ed0f78f1434f4a5588078861815b3ebdbb0913e5129c3f1b37a3408a9f7c772d28702846316734e758ba40cad4e85371e50160d92d7968b86f12bf7227a1c6c9
   languageName: node
   linkType: hard
 
@@ -15799,19 +15801,19 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.31.0":
-  version: 5.31.0
-  resolution: "webpack@npm:5.31.0"
+"webpack@npm:^5.35.0":
+  version: 5.35.0
+  resolution: "webpack@npm:5.35.0"
   dependencies:
     "@types/eslint-scope": ^3.7.0
-    "@types/estree": ^0.0.46
+    "@types/estree": ^0.0.47
     "@webassemblyjs/ast": 1.11.0
     "@webassemblyjs/wasm-edit": 1.11.0
     "@webassemblyjs/wasm-parser": 1.11.0
     acorn: ^8.0.4
     browserslist: ^4.14.5
     chrome-trace-event: ^1.0.2
-    enhanced-resolve: ^5.7.0
+    enhanced-resolve: ^5.8.0
     es-module-lexer: ^0.4.0
     eslint-scope: ^5.1.1
     events: ^3.2.0
@@ -15831,7 +15833,7 @@ resolve@^2.0.0-next.3:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: a419dff80c83969a28f0c130f003487a570870b3bde44a3bcca543f5d052b8c6dd5edd0e330251a632c1eb3bc85944fa42fc7159d18abf210c47189f9da56fd9
+  checksum: 4a86e3435e51846d80a552e64596b7cb6c8f316841fa1a0224071250562fc965f333571334222b00b1f7d7c0c48dc4559e39e146a51d842bab88185b72de09b2
   languageName: node
   linkType: hard
 

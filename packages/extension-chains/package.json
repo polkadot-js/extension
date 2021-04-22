@@ -8,8 +8,8 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.13.10",
-    "@polkadot/networks": "^6.0.5"
+    "@babel/runtime": "^7.13.17",
+    "@polkadot/networks": "^6.2.2-7"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

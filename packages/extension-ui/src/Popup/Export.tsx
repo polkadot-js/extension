@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
@@ -43,12 +44,9 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
 
       exportAccount(address, pass)
         .then(({ exportedJson }) => {
-          const element = document.createElement('a');
-          const { meta } = JSON.parse(exportedJson) as { meta: { name: string } };
+          const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-          element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
-          element.download = `${meta.name}_exported_account_${Date.now()}.json`;
-          element.click();
+          saveAs(blob, `${address}.json`);
 
           onAction('/');
         })

@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
@@ -44,11 +45,9 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
 
       exportAccounts(accounts.map((account) => account.address), pass)
         .then(({ exportedJson }) => {
-          const element = document.createElement('a');
+          const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
-          element.href = `data:text/plain;charset=utf-8,${exportedJson}`;
-          element.download = `batch_exported_account_${Date.now()}.json`;
-          element.click();
+          saveAs(blob, `batch_exported_account_${Date.now()}.json`);
 
           onAction('/');
         })

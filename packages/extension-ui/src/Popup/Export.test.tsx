@@ -10,6 +10,8 @@ import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
 
+import { KeyringPair$Json } from '@polkadot/keyring/types';
+
 import { Button, themes } from '../components';
 import * as messaging from '../messaging';
 import { flushAllPromises } from '../testHelpers';
@@ -27,7 +29,7 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
+    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(

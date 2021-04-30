@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.7.1",
+    "@polkadot/api": "^4.7.3-3",
     "@polkadot/keyring": "^6.3.1",
     "@polkadot/networks": "^6.3.1",
-    "@polkadot/types": "^4.7.1",
+    "@polkadot/types": "^4.7.3-3",
     "@polkadot/util": "^6.3.1",
     "@polkadot/util-crypto": "^6.3.1",
     "@polkadot/x-fetch": "^6.3.1",
@@ -37,9 +37,9 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.16",
-    "@polkadot/dev": "^0.62.10",
-    "@types/jest": "^26.0.22",
+    "@babel/core": "^7.14.0",
+    "@polkadot/dev": "^0.62.11",
+    "@types/jest": "^26.0.23",
     "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",
     "stylelint": "^13.13.0",

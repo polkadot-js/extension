@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -32,7 +32,7 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .itemTitle {
       margin: 0;
       width: 100%;
-      font-size: 10px;
+      font-size: ${theme.inputLabelFontSize};
       line-height: 14px;
       letter-spacing: 0.04em;
       text-transform: uppercase;

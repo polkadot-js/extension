@@ -1,5 +1,77 @@
 # CHANGELOG
 
+## 0.37.3-x
+
+**Important** In the 6.0 version the default package type has been changed to ESM modules by default.
+**Important** Not published to the stored, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
+
+Contributed:
+
+- Support IPFS/IPNS uls (thanks to https://github.com/carumusan)
+
+Changes:
+
+- Bump `@polkadot/api` & `@polkadot/util` to latest released versions
+
+
+## 0.37.2 Feb 28, 2021
+
+**Important** Not published to the stored, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
+
+Contributed:
+
+- Adjust tests to get rid of warnings (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Bump `@polkadot/api` & `@polkadot/util` to latest released versions
+
+
+## 0.37.1 Feb 10, 2021
+
+Contributed:
+
+- Ensure accounts check against raw public keys (Thanks to https://github.com/yuzhiyou1990)
+- Add support for Ledger devices (Thanks to https://github.com/Tbaut)
+- Add network selectors on the creation of all accounts (Thanks to https://github.com/Tbaut)
+- Add explicit derivation field on seed imports (Thanks to https://github.com/Tbaut)
+- Adjust slider color for dark theme (Thanks to https://github.com/Tbaut)
+- Expand and cleanup tests (Thanks to https://github.com/Tbaut)
+- Allow custom chains to be selected as tie-to chains (Thanks to https://github.com/Tbaut)
+- Various UI adjustments for consistency (Thanks to https://github.com/Tbaut)
+- Update i18n fr (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Support for latest JS APIs
+- Adjust phishing detection to check newly opened tabs
+
+
+## 0.36.1 Jan 5, 2021
+
+Contributed:
+
+- Allow for the management of per-site approvals (Thanks to https://github.com/Tbaut)
+- Add support for Ethereum account imports (Thanks to https://github.com/Tbaut)
+- Split account derivation and from-seed creation flows (Thanks to https://github.com/Tbaut)
+- Fix overlapping error labels (Thanks to https://github.com/Tbaut)
+- Rework JSON restoration for consistency (Thanks to https://github.com/Tbaut)
+- Leverage cache for phishing detection (Thanks to https://github.com/Tbaut)
+- Allow ecdsa accounts to be injected (Thanks to https://github.com/Tbaut)
+- Adjust display for overly long names (Thanks to https://github.com/Tbaut)
+- Ensure that attached chain/prefix is always used on accounts (Thanks to https://github.com/Tbaut)
+- Show account name (as entered) in creation screens (Thanks to https://github.com/Tbaut)
+- show wrong password error on export screen (Thanks to https://github.com/Tbaut)
+- Add new UI tests and fix skipped tests (Thanks to https://github.com/Tbaut)
+- Additional fr translations (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Swap to using Webpack 5 for reproducible builds
+- Swap to using TypeScript type imports
+- Hide parent/derivation-path when account is not derived
+
+
 ## 0.35.1 Nov 29, 2020
 
 Contributed:

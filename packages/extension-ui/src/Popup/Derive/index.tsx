@@ -1,13 +1,13 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { AccountContext, ActionContext, Address, BackButton, ButtonArea, NextStepButton, VerticalSpace } from '../../components';
+import { AccountContext, AccountNamePasswordCreation, ActionContext, Address } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
-import { HeaderWithSteps, Name, Password } from '../../partials';
+import { HeaderWithSteps } from '../../partials';
 import SelectParent from './SelectParent';
 
 interface Props {
@@ -35,7 +35,6 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
   const [name, setName] = useState<string | null>(null);
-  const [password, setPassword] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
 
   const parentGenesis = useMemo(
@@ -43,7 +42,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
     [accounts, parentAddress]
   );
 
-  const _onCreate = useCallback(() => {
+  const _onCreate = useCallback((name: string, password: string) => {
     if (!account || !name || !password || !parentPassword) {
       return;
     }
@@ -55,7 +54,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
         setIsBusy(false);
         console.error(error);
       });
-  }, [account, name, password, onAction, parentAddress, parentGenesis, parentPassword]);
+  }, [account, onAction, parentAddress, parentGenesis, parentPassword]);
 
   const _onDerivationConfirmed = useCallback(({ account, parentPassword }: ConfirmState) => {
     setAccount(account);
@@ -89,22 +88,13 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
               name={name}
             />
           </div>
-          <Name
-            isFocused
-            onChange={setName}
+          <AccountNamePasswordCreation
+            buttonLabel={t<string>('Create derived account')}
+            isBusy={isBusy}
+            onBackClick={_onBackClick}
+            onCreate={_onCreate}
+            onNameChange={setName}
           />
-          <Password onChange={setPassword} />
-          <VerticalSpace/>
-          <ButtonArea>
-            <BackButton onClick={_onBackClick}/>
-            <NextStepButton
-              isBusy={isBusy}
-              isDisabled={!password}
-              onClick={_onCreate}
-            >
-              {t<string>('Create derived account')}
-            </NextStepButton>
-          </ButtonArea>
         </>
       )}
     </>

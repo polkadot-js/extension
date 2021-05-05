@@ -1,6 +1,7 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export { default as AccountNamePasswordCreation } from './AccountNamePasswordCreation';
 export { default as ActionBar } from './ActionBar';
 export { default as ActionText } from './ActionText';
 export { default as Address } from './Address';
@@ -14,6 +15,7 @@ export { default as Dropdown } from './Dropdown';
 export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as Icon } from './Icon';
 export { default as Identicon } from './Identicon';
+export { default as InputFilter } from './InputFilter';
 export { default as InputWithLabel } from './InputWithLabel';
 export { default as InputFileWithLabel } from './InputFileWithLabel';
 export { default as Label } from './Label';

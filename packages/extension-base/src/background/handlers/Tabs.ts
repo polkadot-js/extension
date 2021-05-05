@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension authors & contributors
+// Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
@@ -9,10 +9,11 @@ import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
+import { canDerive } from '@polkadot/extension-base/utils';
 import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { assert } from '@polkadot/util';
+import { assert, isNumber } from '@polkadot/util';
 
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
@@ -23,7 +24,7 @@ function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAcc
   return Object
     .values(accounts)
     .filter(({ json: { meta: { isHidden } } }) => !isHidden)
-    .filter(({ type }) => anyType ? true : type && ['ed25519', 'sr25519', 'ecdsa'].includes(type))
+    .filter(({ type }) => anyType ? true : canDerive(type))
     .sort((a, b) => (a.json.meta.whenCreated || 0) - (b.json.meta.whenCreated || 0))
     .map(({ json: { address, meta: { genesisHash, name } }, type }): InjectedAccount => ({
       address,
@@ -140,19 +141,25 @@ export default class Tabs {
     return this.#state.rpcUnsubscribe(request, port);
   }
 
-  private redirectPhishingLanding () {
-    const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}`;
+  private redirectPhishingLanding (phishingWebsite: string): void {
+    const encodedWebsite = encodeURIComponent(phishingWebsite);
+    const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
-    chrome.tabs.update({ url });
-
-    return null;
+    chrome.tabs.query({ url: phishingWebsite }, (tabs) => {
+      tabs
+        .map(({ id }) => id)
+        .filter((id): id is number => isNumber(id))
+        .forEach((id) => chrome.tabs.update(id, { url }));
+    });
   }
 
   private async redirectIfPhishing (url: string): Promise<boolean> {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {
-      this.redirectPhishingLanding();
+      this.redirectPhishingLanding(url);
+
+      return true;
     }
 
     return false;

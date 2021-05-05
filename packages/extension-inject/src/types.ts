@@ -1,8 +1,9 @@
-// Copyright 2019-2020 @polkadot/extension-inject authors & contributors
+// Copyright 2019-2021 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Signer as InjectedSigner, Signer } from '@polkadot/api/types';
 import type { ProviderInterface } from '@polkadot/rpc-provider/types';
+import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 // eslint-disable-next-line no-undef
@@ -63,6 +64,7 @@ export interface MetadataDef extends MetadataDefBase {
   tokenSymbol: string;
   types: Record<string, Record<string, string> | string>;
   metaCalls?: string;
+  userExtensions?: ExtDef;
 }
 
 export interface InjectedMetadataKnown {

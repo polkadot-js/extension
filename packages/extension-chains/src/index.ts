@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-chains authors & contributors
+// Copyright 2019-2021 @polkadot/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
@@ -6,10 +6,10 @@ import type { Chain } from './types';
 
 import { Metadata } from '@polkadot/metadata';
 import { TypeRegistry } from '@polkadot/types';
+import { base64Decode } from '@polkadot/util-crypto';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`
-// import kusama from './kusama';
 
 const definitions = new Map<string, MetadataDef>(
   // [kusama].map((def) => [def.genesisHash, def])
@@ -24,7 +24,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     return cached;
   }
 
-  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types } = definition;
+  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types, userExtensions } = definition;
   const registry = new TypeRegistry();
 
   if (!isPartial) {
@@ -42,7 +42,11 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
 
   if (metaCalls && !isPartial) {
     hasMetadata = true;
-    registry.setMetadata(new Metadata(registry, Buffer.from(metaCalls, 'base64')));
+
+    const metadata = new Metadata(registry, base64Decode(metaCalls));
+    const signedExtensions = metadata.asLatest.extrinsic.signedExtensions.toJSON() as string[];
+
+    registry.setMetadata(metadata, signedExtensions, userExtensions);
   }
 
   const result = {

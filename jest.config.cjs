@@ -1,10 +1,10 @@
-// Copyright 2019-2020 @polkadot/extension authors & contributors
+// Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 const config = require('@polkadot/dev/config/jest.cjs');
 
-module.exports = Object.assign({}, config, {
-  browser: true,
+module.exports = {
+  ...config,
   moduleNameMapper: {
     '@polkadot/extension-(base|chains|dapp|inject|ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
     // eslint-disable-next-line sort-keys
@@ -19,5 +19,6 @@ module.exports = Object.assign({}, config, {
     '<rootDir>/packages/extension-dapp/build',
     '<rootDir>/packages/extension-inject/build',
     '<rootDir>/packages/extension-ui/build'
-  ]
-});
+  ],
+  transformIgnorePatterns: ['/node_modules/(?!(@polkadot|@babel/runtime/helpers/esm/))']
+};

@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension authors & contributors
+// Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable no-use-before-define */
@@ -7,11 +7,13 @@ import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList,
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
+import { AuthUrls } from './handlers/State';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -31,10 +33,12 @@ export interface AccountJson extends KeyringPair$Meta {
   address: string;
   genesisHash?: string | null;
   isExternal?: boolean;
+  isHardware?: boolean;
   isHidden?: boolean;
   name?: string;
   parentAddress?: string;
   suri?: string;
+  type?: KeypairType;
   whenCreated?: number;
 }
 
@@ -71,9 +75,11 @@ export interface SigningRequest {
 export interface RequestSignatures {
   // private/internal requests, i.e. from a popup
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
+  'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
+  'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
   'pri(accounts.forget)': [RequestAccountForget, boolean];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
@@ -81,11 +87,14 @@ export interface RequestSignatures {
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
+  'pri(authorize.list)': [null, ResponseAuthorizeList];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(authorize.toggle)': [string, ResponseAuthorizeList];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
+  'pri(json.batchRestore)': [RequestBatchRestore, void];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
@@ -172,6 +181,15 @@ export interface RequestAccountCreateSuri {
   type?: KeypairType;
 }
 
+export interface RequestAccountCreateHardware {
+  accountIndex: number;
+  address: string;
+  addressOffset: number;
+  genesisHash: string;
+  hardwareType: string;
+  name: string;
+}
+
 export interface RequestAccountChangePassword {
   address: string;
   oldPass: string;
@@ -220,6 +238,11 @@ export interface RequestDeriveValidate {
 
 export interface RequestAccountExport {
   address: string;
+  password: string;
+}
+
+export interface RequestAccountBatchExport {
+  addresses: string[];
   password: string;
 }
 
@@ -329,7 +352,11 @@ export interface ResponseSeedValidate {
 }
 
 export interface ResponseAccountExport {
-  exportedJson: string;
+  exportedJson: KeyringPair$Json;
+}
+
+export interface ResponseAccountsExport {
+  exportedJson: KeyringPairs$Json;
 }
 
 export type ResponseRpcListProviders = ProviderList;
@@ -354,6 +381,11 @@ export interface RequestJsonRestore {
   password: string;
 }
 
+export interface RequestBatchRestore {
+  file: KeyringPairs$Json;
+  password: string;
+}
+
 export interface ResponseJsonRestore {
   error: string | null;
 }
@@ -364,4 +396,9 @@ export interface ResponseJsonGetAccountInfo {
   address: string;
   name: string;
   genesisHash: string;
+  type: KeypairType;
+}
+
+export interface ResponseAuthorizeList {
+  list: AuthUrls;
 }

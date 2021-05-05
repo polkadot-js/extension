@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension authors & contributors
+// Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeyringPair } from '@polkadot/keyring/types';
@@ -15,9 +15,6 @@ export default class RequestExtrinsicSign implements RequestSign {
   }
 
   sign (registry: TypeRegistry, pair: KeyringPair): { signature: string } {
-    // inject the current signed extensions for encoding
-    registry.setSignedExtensions(this.payload.signedExtensions);
-
     return registry
       .createType('ExtrinsicPayload', this.payload, { version: this.payload.version })
       .sign(pair);

@@ -4,11 +4,14 @@
 // import type { Signer } from "@polkadot/api/types";
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 
+// import detectEthereumProvider from '@metamask/detect-provider';
+const detectEthereumProvider = require('@metamask/detect-provider');
 import Web3 from 'web3';
 
-import { 
+import {
   //SignerPayloadJSON, 
-  SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
+  SignerPayloadRaw, SignerResult
+} from '@polkadot/types/types';
 
 //import { TypeRegistry } from '@polkadot/types/create';
 
@@ -21,14 +24,14 @@ interface Web3Window extends InjectedWindow {
 }
 
 // transfor the Web3 accounts into a simple address/name array
-function transformAccounts (accounts: string[]): InjectedAccount[] {
+function transformAccounts(accounts: string[]): InjectedAccount[] {
   return accounts.map((acc, i) => {
     return { address: acc, name: 'MetaMask Address #' + i.toString() };
   });
 }
 
 // add a compat interface of SingleSource to window.injectedWeb3
-function injectWeb3 (win: Web3Window): void {
+function injectWeb3(win: Web3Window): void {
   // let accounts: InjectedAccount[] = [];
 
   // we don't yet have an accounts subscribe on the interface, simply get the
@@ -39,26 +42,28 @@ function injectWeb3 (win: Web3Window): void {
 
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/require-await
+    // // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/require-await
     enable: async (_: string): Promise<Injected> => {
       win.web3 = new Web3(win.ethereum);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      await win.ethereum.enable();
+      // // // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      // await win.ethereum.enable();
 
+      const provider: any = await detectEthereumProvider({ mustBeMetaMask: true });
+      await provider.request({ method: 'eth_requestAccounts' });
       // let mainAccount=(await win.web3.eth.getAccounts())[0]
       return {
         accounts: {
           get: async (): Promise<InjectedAccount[]> => {
             console.log('fetching accounts');
-            console.log(await win.web3.eth.getAccounts());
 
-            return transformAccounts(await win.web3.eth.getAccounts());
+            return transformAccounts(await provider.request({ method: 'eth_requestAccounts' }));
           },
           subscribe: (cb: (accounts: InjectedAccount[]) => void): (() => void) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-            const sub = win.ethereum.on('accountsChanged', function (accounts:string[]) {
+            const sub = provider.on('accountsChanged', function (accounts: string[]) {
               cb(transformAccounts(accounts));
             });
+            // TODO: add onchainchanged
 
             return (): void => {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -74,9 +79,12 @@ function injectWeb3 (win: Web3Window): void {
           //   return { id: 0, signature: await win.web3.eth.sign(raw, payload.address) };
           // },
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
-            console.log('signraw')
-            console.log('signature', await win.web3.eth.sign(raw.data, raw.address));
-            return { id: 0, signature: await win.web3.eth.sign(raw.data, raw.address) };
+            console.log('signraw', raw.data)
+
+            // const msgHashHex =ethUtil.bufferToHex(Buffer.from(testMsg)) //ethUtil.bufferToHex(ethUtil.keccak(Buffer.from(testMsg)))
+            const signature = await provider.request({ method: 'eth_sign', params: [raw.address, raw.data] });
+            console.log('signature', signature);
+            return { id: 0, signature };
           }
         }
       };
@@ -88,7 +96,7 @@ function injectWeb3 (win: Web3Window): void {
 // TODO udpate descr
 // returns the SingleSource instance, as per
 // https://github.com/cennznet/singlesource-extension/blob/f7cb35b54e820bf46339f6b88ffede1b8e140de0/react-example/src/App.js#L19
-export default function initWeb3Source (): Promise<boolean> {
+export default function initWeb3Source(): Promise<boolean> {
   console.log('initWeb3Source');
 
   return new Promise((resolve): void => {

@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -13,13 +13,18 @@ interface Props {
   isDanger?: boolean;
   isDisabled?: boolean;
   onClick?: () => void;
+  title?: string;
   to?: string;
 }
 
-function Link ({ children, className = '', isDisabled, onClick, to }: Props): React.ReactElement<Props> {
+function Link ({ children, className = '', isDisabled, onClick, title, to }: Props): React.ReactElement<Props> {
   if (isDisabled) {
     return (
-      <div className={`${className} isDisabled`}>{children}</div>
+      <div
+        className={`${className} isDisabled`}
+        title={title}>
+        {children}
+      </div>
     );
   }
 
@@ -28,6 +33,7 @@ function Link ({ children, className = '', isDisabled, onClick, to }: Props): Re
       <RouterLink
         className={className}
         onClick={onClick}
+        title={title}
         to={to}
       >
         {children}
@@ -38,6 +44,7 @@ function Link ({ children, className = '', isDisabled, onClick, to }: Props): Re
         className={className}
         href='#'
         onClick={onClick}
+        title={title}
       >
         {children}
       </a>

@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useEffect, useState } from 'react';
@@ -9,22 +9,28 @@ import Warning from './Warning';
 
 interface BasicProps {
   isError?: boolean;
-  value?: string;
+  value?: string | null;
   onChange?: (value: string) => void;
 }
 
 type Props<T extends BasicProps> = T & {
   className?: string;
-  validator: Validator<string>;
   component: React.ComponentType<T>;
-  onValidatedChange: (value: string | null) => void;
   defaultValue?: string;
+  onValidatedChange: (value: string | null) => void;
+  validator: Validator<string>;
 }
 
 function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState(defaultValue || '');
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
   const isMounted = useIsMounted();
+
+  useEffect(() => {
+    if (defaultValue) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue]);
 
   useEffect(() => {
     // Do not show any error on first mount

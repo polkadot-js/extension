@@ -1,15 +1,15 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faExpand } from '@fortawesome/free-solid-svg-icons';
+import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import settings from '@polkadot/ui-settings';
 
-import { ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
+import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
 import { windowOpen } from '../messaging';
@@ -37,6 +37,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const setTheme = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
+  const onAction = useContext(ActionContext);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -67,6 +68,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     []
   );
 
+  const _goToAuthList = useCallback(
+    () => {
+      onAction('auth-list');
+    }, [onAction]
+  );
+
   return (
     <Menu
       className={className}
@@ -78,20 +85,29 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       >
         <Switch
           checked={themeContext.id === themes.dark.id}
-          checkedLabel='Dark'
+          checkedLabel={t<string>('Dark')}
           onChange={_onChangeTheme}
-          uncheckedLabel='Light'
+          uncheckedLabel={t<string>('Light')}
         />
       </MenuItem>
       <MenuDivider />
+      <MenuItem className='setting'>
+        <ActionText
+          className='manageWebsiteAccess'
+          icon={faTasks}
+          onClick={_goToAuthList}
+          text={t<string>('Manage Website Access')}
+        />
+      </MenuItem>
+      <MenuDivider/>
       <MenuItem
         className='setting'
-        title={t<string>('External QR accounts and Access')}
+        title={t<string>('External accounts and Access')}
       >
         <Checkbox
           checked={camera}
-          className='checkbox'
-          label={t<string>('Allow Camera Access')}
+          className='checkbox camera'
+          label={t<string>('Allow QR Camera Access')}
           onChange={setCamera}
         />
       </MenuItem>
@@ -143,12 +159,13 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
   right: 24px;
   user-select: none;
 
-  .openWindow {
+  .openWindow, .manageWebsiteAccess{
     span {
       color: ${theme.textColor};
       font-size: ${theme.fontSize};
       line-height: ${theme.lineHeight};
       text-decoration: none;
+      vertical-align: middle;
     }
 
     ${Svg} {
@@ -165,6 +182,10 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
       line-height: 20px;
       font-size: 15px;
       margin-bottom: 0;
+
+      &.ledger {
+        margin-top: 0.2rem;
+      }
 
       label {
         color: ${theme.textColor};

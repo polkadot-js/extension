@@ -1,17 +1,20 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
-import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
-import allChains from '@polkadot/extension-chains/chains';
 import chrome from '@polkadot/extension-inject/chrome';
+import { MetadataDef } from '@polkadot/extension-inject/types';
+
+import allChains from './util/chains';
+import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +26,6 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
 let idCounter = 0;
@@ -77,8 +79,12 @@ export async function tieAccount (address: string, genesisHash: string | null): 
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }
 
-export async function exportAccount (address: string, password: string): Promise<{ exportedJson: string }> {
+export async function exportAccount (address: string, password: string): Promise<{ exportedJson: KeyringPair$Json }> {
   return sendMessage('pri(accounts.export)', { address, password });
+}
+
+export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
+  return sendMessage('pri(accounts.batchExport)', { addresses, password });
 }
 
 export async function validateAccount (address: string, password: string): Promise<boolean> {
@@ -117,12 +123,20 @@ export async function createAccountExternal (name: string, address: string, gene
   return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
 }
 
-export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType): Promise<boolean> {
-  return sendMessage('pri(accounts.create.suri)', { name, password, suri, type });
+export async function createAccountHardware (address: string, hardwareType: string, accountIndex: number, addressOffset: number, name: string, genesisHash: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.hardware)', { accountIndex, address, addressOffset, genesisHash, hardwareType, name });
+}
+
+export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, type });
+}
+
+export async function getAllMetatdata (): Promise<MetadataDef[]> {
+  return sendMessage('pri(metadata.list)');
 }
 
 export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
@@ -130,11 +144,11 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
     return null;
   }
 
-  let request = metadataGets.get(genesisHash);
+  let request = getSavedMeta(genesisHash);
 
   if (!request) {
     request = sendMessage('pri(metadata.get)', genesisHash || null);
-    metadataGets.set(genesisHash, request);
+    setSavedMeta(genesisHash, request);
   }
 
   const def = await request;
@@ -174,6 +188,14 @@ export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeReques
   return sendMessage('pri(authorize.requests)', null, cb);
 }
 
+export async function getAuthList (): Promise<ResponseAuthorizeList> {
+  return sendMessage('pri(authorize.list)');
+}
+
+export async function toggleAuthorization (url: string): Promise<ResponseAuthorizeList> {
+  return sendMessage('pri(authorize.toggle)', url);
+}
+
 export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(metadata.requests)', null, cb);
 }
@@ -204,4 +226,8 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
 
 export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
   return sendMessage('pri(json.restore)', { file, password });
+}
+
+export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password });
 }

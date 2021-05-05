@@ -1,6 +1,7 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { ThemeProps } from '../types';
 
 import React from 'react';
@@ -10,7 +11,7 @@ import Icon from '@polkadot/react-identicon';
 
 interface Props {
   className?: string;
-  iconTheme?: 'beachball' | 'empty' | 'jdenticon' | 'polkadot' | 'substrate';
+  iconTheme?: IconTheme;
   isExternal?: boolean | null;
   onCopy?: () => void;
   prefix?: number;

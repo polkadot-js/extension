@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-bg authors & contributors
+// Copyright 2019-2021 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
@@ -25,13 +25,15 @@ interface AuthRequest extends Resolver<boolean> {
   url: string;
 }
 
-type AuthUrls = Record<string, {
+export type AuthUrls = Record<string, AuthUrlInfo>;
+
+export interface AuthUrlInfo {
   count: number;
   id: string;
   isAllowed: boolean;
   origin: string;
   url: string;
-}>;
+}
 
 interface MetaRequest extends Resolver<boolean> {
   id: string;
@@ -68,6 +70,8 @@ const WINDOW_OPTS = {
   width: 560
 };
 
+const AUTH_URLS_KEY = 'authUrls';
+
 function getId (): string {
   return `${Date.now()}.${++idCounter}`;
 }
@@ -103,6 +107,12 @@ export default class State {
     this.#metaStore.all((_key: string, def: MetadataDef): void => {
       addMetadata(def);
     });
+
+    // retrieve previously set authorizations
+    const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';
+    const previousAuth = JSON.parse(authString) as AuthUrls;
+
+    this.#authUrls = previousAuth;
   }
 
   public get knownMetadata (): MetadataDef[] {
@@ -139,6 +149,10 @@ export default class State {
       .map(({ account, id, request, url }): SigningRequest => ({ account, id, request, url }));
   }
 
+  public get authUrls (): AuthUrls {
+    return this.#authUrls;
+  }
+
   private popupClose (): void {
     this.#windows.forEach((id: number): void =>
       chrome.windows.remove(id)
@@ -167,6 +181,7 @@ export default class State {
         url
       };
 
+      this.saveCurrentAuthList();
       delete this.#authRequests[id];
       this.updateIconAuth(true);
     };
@@ -181,6 +196,10 @@ export default class State {
         resolve(result);
       }
     };
+  }
+
+  private saveCurrentAuthList () {
+    localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
   }
 
   private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
@@ -220,7 +239,7 @@ export default class State {
   }
 
   private stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:')), `Invalid url ${url}, expected to start with http: or https:`);
+    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');
 
@@ -246,6 +265,18 @@ export default class State {
     }
   }
 
+  public toggleAuthorization (url: string): AuthUrls {
+    const entry = this.#authUrls[url];
+
+    assert(entry, `The source ${url} is not known`);
+
+    const newAllowState = !entry.isAllowed;
+
+    this.#authUrls[url].isAllowed = newAllowState;
+
+    return this.#authUrls;
+  }
+
   private updateIconAuth (shouldClose?: boolean): void {
     this.authSubject.next(this.allAuthRequests);
     this.updateIcon(shouldClose);
@@ -264,7 +295,14 @@ export default class State {
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     const idStr = this.stripUrl(url);
 
+    // Do not enqueue duplicate authorization requests.
+    const isDuplicate = Object.values(this.#authRequests)
+      .some((request) => request.idStr === idStr);
+
+    assert(!isDuplicate, `The source ${url} has a pending authorization request`);
+
     if (this.#authUrls[idStr]) {
+      // this url was seen in the past
       assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return false;

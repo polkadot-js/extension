@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import '../../../../../__mocks__/chrome';
@@ -14,8 +14,10 @@ import { ThemeProvider } from 'styled-components';
 
 import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';
+import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';
 import Extrinsic from './Extrinsic';
+import { westendMetadata } from './metadataMock';
 import Qr from './Qr';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
@@ -24,7 +26,7 @@ import Signing from '.';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-describe.skip('Signing requests', () => {
+describe('Signing requests', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
   let signRequests: SigningRequest[] = [];
@@ -56,58 +58,91 @@ describe.skip('Signing requests', () => {
     wrapper.update();
   };
 
+  const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
+
   beforeEach(async () => {
     jest.spyOn(messaging, 'cancelSignRequest').mockResolvedValue(true);
     jest.spyOn(messaging, 'approveSignPassword').mockResolvedValue(true);
-    signRequests = [{ // 0.031415926500000 DOT -> 5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5
-      account: {
-        address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-        name: 'acc1'
-      },
-      id: '1574174715509.78',
-      request: {
-        payload: {
+    jest.spyOn(messaging, 'isSignLocked').mockResolvedValue({ isLocked: true, remainingTime: 0 });
+    jest.spyOn(MetadataCache, 'getSavedMeta').mockResolvedValue(westendMetadata);
+
+    signRequests = [
+      {
+        account: {
           address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
-          blockHash: '0xc288fbc472dab27d13ce58212eeb1243f460c5b0f9a65e9de97cbbf9bc761cb0',
-          blockNumber: '0x00000000003d8c4a',
-          era: '0xa500',
-          genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-          method: '0x0300ff2c27fb3518d84bfad60f39b2cb5502947746ca5921fd66dccc861bad5c9a65220ba0aa2397921c',
-          nonce: '0x0000000000000000',
-          signedExtensions: [],
-          specVersion: '0x00000070',
-          tip: '0x00000000000000000000000000000000',
-          transactionVersion: '0x00000000',
-          version: 1
+          genesisHash: null,
+          isHidden: false,
+          name: 'acc1',
+          parentAddress: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+          suri: '//0',
+          whenCreated: 1602001346486
         },
-        sign: jest.fn()
-      },
-      url: 'polkadot.js'
-    }, { // 10000000000 nDOT -> 5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj
-      account: {
-        address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-        name: 'acc2'
-      },
-      id: '1574174306604.76',
-      request: {
-        payload: {
-          address: '5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG',
-          blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
-          blockNumber: '0x00000000003d8e9d',
-          era: '0xd501',
-          genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-          method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
-          nonce: '0x0000000000000000',
-          signedExtensions: [],
-          specVersion: '0x00000070',
-          tip: '0x00000000000000000000000000000000',
-          transactionVersion: '0x00000000',
-          version: 1
+        id: '1607347015530.2',
+        request: {
+          payload: {
+            address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
+            blockHash: '0x661f57d206d4fecda0408943427d4d25436518acbff543735e7569da9db6bdd7',
+            blockNumber: '0x0033fa6b',
+            era: '0xb502',
+            genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+            method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+            nonce: '0x00000003',
+            signedExtensions: [
+              'CheckSpecVersion',
+              'CheckTxVersion',
+              'CheckGenesis',
+              'CheckMortality',
+              'CheckNonce',
+              'CheckWeight',
+              'ChargeTransactionPayment'
+            ],
+            specVersion: '0x0000002d',
+            tip: '0x00000000000000000000000000000000',
+            transactionVersion: '0x00000003',
+            version: 4
+          },
+          sign: jest.fn()
         },
-        sign: jest.fn()
+        url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts'
       },
-      url: 'polkadot.js'
-    }];
+      {
+        account: {
+          address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+          genesisHash: null,
+          isHidden: false,
+          name: 'acc 2',
+          suri: '//0',
+          whenCreated: 1602001346486
+        },
+        id: '1607356155395.3',
+        request: {
+          payload: {
+            address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
+            blockHash: '0xcf69b7935b785f90b22d2b36f2227132ef9c5dd33db1dbac9ecdafac05bf9476',
+            blockNumber: '0x0036269a',
+            era: '0xa501',
+            genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+            method: '0x0400cc4e0e2848c488896dd0a24f153070e85e3c83f6199cfc942ab6de29c56c2d7b0700d0ed902e',
+            nonce: '0x00000003',
+            signedExtensions: [
+              'CheckSpecVersion',
+              'CheckTxVersion',
+              'CheckGenesis',
+              'CheckMortality',
+              'CheckNonce',
+              'CheckWeight',
+              'ChargeTransactionPayment'
+            ],
+            specVersion: '0x0000002d',
+            tip: '0x00000000000000000000000000000000',
+            transactionVersion: '0x00000003',
+            version: 4
+          },
+          sign: jest.fn()
+        },
+        url: 'https://polkadot.js.org/apps'
+      }
+    ];
     onActionStub = jest.fn();
     await mountComponent();
   });
@@ -118,29 +153,40 @@ describe.skip('Signing requests', () => {
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
 
-    it('only ArrowRight should be active on first screen', () => {
-      expect(wrapper.find('ArrowLeft').prop('isActive')).toBe(false);
-      expect(wrapper.find('ArrowRight').prop('isActive')).toBe(true);
-      wrapper.find('ArrowLeft').simulate('click');
+    it('only the right arrow should be active on first screen', async () => {
+      expect(wrapper.find('FontAwesomeIcon.arrowLeft')).toHaveLength(1);
+      expect(wrapper.find('FontAwesomeIcon.arrowLeft.active')).toHaveLength(0);
+      expect(wrapper.find('FontAwesomeIcon.arrowRight.active')).toHaveLength(1);
+      wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
     });
 
-    it('should display second request after clicking right arrow', () => {
-      wrapper.find('ArrowRight').simulate('click');
+    it('should display second request after clicking right arrow', async () => {
+      wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[1].id);
     });
 
-    it('only ArrowLeft should be active on second screen', () => {
-      wrapper.find('ArrowRight').simulate('click');
-      expect(wrapper.find('ArrowLeft').prop('isActive')).toBe(true);
-      expect(wrapper.find('ArrowRight').prop('isActive')).toBe(false);
+    it('only the left should be active on second screen', async () => {
+      wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
+      expect(wrapper.find('FontAwesomeIcon.arrowLeft.active')).toHaveLength(1);
+      expect(wrapper.find('FontAwesomeIcon.arrowRight')).toHaveLength(1);
+      expect(wrapper.find('FontAwesomeIcon.arrowRight.active')).toHaveLength(0);
       expect(wrapper.find(TransactionIndex).text()).toBe('2/2');
     });
 
-    it('should display previous request after ArrowLeft has been clicked', () => {
-      wrapper.find('ArrowRight').simulate('click');
-      wrapper.find('ArrowLeft').simulate('click');
+    it('should display previous request after the left arrow has been clicked', async () => {
+      wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+      wrapper.find('FontAwesomeIcon.arrowLeft').simulate('click');
+      await act(flushAllPromises);
+
       expect(wrapper.find(TransactionIndex).text()).toBe('1/2');
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });
@@ -151,28 +197,39 @@ describe.skip('Signing requests', () => {
       signRequests = [{
         account: {
           address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
+          genesisHash: null,
           isExternal: true,
-          name: 'external'
+          isHidden: false,
+          name: 'Dave account on Signer ',
+          whenCreated: 1602085704296
         },
-        id: '1574174306604.76',
+        id: '1607357806151.5',
         request: {
           payload: {
             address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
-            blockHash: '0xf3b92cf71c84762ba1cb59dc4fd192f1824171a96b43bce44ceb0671b378d15a',
-            blockNumber: '0x00000000003d8e9d',
-            era: '0xd501',
-            genesisHash: '0xdcd1346701ca8396496e52aa2785b1748deb6db09551b72159dcb3e08991025b',
-            method: '0x0300ff2a142e8c67a1ddcf6241f4fabf55a0bb0ee41d8a681ab3b3662a75037025967c0700e40b5402',
-            nonce: '0x0000000000000000',
-            signedExtensions: [],
-            specVersion: '0x00000070',
+            blockHash: '0xd2f2dfb56c16af1d0faf5b454153d3199aeb6647537f4161c26a34541c591ec8',
+            blockNumber: '0x00340171',
+            era: '0x1503',
+            genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+            method: '0x0403c6111b239376e5e8b983dc2d2459cbb6caed64cc1d21723973d061ae0861ef690b00b04e2bde6f',
+            nonce: '0x00000000',
+            signedExtensions: [
+              'CheckSpecVersion',
+              'CheckTxVersion',
+              'CheckGenesis',
+              'CheckMortality',
+              'CheckNonce',
+              'CheckWeight',
+              'ChargeTransactionPayment'
+            ],
+            specVersion: '0x0000002d',
             tip: '0x00000000000000000000000000000000',
-            transactionVersion: '0x00000000',
-            version: 1
+            transactionVersion: '0x00000003',
+            version: 4
           },
           sign: jest.fn()
         },
-        url: 'polkadot.js'
+        url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts'
       }];
       await mountComponent();
       expect(wrapper.find(Extrinsic)).toHaveLength(0);
@@ -182,50 +239,102 @@ describe.skip('Signing requests', () => {
 
   describe('Request rendering', () => {
     it('correctly displays request 1', () => {
-      expect(wrapper.find(Address).find('FullAddress').text()).toBe('5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5');
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[0].account.address);
       expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
-        'polkadot.js',
-        'Alexander',
-        '112',
-        '0',
-        'balances.transfer',
-        `{
-  "dest": "5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5",
-  "value": 31415926500000
-}`,
-        ' Transfer some liquid free balance to another account.   `transfer` will set the `FreeBalance` of the sender and receiver.  It will decrease the total issuance of the system by the `TransferFee`.  If the sender\'s account is below the existential deposit as a result  of the transfer, the account will be reaped.   The dispatch origin for this call must be `Signed` by the transactor.',
-        'mortal, valid from #4,033,610 to #4,033,674'
+        'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fwestend-rpc.polkadot.io#/accounts',
+        'Westend',
+        '45',
+        '3',
+        `balances.transferKeepAlive(dest, value)[
+  "5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7",
+  "123.0000 WND"
+]`,
+        'Same as the [`transfer`] call, but with a check that the transfer will not kill the origin account.',
+        'mortal, valid from {{birth}} to {{death}}'
       ]);
     });
 
-    it('correctly displays request 2', () => {
-      wrapper.find('ArrowRight').simulate('click');
-      expect(wrapper.find(Address).find('FullAddress').text()).toBe('5E9nq1yGJJFiP8C75ryD9J2R62q2cesz6NumLnuXRgmuN5DG');
-      expect(wrapper.find(Extrinsic).find('td.data').at(5).text()).toBe(`{
-  "dest": "5D1ss3KFnzNtLzRDfUhqLivzVvt5BDrBnK21dMf1si2twPuj",
-  "value": 10000000000
-}`);
+    it('correctly displays request 2', async () => {
+      wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
+      expect(wrapper.find(Address).find('.fullAddress').text()).toBe(signRequests[1].account.address);
+      expect(wrapper.find(Extrinsic).find('td.data').map((el): string => el.text())).toEqual([
+        'https://polkadot.js.org/apps',
+        'Westend',
+        '45',
+        '3',
+        `balances.transfer(dest, value)[
+  "5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q",
+  "200.0000 mWND"
+]`,
+        'Transfer some liquid free balance to another account.',
+        'mortal, valid from {{birth}} to {{death}}'
+      ]);
     });
   });
 
   describe('Submitting', () => {
-    it('passes request id to cancel call', () => {
-      wrapper.find('CancelButton').find('a').simulate('click');
+    it('passes request id to cancel call', async () => {
+      wrapper.find('.cancelButton').find('a').simulate('click');
+      await act(flushAllPromises);
+
       expect(messaging.cancelSignRequest).toBeCalledWith(signRequests[0].id);
     });
 
-    it('passes request id and password to approve call', () => {
+    it('passes request id and password to approve call', async () => {
       wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
+      await act(flushAllPromises);
+
       wrapper.find(Button).find('button').simulate('click');
-      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, 'hunter1');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, false, 'hunter1');
     });
 
-    it('when last request has been removed/cancelled, shows the previous one', () => {
-      wrapper.find('ArrowRight').simulate('click');
+    it('asks the background to cache the password when the relevant checkbox is checked', async () => {
+      check(wrapper.find('input[type="checkbox"]'));
+      await act(flushAllPromises);
+
+      wrapper.find(Input).simulate('change', { target: { value: 'hunter1' } });
+      await act(flushAllPromises);
+
+      wrapper.find(Button).find('button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(messaging.approveSignPassword).toBeCalledWith(signRequests[0].id, true, 'hunter1');
+    });
+
+    it('shows an error when the password is wrong', async () => {
+      // silencing the following expected console.error
+      console.error = jest.fn();
+      // eslint-disable-next-line @typescript-eslint/require-await
+      jest.spyOn(messaging, 'approveSignPassword').mockImplementation(async () => {
+        throw new Error('Unable to decode using the supplied passphrase');
+      });
+
+      wrapper.find(Input).simulate('change', { target: { value: 'anything' } });
+      await act(flushAllPromises);
+
+      wrapper.find(Button).find('button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+
+      expect(wrapper.find('.warning-message').first().text()).toBe('Unable to decode using the supplied passphrase');
+    });
+
+    it('when last request has been removed/cancelled, shows the previous one', async () => {
+      wrapper.find('FontAwesomeIcon.arrowRight').simulate('click');
+      await act(flushAllPromises);
+
       act(() => {
         emitter.emit('request', [signRequests[0]]);
       });
+      await act(flushAllPromises);
       wrapper.update();
+
       expect(wrapper.find(TransactionIndex)).toHaveLength(0);
       expect(wrapper.find(Request).prop('signId')).toBe(signRequests[0].id);
     });

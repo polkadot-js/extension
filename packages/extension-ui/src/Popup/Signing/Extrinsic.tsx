@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Chain } from '@polkadot/extension-chains/types';
@@ -68,7 +68,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
         <td className='label'>{t<string>('method')}</td>
         <td className='data'>
           <details>
-            <summary>{method.sectionName}.{method.methodName}{
+            <summary>{method.section}.{method.method}{
               method.meta
                 ? `(${method.meta.args.map(({ name }) => name).join(', ')})`
                 : ''
@@ -111,7 +111,6 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
-
   const decoded = useMemo(
     () => chain && chain.hasMetadata
       ? decodeMethod(method, chain, specVersion)

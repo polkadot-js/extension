@@ -1,10 +1,11 @@
-// Copyright 2019-2020 @polkadot/extension authors & contributors
+// Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -26,10 +27,15 @@ const SEED_LENGTHS = [12, 15, 18, 21, 24];
 const registry = new TypeRegistry();
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
-  return Object.values(accounts).map(({ json: { address, meta } }): AccountJson => ({
+  return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
     address,
-    ...meta
+    ...meta,
+    type
   }));
+}
+
+function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
+  return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
 
 export default class Extension {
@@ -44,6 +50,12 @@ export default class Extension {
 
   private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
     keyring.addExternal(address, { genesisHash, name });
+
+    return true;
+  }
+
+  private accountsCreateHardware ({ accountIndex, address, addressOffset, genesisHash, hardwareType, name }: RequestAccountCreateHardware): boolean {
+    keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name });
 
     return true;
   }
@@ -85,7 +97,13 @@ export default class Extension {
   }
 
   private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
-    return { exportedJson: JSON.stringify(keyring.backupAccount(keyring.getPair(address), password)) };
+    return { exportedJson: keyring.backupAccount(keyring.getPair(address), password) };
+  }
+
+  private async accountsBatchExport ({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountsExport> {
+    return {
+      exportedJson: await keyring.backupAccounts(addresses, password)
+    };
   }
 
   private accountsForget ({ address }: RequestAccountForget): boolean {
@@ -165,6 +183,10 @@ export default class Extension {
     resolve(true);
 
     return true;
+  }
+
+  private getAuthList (): ResponseAuthorizeList {
+    return { list: this.#state.authUrls };
   }
 
   private authorizeReject ({ id }: RequestAuthorizeReject): boolean {
@@ -250,14 +272,23 @@ export default class Extension {
     }
   }
 
+  private batchRestore ({ file, password }: RequestBatchRestore): void {
+    try {
+      keyring.restoreAccounts(file, password);
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  }
+
   private jsonGetAccountInfo (json: KeyringPair$Json): ResponseJsonGetAccountInfo {
     try {
-      const pair = keyring.createFromJson(json);
+      const { address, meta: { genesisHash, name }, type } = keyring.createFromJson(json);
 
       return {
-        address: pair.address,
-        genesisHash: pair.meta.genesisHash,
-        name: pair.meta.name
+        address,
+        genesisHash,
+        name,
+        type
       } as ResponseJsonGetAccountInfo;
     } catch (e) {
       console.error(e);
@@ -319,6 +350,21 @@ export default class Extension {
 
     if (pair.isLocked) {
       pair.decodePkcs8(password);
+    }
+
+    const { payload } = request;
+
+    if (isJsonPayload(payload)) {
+      // Get the metadata for the genesisHash
+      const currentMetadata = this.#state.knownMetadata.find((meta: MetadataDef) =>
+        meta.genesisHash === payload.genesisHash);
+
+      // set the registry before calling the sign function
+      registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
+
+      if (currentMetadata) {
+        registry.register(currentMetadata?.types);
+      }
     }
 
     const result = request.sign(registry, pair);
@@ -447,6 +493,10 @@ export default class Extension {
     return true;
   }
 
+  private toggleAuthorization (url: string): ResponseAuthorizeList {
+    return { list: this.#state.toggleAuthorization(url) };
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -454,14 +504,23 @@ export default class Extension {
       case 'pri(authorize.approve)':
         return this.authorizeApprove(request as RequestAuthorizeApprove);
 
+      case 'pri(authorize.list)':
+        return this.getAuthList();
+
       case 'pri(authorize.reject)':
         return this.authorizeReject(request as RequestAuthorizeReject);
+
+      case 'pri(authorize.toggle)':
+        return this.toggleAuthorization(request as string);
 
       case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);
 
       case 'pri(accounts.create.external)':
         return this.accountsCreateExternal(request as RequestAccountCreateExternal);
+
+      case 'pri(accounts.create.hardware)':
+        return this.accountsCreateHardware(request as RequestAccountCreateHardware);
 
       case 'pri(accounts.create.suri)':
         return this.accountsCreateSuri(request as RequestAccountCreateSuri);
@@ -474,6 +533,9 @@ export default class Extension {
 
       case 'pri(accounts.export)':
         return this.accountsExport(request as RequestAccountExport);
+
+      case 'pri(accounts.batchExport)':
+        return this.accountsBatchExport(request as RequestAccountBatchExport);
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);
@@ -513,6 +575,9 @@ export default class Extension {
 
       case 'pri(json.restore)':
         return this.jsonRestore(request as RequestJsonRestore);
+
+      case 'pri(json.batchRestore)':
+        return this.batchRestore(request as RequestBatchRestore);
 
       case 'pri(json.account.info)':
         return this.jsonGetAccountInfo(request as KeyringPair$Json);

@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext, useMemo } from 'react';
@@ -14,15 +14,16 @@ interface Props {
   label?: string;
   onBlur?: () => void;
   onChange: (name: string | null) => void;
+  value?: string | null;
 }
 
-export default function Name ({ address, className, isFocused, label, onBlur, onChange }: Props): React.ReactElement<Props> {
+export default function Name ({ address, className, isFocused, label, onBlur, onChange, value }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const isNameValid = useMemo(() => isNotShorterThan(3, t<string>('Account name is too short')), [t]);
 
   const account = accounts.find((account) => account.address === address);
-  const startValue = account && account.name;
+  const startValue = value || account?.name;
 
   return (
     <ValidatedInput
@@ -33,6 +34,7 @@ export default function Name ({ address, className, isFocused, label, onBlur, on
       isFocused={isFocused}
       label={label || t<string>('A descriptive name for your account')}
       onBlur={onBlur}
+      onEnter={onBlur}
       onValidatedChange={onChange}
       type='text'
       validator={isNameValid}

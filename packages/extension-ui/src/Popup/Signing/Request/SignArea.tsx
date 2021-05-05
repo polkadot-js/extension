@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -21,7 +21,7 @@ interface Props {
   signId: string;
 }
 
-function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId } : Props): JSX.Element {
+function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -31,7 +31,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
   useEffect(() => {
     setIsLocked(null);
-    let timeout: number;
+    let timeout: NodeJS.Timeout;
 
     !isExternal && isSignLocked(signId)
       .then(({ isLocked, remainingTime }) => {

@@ -1,11 +1,11 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
 
 import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { Button, InputWithLabel } from '../../components';
@@ -18,12 +18,17 @@ interface Props extends ThemeProps{
   onChange: (suri: string) => void;
   parentAddress: string;
   parentPassword: string;
+  withSoftPath: boolean;
 }
 
-function DerivationPath ({ className, defaultPath, isError, onChange }: Props): React.ReactElement<Props> {
+function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPath }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [path, setPath] = useState<string>(defaultPath);
   const [isDisabled, setIsDisabled] = useState(true);
+
+  useEffect(() => {
+    setPath(defaultPath);
+  }, [defaultPath]);
 
   const _onExpand = useCallback(() => setIsDisabled(!isDisabled), [isDisabled]);
 
@@ -46,7 +51,10 @@ function DerivationPath ({ className, defaultPath, isError, onChange }: Props): 
                 : t('Derivation Path')
             }
             onChange={_onChange}
-            placeholder={t<string>('//hard/soft')}
+            placeholder={withSoftPath
+              ? t<string>('//hard/soft')
+              : t<string>('//hard')
+            }
             value={path}
           />
         </div>

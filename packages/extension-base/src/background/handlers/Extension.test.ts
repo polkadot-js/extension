@@ -1,17 +1,27 @@
-// Copyright 2019-2020 @polkadot/extension authors & contributors
+// Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import '../../../../../__mocks__/chrome';
 
+import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
+import type { SignerPayloadJSON } from '@polkadot/types/types';
+
+import { ResponseSigning } from '@polkadot/extension-base/background/types';
+import { MetadataDef } from '@polkadot/extension-inject/types';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountsStore } from '../../stores';
 import Extension from './Extension';
-import State from './State';
+import State, { AuthUrls } from './State';
+import Tabs from './Tabs';
 
 describe('Extension', () => {
   let extension: Extension;
+  let state: State;
+  let tabs: Tabs;
   const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   const password = 'passw0rd';
 
@@ -19,8 +29,20 @@ describe('Extension', () => {
     await cryptoWaitReady();
 
     keyring.loadAll({ store: new AccountsStore() });
+    const authUrls: AuthUrls = {};
 
-    return new Extension(new State());
+    authUrls['localhost:3000'] = {
+      count: 0,
+      id: '11',
+      isAllowed: true,
+      origin: 'example.com',
+      url: 'http://localhost:3000'
+    };
+    localStorage.setItem('authUrls', JSON.stringify(authUrls));
+    state = new State();
+    tabs = new Tabs(state);
+
+    return new Extension(state);
   }
 
   const createAccount = async (): Promise<string> => {
@@ -47,8 +69,8 @@ describe('Extension', () => {
       password
     }, {} as chrome.runtime.Port);
 
-    expect(result.exportedJson).toContain(address);
-    expect(result.exportedJson).toContain('"encoded"');
+    expect(result.exportedJson.address).toBe(address);
+    expect(result.exportedJson.encoded).toBeDefined();
   });
 
   describe('account derivation', () => {
@@ -140,6 +162,235 @@ describe('Extension', () => {
       expect(() => {
         pair.decodePkcs8(password);
       }).toThrowError('Unable to decode using the supplied passphrase');
+    });
+  });
+
+  describe('custom user extension', () => {
+    let address: string, payload: SignerPayloadJSON, pair: KeyringPair;
+
+    beforeEach(async () => {
+      address = await createAccount();
+      pair = keyring.getPair(address);
+      pair.decodePkcs8(password);
+      payload = {
+        address,
+        blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
+        blockNumber: '0x00000393',
+        era: '0x3601',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        method: '0x040105fa8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a4882380100',
+        nonce: '0x0000000000000000',
+        signedExtensions: ['CheckSpecVersion', 'CheckTxVersion', 'CheckGenesis', 'CheckMortality', 'CheckNonce', 'CheckWeight', 'ChargeTransactionPayment'],
+        specVersion: '0x00000026',
+        tip: null,
+        transactionVersion: '0x00000005',
+        version: 4
+      } as unknown as SignerPayloadJSON;
+    });
+
+    test('signs with default signed extensions', async () => {
+      const registry = new TypeRegistry();
+
+      registry.setSignedExtensions(payload.signedExtensions);
+
+      const signatureExpected = registry
+        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
+
+      tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+        .then((result) => {
+          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
+        }).catch((err) => console.log(err));
+
+      await expect(extension.handle('1615192072290.7', 'pri(signing.approve.password)', {
+        id: state.allSignRequests[0].id,
+        password,
+        savePass: false
+      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+    });
+
+    test('signs with user extensions, known types', async () => {
+      const types = {} as unknown as Record<string, string>;
+
+      const userExtensions = {
+        MyUserExtension: {
+          extrinsic: {
+            assetId: 'AssetId'
+          },
+          payload: {}
+        }
+      } as unknown as ExtDef;
+
+      const meta: MetadataDef = {
+        chain: 'Development',
+        color: '#191a2e',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        icon: '',
+        specVersion: 38,
+        ss58Format: 0,
+        tokenDecimals: 12,
+        tokenSymbol: '',
+        types,
+        userExtensions
+      };
+
+      state.saveMetadata(meta);
+
+      const payload = {
+        address,
+        blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
+        blockNumber: '0x00000393',
+        era: '0x3601',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        method: '0x040105fa8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a4882380100',
+        nonce: '0x0000000000000000',
+        signedExtensions: ['MyUserExtension'],
+        specVersion: '0x00000026',
+        tip: null,
+        transactionVersion: '0x00000005',
+        version: 4
+      } as unknown as SignerPayloadJSON;
+
+      const registry = new TypeRegistry();
+
+      registry.setSignedExtensions(payload.signedExtensions, userExtensions);
+      registry.register(types);
+
+      const signatureExpected = registry
+        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
+
+      tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+        .then((result) => {
+          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
+        }).catch((err) => console.log(err));
+
+      await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+        id: state.allSignRequests[0].id,
+        password,
+        savePass: false
+      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+    });
+
+    test('override default signed extension', async () => {
+      const types = {
+        FeeExchangeV1: {
+          assetId: 'Compact<AssetId>',
+          maxPayment: 'Compact<Balance>'
+        },
+        PaymentOptions: {
+          feeExchange: 'FeeExchangeV1',
+          tip: 'Compact<Balance>'
+        }
+      } as unknown as Record<string, string>;
+
+      const userExtensions = {
+        ChargeTransactionPayment: {
+          extrinsic: {
+            transactionPayment: 'PaymentOptions'
+          },
+          payload: {}
+        }
+      } as unknown as ExtDef;
+
+      const meta: MetadataDef = {
+        chain: 'Development',
+        color: '#191a2e',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        icon: '',
+        specVersion: 38,
+        ss58Format: 0,
+        tokenDecimals: 12,
+        tokenSymbol: '',
+        types,
+        userExtensions
+      };
+
+      state.saveMetadata(meta);
+
+      const registry = new TypeRegistry();
+
+      registry.setSignedExtensions(payload.signedExtensions, userExtensions);
+      registry.register(types);
+
+      const signatureExpected = registry
+        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
+
+      tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+        .then((result) => {
+          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
+        }).catch((err) => console.log(err));
+
+      await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+        id: state.allSignRequests[0].id,
+        password,
+        savePass: false
+      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
+    });
+
+    test('signs with user extensions, additional types', async () => {
+      const types = {
+        myCustomType: {
+          feeExchange: 'Compact<AssetId>',
+          tip: 'Compact<Balance>'
+        }
+      } as unknown as Record<string, string>;
+
+      const userExtensions = {
+        MyUserExtension: {
+          extrinsic: {
+            myCustomType: 'myCustomType'
+          },
+          payload: {}
+        }
+      } as unknown as ExtDef;
+
+      const meta: MetadataDef = {
+        chain: 'Development',
+        color: '#191a2e',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        icon: '',
+        specVersion: 38,
+        ss58Format: 0,
+        tokenDecimals: 12,
+        tokenSymbol: '',
+        types,
+        userExtensions
+      };
+
+      state.saveMetadata(meta);
+
+      const payload = {
+        address,
+        blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
+        blockNumber: '0x00000393',
+        era: '0x3601',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        method: '0x040105fa8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a4882380100',
+        nonce: '0x0000000000000000',
+        signedExtensions: ['MyUserExtension', 'CheckTxVersion', 'CheckGenesis', 'CheckMortality', 'CheckNonce', 'CheckWeight', 'ChargeTransactionPayment'],
+        specVersion: '0x00000026',
+        tip: null,
+        transactionVersion: '0x00000005',
+        version: 4
+      } as unknown as SignerPayloadJSON;
+
+      const registry = new TypeRegistry();
+
+      registry.setSignedExtensions(payload.signedExtensions, userExtensions);
+      registry.register(types);
+
+      const signatureExpected = registry
+        .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
+
+      tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+        .then((result) => {
+          expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
+        }).catch((err) => console.log(err));
+
+      await expect(extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+        id: state.allSignRequests[0].id,
+        password,
+        savePass: false
+      }, {} as chrome.runtime.Port)).resolves.toEqual(true);
     });
   });
 });

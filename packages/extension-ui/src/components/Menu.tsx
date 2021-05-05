@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -29,7 +29,7 @@ export default styled(Menu)(({ theme }: ThemeProps) => `
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   box-shadow: 0 0 10px ${theme.boxShadow};
-  margin-top: 90px;
+  margin-top: 60px;
   padding: 16px 0;
   position: absolute;
   right: 0;

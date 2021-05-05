@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -17,6 +17,7 @@ interface DropdownOption {
 interface Props extends ThemeProps {
   className?: string;
   defaultValue?: string | null;
+  isDisabled?: boolean
   isError?: boolean;
   isFocussed?: boolean;
   label: string;
@@ -26,7 +27,7 @@ interface Props extends ThemeProps {
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
   const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>): void => {
     onChange && onChange(value.trim());
   };
@@ -40,6 +41,7 @@ function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChang
         <select
           autoFocus={isFocussed}
           defaultValue={defaultValue || undefined}
+          disabled={isDisabled}
           onBlur={onBlur}
           onChange={_onChange}
           value={value}
@@ -58,7 +60,7 @@ function Dropdown ({ className, defaultValue, isFocussed, label, onBlur, onChang
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, theme }: Props) => `
+export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
   position: relative;
 
   select {
@@ -88,7 +90,7 @@ export default React.memo(styled(Dropdown)(({ isError, theme }: Props) => `
   label::after {
     content: '';
     position: absolute;
-    top: 50%;
+    top: ${label ? 'calc(50% + 14px)' : '50%'};
     transform: translateY(-50%);
     right: 12px;
     width: 8px;

@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -81,6 +81,10 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     position: absolute;
     right: 0;
     top: 0;
+  }
+
+  svg {
+    margin-right: 0.3rem;
   }
 
   &.isBusy {

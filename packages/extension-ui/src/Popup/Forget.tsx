@@ -1,9 +1,9 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
@@ -19,6 +19,7 @@ interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
 function Forget ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const [isBusy, setIsBusy] = useState(false);
 
   const _goHome = useCallback(
     () => onAction('/'),
@@ -26,10 +27,18 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   );
 
   const _onClick = useCallback(
-    (): Promise<void> =>
+    (): void => {
+      setIsBusy(true);
       forgetAccount(address)
-        .then(() => onAction('/'))
-        .catch((error: Error) => console.error(error)),
+        .then(() => {
+          setIsBusy(false);
+          onAction('/');
+        })
+        .catch((error: Error) => {
+          setIsBusy(false);
+          console.error(error);
+        });
+    },
     [address, onAction]
   );
 
@@ -46,6 +55,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
           </Warning>
           <div className='actionArea'>
             <Button
+              isBusy={isBusy}
               isDanger
               onClick={_onClick}
             >

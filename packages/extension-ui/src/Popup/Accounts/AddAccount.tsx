@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
@@ -28,7 +28,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
       <Header
         showAdd
         showSettings
-        text='Add Account'
+        text={t<string>('Add Account')}
       />
       <div className={className}>
         <div className='image'>

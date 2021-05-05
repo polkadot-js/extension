@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import '../../../../__mocks__/chrome';
@@ -9,6 +9,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
+
+import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 import { Button, themes } from '../components';
 import * as messaging from '../messaging';
@@ -27,7 +29,7 @@ describe('Export component', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: '{ "meta": { "name": "account_name" } }' });
+    jest.spyOn(messaging, 'exportAccount').mockResolvedValue({ exportedJson: { meta: { name: 'account_name' } } as unknown as KeyringPair$Json });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     wrapper = mount(
@@ -49,6 +51,43 @@ describe('Export component', () => {
 
   it('button is disabled before any password is typed', () => {
     expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
+  });
+
+  it('shows an error if the password is wrong', async () => {
+    // silencing the following expected console.error
+    console.error = jest.fn();
+    // eslint-disable-next-line @typescript-eslint/require-await
+    jest.spyOn(messaging, 'exportAccount').mockImplementation(async () => {
+      throw new Error('Unable to decode using the supplied passphrase');
+    });
+    enterPassword();
+    wrapper.find('[data-export-button] button').simulate('click');
+    await act(flushAllPromises);
+    wrapper.update();
+
+    // the first message is "You are exporting your account. Keep it safe and don't share it with anyone."
+    expect(wrapper.find('.warning-message').at(1).text()).toBe('Unable to decode using the supplied passphrase');
+    expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
+    expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(true);
+  });
+
+  it('shows no error when typing again after a wrong password', async () => {
+    // silencing the following expected console.error
+    console.error = jest.fn();
+    // eslint-disable-next-line @typescript-eslint/require-await
+    jest.spyOn(messaging, 'exportAccount').mockImplementation(async () => {
+      throw new Error('Unable to decode using the supplied passphrase');
+    });
+    enterPassword();
+    wrapper.find('[data-export-button] button').simulate('click');
+    await act(flushAllPromises);
+    wrapper.update();
+    enterPassword();
+
+    // the first message is "You are exporting your account. Keep it safe and don't share it with anyone."
+    expect(wrapper.find('.warning-message')).toHaveLength(1);
+    expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    expect(wrapper.find('InputWithLabel').first().prop('isError')).toBe(false);
   });
 
   it('button is enabled after password is typed', async () => {

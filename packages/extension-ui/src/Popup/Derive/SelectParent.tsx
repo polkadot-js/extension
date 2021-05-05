@@ -1,21 +1,18 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types';
-
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import styled from 'styled-components';
 
-import { assert } from '@polkadot/util';
+import { canDerive } from '@polkadot/extension-base/utils';
 
-import { AccountContext, ActionContext, Address, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
+import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
 import AddressDropdown from './AddressDropdown';
 import DerivationPath from './DerivationPath';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   isLocked?: boolean;
   parentAddress: string;
@@ -23,7 +20,10 @@ interface Props extends ThemeProps {
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
 }
 
-function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+// match any single slash
+const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
+
+export default function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -32,25 +32,50 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
-  const [shouldAccountBeDerived, setShouldAccountBeDerived] = useState(true);
+  const [pathError, setPathError] = useState('');
   const passwordInputRef = useRef<HTMLDivElement>(null);
+  const allowSoftDerivation = useMemo(() => {
+    const parent = accounts.find(({ address }) => address === parentAddress);
+
+    return parent?.type === 'sr25519';
+  }, [accounts, parentAddress]);
+
+  // reset the password field if the parent address changes
+  useEffect(() => {
+    setParentPassword('');
+  }, [parentAddress]);
+
+  useEffect(() => {
+    // forbid the use of password since Keyring ignores it
+    if (suriPath?.includes('///')) {
+      setPathError(t('`///password` not supported for derivation'));
+    }
+
+    if (!allowSoftDerivation && suriPath && singleSlashRegex.test(suriPath)) {
+      setPathError(t('Soft derivation is only allowed for sr25519 accounts'));
+    }
+  }, [allowSoftDerivation, suriPath, t]);
 
   const allAddresses = useMemo(
     () => hierarchy
       .filter(({ isExternal }) => !isExternal)
+      .filter(({ type }) => canDerive(type))
       .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
-  );
-
-  const _goCreate = useCallback(
-    () => onAction('/account/create'),
-    [onAction]
   );
 
   const _onParentPasswordEnter = useCallback(
     (parentPassword: string): void => {
       setParentPassword(parentPassword);
       setIsProperParentPassword(!!parentPassword);
+    },
+    []
+  );
+
+  const _onSuriPathChange = useCallback(
+    (path: string): void => {
+      setSuriPath(path);
+      setPathError('');
     },
     []
   );
@@ -71,11 +96,11 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
           try {
             const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
 
-            assert(account, 'Unable to derive');
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {
             setIsBusy(false);
-            setSuriPath(null);
+            setPathError(t('Invalid derivation path'));
+            console.error(error);
           }
         } else {
           setIsBusy(false);
@@ -83,7 +108,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
         }
       }
     },
-    [parentAddress, parentPassword, onDerivationConfirmed, suriPath]
+    [parentAddress, parentPassword, onDerivationConfirmed, suriPath, t]
   );
 
   useEffect(() => {
@@ -96,112 +121,75 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   return (
     <>
       <div className={className}>
-        {!isLocked && (
-          <Checkbox
-            checked={shouldAccountBeDerived}
-            className='smallerMargin'
-            label={t<string>('Derive new account from existing')}
-            onChange={setShouldAccountBeDerived}
-          />
-        )}
-        <div className={`disableArea ${shouldAccountBeDerived ? '' : 'disabled'}`}>
-          {isLocked
-            ? (
-              <Address
-                address={parentAddress}
-                genesisHash={parentGenesis}
-              />
-            )
-            : (
-              <Label label={t<string>('Choose Parent Account:')}>
-                <AddressDropdown
-                  allAddresses={allAddresses}
-                  onSelect={_onParentChange}
-                  selectedAddress={parentAddress}
-                  selectedGenesis={parentGenesis}
-                />
-              </Label>
-            )
-          }
-          <div ref={passwordInputRef}>
-            <InputWithLabel
-              data-export-password
-              isError={!isProperParentPassword}
-              isFocused
-              label={t<string>('enter the password for the account you want to derive from')}
-              onChange={_onParentPasswordEnter}
-              type='password'
-              value={parentPassword}
+        {isLocked
+          ? (
+            <Address
+              address={parentAddress}
+              genesisHash={parentGenesis}
             />
-            {!!parentPassword && !isProperParentPassword && (
+          )
+          : (
+            <Label label={t<string>('Choose Parent Account:')}>
+              <AddressDropdown
+                allAddresses={allAddresses}
+                onSelect={_onParentChange}
+                selectedAddress={parentAddress}
+                selectedGenesis={parentGenesis}
+              />
+            </Label>
+          )
+        }
+        <div ref={passwordInputRef}>
+          <InputWithLabel
+            data-input-password
+            isError={!!parentPassword && !isProperParentPassword}
+            isFocused
+            label={t<string>('enter the password for the account you want to derive from')}
+            onChange={_onParentPasswordEnter}
+            type='password'
+            value={parentPassword}
+          />
+          {!!parentPassword && !isProperParentPassword && (
+            <Warning
+              isBelowInput
+              isDanger
+            >
+              {t('Wrong password')}
+            </Warning>
+          )}
+        </div>
+        {isProperParentPassword && (
+          <>
+            <DerivationPath
+              defaultPath={defaultPath}
+              isError={!!pathError}
+              onChange={_onSuriPathChange}
+              parentAddress={parentAddress}
+              parentPassword={parentPassword}
+              withSoftPath={allowSoftDerivation}
+            />
+            {(!!pathError) && (
               <Warning
                 isBelowInput
                 isDanger
               >
-                {t('Wrong password')}
+                {pathError}
               </Warning>
             )}
-          </div>
-          {isProperParentPassword && (
-            <>
-              <DerivationPath
-                defaultPath={defaultPath}
-                isError={!suriPath}
-                onChange={setSuriPath}
-                parentAddress={parentAddress}
-                parentPassword={parentPassword}
-              />
-              {!suriPath && (
-                <Warning
-                  isBelowInput
-                  isDanger
-                >
-                  {t('Incorrect derivation path')}
-                </Warning>
-              )}
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
       <VerticalSpace/>
       <ButtonArea>
-        {shouldAccountBeDerived
-          ? (
-            <NextStepButton
-              data-button-action='create derived account'
-              isBusy={isBusy}
-              isDisabled={!isProperParentPassword || !suriPath}
-              onClick={_onSubmit}
-            >
-              {t<string>('Create a derived account')}
-            </NextStepButton>
-          )
-          : (
-            <NextStepButton
-              data-button-action='create root account'
-              onClick={_goCreate}
-            >
-              {t<string>('Create account from new seed')}
-            </NextStepButton>
-          )
-        }
+        <NextStepButton
+          data-button-action='create derived account'
+          isBusy={isBusy}
+          isDisabled={!isProperParentPassword || !!pathError}
+          onClick={_onSubmit}
+        >
+          {t<string>('Create a derived account')}
+        </NextStepButton>
       </ButtonArea>
     </>
   );
 }
-
-export default styled(SelectParent)`
-  .smallerMargin {
-    margin-top: 0;
-    margin-bottom: 10px;
-  }
-
-  .disableArea {
-    opacity: 1;
-
-    .disabled {
-      opacity: 0.2;
-      pointer-events: none;
-    }
-  }
-`;

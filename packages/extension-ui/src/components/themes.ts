@@ -1,4 +1,4 @@
-// Copyright 2019-2020 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 const darkTheme = {
@@ -32,6 +32,7 @@ const darkTheme = {
   identiconBackground: '#F4F5F8',
   inputBackground: '#111218',
   inputBorderColor: '#43444B',
+  inputLabelFontSize: '10px',
   labelColor: '#9F9E99',
   labelFontSize: '13px',
   labelLineHeight: '18px',

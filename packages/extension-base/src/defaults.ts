@@ -1,7 +1,7 @@
-// Copyright 2019-2020 @polkadot/extension-base authors & contributors
+// Copyright 2019-2021 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const ALLOWED_PATH = ['/', '/account/restore-json'] as const;
+const ALLOWED_PATH = ['/', '/account/import-ledger', '/account/restore-json'] as const;
 const PORT_CONTENT = 'content';
 const PHISHING_PAGE_REDIRECT = '/phishing-page-detected';
 const PORT_EXTENSION = 'extension';

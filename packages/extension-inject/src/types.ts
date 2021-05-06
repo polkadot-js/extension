@@ -15,7 +15,7 @@ export interface InjectedAccount {
   address: string;
   genesisHash?: string | null;
   name?: string;
-  type?: KeypairType;
+  type: KeypairType;
 }
 
 export interface InjectedAccountWithMeta {
@@ -25,6 +25,7 @@ export interface InjectedAccountWithMeta {
     name?: string;
     source: string;
   };
+  type:KeypairType;
   signer:Signer;
 }
 

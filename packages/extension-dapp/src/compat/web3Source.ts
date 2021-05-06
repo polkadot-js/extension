@@ -1,11 +1,10 @@
 // Copyright 2019-2020 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// import type { Signer } from "@polkadot/api/types";
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 
-// import detectEthereumProvider from '@metamask/detect-provider';
-const detectEthereumProvider = require('@metamask/detect-provider');
+import detectEthereumProvider from '@metamask/detect-provider';
+// const detectEthereumProvider = require('@metamask/detect-provider');
 import Web3 from 'web3';
 
 import {
@@ -13,9 +12,7 @@ import {
   SignerPayloadRaw, SignerResult
 } from '@polkadot/types/types';
 
-//import { TypeRegistry } from '@polkadot/types/create';
-
-//const registry = new TypeRegistry();
+console.log("UP TO DATE")
 
 interface Web3Window extends InjectedWindow {
   web3: Web3;
@@ -26,31 +23,21 @@ interface Web3Window extends InjectedWindow {
 // transfor the Web3 accounts into a simple address/name array
 function transformAccounts(accounts: string[]): InjectedAccount[] {
   return accounts.map((acc, i) => {
-    return { address: acc, name: 'MetaMask Address #' + i.toString() };
+    return { address: acc, name: 'MetaMask Address #' + i.toString(), type:"ethereum" };
   });
 }
 
 // add a compat interface of SingleSource to window.injectedWeb3
 function injectWeb3(win: Web3Window): void {
-  // let accounts: InjectedAccount[] = [];
-
-  // we don't yet have an accounts subscribe on the interface, simply get the
-  // accounts and store them, any get will resolve the last found values
-  //   win.web3.accounts$.subscribe((_accounts): void => {
-  //     accounts = transformAccounts(_accounts);
-  //   });
 
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
-    // // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/require-await
     enable: async (_: string): Promise<Injected> => {
       win.web3 = new Web3(win.ethereum);
-      // // // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      // await win.ethereum.enable();
 
       const provider: any = await detectEthereumProvider({ mustBeMetaMask: true });
       await provider.request({ method: 'eth_requestAccounts' });
-      // let mainAccount=(await win.web3.eth.getAccounts())[0]
+      
       return {
         accounts: {
           get: async (): Promise<InjectedAccount[]> => {
@@ -100,8 +87,6 @@ export default function initWeb3Source(): Promise<boolean> {
   console.log('initWeb3Source');
 
   return new Promise((resolve): void => {
-    // console.log('listening')
-    // window.addEventListener("load", (): void => {
     console.log('loading web3');
     const win = window as Window & Web3Window;
 
@@ -111,6 +96,5 @@ export default function initWeb3Source(): Promise<boolean> {
     } else {
       resolve(false);
     }
-    // });
   });
 }

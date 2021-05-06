@@ -29,13 +29,14 @@ function throwError (method: string): never {
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
 function mapAccounts (source: string, list: InjectedAccount[], signer:Signer, ss58Format?: number): InjectedAccountWithMeta[] {
   return list.map(
-    ({ address, genesisHash, name }): InjectedAccountWithMeta => {
+    ({ address, genesisHash, name, type }): InjectedAccountWithMeta => {
       const encodedAddress = address.length === 42 ? address : encodeAddress(decodeAddress(address), ss58Format);
 
       return {
         address: encodedAddress,
         meta: { genesisHash, name, source },
-        signer
+        signer,
+        type
       };
     }
   );

@@ -36,7 +36,7 @@ function mapAccounts (source: string, list: InjectedAccount[], signer:Signer, ss
         address: encodedAddress,
         meta: { genesisHash, name, source },
         signer,
-        type
+        type: type? type:"ethereum"
       };
     }
   );

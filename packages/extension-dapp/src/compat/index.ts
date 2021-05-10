@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import singleSource from './singleSource';
-import web3Source from './Web3Source';
+import initMetaMaskSource from './metaMaskSource';
 
 // initialize all the compatibility engines
 export default function initCompat (): Promise<boolean> {
-  console.log('init compat');
-
   return Promise.all([
     singleSource(),
-    web3Source()
+    initMetaMaskSource()
   ]).then((): boolean => true);
 }

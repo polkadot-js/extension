@@ -4,18 +4,14 @@
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 
 import detectEthereumProvider from '@metamask/detect-provider';
-// const detectEthereumProvider = require('@metamask/detect-provider');
 import Web3 from 'web3';
 
 import {
-  //SignerPayloadJSON, 
   SignerPayloadRaw, SignerResult
 } from '@polkadot/types/types';
 
-console.log("UP TO DATE")
-
 interface Web3Window extends InjectedWindow {
-  web3: Web3;
+  web3: Web3; // TODO: this could probably be removed
   // this is injected by metaMask
   ethereum: any;
 }
@@ -28,7 +24,7 @@ function transformAccounts(accounts: string[]): InjectedAccount[] {
 }
 
 // add a compat interface of SingleSource to window.injectedWeb3
-function injectWeb3(win: Web3Window): void {
+function injectMetaMaskWeb3(win: Web3Window): void {
 
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
@@ -46,31 +42,19 @@ function injectWeb3(win: Web3Window): void {
             return transformAccounts(await provider.request({ method: 'eth_requestAccounts' }));
           },
           subscribe: (cb: (accounts: InjectedAccount[]) => void): (() => void) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
             const sub = provider.on('accountsChanged', function (accounts: string[]) {
               cb(transformAccounts(accounts));
             });
             // TODO: add onchainchanged
 
             return (): void => {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
               sub.unsubscribe();
             };
           }
         },
         signer: {
-          // signPayload: async (payload: SignerPayloadJSON) : Promise<SignerResult> => {
-          //   console.log('signPayload');
-          //   const raw = registry.createType('ExtrinsicPayload', payload).toString();
-
-          //   return { id: 0, signature: await win.web3.eth.sign(raw, payload.address) };
-          // },
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
-            console.log('signraw', raw.data)
-
-            // const msgHashHex =ethUtil.bufferToHex(Buffer.from(testMsg)) //ethUtil.bufferToHex(ethUtil.keccak(Buffer.from(testMsg)))
-            const signature = await provider.request({ method: 'eth_sign', params: [raw.address, raw.data] });
-            console.log('signature', signature);
+            const signature = await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] });
             return { id: 0, signature };
           }
         }
@@ -80,18 +64,16 @@ function injectWeb3(win: Web3Window): void {
   };
 }
 
-// TODO udpate descr
-// returns the SingleSource instance, as per
+
+// returns the MetaMask source instance, as per
 // https://github.com/cennznet/singlesource-extension/blob/f7cb35b54e820bf46339f6b88ffede1b8e140de0/react-example/src/App.js#L19
-export default function initWeb3Source(): Promise<boolean> {
-  console.log('initWeb3Source');
+export default function initMetaMaskSource(): Promise<boolean> {
 
   return new Promise((resolve): void => {
-    console.log('loading web3');
     const win = window as Window & Web3Window;
 
     if (win.ethereum) {
-      injectWeb3(win);
+      injectMetaMaskWeb3(win);
       resolve(true);
     } else {
       resolve(false);

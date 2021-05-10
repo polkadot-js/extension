@@ -6,9 +6,22 @@ import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extens
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 
-import {
-  SignerPayloadRaw, SignerResult
-} from '@polkadot/types/types';
+import { SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
+
+interface RequestArguments {
+  method: string;
+  params?: unknown[];
+}
+
+interface EthRpcSubscription {
+  unsubscribe: () => void
+}
+
+interface EthereumProvider {
+  request: (args: RequestArguments) => Promise<any>;
+  isMetaMask: boolean;
+  on: (name: string, cb: any) => EthRpcSubscription;
+}
 
 interface Web3Window extends InjectedWindow {
   web3: Web3; // TODO: this could probably be removed
@@ -16,24 +29,33 @@ interface Web3Window extends InjectedWindow {
   ethereum: any;
 }
 
+function isMetaMaskProvider (prov: unknown): EthereumProvider {
+  if (prov !== null) {
+    return (prov as EthereumProvider);
+  } else {
+    throw new Error('Injected provider is not MetaMask');
+  }
+}
+
 // transfor the Web3 accounts into a simple address/name array
-function transformAccounts(accounts: string[]): InjectedAccount[] {
+function transformAccounts (accounts: string[]): InjectedAccount[] {
   return accounts.map((acc, i) => {
-    return { address: acc, name: 'MetaMask Address #' + i.toString(), type:"ethereum" };
+    return { address: acc, name: 'MetaMask Address #' + i.toString(), type: 'ethereum' };
   });
 }
 
 // add a compat interface of SingleSource to window.injectedWeb3
-function injectMetaMaskWeb3(win: Web3Window): void {
-
+function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
     enable: async (_: string): Promise<Injected> => {
       win.web3 = new Web3(win.ethereum);
 
-      const provider: any = await detectEthereumProvider({ mustBeMetaMask: true });
+      const providerRaw: unknown = await detectEthereumProvider({ mustBeMetaMask: true });
+      const provider: EthereumProvider = isMetaMaskProvider(providerRaw);
+
       await provider.request({ method: 'eth_requestAccounts' });
-      
+
       return {
         accounts: {
           get: async (): Promise<InjectedAccount[]> => {
@@ -54,7 +76,8 @@ function injectMetaMaskWeb3(win: Web3Window): void {
         },
         signer: {
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
-            const signature = await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] });
+            const signature = (await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] })as string);
+
             return { id: 0, signature };
           }
         }
@@ -64,11 +87,9 @@ function injectMetaMaskWeb3(win: Web3Window): void {
   };
 }
 
-
 // returns the MetaMask source instance, as per
 // https://github.com/cennznet/singlesource-extension/blob/f7cb35b54e820bf46339f6b88ffede1b8e140de0/react-example/src/App.js#L19
-export default function initMetaMaskSource(): Promise<boolean> {
-
+export default function initMetaMaskSource (): Promise<boolean> {
   return new Promise((resolve): void => {
     const win = window as Window & Web3Window;
 

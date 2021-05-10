@@ -27,7 +27,7 @@ function throwError (method: string): never {
 }
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
-function mapAccounts (source: string, list: InjectedAccount[], signer:Signer, ss58Format?: number): InjectedAccountWithMeta[] {
+function mapAccounts (source: string, list: InjectedAccount[], signer: Signer, ss58Format?: number): InjectedAccountWithMeta[] {
   return list.map(
     ({ address, genesisHash, name, type }): InjectedAccountWithMeta => {
       const encodedAddress = address.length === 42 ? address : encodeAddress(decodeAddress(address), ss58Format);
@@ -36,7 +36,7 @@ function mapAccounts (source: string, list: InjectedAccount[], signer:Signer, ss
         address: encodedAddress,
         meta: { genesisHash, name, source },
         signer,
-        type: type? type:"ethereum"
+        type: type || 'ethereum'
       };
     }
   );
@@ -118,7 +118,7 @@ export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): P
   }
 
   const accounts: InjectedAccountWithMeta[] = [];
-  const injected : InjectedExtension[] = await web3EnablePromise;
+  const injected: InjectedExtension[] = await web3EnablePromise;
   const retrieved = await Promise.all(
     injected.map(
       async ({ accounts, name: source, signer }): Promise<InjectedAccountWithMeta[]> => {

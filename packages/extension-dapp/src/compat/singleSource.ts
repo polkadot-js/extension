@@ -32,7 +32,7 @@ function transformAccounts (accounts: SingleSourceAccount[]): InjectedAccount[] 
   return accounts.map(({ address, name }): InjectedAccount => ({
     address,
     name,
-    type:"ethereum"
+    type: 'ethereum'
   }));
 }
 

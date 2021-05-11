@@ -375,7 +375,7 @@ export default class State {
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
 
-    return provider.send(request.method, request.params) as Promise<JsonRpcResponse>;
+    return provider.send(request.method, request.params);
   }
 
   // Start a provider, return its meta

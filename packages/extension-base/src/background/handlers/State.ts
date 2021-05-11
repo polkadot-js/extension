@@ -59,7 +59,7 @@ interface SignRequest extends Resolver<ResponseSigning> {
 
 let idCounter = 0;
 
-const WINDOW_OPTS = {
+const WINDOW_OPTS: chrome.windows.CreateData = {
   // This is not allowed on FF, only on Chrome - disable completely
   // focused: true,
   height: 621,
@@ -163,7 +163,7 @@ export default class State {
   private popupOpen (): void {
     chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {
-        this.#windows.push(window.id);
+        this.#windows.push(window.id || 0);
       }
     });
   }
@@ -375,7 +375,7 @@ export default class State {
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');
 
-    return provider.send(request.method, request.params) as Promise<JsonRpcResponse>;
+    return provider.send(request.method, request.params);
   }
 
   // Start a provider, return its meta

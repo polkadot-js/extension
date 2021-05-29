@@ -20,5 +20,6 @@ module.exports = {
     '<rootDir>/packages/extension-inject/build',
     '<rootDir>/packages/extension-ui/build'
   ],
-  transformIgnorePatterns: ['/node_modules/(?!(@polkadot|@babel/runtime/helpers/esm/))']
+  testEnvironment: 'jsdom',
+  transformIgnorePatterns: ['/node_modules/(?!@polkadot|@babel/runtime/helpers/esm/)']
 };

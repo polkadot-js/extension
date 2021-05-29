@@ -3,14 +3,14 @@
 
 import '../../../../__mocks__/chrome';
 
+import type { KeyringPair$Json } from '@polkadot/keyring/types';
+
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter, Route } from 'react-router';
 import { ThemeProvider } from 'styled-components';
-
-import { KeyringPair$Json } from '@polkadot/keyring/types';
 
 import { Button, themes } from '../components';
 import * as messaging from '../messaging';

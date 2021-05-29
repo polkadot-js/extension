@@ -3,12 +3,12 @@
 
 import '../../../../../__mocks__/chrome';
 
+import type { ResponseSigning } from '@polkadot/extension-base/background/types';
+import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { KeyringPair } from '@polkadot/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 
-import { ResponseSigning } from '@polkadot/extension-base/background/types';
-import { MetadataDef } from '@polkadot/extension-inject/types';
-import { KeyringPair } from '@polkadot/keyring/types';
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';

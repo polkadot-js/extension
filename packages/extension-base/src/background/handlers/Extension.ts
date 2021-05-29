@@ -450,7 +450,9 @@ export default class Extension {
     }
 
     console.log('open', url);
-    chrome.tabs.create({ url });
+
+    // eslint-disable-next-line no-void
+    void chrome.tabs.create({ url });
 
     return true;
   }

@@ -1,12 +1,13 @@
 # CHANGELOG
 
-## 0.38.2 May 29, 2021
+## 0.38.2 May 30, 2021
 
 **Important** Not published to the stores, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
 
 Changes:
 
-- Bump `@polkadot/api` & `@polkadot/util` to latest released versions
+- Bump `@polkadot/api` to `4.12.1`
+- Bump `@polkadot/util` to `6.6.1`
 
 
 ## 0.38.1 May 25, 2021

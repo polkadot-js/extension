@@ -79,7 +79,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(AuthManagement)`
-  height: 100%;
+  height: calc(100vh - 2px);
   overflow-y: auto;
 
   .empty-list {

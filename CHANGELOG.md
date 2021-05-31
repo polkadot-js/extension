@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.38.3 May 31, 2021
+
+Contributed:
+
+- Fix Chromium not displaying accounts due to height mismatch (Thanks to https://github.com/wirednkod)
+
+
 ## 0.38.2 May 30, 2021
 
 **Important** Not published to the stores, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`

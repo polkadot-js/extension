@@ -155,7 +155,8 @@ export default class State {
 
   private popupClose (): void {
     this.#windows.forEach((id: number): void =>
-      chrome.windows.remove(id)
+      // eslint-disable-next-line no-void
+      void chrome.windows.remove(id)
     );
     this.#windows = [];
   }
@@ -258,7 +259,8 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    chrome.browserAction.setBadgeText({ text });
+    // eslint-disable-next-line no-void
+    void chrome.browserAction.setBadgeText({ text });
 
     if (shouldClose && text === '') {
       this.popupClose();

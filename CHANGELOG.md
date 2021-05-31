@@ -1,22 +1,45 @@
 # CHANGELOG
 
-## 0.37.3-x
-
-**Important** In the 6.0 version the default package type has been changed to ESM modules by default.
-**Important** Not published to the stored, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
+## 0.38.3 May 31, 2021
 
 Contributed:
 
-- Support IPFS/IPNS uls (thanks to https://github.com/carumusan)
+- Fix Chromium not displaying accounts due to height mismatch (Thanks to https://github.com/wirednkod)
+
+
+## 0.38.2 May 30, 2021
+
+**Important** Not published to the stores, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
 
 Changes:
 
+- Bump `@polkadot/api` to `4.12.1`
+- Bump `@polkadot/util` to `6.6.1`
+
+
+## 0.38.1 May 25, 2021
+
+Contributed:
+
+- Support IPFS/IPNS uls (Thanks to https://github.com/carumusan)
+- Batch export of all accounts (Thanks to https://github.com/BubbleBear)
+- Turkish i18n (Thanks to https://github.com/zinderud)
+- Support for custom signed extensions (Thanks to https://github.com/KarishmaBothara)
+- Adjust background handler port mapping (Thanks to https://github.com/hlminh2000)
+- Prevent 3rd party authorize abuse (Thanks to https://github.com/remon-nashid)
+- Use file-saver for account export (Thanks to https://github.com/Tbaut)
+- Language fixes (Thanks to https://github.com/n3wborn)
+
+Changes:
+
+- Support for Metadata v13 from Substrate
 - Bump `@polkadot/api` & `@polkadot/util` to latest released versions
+- Swap to use of ESM modules all in published packages
 
 
 ## 0.37.2 Feb 28, 2021
 
-**Important** Not published to the stored, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
+**Important** Not published to the stores, just made available to ensure users can have access to a version that uses the latest `@polkadot/{api, util}`
 
 Contributed:
 

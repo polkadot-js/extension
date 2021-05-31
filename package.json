@@ -2,7 +2,7 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.38.3-1",
+  "version": "0.38.3",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -46,6 +46,5 @@
     "stylelint": "^13.13.1",
     "stylelint-config-recommended": "^5.0.0",
     "stylelint-config-styled-components": "^0.1.1"
-  },
-  "stableVersion": "0.38.3-0"
+  }
 }

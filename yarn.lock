@@ -2051,9 +2051,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.62.22":
-  version: 0.62.22
-  resolution: "@polkadot/dev@npm:0.62.22"
+"@polkadot/dev@npm:^0.62.24":
+  version: 0.62.24
+  resolution: "@polkadot/dev@npm:0.62.24"
   dependencies:
     "@babel/cli": ^7.14.3
     "@babel/core": ^7.14.3
@@ -2133,7 +2133,7 @@ __metadata:
     polkadot-exec-prettier: scripts/polkadot-exec-prettier.cjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.cjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.cjs
-  checksum: 3a1ab0c809ccb027f8159e67bd53b02525781f59866e7dbc626c7128c77406fde33daa68cdec2a87d1ad678e4bc341b1ad77450e9724bcac6f4a2009d41d9048
+  checksum: ea87348ad013f9ba8c1a0be32519ea63f0290fc7bd2a375ce4212e92f1fbaf3a34d45ac3ae7a13d900c172dac421bfda3bccdc8cae45b8e36a814020862cc88c
   languageName: node
   linkType: hard
 
@@ -2145,7 +2145,7 @@ __metadata:
     "@polkadot/api": ^4.12.1
     "@polkadot/extension-inject": ^0.38.3-0
     "@polkadot/keyring": ^6.6.1
-    "@polkadot/phishing": ^0.6.162
+    "@polkadot/phishing": ^0.6.164
     "@polkadot/ui-keyring": ^0.78.1
   languageName: unknown
   linkType: soft
@@ -2239,7 +2239,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.14.0
-    "@polkadot/dev": ^0.62.22
+    "@polkadot/dev": ^0.62.24
     "@polkadot/extension-base": ^0.38.3-0
     "@polkadot/extension-inject": ^0.38.3-0
     "@polkadot/extension-ui": ^0.38.3-0
@@ -2325,15 +2325,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.6.162":
-  version: 0.6.162
-  resolution: "@polkadot/phishing@npm:0.6.162"
+"@polkadot/phishing@npm:^0.6.164":
+  version: 0.6.164
+  resolution: "@polkadot/phishing@npm:0.6.164"
   dependencies:
     "@babel/runtime": ^7.14.0
     "@polkadot/util": ^6.6.1
     "@polkadot/util-crypto": ^6.6.1
     "@polkadot/x-fetch": ^6.6.1
-  checksum: f50fbcd6ed95712aedc11470c528195f2a6b348d420a44346c623ae7d76a57c7460f72b16ecf470d9759dbe80e84d8bc0d8c53ab3374c814b827605feec3748a
+  checksum: cb80953a4c85bf17f166cb314beeabd331c2fc9689f055149fb4272ab8329755ac24b29b3925e5e856a56b2397891209c8111d953922808f6e369a5b73d59cd2
   languageName: node
   linkType: hard
 
@@ -13622,7 +13622,7 @@ resolve@^2.0.0-next.3:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.14.3
-    "@polkadot/dev": ^0.62.22
+    "@polkadot/dev": ^0.62.24
     "@types/jest": ^26.0.23
     i18next-scanner: ^3.0.0
     sinon-chrome: ^3.0.1

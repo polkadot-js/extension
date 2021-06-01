@@ -2,39 +2,60 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import type { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
+import { hexToU8a } from '@polkadot/util';
 
 import { Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import { CMD_MORTAL, CMD_SIGN_MESSAGE } from './Request';
 
 interface Props {
+  address: string;
   children?: React.ReactNode;
   className?: string;
+  cmd: number;
+  genesisHash: string;
   onSignature: ({ signature }: { signature: string }) => void;
-  payload: ExtrinsicPayload;
-  request: SignerPayloadJSON;
+  payload: ExtrinsicPayload | string;
+
 }
 
-const CMD_MORTAL = 2;
-
-function Qr ({ className, onSignature, payload, request }: Props): React.ReactElement<Props> {
+function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isScanning, setIsScanning] = useState(false);
 
   const payloadU8a = useMemo(
-    () => payload.toU8a(),
-    [payload]
+    () => {
+      switch (cmd) {
+        case CMD_MORTAL:
+          return (payload as ExtrinsicPayload).toU8a();
+        case CMD_SIGN_MESSAGE:
+          return hexToU8a(payload as string);
+        default:
+          return null;
+      }
+    },
+    [cmd, payload]
   );
 
   const _onShowQr = useCallback(
     () => setIsScanning(true),
     []
   );
+
+  if (!payloadU8a) {
+    return (
+      <div className={className}>
+        <div className='qrContainer'>
+          Transaction command:{cmd} not supported.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
@@ -43,9 +64,9 @@ function Qr ({ className, onSignature, payload, request }: Props): React.ReactEl
           ? <QrScanSignature onScan={onSignature} />
           : (
             <QrDisplayPayload
-              address={request.address}
-              cmd={CMD_MORTAL}
-              genesisHash={request.genesisHash}
+              address={address}
+              cmd={cmd}
+              genesisHash={genesisHash}
               payload={payloadU8a}
             />
           )

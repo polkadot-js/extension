@@ -48,11 +48,13 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
   );
 
   if (!payloadU8a) {
-    return (<div className={className}>
-      <div className='qrContainer'>
-        Transaction command:{cmd} not supported.
+    return (
+      <div className={className}>
+        <div className='qrContainer'>
+          Transaction command:{cmd} not supported.
+        </div>
       </div>
-    </div>);
+    );
   }
 
   return (

@@ -44,7 +44,7 @@ function transformAccounts (accounts: string[]): InjectedAccount[] {
   });
 }
 
-// add a compat interface of SingleSource to window.injectedWeb3
+// add a compat interface of metaMaskSource to window.injectedWeb3
 function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {

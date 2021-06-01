@@ -30,7 +30,7 @@ function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAcc
       address,
       genesisHash,
       name,
-      type
+      type: type || 'sr25519'
     }));
 }
 

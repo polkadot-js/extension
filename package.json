@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.12.1",
+    "@polkadot/api": "^4.12.2-6",
     "@polkadot/keyring": "^6.6.1",
     "@polkadot/networks": "^6.6.1",
-    "@polkadot/types": "^4.12.1",
+    "@polkadot/types": "^4.12.2-6",
     "@polkadot/util": "^6.6.1",
     "@polkadot/util-crypto": "^6.6.1",
     "@polkadot/x-fetch": "^6.6.1",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",
-    "@polkadot/dev": "^0.62.25",
+    "@polkadot/dev": "^0.62.28",
     "@types/jest": "^26.0.23",
     "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",

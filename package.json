@@ -2,7 +2,7 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.38.4-8",
+  "version": "0.38.4-9",
   "private": true,
   "workspaces": [
     "packages/*"

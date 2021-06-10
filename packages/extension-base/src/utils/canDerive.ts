@@ -3,6 +3,6 @@
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-export default function canDerive (type?: KeypairType): boolean {
+export function canDerive (type?: KeypairType): boolean {
   return !!type && ['ed25519', 'sr25519', 'ecdsa'].includes(type);
 }

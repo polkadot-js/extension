@@ -6,10 +6,10 @@ import type { SignerPayloadRaw } from '@polkadot/types/types';
 import type { RequestSign } from './types';
 
 import { TypeRegistry } from '@polkadot/types';
-import { hexToU8a, stringToU8a, u8aConcat, u8aEq, u8aToHex } from '@polkadot/util';
+import { u8aConcat, u8aEq, u8aToHex, u8aToU8a } from '@polkadot/util';
 
-const PREFIX = stringToU8a('<RawBytes>');
-const POSTFIX = stringToU8a('</RawBytes>');
+const PREFIX = u8aToU8a('<RawBytes>');
+const POSTFIX = u8aToU8a('</RawBytes>');
 const WRAP_LEN = PREFIX.length + POSTFIX.length;
 
 export default class RequestBytesSign implements RequestSign {
@@ -20,7 +20,7 @@ export default class RequestBytesSign implements RequestSign {
   }
 
   sign (_registry: TypeRegistry, pair: KeyringPair): { signature: string } {
-    const rawBytes = hexToU8a(this.payload.data);
+    const rawBytes = u8aToU8a(this.payload.data);
     const hasWrapper = rawBytes.length <= WRAP_LEN &&
       u8aEq(rawBytes.subarray(0, PREFIX.length), PREFIX) &&
       u8aEq(rawBytes.slice(-POSTFIX.length), POSTFIX);

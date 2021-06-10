@@ -21,7 +21,7 @@ export default class RequestBytesSign implements RequestSign {
 
   sign (_registry: TypeRegistry, pair: KeyringPair): { signature: string } {
     const rawBytes = u8aToU8a(this.payload.data);
-    const hasWrapper = rawBytes.length <= WRAP_LEN &&
+    const hasWrapper = rawBytes.length >= WRAP_LEN &&
       u8aEq(rawBytes.subarray(0, PREFIX.length), PREFIX) &&
       u8aEq(rawBytes.slice(-POSTFIX.length), POSTFIX);
 

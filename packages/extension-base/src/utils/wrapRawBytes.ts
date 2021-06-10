@@ -3,8 +3,8 @@
 
 import { u8aConcat, u8aEq, u8aToU8a } from '@polkadot/util';
 
-export const PREFIX = u8aToU8a('<RawBytes>');
-export const POSTFIX = u8aToU8a('</RawBytes>');
+export const PREFIX = u8aToU8a('<Bytes>');
+export const POSTFIX = u8aToU8a('</Bytes>');
 
 const WRAP_LEN = PREFIX.length + POSTFIX.length;
 

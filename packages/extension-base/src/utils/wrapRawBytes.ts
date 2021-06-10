@@ -10,7 +10,7 @@ const WRAP_LEN = PREFIX.length + POSTFIX.length;
 
 export function wrapRawBytes (bytes: string | Uint8Array): Uint8Array {
   const u8a = u8aToU8a(bytes);
-  const hasWrapper = u8a.length <= WRAP_LEN &&
+  const hasWrapper = u8a.length >= WRAP_LEN &&
     u8aEq(u8a.subarray(0, PREFIX.length), PREFIX) &&
     u8aEq(u8a.slice(-POSTFIX.length), POSTFIX);
 

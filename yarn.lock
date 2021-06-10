@@ -2143,6 +2143,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.14.0
     "@polkadot/api": ^4.12.2-6
+    "@polkadot/extension-dapp": ^0.38.4-18
     "@polkadot/extension-inject": ^0.38.4-18
     "@polkadot/keyring": ^6.6.1
     "@polkadot/phishing": ^0.6.171
@@ -2161,7 +2162,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-dapp@^0.38.4-18, @polkadot/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
@@ -2199,6 +2200,7 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": ^5.15.3
     "@fortawesome/react-fontawesome": ^0.1.14
     "@polkadot/extension-base": ^0.38.4-18
+    "@polkadot/extension-dapp": ^0.38.4-18
     "@polkadot/extension-inject": ^0.38.4-18
     "@polkadot/hw-ledger": ^6.6.1
     "@polkadot/keyring": ^6.6.1

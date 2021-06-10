@@ -14,6 +14,7 @@ const packages = [
   'extension',
   'extension-base',
   'extension-chains',
+  'extension-dapp',
   'extension-inject',
   'extension-ui'
 ];

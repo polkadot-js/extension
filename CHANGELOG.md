@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## master
+
+Contributed:
+
+- Support signing of raw data via Qr (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Raw signing interfaces will now always place a `<Bytes>...</Bytes>` wrapper around signed data
+
+
 ## 0.38.3 May 31, 2021
 
 Contributed:

@@ -27,11 +27,21 @@ describe('wrapRawBytes', (): void => {
     ).toEqual(TEST_WRAP);
   });
 
-  it('does not re-wrap when a prefix is already present', (): void => {
+  it('does not re-wrap when a wrap is already present', (): void => {
     expect(
       u8aToString(
         wrapRawBytes(TEST_WRAP)
       )
     ).toEqual(TEST_WRAP);
+  });
+
+  it('does not re-wrap when a wrap (empty data) is already present', (): void => {
+    const EMPTY_WRAP = `${u8aToString(PREFIX)}${u8aToString(POSTFIX)}`;
+
+    expect(
+      u8aToString(
+        wrapRawBytes(EMPTY_WRAP)
+      )
+    ).toEqual(EMPTY_WRAP);
   });
 });

@@ -27,6 +27,26 @@ describe('wrapRawBytes', (): void => {
     ).toEqual(TEST_WRAP);
   });
 
+  it('wraps when only start wrap is detected', (): void => {
+    const START_WRAP = `${u8aToString(PREFIX)}${TEST_DATA}`;
+
+    expect(
+      u8aToString(
+        wrapRawBytes(START_WRAP)
+      )
+    ).toEqual(`${u8aToString(PREFIX)}${START_WRAP}${u8aToString(POSTFIX)}`);
+  });
+
+  it('wraps when only end wrap is detected', (): void => {
+    const END_WRAP = `${TEST_DATA}${u8aToString(POSTFIX)}`;
+
+    expect(
+      u8aToString(
+        wrapRawBytes(END_WRAP)
+      )
+    ).toEqual(`${u8aToString(PREFIX)}${END_WRAP}${u8aToString(POSTFIX)}`);
+  });
+
   it('does not re-wrap when a wrap is already present', (): void => {
     expect(
       u8aToString(

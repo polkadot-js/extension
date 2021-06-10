@@ -13,6 +13,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@polkadot/extension-base": "^0.38.4-18",
+    "@polkadot/extension-dapp": "^0.38.4-18",
     "@polkadot/extension-inject": "^0.38.4-18",
     "@polkadot/hw-ledger": "^6.6.1",
     "@polkadot/keyring": "^6.6.1",

@@ -6,7 +6,7 @@ import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { wrapRawBytes } from '@polkadot/extension-base/utils';
+import { wrapBytes } from '@polkadot/extension-dapp/wrapBytes';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
 import { Button } from '../../components';
@@ -34,7 +34,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
         case CMD_MORTAL:
           return (payload as ExtrinsicPayload).toU8a();
         case CMD_SIGN_MESSAGE:
-          return wrapRawBytes(payload as string);
+          return wrapBytes(payload as string);
         default:
           return null;
       }

@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## master
+## 0.38.4 Jun 11, 2021
+
+**Important** Not published to the stores, just made available to expose `{unwrap, wrap}Bytes`
 
 Contributed:
 

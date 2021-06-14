@@ -113,15 +113,6 @@ describe('unwrapBytes', (): void => {
     ).toEqual('');
   });
 
-  it('does not rewrap an Ethereum wrap', (): void => {
-    expect(
-      u8aEq(
-        wrapBytes(TEST_ETH),
-        TEST_ETH
-      )
-    ).toBe(true);
-  });
-
   describe('Ethereum-style', (): void => {
     it('does not wrap an Ethereum wrap', (): void => {
       expect(

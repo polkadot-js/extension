@@ -36,12 +36,8 @@ function getState (): StateBase {
   };
 }
 
-function getNetwork (genesisHash: string): string | null {
-  const network = Object.keys(knownGenesis).find((n) => knownGenesis[n].includes(genesisHash));
-
-  return network && knownLedger[network]
-    ? network
-    : null;
+function getNetwork (genesisHash: string): string | undefined {
+  return Object.keys(knownGenesis).find((n) => knownGenesis[n].includes(genesisHash));
 }
 
 function retrieveLedger (genesisHash: string): Ledger {
@@ -53,7 +49,7 @@ function retrieveLedger (genesisHash: string): Ledger {
 
   const network = getNetwork(genesisHash);
 
-  assert(network, `Unable to find Ledger config for genesisHash ${genesisHash}`);
+  assert(network && knownLedger[network], `Unable to find Ledger config for genesisHash ${genesisHash}`);
 
   ledger = new Ledger('webusb', network);
 

@@ -4,11 +4,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import { Network } from '@polkadot/networks/types';
+import { knownGenesis, knownLedger } from '@polkadot/networks/defaults';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import ledgerChains from '../util/legerChains';
 import useTranslation from './useTranslation';
 
 interface StateBase {
@@ -28,26 +27,6 @@ interface State extends StateBase {
   warning: string | null;
 }
 
-function getNetwork (genesis: string): Network | undefined {
-  return ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
-}
-
-function retrieveLedger (genesis: string): Ledger {
-  let ledger: Ledger | null = null;
-
-  const { isLedgerCapable } = getState();
-
-  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
-
-  const def = getNetwork(genesis);
-
-  assert(def, `Unable to find supported chain for ${genesis}`);
-
-  ledger = new Ledger('webusb', def.network);
-
-  return ledger;
-}
-
 function getState (): StateBase {
   const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
@@ -55,6 +34,30 @@ function getState (): StateBase {
     isLedgerCapable,
     isLedgerEnabled: isLedgerCapable && uiSettings.ledgerConn !== 'none'
   };
+}
+
+function getNetwork (genesisHash: string): string | null {
+  const network = Object.keys(knownGenesis).find((n) => knownGenesis[n].includes(genesisHash));
+
+  return network && knownLedger[network]
+    ? network
+    : null;
+}
+
+function retrieveLedger (genesisHash: string): Ledger {
+  let ledger: Ledger | null = null;
+
+  const { isLedgerCapable } = getState();
+
+  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
+
+  const network = getNetwork(genesisHash);
+
+  assert(network, `Unable to find Ledger config for genesisHash ${genesisHash}`);
+
+  ledger = new Ledger('webusb', network);
+
+  return ledger;
 }
 
 export function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
@@ -100,7 +103,7 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         setAddress(res.address);
       }).catch((e: Error) => {
         setIsLoading(false);
-        const { network } = getNetwork(genesis) || { network: 'unknown network' };
+        const network = getNetwork(genesis) || 'unknown network';
 
         const warningMessage = e.message.includes('Code: 26628')
           ? t<string>('Is your ledger locked?')

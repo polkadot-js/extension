@@ -65,7 +65,7 @@
 	  "from": "od",
 	  "chain": "łańcuch",
 	  "icon": "ikona",
-	  "decimals": "dziesiętne",
+	  "decimals": "miejsca dziesiętne",
 	  "symbol": "symbol",
 	  "upgrade": "aktualizacja",
 	  "This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.": "To zatwierdzenie doda metadane do instancji wtyczki, umożliwiając dekodowanie przyszłych żądań przy użyciu tych metadanych.",

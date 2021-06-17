@@ -112,7 +112,7 @@
 	  "copy address": "kopiuj adres",
 	  "account visibility": "widoczność konta",
 	  "Wrong password": "Złe hasło",
-	  "Incorrect derivation path": "Nieprawidłowa ścieżka wyprowadzenia",
+	  "Incorrect derivation path": "Nieprawidłowa ścieżka pochodna",
 	  "lifetime": "dożywotni",
 	  "Warning: Caps lock is on": "Ostrzeżenie: Caps lock jest włączony",
 	  "Invalid Json file": "Nieprawidłowy plik JSON",

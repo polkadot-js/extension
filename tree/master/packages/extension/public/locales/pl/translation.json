@@ -99,7 +99,7 @@
 	  "We don't collect keys, addresses or any information - your information never leaves this machine": "Nie zbieramy kluczy, adresów ani żadnych informacji - Twoje informacje nigdy nie opuszczają tego komputera",
 	  "... we are not in the information collection business (even anonymized).": "... nie zajmujemy się zbieraniem informacji (nawet anonimowych).",
 	  "Understood, let me continue": "Zrozumiałem, kontynuuję",
-	  "An error occured": "Błąd wystąpił ",
+	  "An error occured": "Wystąpił błąd ",
 	  "Something went wrong with the query and rendering of this component. {{message}}": "Coś poszło nie tak z zapytaniem i renderowaniem tego komponentu. {{message}}",
 	  "Back to home": "Wrócić do domu",
 	  "external account": "konto zewnętrzne",

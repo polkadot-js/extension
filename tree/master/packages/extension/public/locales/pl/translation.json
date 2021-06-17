@@ -154,7 +154,7 @@
 	  "Sign on Ledger": "Podpisz się w Ledger",
 	  "Allow use on any chain": "Zezwól na użycie w dowolnym łańcuchu",
 	  "Select network": "Wybierz sieć",
-	  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.": "Zostałeś przekierowany ponieważ wtyczka Polkadot{.js} uważa że ta strona może naruszyć bezpieczeństwo swoich kont i swoimi żetonami}.",
+	  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.": "Zostałeś przekierowany ponieważ wtyczka Polkadot{.js} uważa że ta strona może naruszyć bezpieczeństwo Twoich kont i aktywów}.",
 	  "Export all accounts": "Eksportuj wszystkie konta",
 	  "All account": "Wszystkie konta",
 	  "password for encrypting all accounts": "hasło do szyfrowania wszystkich kont",

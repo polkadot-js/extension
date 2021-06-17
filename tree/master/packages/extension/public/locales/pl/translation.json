@@ -132,7 +132,7 @@
 	  "derivation path": "ścieżka pochodna",
 	  "Next": "Dalej",
 	  "//hard": "//twarda",
-	  "`///password` not supported for derivation": "`///hasło` nie jest obsługiwane przy tworzenia konta pochodnego",
+	  "`///password` not supported for derivation": "`///hasło` nie jest obsługiwane przy tworzeniu konta pochodnego",
 	  "Soft derivation is only allowed for sr25519 accounts": "Miękka pochodna jest dozwolona tylko dla kont typu sr25519",
 	  "Invalid derivation path": "Nieprawidłowa ścieżka pochodna",
 	  "hardware wallet account": "konto portfela sprzętowego",

@@ -130,7 +130,7 @@
 	  "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "Mnemonik musi zawierać 12, 15, 18, 21, 24 słowa",
 	  "advanced": "zaawansowane",
 	  "derivation path": "ścieżka pochodna",
-	  "Next": "Następny",
+	  "Next": "Dalej",
 	  "//hard": "//ciężko ",
 	  "`///password` not supported for derivation": "`///password` nie jest obsługiwane przy wyprowadzaniu",
 	  "Soft derivation is only allowed for sr25519 accounts": "Miękka pochodna jest dozwolona tylko dla kont typu sr25519",

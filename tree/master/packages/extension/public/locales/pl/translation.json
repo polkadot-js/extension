@@ -100,7 +100,7 @@
 	  "... we are not in the information collection business (even anonymized).": "... nie zajmujemy się zbieraniem informacji (nawet anonimowych).",
 	  "Understood, let me continue": "Zrozumiałem, kontynuuję",
 	  "An error occured": "Wystąpił błąd ",
-	  "Something went wrong with the query and rendering of this component. {{message}}": "Coś poszło nie tak z zapytaniem i renderowaniem tego komponentu. {{message}}",
+	  "Something went wrong with the query and rendering of this component. {{message}}": "Coś poszło nie tak z zapytaniem i wyświetleniem tego komponentu. {{message}}",
 	  "Back to home": "Wrócić do domu",
 	  "external account": "konto zewnętrzne",
 	  "Phishing detected": "Wykryto phishing",

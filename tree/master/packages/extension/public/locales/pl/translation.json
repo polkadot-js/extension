@@ -54,7 +54,7 @@
 	  "I want to export this account": "Chcę wyeksportować to konto",
 	  "Cancel": "Anuluj",
 	  "Forget account": "Zapomnij konto",
-	  "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "Zamierzasz usunąć konto. Oznacza to, że nie będziesz już mógł uzyskać do niego dostępu za pośrednictwem tej wtyczki. Jeśli chcesz je odzyskać, musisz użyć seedu.",
+	  "You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.": "Zamierzasz usunąć konto. Oznacza to, że nie będziesz już mógł uzyskać do niego dostępu za pośrednictwem tej wtyczki. Jeśli chcesz je odzyskać, musisz użyć ziarna.",
 	  "I want to forget this account": "Chcę zapomnieć to konto",
 	  "Scan Address Qr": "Skanuj Adres Qr",
 	  "Add the account with identified address": "Dodaj konto ze zidentyfikowanym adresem",

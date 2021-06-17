@@ -131,7 +131,7 @@
 	  "advanced": "zaawansowane",
 	  "derivation path": "ścieżka pochodna",
 	  "Next": "Dalej",
-	  "//hard": "//ciężko ",
+	  "//hard": "//twarda",
 	  "`///password` not supported for derivation": "`///password` nie jest obsługiwane przy wyprowadzaniu",
 	  "Soft derivation is only allowed for sr25519 accounts": "Miękka pochodna jest dozwolona tylko dla kont typu sr25519",
 	  "Invalid derivation path": "Nieprawidłowa ścieżka pochodna",

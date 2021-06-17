@@ -133,7 +133,7 @@
 	  "Next": "Następny",
 	  "//hard": "//ciężko ",
 	  "`///password` not supported for derivation": "`///password` nie jest obsługiwane przy wyprowadzaniu",
-	  "Soft derivation is only allowed for sr25519 accounts": "Miękkie wyprowadzanie jest dozwolone tylko dla kont sr25519",
+	  "Soft derivation is only allowed for sr25519 accounts": "Miękka pochodna jest dozwolona tylko dla kont typu sr25519",
 	  "Invalid derivation path": "Nieprawidłowa ścieżka pochodna",
 	  "hardware wallet account": "konto portfela sprzętowego",
 	  "Camera access must be first enabled in the settings": "Dostęp do kamery musi być najpierw włączony w ustawieniach",

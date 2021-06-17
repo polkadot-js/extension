@@ -106,7 +106,7 @@
 	  "Phishing detected": "Wykryto phishing",
 	  "Remember my password for the next {{expiration}} minutes": "Zapamiętaj moje hasło przez następne {{expiration}} minut",
 	  "Extend the period without password by {{expiration}} minutes": "Przedłuż okres bez hasła o {{expiration}} minut",
-	  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts.": "Zostałeś przekierowany ponieważ wtyczka Polkadot{.js} uważa że ta strona może naruszyć bezpieczeństwo swoich kont.",
+	  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts.": "Zostałeś przekierowany ponieważ wtyczka Polkadot{.js} uważa że ta strona może naruszyć bezpieczeństwo Twoich kont.",
 	  "The redirection could also happen on an outright malicious website or on a legitimate websites that has been compromised and flagged.": "Przekierowanie może również nastąpić na całkowicie złośliwej witrynie lub na legalnych witrynach, które zostały zhakowane i oznaczone.",
 	  "This redirection is based on a list of websites accessible at https://github.com/polkadot-js/phishing. Note that this is a community-driven, curated list. \n It might be incomplete or inaccurate.": "To przekierowanie jest oparte na liście stron internetowych dostępnych pod adresem https://github.com/polkadot-js/phishing. Pamiętaj, że jest to lista zarządzana przez społeczność. \n Może być niekompletna lub niedokładna.",
 	  "copy address": "kopiuj adres",

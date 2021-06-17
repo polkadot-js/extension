@@ -125,7 +125,7 @@
 	  "Derive from an account": "Utwórz konto pochodne z konta",
 	  "Dark": "Ciemny",
 	  "Light": "Jasny",
-	  "Invalid mnemonic seed or derivation path": "Nieprawidłowy inicjator mnemoniczny lub ścieżka derywacyjna",
+	  "Invalid mnemonic seed or derivation path": "Nieprawidłowe ziarno mnemoniczne lub ścieżka pochodna",
 	  "Invalid mnemonic seed": "Nieprawidłowe ziarno mnemoniczne",
 	  "Mnemonic needs to contain 12, 15, 18, 21, 24 words": "Mnemonik musi zawierać 12, 15, 18, 21, 24 słowa",
 	  "advanced": "zaawansowane",

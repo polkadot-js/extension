@@ -113,7 +113,7 @@
 	  "account visibility": "widoczność konta",
 	  "Wrong password": "Złe hasło",
 	  "Incorrect derivation path": "Nieprawidłowa ścieżka pochodna",
-	  "lifetime": "dożywotni",
+	  "lifetime": "czas życia",
 	  "Warning: Caps lock is on": "Ostrzeżenie: Caps lock jest włączony",
 	  "Invalid Json file": "Nieprawidłowy plik JSON",
 	  "Unable to decode using the supplied passphrase": "Nie można zdekodować przy użyciu dostarczonego hasła",

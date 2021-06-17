@@ -68,7 +68,7 @@
 	  "decimals": "miejsca dziesiętne",
 	  "symbol": "symbol",
 	  "upgrade": "aktualizacja",
-	  "This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.": "To zatwierdzenie doda metadane do instancji wtyczki, umożliwiając dekodowanie przyszłych żądań przy użyciu tych metadanych.",
+	  "This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.": "Zatwierdzenie doda metadane do wtyczki, umożliwiając dekodowanie przyszłych żądań przy użyciu tych metadanych.",
 	  "Yes, do this metadata update": "Tak, zaktualizuj metadane aktualizacje",
 	  "Reject": "Odrzuć",
 	  "Restore from JSON": "Przywróć z JSON",

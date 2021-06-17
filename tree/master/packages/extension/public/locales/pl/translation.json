@@ -117,7 +117,7 @@
 	  "Warning: Caps lock is on": "Ostrzeżenie: Caps lock jest włączony",
 	  "Invalid Json file": "Nieprawidłowy plik JSON",
 	  "Unable to decode using the supplied passphrase": "Nie można odszyfrować używając dostarczonego hasła",
-	  "Manage Website Access": "Zarządzaj dostępem do witryny",
+	  "Manage Website Access": "Zarządzaj dostępem do stron",
 	  "example.com": "example.com",
 	  "No website request yet!": "Nie ma jeszcze żądania strony!",
 	  "allowed": "dozwolony",

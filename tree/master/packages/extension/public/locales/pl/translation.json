@@ -39,7 +39,7 @@
 	  "I have saved my mnemonic seed safely.": "Bezpiecznie zapisałem moje ziarno mnemoniczne.",
 	  "Next step": "Następny krok",
 	  "Derivation Path": "Ścieżka pochodna",
-	  "Derivation Path (unlock to edit)": "Ścieżka wyprowadzania (odblokuj, aby edytować)",
+	  "Derivation Path (unlock to edit)": "Ścieżka pochodna (odblokuj, aby zmienić)",
 	  "//hard/soft": "//twarda/miękka ",
 	  "Add new account": "Dodaj nowe konto",
 	  "Create derived account": "Utwórz konto pochodne",

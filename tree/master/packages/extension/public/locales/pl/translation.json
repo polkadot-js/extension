@@ -151,7 +151,7 @@
 	  "address index": "indeks adresu",
 	  "Refresh": "Odśwież",
 	  "Import Account": "Importuj konto",
-	  "Sign on Ledger": "Podpisz się w Ledger",
+	  "Sign on Ledger": "Podpisz z użyciem Ledger",
 	  "Allow use on any chain": "Zezwól na użycie w dowolnym łańcuchu",
 	  "Select network": "Wybierz sieć",
 	  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.": "Zostałeś przekierowany ponieważ wtyczka Polkadot{.js} uważa że ta strona może naruszyć bezpieczeństwo Twoich kont i aktywów}.",

@@ -38,7 +38,7 @@
 	  "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.": "Proszę zapisać ziarno mnemoniczne portfela i przechowywać je w bezpiecznym miejscu. Mnemonik może być użyty do przywrócenia portfela. Przechowuj go ostrożnie, aby nie stracić swoich aktywów.",
 	  "I have saved my mnemonic seed safely.": "Bezpiecznie zapisałem moje ziarno mnemoniczne.",
 	  "Next step": "Następny krok",
-	  "Derivation Path": "Ścieżka Wyprowadzenia",
+	  "Derivation Path": "Ścieżka pochodna",
 	  "Derivation Path (unlock to edit)": "Ścieżka wyprowadzania (odblokuj, aby edytować)",
 	  "//hard/soft": "//twarda/miękka ",
 	  "Add new account": "Dodaj nowe konto",

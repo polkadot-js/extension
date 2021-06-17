@@ -33,7 +33,7 @@
 	  "Authorize": "Autoryzuj",
 	  "Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.": "Zatwierdź tę prośbę tylko wtedy, gdy ufasz aplikacji. Zatwierdzenie daje aplikacji dostęp do adresów Twoich kont.",
 	  "Yes, allow this application access": "Tak, zezwól tej aplikacji na dostęp",
-	  "Add the account with the generated seed": "Dodaj konto z wygenerowanym seedem",
+	  "Add the account with the generated seed": "Dodaj konto z tym ziarnem",
 	  "Create an account": "Utwórz konto",
 	  "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.": "Proszę zapisać ziarno mnemoniczne portfela i przechowywać je w bezpiecznym miejscu. Mnemonik może być użyty do przywrócenia portfela. Przechowuj go ostrożnie, aby nie stracić swoich aktywów.",
 	  "I have saved my mnemonic seed safely.": "Bezpiecznie zapisałem moje ziarno mnemoniczne.",

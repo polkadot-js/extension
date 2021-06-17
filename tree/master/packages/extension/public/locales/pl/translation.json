@@ -156,7 +156,7 @@
 	  "Select network": "Wybierz sieć",
 	  "You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.": "Zostałeś przekierowany ponieważ wtyczka Polkadot{.js} uważa że ta strona może naruszyć bezpieczeństwo swoich kont i swoimi żetonami}.",
 	  "Export all accounts": "Eksportuj wszystkie konta",
-	  "All account": "Wszystkie konto",
+	  "All account": "Wszystkie konta",
 	  "password for encrypting all accounts": "hasło do szyfrowania wszystkich kont",
 	  "I want to export all my accounts": "Chcę wyeksportować wszystkie moje konta"
 	}

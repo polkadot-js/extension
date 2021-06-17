@@ -9,7 +9,7 @@
 	  "Back": "Z powrotem",
 	  "Create new account (root or derived)": "Utwórz nowe konto (główne lub pochodne)",
 	  "Create new account": "Stwórz nowe konto",
-	  "Import account from pre-existing seed": "Importu konto z wcześniej istniejącego materiału siewnego",
+	  "Import account from pre-existing seed": "Importu konto z istniejącego ziarna",
 	  "Restore account from backup JSON file": "Przywróć konto z zapasowego pliku JSON",
 	  "Attach external QR-signer account": "Dołącz zewnętrzne konto osoby podpisującej kod QR",
 	  "External QR accounts and Access": "Zewnętrzne konta QR i dostęp",

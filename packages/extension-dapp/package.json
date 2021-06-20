@@ -8,7 +8,7 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.14.5",
+    "@babel/runtime": "^7.14.6",
     "@polkadot/extension-inject": "^0.38.6",
     "@polkadot/util": "^6.9.1",
     "@polkadot/util-crypto": "^6.9.1"

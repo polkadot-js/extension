@@ -1,17 +1,17 @@
 {
   "name": "@polkadot/extension-dapp",
   "description": "Provides an interfaces around the injected globals for ease of access by dapp developers.",
-  "version": "0.38.5",
+  "version": "0.38.6",
   "type": "module",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.14.5",
-    "@polkadot/extension-inject": "^0.38.5",
-    "@polkadot/util": "^6.8.1",
-    "@polkadot/util-crypto": "^6.8.1"
+    "@babel/runtime": "^7.14.6",
+    "@polkadot/extension-inject": "^0.38.6",
+    "@polkadot/util": "^6.9.1",
+    "@polkadot/util-crypto": "^6.9.1"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.38.6 Jun 20, 2012
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump `@polkadot/api` to `4.15.1`
+- Bump `@polkadot/util` to `6.9.1`
+
+
 ## 0.38.5 Jun 14, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.

@@ -20,6 +20,9 @@ import { decodeAddress, encodeAddress } from "@polkadot/util-crypto";
 import initCompat from "./compat";
 import { documentReadyPromise } from "./util";
 
+// expose utility functions
+export { unwrapBytes, wrapBytes } from './wrapBytes';
+
 // just a helper (otherwise we cast all-over, so shorter and more readable)
 const win = window as Window & InjectedWindow;
 

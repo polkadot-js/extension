@@ -8,8 +8,9 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
+import { decodeAddress } from '@polkadot/util-crypto';
 
-import { ActionContext, Address, VerticalSpace } from '../../../components';
+import { AccountContext, ActionContext, Address, VerticalSpace } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
@@ -31,6 +32,9 @@ interface Data {
   payload: ExtrinsicPayload | null;
 }
 
+export const CMD_MORTAL = 2;
+export const CMD_SIGN_MESSAGE = 3;
+
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
@@ -42,6 +46,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
+  const { accounts } = useContext(AccountContext);
 
   useEffect((): void => {
     const payload = request.payload;
@@ -88,9 +93,11 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
         {isExternal && !isHardware
           ? (
             <Qr
+              address={json.address}
+              cmd={CMD_MORTAL}
+              genesisHash={json.genesisHash}
               onSignature={_onSignature}
               payload={payload}
-              request={json}
             />
           )
           : (
@@ -123,20 +130,32 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
       </>
     );
   } else if (hexBytes !== null) {
-    const raw = request.payload as SignerPayloadRaw;
+    const { address, data } = request.payload as SignerPayloadRaw;
+    const account = accounts.find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
     return (
       <>
         <div>
           <Address
-            address={raw.address}
+            address={address}
             isExternal={isExternal}
           />
         </div>
-        <Bytes
-          bytes={raw.data}
-          url={url}
-        />
+        {isExternal && !isHardware && account?.genesisHash
+          ? (
+            <Qr
+              address={address}
+              cmd={CMD_SIGN_MESSAGE}
+              genesisHash={account.genesisHash}
+              onSignature={_onSignature}
+              payload={data}
+            />
+          )
+          : <Bytes
+            bytes={data}
+            url={url}
+          />
+        }
         <VerticalSpace />
         <SignArea
           buttonText={buttonText}

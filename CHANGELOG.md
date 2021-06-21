@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## 0.38.6 Jun 20, 2012
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump `@polkadot/api` to `4.15.1`
+- Bump `@polkadot/util` to `6.9.1`
+
+
+## 0.38.5 Jun 14, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Raw signing interface will not re-wrap Ethereum-type messages
+- Bump `@polkadot/api` to `4.14.1`
+- Bump `@polkadot/util` to `6.8.1`
+
+
+
+## 0.38.4 Jun 11, 2021
+
+**Important** Not published to the stores, just made available to expose `{unwrap, wrap}Bytes`
+
+Contributed:
+
+- Support signing of raw data via Qr (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Raw signing interfaces will now always place a `<Bytes>...</Bytes>` wrapper around signed data
+
+
 ## 0.38.3 May 31, 2021
 
 Contributed:

@@ -2,19 +2,19 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.38.4-0",
+  "version": "0.38.6",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.12.1",
-    "@polkadot/keyring": "^6.6.1",
-    "@polkadot/networks": "^6.6.1",
-    "@polkadot/types": "^4.12.1",
-    "@polkadot/util": "^6.6.1",
-    "@polkadot/util-crypto": "^6.6.1",
-    "@polkadot/x-fetch": "^6.6.1",
+    "@polkadot/api": "^4.15.1",
+    "@polkadot/keyring": "^6.9.1",
+    "@polkadot/networks": "^6.9.1",
+    "@polkadot/types": "^4.15.1",
+    "@polkadot/util": "^6.9.1",
+    "@polkadot/util-crypto": "^6.9.1",
+    "@polkadot/x-fetch": "^6.9.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.3.2"
@@ -38,8 +38,8 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.3",
-    "@polkadot/dev": "^0.62.25",
+    "@babel/core": "^7.14.6",
+    "@polkadot/dev": "^0.62.42",
     "@types/jest": "^26.0.23",
     "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",

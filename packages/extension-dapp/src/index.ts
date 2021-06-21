@@ -14,7 +14,6 @@ import type {
   Web3AccountsOptions,
 } from "@polkadot/extension-inject/types";
 
-import { Signer } from "@polkadot/api/types";
 import { u8aEq } from "@polkadot/util";
 import { decodeAddress, encodeAddress } from "@polkadot/util-crypto";
 
@@ -41,7 +40,6 @@ function throwError(method: string): never {
 function mapAccounts(
   source: string,
   list: InjectedAccount[],
-  signer: Signer,
   ss58Format?: number
 ): InjectedAccountWithMeta[] {
   return list.map(
@@ -51,7 +49,6 @@ function mapAccounts(
       return {
         address: encodedAddress,
         meta: { genesisHash, name, source },
-        signer,
         type,
       };
     }
@@ -137,13 +134,13 @@ export async function web3Accounts({ ss58Format }: Web3AccountsOptions = {}): Pr
   const injected: InjectedExtension[] = await web3EnablePromise;
   const retrieved = await Promise.all(
     injected.map(
-      async ({ accounts, name: source, signer }): Promise<InjectedAccountWithMeta[]> => {
+      async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
         try {
           const list = await accounts.get();
 
           console.log("web3Accounts call res", list);
 
-          return mapAccounts(source, list, signer, ss58Format);
+          return mapAccounts(source, list, ss58Format);
         } catch (error) {
           // cannot handle this one
           return [];
@@ -179,7 +176,7 @@ export async function web3AccountsSubscribe(
     cb(
       Object.entries(accounts).reduce(
         (result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
-          result.push(...mapAccounts(source, list, result[0].signer, ss58Format));
+          result.push(...mapAccounts(source, list, ss58Format));
 
           return result;
         },

@@ -82,6 +82,6 @@ export default function initSingleSource (): Promise<boolean> {
       } else {
         resolve(false);
       }
-    })
+    });
   });
 }

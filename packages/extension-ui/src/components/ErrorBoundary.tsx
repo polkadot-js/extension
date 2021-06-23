@@ -23,13 +23,13 @@ interface State {
 
 // NOTE: This is the only way to do an error boundary, via extend
 class ErrorBoundary extends React.Component<Props> {
-  state: State = { error: null };
+  public override state: State = { error: null };
 
-  static getDerivedStateFromError (error: Error): Partial<State> {
+  public static getDerivedStateFromError (error: Error): Partial<State> {
     return { error };
   }
 
-  componentDidUpdate (prevProps: Props) {
+  public override componentDidUpdate (prevProps: Props) {
     const { error } = this.state;
     const { trigger } = this.props;
 
@@ -38,12 +38,12 @@ class ErrorBoundary extends React.Component<Props> {
     }
   }
 
-  goHome = () => {
+  #goHome = () => {
     this.setState({ error: null });
     window.location.hash = '/';
   };
 
-  public render (): React.ReactNode {
+  public override render (): React.ReactNode {
     const { children, t } = this.props;
     const { error } = this.state;
 
@@ -59,7 +59,7 @@ class ErrorBoundary extends React.Component<Props> {
           <VerticalSpace/>
           <ButtonArea>
             <Button
-              onClick={this.goHome}
+              onClick={this.#goHome}
             >
               {t<string>('Back to home')}
             </Button>

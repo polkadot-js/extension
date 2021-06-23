@@ -10,19 +10,7 @@ export default class AccountsStore extends BaseStore<KeyringJson> implements Key
     super(null);
   }
 
-  public all (cb: (key: string, value: KeyringJson) => void): void {
-    super.all(cb);
-  }
-
-  public get (key: string, update: (value: KeyringJson) => void): void {
-    super.get(key, update);
-  }
-
-  public remove (key: string, update?: () => void): void {
-    super.remove(key, update);
-  }
-
-  public set (key: string, value: KeyringJson, update?: () => void): void {
+  public override set (key: string, value: KeyringJson, update?: () => void): void {
     // shortcut, don't save testing accounts in extension storage
     if (key.startsWith('account:') && value.meta && value.meta.isTesting) {
       update && update();

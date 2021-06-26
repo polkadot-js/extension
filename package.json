@@ -2,19 +2,19 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.38.7-1",
+  "version": "0.38.7",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.15.2-2",
-    "@polkadot/keyring": "^6.9.1",
-    "@polkadot/networks": "^6.9.1",
-    "@polkadot/types": "^4.15.2-2",
-    "@polkadot/util": "^6.9.1",
-    "@polkadot/util-crypto": "^6.9.1",
-    "@polkadot/x-fetch": "^6.9.1",
+    "@polkadot/api": "^4.16.1",
+    "@polkadot/keyring": "^6.10.1",
+    "@polkadot/networks": "^6.10.1",
+    "@polkadot/types": "^4.16.1",
+    "@polkadot/util": "^6.10.1",
+    "@polkadot/util-crypto": "^6.10.1",
+    "@polkadot/x-fetch": "^6.10.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.3.4"

@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import networks from '@polkadot/networks';
 import settings from '@polkadot/ui-settings';
 
 import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components';
@@ -14,7 +15,6 @@ import useTranslation from '../hooks/useTranslation';
 import { createAccountHardware } from '../messaging';
 import { Header, Name } from '../partials';
 import { ThemeProps } from '../types';
-import ledgerChains from '../util/legerChains';
 
 interface AccOption {
   text: string;
@@ -59,16 +59,20 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     value
   })));
 
-  const networkOps = useRef(
-    [{
+  const networkOps = useRef([
+    {
       text: t('Select network'),
       value: ''
     },
-    ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
-      text: displayName,
-      value: genesisHash[0]
-    }))]
-  );
+    ...(
+      networks
+        .filter((n) => n.hasLedgerSupport)
+        .map(({ displayName, genesisHash }): NetworkOption => ({
+          text: displayName,
+          value: genesisHash[0]
+        }))
+    )
+  ]);
 
   const _onSave = useCallback(
     () => {

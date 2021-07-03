@@ -26,7 +26,7 @@ interface Props extends ThemeProps {
 }
 
 const notificationOptions = ['Extension', 'PopUp', 'Window']
-  .map(item => ({text: item, value: item.toLowerCase()}));
+  .map((item) => ({ text: item, value: item.toLowerCase() }));
 
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)

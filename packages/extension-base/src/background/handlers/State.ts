@@ -9,10 +9,10 @@ import { BehaviorSubject } from 'rxjs';
 
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
 import chrome from '@polkadot/extension-inject/chrome';
+import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import { MetadataStore } from '../../stores';
-import settings from '@polkadot/ui-settings';
 
 interface Resolver <T> {
   reject: (error: Error) => void;
@@ -75,8 +75,8 @@ const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
 const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
   type: 'normal',
-  url: NOTIFICATION_URL,
-}
+  url: NOTIFICATION_URL
+};
 
 export enum NotificationOptions {
   None,
@@ -176,9 +176,9 @@ export default class State {
   }
 
   private popupOpen (): void {
-    if (settings.notification === 'extension') { return }
+    if (settings.notification === 'extension') { return; }
 
-    let WINDOW_OPTS = settings.notification === 'window' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS;
+    const WINDOW_OPTS = settings.notification === 'window' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS;
 
     chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {

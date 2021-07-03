@@ -60,14 +60,9 @@ interface SignRequest extends Resolver<ResponseSigning> {
 let idCounter = 0;
 
 const WINDOW_OPTS: chrome.windows.CreateData = {
-  // This is not allowed on FF, only on Chrome - disable completely
-  // focused: true,
-  height: 621,
-  left: 150,
-  top: 150,
+  focused: true,
   type: 'popup',
-  url: chrome.extension.getURL('notification.html'),
-  width: 560
+  url: chrome.extension.getURL('notification.html')
 };
 
 const AUTH_URLS_KEY = 'authUrls';

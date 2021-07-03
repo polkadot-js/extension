@@ -2194,7 +2194,7 @@ __metadata:
     "@polkadot/extension-inject": ^0.38.8-1
     "@polkadot/keyring": ^6.10.1
     "@polkadot/phishing": ^0.6.214
-    "@polkadot/ui-keyring": ^0.82.1
+    "@polkadot/ui-keyring": ^0.82.2-1
   languageName: unknown
   linkType: soft
 
@@ -2489,14 +2489,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^0.82.1":
-  version: 0.82.1
-  resolution: "@polkadot/ui-keyring@npm:0.82.1"
+"@polkadot/ui-keyring@npm:^0.82.2-1":
+  version: 0.82.2-1
+  resolution: "@polkadot/ui-keyring@npm:0.82.2-1"
   dependencies:
     "@babel/runtime": ^7.14.6
     "@polkadot/hw-ledger": ^6.10.1
     "@polkadot/keyring": ^6.10.1
-    "@polkadot/ui-settings": 0.82.1
+    "@polkadot/ui-settings": 0.82.2-1
     "@polkadot/util": ^6.10.1
     "@polkadot/x-rxjs": ^6.10.1
     mkdirp: ^1.0.4
@@ -2505,7 +2505,7 @@ __metadata:
     "@polkadot/keyring": "*"
     "@polkadot/ui-settings": "*"
     "@polkadot/util": "*"
-  checksum: 0712182c57e4671d77031671106f386bf4daf6bd388acd129338b2f24986f0ad173470728ecefeeae96d8d7447d05af963d30e619f7be297d08b699b4c3a92c7
+  checksum: 5024811f7ca095a30e84bc6f7dd3d1147437fc029f176a32240d51e685e4652cca5641d99e948d7c578055d38933596e8fcc6ff4866c78c974c5874324ca0545
   languageName: node
   linkType: hard
 
@@ -2522,6 +2522,22 @@ __metadata:
     "@polkadot/networks": "*"
     "@polkadot/util": "*"
   checksum: 5900f99bb55b19e05d3a662a31b33350ed440ea76ee14487aeba87912c09628427392ad3444a094fc90196eb6eabed7d00af5657b2da1506acdc83d81090f979
+  languageName: node
+  linkType: hard
+
+"@polkadot/ui-settings@npm:0.82.2-1":
+  version: 0.82.2-1
+  resolution: "@polkadot/ui-settings@npm:0.82.2-1"
+  dependencies:
+    "@babel/runtime": ^7.14.6
+    "@polkadot/networks": ^6.10.1
+    "@polkadot/util": ^6.10.1
+    eventemitter3: ^4.0.7
+    store: ^2.0.12
+  peerDependencies:
+    "@polkadot/networks": "*"
+    "@polkadot/util": "*"
+  checksum: 9e63dca094f4036cf66b975813734fea1562458eb2ab219f17904d341d467a5f4bdf8a9404301be37d037a00f6a85001c396158aa767b658939057493970fbed
   languageName: node
   linkType: hard
 

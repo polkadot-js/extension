@@ -176,9 +176,9 @@ export default class State {
   }
 
   private popupOpen (): void {
-    if (settings.notification === 'none') { return }
+    if (settings.notification === 'extension') { return }
 
-    let WINDOW_OPTS = settings.notification === 'normal' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS;
+    let WINDOW_OPTS = settings.notification === 'window' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS;
 
     chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {

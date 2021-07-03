@@ -25,8 +25,8 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
-const notificationOptions = ['none', 'popup', 'window']
-  .map(item => ({text: item.toLocaleUpperCase(), value: item.toLowerCase()}));
+const notificationOptions = ['Extension', 'PopUp', 'Window']
+  .map(item => ({text: item, value: item.toLowerCase()}));
 
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
@@ -59,9 +59,8 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     (value: string): void => {
       setNotification(value);
       settings.set({ notification: value });
-
     },
-    [notification]
+    []
   );
 
   const _onChangeTheme = useCallback(

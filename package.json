@@ -8,13 +8,13 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.16.1",
-    "@polkadot/keyring": "^6.10.1",
-    "@polkadot/networks": "^6.10.1",
-    "@polkadot/types": "^4.16.1",
-    "@polkadot/util": "^6.10.1",
-    "@polkadot/util-crypto": "^6.10.1",
-    "@polkadot/x-fetch": "^6.10.1",
+    "@polkadot/api": "^4.16.3-4",
+    "@polkadot/keyring": "^6.10.2-3",
+    "@polkadot/networks": "^6.10.2-3",
+    "@polkadot/types": "^4.16.3-4",
+    "@polkadot/util": "^6.10.2-3",
+    "@polkadot/util-crypto": "^6.10.2-3",
+    "@polkadot/x-fetch": "^6.10.2-3",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.3.5"

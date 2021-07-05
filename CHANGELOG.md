@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.38.8 Jun 26, 2012
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Add pl i18n (Thanks to https://github.com/ccris02)
+
+Changes:
+
+- Bump `@polkadot/api` to `4.17.1`
+- Bump `@polkadot/util` to `6.11.1`
+
+
 ## 0.38.7 Jun 26, 2012
 
 **Important** Not published to the stores, aligns with latest released packages.

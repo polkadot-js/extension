@@ -27,6 +27,10 @@ export default function getLanguageOptions (): Option[] {
     {
       text: 'Türkce',
       value: 'tr'
+    },
+    {
+      text: 'Polski',
+      value: 'pl'
     }
   ];
 }

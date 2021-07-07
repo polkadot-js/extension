@@ -24,7 +24,7 @@ interface EthereumProvider {
 }
 
 interface Web3Window extends InjectedWindow {
-  web3: Web3; // TODO: this could probably be removed
+  // web3: Web3; // TODO: this could probably be removed
   // this is injected by metaMask
   ethereum: any;
 }
@@ -49,7 +49,7 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
     enable: async (_: string): Promise<Injected> => {
-      win.web3 = new Web3(win.ethereum);
+      // win.web3 = new Web3(win.ethereum);
 
       const providerRaw: unknown = await detectEthereumProvider({ mustBeMetaMask: true });
       const provider: EthereumProvider = isMetaMaskProvider(providerRaw);
@@ -83,7 +83,7 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
         }
       };
     },
-    version: win.web3.version
+    version: "0" //win.ethereum.version
   };
 }
 

@@ -90,7 +90,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                   className={className}
                   label={t<string>('Network')}
                   onChange={(newGenesisHash: string) => {
-                    if (getChainName(newGenesisHash) === 'Moonbase Alpha') {
+                    if (getChainName(newGenesisHash) === 'Moonbase Alpha') { //TODO: use list
                       setType('ethereum');
                     }
 

@@ -31,7 +31,6 @@ import Identicon from './Identicon';
 import Menu from './Menu';
 import Svg from './Svg';
 
-console.log('LOGGING');
 export interface Props {
   actions?: React.ReactNode;
   address?: string | null;
@@ -121,7 +120,6 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
 
-    console.log('recoded', recoded);
     setRecoded(recoded || defaultRecoded);
   }, [accounts, address, chain, givenType, settings]);
 

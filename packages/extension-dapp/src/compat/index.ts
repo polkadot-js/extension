@@ -9,5 +9,7 @@ export default function initCompat (): Promise<boolean> {
   return Promise.all([
     singleSource(),
     initMetaMaskSource()
-  ]).then((): boolean => true);
+  ]).then((): boolean => {
+    return true;
+  });
 }

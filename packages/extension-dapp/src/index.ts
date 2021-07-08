@@ -88,8 +88,8 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
     (): Promise<InjectedExtension[]> =>
       initCompat().then(() =>
         getWindowExtensions(originName)
-          .then((values): InjectedExtension[] =>
-            values
+          .then((values): InjectedExtension[] => {
+            return values
               .filter((value): value is [InjectedExtensionInfo, Injected] => !!value[1])
               .map(
                 ([info, ext]): InjectedExtension => {
@@ -106,7 +106,8 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
 
                   return { ...info, ...ext };
                 }
-              )
+              );
+          }
           )
           .catch((): InjectedExtension[] => [])
           .then((values): InjectedExtension[] => {
@@ -138,8 +139,6 @@ export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): P
       async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
         try {
           const list = await accounts.get();
-
-          console.log('web3Accounts call res', list);
 
           return mapAccounts(source, list, ss58Format);
         } catch (error) {

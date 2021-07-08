@@ -24,7 +24,6 @@ interface EthereumProvider {
 }
 
 interface Web3Window extends InjectedWindow {
-  // web3: Web3; // TODO: this could probably be removed
   // this is injected by metaMask
   ethereum: any;
 }
@@ -48,7 +47,7 @@ function transformAccounts (accounts: string[]): InjectedAccount[] {
 function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
-    enable: async (_: string): Promise<Injected> => {
+    enable: async (): Promise<Injected> => {
       // win.web3 = new Web3(win.ethereum);
 
       const providerRaw: unknown = await detectEthereumProvider({ mustBeMetaMask: true });
@@ -59,8 +58,6 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
       return {
         accounts: {
           get: async (): Promise<InjectedAccount[]> => {
-            console.log('fetching accounts');
-
             return transformAccounts(await provider.request({ method: 'eth_requestAccounts' }));
           },
           subscribe: (cb: (accounts: InjectedAccount[]) => void): (() => void) => {
@@ -83,7 +80,7 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
         }
       };
     },
-    version: "0" //win.ethereum.version
+    version: '0' // TODO: win.ethereum.version
   };
 }
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Bundler tests</title>
+    <style>
+      pre {
+        margin: 0.5rem 0;
+      }
+
+      pre.header {
+        background: #ddd;
+        margin-top: 1.5rem;
+        padding: 0.25rem 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      function log (label, result) {
+        const pre = document.createElement('pre');
+
+        if (typeof result !== 'undefined') {
+          pre.innerHTML = `${label.padStart(24)} = ${result}`;
+        } else {
+          pre.innerHTML = label;
+          pre.className = 'header';
+        }
+
+        document.body.appendChild(pre);
+      }
+    </script>
+    <script src="node_modules/@polkadot/util/bundle-polkadot-util.js"></script>
+    <script src="node_modules/@polkadot/networks/bundle-polkadot-networks.js"></script>
+    <script src="node_modules/@polkadot/util-crypto/bundle-polkadot-util-crypto.js"></script>
+    <script src="packages/extension-dapp/build/bundle-polkadot-extension-dapp.js"></script>
+    <script>
+      log('polkadotExtensionDapp (not quite useful... extension does not inject to files)');
+
+      const { web3Accounts, web3Enable } = polkadotExtensionDapp;
+
+      web3Enable('bundle-testing')
+        .then(() => {
+          log('enabled', true);
+
+          return web3Accounts();
+        })
+        .then((accounts) =>
+          log('accounts', accounts.length)
+        );
+    </script>
+  </body>
+</html>

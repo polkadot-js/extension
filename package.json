@@ -8,22 +8,24 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.17.1",
-    "@polkadot/keyring": "^6.11.1",
-    "@polkadot/networks": "^6.11.1",
-    "@polkadot/types": "^4.17.1",
-    "@polkadot/util": "^6.11.1",
-    "@polkadot/util-crypto": "^6.11.1",
-    "@polkadot/x-fetch": "^6.11.1",
+    "@polkadot/api": "^4.17.2-17",
+    "@polkadot/keyring": "^6.11.2-13",
+    "@polkadot/networks": "^6.11.2-13",
+    "@polkadot/types": "^4.17.2-17",
+    "@polkadot/util": "^6.11.2-13",
+    "@polkadot/util-crypto": "^6.11.2-13",
+    "@polkadot/x-fetch": "^6.11.2-13",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "webpack": "5.41.1"
   },
   "scripts": {
-    "build": "polkadot-dev-build-ts && yarn build:zip",
+    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:release": "polkadot-ci-ghact-build",
+    "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
@@ -39,7 +41,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
-    "@polkadot/dev": "^0.62.44",
+    "@polkadot/dev": "^0.62.56",
     "@types/jest": "^26.0.23",
     "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",

@@ -10,8 +10,8 @@
   "dependencies": {
     "@babel/runtime": "^7.14.6",
     "@polkadot/extension-inject": "^0.38.8",
-    "@polkadot/util": "^6.11.1",
-    "@polkadot/util-crypto": "^6.11.1"
+    "@polkadot/util": "^6.11.2-14",
+    "@polkadot/util-crypto": "^6.11.2-14"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

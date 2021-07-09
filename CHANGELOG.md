@@ -6,6 +6,7 @@ Changes:
 
 - Allow building as a completely stand-alone browser bundle (experimental)
 
+
 ## 0.38.8 Jun 26, 2012
 
 **Important** Not published to the stores, aligns with latest released packages.

@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## master
+## 0.39.1 Jul 11, 2012
+
+**Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
 - Allow building as a completely stand-alone browser bundle (experimental)
+- Bump `@polkadot/api` to `5.0.1`
+- Bump `@polkadot/util` to `7.0.1`
 
 
 ## 0.38.8 Jun 26, 2012

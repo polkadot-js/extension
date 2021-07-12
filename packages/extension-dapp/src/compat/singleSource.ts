@@ -27,7 +27,7 @@ interface SingleWindow extends InjectedWindow {
   SingleSource: SingleSource;
 }
 
-// transfor the SingleSource accounts into a simple address/name array
+// transform the SingleSource accounts into a simple address/name array
 function transformAccounts (accounts: SingleSourceAccount[]): InjectedAccount[] {
   return accounts.map(({ address, name }): InjectedAccount => ({
     address,
@@ -73,15 +73,13 @@ function injectSingleSource (win: SingleWindow): void {
 // https://github.com/cennznet/singlesource-extension/blob/f7cb35b54e820bf46339f6b88ffede1b8e140de0/react-example/src/App.js#L19
 export default function initSingleSource (): Promise<boolean> {
   return new Promise((resolve): void => {
-    window.addEventListener('load', (): void => {
-      const win = window as Window & SingleWindow;
+    const win = window as Window & SingleWindow;
 
-      if (win.SingleSource) {
-        injectSingleSource(win);
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    });
+    if (win.SingleSource) {
+      injectSingleSource(win);
+      resolve(true);
+    } else {
+      resolve(false);
+    }
   });
 }

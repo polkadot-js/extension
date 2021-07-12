@@ -25,6 +25,7 @@ export interface InjectedAccountWithMeta {
     name?: string;
     source: string;
   };
+  type?: KeypairType;
 }
 
 export interface InjectedAccounts {

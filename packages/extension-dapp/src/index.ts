@@ -1,11 +1,21 @@
 // Copyright 2019-2021 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import type { Injected,
+  InjectedAccount,
+  InjectedAccountWithMeta,
+  InjectedExtension,
+  InjectedExtensionInfo,
+  InjectedProviderWithMeta,
+  InjectedWindow,
+  ProviderList,
+  Unsubcall,
+  Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
+import initCompat from './compat';
 import { documentReadyPromise } from './util';
 
 // expose utility functions
@@ -28,15 +38,22 @@ function throwError (method: string): never {
 }
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
-function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
-  return list.map(({ address, genesisHash, name }): InjectedAccountWithMeta => {
-    const encodedAddress = encodeAddress(decodeAddress(address), ss58Format);
+function mapAccounts (
+  source: string,
+  list: InjectedAccount[],
+  ss58Format?: number
+): InjectedAccountWithMeta[] {
+  return list.map(
+    ({ address, genesisHash, name, type }): InjectedAccountWithMeta => {
+      const encodedAddress = address.length === 42 ? address : encodeAddress(decodeAddress(address), ss58Format);
 
-    return ({
-      address: encodedAddress,
-      meta: { genesisHash, name, source }
-    });
-  });
+      return {
+        address: encodedAddress,
+        meta: { genesisHash, name, source },
+        type
+      };
+    }
+  );
 }
 
 // have we found a properly constructed window.injectedWeb3
@@ -49,13 +66,14 @@ export { isWeb3Injected, web3EnablePromise };
 
 function getWindowExtensions (originName: string): Promise<[InjectedExtensionInfo, Injected | void][]> {
   return Promise.all(
-    Object.entries(win.injectedWeb3).map(([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
-      Promise.all([
-        Promise.resolve({ name, version }),
-        enable(originName).catch((error: Error): void => {
-          console.error(`Error initializing ${name}: ${error.message}`);
-        })
-      ])
+    Object.entries(win.injectedWeb3).map(
+      ([name, { enable, version }]): Promise<[InjectedExtensionInfo, Injected | void]> =>
+        Promise.all([
+          Promise.resolve({ name, version }),
+          enable(originName).catch((error: Error): void => {
+            console.error(`Error initializing ${name}: ${error.message}`);
+          })
+        ])
     )
   );
 }
@@ -66,35 +84,43 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
     throw new Error('You must pass a name for your app to the web3Enable function');
   }
 
-  web3EnablePromise = documentReadyPromise((): Promise<InjectedExtension[]> =>
-    getWindowExtensions(originName)
-      .then((values): InjectedExtension[] =>
-        values
-          .filter((value): value is [InjectedExtensionInfo, Injected] => !!value[1])
-          .map(([info, ext]): InjectedExtension => {
-            // if we don't have an accounts subscriber, add a single-shot version
-            if (!ext.accounts.subscribe) {
-              ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
-                ext.accounts.get().then(cb).catch(console.error);
+  web3EnablePromise = documentReadyPromise(
+    (): Promise<InjectedExtension[]> =>
+      initCompat().then(() =>
+        getWindowExtensions(originName)
+          .then((values): InjectedExtension[] => {
+            return values
+              .filter((value): value is [InjectedExtensionInfo, Injected] => !!value[1])
+              .map(
+                ([info, ext]): InjectedExtension => {
+                  // if we don't have an accounts subscriber, add a single-shot version
+                  if (!ext.accounts.subscribe) {
+                    ext.accounts.subscribe = (cb: (accounts: InjectedAccount[]) => void | Promise<void>): Unsubcall => {
+                      ext.accounts.get().then(cb).catch(console.error);
 
-                return (): void => {
-                  // no ubsubscribe needed, this is a single-shot
-                };
-              };
-            }
+                      return (): void => {
+                        // no ubsubscribe needed, this is a single-shot
+                      };
+                    };
+                  }
 
-            return { ...info, ...ext };
+                  return { ...info, ...ext };
+                }
+              );
+          }
+          )
+          .catch((): InjectedExtension[] => [])
+          .then((values): InjectedExtension[] => {
+            const names = values.map(({ name, version }): string => `${name}/${version}`);
+
+            isWeb3Injected = web3IsInjected();
+            console.log(
+              `web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`
+            );
+
+            return values;
           })
       )
-      .catch((): InjectedExtension[] => [])
-      .then((values): InjectedExtension[] => {
-        const names = values.map(({ name, version }): string => `${name}/${version}`);
-
-        isWeb3Injected = web3IsInjected();
-        console.log(`web3Enable: Enabled ${values.length} extension${values.length !== 1 ? 's' : ''}: ${names.join(', ')}`);
-
-        return values;
-      })
   );
 
   return web3EnablePromise;
@@ -107,18 +133,20 @@ export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): P
   }
 
   const accounts: InjectedAccountWithMeta[] = [];
-  const injected = await web3EnablePromise;
+  const injected: InjectedExtension[] = await web3EnablePromise;
   const retrieved = await Promise.all(
-    injected.map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
-      try {
-        const list = await accounts.get();
+    injected.map(
+      async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
+        try {
+          const list = await accounts.get();
 
-        return mapAccounts(source, list, ss58Format);
-      } catch (error) {
-        // cannot handle this one
-        return [];
+          return mapAccounts(source, list, ss58Format);
+        } catch (error) {
+          // cannot handle this one
+          return [];
+        }
       }
-    })
+    )
   );
 
   retrieved.forEach((result): void => {
@@ -127,35 +155,43 @@ export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): P
 
   const addresses = accounts.map(({ address }): string => address);
 
-  console.log(`web3Accounts: Found ${accounts.length} address${accounts.length !== 1 ? 'es' : ''}: ${addresses.join(', ')}`);
+  console.log(
+    `web3Accounts: Found ${accounts.length} address${accounts.length !== 1 ? 'es' : ''}: ${addresses.join(', ')}`
+  );
 
   return accounts;
 }
 
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (
+  cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>,
+  { ss58Format }: Web3AccountsOptions = {}
+): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }
 
   const accounts: Record<string, InjectedAccount[]> = {};
 
-  const triggerUpdate = (): void | Promise<void> => cb(
-    Object
-      .entries(accounts)
-      .reduce((result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
-        result.push(...mapAccounts(source, list, ss58Format));
+  const triggerUpdate = (): void | Promise<void> =>
+    cb(
+      Object.entries(accounts).reduce(
+        (result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
+          result.push(...mapAccounts(source, list, ss58Format));
 
-        return result;
-      }, [])
-  );
+          return result;
+        },
+        []
+      )
+    );
 
-  const unsubs = (await web3EnablePromise).map(({ accounts: { subscribe }, name: source }): Unsubcall =>
-    subscribe((result): void => {
-      accounts[source] = result;
+  const unsubs = (await web3EnablePromise).map(
+    ({ accounts: { subscribe }, name: source }): Unsubcall =>
+      subscribe((result): void => {
+        accounts[source] = result;
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      triggerUpdate();
-    })
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        triggerUpdate();
+      })
   );
 
   return (): void => {

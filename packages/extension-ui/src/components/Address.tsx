@@ -99,6 +99,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const settings = useContext(SettingsContext);
   const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
+
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -114,7 +115,8 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     }
 
     const accountByAddress = findAccountByAddress(accounts, address);
-    const recoded = (accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
+
+    const recoded = (chain?.definition.chainType === 'ethereum' || accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
       ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
 

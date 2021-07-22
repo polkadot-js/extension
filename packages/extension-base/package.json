@@ -9,11 +9,11 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.14.6",
-    "@polkadot/api": "^5.0.1",
+    "@polkadot/api": "^5.1.1",
     "@polkadot/extension-dapp": "^0.39.1",
     "@polkadot/extension-inject": "^0.39.1",
-    "@polkadot/keyring": "^7.0.1",
-    "@polkadot/phishing": "^0.6.220",
+    "@polkadot/keyring": "^7.0.2",
+    "@polkadot/phishing": "^0.6.231",
     "@polkadot/ui-keyring": "^0.84.1"
   }
 }

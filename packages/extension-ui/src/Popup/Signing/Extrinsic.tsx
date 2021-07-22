@@ -82,7 +82,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
           <td className='label'>{t<string>('info')}</td>
           <td className='data'>
             <details>
-              <summary>{method.meta.documentation.map((d) => d.toString().trim()).join(' ')}</summary>
+              <summary>{method.meta.docs.map((d) => d.toString().trim()).join(' ')}</summary>
             </details>
           </td>
         </tr>

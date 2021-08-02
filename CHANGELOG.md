@@ -1,6 +1,16 @@
 # CHANGELOG
 
-## 0.39.1 Jul 11, 2012
+## 0.39.2 Aug 2, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump `@polkadot/api` to `5.3.1`
+- Bump `@polkadot/util` to `7.1.1`
+
+
+## 0.39.1 Jul 11, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.
 
@@ -11,7 +21,7 @@ Changes:
 - Bump `@polkadot/util` to `7.0.1`
 
 
-## 0.38.8 Jun 26, 2012
+## 0.38.8 Jun 26, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.
 
@@ -25,7 +35,7 @@ Changes:
 - Bump `@polkadot/util` to `6.11.1`
 
 
-## 0.38.7 Jun 26, 2012
+## 0.38.7 Jun 26, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.
 
@@ -35,7 +45,7 @@ Changes:
 - Bump `@polkadot/util` to `6.10.1`
 
 
-## 0.38.6 Jun 20, 2012
+## 0.38.6 Jun 20, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.
 

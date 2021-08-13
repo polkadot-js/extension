@@ -8,13 +8,13 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^5.3.1",
-    "@polkadot/keyring": "^7.1.1",
-    "@polkadot/networks": "^7.1.1",
-    "@polkadot/types": "^5.3.1",
-    "@polkadot/util": "^7.1.1",
-    "@polkadot/util-crypto": "^7.1.1",
-    "@polkadot/x-fetch": "^7.1.1",
+    "@polkadot/api": "^5.4.2-6",
+    "@polkadot/keyring": "^7.1.3-3",
+    "@polkadot/networks": "^7.1.3-3",
+    "@polkadot/types": "^5.4.2-6",
+    "@polkadot/util": "^7.1.3-3",
+    "@polkadot/util-crypto": "^7.1.3-3",
+    "@polkadot/x-fetch": "^7.1.3-3",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.3.5",
@@ -41,12 +41,13 @@
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",
-    "@polkadot/dev": "^0.62.57",
+    "@polkadot/dev": "^0.62.59",
     "@types/jest": "^26.0.24",
     "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",
     "stylelint": "^13.13.1",
     "stylelint-config-recommended": "^5.0.0",
     "stylelint-config-styled-components": "^0.1.1"
-  }
+  },
+  "packageManager": "yarn@3.0.1"
 }

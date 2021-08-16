@@ -31,6 +31,10 @@ export default function getLanguageOptions (): Option[] {
     {
       text: 'Polski',
       value: 'pl'
+    },
+    {
+      text: 'ภาษาไทย',
+      value: 'th'
     }
   ];
 }

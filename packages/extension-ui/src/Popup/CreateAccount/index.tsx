@@ -62,6 +62,14 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
+  const _onChangeNetwork = useCallback((newGenesisHash: string) => {
+    if (getChainName(newGenesisHash) === 'Moonbase Alpha') { // TODO: use list
+      setType('ethereum');
+    }
+
+    setGenesis(newGenesisHash);
+  }, []);
+
   return (
     <>
       <HeaderWithSteps
@@ -89,13 +97,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                 <Dropdown
                   className={className}
                   label={t<string>('Network')}
-                  onChange={(newGenesisHash: string) => {
-                    if (getChainName(newGenesisHash) === 'Moonbase Alpha') { // TODO: use list
-                      setType('ethereum');
-                    }
-
-                    setGenesis(newGenesisHash);
-                  }}
+                  onChange={_onChangeNetwork}
                   options={options}
                   value={genesisHash}
                 />

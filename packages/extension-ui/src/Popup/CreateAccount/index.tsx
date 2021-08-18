@@ -64,7 +64,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     }
 
     setGenesis(newGenesisHash);
-  }, []);
+  }, [options]);
 
   return (
     <>

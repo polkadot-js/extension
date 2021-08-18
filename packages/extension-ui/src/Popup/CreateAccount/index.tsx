@@ -28,14 +28,6 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
 
-  function getChainName (genesisHash: string): string {
-    const filtered = options.filter(({ value }) => {
-      return genesisHash === value;
-    });
-
-    return filtered.length > 0 ? filtered[0].text : '';
-  }
-
   useEffect((): void => {
     createSeed(undefined, type)
       .then(setAccount)
@@ -63,7 +55,11 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
   const _onChangeNetwork = useCallback((newGenesisHash: string) => {
-    if (getChainName(newGenesisHash) === 'Moonbase Alpha') { // TODO: use list
+    const chain = options.find(({ value }) => {
+      return newGenesisHash === value;
+    });
+
+    if (chain?.text === 'Moonbase Alpha') { // TODO: use list
       setType('ethereum');
     }
 

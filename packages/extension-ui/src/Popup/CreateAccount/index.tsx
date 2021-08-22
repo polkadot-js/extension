@@ -23,10 +23,10 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
-  const type = DEFAULT_TYPE;
+  const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
   const options = useGenesisHashOptions();
-  const [genesis, setGenesis] = useState('');
+  const [genesisHash, setGenesis] = useState('');
 
   useEffect((): void => {
     createSeed(undefined, type)
@@ -40,7 +40,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
       if (name && password && account) {
         setIsBusy(true);
 
-        createAccountSuri(name, password, account.seed, undefined, genesis)
+        createAccountSuri(name, password, account.seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
             setIsBusy(false);
@@ -48,11 +48,23 @@ function CreateAccount ({ className }: Props): React.ReactElement {
           });
       }
     },
-    [account, genesis, onAction]
+    [account, genesisHash, onAction, type]
   );
 
   const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
+
+  const _onChangeNetwork = useCallback((newGenesisHash: string) => {
+    const chain = options.find(({ value }) => {
+      return newGenesisHash === value;
+    });
+
+    if (chain?.text === 'Moonbase Alpha') { // TODO: use list
+      setType('ethereum');
+    }
+
+    setGenesis(newGenesisHash);
+  }, [options]);
 
   return (
     <>
@@ -64,7 +76,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
         <div>
           <Address
             address={account?.address}
-            genesisHash={genesis}
+            genesisHash={genesisHash}
             name={name}
           />
         </div>
@@ -81,9 +93,9 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                 <Dropdown
                   className={className}
                   label={t<string>('Network')}
-                  onChange={setGenesis}
+                  onChange={_onChangeNetwork}
                   options={options}
-                  value={genesis}
+                  value={genesisHash}
                 />
                 <AccountNamePasswordCreation
                   buttonLabel={t<string>('Add the account with the generated seed')}

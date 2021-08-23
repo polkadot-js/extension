@@ -48,8 +48,6 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
     enable: async (): Promise<Injected> => {
-      // win.web3 = new Web3(win.ethereum);
-
       const providerRaw: unknown = await detectEthereumProvider({ mustBeMetaMask: true });
       const provider: EthereumProvider = isMetaMaskProvider(providerRaw);
 

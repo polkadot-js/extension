@@ -71,7 +71,7 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
         },
         signer: {
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
-            const signature = (await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] })as string);
+            const signature = (await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] }) as string);
 
             return { id: 0, signature };
           }

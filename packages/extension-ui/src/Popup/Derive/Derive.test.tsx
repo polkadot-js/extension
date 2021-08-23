@@ -238,7 +238,7 @@ describe('Derive', () => {
     it('selects internal root accounts as other options, no external and no Ethereum account', () => {
       const options = wrapper.find('[data-parent-option] [data-field="name"]').map((el) => el.text());
 
-      expect(options).toEqual(['A', 'B', 'D']);
+      expect(options).toEqual(['A', 'B', 'D', 'Ethereum']);
     });
 
     it('redirects to derive from next account when other option is selected', () => {

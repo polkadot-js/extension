@@ -1,16 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Injected,
-  InjectedAccount,
-  InjectedAccountWithMeta,
-  InjectedExtension,
-  InjectedExtensionInfo,
-  InjectedProviderWithMeta,
-  InjectedWindow,
-  ProviderList,
-  Unsubcall,
-  Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -39,7 +30,7 @@ function throwError (method: string): never {
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
 function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
-  return list.map(({ address, genesisHash, name, type  }): InjectedAccountWithMeta => {
+  return list.map(({ address, genesisHash, name, type }): InjectedAccountWithMeta => {
     const encodedAddress = address.length === 42 ? address : encodeAddress(decodeAddress(address), ss58Format);
 
     return ({

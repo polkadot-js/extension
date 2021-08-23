@@ -1,15 +1,15 @@
 {
   "name": "@polkadot/extension-chains",
   "description": "Definitions for all known chains as exposed by the extension.",
-  "version": "0.39.2-0",
+  "version": "0.39.4-3",
   "type": "module",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.14.6",
-    "@polkadot/networks": "^7.0.2"
+    "@babel/runtime": "^7.15.3",
+    "@polkadot/networks": "^7.2.1"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

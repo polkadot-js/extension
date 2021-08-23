@@ -127,7 +127,7 @@ export function web3Enable (originName: string): Promise<InjectedExtension[]> {
 }
 
 // retrieve all the accounts accross all providers
-export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ accountType, ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }
@@ -140,7 +140,7 @@ export async function web3Accounts ({ ss58Format }: Web3AccountsOptions = {}): P
         try {
           const list = await accounts.get();
 
-          return mapAccounts(source, list, ss58Format);
+          return mapAccounts(source, list.filter((acc) => { return acc.type ? acc.type === accountType : true; }), ss58Format);
         } catch (error) {
           // cannot handle this one
           return [];

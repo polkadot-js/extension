@@ -113,5 +113,5 @@ export type InjectOptions = InjectedExtensionInfo;
 
 export interface Web3AccountsOptions {
   ss58Format?: number,
-  accountType?: KeypairType
+  accountType?: KeypairType[]
 }

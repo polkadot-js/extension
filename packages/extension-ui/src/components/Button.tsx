@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import Spinner from './Spinner';
@@ -19,17 +19,20 @@ interface Props extends ThemeProps {
 }
 
 function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: Props): React.ReactElement<Props> {
-  const _onClick = (): void => {
-    if (isBusy || isDisabled) {
-      return;
-    }
+  const _onClick = useCallback(
+    (): void => {
+      if (isBusy || isDisabled) {
+        return;
+      }
 
-    onClick && onClick();
+      onClick && onClick();
 
-    if (to) {
-      window.location.hash = to;
-    }
-  };
+      if (to) {
+        window.location.hash = to;
+      }
+    },
+    [isBusy, isDisabled, onClick, to]
+  );
 
   return (
     <button

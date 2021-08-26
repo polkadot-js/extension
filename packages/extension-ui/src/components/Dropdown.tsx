@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import arrow from '../assets/arrow-down.svg';
@@ -28,9 +28,11 @@ interface Props extends ThemeProps {
 }
 
 function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
-  const _onChange = ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>): void => {
-    onChange && onChange(value.trim());
-  };
+  const _onChange = useCallback(
+    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) =>
+      onChange && onChange(value.trim()),
+    [onChange]
+  );
 
   return (
     <>

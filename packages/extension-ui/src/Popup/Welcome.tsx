@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
@@ -18,10 +18,13 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
-  const _onClick = (): void => {
-    window.localStorage.setItem('welcome_read', 'ok');
-    onAction();
-  };
+  const _onClick = useCallback(
+    (): void => {
+      window.localStorage.setItem('welcome_read', 'ok');
+      onAction();
+    },
+    [onAction]
+  );
 
   return (
     <>

@@ -151,10 +151,12 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
               payload={data}
             />
           )
-          : <Bytes
-            bytes={data}
-            url={url}
-          />
+          : (
+            <Bytes
+              bytes={data}
+              url={url}
+            />
+          )
         }
         <VerticalSpace />
         <SignArea

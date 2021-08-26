@@ -5,7 +5,7 @@ import type { ThemeProps } from '../../types';
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -20,6 +20,20 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
   const previousClickActive = index !== 0;
   const nextClickActive = index < totalItems - 1;
 
+  const prevClick = useCallback(
+    (): void => {
+      previousClickActive && onPreviousClick();
+    },
+    [onPreviousClick, previousClickActive]
+  );
+
+  const nextClick = useCallback(
+    (): void => {
+      nextClickActive && onNextClick();
+    },
+    [nextClickActive, onNextClick]
+  );
+
   return (
     <div className={className}>
       <div>
@@ -30,13 +44,13 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
         <FontAwesomeIcon
           className={`arrowLeft ${previousClickActive ? 'active' : ''}`}
           icon={faArrowLeft}
-          onClick={(): void => { previousClickActive && onPreviousClick(); }}
+          onClick={prevClick}
           size='sm'
         />
         <FontAwesomeIcon
           className={`arrowRight ${nextClickActive ? 'active' : ''}`}
           icon={faArrowRight}
-          onClick={(): void => { nextClickActive && onNextClick(); }}
+          onClick={nextClick}
           size='sm'
         />
       </div>

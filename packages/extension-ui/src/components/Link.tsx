@@ -22,7 +22,8 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
     return (
       <div
         className={`${className} isDisabled`}
-        title={title}>
+        title={title}
+      >
         {children}
       </div>
     );

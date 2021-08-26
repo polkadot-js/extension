@@ -165,17 +165,21 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       <>
         {!!accountName && (account?.isExternal || isExternal) && (
           (account?.isHardware || isHardware)
-            ? <FontAwesomeIcon
-              className='hardwareIcon'
-              icon={faUsb}
-              rotation={270}
-              title={t('hardware wallet account')}
-            />
-            : <FontAwesomeIcon
-              className='externalIcon'
-              icon={faQrcode}
-              title={t('external account')}
-            />
+            ? (
+              <FontAwesomeIcon
+                className='hardwareIcon'
+                icon={faUsb}
+                rotation={270}
+                title={t('hardware wallet account')}
+              />
+            )
+            : (
+              <FontAwesomeIcon
+                className='externalIcon'
+                icon={faQrcode}
+                title={t('external account')}
+              />
+            )
         )}
         <span title={displayName}>{displayName}</span>
       </>);

@@ -47,10 +47,12 @@ describe('Derive', () => {
     const wrapper = mount(
       <MemoryRouter initialEntries={ [`/account/derive/${accounts[account].address}`] }>
         <ActionContext.Provider value={onActionStub}>
-          <AccountContext.Provider value={{
-            accounts: accounts,
-            hierarchy: buildHierarchy(accounts)
-          }}>
+          <AccountContext.Provider
+            value={{
+              accounts: accounts,
+              hierarchy: buildHierarchy(accounts)
+            }}
+          >
             <ThemeProvider theme={themes.dark}>
               <Route path='/account/derive/:address'>
                 <Derive isLocked={locked}/>

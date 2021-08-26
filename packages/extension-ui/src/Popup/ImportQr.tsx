@@ -22,18 +22,24 @@ export default function ImportQr (): React.ReactElement {
   const [account, setAccount] = useState<QrAccount | null>(null);
   const [name, setName] = useState<string | null>(null);
 
-  const _setAccount = useCallback((qrAccount: QrAccount) => {
-    setAccount(qrAccount);
-    setName(qrAccount?.name || null);
-  }, []);
+  const _setAccount = useCallback(
+    (qrAccount: QrAccount) => {
+      setAccount(qrAccount);
+      setName(qrAccount?.name || null);
+    },
+    []
+  );
 
-  const _onCreate = (): void => {
-    if (account && name) {
-      createAccountExternal(name, account.content, account.genesisHash)
-        .then(() => onAction('/'))
-        .catch((error: Error) => console.error(error));
-    }
-  };
+  const _onCreate = useCallback(
+    (): void => {
+      if (account && name) {
+        createAccountExternal(name, account.content, account.genesisHash)
+          .then(() => onAction('/'))
+          .catch((error: Error) => console.error(error));
+      }
+    },
+    [account, name, onAction]
+  );
 
   return (
     <>

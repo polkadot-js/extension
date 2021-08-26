@@ -87,7 +87,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       <MenuItem className='menuItem'>
         <Link
           isDisabled={!mediaAllowed}
-          title={ !mediaAllowed
+          title={!mediaAllowed
             ? t<string>('Camera access must be first enabled in the settings')
             : ''
           }
@@ -99,24 +99,28 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
       </MenuItem>
       <MenuItem className='menuItem ledger'>
         {isLedgerEnabled
-          ? <Link
-            isDisabled={!isLedgerCapable}
-            title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
-            to={ledgerPath}
-          >
-            <FontAwesomeIcon
-              icon={faUsb}
-              rotation={270}
-            />
-            <span>{ t<string>('Attach ledger account')}</span>
-          </Link>
-          : <Link onClick={_onOpenLedgerConnect}>
-            <FontAwesomeIcon
-              icon={faUsb}
-              rotation={270}
-            />
-            <span>{ t<string>('Connect Ledger device')}</span>
-          </Link>
+          ? (
+            <Link
+              isDisabled={!isLedgerCapable}
+              title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
+              to={ledgerPath}
+            >
+              <FontAwesomeIcon
+                icon={faUsb}
+                rotation={270}
+              />
+              <span>{ t<string>('Attach ledger account')}</span>
+            </Link>
+          )
+          : (
+            <Link onClick={_onOpenLedgerConnect}>
+              <FontAwesomeIcon
+                icon={faUsb}
+                rotation={270}
+              />
+              <span>{ t<string>('Connect Ledger device')}</span>
+            </Link>
+          )
         }
       </MenuItem>
     </Menu>

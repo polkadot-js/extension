@@ -142,10 +142,11 @@ export default class Tabs {
   }
 
   private redirectPhishingLanding (phishingWebsite: string): void {
-    const encodedWebsite = encodeURIComponent(phishingWebsite);
+    const nonFragment = phishingWebsite.split('#')[0];
+    const encodedWebsite = encodeURIComponent(nonFragment);
     const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
-    chrome.tabs.query({ url: phishingWebsite }, (tabs) => {
+    chrome.tabs.query({ url: nonFragment }, (tabs) => {
       tabs
         .map(({ id }) => id)
         .filter((id): id is number => isNumber(id))

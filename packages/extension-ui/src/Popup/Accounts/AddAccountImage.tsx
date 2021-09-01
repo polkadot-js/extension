@@ -68,9 +68,9 @@ function AddAccountImage ({ className, onClick }: Props): React.ReactElement<Pro
           id='filter0_f' x='-3' y='-7' width='271' height='284.846' filterUnits='userSpaceOnUse'
           colorInterpolationFilters='sRGB'
         >
-          <feFlood floodOpacity='0' result='BackgroundImageFix'/>
-          <feBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape'/>
-          <feGaussianBlur stdDeviation='10' result='effect1_foregroundBlur'/>
+          <feFlood floodOpacity='0' result='BackgroundImageFix' />
+          <feBlend mode='normal' in='SourceGraphic' in2='BackgroundImageFix' result='shape' />
+          <feGaussianBlur stdDeviation='10' result='effect1_foregroundBlur' />
         </filter>
       </defs>
     </svg>

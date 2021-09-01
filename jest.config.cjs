@@ -12,14 +12,5 @@ module.exports = {
     '\\.(css|less)$': 'empty/object',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/__mocks__/fileMock.js'
   },
-  modulePathIgnorePatterns: [
-    '<rootDir>/packages/extension/build',
-    '<rootDir>/packages/extension-base/build',
-    '<rootDir>/packages/extension-chains/build',
-    '<rootDir>/packages/extension-dapp/build',
-    '<rootDir>/packages/extension-inject/build',
-    '<rootDir>/packages/extension-ui/build'
-  ],
-  testEnvironment: 'jsdom',
-  transformIgnorePatterns: ['/node_modules/(?!@polkadot|@babel/runtime/helpers/esm/)']
+  testEnvironment: 'jsdom'
 };

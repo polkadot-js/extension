@@ -56,7 +56,7 @@ class ErrorBoundary extends React.Component<Props> {
               replace: { message: error.message }
             })}
           </div>
-          <VerticalSpace/>
+          <VerticalSpace />
           <ButtonArea>
             <Button
               onClick={this.#goHome}

@@ -122,8 +122,8 @@ export default function Popup (): React.ReactElement {
       : metaRequests && metaRequests.length
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
-          ? wrapWithErrorBoundary(<Signing/>, 'signing')
-          : wrapWithErrorBoundary(<Accounts/>, 'accounts')
+          ? wrapWithErrorBoundary(<Signing />, 'signing')
+          : wrapWithErrorBoundary(<Accounts />, 'accounts')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (

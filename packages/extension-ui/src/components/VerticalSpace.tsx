@@ -9,7 +9,7 @@ interface Props {
 }
 
 function VerticalSpace ({ className }: Props): React.ReactElement<Props> {
-  return <div className={className}/>;
+  return <div className={className} />;
 }
 
 export default styled(VerticalSpace)`

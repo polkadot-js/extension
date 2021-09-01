@@ -216,7 +216,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                   </div>
                 </div>
                 <div className='name displaced'>
-                  <Name/>
+                  <Name />
                 </div>
               </>
             )
@@ -225,7 +225,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 className='name'
                 data-field='name'
               >
-                <Name/>
+                <Name />
               </div>
             )
           }
@@ -249,7 +249,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             >
               {formatted || address || t('<unknown>')}
             </div>
-            <CopyToClipboard text={(formatted && formatted) || ''} >
+            <CopyToClipboard text={(formatted && formatted) || ''}>
               <FontAwesomeIcon
                 className='copyIcon'
                 icon={faCopy}

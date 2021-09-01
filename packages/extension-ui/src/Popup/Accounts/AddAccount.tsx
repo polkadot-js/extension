@@ -32,7 +32,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
       />
       <div className={className}>
         <div className='image'>
-          <AddAccountImage onClick={_onClick}/>
+          <AddAccountImage onClick={_onClick} />
         </div>
         <div className='no-accounts'>
           <p>{t<string>("You currently don't have any accounts. Create your first account to get started.")}</p>

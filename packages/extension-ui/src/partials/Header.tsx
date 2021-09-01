@@ -101,10 +101,10 @@ function Header ({ children, className = '', showAdd, showBackArrow, showSetting
           )}
         </div>
         {isAddOpen && (
-          <MenuAdd reference={addRef}/>
+          <MenuAdd reference={addRef} />
         )}
         {isSettingsOpen && (
-          <MenuSettings reference={setRef}/>
+          <MenuSettings reference={setRef} />
         )}
         {children}
       </div>

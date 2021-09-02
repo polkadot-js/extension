@@ -152,7 +152,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           </Warning>
         )}
       </div>
-      <VerticalSpace/>
+      <VerticalSpace />
       <ButtonArea>
         {ledgerLocked
           ? (

@@ -99,7 +99,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           text={t<string>('Manage Website Access')}
         />
       </MenuItem>
-      <MenuDivider/>
+      <MenuDivider />
       <MenuItem
         className='setting'
         title={t<string>('External accounts and Access')}

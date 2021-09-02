@@ -95,7 +95,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep }: Props): React.
           className='advancedToggle'
           onClick={_onToggleAdvanced}
         >
-          <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight}/>
+          <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight} />
           <span>{t<string>('advanced')}</span>
         </div>
         { advanced && (

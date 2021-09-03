@@ -25,6 +25,7 @@ export interface InjectedAccountWithMeta {
     name?: string;
     source: string;
   };
+  type?: KeypairType;
 }
 
 export interface InjectedAccounts {
@@ -111,5 +112,6 @@ export type InjectedExtension = InjectedExtensionInfo & Injected;
 export type InjectOptions = InjectedExtensionInfo;
 
 export interface Web3AccountsOptions {
-  ss58Format?: number
+  ss58Format?: number,
+  accountType?: KeypairType[]
 }

@@ -179,7 +179,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
           </>
         )}
       </div>
-      <VerticalSpace/>
+      <VerticalSpace />
       <ButtonArea>
         <NextStepButton
           data-button-action='create derived account'

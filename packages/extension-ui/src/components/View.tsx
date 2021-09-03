@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 // FIXME We should not import from index when this one is imported there as well
@@ -16,12 +16,16 @@ interface Props {
 
 function View ({ children, className }: Props): React.ReactElement<Props> {
   const [theme, setTheme] = useState(chooseTheme());
-  const _theme = themes[theme];
 
-  const switchTheme = (theme: AvailableThemes): void => {
-    localStorage.setItem('theme', theme);
-    setTheme(theme);
-  };
+  const switchTheme = useCallback(
+    (theme: AvailableThemes): void => {
+      localStorage.setItem('theme', theme);
+      setTheme(theme);
+    },
+    []
+  );
+
+  const _theme = themes[theme];
 
   return (
     <ThemeSwitchContext.Provider value={switchTheme}>

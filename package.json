@@ -2,28 +2,30 @@
   "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
-  "version": "0.38.8-1",
+  "version": "0.39.4-7",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^4.16.1",
-    "@polkadot/keyring": "^6.10.1",
-    "@polkadot/networks": "^6.10.1",
-    "@polkadot/types": "^4.16.1",
-    "@polkadot/util": "^6.10.1",
-    "@polkadot/util-crypto": "^6.10.1",
-    "@polkadot/x-fetch": "^6.10.1",
+    "@polkadot/api": "^5.7.2-2",
+    "@polkadot/keyring": "^7.3.1",
+    "@polkadot/networks": "^7.3.1",
+    "@polkadot/types": "^5.7.2-2",
+    "@polkadot/util": "^7.3.1",
+    "@polkadot/util-crypto": "^7.3.1",
+    "@polkadot/x-fetch": "^7.3.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "webpack": "5.41.1"
   },
   "scripts": {
-    "build": "polkadot-dev-build-ts && yarn build:zip",
+    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:release": "polkadot-ci-ghact-build",
+    "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
@@ -38,13 +40,14 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.14.6",
-    "@polkadot/dev": "^0.62.44",
-    "@types/jest": "^26.0.23",
+    "@babel/core": "^7.15.0",
+    "@polkadot/dev": "^0.62.64",
+    "@types/jest": "^27.0.1",
     "i18next-scanner": "^3.0.0",
     "sinon-chrome": "^3.0.1",
     "stylelint": "^13.13.1",
     "stylelint-config-recommended": "^5.0.0",
     "stylelint-config-styled-components": "^0.1.1"
-  }
+  },
+  "packageManager": "yarn@3.0.1"
 }

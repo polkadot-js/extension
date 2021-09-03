@@ -99,6 +99,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   const settings = useContext(SettingsContext);
   const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
+
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -114,7 +115,8 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     }
 
     const accountByAddress = findAccountByAddress(accounts, address);
-    const recoded = (accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
+
+    const recoded = (chain?.definition.chainType === 'ethereum' || accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
       ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
 
@@ -163,17 +165,21 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       <>
         {!!accountName && (account?.isExternal || isExternal) && (
           (account?.isHardware || isHardware)
-            ? <FontAwesomeIcon
-              className='hardwareIcon'
-              icon={faUsb}
-              rotation={270}
-              title={t('hardware wallet account')}
-            />
-            : <FontAwesomeIcon
-              className='externalIcon'
-              icon={faQrcode}
-              title={t('external account')}
-            />
+            ? (
+              <FontAwesomeIcon
+                className='hardwareIcon'
+                icon={faUsb}
+                rotation={270}
+                title={t('hardware wallet account')}
+              />
+            )
+            : (
+              <FontAwesomeIcon
+                className='externalIcon'
+                icon={faQrcode}
+                title={t('external account')}
+              />
+            )
         )}
         <span title={displayName}>{displayName}</span>
       </>);
@@ -210,7 +216,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                   </div>
                 </div>
                 <div className='name displaced'>
-                  <Name/>
+                  <Name />
                 </div>
               </>
             )
@@ -219,7 +225,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 className='name'
                 data-field='name'
               >
-                <Name/>
+                <Name />
               </div>
             )
           }
@@ -243,7 +249,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             >
               {formatted || address || t('<unknown>')}
             </div>
-            <CopyToClipboard text={(formatted && formatted) || ''} >
+            <CopyToClipboard text={(formatted && formatted) || ''}>
               <FontAwesomeIcon
                 className='copyIcon'
                 icon={faCopy}

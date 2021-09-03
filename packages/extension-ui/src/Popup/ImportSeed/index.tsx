@@ -60,18 +60,21 @@ function ImportSeed (): React.ReactElement {
         />
       </div>
       {step1
-        ? <SeedAndPath
-          onAccountChange={setAccount}
-          onNextStep={_onNextStep}
-        />
-        : <AccountNamePasswordCreation
-          buttonLabel={t<string>('Add the account with the supplied seed')}
-          isBusy={isBusy}
-          onBackClick={_onBackClick}
-          onCreate={_onCreate}
-          onNameChange={setName}
-        />
-
+        ? (
+          <SeedAndPath
+            onAccountChange={setAccount}
+            onNextStep={_onNextStep}
+          />
+        )
+        : (
+          <AccountNamePasswordCreation
+            buttonLabel={t<string>('Add the account with the supplied seed')}
+            isBusy={isBusy}
+            onBackClick={_onBackClick}
+            onCreate={_onCreate}
+            onNameChange={setName}
+          />
+        )
       }
     </>
   );

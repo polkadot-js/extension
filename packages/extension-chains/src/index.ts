@@ -4,8 +4,7 @@
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { Chain } from './types';
 
-import { Metadata } from '@polkadot/metadata';
-import { TypeRegistry } from '@polkadot/types';
+import { Metadata, TypeRegistry } from '@polkadot/types';
 import { base64Decode } from '@polkadot/util-crypto';
 
 // imports chain details, generally metadata. For the generation of these,

@@ -106,10 +106,12 @@ const mountComponent = async (addressComponentProps: AddressComponentProps, cont
   const { actions = actionStub } = addressComponentProps;
 
   const wrapper = mount(
-    <AccountContext.Provider value={{
-      accounts: contextAccounts,
-      hierarchy: buildHierarchy(contextAccounts)
-    }}>
+    <AccountContext.Provider
+      value={{
+        accounts: contextAccounts,
+        hierarchy: buildHierarchy(contextAccounts)
+      }}
+    >
       <Address
         actions={actions}
         {...addressComponentProps}

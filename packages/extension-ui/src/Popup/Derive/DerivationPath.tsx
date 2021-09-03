@@ -60,7 +60,8 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
         </div>
         <Button
           className='lockButton'
-          onClick={_onExpand}>
+          onClick={_onExpand}
+        >
           <FontAwesomeIcon
             className='lockIcon'
             icon={isDisabled ? faLock : faLockOpen}

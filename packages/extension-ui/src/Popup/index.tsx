@@ -4,7 +4,7 @@
 import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
@@ -74,13 +74,16 @@ export default function Popup (): React.ReactElement {
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
 
-  const _onAction = (to?: string): void => {
-    setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+  const _onAction = useCallback(
+    (to?: string): void => {
+      setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
-    if (to) {
-      window.location.hash = to;
-    }
-  };
+      if (to) {
+        window.location.hash = to;
+      }
+    },
+    []
+  );
 
   useEffect((): void => {
     Promise.all([
@@ -96,6 +99,7 @@ export default function Popup (): React.ReactElement {
     });
 
     _onAction();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {
@@ -118,8 +122,8 @@ export default function Popup (): React.ReactElement {
       : metaRequests && metaRequests.length
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
-          ? wrapWithErrorBoundary(<Signing/>, 'signing')
-          : wrapWithErrorBoundary(<Accounts/>, 'accounts')
+          ? wrapWithErrorBoundary(<Signing />, 'signing')
+          : wrapWithErrorBoundary(<Accounts />, 'accounts')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (

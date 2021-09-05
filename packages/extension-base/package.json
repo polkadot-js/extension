@@ -1,7 +1,7 @@
 {
   "name": "@polkadot/extension-base",
   "description": "Functions, classes and other utilities used in @polkadot/extension",
-  "version": "0.39.4-8",
+  "version": "0.39.4-9",
   "type": "module",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
@@ -10,8 +10,8 @@
   "dependencies": {
     "@babel/runtime": "^7.15.3",
     "@polkadot/api": "^5.7.2-7",
-    "@polkadot/extension-dapp": "^0.39.4-8",
-    "@polkadot/extension-inject": "^0.39.4-8",
+    "@polkadot/extension-dapp": "^0.39.4-9",
+    "@polkadot/extension-inject": "^0.39.4-9",
     "@polkadot/keyring": "^7.3.1",
     "@polkadot/phishing": "^0.6.281",
     "@polkadot/ui-keyring": "^0.85.4-2"

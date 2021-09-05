@@ -14,6 +14,7 @@
       "@polkadot/extension-base/*": ["packages/extension-base/src/*"],
       "@polkadot/extension-chains": ["packages/extension-chains/src"],
       "@polkadot/extension-chains/*": ["packages/extension-chains/src/*"],
+      "@polkadot/extension-compat-metamask": ["packages/extension-compat-metamask/src"],
       "@polkadot/extension-dapp": ["packages/extension-dapp/src"],
       "@polkadot/extension-dapp/*": ["packages/extension-dapp/src/*"],
       "@polkadot/extension-inject": ["packages/extension-inject/src"],

@@ -2448,9 +2448,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@^0.39.4-8, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-compat-metamask@workspace:packages/extension-compat-metamask":
   version: 0.0.0-use.local
-  resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
+  resolution: "@polkadot/extension-compat-metamask@workspace:packages/extension-compat-metamask"
   dependencies:
     "@babel/runtime": ^7.15.3
     "@metamask/detect-provider": ^1.2.0
@@ -2458,6 +2458,20 @@ __metadata:
     "@polkadot/util": ^7.3.1
     "@polkadot/util-crypto": ^7.3.1
     web3: ^1.5.2
+  peerDependencies:
+    "@polkadot/util": "*"
+    "@polkadot/util-crypto": "*"
+  languageName: unknown
+  linkType: soft
+
+"@polkadot/extension-dapp@^0.39.4-8, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+  version: 0.0.0-use.local
+  resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
+  dependencies:
+    "@babel/runtime": ^7.15.3
+    "@polkadot/extension-inject": ^0.39.4-8
+    "@polkadot/util": ^7.3.1
+    "@polkadot/util-crypto": ^7.3.1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"

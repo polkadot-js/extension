@@ -6,7 +6,6 @@ import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtens
 import { u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import initCompat from './compat';
 import { documentReadyPromise } from './util';
 
 // expose utility functions
@@ -64,14 +63,18 @@ function getWindowExtensions (originName: string): Promise<[InjectedExtensionInf
 }
 
 // enables all the providers found on the injected window interface
-export function web3Enable (originName: string): Promise<InjectedExtension[]> {
+export function web3Enable (originName: string, compatInits: (() => Promise<boolean>)[] = []): Promise<InjectedExtension[]> {
   if (!originName) {
     throw new Error('You must pass a name for your app to the web3Enable function');
   }
 
+  const initCompat = compatInits.length
+    ? Promise.all(compatInits.map((c) => c()))
+    : Promise.resolve([true]);
+
   web3EnablePromise = documentReadyPromise(
     (): Promise<InjectedExtension[]> =>
-      initCompat().then(() =>
+      initCompat.then(() =>
         getWindowExtensions(originName)
           .then((values): InjectedExtension[] =>
             values

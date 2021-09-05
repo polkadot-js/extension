@@ -85,7 +85,7 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
   };
 }
 
-export default function initMetaMaskSource (): Promise<boolean> {
+export default function initMetaMask (): Promise<boolean> {
   return new Promise((resolve): void => {
     const win = window as Window & Web3Window;
 

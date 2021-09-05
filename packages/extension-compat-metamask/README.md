@@ -1,3 +1,3 @@
-# @polkadot/extension-dapp
+# @polkadot/extension-metamask-compat
 
-Documentation available [in the polkadot-js doc](https://polkadot.js.org/docs/extension).
+An optional metamask-compatible layer

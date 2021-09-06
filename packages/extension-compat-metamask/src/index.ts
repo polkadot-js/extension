@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
+import type { SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
 
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 
-import { SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
 import { assert } from '@polkadot/util';
 
 interface RequestArguments {
@@ -49,17 +49,17 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
   // decorate the compat interface
   win.injectedWeb3.Web3Source = {
     enable: async (): Promise<Injected> => {
-      const providerRaw: unknown = await detectEthereumProvider({ mustBeMetaMask: true });
-      const provider: EthereumProvider = isMetaMaskProvider(providerRaw);
+      const providerRaw = await detectEthereumProvider({ mustBeMetaMask: true });
+      const provider = isMetaMaskProvider(providerRaw);
 
       await provider.request({ method: 'eth_requestAccounts' });
 
       return {
         accounts: {
           get: async (): Promise<InjectedAccount[]> => {
-            const response = await provider.request({ method: 'eth_requestAccounts' });
+            const response = (await provider.request({ method: 'eth_requestAccounts' })) as string[];
 
-            return transformAccounts(response as string[]);
+            return transformAccounts(response);
           },
           subscribe: (cb: (accounts: InjectedAccount[]) => void): (() => void) => {
             const sub = provider.on('accountsChanged', (accounts): void => {
@@ -74,9 +74,9 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
         },
         signer: {
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
-            const signature = await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] });
+            const signature = (await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] })) as string;
 
-            return { id: 0, signature: signature as string };
+            return { id: 0, signature };
           }
         }
       };

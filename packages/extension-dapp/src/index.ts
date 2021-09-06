@@ -69,7 +69,7 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
   }
 
   const initCompat = compatInits.length
-    ? Promise.all(compatInits.map((c) => c()))
+    ? Promise.all(compatInits.map((c) => c().catch(() => false)))
     : Promise.resolve([true]);
 
   web3EnablePromise = documentReadyPromise(

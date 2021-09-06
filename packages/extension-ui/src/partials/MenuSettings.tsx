@@ -25,6 +25,9 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
 }
 
+const notificationOptions = ['Extension', 'PopUp', 'Window']
+  .map((item) => ({ text: item, value: item.toLowerCase() }));
+
 const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
@@ -33,6 +36,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
+  const [notification, setNotification] = useState(settings.notification);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
@@ -47,6 +51,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     (value: string): void => {
       setPrefix(value);
       settings.set({ prefix: parseInt(value, 10) });
+    },
+    []
+  );
+
+  const _onChangeNotification = useCallback(
+    (value: string): void => {
+      setNotification(value);
+      settings.set({ notification: value });
     },
     []
   );
@@ -135,6 +147,19 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           onChange={_onChangeLang}
           options={languageOptions}
           value={settings.i18nLang}
+        />
+      </MenuItem>
+      <MenuDivider />
+      <MenuItem
+        className='setting'
+        title={t<string>('Notifications')}
+      >
+        <Dropdown
+          className='dropdown'
+          label=''
+          onChange={_onChangeNotification}
+          options={notificationOptions}
+          value={notification}
         />
       </MenuItem>
       {isPopup && (

@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
 import chrome from '@polkadot/extension-inject/chrome';
+import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import { MetadataStore } from '../../stores';
@@ -59,16 +60,29 @@ interface SignRequest extends Resolver<ResponseSigning> {
 
 let idCounter = 0;
 
-const WINDOW_OPTS: chrome.windows.CreateData = {
-  // This is not allowed on FF, only on Chrome - disable completely
-  // focused: true,
+const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
+
+const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
+  focused: true,
   height: 621,
   left: 150,
   top: 150,
   type: 'popup',
-  url: chrome.extension.getURL('notification.html'),
+  url: NOTIFICATION_URL,
   width: 560
 };
+
+const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
+  focused: true,
+  type: 'normal',
+  url: NOTIFICATION_URL
+};
+
+export enum NotificationOptions {
+  None,
+  Normal,
+  PopUp,
+}
 
 const AUTH_URLS_KEY = 'authUrls';
 
@@ -162,6 +176,10 @@ export default class State {
   }
 
   private popupOpen (): void {
+    if (settings.notification === 'extension') { return; }
+
+    const WINDOW_OPTS = settings.notification === 'window' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS;
+
     chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
       if (window) {
         this.#windows.push(window.id || 0);

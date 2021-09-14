@@ -8,10 +8,10 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.15.3"
+    "@babel/runtime": "^7.15.4"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.154",
+    "@types/chrome": "^0.0.157",
     "@types/firefox-webext-browser": "^82.0.1"
   },
   "peerDependencies": {

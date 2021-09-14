@@ -102,28 +102,6 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           uncheckedLabel={t<string>('Light')}
         />
       </MenuItem>
-      <MenuDivider />
-      <MenuItem className='setting'>
-        <ActionText
-          className='manageWebsiteAccess'
-          icon={faTasks}
-          onClick={_goToAuthList}
-          text={t<string>('Manage Website Access')}
-        />
-      </MenuItem>
-      <MenuDivider />
-      <MenuItem
-        className='setting'
-        title={t<string>('External accounts and Access')}
-      >
-        <Checkbox
-          checked={camera}
-          className='checkbox camera'
-          label={t<string>('Allow QR Camera Access')}
-          onChange={setCamera}
-        />
-      </MenuItem>
-      <MenuDivider />
       <MenuItem
         className='setting'
         title={t<string>('Display address format for')}
@@ -136,7 +114,6 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           value={`${prefix}`}
         />
       </MenuItem>
-      <MenuDivider />
       <MenuItem
         className='setting'
         title={t<string>('Language')}
@@ -149,7 +126,6 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           value={settings.i18nLang}
         />
       </MenuItem>
-      <MenuDivider />
       <MenuItem
         className='setting'
         title={t<string>('Notifications')}
@@ -162,18 +138,35 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           value={notification}
         />
       </MenuItem>
+      <MenuItem
+        className='setting'
+        title={t<string>('External accounts and Access')}
+      >
+        <Checkbox
+          checked={camera}
+          className='checkbox camera'
+          label={t<string>('Allow QR Camera Access')}
+          onChange={setCamera}
+        />
+      </MenuItem>
+      <MenuDivider />
+      <MenuItem className='setting'>
+        <ActionText
+          className='manageWebsiteAccess'
+          icon={faTasks}
+          onClick={_goToAuthList}
+          text={t<string>('Manage Website Access')}
+        />
+      </MenuItem>
       {isPopup && (
-        <>
-          <MenuDivider />
-          <MenuItem className='setting'>
-            <ActionText
-              className='openWindow'
-              icon={faExpand}
-              onClick={_onWindowOpen}
-              text={t<string>('Open extension in new window')}
-            />
-          </MenuItem>
-        </>
+        <MenuItem className='setting'>
+          <ActionText
+            className='openWindow'
+            icon={faExpand}
+            onClick={_onWindowOpen}
+            text={t<string>('Open extension in new window')}
+          />
+        </MenuItem>
       )}
     </Menu>
   );

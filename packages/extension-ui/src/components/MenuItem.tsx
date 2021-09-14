@@ -15,7 +15,7 @@ interface Props extends ThemeProps {
 
 function MenuItem ({ children, className = '', title }: Props): React.ReactElement<Props> {
   return (
-    <div className={className}>
+    <div className={`${className}${title ? ' isTitled' : ''}`}>
       {title && (
         <div className='itemTitle'>{title}</div>
       )}
@@ -30,13 +30,17 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   max-width: 100%;
 
   > .itemTitle {
-      margin: 0;
-      width: 100%;
-      font-size: ${theme.inputLabelFontSize};
-      line-height: 14px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: ${theme.textColor};
-      opacity: 0.65;
-    }
+    margin: 0;
+    width: 100%;
+    font-size: ${theme.inputLabelFontSize};
+    line-height: 14px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: ${theme.textColor};
+    opacity: 0.65;
+  }
+
+  &+&.isTitled {
+    margin-top: 16px;
+  }
 `);

@@ -8,7 +8,7 @@
   "main": "index.js",
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.15.3",
+    "@babel/runtime": "^7.15.4",
     "@metamask/detect-provider": "^1.2.0",
     "@polkadot/extension-inject": "^0.39.4-11",
     "@polkadot/util": "^7.3.1",

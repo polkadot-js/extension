@@ -590,6 +590,9 @@ export default class Extension {
       case 'pri(seed.validate)':
         return this.seedValidate(request as RequestSeedValidate);
 
+      case 'pri(settings.notification)':
+        return this.#state.setNotification(request as string);
+
       case 'pri(signing.approve.password)':
         return this.signingApprovePassword(request as RequestSigningApprovePassword);
 

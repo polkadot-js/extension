@@ -102,6 +102,8 @@ export default class State {
 
   readonly #metaRequests: Record<string, MetaRequest> = {};
 
+  #notification = settings.notification;
+
   // Map of all providers exposed by the extension, they are retrievable by key
   readonly #providers: Providers;
 
@@ -176,15 +178,16 @@ export default class State {
   }
 
   private popupOpen (): void {
-    if (settings.notification === 'extension') { return; }
-
-    const WINDOW_OPTS = settings.notification === 'window' ? NORMAL_WINDOW_OPTS : POPUP_WINDOW_OPTS;
-
-    chrome.windows.create({ ...WINDOW_OPTS }, (window?: chrome.windows.Window): void => {
-      if (window) {
-        this.#windows.push(window.id || 0);
-      }
-    });
+    this.#notification !== 'extension' &&
+      chrome.windows.create(
+        this.#notification === 'window'
+          ? NORMAL_WINDOW_OPTS
+          : POPUP_WINDOW_OPTS,
+        (window): void => {
+          if (window) {
+            this.#windows.push(window.id || 0);
+          }
+        });
   }
 
   private authComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
@@ -453,6 +456,12 @@ export default class State {
     this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
+  }
+
+  public setNotification (notification: string): boolean {
+    this.#notification = notification;
+
+    return true;
   }
 
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {

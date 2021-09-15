@@ -231,3 +231,7 @@ export async function jsonRestore (file: KeyringPair$Json, password: string): Pr
 export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
   return sendMessage('pri(json.batchRestore)', { file, password });
 }
+
+export async function setNotification (notification: string): Promise<boolean> {
+  return sendMessage('pri(settings.notification)', notification);
+}

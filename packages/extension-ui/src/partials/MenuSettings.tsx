@@ -57,14 +57,10 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
 
   const _onChangeNotification = useCallback(
     (value: string): void => {
-      setNotification(value)
-        .then((ok): void => {
-          if (ok) {
-            updateNotification(value);
-            settings.set({ notification: value });
-          }
-        })
-        .catch(console.error);
+      setNotification(value).catch(console.error);
+
+      updateNotification(value);
+      settings.set({ notification: value });
     },
     []
   );
@@ -75,7 +71,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 
   const _onWindowOpen = useCallback(
-    () => windowOpen('/'),
+    () => windowOpen('/').catch(console.error),
     []
   );
 

@@ -12,7 +12,7 @@ import settings from '@polkadot/ui-settings';
 import { ActionContext, ActionText, Checkbox, Dropdown, Menu, MenuDivider, MenuItem, Svg, Switch, themes, ThemeSwitchContext } from '../components';
 import useIsPopup from '../hooks/useIsPopup';
 import useTranslation from '../hooks/useTranslation';
-import { windowOpen } from '../messaging';
+import { setNotification, windowOpen } from '../messaging';
 import getLanguageOptions from '../util/getLanguageOptions';
 
 interface Option {
@@ -36,7 +36,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
-  const [notification, setNotification] = useState(settings.notification);
+  const [notification, updateNotification] = useState(settings.notification);
   const themeContext = useContext<Theme>(ThemeContext);
   const setTheme = useContext(ThemeSwitchContext);
   const isPopup = useIsPopup();
@@ -57,7 +57,9 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
 
   const _onChangeNotification = useCallback(
     (value: string): void => {
-      setNotification(value);
+      setNotification(value).catch(console.error);
+
+      updateNotification(value);
       settings.set({ notification: value });
     },
     []
@@ -69,7 +71,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 
   const _onWindowOpen = useCallback(
-    () => windowOpen('/'),
+    () => windowOpen('/').catch(console.error),
     []
   );
 

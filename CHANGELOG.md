@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.40.2 Sep 16, 2021
+
+Changes:
+
+- Fix polish translation (valid JSON)
+
+
 ## 0.40.1 Sep 16, 2021
 
 Contributed:

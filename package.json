@@ -8,10 +8,10 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "^5.9.2-2",
+    "@polkadot/api": "^5.9.2-7",
     "@polkadot/keyring": "^7.3.1",
     "@polkadot/networks": "^7.3.1",
-    "@polkadot/types": "^5.9.2-2",
+    "@polkadot/types": "^5.9.2-7",
     "@polkadot/util": "^7.3.1",
     "@polkadot/util-crypto": "^7.3.1",
     "@polkadot/x-fetch": "^7.3.1",

@@ -2423,16 +2423,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@^0.39.4-15, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@^0.40.0, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.15.4
     "@polkadot/api": ^5.9.2-7
-    "@polkadot/extension-dapp": ^0.39.4-15
-    "@polkadot/extension-inject": ^0.39.4-15
+    "@polkadot/extension-dapp": ^0.40.0
+    "@polkadot/extension-inject": ^0.40.0
     "@polkadot/keyring": ^7.3.1
-    "@polkadot/phishing": ^0.6.291
+    "@polkadot/phishing": ^0.6.294
     "@polkadot/ui-keyring": ^0.85.4-3
   languageName: unknown
   linkType: soft
@@ -2454,7 +2454,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.15.4
     "@metamask/detect-provider": ^1.2.0
-    "@polkadot/extension-inject": ^0.39.4-15
+    "@polkadot/extension-inject": ^0.40.0
     "@polkadot/util": ^7.3.1
     web3: ^1.5.2
   peerDependencies:
@@ -2462,12 +2462,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@^0.39.4-15, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-dapp@^0.40.0, @polkadot/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.15.4
-    "@polkadot/extension-inject": ^0.39.4-15
+    "@polkadot/extension-inject": ^0.40.0
     "@polkadot/util": ^7.3.1
     "@polkadot/util-crypto": ^7.3.1
   peerDependencies:
@@ -2477,7 +2477,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@^0.39.4-15, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@^0.40.0, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -2489,7 +2489,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@^0.39.4-15, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@^0.40.0, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -2499,9 +2499,9 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^5.15.4
     "@fortawesome/free-solid-svg-icons": ^5.15.4
     "@fortawesome/react-fontawesome": ^0.1.15
-    "@polkadot/extension-base": ^0.39.4-15
-    "@polkadot/extension-dapp": ^0.39.4-15
-    "@polkadot/extension-inject": ^0.39.4-15
+    "@polkadot/extension-base": ^0.40.0
+    "@polkadot/extension-dapp": ^0.40.0
+    "@polkadot/extension-inject": ^0.40.0
     "@polkadot/hw-ledger": ^7.3.1
     "@polkadot/keyring": ^7.3.1
     "@polkadot/networks": ^7.3.1
@@ -2516,7 +2516,7 @@ __metadata:
     "@types/react-copy-to-clipboard": ^5.0.1
     "@types/react-dom": ^17.0.9
     "@types/react-router": ^5.1.16
-    "@types/react-router-dom": ^5.1.8
+    "@types/react-router-dom": ^5.1.9
     "@types/sinon-chrome": ^2.2.11
     "@types/styled-components": ^5.1.14
     "@wojtekmaj/enzyme-adapter-react-17": ^0.6.3
@@ -2526,7 +2526,7 @@ __metadata:
     i18next: ^20.6.1
     react: ^17.0.2
     react-dom: ^17.0.2
-    react-dropzone: ^11.3.5
+    react-dropzone: ^11.4.0
     react-i18next: ^11.12.0
     react-is: ^17.0.2
     react-router: ^5.2.1
@@ -2542,9 +2542,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.15.4
     "@polkadot/dev": ^0.62.67
-    "@polkadot/extension-base": ^0.39.4-15
-    "@polkadot/extension-inject": ^0.39.4-15
-    "@polkadot/extension-ui": ^0.39.4-15
+    "@polkadot/extension-base": ^0.40.0
+    "@polkadot/extension-inject": ^0.40.0
+    "@polkadot/extension-ui": ^0.40.0
     babel-loader: ^8.2.2
     browser-resolve: ^2.0.0
     buffer: ^6.0.3
@@ -2615,15 +2615,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.6.291":
-  version: 0.6.291
-  resolution: "@polkadot/phishing@npm:0.6.291"
+"@polkadot/phishing@npm:^0.6.294":
+  version: 0.6.294
+  resolution: "@polkadot/phishing@npm:0.6.294"
   dependencies:
     "@babel/runtime": ^7.15.4
     "@polkadot/util": ^7.3.1
     "@polkadot/util-crypto": ^7.3.1
     "@polkadot/x-fetch": ^7.3.1
-  checksum: b33f31fad1142d02b144bcf3df67f0fdd9ceddd01c0764c6a2205d7df1ebc018ece2600d48b4d4b848aac6163db69d241b26283613c8ff4fe1f0c2a7c5d87b1c
+  checksum: 166ad5c11e1e1e885b17e63c6ef2d5a6890dfb17c250ca06437ab39cb171efd1d6213ba6700702b923caa75d874377dddc6d1273a0cbe37583a81c5910250a67
   languageName: node
   linkType: hard
 
@@ -3463,14 +3463,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-router-dom@npm:^5.1.8":
-  version: 5.1.8
-  resolution: "@types/react-router-dom@npm:5.1.8"
+"@types/react-router-dom@npm:^5.1.9":
+  version: 5.1.9
+  resolution: "@types/react-router-dom@npm:5.1.9"
   dependencies:
     "@types/history": "*"
     "@types/react": "*"
     "@types/react-router": "*"
-  checksum: ff4af091f8e076b64f6f3f2af52429772641388393065930880e8931ce881873c2f0dff53bb1e373db5ae6b737fc514db4a1f5daa7d8bf3cf3b3088ce84472fc
+  checksum: 6ff2f10f21124f529e191adce60ad8f1d9a47ee19a0e00f10259e9d39c06ef0ccb8d6d57686b10286fe241bf20c89115c77494b683b0c70de9bddb13b28ee6e1
   languageName: node
   linkType: hard
 
@@ -14456,16 +14456,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dropzone@npm:^11.3.5":
-  version: 11.3.5
-  resolution: "react-dropzone@npm:11.3.5"
+"react-dropzone@npm:^11.4.0":
+  version: 11.4.0
+  resolution: "react-dropzone@npm:11.4.0"
   dependencies:
     attr-accept: ^2.2.1
     file-selector: ^0.2.2
     prop-types: ^15.7.2
   peerDependencies:
     react: ">= 16.8"
-  checksum: 9e93b40d411cb34509ebc2584ffbd8b7749a7adc528183dae34df654d812d77c59f1a9a2ec5f638bb34f66b4f7214560417359c99a3143a836d0cb9801cf76c3
+  checksum: a076b1bd98778abb81738cb0e532fbe1c1141f3f0055368206e370f49c2b59413bf84c8f32bc6543e4c55c6b79b639305e8be8c4608ee95655b04f47220c87a8
   languageName: node
   linkType: hard
 

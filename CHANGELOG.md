@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.40.1 Sep 16, 2021
+
+Contributed:
+
+- Support signing of raw data via Qr (Thanks to https://github.com/Tbaut, prior 0.38.4)
+- Add Polish language support (Thanks to https://github.com/ccris02, prior 0.38.8)
+- Add Thai language support (Thanks to https://github.com/Chakrarin)
+- Display Ethereum formatted addressed for compatible chains (Thanks to https://github.com/joelamouche)
+- Allow import of Metamask addresses for compatible chains (Thanks to https://github.com/joelamouche)
+- Add configurable popup location (Thanks to https://github.com/shawntabrizi)
+
+Changes:
+
+- Adjust raw signing outputs with data wrapper
+- Adjust settings menu layouts
+- Cater for v14 metadata formats
+- Cater for `#` in phishing Urls as part of the checks
+- Bump `@polkadot/api` & `@polkadot/util` to latest versions
+
+
 ## 0.39.3 Aug 16, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.

@@ -113,13 +113,13 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           options={networkOps.current}
           value={genesis}
         />
-        { !!genesis && !!address && !ledgerError && (
+        {!!genesis && !!address && !ledgerError && (
           <Name
             onChange={setName}
             value={name || ''}
           />
         )}
-        { !!name && (
+        {!!name && (
           <>
             <Dropdown
               className='accountType'

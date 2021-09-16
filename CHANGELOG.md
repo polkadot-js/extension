@@ -4,9 +4,9 @@
 
 Contributed:
 
-- Add Polish language support (Thanks to https://github.com/ccris02)
+- Support signing of raw data via Qr (Thanks to https://github.com/Tbaut, prior 0.38.4)
+- Add Polish language support (Thanks to https://github.com/ccris02, prior 0.38.8)
 - Add Thai language support (Thanks to https://github.com/Chakrarin)
-- Support signing of raw data via Qr (Thanks to https://github.com/Tbaut)
 - Display Ethereum formatted addressed for compatible chains (Thanks to https://github.com/joelamouche)
 - Allow import of Metamask addresses for compatible chains (Thanks to https://github.com/joelamouche)
 - Add configurable popup location (Thanks to https://github.com/shawntabrizi)

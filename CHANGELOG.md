@@ -9,6 +9,8 @@ Changes:
 
 ## 0.40.1 Sep 16, 2021
 
+- **Important** The signatures generated now via the extension will be a wrapped data set, i.e. `signRaw` cannot be used directly to sign transactions, rather it is only meant to be used for actual messages
+
 Contributed:
 
 - Support signing of raw data via Qr (Thanks to https://github.com/Tbaut, prior 0.38.4)
@@ -20,6 +22,7 @@ Contributed:
 
 Changes:
 
+- Raw signing interfaces will now always place a `<Bytes>...</Bytes>` wrapper around signed data (via `wrapBytes` in `extension-dapp`)
 - Adjust raw signing outputs with data wrapper
 - Adjust settings menu layouts
 - Cater for v14 metadata formats

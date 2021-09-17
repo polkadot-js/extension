@@ -1,7 +1,7 @@
 {
   "name": "@polkadot/extension-chains",
   "description": "Definitions for all known chains as exposed by the extension.",
-  "version": "0.40.3-0",
+  "version": "0.40.3-1",
   "type": "module",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",

@@ -312,7 +312,7 @@ export default class Extension {
       assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
     } else {
       // sadly isHex detects as string, so we need a cast here
-      assert(SEED_LENGTHS.includes((phrase as string).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
+      assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
       assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
     }
 

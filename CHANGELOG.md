@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Expose `wrapBytes`, `unwrapBytes` directly from `@polkadot/util`
+
+
 ## 0.40.2 Sep 16, 2021
 
 Changes:

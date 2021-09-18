@@ -51,6 +51,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
           onChange={_onChangeFilter}
           placeholder={t<string>('example.com')}
           value={filter}
+          withReset
         />
         <div className={className}>
           {

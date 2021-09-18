@@ -237,7 +237,6 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     }
   }
 
-
   .plusIcon, .cogIcon, .searchIcon {
     color: ${theme.iconNeutralColor};
 

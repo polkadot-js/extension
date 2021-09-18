@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## master
+## 0.40.3 Sep 18, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
 - Expose `wrapBytes`, `unwrapBytes` directly from `@polkadot/util`
+- Bump `@polkadot/util` to 7.4.1
+- Bump `@polkadot/api` to 6.0.1
 
 
 ## 0.40.2 Sep 16, 2021

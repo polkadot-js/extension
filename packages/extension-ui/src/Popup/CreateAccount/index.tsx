@@ -17,7 +17,7 @@ interface Props {
   className?: string;
 }
 
-const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha', 'Moonriver'];
+const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha','Moonriver'];
 
 function CreateAccount ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
@@ -60,8 +60,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     const chain = options.find(({ value }) => {
       return newGenesisHash === value;
     });
-
-    if (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text)) {
+    if ( chain?.chainType==="ethereum"||chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text)) {
       setType('ethereum');
     }
 

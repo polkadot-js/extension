@@ -3,14 +3,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { getAllMetatdata } from '../messaging';
+import { getAllMetadata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
 
 interface Option {
   text: string;
   value: string;
-  chainType:"substrate" | "ethereum" |undefined
+  chainType: 'substrate' | 'ethereum' |undefined
 }
 
 const RELAY_CHAIN = 'Relay Chain';
@@ -20,9 +20,8 @@ export default function (): Option[] {
   const [metadataChains, setMetadatachains] = useState<Option[]>([]);
 
   useEffect(() => {
-    getAllMetatdata().then((metadataDefs) => {
-      console.log("metadataDefs",metadataDefs)
-      const res = metadataDefs.map((metadata) => ({ text: metadata.chain, value: metadata.genesisHash, chainType:metadata.chainType||'substrate' }));
+    getAllMetadata().then((metadataDefs) => {
+      const res = metadataDefs.map((metadata) => ({ chainType: metadata.chainType || 'substrate', text: metadata.chain, value: metadata.genesisHash }));
 
       setMetadatachains(res);
     }).catch(console.error);
@@ -30,21 +29,22 @@ export default function (): Option[] {
 
   const hashes = useMemo(() => [
     {
+      chainType: undefined,
       text: t('Allow use on any chain'),
-      value: '',
-      chainType:undefined
+      value: ''
     },
     // put the relay chains at the top
     ...chains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash,chainType }) => ({
+      .map(({ chain, chainType, genesisHash }) => ({
+        chainType,
         text: chain,
-        value: genesisHash,
-        chainType
+        value: genesisHash
       })),
-    ...chains.map(({ chain, genesisHash, chainType }) => ({
+    ...chains.map(({ chain, chainType, genesisHash }) => ({
+      chainType,
       text: chain,
-      value: genesisHash,
-      chainType
+      value: genesisHash
+
     }))
       // remove the relay chains, they are at the top already
       .filter(({ text }) => !text.includes(RELAY_CHAIN))

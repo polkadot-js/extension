@@ -83,7 +83,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   // always allow the actual settings to override the display
   return {
     account,
-    formatted: encodeAddress(publicKey, prefix),
+    formatted: publicKey.length === 20 ? address : encodeAddress(publicKey, prefix), // for ethereum address, no need to encode
     genesisHash: account?.genesisHash,
     prefix,
     type: account?.type || DEFAULT_TYPE

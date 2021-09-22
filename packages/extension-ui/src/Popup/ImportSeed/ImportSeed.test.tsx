@@ -26,7 +26,7 @@ const account = {
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-jest.spyOn(messaging, 'getAllMetatdata').mockResolvedValue([]);
+jest.spyOn(messaging, 'getAllMetadata').mockResolvedValue([]);
 
 const typeSeed = async (wrapper: ReactWrapper, value: string) => {
   wrapper.find('textarea').first().simulate('change', { target: { value } });

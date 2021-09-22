@@ -298,8 +298,9 @@ export default class Extension {
 
   private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
     let seed = mnemonicGenerate(length);
-    if (type==="ethereum"){
-      seed+=`/m/44'/60'/0'/0/0`
+
+    if (type === 'ethereum') {
+      seed += '/m/44\'/60\'/0\'/0/0';
     }
 
     return {

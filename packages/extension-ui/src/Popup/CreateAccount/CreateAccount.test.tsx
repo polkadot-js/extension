@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, ActionText, Button, themes } from '../../components';
+import { ActionContext, ActionText, Address, Button, themes } from '../../components';
 import * as messaging from '../../messaging';
 import { Header } from '../../partials';
 import { flushAllPromises } from '../../testHelpers';
@@ -18,9 +18,10 @@ import CreateAccount from '.';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 
-describe('Create Account', () => {
+describe('Create Account - kusama', () => {
   let wrapper: ReactWrapper;
   let onActionStub: jest.Mock;
+  const kusamaGenesis = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe';
   const exampleAccount = {
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
     seed: 'horse battery staple correct'
@@ -50,6 +51,7 @@ describe('Create Account', () => {
     onActionStub = jest.fn();
     jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
     jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
+    jest.spyOn(messaging, 'getAllMetadata').mockResolvedValue([]);// Uploading Metadata shouldn't be necessary for Kusama
     wrapper = mountComponent();
     await act(flushAllPromises);
     wrapper.update();
@@ -88,6 +90,9 @@ describe('Create Account', () => {
 
   describe('Phase 2', () => {
     beforeEach(async () => {
+      wrapper.find('select').simulate('change', { target: { value: kusamaGenesis } });
+      await act(flushAllPromises);
+      wrapper.update();
       check(wrapper.find('input[type="checkbox"]'));
       wrapper.find('button').simulate('click');
       await act(flushAllPromises);
@@ -95,18 +100,119 @@ describe('Create Account', () => {
     });
 
     it('saves account with provided network, name and password', async () => {
-      const kusamaGenesis = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe';
-
-      wrapper.find('select').simulate('change', { target: { value: kusamaGenesis } });
-      await act(flushAllPromises);
-      wrapper.update();
-
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
       wrapper.find('[data-button-action="add new root"] button').simulate('click');
       await act(flushAllPromises);
 
       expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, 'sr25519', kusamaGenesis);
       expect(onActionStub).toBeCalledWith('/');
+      expect(wrapper.find(Address).text()).toBe('abcKusama' + exampleAccount.address + 'copy address');
+    });
+  });
+});
+
+const moonbaseMetadata = { chain: 'Moonbase Alpha',
+  chainType: 'ethereum' as const,
+  color: '#53cbc9',
+  genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
+  icon: 'substrate',
+  metaCalls: 'bWV0YQ1cGFN5c3RlbQABKChmaWxsX2Jsb2NrBBhfcmF0aW8cU',
+  specVersion: 300,
+  ss58Format: 1287,
+  tokenDecimals: 18,
+  tokenSymbol: 'UNIT',
+  types: {} }; // no need to use types for this test
+
+describe('Create Account - ethereum type - moonbase as example', () => {
+  let wrapper: ReactWrapper;
+  let onActionStub: jest.Mock;
+  const exampleAccount = {
+    address: '0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac',
+    seed: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk'
+  };
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  const mountComponent = (): ReactWrapper => mount(
+    <ActionContext.Provider value={onActionStub}>
+      <ThemeProvider theme={themes.dark}>
+        <CreateAccount />
+      </ThemeProvider>
+    </ActionContext.Provider>
+  );
+
+  const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
+
+  const type = async (input: ReactWrapper, value: string): Promise<void> => {
+    input.simulate('change', { target: { value } });
+    await act(flushAllPromises);
+    wrapper.update();
+  };
+
+  const enterName = (name: string): Promise<void> => type(wrapper.find('input').first(), name);
+  const password = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').first(), password);
+  const repeat = (password: string) => (): Promise<void> => type(wrapper.find('input[type="password"]').last(), password);
+
+  beforeEach(async () => {
+    onActionStub = jest.fn();
+    jest.spyOn(messaging, 'createSeed').mockResolvedValue(exampleAccount);
+    jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
+    jest.spyOn(messaging, 'getAllMetadata').mockResolvedValue([moonbaseMetadata]);
+    wrapper = mountComponent();
+    await act(flushAllPromises);
+    wrapper.update();
+  });
+
+  describe('Phase 1', () => {
+    it('shows seed phrase in textarea', () => {
+      expect(wrapper.find('textarea').text()).toBe(exampleAccount.seed);
+    });
+
+    it('next step button is disabled when checkbox is not checked', () => {
+      expect(wrapper.find(Button).prop('isDisabled')).toBe(true);
+    });
+
+    it('action text is "Cancel"', () => {
+      expect(wrapper.find(Header).find(ActionText).text()).toBe('Cancel');
+    });
+
+    it('clicking "Cancel" redirects to main screen', () => {
+      wrapper.find(Header).find(ActionText).simulate('click');
+      expect(onActionStub).toBeCalledWith('/');
+    });
+
+    it('checking the checkbox enables the Next button', () => {
+      check(wrapper.find('input[type="checkbox"]'));
+
+      expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
+    });
+
+    it('clicking on Next activates phase 2', () => {
+      check(wrapper.find('input[type="checkbox"]'));
+      wrapper.find('button').simulate('click');
+      expect(wrapper.find(Header).text()).toBe('Create an account2/2Cancel');
+    });
+  });
+
+  describe('Phase 2', () => {
+    beforeEach(async () => {
+      wrapper.find('select').simulate('change', { target: { value: moonbaseMetadata.genesisHash } });
+      await act(flushAllPromises);
+      wrapper.update();
+      check(wrapper.find('input[type="checkbox"]'));
+      wrapper.find('button').simulate('click');
+      await act(flushAllPromises);
+      wrapper.update();
+    });
+
+    it('saves account with provided network, name and password', async () => {
+      await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
+      wrapper.find('[data-button-action="add new root"] button').simulate('click');
+      await act(flushAllPromises);
+
+      expect(messaging.createAccountSuri).toBeCalledWith('abc', 'abcdef', exampleAccount.seed, 'ethereum', moonbaseMetadata.genesisHash);
+      expect(onActionStub).toBeCalledWith('/');
+      console.log('OHHHH wrapper.find(Address).text()', wrapper.find(Address).text());
+      // console.log("OHHHH wrapper.find('fullAddress').text()",wrapper.find('fullAddress').text())
+      expect(wrapper.find(Address).text()).toBe('abc' + exampleAccount.address + 'copy address');
     });
   });
 });

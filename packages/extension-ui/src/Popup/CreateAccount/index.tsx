@@ -17,7 +17,7 @@ interface Props {
   className?: string;
 }
 
-const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha','Moonriver'];
+const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha', 'Moonriver'];
 
 function CreateAccount ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
@@ -56,11 +56,12 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
   const _onChangeNetwork = useCallback((newGenesisHash: string) => {
-    console.log("newGenesisHash",newGenesisHash)
+    console.log('newGenesisHash', newGenesisHash);
     const chain = options.find(({ value }) => {
       return newGenesisHash === value;
     });
-    if ( chain?.chainType==="ethereum"||chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text)) {
+
+    if (chain?.chainType === 'ethereum' || (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text))) {
       setType('ethereum');
     }
 
@@ -95,17 +96,17 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                 onNextStep={_onNextStep}
                 seed={account.seed}
               />
-              </>
+            </>
             )
             : (
-              
-                <AccountNamePasswordCreation
-                  buttonLabel={t<string>('Add the account with the generated seed')}
-                  isBusy={isBusy}
-                  onBackClick={_onPreviousStep}
-                  onCreate={_onCreate}
-                  onNameChange={setName}
-                />
+
+              <AccountNamePasswordCreation
+                buttonLabel={t<string>('Add the account with the generated seed')}
+                isBusy={isBusy}
+                onBackClick={_onPreviousStep}
+                onCreate={_onCreate}
+                onNameChange={setName}
+              />
             )
         )}
       </Loading>

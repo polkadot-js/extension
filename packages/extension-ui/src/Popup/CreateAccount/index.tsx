@@ -41,7 +41,6 @@ function CreateAccount ({ className }: Props): React.ReactElement {
       // this should always be the case
       if (name && password && account) {
         setIsBusy(true);
-
         createAccountSuri(name, password, account.seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
@@ -57,6 +56,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
 
   const _onChangeNetwork = useCallback((newGenesisHash: string) => {
+    console.log("newGenesisHash",newGenesisHash)
     const chain = options.find(({ value }) => {
       return newGenesisHash === value;
     });
@@ -83,21 +83,22 @@ function CreateAccount ({ className }: Props): React.ReactElement {
         </div>
         {account && (
           step === 1
-            ? (
+            ? (<>
+              <Dropdown
+                className={className}
+                label={t<string>('Network')}
+                onChange={_onChangeNetwork}
+                options={options}
+                value={genesisHash}
+              />
               <Mnemonic
                 onNextStep={_onNextStep}
                 seed={account.seed}
               />
+              </>
             )
             : (
-              <>
-                <Dropdown
-                  className={className}
-                  label={t<string>('Network')}
-                  onChange={_onChangeNetwork}
-                  options={options}
-                  value={genesisHash}
-                />
+              
                 <AccountNamePasswordCreation
                   buttonLabel={t<string>('Add the account with the generated seed')}
                   isBusy={isBusy}
@@ -105,7 +106,6 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                   onCreate={_onCreate}
                   onNameChange={setName}
                 />
-              </>
             )
         )}
       </Loading>

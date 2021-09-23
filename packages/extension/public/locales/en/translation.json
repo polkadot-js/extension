@@ -159,5 +159,13 @@
   "All account": "",
   "password for encrypting all accounts": "",
   "I want to export all my accounts": "",
-  "Notifications": ""
+  "Notifications": "",
+  "This is an invalid derivation path.": "",
+  "Password are ignored for hex seed": "",
+  "Soft derivation paths are not allowed on ed25519": "",
+  "Your password contains at least one \"/\" character. Disregard this warning if it is intended.": "",
+  "Use custom address index": "",
+  "Custom index": "",
+  "Use custom derivation index": "",
+  "secret derivation path": ""
 }

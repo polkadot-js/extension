@@ -11,6 +11,7 @@ import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
+import CreateEthDerivationPath from './CreateEthDerivationPath';
 import Mnemonic from './Mnemonic';
 
 interface Props {
@@ -18,7 +19,7 @@ interface Props {
 }
 
 const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha', 'Moonriver'];
-
+console.log('669')
 function CreateAccount ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -27,20 +28,25 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
+  const [ethDerivePath, setEthDerivePath] = useState("m/44'/60'/0'/0/0");
   const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
 
   useEffect((): void => {
-    createSeed(undefined, type)
+    console.log("TYPE",type)
+    console.log("ethDerivePath",ethDerivePath)
+    createSeed(undefined, type,ethDerivePath)
       .then(setAccount)
       .catch((error: Error) => console.error(error));
-  }, [type]);
+  }, [type,ethDerivePath]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
       // this should always be the case
       if (name && password && account) {
         setIsBusy(true);
+        console.log("account.seed",account.seed)
+        // const suri=type==="ethereum"?account.seed+ethDerivePath:account.seed
         createAccountSuri(name, password, account.seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
@@ -61,12 +67,20 @@ function CreateAccount ({ className }: Props): React.ReactElement {
       return newGenesisHash === value;
     });
 
+    // if chain has chain type ethereum or is in nbackup eth list, set type to eth
+    console.log('opt1',(chain?.chainType === 'ethereum' || (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text))))
+    console.log('opt2',type==="ethereum" )
+    const currentType=type
+    console.log('type ',currentType)
     if (chain?.chainType === 'ethereum' || (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text))) {
       setType('ethereum');
-    }
+      // if type was set to type but new chain isnt, revert to sr25519
+    } else if (type==="ethereum"){
+      setType(DEFAULT_TYPE)
+    } 
 
     setGenesis(newGenesisHash);
-  }, [options]);
+  }, [options, type]);
 
   return (
     <>
@@ -92,6 +106,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                 options={options}
                 value={genesisHash}
               />
+              {type==="ethereum"?<CreateEthDerivationPath derivePath={ethDerivePath} onChange={setEthDerivePath}  />:null}
               <Mnemonic
                 onNextStep={_onNextStep}
                 seed={account.seed}

@@ -22,6 +22,9 @@ type CachedUnlocks = Record<string, number>;
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
+const ETH_DEFAULT_PATH = "m/44'/60'/0'/0/0";
+// const ETH_DEFAULT_PATH_2 = `/m/44'/60'/0'/0/0`;
+// console.log("ETH_DEFAULT_PATH",ETH_DEFAULT_PATH,ETH_DEFAULT_PATH_2)
 
 // a global registry to use internally
 const registry = new TypeRegistry();
@@ -296,11 +299,13 @@ export default class Extension {
     }
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type , customEthDerivationPath=ETH_DEFAULT_PATH}: RequestSeedCreate): ResponseSeedCreate {
     let seed = mnemonicGenerate(length);
-
+    console.log("SEEDCREATE ",type)
     if (type === 'ethereum') {
-      seed += '/m/44\'/60\'/0\'/0/0';
+      console.log(seed, customEthDerivationPath)
+      seed =`${seed}/${customEthDerivationPath}` //customEthDerivationPath;
+      console.log('CREATE SEED ',seed)
     }
 
     return {

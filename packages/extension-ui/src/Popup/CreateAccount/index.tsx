@@ -19,7 +19,6 @@ interface Props {
 }
 
 const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha', 'Moonriver'];
-console.log('669')
 function CreateAccount ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -46,7 +45,6 @@ function CreateAccount ({ className }: Props): React.ReactElement {
       if (name && password && account) {
         setIsBusy(true);
         console.log("account.seed",account.seed)
-        // const suri=type==="ethereum"?account.seed+ethDerivePath:account.seed
         createAccountSuri(name, password, account.seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
@@ -68,10 +66,6 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     });
 
     // if chain has chain type ethereum or is in nbackup eth list, set type to eth
-    console.log('opt1',(chain?.chainType === 'ethereum' || (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text))))
-    console.log('opt2',type==="ethereum" )
-    const currentType=type
-    console.log('type ',currentType)
     if (chain?.chainType === 'ethereum' || (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text))) {
       setType('ethereum');
       // if type was set to type but new chain isnt, revert to sr25519
@@ -82,6 +76,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     setGenesis(newGenesisHash);
   }, [options, type]);
 
+              //TODO remove derivation from mnemonic
   return (
     <>
       <HeaderWithSteps

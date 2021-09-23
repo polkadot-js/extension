@@ -115,11 +115,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     }
 
     const accountByAddress = findAccountByAddress(accounts, address);
-
     const recoded = (chain?.definition.chainType === 'ethereum' || accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
       ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
-
     setRecoded(recoded || defaultRecoded);
   }, [accounts, address, chain, givenType, settings]);
 
@@ -139,12 +137,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     setShowActionsMenu(false);
   }, [toggleActions]);
 
+  // Note: ethereum typed blockchain dont have the right chain.icon yet
   const theme = (
+    type === 'ethereum'
+        ? 'ethereum'
+        : 
     chain?.icon
       ? chain.icon
-      : type === 'ethereum'
-        ? 'ethereum'
-        : 'polkadot'
+        : 'substrate'
   ) as IconTheme;
 
   const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);

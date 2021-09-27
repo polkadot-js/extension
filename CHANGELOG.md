@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Ensure site authorization toggle is saved
+
+
 ## 0.40.3 Sep 18, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.

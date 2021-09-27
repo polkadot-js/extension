@@ -293,9 +293,8 @@ export default class State {
 
     assert(entry, `The source ${url} is not known`);
 
-    const newAllowState = !entry.isAllowed;
-
-    this.#authUrls[url].isAllowed = newAllowState;
+    this.#authUrls[url].isAllowed = !entry.isAllowed;
+    this.saveCurrentAuthList();
 
     return this.#authUrls;
   }

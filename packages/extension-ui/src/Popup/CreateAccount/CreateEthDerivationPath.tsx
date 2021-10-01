@@ -1,11 +1,12 @@
 // Copyright 2017-2021 @polkadot/app-accounts authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useTranslation from '@polkadot/extension-ui/hooks/useTranslation';
 import BN from 'bn.js';
 import React, { ReactNode, useEffect, useState } from 'react';
 
-import {InputWithLabel, Dropdown, Checkbox } from '../../components';
+import useTranslation from '@polkadot/extension-ui/hooks/useTranslation';
+
+import { Checkbox, Dropdown, InputWithLabel } from '../../components';
 
 // import { useToggle } from '@polkadot/react-hooks';
 
@@ -17,7 +18,7 @@ interface Props {
   onChange: (string: string) => void;
   // seedType: string;
   derivePath: string;
-  //deriveValidation: DeriveValidationOutput | undefined;
+  // deriveValidation: DeriveValidationOutput | undefined;
   // seed: string;
 }
 
@@ -26,8 +27,8 @@ export const ETH_DEFAULT_PATH = "m/44'/60'/0'/0/0";
 function CreateEthDerivationPath ({ className,
   derivePath,
   // deriveValidation,
-  onChange,
-  // seedType 
+  onChange
+  // seedType
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [addIndex, setAddIndex] = useState(0);
@@ -39,7 +40,7 @@ function CreateEthDerivationPath ({ className,
     }),
     value: i
   })));
-  const [useCustomPath, setUseCustomPath] =  useState(false);
+  const [useCustomPath, setUseCustomPath] = useState(false);
   const [useCustomIndex, setUseCustomIndex] = useState(false);
 
   // const errorIndex = useRef<Record<string, string>>({
@@ -48,8 +49,8 @@ function CreateEthDerivationPath ({ className,
   //   SOFT_NOT_ALLOWED: t<string>('Soft derivation paths are not allowed on ed25519'),
   //   WARNING_SLASH_PASSWORD: t<string>('Your password contains at least one "/" character. Disregard this warning if it is intended.')
   // });
-  function setCustomIndexText(inp:string){
-    setCustomIndex(new BN(inp))
+  function setCustomIndexText (inp: string) {
+    setCustomIndex(new BN(inp));
   }
 
   useEffect((): void => {
@@ -57,51 +58,51 @@ function CreateEthDerivationPath ({ className,
   }, [customIndex, onChange, useCustomIndex, addIndex]);
 
   return (
-          <>
-            <div className='saveToggle'>
-              <Checkbox
-                    checked={useCustomIndex}
-                    label={t<string>('Use custom address index')}
-                    onChange={setUseCustomIndex}
-                />
-            </div>
-            {useCustomIndex
-              ? (
-                <InputWithLabel
-                    label={t<string>('Custom index')}
-                    onChange={setCustomIndexText}
-                    type='text'
-                    className={className}
-                />
-              )
-              : (
-                <Dropdown
-                className={'derivation-path'}
-                label={t<string>('address index')}
-                onChange={setAddIndex}
-                options={addressList}
-                value={addIndex}
-              />
-              )}
-            <div className='saveToggle'>
-              <Checkbox
-                    checked={useCustomPath}
-                    label={t<string>('Use custom derivation index')}
-                    onChange={setUseCustomPath}
-                />
-            </div>
-            {useCustomPath
-              ? (
-                <InputWithLabel
-                    label={t<string>('secret derivation path')}
-                    onChange={onChange}
-                    type='text'
-                    value={derivePath}
-                    className={className}
-                />
-              )
-              : null}
-          </>
+    <>
+      <div className='saveToggle'>
+        <Checkbox
+          checked={useCustomIndex}
+          label={t<string>('Use custom address index')}
+          onChange={setUseCustomIndex}
+        />
+      </div>
+      {useCustomIndex
+        ? (
+          <InputWithLabel
+            className={className}
+            label={t<string>('Custom index')}
+            onChange={setCustomIndexText}
+            type='text'
+          />
+        )
+        : (
+          <Dropdown
+            className={'derivation-path'}
+            label={t<string>('address index')}
+            onChange={setAddIndex}
+            options={addressList}
+            value={addIndex}
+          />
+        )}
+      <div className='saveToggle'>
+        <Checkbox
+          checked={useCustomPath}
+          label={t<string>('Use custom derivation index')}
+          onChange={setUseCustomPath}
+        />
+      </div>
+      {useCustomPath
+        ? (
+          <InputWithLabel
+            className={className}
+            label={t<string>('secret derivation path')}
+            onChange={onChange}
+            type='text'
+            value={derivePath}
+          />
+        )
+        : null}
+    </>
   );
 }
 

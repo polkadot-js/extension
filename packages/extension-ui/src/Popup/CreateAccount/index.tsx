@@ -19,6 +19,7 @@ interface Props {
 }
 
 const ETHEREUM_CHAIN_NAMES = ['Moonbase Alpha', 'Moonriver'];
+
 function CreateAccount ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -32,19 +33,19 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const [genesisHash, setGenesis] = useState('');
 
   useEffect((): void => {
-    console.log("TYPE",type)
-    console.log("ethDerivePath",ethDerivePath)
-    createSeed(undefined, type,ethDerivePath)
+    console.log('TYPE', type);
+    console.log('ethDerivePath', ethDerivePath);
+    createSeed(undefined, type, ethDerivePath)
       .then(setAccount)
       .catch((error: Error) => console.error(error));
-  }, [type,ethDerivePath]);
+  }, [type, ethDerivePath]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
       // this should always be the case
       if (name && password && account) {
         setIsBusy(true);
-        console.log("account.seed",account.seed)
+        console.log('account.seed', account.seed);
         createAccountSuri(name, password, account.seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
@@ -69,14 +70,14 @@ function CreateAccount ({ className }: Props): React.ReactElement {
     if (chain?.chainType === 'ethereum' || (chain && ETHEREUM_CHAIN_NAMES.includes(chain?.text))) {
       setType('ethereum');
       // if type was set to type but new chain isnt, revert to sr25519
-    } else if (type==="ethereum"){
-      setType(DEFAULT_TYPE)
-    } 
+    } else if (type === 'ethereum') {
+      setType(DEFAULT_TYPE);
+    }
 
     setGenesis(newGenesisHash);
   }, [options, type]);
 
-              //TODO remove derivation from mnemonic
+  // TODO remove derivation from mnemonic
   return (
     <>
       <HeaderWithSteps
@@ -101,7 +102,12 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                 options={options}
                 value={genesisHash}
               />
-              {type==="ethereum"?<CreateEthDerivationPath derivePath={ethDerivePath} onChange={setEthDerivePath}  />:null}
+              {type === 'ethereum'
+                ? <CreateEthDerivationPath
+                  derivePath={ethDerivePath}
+                  onChange={setEthDerivePath}
+                />
+                : null}
               <Mnemonic
                 onNextStep={_onNextStep}
                 seed={account.seed}

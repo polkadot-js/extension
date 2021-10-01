@@ -118,6 +118,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     const recoded = (chain?.definition.chainType === 'ethereum' || accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
       ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
+
     setRecoded(recoded || defaultRecoded);
   }, [accounts, address, chain, givenType, settings]);
 
@@ -140,10 +141,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   // Note: ethereum typed blockchain dont have the right chain.icon yet
   const theme = (
     type === 'ethereum'
-        ? 'ethereum'
-        : 
-    chain?.icon
-      ? chain.icon
+      ? 'ethereum'
+      : chain?.icon
+        ? chain.icon
         : 'substrate'
   ) as IconTheme;
 

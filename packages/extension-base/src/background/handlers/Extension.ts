@@ -299,13 +299,15 @@ export default class Extension {
     }
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type , customEthDerivationPath=ETH_DEFAULT_PATH}: RequestSeedCreate): ResponseSeedCreate {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type, customEthDerivationPath = ETH_DEFAULT_PATH }: RequestSeedCreate): ResponseSeedCreate {
     let seed = mnemonicGenerate(length);
-    console.log("SEEDCREATE ",type)
+
+    console.log('SEEDCREATE ', type);
+
     if (type === 'ethereum') {
-      console.log(seed, customEthDerivationPath)
-      seed =`${seed}/${customEthDerivationPath}` //customEthDerivationPath;
-      console.log('CREATE SEED ',seed)
+      console.log(seed, customEthDerivationPath);
+      seed = `${seed}/${customEthDerivationPath}`; // customEthDerivationPath;
+      console.log('CREATE SEED ', seed);
     }
 
     return {

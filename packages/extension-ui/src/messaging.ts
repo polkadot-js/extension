@@ -131,7 +131,7 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createSeed (length?: SeedLengths, type?: KeypairType, customEthDerivationPath?:string): Promise<{ address: string; seed: string }> {
+export async function createSeed (length?: SeedLengths, type?: KeypairType, customEthDerivationPath?: string): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, type, customEthDerivationPath });
 }
 

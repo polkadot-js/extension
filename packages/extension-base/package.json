@@ -9,7 +9,7 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.15.4",
-    "@polkadot/api": "^6.3.2-15",
+    "@polkadot/api": "^6.3.2-17",
     "@polkadot/extension-dapp": "^0.40.4-0",
     "@polkadot/extension-inject": "^0.40.4-0",
     "@polkadot/keyring": "^7.5.1",

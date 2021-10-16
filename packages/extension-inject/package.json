@@ -11,7 +11,7 @@
     "@babel/runtime": "^7.15.4"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.157",
+    "@types/chrome": "^0.0.159",
     "@types/firefox-webext-browser": "^82.0.1"
   },
   "peerDependencies": {

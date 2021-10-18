@@ -218,7 +218,7 @@ export default class State {
         resolve(result);
       }
     };
-  }
+  };
 
   private saveCurrentAuthList () {
     localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
@@ -240,7 +240,7 @@ export default class State {
         resolve(result);
       }
     };
-  }
+  };
 
   private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
     const complete = (): void => {
@@ -258,7 +258,7 @@ export default class State {
         resolve(result);
       }
     };
-  }
+  };
 
   private stripUrl (url: string): string {
     assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);

@@ -3,6 +3,8 @@
 
 // Runs in the extension background, handling all keyring access
 
+import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
+
 import handlers from '@polkadot/extension-base/background/handlers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
@@ -21,7 +23,7 @@ chrome.runtime.onConnect.addListener((port): void => {
   assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
   // message and disconnect handlers
-  port.onMessage.addListener((data) => handlers(data, port));
+  port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
   port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
 });
 

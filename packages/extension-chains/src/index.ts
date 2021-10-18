@@ -36,17 +36,13 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     tokenSymbol
   }));
 
-  const isUnknown = genesisHash === '0x';
-  let hasMetadata = false;
+  const hasMetadata = !!metaCalls && !isPartial;
 
-  if (metaCalls && !isPartial) {
-    hasMetadata = true;
-
-    const metadata = new Metadata(registry, base64Decode(metaCalls));
-    const signedExtensions = metadata.asLatest.extrinsic.signedExtensions.toJSON() as string[];
-
-    registry.setMetadata(metadata, signedExtensions, userExtensions);
+  if (hasMetadata) {
+    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)), undefined, userExtensions);
   }
+
+  const isUnknown = genesisHash === '0x';
 
   const result = {
     definition,

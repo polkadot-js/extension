@@ -1,6 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 
 import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
@@ -14,8 +15,7 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 
   if (data.id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleResponse(data as any);
+    handleResponse(data as TransportRequestMessage<keyof RequestSignatures>);
   } else {
     console.error('Missing id for response.');
   }

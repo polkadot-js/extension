@@ -19,6 +19,9 @@ import { buildHierarchy } from '../../util/buildHierarchy';
 import AddressDropdown from './AddressDropdown';
 import Derive from '.';
 
+// For this file, there are a lot of them
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 configure({ adapter: new Adapter() });
 

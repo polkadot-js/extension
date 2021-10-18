@@ -32,7 +32,7 @@ export default class PostMessageProvider implements InjectedProvider {
   readonly #eventemitter: EventEmitter;
 
   // Whether or not the actual extension background provider is connected
-  #isConnected = false
+  #isConnected = false;
 
   // Subscription IDs are (historically) not guaranteed to be globally unique;
   // only unique for a given subscription method; which is why we identify

@@ -1,7 +1,7 @@
 {
   "name": "@polkadot/extension-compat-metamask",
   "description": "Metamask compatibility layer",
-  "version": "0.40.4-3",
+  "version": "0.40.4-4",
   "type": "module",
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "license": "Apache-2",
@@ -10,7 +10,7 @@
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.40.4-3",
+    "@polkadot/extension-inject": "^0.40.4-4",
     "@polkadot/util": "^7.5.1",
     "web3": "^1.6.0"
   },

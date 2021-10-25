@@ -1,7 +1,7 @@
 {
   "name": "@polkadot/extension-compat-metamask",
   "license": "Apache-2",
-  "version": "0.40.4-5",
+  "version": "0.40.4-6",
   "type": "module",
   "description": "Metamask compatibility layer",
   "main": "index.js",
@@ -19,7 +19,7 @@
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.40.4-5",
+    "@polkadot/extension-inject": "^0.40.4-6",
     "@polkadot/util": "^7.5.1",
     "web3": "^1.6.0"
   },

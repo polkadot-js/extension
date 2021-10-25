@@ -8,7 +8,6 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-compat-metamask",
-  "private": false,
   "repository": {
     "directory": "packages/extension-compat-metamask",
     "type": "git",
@@ -16,21 +15,17 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.40.4-7",
+  "version": "0.40.4",
   "main": "index.js",
-  "bin": {},
   "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.40.4-7",
-    "@polkadot/util": "^7.5.1",
+    "@polkadot/extension-inject": "^0.40.4",
+    "@polkadot/util": "^7.6.1",
     "web3": "^1.6.0"
   },
-  "devDependencies": {},
-  "optionalDependencies": {},
   "peerDependencies": {
     "@polkadot/util": "*"
-  },
-  "resolutions": {}
+  }
 }

@@ -8,6 +8,7 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-base",
+  "private": false,
   "repository": {
     "directory": "packages/extension-base",
     "type": "git",
@@ -17,7 +18,6 @@
   "type": "module",
   "version": "0.40.4",
   "main": "index.js",
-  "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@polkadot/api": "^6.5.1",

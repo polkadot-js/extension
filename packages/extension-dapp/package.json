@@ -8,6 +8,7 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-dapp",
+  "private": false,
   "repository": {
     "directory": "packages/extension-dapp",
     "type": "git",
@@ -17,7 +18,6 @@
   "type": "module",
   "version": "0.40.4",
   "main": "index.js",
-  "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@polkadot/extension-inject": "^0.40.4",

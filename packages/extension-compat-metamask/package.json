@@ -1,11 +1,20 @@
 {
   "name": "@polkadot/extension-compat-metamask",
-  "description": "Metamask compatibility layer",
+  "license": "Apache-2",
   "version": "0.40.4-5",
   "type": "module",
-  "author": "Jaco Greeff <jacogr@gmail.com>",
-  "license": "Apache-2",
+  "description": "Metamask compatibility layer",
   "main": "index.js",
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "maintainers": [],
+  "contributors": [],
+  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "homepage": "https://github.com/polkadot-js/extension#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polkadot-js/extension.git",
+    "directory": "packages/extension-compat-metamask"
+  },
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.15.4",

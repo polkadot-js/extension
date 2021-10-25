@@ -1,20 +1,24 @@
 {
-  "name": "@polkadot/extension",
-  "license": "Apache-2",
-  "version": "0.40.4-6",
-  "type": "module",
-  "description": "A sample signer extension for the @polkadot/api",
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "maintainers": [],
-  "contributors": [],
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "homepage": "https://github.com/polkadot-js/extension#readme",
+  "contributors": [],
+  "description": "A sample signer extension for the @polkadot/api",
+  "engines": {},
+  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension#readme",
+  "license": "Apache-2",
+  "maintainers": [],
+  "name": "@polkadot/extension",
+  "private": false,
   "repository": {
+    "directory": "packages/extension",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git",
-    "directory": "packages/extension"
+    "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
+  "type": "module",
+  "version": "0.40.4-6",
+  "bin": {},
+  "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@polkadot/extension-base": "^0.40.4-6",
@@ -22,8 +26,8 @@
     "@polkadot/extension-ui": "^0.40.4-6"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.63.5",
-    "babel-loader": "^8.2.2",
+    "@polkadot/dev": "^0.63.8",
+    "babel-loader": "^8.2.3",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^9.0.1",
@@ -36,8 +40,11 @@
     "stream-browserify": "^3.0.0",
     "thread-loader": "^3.0.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.58.2",
+    "webpack": "^5.59.1",
     "webpack-cli": "^4.9.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
-  }
+  },
+  "optionalDependencies": {},
+  "peerDependencies": {},
+  "resolutions": {}
 }

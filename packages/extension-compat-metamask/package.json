@@ -1,21 +1,25 @@
 {
-  "name": "@polkadot/extension-compat-metamask",
-  "license": "Apache-2",
-  "version": "0.40.4-6",
-  "type": "module",
-  "description": "Metamask compatibility layer",
-  "main": "index.js",
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "maintainers": [],
-  "contributors": [],
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "homepage": "https://github.com/polkadot-js/extension#readme",
+  "contributors": [],
+  "description": "Metamask compatibility layer",
+  "engines": {},
+  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-compat-metamask#readme",
+  "license": "Apache-2",
+  "maintainers": [],
+  "name": "@polkadot/extension-compat-metamask",
+  "private": false,
   "repository": {
+    "directory": "packages/extension-compat-metamask",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git",
-    "directory": "packages/extension-compat-metamask"
+    "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
+  "type": "module",
+  "version": "0.40.4-6",
+  "main": "index.js",
+  "bin": {},
+  "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@metamask/detect-provider": "^1.2.0",
@@ -23,7 +27,10 @@
     "@polkadot/util": "^7.5.1",
     "web3": "^1.6.0"
   },
+  "devDependencies": {},
+  "optionalDependencies": {},
   "peerDependencies": {
     "@polkadot/util": "*"
-  }
+  },
+  "resolutions": {}
 }

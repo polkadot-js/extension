@@ -1,12 +1,53 @@
 {
-  "repository": "https://github.com/polkadot-js/extension",
   "author": "Jaco Greeff <jacogr@gmail.com>",
+  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "engines": {},
+  "homepage": "https://github.com/polkadot-js/extension#readme",
   "license": "Apache-2",
-  "version": "0.40.4-6",
+  "packageManager": "yarn@3.0.1",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polkadot-js/extension.git"
+  },
+  "sideEffects": false,
+  "version": "0.40.4-6",
   "workspaces": [
     "packages/*"
   ],
+  "bin": {},
+  "scripts": {
+    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
+    "build:extra": "yarn build:i18n && yarn build:ui",
+    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
+    "build:release": "polkadot-ci-ghact-build",
+    "build:rollup": "polkadot-exec-rollup --config",
+    "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
+    "build:zip": "yarn build:zip:dst && yarn build:zip:src",
+    "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
+    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
+    "clean": "polkadot-dev-clean-build",
+    "lint": "polkadot-dev-run-lint",
+    "lint:css": "stylelint './packages/**/src/**/*.tsx'",
+    "postinstall": "polkadot-dev-yarn-only",
+    "start": "yarn watch",
+    "test": "polkadot-dev-run-test --detectOpenHandles",
+    "test:one": "polkadot-dev-run-test --detectOpenHandles",
+    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@polkadot/dev": "^0.63.8",
+    "@types/jest": "^27.0.2",
+    "i18next-scanner": "^3.1.0",
+    "sinon-chrome": "^3.0.1",
+    "stylelint": "^13.13.1",
+    "stylelint-config-recommended": "^5.0.0",
+    "stylelint-config-styled-components": "^0.1.1"
+  },
+  "optionalDependencies": {},
+  "peerDependencies": {},
   "resolutions": {
     "@polkadot/api": "^6.4.2",
     "@polkadot/keyring": "^7.5.1",
@@ -18,35 +59,5 @@
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.4.4"
-  },
-  "scripts": {
-    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
-    "build:extra": "yarn build:i18n && yarn build:ui",
-    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
-    "build:release": "polkadot-ci-ghact-build",
-    "build:rollup": "polkadot-exec-rollup --config",
-    "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
-    "build:zip": "yarn build:zip:dst && yarn build:zip:src",
-    "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
-    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
-    "lint": "polkadot-dev-run-lint",
-    "lint:css": "stylelint './packages/**/src/**/*.tsx'",
-    "clean": "polkadot-dev-clean-build",
-    "postinstall": "polkadot-dev-yarn-only",
-    "start": "yarn watch",
-    "test": "polkadot-dev-run-test --detectOpenHandles",
-    "test:one": "polkadot-dev-run-test --detectOpenHandles",
-    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.15.8",
-    "@polkadot/dev": "^0.63.5",
-    "@types/jest": "^27.0.2",
-    "i18next-scanner": "^3.1.0",
-    "sinon-chrome": "^3.0.1",
-    "stylelint": "^13.13.1",
-    "stylelint-config-recommended": "^5.0.0",
-    "stylelint-config-styled-components": "^0.1.1"
-  },
-  "packageManager": "yarn@3.0.1"
+  }
 }

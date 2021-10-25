@@ -1,29 +1,35 @@
 {
-  "name": "@polkadot/extension-inject",
-  "license": "Apache-2",
-  "version": "0.40.4-6",
-  "type": "module",
-  "description": "A generic injector (usable to any extension), that populates the base exposed interfaces to be used by dapps.",
-  "main": "index.js",
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "maintainers": [],
-  "contributors": [],
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "homepage": "https://github.com/polkadot-js/extension#readme",
+  "contributors": [],
+  "description": "A generic injector (usable to any extension), that populates the base exposed interfaces to be used by dapps.",
+  "engines": {},
+  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-inject#readme",
+  "license": "Apache-2",
+  "maintainers": [],
+  "name": "@polkadot/extension-inject",
+  "private": false,
   "repository": {
+    "directory": "packages/extension-inject",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git",
-    "directory": "packages/extension-inject"
+    "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
+  "type": "module",
+  "version": "0.40.4-6",
+  "main": "index.js",
+  "bin": {},
+  "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.159",
+    "@types/chrome": "^0.0.161",
     "@types/firefox-webext-browser": "^82.0.1"
   },
+  "optionalDependencies": {},
   "peerDependencies": {
     "@polkadot/api": "*"
-  }
+  },
+  "resolutions": {}
 }

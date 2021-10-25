@@ -1,20 +1,24 @@
 {
-  "name": "@polkadot/extension-ui",
-  "license": "Apache-2",
-  "version": "0.40.4-6",
-  "type": "module",
-  "description": "A sample signer extension for the @polkadot/api",
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "maintainers": [],
-  "contributors": [],
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "homepage": "https://github.com/polkadot-js/extension#readme",
+  "contributors": [],
+  "description": "A sample signer extension for the @polkadot/api",
+  "engines": {},
+  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-ui#readme",
+  "license": "Apache-2",
+  "maintainers": [],
+  "name": "@polkadot/extension-ui",
+  "private": false,
   "repository": {
+    "directory": "packages/extension-ui",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git",
-    "directory": "packages/extension-ui"
+    "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
+  "type": "module",
+  "version": "0.40.4-6",
+  "bin": {},
+  "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
@@ -33,7 +37,7 @@
     "@polkadot/util": "^7.5.1",
     "@polkadot/util-crypto": "^7.5.1",
     "file-saver": "^2.0.5",
-    "i18next": "^21.3.2",
+    "i18next": "^21.3.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.4.2",
@@ -41,22 +45,25 @@
     "react-is": "^17.0.2",
     "react-router": "^5.2.1",
     "react-router-dom": "^5.3.0",
-    "styled-components": "^5.3.1"
+    "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@types/bn.js": "^4.11.6",
-    "@types/enzyme": "^3.10.9",
+    "@types/enzyme": "^3.10.10",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/file-saver": "^2.0.3",
     "@types/react-copy-to-clipboard": "^5.0.2",
-    "@types/react-dom": "^17.0.9",
+    "@types/react-dom": "^17.0.10",
     "@types/react-router": "^5.1.17",
     "@types/react-router-dom": "^5.3.1",
     "@types/sinon-chrome": "^2.2.11",
     "@types/styled-components": "^5.1.15",
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.5",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "sinon-chrome": "^3.0.1"
-  }
+  },
+  "optionalDependencies": {},
+  "peerDependencies": {},
+  "resolutions": {}
 }

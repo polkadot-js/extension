@@ -8,7 +8,6 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension",
-  "private": false,
   "repository": {
     "directory": "packages/extension",
     "type": "git",
@@ -16,17 +15,16 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.40.4-7",
-  "bin": {},
+  "version": "0.40.4",
   "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
-    "@polkadot/extension-base": "^0.40.4-7",
-    "@polkadot/extension-inject": "^0.40.4-7",
-    "@polkadot/extension-ui": "^0.40.4-7"
+    "@polkadot/extension-base": "^0.40.4",
+    "@polkadot/extension-inject": "^0.40.4",
+    "@polkadot/extension-ui": "^0.40.4"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.63.8",
+    "@polkadot/dev": "^0.63.9",
     "babel-loader": "^8.2.3",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
@@ -43,8 +41,5 @@
     "webpack": "^5.59.1",
     "webpack-cli": "^4.9.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
-  },
-  "optionalDependencies": {},
-  "peerDependencies": {},
-  "resolutions": {}
+  }
 }

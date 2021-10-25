@@ -1,10 +1,15 @@
 # CHANGELOG
 
-## master
+## 0.40.4 Oct 25, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
 - Ensure site authorization toggle is saved
+- Optimize metadata conversion process
+- Bump `@polkadot/util` to 7.6.1
+- Bump `@polkadot/api` to 6.5.1
 
 
 ## 0.40.3 Sep 18, 2021

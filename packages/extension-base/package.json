@@ -8,7 +8,6 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-base",
-  "private": false,
   "repository": {
     "directory": "packages/extension-base",
     "type": "git",
@@ -16,21 +15,16 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.40.4-7",
+  "version": "0.40.4",
   "main": "index.js",
-  "bin": {},
   "scripts": {},
   "dependencies": {
     "@babel/runtime": "^7.15.4",
-    "@polkadot/api": "^6.4.2",
-    "@polkadot/extension-dapp": "^0.40.4-7",
-    "@polkadot/extension-inject": "^0.40.4-7",
-    "@polkadot/keyring": "^7.5.1",
-    "@polkadot/phishing": "^0.6.381",
-    "@polkadot/ui-keyring": "^0.86.2-0"
-  },
-  "devDependencies": {},
-  "optionalDependencies": {},
-  "peerDependencies": {},
-  "resolutions": {}
+    "@polkadot/api": "^6.5.1",
+    "@polkadot/extension-dapp": "^0.40.4",
+    "@polkadot/extension-inject": "^0.40.4",
+    "@polkadot/keyring": "^7.6.1",
+    "@polkadot/phishing": "^0.6.382",
+    "@polkadot/ui-keyring": "^0.86.2"
+  }
 }

@@ -8,7 +8,6 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-inject",
-  "private": false,
   "repository": {
     "directory": "packages/extension-inject",
     "type": "git",
@@ -23,7 +22,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.161",
-    "@types/firefox-webext-browser": "^82.0.1"
+    "@types/firefox-webext-browser": "^94.0.0"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

@@ -8,7 +8,6 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension",
-  "private": false,
   "repository": {
     "directory": "packages/extension",
     "type": "git",
@@ -24,7 +23,7 @@
     "@polkadot/extension-ui": "^0.40.5-0"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.63.9",
+    "@polkadot/dev": "^0.63.10",
     "babel-loader": "^8.2.3",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
@@ -32,13 +31,13 @@
     "crypto-browserify": "^3.12.0",
     "extract-loader": "^5.1.0",
     "file-loader": "^6.2.0",
-    "html-loader": "^2.1.2",
+    "html-loader": "^3.0.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "thread-loader": "^3.0.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.59.1",
+    "webpack": "^5.60.0",
     "webpack-cli": "^4.9.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
   }

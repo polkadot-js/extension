@@ -8,7 +8,6 @@
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-chains",
-  "private": false,
   "repository": {
     "directory": "packages/extension-chains",
     "type": "git",

@@ -11,8 +11,11 @@ Accounts page, shows the list of all accounts an their balances which you have c
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
+You can transfer funds with the extention, first add a recepient, you can also choose recepient from you accounts list to transfer between your accounts:
 
-You can transfer funds with the extention, it also shows appropriate alerts based on your selected amount to transfer. you can choose Safe Max to withdraw all from your account while still keep your account active.
+![accounts page screenshot](docs/pjp/addRcepient.PNG)
+
+ choose amount you want to transfer, extension shows appropriate alerts based on your selected amount. you can choose Safe Max to withdraw all from your account while still keep your account active.
 
 ![accounts page screenshot](docs/pjp/transferFunds.PNG)
 

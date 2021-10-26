@@ -1,8 +1,10 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
+import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
 import useTranslation from '../../hooks/useTranslation';
 
@@ -15,6 +17,13 @@ interface Props {
 function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
+  const text = useMemo(
+    () => isAscii(bytes)
+      ? u8aToString(u8aUnwrapBytes(bytes))
+      : bytes,
+    [bytes]
+  );
+
   return (
     <table className={className}>
       <tbody>
@@ -24,7 +33,7 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
         </tr>
         <tr>
           <td className='label'>{t<string>('bytes')}</td>
-          <td className='data'>{bytes}</td>
+          <td className='data'>{text}</td>
         </tr>
       </tbody>
     </table>

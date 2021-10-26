@@ -27,7 +27,6 @@
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
     "clean": "polkadot-dev-clean-build",
     "lint": "polkadot-dev-run-lint",
-    "lint:css": "stylelint './packages/**/src/**/*.tsx'",
     "postinstall": "polkadot-dev-yarn-only",
     "start": "yarn watch",
     "test": "polkadot-dev-run-test --detectOpenHandles",
@@ -39,10 +38,7 @@
     "@polkadot/dev": "^0.63.10",
     "@types/jest": "^27.0.2",
     "i18next-scanner": "^3.1.0",
-    "sinon-chrome": "^3.0.1",
-    "stylelint": "^14.0.0",
-    "stylelint-config-recommended": "^6.0.0",
-    "stylelint-config-styled-components": "^0.1.1"
+    "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
     "@polkadot/api": "^6.5.1",

@@ -23,6 +23,10 @@ In transaction confirmation page, you can confirm the transaction to be send to 
 
 ![transfer funds page screenshot](docs/pjp/confirmTransaction.PNG)
 
+After a little while, depend on the network response time, transaction will be done and you see the following page and your balance(s) will be updated.
+
+![transfer funds page screenshot](docs/pjp/transactionDone.PNG)
+
 
 ## Installation (Development version)
 

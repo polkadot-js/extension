@@ -47,7 +47,7 @@ After a little while, depend on the network response time, transaction will be d
 
 ![transaction done page screenshot](docs/pjp/transactionDone.PNG)
 
-you can see the transaction histroy from the account page like the following, which shows the transaction details status, if failed, fail reason, and a link to subscan for more info.
+you can see the transaction histroy from the account page like the following, which shows the transaction details, status, if failed, fail reason, and a link to subscan for more info.
 
 ![transaction history page screenshot](docs/pjp/transactionHistory.PNG)
 

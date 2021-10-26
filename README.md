@@ -12,6 +12,11 @@ Accounts page, shows the list of all accounts an their balances which you have c
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
 
+You can transfer funds with the extention, it also shows appropriate alerts based on your selected amount to transfer. you can choose Safe Max to withdraw all from your account while still keep your account active.
+
+![accounts page screenshot](docs/pjp/transferFunds.PNG)
+
+
 ## Installation (Development version)
 
 Steps to build the extension and view your changes in a browser:

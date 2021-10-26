@@ -7,7 +7,8 @@ It is based on polkadot js extension, which also injects a [@polkadot/api](https
 
 ## How To
 
-Accounts page:
+Accounts page, show the list of accounts which you have created/imported on different polkadot blockhian/parachains.
+
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
 

@@ -71,6 +71,15 @@ export async function editAccount (address: string, name: string): Promise<boole
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
+// add by kami TODOBalance
+export async function updateBalance (address: string, balance: string, chainName: string): Promise<boolean> {
+  return sendMessage('pri(accounts.update)', { address, balance, chainName });
+}
+
+export async function updateTransactionHistory (address: string, amount: string, coin: string, fee: string, hash: string, status: string, to: string, txHistory: string | null): Promise<boolean> {
+  return sendMessage('pri(accounts.updateTxHistory)', { address, amount, coin, fee, hash, status, to, txHistory });
+}
+
 export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }

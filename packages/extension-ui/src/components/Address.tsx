@@ -1,13 +1,13 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line simple-import-sort/imports
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
-
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
@@ -20,16 +20,21 @@ import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
 import useMetadata from '../hooks/useMetadata';
-import useOutsideClick from '../hooks/useOutsideClick';
+// import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
+import Balance from './hackathonComponents/Balance';
 import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';
 import Svg from './Svg';
+
+// added by kami
+import { ClickAwayListener, Grid } from '@mui/material';
+import { accountsBalanceType } from '../util/HackathonUtilFiles/hackatonUtils';
 
 export interface Props {
   actions?: React.ReactNode;
@@ -45,6 +50,9 @@ export interface Props {
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
+  balances?: accountsBalanceType[] | null;
+  setBalances?: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
+  showBalance?: boolean;
 }
 
 interface Recoded {
@@ -93,19 +101,22 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ actions, address, balances, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, setBalances, showBalance, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
-
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
 
-  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+  // added by Kami
+  const [openMenu, setOpenMenu] = useState(false);
+
+  // TODO: use outside click is disabled Temporarily
+  // useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
     if (!address) {
@@ -116,7 +127,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
     const accountByAddress = findAccountByAddress(accounts, address);
 
-    const recoded = (chain?.definition.chainType === 'ethereum' || accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
+    const recoded = (chain?.definition.chainType === 'ethereum' ||
+      accountByAddress?.type === 'ethereum' ||
+      (!accountByAddress && givenType === 'ethereum'))
       ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
       : recodeAddress(address, accounts, chain, settings);
 
@@ -147,7 +160,10 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
         : 'polkadot'
   ) as IconTheme;
 
-  const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
+  const _onClick = useCallback((): void => {
+    setOpenMenu(!openMenu);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
   const _toggleVisibility = useCallback(
     (): void => {
@@ -186,6 +202,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   };
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
+  const handleClickAway = useCallback((): void => {
+    setOpenMenu(false);
+  }, []);
 
   return (
     <div className={className}>
@@ -210,7 +229,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                   <div
                     className='parentName'
                     data-field='parent'
-                    title = {parentNameSuri}
+                    title={parentNameSuri}
                   >
                     {parentNameSuri}
                   </div>
@@ -270,204 +289,225 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
           </div>
         </div>
         {actions && (
-          <>
-            <div
-              className='settings'
-              onClick={_onClick}
-            >
-              <Svg
-                className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
-                src={details}
-              />
-            </div>
-            {showActionsMenu && (
-              <Menu
-                className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
-                reference={actionsRef}
+          <ClickAwayListener onClickAway={handleClickAway}>
+            <Grid>
+              <div
+                className='settings'
+                onClick={_onClick}
               >
-                {actions}
-              </Menu>
-            )}
-          </>
+                <Svg
+                  className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
+                  src={details}
+                />
+              </div>
+              {/* {showActionsMenu && ( */}
+              <div>
+                {openMenu
+                  ? (<Menu
+                    className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
+                    reference={actionsRef}
+                     >
+                    {actions}
+                  </Menu>)
+                  : ''
+                }
+              </div>
+
+              {/* )} */}
+            </Grid>
+          </ClickAwayListener>
+
         )}
       </div>
+      {
+        (formatted || address) && showBalance
+          ? <Balance
+            address={address}
+            balances={balances}
+            chain={chain}
+            formattedAddress={formatted || address}
+            givenType={givenType}
+            name={name || account?.name || t('<unknown>')}
+            setBalances={setBalances}
+          />
+          : ''
+      }
       {children}
     </div>
   );
 }
 
 export default styled(Address)(({ theme }: ThemeProps) => `
-  background: ${theme.accountBackground};
-  border: 1px solid ${theme.boxBorderColor};
-  box-sizing: border-box;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  position: relative;
+        background: ${theme.accountBackground};
+        border: 1px solid ${theme.boxBorderColor};
+        box-sizing: border-box;
+        border-radius: 4px;
+        margin-bottom: 8px;
+        position: relative;
 
-  .banner {
-    font-size: 12px;
-    line-height: 16px;
-    position: absolute;
-    top: 0;
+        .banner {
+          font - size: 12px;
+        line-height: 16px;
+        position: absolute;
+        top: 0;
 
-    &.chain {
-      background: ${theme.primaryColor};
-      border-radius: 0 0 0 10px;
-      color: white;
-      padding: 0.1rem 0.5rem 0.1rem 0.75rem;
-      right: 0;
-      z-index: 1;
+        &.chain {
+          background: ${theme.primaryColor};
+        border-radius: 0 0 0 10px;
+        color: white;
+        padding: 0.1rem 0.5rem 0.1rem 0.75rem;
+        right: 0;
+        z-index: 1;
     }
   }
 
-  .addressDisplay {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
+        .addressDisplay {
+          display: flex;
+        justify-content: space-between;
+        position: relative;
 
-    .svg-inline--fa {
-      width: 14px;
-      height: 14px;
-      margin-right: 10px;
-      color: ${theme.accountDotsIconColor};
-      &:hover {
-        color: ${theme.labelColor};
+        .svg-inline--fa {
+          width: 14px;
+        height: 14px;
+        margin-right: 10px;
+        color: ${theme.accountDotsIconColor};
+        &:hover {
+          color: ${theme.labelColor};
         cursor: pointer;
       }
     }
-
-    .hiddenIcon, .visibleIcon {
-      position: absolute;
-      right: 2px;
-      top: -18px;
+        .hiddenIcon, .visibleIcon {
+          position: absolute;
+        right: 2px;
+        top: -18px;
     }
 
-    .hiddenIcon {
-      color: ${theme.errorColor};
-      &:hover {
-        color: ${theme.accountDotsIconColor};
+        .hiddenIcon {
+          color: ${theme.errorColor};
+        &:hover {
+          color: ${theme.accountDotsIconColor};
       }
     }
   }
 
-  .externalIcon, .hardwareIcon {
-    margin-right: 0.3rem;
-    color: ${theme.labelColor};
-    width: 0.875em;
+        .externalIcon, .hardwareIcon {
+          margin - right: 0.3rem;
+        color: ${theme.labelColor};
+        width: 0.875em;
   }
 
-  .identityIcon {
-    margin-left: 15px;
-    margin-right: 10px;
+        .identityIcon {
+          margin - left: 15px;
+        margin-right: 10px;
 
-    & svg {
-      width: 50px;
-      height: 50px;
+        & svg {
+          width: 50px;
+        height: 50px;
     }
   }
 
-  .info {
-    width: 100%;
+        .info {
+          width: 100%;
   }
 
-  .infoRow {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    height: 72px;
-    border-radius: 4px;
+        .infoRow {
+          display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        height: 72px;
+        border-radius: 4px;
   }
 
-  img {
-    max-width: 50px;
-    max-height: 50px;
-    border-radius: 50%;
+        img {
+          max - width: 50px;
+        max-height: 50px;
+        border-radius: 50%;
   }
 
-  .name {
-    font-size: 16px;
-    line-height: 22px;
-    margin: 2px 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 300px;
-    white-space: nowrap;
+        .name {
+          font - size: 16px;
+        line-height: 22px;
+        margin: 2px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 300px;
+        white-space: nowrap;
 
-    &.displaced {
-      padding-top: 10px;
+        &.displaced {
+          padding - top: 10px;
     }
   }
 
-  .parentName {
-    color: ${theme.labelColor};
-    font-size: ${theme.inputLabelFontSize};
-    line-height: 14px;
-    overflow: hidden;
-    padding: 0.25rem 0 0 0.8rem;
-    text-overflow: ellipsis;
-    width: 270px;
-    white-space: nowrap;
+        .parentName {
+          color: ${theme.labelColor};
+        font-size: ${theme.inputLabelFontSize};
+        line-height: 14px;
+        overflow: hidden;
+        padding: 0.25rem 0 0 0.8rem;
+        text-overflow: ellipsis;
+        width: 270px;
+        white-space: nowrap;
   }
 
-  .fullAddress {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: ${theme.labelColor};
-    font-size: 12px;
-    line-height: 16px;
+        .fullAddress {
+          overflow: hidden;
+        text-overflow: ellipsis;
+        color: ${theme.labelColor};
+        font-size: 12px;
+        line-height: 16px;
   }
 
-  .detailsIcon {
-    background: ${theme.accountDotsIconColor};
-    width: 3px;
-    height: 19px;
+        .detailsIcon {
+          background: ${theme.accountDotsIconColor};
+        width: 3px;
+        height: 19px;
 
-    &.active {
-      background: ${theme.primaryColor};
+        &.active {
+          background: ${theme.primaryColor};
     }
   }
 
-  .deriveIcon {
-    color: ${theme.labelColor};
-    position: absolute;
-    top: 5px;
-    width: 9px;
-    height: 9px;
+        .deriveIcon {
+          color: ${theme.labelColor};
+        position: absolute;
+        top: 5px;
+        width: 9px;
+        height: 9px;
   }
 
-  .movableMenu {
-    margin-top: -20px;
-    right: 28px;
-    top: 0;
+        .movableMenu {
+          margin - top: -20px;
+        right: 28px;
+        top: 0;
 
-    &.isMoved {
-      top: auto;
-      bottom: 0;
+        &.isMoved {
+          top: auto;
+        bottom: 0;
     }
   }
 
-  .settings {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 40px;
+        .settings {
+          position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 40px;
 
-    &:before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 25%;
-      bottom: 25%;
-      width: 1px;
-      background: ${theme.boxBorderColor};
+        &:before {
+          content: '';
+        position: absolute;
+        left: 0;
+        top: 25%;
+        bottom: 25%;
+        width: 1px;
+        background: ${theme.boxBorderColor};
     }
 
-    &:hover {
-      cursor: pointer;
-      background: ${theme.readonlyInputBackground};
+        &:hover {
+          cursor: pointer;
+        background: ${theme.readonlyInputBackground};
     }
   }
-`);
+        `);

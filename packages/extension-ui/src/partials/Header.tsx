@@ -5,12 +5,13 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft, faCog, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Box, ClickAwayListener } from '@mui/material';
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import logo from '../assets/pjs.svg';
 import Link from '../components/Link';
-import useOutsideClick from '../hooks/useOutsideClick';
+// import useOutsideClick from '../hooks/useOutsideClick';
 import MenuAdd from './MenuAdd';
 import MenuSettings from './MenuSettings';
 
@@ -24,19 +25,19 @@ interface Props extends ThemeProps {
   text?: React.ReactNode;
 }
 
-function Header ({ children, className = '', showAdd, showBackArrow, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
+function Header({ children, className = '', showAdd, showBackArrow, showSettings, smallMargin = false, text }: Props): React.ReactElement<Props> {
   const [isAddOpen, setShowAdd] = useState(false);
   const [isSettingsOpen, setShowSettings] = useState(false);
   const addRef = useRef(null);
   const setRef = useRef(null);
 
-  useOutsideClick(addRef, (): void => {
-    isAddOpen && setShowAdd(!isAddOpen);
-  });
+  // useOutsideClick(addRef, (): void => {
+  //   isAddOpen && setShowAdd(!isAddOpen);
+  // });
 
-  useOutsideClick(setRef, (): void => {
-    isSettingsOpen && setShowSettings(!isSettingsOpen);
-  });
+  // useOutsideClick(setRef, (): void => {
+  //   isSettingsOpen && setShowSettings(!isSettingsOpen);
+  // });
 
   const _toggleAdd = useCallback(
     (): void => setShowAdd((isAddOpen) => !isAddOpen),
@@ -47,6 +48,12 @@ function Header ({ children, className = '', showAdd, showBackArrow, showSetting
     (): void => setShowSettings((isSettingsOpen) => !isSettingsOpen),
     []
   );
+
+  const handleClickAway = useCallback((): void => {
+    setShowAdd(false);
+    setShowSettings(false);
+  }, []);
+
 
   return (
     <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
@@ -73,39 +80,43 @@ function Header ({ children, className = '', showAdd, showBackArrow, showSetting
           }
           <span className='logoText'>{text || 'polkadot{.js}'}</span>
         </div>
-        <div className='popupMenus'>
-          {showAdd && (
-            <div
-              className='popupToggle'
-              onClick={_toggleAdd}
-            >
-              <FontAwesomeIcon
-                className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
-                icon={faPlusCircle}
-                size='lg'
-              />
+        <ClickAwayListener onClickAway={handleClickAway}>
+          <Box mt={2}>
+            <div className='popupMenus'>
+              {showAdd && (
+                <div
+                  className='popupToggle'
+                  onClick={_toggleAdd}
+                >
+                  <FontAwesomeIcon
+                    className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
+                    icon={faPlusCircle}
+                    size='lg'
+                  />
+                </div>
+              )}
+              {showSettings && (
+                <div
+                  className='popupToggle'
+                  data-toggle-settings
+                  onClick={_toggleSettings}
+                >
+                  <FontAwesomeIcon
+                    className={`cogIcon ${isSettingsOpen ? 'selected' : ''}`}
+                    icon={faCog}
+                    size='lg'
+                  />
+                </div>
+              )}
             </div>
-          )}
-          {showSettings && (
-            <div
-              className='popupToggle'
-              data-toggle-settings
-              onClick={_toggleSettings}
-            >
-              <FontAwesomeIcon
-                className={`cogIcon ${isSettingsOpen ? 'selected' : ''}`}
-                icon={faCog}
-                size='lg'
-              />
-            </div>
-          )}
-        </div>
-        {isAddOpen && (
-          <MenuAdd reference={addRef} />
-        )}
-        {isSettingsOpen && (
-          <MenuSettings reference={setRef} />
-        )}
+            {isAddOpen && (
+              <MenuAdd reference={addRef} />
+            )}
+            {isSettingsOpen && (
+              <MenuSettings reference={setRef} />
+            )}
+          </Box>
+        </ClickAwayListener>
         {children}
       </div>
     </div>

@@ -14,10 +14,13 @@ import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { editAccount, tieAccount } from '../../messaging';
 import { Name } from '../../partials';
+import { accountsBalanceType } from '../../util/HackathonUtilFiles/hackatonUtils';
 
 interface Props extends AccountJson {
   className?: string;
   parentName?: string;
+  balances: accountsBalanceType[] | null;
+  setBalances: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
 }
 
 interface EditState {
@@ -25,12 +28,11 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, type }: Props): React.ReactElement<Props> {
+function Account ({ address, balances, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, setBalances, suri, type }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | undefined | null>(name);
   const genesisOptions = useGenesisHashOptions();
-
   const _onChangeGenesis = useCallback(
     (genesisHash?: string | null): void => {
       tieAccount(address, genesisHash || null)
@@ -110,12 +112,15 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
       <Address
         actions={_actions}
         address={address}
+        balances={balances}
         className='address'
         genesisHash={genesisHash}
         isExternal={isExternal}
         isHidden={isHidden}
         name={editedName}
         parentName={parentName}
+        setBalances={setBalances}
+        showBalance = {true}
         suri={suri}
         toggleActions={toggleActions}
       >

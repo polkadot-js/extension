@@ -86,6 +86,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
               address={account.address}
               genesisHash={parentGenesis}
               name={name}
+              showBalance = {false}
             />
           </div>
           <AccountNamePasswordCreation

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable no-use-before-define */
-
+import type { Chain } from '@polkadot/extension-chains/types';
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
@@ -10,6 +10,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { BalanceType } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackatonUtils';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
@@ -40,16 +41,33 @@ export interface AccountJson extends KeyringPair$Meta {
   suri?: string;
   type?: KeypairType;
   whenCreated?: number;
+  lastBalance?: string; // added by Kami TODOBalance
+  txHistory?: string; // added by Kami TODOBalance
+
 }
+
+// export type Balance = {// added by Kami
+//   address: string;
+//   chainName: string;
+//   balance?: string;
+//   lastUpdate?: Date;
+// }
 
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
+}
+
+interface accountsBalanceType {
+  address: string | null;
+  chain: Chain | null;
+  balance: BalanceType | null;
 }
 
 export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
+  balance?: accountsBalanceType[]; // added by Kami
 }
 
 export interface AuthorizeRequest {
@@ -77,7 +95,14 @@ export interface RequestSignatures {
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
+  // eslint-disable-next-line no-trailing-spaces
+
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
+  'pri(accounts.update)': [RequestBalanceUpdate, boolean]; // added by Kami TODOBalance
+  'pri(accounts.updateTxHistory)': [RequestTransactionHistoryUpdate, boolean]; // added by Kami TODOBalance
+
+  // eslint-disable-next-line no-trailing-spaces
+
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
   'pri(accounts.forget)': [RequestAccountForget, boolean];
@@ -201,6 +226,23 @@ export interface RequestAccountEdit {
   address: string;
   genesisHash?: string | null;
   name: string;
+}
+// added  by Kami TODOBalance
+export interface RequestBalanceUpdate {
+  address: string;
+  chainName: string;
+  balance: string;
+}
+
+export interface RequestTransactionHistoryUpdate {
+  address: string;
+  amount: string;
+  coin: string;
+  hash: string;
+  txHistory: string | null;
+  fee: string;
+  to: string;
+  status: string;
 }
 
 export interface RequestAccountForget {
@@ -327,10 +369,10 @@ interface TransportResponseMessageNoSub<TMessageType extends MessageTypesWithNoS
 
 export type TransportResponseMessage<TMessageType extends MessageTypes> =
   TMessageType extends MessageTypesWithNoSubscriptions
-    ? TransportResponseMessageNoSub<TMessageType>
-    : TMessageType extends MessageTypesWithSubscriptions
-      ? TransportResponseMessageSub<TMessageType>
-      : never;
+  ? TransportResponseMessageNoSub<TMessageType>
+  : TMessageType extends MessageTypesWithSubscriptions
+  ? TransportResponseMessageSub<TMessageType>
+  : never;
 
 export interface ResponseSigning {
   id: string;
@@ -374,7 +416,7 @@ export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof Subscr
 export interface RequestSign {
   readonly payload: SignerPayloadJSON | SignerPayloadRaw;
 
-  sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
+  sign(registry: TypeRegistry, pair: KeyringPair): { signature: string };
 }
 
 export interface RequestJsonRestore {

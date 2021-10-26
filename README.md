@@ -11,13 +11,15 @@ Accounts page, shows the list of all accounts an their balances which you have c
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
-You can transfer funds with the extention, first add a recepient, you can also choose recepient from you accounts list to transfer between your accounts:
+You can transfer funds with the extention, first add a recepient, you can choose recepient from you accounts list to transfer between your accounts:
 
-![accounts page screenshot](docs/pjp/addRecepiet.PNG)
+![add recepient page screenshot](docs/pjp/addRecepiet.PNG)
 
  choose amount you want to transfer, extension shows appropriate alerts based on your selected amount. you can choose Safe Max to withdraw all from your account while still keep your account active.
+![transfer funds page screenshot](docs/pjp/transferFunds.PNG)
 
-![accounts page screenshot](docs/pjp/transferFunds.PNG)
+In transaction confirmation page, you can confirm the transaction to be send to the blockchain by entering your sending account password.
+![transfer funds page screenshot](docs/pjp/confirmTransaction.PNG)
 
 
 ## Installation (Development version)

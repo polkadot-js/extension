@@ -5,15 +5,13 @@ A userfriendly wallet used to interact with the Polkadot/substrate blockchain th
 
 It is based on polkadot js extension, which also injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts.
 
-## Installation
+## How To
 
-- On Chrome, install via [Chrome web store](https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd)
-- On Firefox, install via [Firefox add-ons](https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/)
-
-![interface screenshots](docs/extension-overview.png)
+Accounts page:
+![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
 
-## Development version
+## Installation (Development version)
 
 Steps to build the extension and view your changes in a browser:
 

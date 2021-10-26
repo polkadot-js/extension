@@ -7,7 +7,7 @@ It is based on polkadot js extension, which also injects a [@polkadot/api](https
 
 ## How To
 
-Accounts page, shows the list of all accounts which you have created/imported on polkadot/kusama blockhian and parachains.
+Accounts page, shows the list of all accounts an their balances which you have created/imported on polkadot/kusama blockchain and parachains.
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 

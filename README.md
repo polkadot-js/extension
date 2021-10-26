@@ -12,8 +12,6 @@ It is based on polkadot js extension, which also injects a [@polkadot/api](https
 
 ![interface screenshots](docs/extension-overview.png)
 
-## Documentation and examples
-Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
 
 ## Development version
 

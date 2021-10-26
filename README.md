@@ -34,12 +34,3 @@ Steps to build the extension and view your changes in a browser:
 3. When visiting `https://polkadot.js.org/apps/` it will inject the extension
 
 Once added, you can create an account (via a generated seed) or import via an existing seed. The [apps UI](https://github.com/polkadot-js/apps/), when loaded, will show these accounts as `<account name> (extension)`
-
-## Development
-
-The repo is split into a number of packages -
-
-- [extension](packages/extension/) - All the injection and background processing logic (the main entry)
-- [extension-ui](packages/extension-ui/) - The UI components for the extension, to build up the popup
-- [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
-- [extension-inject](packages/extension-inject/) - A convenience wrapper that allows extension developers to inject their extension for use by any dapp

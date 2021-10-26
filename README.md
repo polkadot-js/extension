@@ -16,9 +16,11 @@ You can transfer funds with the extention, first add a recepient, you can choose
 ![add recepient page screenshot](docs/pjp/addRecepiet.PNG)
 
  choose amount you want to transfer, extension shows appropriate alerts based on your selected amount. you can choose Safe Max to withdraw all from your account while still keep your account active.
+
 ![transfer funds page screenshot](docs/pjp/transferFunds.PNG)
 
 In transaction confirmation page, you can confirm the transaction to be send to the blockchain by entering your sending account password.
+
 ![transfer funds page screenshot](docs/pjp/confirmTransaction.PNG)
 
 

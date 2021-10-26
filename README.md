@@ -7,7 +7,7 @@ It is based on polkadot js extension, which also injects a [@polkadot/api](https
 
 ## How To
 
-Accounts page, show the list of accounts which you have created/imported on different polkadot blockhian/parachains.
+Accounts page, shows the list of all accounts which you have created/imported on polkadot/kusama blockhian and parachains.
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 

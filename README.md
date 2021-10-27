@@ -51,5 +51,8 @@ Transaction histroy can be seen from the account page, which shows the transacti
 
 ![transaction history page screenshot](docs/pjp/transactionHistory.PNG)
 
+Entering crypto address is error prone, hence use QR code to be scanned by camera is useful.
 
-...
+![Address QR code page screenshot](docs/pjp/addressQrCode.PNG)
+
+

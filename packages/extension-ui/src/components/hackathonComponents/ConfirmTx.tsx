@@ -295,10 +295,6 @@ export default function ConfirmTx({
         if (setBalances) {
           setBalances([...temp]);
         }
-
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`${_acc.address} balance is now `);
-        console.log(temp);
       }
     });
   }
@@ -410,7 +406,7 @@ export default function ConfirmTx({
                 <Divider />
               </Grid>
               <Grid item container alignItems='center' xs={12} sx={{ padding: '10px 40px 20px' }}>
-                <Grid item xs={2} sx={{ fontSize: 13, fontWeight: '600', textAlign: 'left' }}>
+                <Grid item xs={1} sx={{ fontSize: 13, fontWeight: '600', textAlign: 'left' }}>
                   {'Total'}
                 </Grid>
                 <Grid item xs={8} sx={{ fontSize: 13, fontWeight: '600', textAlign: 'left' }}>
@@ -418,7 +414,7 @@ export default function ConfirmTx({
                     ? <Alert severity='warning' sx={{ fontSize: 11 }}>Transaction most likely fail, consider fee!</Alert>
                     : ''}
                 </Grid>
-                <Grid item xs={2} sx={{ fontSize: 13, fontWeight: '600', textAlign: 'right' }}>
+                <Grid item xs={3} sx={{ fontSize: 13, fontWeight: '600', textAlign: 'right' }}>
                   {total || ' ... '} {' '} {coin}
                 </Grid>
               </Grid>

@@ -8,6 +8,8 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
+// import allChains from '../chains';
+
 // eslint-disable-next-line header/header
 export const FLOATING_POINT_DIGIT = 4;
 export const DEFAULT_TOKEN_DECIMALS = 12;
@@ -53,7 +55,7 @@ export interface transactionHistory {
   status: string;
 }
 
-export function fixFloatingPoint (_number: number | string): string {
+export function fixFloatingPoint(_number: number | string): string {
   const sNumber = String(_number);
   const dotIndex = sNumber.indexOf('.');
 
@@ -62,7 +64,7 @@ export function fixFloatingPoint (_number: number | string): string {
   return sNumber.slice(0, dotIndex) + sNumber.slice(dotIndex, dotIndex + FLOATING_POINT_DIGIT + 1);
 }
 
-export function balanceToHuman (_balance: accountsBalanceType | null, _type: string): string {
+export function balanceToHuman(_balance: accountsBalanceType | null, _type: string): string {
   if (!_balance || !_balance.balanceInfo) return '';
 
   const balance = _balance.balanceInfo;
@@ -80,7 +82,7 @@ export function balanceToHuman (_balance: accountsBalanceType | null, _type: str
   }
 }
 
-export function amountToHuman (_amount: string | undefined, _decimals: number): string {
+export function amountToHuman(_amount: string | undefined, _decimals: number): string {
   if (!_amount) return '';
 
   const x = 10 ** _decimals;
@@ -88,7 +90,7 @@ export function amountToHuman (_amount: string | undefined, _decimals: number): 
   return fixFloatingPoint(Number(_amount) / x);
 }
 
-export function amountToMachine (_amount: string | undefined, _decimals: number): bigint {
+export function amountToMachine(_amount: string | undefined, _decimals: number): bigint {
   if (!_amount) return BigInt(0);
 
   const dotIndex = _amount.indexOf('.');
@@ -106,14 +108,14 @@ export function amountToMachine (_amount: string | undefined, _decimals: number)
   return BigInt(_amount) * BigInt(x);
 }
 
-export function getFormattedAddress (_address: string | null | undefined, _chain: Chain | null | undefined, settings: SettingsStruct): string {
+export function getFormattedAddress(_address: string | null | undefined, _chain: Chain | null | undefined, settings: SettingsStruct): string {
   const publicKey = decodeAddress(_address);
   const prefix = _chain ? _chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
 
   return encodeAddress(publicKey, prefix);
 }
 
-export function handleAccountBalance (balance: any): { available: bigint, feeFrozen: bigint, miscFrozen: bigint, reserved: bigint, total: bigint } {
+export function handleAccountBalance(balance: any): { available: bigint, feeFrozen: bigint, miscFrozen: bigint, reserved: bigint, total: bigint } {
   return {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     available: BigInt(String(balance.free)) - BigInt(String(balance.miscFrozen)),
@@ -127,3 +129,13 @@ export function handleAccountBalance (balance: any): { available: bigint, feeFro
     total: BigInt(String(balance.free)) + BigInt(String(balance.reserved))
   };
 }
+
+// export function getChain(_genesisHash?: string | null): Chain | null | undefined {
+//   if (!_genesisHash) {
+//     return null;
+//   }
+
+//   const chain = allChains.find((chain) => chain.genesisHash === _genesisHash);
+
+//   return chain;
+// }

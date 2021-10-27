@@ -33,7 +33,7 @@ import Menu from './Menu';
 import Svg from './Svg';
 
 // added by kami
-import { ClickAwayListener, Grid } from '@mui/material';
+import { ClickAwayListener } from '@mui/material';
 import { accountsBalanceType } from '../util/HackathonUtilFiles/hackatonUtils';
 
 export interface Props {

@@ -154,8 +154,6 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
       (Number(availableBalance) < Number(transferAmountInHuman) +
         (ED + Number(amountToHuman(lastFee || defaultFee, decimals)))
       )) {
-      console.log('Number(availableBalance) - Number(transferAmountInHuman):', Number(availableBalance) - Number(transferAmountInHuman))
-      console.log('ED + Number(amountToHuman(lastFee || defaultFee, decimals)):', ED + Number(amountToHuman(lastFee || defaultFee, decimals)))
       setReapAlert(true);
     } else {
       setReapAlert(false);

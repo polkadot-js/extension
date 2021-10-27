@@ -55,4 +55,4 @@ Entering the crypto address is error prone, so it is useful to use the QR code f
 
 ![Address QR code page screenshot](docs/pjp/addressQrCode.PNG)
 
-
+.

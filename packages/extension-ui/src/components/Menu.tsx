@@ -29,7 +29,7 @@ export default styled(Menu)(({ theme }: ThemeProps) => `
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   box-shadow: 0 0 10px ${theme.boxShadow};
-  margin-top: 60px;
+  margin-top: -60px;
   padding: 16px 0;
   position: absolute;
   right: 0;

@@ -20,7 +20,7 @@ import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
 import useMetadata from '../hooks/useMetadata';
-// import useOutsideClick from '../hooks/useOutsideClick';
+import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
@@ -64,7 +64,7 @@ interface Recoded {
 }
 
 // find an account in our list
-function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
+function findSubstrateAccount(accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
   return accounts.find(({ address }): boolean =>
@@ -73,14 +73,14 @@ function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): 
 }
 
 // find an account in our list
-function findAccountByAddress (accounts: AccountJson[], _address: string): AccountJson | null {
+function findAccountByAddress(accounts: AccountJson[], _address: string): AccountJson | null {
   return accounts.find(({ address }): boolean =>
     address === _address
   ) || null;
 }
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
+function recodeAddress(address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -101,7 +101,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, balances, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, setBalances, showBalance, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address({ actions, address, balances, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, setBalances, showBalance, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -116,7 +116,7 @@ function Address ({ actions, address, balances, children, className, genesisHash
   const [openMenu, setOpenMenu] = useState(false);
 
   // TODO: use outside click is disabled Temporarily
-  // useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
     if (!address) {
@@ -162,7 +162,7 @@ function Address ({ actions, address, balances, children, className, genesisHash
 
   const _onClick = useCallback((): void => {
     setOpenMenu(!openMenu);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showActionsMenu]);
   const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
   const _toggleVisibility = useCallback(
@@ -290,7 +290,7 @@ function Address ({ actions, address, balances, children, className, genesisHash
         </div>
         {actions && (
           <ClickAwayListener onClickAway={handleClickAway}>
-            <Grid>
+            <div>
               <div
                 className='settings'
                 onClick={_onClick}
@@ -306,7 +306,7 @@ function Address ({ actions, address, balances, children, className, genesisHash
                   ? (<Menu
                     className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
                     reference={actionsRef}
-                     >
+                  >
                     {actions}
                   </Menu>)
                   : ''
@@ -314,7 +314,7 @@ function Address ({ actions, address, balances, children, className, genesisHash
               </div>
 
               {/* )} */}
-            </Grid>
+            </div>
           </ClickAwayListener>
 
         )}

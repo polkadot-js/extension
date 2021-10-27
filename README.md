@@ -1,9 +1,9 @@
 
 # ![polkadot{.js} plus extension](docs/logo.jpg)
 
-A userfriendly wallet used to interact with the Polkadot/substrate blockchain through a browser. It allows users to access their Polkadot account(s), which can then be used to interact with decentralized applications.
+A user-friendly wallet to interact with the Polkadot/substrate blockchain through a browser. It allows users to access their Polkadot account(s), which can also be used to interact with decentralized apps.
 
-It is based on polkadot js extension, which also injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts.
+It is based on polkadot js extension, which injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts.
 
 ## Installation (Development version)
 

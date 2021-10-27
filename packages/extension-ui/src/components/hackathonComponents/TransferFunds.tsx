@@ -181,6 +181,10 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
   }, [transferAmountInHuman, availableBalance, ED, t]);
 
   function handleTransferAmountOnChange(value: string) {
+    if (Number(value) < 0) {
+      value = String(-Number(value));
+    }
+
     setTransferAmountInHuman(fixFloatingPoint(value));
   }
 
@@ -247,7 +251,11 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
       subtrahend += amountToMachine(String(ED), decimals);
     }
 
-    const max = BigInt(available) - subtrahend;
+    let max = BigInt(available) - subtrahend;
+
+    if (max <= 0) {
+      max = 0n;
+    }
 
     setTransferAmount(max);
 

@@ -248,10 +248,10 @@ describe('Signing requests', () => {
         'Westend',
         '45',
         '3',
-        `balances.transferKeepAlive(dest, value)[
-  "5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7",
-  "123.0000 WND"
-]`,
+        `balances.transferKeepAlive(dest, value){
+  "dest": "5GYQRJj3NUznYDzCduENRcocMsyxmb6tjb5xW87ZMErBe9R7",
+  "value": "123.0000 WND"
+}`,
         'Same as the [`transfer`] call, but with a check that the transfer will not kill the origin account.',
         'mortal, valid from {{birth}} to {{death}}'
       ]);
@@ -267,10 +267,10 @@ describe('Signing requests', () => {
         'Westend',
         '45',
         '3',
-        `balances.transfer(dest, value)[
-  "5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q",
-  "200.0000 mWND"
-]`,
+        `balances.transfer(dest, value){
+  "dest": "5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q",
+  "value": "200.0000 mWND"
+}`,
         'Transfer some liquid free balance to another account.',
         'mortal, valid from {{birth}} to {{death}}'
       ]);

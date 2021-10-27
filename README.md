@@ -31,15 +31,15 @@ Accounts page, shows the list of all accounts an their balances which you have c
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
-You can transfer funds with the extention, first add a recepient, you can choose recepient from you accounts list to transfer between your accounts:
+Transfering funds with the extention, first add a recepient, you can even choose recepient from you own accounts list to transfer between your accounts:
 
 ![add recepient page screenshot](docs/pjp/addRecepiet.PNG)
 
-Choose amount you want to transfer, extension shows appropriate alerts based on your selected amount. you can click on Safe Max to withdraw all from your account while still keep your account active.
+Choosing the amount you want to transfer, extension shows appropriate alerts based on your selected amount. Click on Safe Max to withdraw all from your account while still keep your account active.
 
 ![transfer funds page screenshot](docs/pjp/transferFunds.PNG)
 
-In transaction confirmation page, you can confirm the transaction to be send to the blockchain by entering your sending account password.
+In transaction confirmation page, confirm the transaction to broadcast it on the blockchain by entering your sending account password.
 
 ![confirm transaction page screenshot](docs/pjp/confirmTransaction.PNG)
 
@@ -47,7 +47,7 @@ After a little while, depend on the network response time, transaction will be d
 
 ![transaction done page screenshot](docs/pjp/transactionDone.PNG)
 
-you can see the transaction histroy from the account page like the following, which shows the transaction details, status, if failed, fail reason, and a link to subscan for more info.
+Transaction histroy can be seen from the account page, which shows the transaction details, status, the failure reason  if transaction is failed, and a link to subscan for more info.
 
 ![transaction history page screenshot](docs/pjp/transactionHistory.PNG)
 

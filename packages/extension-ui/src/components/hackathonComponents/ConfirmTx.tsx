@@ -94,8 +94,8 @@ export default function ConfirmTx({
       <Box
         component='span'
         fontFamily='Monospace'
-        // fontStyle='oblique'
-        // fontWeight='fontWeightBold'
+      // fontStyle='oblique'
+      // fontWeight='fontWeightBold'
       >
         {_address.slice(0, 4) +
           '...' +
@@ -111,29 +111,29 @@ export default function ConfirmTx({
     setTransferAmountInHuman(amountToHuman(String(transferAmount), decimals));
   }, [chain, transferAmount]);
 
-  useEffect(() => {
-    try {
-      if (transfering) {
-        const pair = keyring.getPair(String(sender.address));
+  // useEffect(() => {
+  //   // try {
+  //   //   if (transfering) {
+  //   //     const pair = keyring.getPair(String(sender.address));
 
-        pair.unlock(password);
-        setPasswordIsCorrect(1);
+  //   //     pair.unlock(password);
+  //   //     setPasswordIsCorrect(1);
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
-          .then((hash) => {
-            setTransactionHash(hash);
-            setTransfering(false);
-          });
+  //   //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
+  //   //     signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
+  //   //       .then((hash) => {
+  //   //         setTransactionHash(hash);
+  //   //         setTransfering(false);
+  //   //       });
 
-        subscribeAllAccounts();
-      }
-    } catch (e) {
-      setPasswordIsCorrect(-1);
-      setTransfering(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transfering]);
+  //   //     subscribeAllAccounts();
+  //   //   }
+  //   // } catch (e) {
+  //   //   setPasswordIsCorrect(-1);
+  //   //   setTransfering(false);
+  //   // }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [transfering]);
 
   useEffect(() => {
     if (!transactionHash) {
@@ -156,7 +156,29 @@ export default function ConfirmTx({
   }, [transactionHash, txStatus]);
 
   function handleConfirmTransfer() {
+    console.log('handleConfirmTransfer is runing ...')
     setTransfering(true);
+
+    try {
+      const pair = keyring.getPair(String(sender.address));
+
+      pair.unlock(password);
+      setPasswordIsCorrect(1);
+
+      console.log('calling signAndTransfer.');
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
+        .then((hash) => {
+          setTransactionHash(hash);
+          setTransfering(false);
+        });
+
+      setTimeout(subscribeAllAccounts, 1000);
+    } catch (e) {
+      setPasswordIsCorrect(-1);
+      setTransfering(false);
+    }
   }
 
   useEffect(() => {
@@ -254,6 +276,8 @@ export default function ConfirmTx({
   }
 
   function subscribeAllAccounts() {
+    console.log('calling subscribeToBalanceChange for all accounts.')
+
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     hierarchy.forEach((h) => subscribeToBalanceChange(h));
   }
@@ -265,7 +289,7 @@ export default function ConfirmTx({
     const wsProvider = new WsProvider(url);
     const api = await ApiPromise.create({ provider: wsProvider });
 
-    await api.query.system.account(formattedAddress, ({ data: balance }) => {
+    const unsubscribe = await api.query.system.account(formattedAddress, ({ data: balance }) => {
       if (balance) {
         const result = {
           coin: coin,
@@ -296,6 +320,11 @@ export default function ConfirmTx({
           setBalances([...temp]);
         }
       }
+
+      setTimeout(() => {
+        unsubscribe();
+        console.log('Unsubscribed');
+      }, 60000); // unsubscribe after 20 sec.
     });
   }
 
@@ -362,7 +391,7 @@ export default function ConfirmTx({
                 </Avatar>
               </Divider>
               <Grid item xs={4} sx={{ fontSize: 14 }}>
-                {recepient.name !='null' ? recepient.name : makeAddressShort(String(recepient.address))}
+                {recepient.name != 'null' ? recepient.name : makeAddressShort(String(recepient.address))}
               </Grid>
               <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '25px 40px 25px' }}>
                 <Grid item xs={3} sx={{ padding: '5px 10px 5px', borderRadius: '5px', border: '2px double grey', justifyContent: 'flex-start', fontSize: 15, textAlign: 'center', fontVariant: 'small-caps' }}>
@@ -509,12 +538,9 @@ export default function ConfirmTx({
                     {', block number ' + String(txStatus.blockNumber)}
                   </Grid>
                   <Grid item xs={2} sx={{ textAlign: 'right' }}>
-                    {transactionHash
-                      ? <IconButton onClick={openTxOnExplorer}>
-                        <LaunchRounded />
-                      </IconButton>
-                      : ''
-                    }
+                    <IconButton disabled={!transactionHash} size='small' onClick={openTxOnExplorer}>
+                      <LaunchRounded />
+                    </IconButton>
                   </Grid>
                 </Grid>
                 : ''

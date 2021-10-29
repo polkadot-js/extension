@@ -25,7 +25,7 @@ export default function getNetworkInfo(chain: Chain | null | undefined)
         decimals: 10,
         ED: 1, 
         url: 'wss://rpc.polkadot.io',
-        defaultFee: '16100000000'
+        defaultFee: '161000000'
         // genesisHash:'0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
       };
     case ('Kusama'):
@@ -34,7 +34,7 @@ export default function getNetworkInfo(chain: Chain | null | undefined)
         decimals: 12,
         ED: 0.0000333333,
         url: 'wss://kusama-rpc.polkadot.io',
-        defaultFee: '16100000000'
+        defaultFee: '161000000'
         // genesisHash:'0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe'
       };
     case ('Bifrost'):

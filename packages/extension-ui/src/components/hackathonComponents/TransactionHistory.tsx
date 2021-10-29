@@ -26,7 +26,8 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
   const [transactionHistoryList, setTransactionHistoryList] = useState<string[][] | null>(null);
-  const [loadMore, setLoadMore] = useState(false);
+  const [moreLoaded, setLoadMore] = useState(false);
+  const [hasMoreToLoad, setHasMoreToLoad] = useState(false);
 
   useEffect(() => {
     const txHistory = hierarchy.find((h) => h.address === address)?.txHistory;
@@ -40,7 +41,11 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
 
       txH = txH?.reverse(); //`${coin}_${amount}_${fee}_${to}_${status}_${hash}_${date}
 
-      if (!loadMore) {
+      if ((txH?.length || 0) > TRANSACTION_HISTROY_DEFAULT_ROWS) {
+        setHasMoreToLoad(true);
+      }
+
+      if (!moreLoaded) {
         txH = txH?.slice(0, TRANSACTION_HISTROY_DEFAULT_ROWS);
       }
 
@@ -50,7 +55,7 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
 
       return null;
     }
-  }, [address, hierarchy, loadMore]);
+  }, [address, hierarchy, moreLoaded]);
 
   const handleTxHistoryModalClose = useCallback(
     (): void => {
@@ -116,10 +121,10 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
             {transactionHistoryList?.map((h) => (
               <>
                 <Grid item container xs={12} sx={{ paddingTop: '10px' }}>
-                  <Grid xs={4} sx={{ textAlign: 'left', fontSize: '13', fontVariant: 'small-caps' }}>
+                  <Grid xs={4} sx={{ textAlign: 'left', fontVariant: 'small-caps' }}>
                     {t('Transfer of')}
                   </Grid>
-                  <Grid item xs={3}  sx={{ textAlign: 'left', fontWeight: 'bold' }}>
+                  <Grid item xs={3} sx={{ textAlign: 'left', fontWeight: 'bold' }}>
                     {h[1]} {' '}{h[0]}
                   </Grid>
                   <Grid item container xs={4} justifyContent='center' >
@@ -153,7 +158,7 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
                 </Grid>
               </>
             ))}
-            {!loadMore
+            {!moreLoaded && hasMoreToLoad
               ? <Grid item display='flex' justifyContent='center' xs={12} sx={{ paddingTop: '20px' }}>
                 <Button color='primary' onClick={() => setLoadMore(true)} variant='text'>
                   {t('View More')}

@@ -26,11 +26,12 @@ export default async function getFee (
     .transfer(_receiverAddress, transferValue)
     .paymentInfo(_senderKeyring);
 
-//   console.log(`
-//   class=${info.class.toString()},
-//   weight=${info.weight.toString()},
-//   partialFee=${info.partialFee.toHuman()}
-// `);
+  console.log(`
+  class=${info.class.toString()},
+  weight=${info.weight.toString()},
+  partialFee=${info.partialFee},
+  partialFeeInHuman=${info.partialFee.toHuman()}
+`);
 
   return info.partialFee.toString();
 }

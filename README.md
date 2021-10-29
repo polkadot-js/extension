@@ -31,27 +31,27 @@ Accounts page, shows the list of all accounts an their balances which you have c
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
-Transfering funds with the extention, first add a recepient, you can even choose recepient from you own accounts list to transfer between your accounts:
+To Transfer funds, first add a recepient, you can even choose a recepient from you own accounts to transfer between your accounts:
 
 ![add recepient page screenshot](docs/pjp/addRecepiet.PNG)
 
-Choosing the amount you want to transfer, extension shows appropriate alerts based on your selected amount. Click on Safe Max to withdraw all from your account while still keep your account active.
+While Choosing an amount want to transfer, the extension shows appropriate alerts based on your selected amount. Click on Safe Max to withdraw all from your account while still keep your account active.
 
 ![transfer funds page screenshot](docs/pjp/transferFunds.PNG)
 
-In transaction confirmation page, confirm the transaction to broadcast it on the blockchain by entering your sending account password.
+In transaction confirmation page, confirm the transaction to broadcast it on the blockchain by entering your sending account's password.
 
 ![confirm transaction page screenshot](docs/pjp/confirmTransaction.PNG)
 
-After a little while, depend on the network response time, transaction will be done and you see the following page and your balance(s) will be updated.
+After a little while, depend on the network response time, transaction will be done, you see the following page and your balance(s) are updated.
 
 ![transaction done page screenshot](docs/pjp/transactionDone.PNG)
 
-Transaction histroy can be seen from the account page, which shows the transaction details, status, the failure reason  if transaction is failed, and a link to subscan for more info.
+Transactions' histroy can be seen from the account page, which shows transactions detail, status, failure reason  if transaction failed, and a link to subscan for more info.
 
 ![transaction history page screenshot](docs/pjp/transactionHistory.PNG)
 
-Entering the crypto address is error prone, so it is useful to use the QR code for scanning by the camera.
+Entering the crypto address is error prone, so it is useful to use the QR code for scanning by a mobile wallet.
 
 ![Address QR code page screenshot](docs/pjp/addressQrCode.PNG)
 

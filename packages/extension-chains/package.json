@@ -3,7 +3,6 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "contributors": [],
   "description": "Definitions for all known chains as exposed by the extension.",
-  "engines": {},
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-chains#readme",
   "license": "Apache-2",
   "maintainers": [],
@@ -15,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.40.5-2",
+  "version": "0.40.5-3",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.15.4",

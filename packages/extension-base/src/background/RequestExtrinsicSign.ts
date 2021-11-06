@@ -3,6 +3,7 @@
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
+import type { HexString } from '@polkadot/util/types';
 import type { RequestSign } from './types';
 
 import { TypeRegistry } from '@polkadot/types';
@@ -14,7 +15,7 @@ export default class RequestExtrinsicSign implements RequestSign {
     this.payload = payload;
   }
 
-  sign (registry: TypeRegistry, pair: KeyringPair): { signature: string } {
+  sign (registry: TypeRegistry, pair: KeyringPair): { signature: HexString } {
     return registry
       .createType('ExtrinsicPayload', this.payload, { version: this.payload.version })
       .sign(pair);

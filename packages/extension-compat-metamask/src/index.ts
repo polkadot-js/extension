@@ -3,6 +3,7 @@
 
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 import type { SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
+import type { HexString } from '@polkadot/util/types';
 
 import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
@@ -74,7 +75,7 @@ function injectMetaMaskWeb3 (win: Web3Window): void {
         },
         signer: {
           signRaw: async (raw: SignerPayloadRaw): Promise<SignerResult> => {
-            const signature = (await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] })) as string;
+            const signature = (await provider.request({ method: 'eth_sign', params: [raw.address, Web3.utils.sha3(raw.data)] })) as HexString;
 
             return { id: 0, signature };
           }

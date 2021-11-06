@@ -4,6 +4,7 @@
 import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
@@ -67,7 +68,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
   }, [request]);
 
   const _onSignature = useCallback(
-    ({ signature }: { signature: string }): Promise<void> =>
+    ({ signature }: { signature: HexString }): Promise<void> =>
       approveSignSignature(signId, signature)
         .then(() => onAction())
         .catch((error: Error): void => {

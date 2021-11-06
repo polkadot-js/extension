@@ -8,6 +8,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
+import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
@@ -276,7 +277,7 @@ export interface RequestSigningApprovePassword {
 
 export interface RequestSigningApproveSignature {
   id: string;
-  signature: string;
+  signature: HexString;
 }
 
 export interface RequestSigningCancel {
@@ -334,7 +335,7 @@ export type TransportResponseMessage<TMessageType extends MessageTypes> =
 
 export interface ResponseSigning {
   id: string;
-  signature: string;
+  signature: HexString;
 }
 
 export interface ResponseDeriveValidate {
@@ -374,7 +375,7 @@ export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof Subscr
 export interface RequestSign {
   readonly payload: SignerPayloadJSON | SignerPayloadRaw;
 
-  sign (registry: TypeRegistry, pair: KeyringPair): { signature: string };
+  sign (registry: TypeRegistry, pair: KeyringPair): { signature: HexString };
 }
 
 export interface RequestJsonRestore {

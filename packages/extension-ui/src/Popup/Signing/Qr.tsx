@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -19,7 +20,7 @@ interface Props {
   className?: string;
   cmd: number;
   genesisHash: string;
-  onSignature: ({ signature }: { signature: string }) => void;
+  onSignature: ({ signature }: { signature: HexString }) => void;
   payload: ExtrinsicPayload | string;
 
 }

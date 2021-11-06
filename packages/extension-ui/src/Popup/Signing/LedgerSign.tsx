@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
+import type { HexString } from '@polkadot/util/types';
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,7 +19,7 @@ interface Props {
   className?: string;
   error: string | null;
   genesisHash?: string;
-  onSignature?: ({ signature }: { signature: string }) => void;
+  onSignature?: ({ signature }: { signature: HexString }) => void;
   payload?: ExtrinsicPayload;
   setError: (value: string | null) => void;
 }

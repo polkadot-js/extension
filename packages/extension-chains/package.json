@@ -18,7 +18,7 @@
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.15.4",
-    "@polkadot/networks": "^7.7.2-6"
+    "@polkadot/networks": "^7.8.2"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

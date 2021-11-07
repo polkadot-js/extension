@@ -14,13 +14,13 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.40.5-3",
+  "version": "0.40.5-4",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.15.4",
     "@polkadot/api": "^6.7.1",
-    "@polkadot/extension-dapp": "^0.40.5-3",
-    "@polkadot/extension-inject": "^0.40.5-3",
+    "@polkadot/extension-dapp": "^0.40.5-4",
+    "@polkadot/extension-inject": "^0.40.5-4",
     "@polkadot/keyring": "^7.8.2",
     "@polkadot/phishing": "^0.6.407",
     "@polkadot/ui-keyring": "^0.86.5"

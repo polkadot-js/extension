@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.41.1 Nov 8, 2021
+
+Contributed:
+
+- Add search functionality (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Detect Ascii bytes (& display) when signing
+- Correctly detect and create Ethereum-compatible chain accounts
+- Ensure site authorization toggle is saved
+- Optimize metadata conversion process
+- Bump `@polkadot/util` to 7.8.2
+- Bump `@polkadot/api` to 6.7.1
+
+
 ## 0.40.4 Oct 25, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.

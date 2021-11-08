@@ -7,8 +7,9 @@ import styled from 'styled-components';
 import { ActionContext, Address, Dropdown, Loading } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri, createSeed } from '../../messaging';
+import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import Mnemonic from './Mnemonic';
@@ -22,25 +23,44 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
-  const [account, setAccount] = useState<null | { address: string; seed: string }>(null);
+  const [address, setAddress] = useState<null | string>(null);
+  const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
   const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
+  const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
-    createSeed(undefined, type)
-      .then(setAccount)
-      .catch((error: Error) => console.error(error));
-  }, [type]);
+    createSeed(undefined)
+      .then(({ address, seed }): void => {
+        setAddress(address);
+        setSeed(seed);
+      })
+      .catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect((): void => {
+    if (seed) {
+      const type = chain && chain.definition.chainType === 'ethereum'
+        ? 'ethereum'
+        : DEFAULT_TYPE;
+
+      setType(type);
+      validateSeed(seed, type)
+        .then(({ address }) => setAddress(address))
+        .catch(console.error);
+    }
+  }, [seed, chain]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
       // this should always be the case
-      if (name && password && account) {
+      if (name && password && seed) {
         setIsBusy(true);
 
-        createAccountSuri(name, password, account.seed, type, genesisHash)
+        createAccountSuri(name, password, seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
             setIsBusy(false);
@@ -48,23 +68,23 @@ function CreateAccount ({ className }: Props): React.ReactElement {
           });
       }
     },
-    [account, genesisHash, onAction, type]
+    [genesisHash, onAction, seed, type]
   );
 
-  const _onNextStep = useCallback(() => setStep((step) => step + 1), []);
-  const _onPreviousStep = useCallback(() => setStep((step) => step - 1), []);
+  const _onNextStep = useCallback(
+    () => setStep((step) => step + 1),
+    []
+  );
 
-  const _onChangeNetwork = useCallback((newGenesisHash: string) => {
-    const chain = options.find(({ value }) => {
-      return newGenesisHash === value;
-    });
+  const _onPreviousStep = useCallback(
+    () => setStep((step) => step - 1),
+    []
+  );
 
-    if (chain?.text === 'Moonbase Alpha') { // TODO: use list
-      setType('ethereum');
-    }
-
-    setGenesis(newGenesisHash);
-  }, [options]);
+  const _onChangeNetwork = useCallback(
+    (newGenesisHash: string) => setGenesis(newGenesisHash),
+    []
+  );
 
   return (
     <>
@@ -75,17 +95,17 @@ function CreateAccount ({ className }: Props): React.ReactElement {
       <Loading>
         <div>
           <Address
-            address={account?.address}
+            address={address}
             genesisHash={genesisHash}
             name={name}
           />
         </div>
-        {account && (
+        {seed && (
           step === 1
             ? (
               <Mnemonic
                 onNextStep={_onNextStep}
-                seed={account.seed}
+                seed={seed}
               />
             )
             : (

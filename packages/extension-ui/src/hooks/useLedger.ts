@@ -19,8 +19,6 @@ interface StateBase {
 interface State extends StateBase {
   address: string | null;
   error: string | null;
-  isLedgerCapable: boolean;
-  isLedgerEnabled: boolean;
   isLoading: boolean;
   isLocked: boolean;
   ledger: Ledger | null;
@@ -28,24 +26,8 @@ interface State extends StateBase {
   warning: string | null;
 }
 
-function getNetwork (genesis: string): Network | undefined {
-  return ledgerChains.find(({ genesisHash }) => genesisHash[0] === genesis);
-}
-
-function retrieveLedger (genesis: string): Ledger {
-  let ledger: Ledger | null = null;
-
-  const { isLedgerCapable } = getState();
-
-  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
-
-  const def = getNetwork(genesis);
-
-  assert(def, `Unable to find supported chain for ${genesis}`);
-
-  ledger = new Ledger('webusb', def.network);
-
-  return ledger;
+function getNetwork (genesisHash: string): Network | undefined {
+  return ledgerChains.find(({ genesisHash: [hash] }) => hash === genesisHash);
 }
 
 function getState (): StateBase {
@@ -57,6 +39,22 @@ function getState (): StateBase {
   };
 }
 
+function retrieveLedger (genesis: string): Ledger {
+  let ledger: Ledger | null = null;
+
+  const { isLedgerCapable } = getState();
+
+  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
+
+  const def = getNetwork(genesis);
+
+  assert(def, 'There is no known Ledger app available for this chain');
+
+  ledger = new Ledger('webusb', def.network);
+
+  return ledger;
+}
+
 export function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -66,6 +64,7 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
   const [address, setAddress] = useState<string | null>(null);
   const { t } = useTranslation();
   const ledger = useMemo(() => {
+    setError(null);
     setIsLocked(false);
     setRefreshLock(false);
 
@@ -77,7 +76,11 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         return null;
       }
 
-      return retrieveLedger(genesis);
+      try {
+        return retrieveLedger(genesis);
+      } catch (error) {
+        setError((error as Error).message);
+      }
     }
 
     return null;

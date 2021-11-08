@@ -10,7 +10,6 @@ Changes:
 
 - Detect Ascii bytes (& display) when signing
 - Correctly detect and create Ethereum-compatible chain accounts
-- Fix polish translation (valid JSON)
 - Ensure site authorization toggle is saved
 - Optimize metadata conversion process
 - Bump `@polkadot/util` to 7.8.2

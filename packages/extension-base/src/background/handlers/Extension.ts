@@ -5,6 +5,7 @@ import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
@@ -22,9 +23,16 @@ type CachedUnlocks = Record<string, number>;
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
+const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 
 // a global registry to use internally
 const registry = new TypeRegistry();
+
+function getSuri (seed: string, type?: KeypairType): string {
+  return type === 'ethereum'
+    ? `${seed}${ETH_DERIVE_DEFAULT}`
+    : seed;
+}
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
   return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
@@ -61,7 +69,7 @@ export default class Extension {
   }
 
   private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
-    keyring.addUri(suri, password, { genesisHash, name }, type);
+    keyring.addUri(getSuri(suri, type), password, { genesisHash, name }, type);
 
     return true;
   }
@@ -300,7 +308,7 @@ export default class Extension {
     const seed = mnemonicGenerate(length);
 
     return {
-      address: keyring.createFromUri(seed, {}, type).address,
+      address: keyring.createFromUri(getSuri(seed, type), {}, type).address,
       seed
     };
   }
@@ -317,7 +325,7 @@ export default class Extension {
     }
 
     return {
-      address: keyring.createFromUri(suri, {}, type).address,
+      address: keyring.createFromUri(getSuri(suri, type), {}, type).address,
       suri
     };
   }

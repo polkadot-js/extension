@@ -83,7 +83,9 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   // always allow the actual settings to override the display
   return {
     account,
-    formatted: encodeAddress(publicKey, prefix),
+    formatted: account?.type === 'ethereum'
+      ? address
+      : encodeAddress(publicKey, prefix),
     genesisHash: account?.genesisHash,
     prefix,
     type: account?.type || DEFAULT_TYPE
@@ -116,11 +118,25 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
     const accountByAddress = findAccountByAddress(accounts, address);
 
-    const recoded = (chain?.definition.chainType === 'ethereum' || accountByAddress?.type === 'ethereum' || (!accountByAddress && givenType === 'ethereum'))
-      ? { account: accountByAddress, formatted: address, type: 'ethereum' } as Recoded
-      : recodeAddress(address, accounts, chain, settings);
+    console.log(
+      address,
+      (
+        chain?.definition.chainType === 'ethereum' ||
+        accountByAddress?.type === 'ethereum' ||
+        (!accountByAddress && givenType === 'ethereum')
+      )
+        ? { account: accountByAddress, formatted: address, type: 'ethereum' }
+        : recodeAddress(address, accounts, chain, settings)
+    );
 
-    setRecoded(recoded || defaultRecoded);
+    setRecoded(
+      (
+        chain?.definition.chainType === 'ethereum' ||
+        accountByAddress?.type === 'ethereum' ||
+        (!accountByAddress && givenType === 'ethereum')
+      )
+        ? { account: accountByAddress, formatted: address, type: 'ethereum' }
+        : recodeAddress(address, accounts, chain, settings));
   }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {
@@ -140,20 +156,23 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   }, [toggleActions]);
 
   const theme = (
-    chain?.icon
-      ? chain.icon
-      : type === 'ethereum'
-        ? 'ethereum'
-        : 'polkadot'
+    type === 'ethereum'
+      ? 'ethereum'
+      : (chain?.icon || 'polkadot')
   ) as IconTheme;
 
-  const _onClick = useCallback((): void => setShowActionsMenu(!showActionsMenu), [showActionsMenu]);
-  const _onCopy = useCallback((): void => show(t('Copied')), [show, t]);
+  const _onClick = useCallback(
+    () => setShowActionsMenu(!showActionsMenu),
+    [showActionsMenu]
+  );
+
+  const _onCopy = useCallback(
+    () => show(t('Copied')),
+    [show, t]
+  );
+
   const _toggleVisibility = useCallback(
-    (): void => {
-      address && showAccount(address, isHidden || false)
-        .catch(console.error);
-    },
+    () => address && showAccount(address, isHidden || false).catch(console.error),
     [address, isHidden]
   );
 

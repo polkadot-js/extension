@@ -5,6 +5,7 @@
 Contributed:
 
 - Add search functionality (Thanks to https://github.com/Tbaut)
+- Add Urdu translation (Thanks to https://github.com/itsonal)
 
 Changes:
 

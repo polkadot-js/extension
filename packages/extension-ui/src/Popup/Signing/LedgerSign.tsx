@@ -71,7 +71,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           {error}
         </Warning>
       )}
-      {ledgerLocked
+      {(ledgerLocked || error)
         ? (
           <Button
             isBusy={isBusy || ledgerLoading}
@@ -91,7 +91,6 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         )
       }
     </div>
-
   );
 }
 

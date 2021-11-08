@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Expand error messaging for non-compatible Ledger chains
+
+
 ## 0.41.1 Nov 8, 2021
 
 Contributed:

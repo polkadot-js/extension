@@ -160,5 +160,9 @@
   "password for encrypting all accounts": "",
   "I want to export all my accounts": "",
   "Notifications": "",
-  "Search by name or network...": ""
+  "Search by name or network...": "",
+  "Use custom address index": "",
+  "Custom index": "",
+  "Use custom derivation index": "",
+  "secret derivation path": ""
 }

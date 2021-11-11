@@ -28,9 +28,9 @@ const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 // a global registry to use internally
 const registry = new TypeRegistry();
 
-function getSuri (seed: string, type?: KeypairType): string {
+function getSuri (seed: string, type?: KeypairType, derivationPath=ETH_DERIVE_DEFAULT): string {
   return type === 'ethereum'
-    ? `${seed}${ETH_DERIVE_DEFAULT}`
+    ? `${seed}${derivationPath}`
     : seed;
 }
 
@@ -304,16 +304,16 @@ export default class Extension {
     }
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type, customEthDerivationPath }: RequestSeedCreate): ResponseSeedCreate {
     const seed = mnemonicGenerate(length);
 
     return {
-      address: keyring.createFromUri(getSuri(seed, type), {}, type).address,
+      address: keyring.createFromUri(getSuri(seed, type, customEthDerivationPath), {}, type).address,
       seed
     };
   }
 
-  private seedValidate ({ suri, type }: RequestSeedValidate): ResponseSeedValidate {
+  private seedValidate ({ suri, type, customEthDerivationPath}: RequestSeedValidate): ResponseSeedValidate {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
@@ -325,7 +325,7 @@ export default class Extension {
     }
 
     return {
-      address: keyring.createFromUri(getSuri(suri, type), {}, type).address,
+      address: keyring.createFromUri(getSuri(suri, type, customEthDerivationPath), {}, type).address,
       suri
     };
   }

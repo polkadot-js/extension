@@ -29,14 +29,8 @@ const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 const registry = new TypeRegistry();
 
 function getSuri (seed: string, type?: KeypairType, derivationPath = ETH_DERIVE_DEFAULT): string {
-  // console.log('test');
-  // console.log(`${seed}${derivationPath}`);
-  // console.log(`${seed}/${derivationPath}`);
-  // console.log(seed + derivationPath);
-  // console.log(derivationPath[0] === '/', derivationPath[0] === '/' ? `${seed}${derivationPath}` : `${seed}/${derivationPath}`);
-
   return type === 'ethereum'
-    ? derivationPath[0] === '/' ? `${seed}${derivationPath}` : `${seed}/${derivationPath}`// `${seed}${derivationPath}`//`${seed}${derivationPath}`
+    ? derivationPath[0] === '/' ? `${seed}${derivationPath}` : `${seed}/${derivationPath}`
     : seed;
 }
 

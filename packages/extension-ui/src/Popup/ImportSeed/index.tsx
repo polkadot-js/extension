@@ -33,13 +33,10 @@ function ImportSeed (): React.ReactElement {
   const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
-    console.log("accounts, onAction")
     !accounts.length && onAction();
-    console.log("accounts, onAction 2")
   }, [accounts, onAction]);
 
   useEffect((): void => {
-    console.log("CHAIN",chain)
     setType(
       chain && chain.definition.chainType === 'ethereum'
         ? 'ethereum'
@@ -47,21 +44,7 @@ function ImportSeed (): React.ReactElement {
     );
   }, [chain, genesisHash]);
 
-  // useEffect((): void => {
-  //   if (seed) {
-  //     const type = chain && chain.definition.chainType === 'ethereum'
-  //       ? 'ethereum'
-  //       : DEFAULT_TYPE;
-
-  //     setType(type);
-  //     validateSeed(seed, type, ethDerivePath)
-  //       .then(({ address }) => setAddress(address))
-  //       .catch(console.error);
-  //   }
-  // }, [seed, chain, ethDerivePath]);
-
   const _onCreate = useCallback((name: string, password: string): void => {
-    console.log("_onCreate")
     // this should always be the case
     if (name && password && account) {
       setIsBusy(true);

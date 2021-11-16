@@ -47,17 +47,13 @@ function SeedAndPath ({ className, genesisHash, onAccountChange, onNextStep, typ
 
     const suri = `${seed || ''}${path || ''}`;
 
-    console.log("SeedAndPath",suri, type, customEthDerivationPath);
     validateSeed(suri, type, customEthDerivationPath)
       .then((validatedAccount) => {
-        console.log("validatedAccount",validatedAccount)
         setError('');
         setAddress(validatedAccount.address);
-        console.log("setAddress")
         onAccountChange(
           objectSpread<AccountInfo>({}, validatedAccount, { genesisHash, type })
         );
-        console.log("onAccountChange")
       })
       .catch(() => {
         setAddress('');

@@ -133,7 +133,7 @@ export async function createAccountSuri (name: string, password: string, suri: s
 }
 
 export async function createSeed (length?: SeedLengths, type?: KeypairType, customEthDerivationPath?: string): Promise<{ address: string; seed: string }> {
-  return sendMessage('pri(seed.create)', { length, customEthDerivationPath, type });
+  return sendMessage('pri(seed.create)', { customEthDerivationPath, length, type });
 }
 
 export async function getAllMetatdata (): Promise<MetadataDef[]> {
@@ -206,7 +206,7 @@ export async function subscribeSigningRequests (cb: (accounts: SigningRequest[])
 }
 
 export async function validateSeed (suri: string, type?: KeypairType, customEthDerivationPath?: string): Promise<{ address: string; suri: string }> {
-  return sendMessage('pri(seed.validate)', { suri, customEthDerivationPath, type });
+  return sendMessage('pri(seed.validate)', { customEthDerivationPath, suri, type });
 }
 
 export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {

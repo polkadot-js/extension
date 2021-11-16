@@ -8,28 +8,17 @@ import useTranslation from '@polkadot/extension-ui/hooks/useTranslation';
 
 import { Checkbox, Dropdown, InputWithLabel } from '../../components';
 
-// import { useToggle } from '@polkadot/react-hooks';
-
-// import { useTranslation } from '../translate';
-// import { DeriveValidationOutput } from '../types';
-
 interface Props {
   className?: string;
   onChange: (string: string) => void;
-  // seedType: string;
   derivePath: string;
-  // deriveValidation: DeriveValidationOutput | undefined;
-  // seed: string;
 }
 
 export const ETH_DEFAULT_PATH = "m/44'/60'/0'/0/0";
 
 function CreateEthDerivationPath ({ className,
   derivePath,
-  // deriveValidation,
-  onChange
-  // seedType
-}: Props): React.ReactElement<Props> {
+  onChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [addIndex, setAddIndex] = useState(0);
   const [customIndex, setCustomIndex] = useState(new BN(0));
@@ -43,12 +32,6 @@ function CreateEthDerivationPath ({ className,
   const [useCustomPath, setUseCustomPath] = useState(false);
   const [useCustomIndex, setUseCustomIndex] = useState(false);
 
-  // const errorIndex = useRef<Record<string, string>>({
-  //   INVALID_DERIVATION_PATH: t<string>('This is an invalid derivation path.'),
-  //   PASSWORD_IGNORED: t<string>('Password are ignored for hex seed'),
-  //   SOFT_NOT_ALLOWED: t<string>('Soft derivation paths are not allowed on ed25519'),
-  //   WARNING_SLASH_PASSWORD: t<string>('Your password contains at least one "/" character. Disregard this warning if it is intended.')
-  // });
   function setCustomIndexText (inp: string) {
     setCustomIndex(new BN(inp));
   }

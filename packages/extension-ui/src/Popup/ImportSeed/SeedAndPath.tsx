@@ -27,14 +27,12 @@ interface Props {
 
 function SeedAndPath ({ className, genesisHash, onAccountChange, onNextStep, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  // const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [customEthDerivationPath, setCustomEthDerivationPath] = useState<string>("m/44'/60'/0'/0/0");
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
-  // const [genesis, setGenesis] = useState('');
 
   useEffect(() => {
     // No need to validate an empty seed

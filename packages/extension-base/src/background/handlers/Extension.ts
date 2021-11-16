@@ -314,22 +314,15 @@ export default class Extension {
   }
 
   private seedValidate ({ customEthDerivationPath, suri, type }: RequestSeedValidate): ResponseSeedValidate {
-    console.log('seedValidate');
     const { phrase } = keyExtractSuri(suri);
-
-    console.log('phrase', phrase);
 
     if (isHex(phrase)) {
       assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
     } else {
       // sadly isHex detects as string, so we need a cast here
       assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
-      console.log(1);
       assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
-      console.log(2);
     }
-
-    console.log('getSuri(suri, type, customEthDerivationPath)', getSuri(suri, type, customEthDerivationPath));
 
     return {
       address: keyring.createFromUri(getSuri(suri, type, customEthDerivationPath), {}, type).address,

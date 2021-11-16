@@ -3,8 +3,9 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { AccountContext, ActionContext, Address } from '../../components';
+import { AccountContext, ActionContext, Address, Dropdown } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
+import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri } from '../../messaging';
@@ -20,6 +21,7 @@ export interface AccountInfo {
 
 function ImportSeed (): React.ReactElement {
   const { t } = useTranslation();
+  const genesisOptions = useGenesisHashOptions();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -27,21 +29,39 @@ function ImportSeed (): React.ReactElement {
   const [name, setName] = useState<string | null>(null);
   const [step1, setStep1] = useState(true);
   const [type, setType] = useState(DEFAULT_TYPE);
-  const chain = useMetadata(account && account.genesis, true);
+  const [genesisHash, setGenesisHash] = useState('');
+  const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
+    console.log("accounts, onAction")
     !accounts.length && onAction();
+    console.log("accounts, onAction 2")
   }, [accounts, onAction]);
 
   useEffect((): void => {
+    console.log("CHAIN",chain)
     setType(
       chain && chain.definition.chainType === 'ethereum'
         ? 'ethereum'
         : DEFAULT_TYPE
     );
-  }, [chain]);
+  }, [chain, genesisHash]);
+
+  // useEffect((): void => {
+  //   if (seed) {
+  //     const type = chain && chain.definition.chainType === 'ethereum'
+  //       ? 'ethereum'
+  //       : DEFAULT_TYPE;
+
+  //     setType(type);
+  //     validateSeed(seed, type, ethDerivePath)
+  //       .then(({ address }) => setAddress(address))
+  //       .catch(console.error);
+  //   }
+  // }, [seed, chain, ethDerivePath]);
 
   const _onCreate = useCallback((name: string, password: string): void => {
+    console.log("_onCreate")
     // this should always be the case
     if (name && password && account) {
       setIsBusy(true);
@@ -74,17 +94,27 @@ function ImportSeed (): React.ReactElement {
       <div>
         <Address
           address={account?.address}
-          genesisHash={account?.genesis}
+          genesisHash={genesisHash}
           name={name}
         />
       </div>
       {step1
         ? (
-          <SeedAndPath
-            onAccountChange={setAccount}
-            onNextStep={_onNextStep}
-            type={type}
-          />
+          <>
+            <Dropdown
+              className='genesisSelection'
+              label={t<string>('Network')}
+              onChange={setGenesisHash}
+              options={genesisOptions}
+              value={genesisHash}
+            />
+            <SeedAndPath
+              genesisHash={genesisHash}
+              onAccountChange={setAccount}
+              onNextStep={_onNextStep}
+              type={type}
+            />
+          </>
         )
         : (
           <AccountNamePasswordCreation

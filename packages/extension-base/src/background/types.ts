@@ -298,13 +298,13 @@ export type RequestSigningSubscribe = null;
 export interface RequestSeedCreate {
   length?: SeedLengths;
   type?: KeypairType;
-  customEthDerivationPath?:string;
+  customEthDerivationPath?: string;
 }
 
 export interface RequestSeedValidate {
   suri: string;
   type?: KeypairType;
-  customEthDerivationPath?:string;
+  customEthDerivationPath?: string;
 }
 
 // Responses

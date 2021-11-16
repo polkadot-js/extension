@@ -13,26 +13,28 @@ import styled from 'styled-components';
 import { validateSeed } from '@polkadot/extension-ui/messaging';
 import { objectSpread } from '@polkadot/util';
 
-import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import { ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import CreateEthDerivationPath from '../CreateAccount/CreateEthDerivationPath';
 
 interface Props {
   className?: string;
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
   type: KeypairType;
+  genesisHash: string;
 }
 
-function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
+function SeedAndPath ({ className, genesisHash, onAccountChange, onNextStep, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const genesisOptions = useGenesisHashOptions();
+  // const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
+  const [customEthDerivationPath, setCustomEthDerivationPath] = useState<string>("m/44'/60'/0'/0/0");
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
-  const [genesis, setGenesis] = useState('');
+  // const [genesis, setGenesis] = useState('');
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -45,13 +47,17 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
 
     const suri = `${seed || ''}${path || ''}`;
 
-    validateSeed(suri, type)
+    console.log("SeedAndPath",suri, type, customEthDerivationPath);
+    validateSeed(suri, type, customEthDerivationPath)
       .then((validatedAccount) => {
+        console.log("validatedAccount",validatedAccount)
         setError('');
         setAddress(validatedAccount.address);
+        console.log("setAddress")
         onAccountChange(
-          objectSpread<AccountInfo>({}, validatedAccount, { genesis, type })
+          objectSpread<AccountInfo>({}, validatedAccount, { genesisHash, type })
         );
+        console.log("onAccountChange")
       })
       .catch(() => {
         setAddress('');
@@ -61,7 +67,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
           : t<string>('Invalid mnemonic seed')
         );
       });
-  }, [t, genesis, seed, path, onAccountChange, type]);
+  }, [t, genesisHash, seed, path, onAccountChange, type, customEthDerivationPath]);
 
   const _onToggleAdvanced = useCallback(() => {
     setAdvances(!advanced);
@@ -88,13 +94,6 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
             {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
           </Warning>
         )}
-        <Dropdown
-          className='genesisSelection'
-          label={t<string>('Network')}
-          onChange={setGenesis}
-          options={genesisOptions}
-          value={genesis}
-        />
         <div
           className='advancedToggle'
           onClick={_onToggleAdvanced}
@@ -102,14 +101,19 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
           <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight} />
           <span>{t<string>('advanced')}</span>
         </div>
-        { advanced && (
-          <InputWithLabel
+        { advanced && (type === 'ethereum'
+          ? <CreateEthDerivationPath
+            derivePath={customEthDerivationPath}
+            onChange={setCustomEthDerivationPath}
+            />
+          : <InputWithLabel
             className='derivationPath'
             isError={!!path && !!error}
             label={t<string>('derivation path')}
             onChange={setPath}
             value={path || ''}
-          />
+            />
+
         )}
         {!!error && !!seed && (
           <Warning

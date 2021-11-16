@@ -121,7 +121,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
                 onNextStep={_onNextStep}
                 seed={seed}
               />
-              </>
+            </>
             )
             : (
               <>

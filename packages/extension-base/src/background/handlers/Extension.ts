@@ -23,14 +23,20 @@ type CachedUnlocks = Record<string, number>;
 
 const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
-const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
+const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
 // a global registry to use internally
 const registry = new TypeRegistry();
 
-function getSuri (seed: string, type?: KeypairType, derivationPath=ETH_DERIVE_DEFAULT): string {
+function getSuri (seed: string, type?: KeypairType, derivationPath = ETH_DERIVE_DEFAULT): string {
+  // console.log('test');
+  // console.log(`${seed}${derivationPath}`);
+  // console.log(`${seed}/${derivationPath}`);
+  // console.log(seed + derivationPath);
+  // console.log(derivationPath[0] === '/', derivationPath[0] === '/' ? `${seed}${derivationPath}` : `${seed}/${derivationPath}`);
+
   return type === 'ethereum'
-    ? `${seed}${derivationPath}`
+    ? derivationPath[0] === '/' ? `${seed}${derivationPath}` : `${seed}/${derivationPath}`// `${seed}${derivationPath}`//`${seed}${derivationPath}`
     : seed;
 }
 
@@ -313,16 +319,23 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ suri, type, customEthDerivationPath}: RequestSeedValidate): ResponseSeedValidate {
+  private seedValidate ({ customEthDerivationPath, suri, type }: RequestSeedValidate): ResponseSeedValidate {
+    console.log('seedValidate');
     const { phrase } = keyExtractSuri(suri);
+
+    console.log('phrase', phrase);
 
     if (isHex(phrase)) {
       assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
     } else {
       // sadly isHex detects as string, so we need a cast here
       assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
+      console.log(1);
       assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+      console.log(2);
     }
+
+    console.log('getSuri(suri, type, customEthDerivationPath)', getSuri(suri, type, customEthDerivationPath));
 
     return {
       address: keyring.createFromUri(getSuri(suri, type, customEthDerivationPath), {}, type).address,

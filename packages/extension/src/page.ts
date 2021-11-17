@@ -4,13 +4,14 @@
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 
+import { MESSAGE_ORIGIN_CONTENT } from '@polkadot/extension-base/defaults';
 import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {
   // only allow messages from our window, by the loader
-  if (source !== window || data.origin !== 'content') {
+  if (source !== window || data.origin !== MESSAGE_ORIGIN_CONTENT) {
     return;
   }
 

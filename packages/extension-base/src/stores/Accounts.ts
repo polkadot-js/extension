@@ -3,11 +3,12 @@
 
 import type { KeyringJson, KeyringStore } from '@polkadot/ui-keyring/types';
 
+import { EXTENSION_PREFIX } from '../defaults';
 import BaseStore from './Base';
 
 export default class AccountsStore extends BaseStore<KeyringJson> implements KeyringStore {
   constructor () {
-    super(null);
+    super(`${EXTENSION_PREFIX}accounts`);
   }
 
   public override set (key: string, value: KeyringJson, update?: () => void): void {

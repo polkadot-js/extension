@@ -109,7 +109,7 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async send (method: string, params: unknown[], subscription?: SubscriptionHandler): Promise<any> {
+  public async send (method: string, params: unknown[], _?: boolean, subscription?: SubscriptionHandler): Promise<any> {
     if (subscription) {
       const { callback, type } = subscription;
 
@@ -152,7 +152,7 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   public subscribe (type: string, method: string, params: unknown[], callback: AnyFunction): Promise<number> {
-    return this.send(method, params, { callback, type }) as Promise<number>;
+    return this.send(method, params, false, { callback, type }) as Promise<number>;
   }
 
   /**

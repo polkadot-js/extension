@@ -17,10 +17,10 @@
   "version": "0.41.2-0",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.15.4"
+    "@babel/runtime": "^7.16.3"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.161",
+    "@types/chrome": "^0.0.164",
     "@types/firefox-webext-browser": "^94.0.0"
   },
   "peerDependencies": {

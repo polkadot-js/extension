@@ -233,7 +233,7 @@ export async function bondOrExtra(
   _value: bigint,
   _selectedValidators: AccountId[] | null,
   _alreadyBondedAmount: bigint,
-  payee = 'Staked'): Promise<any> {
+  payee = 'Staked'): Promise<string | null> {
   try {
     console.log('bondOrExtra is called!');
 
@@ -261,8 +261,6 @@ export async function bondOrExtra(
       bonded = api.tx.staking.bond(_stashAccountId, _value, payee);
     }
 
-    console.log('bond call :', bonded);
-
     return new Promise((resolve) => {
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       bonded.signAndSend(_signer, ({ events = [], status }) => {
@@ -286,8 +284,6 @@ export async function bondOrExtra(
           if (String(method).includes('Success')) {
             console.log('Bonded Successfully');
             resolve('success');
-
-            return;
           }
         });
       });

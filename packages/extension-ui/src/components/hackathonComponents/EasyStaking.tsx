@@ -14,7 +14,7 @@ import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
-import { accountsBalanceType, AllValidatorsFromSubscan, savedMetaData,StakingConsts, Validators, ValidatorsFromSubscan, ValidatorsName } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
+import { accountsBalanceType, AllValidatorsFromSubscan, savedMetaData, StakingConsts, Validators, ValidatorsFromSubscan, ValidatorsName } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
 import { bondOrExtra, getAllValidatorsFromSubscan, getCurrentEraIndex, getStakingReward, nominate } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
 import keyring from '@polkadot/ui-keyring';
 import { formatBalance } from '@polkadot/util';
@@ -353,12 +353,14 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     //   setNoFeeAlert(false);
     // }
 
+    setNextButtonCaption(t('Next'));
+
     if (Number(availableBalance) <= Number(stakeAmountInHuman) || !Number(stakeAmountInHuman)) {
       setNextButtonDisabled(true);
 
       if (Number(availableBalance) <= Number(stakeAmountInHuman) && Number(stakeAmountInHuman) !== 0) {
         setNextButtonCaption(t('Insufficient Balance'));
-      }
+      } 
     } else {
       setNextButtonDisabled(false);
     }
@@ -435,7 +437,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
         setMinNominatorBond(String(MIN_EXTRA_BOND));
       }
 
-      getLedgerWorker.terminate();
+      // getLedgerWorker.terminate(); stay awake, will be terminated at the end
     };
   }
 
@@ -484,7 +486,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     }
 
     setStakeAmount(BigInt(Number(value)) * BigInt(10 ** (decimals - floatingPointDigit)));
-    console.log('stakeAmount 0',BigInt(Number(value)) * BigInt(10 ** (decimals - floatingPointDigit)))
+    console.log('stakeAmount 0', BigInt(Number(value)) * BigInt(10 ** (decimals - floatingPointDigit)))
   }
 
   function handleMinClicked() {
@@ -492,7 +494,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     setStakeAmountInHuman(minNominatorBond);
 
     setStakeAmount(amountToMachine(minNominatorBond, decimals));
-    console.log('stakeAmount 1',amountToMachine(minNominatorBond, decimals))
+    console.log('stakeAmount 1', amountToMachine(minNominatorBond, decimals))
   }
 
   function handleMaxClicked() {
@@ -510,7 +512,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     }
 
     setStakeAmount(BigInt(max) * BigInt(10 ** (decimals - floatingPointDigits)));
-    console.log('stakeAmount 1',BigInt(max) * BigInt(10 ** (decimals - floatingPointDigits)))
+    console.log('stakeAmount 1', BigInt(max) * BigInt(10 ** (decimals - floatingPointDigits)))
 
   }
 
@@ -777,19 +779,19 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                       ? <ConfirmStaking
                         chain={chain}
                         coin={coin}
-                        handleEasyStakingModalClose={handleEasyStakingModalClose}
+                        // handleEasyStakingModalClose={handleEasyStakingModalClose}
                         // lastFee={lastFee}
                         ledger={ledger}
                         nominatedValidatorsInfo={nominatedValidatorsInfo}
-                        selectedValidatorsAccountId={selectedValidatorsAccountId}
                         setConfirmStakingModalOpen={setConfirmStakingModalOpen}
                         setState={setState}
                         showConfirmStakingModal={showConfirmStakingModal}
                         stakeAmount={stakeAmount}
                         staker={staker}
-                        stakingConstsInfo={stakingConsts}
+                        stakingConsts={stakingConsts}
                         state={state}
                         validatorsInfo={validatorsInfo}
+                        validatorsName={validatorsName}
                       />
                       : ''}
                   </Grid>

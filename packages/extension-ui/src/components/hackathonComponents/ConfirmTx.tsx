@@ -18,7 +18,8 @@ import keyring from '@polkadot/ui-keyring';
 import useTranslation from '../../hooks/useTranslation';
 import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
 import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import { accountsBalanceType, amountToHuman, fixFloatingPoint, TransactionStatus } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { amountToHuman, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { accountsBalanceType, TransactionStatus } from '../../util/HackathonUtilFiles/pjpeTypes';
 import signAndTransfer from '../../util/HackathonUtilFiles/signAndTransfer';
 import { AccountContext } from '../contexts';
 import { ActionText, Button } from '../';
@@ -128,6 +129,34 @@ export default function ConfirmTx({
     }
   }
 
+  function callGetLedgerWorker() {
+    const getLedgerWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getLedger.js', import.meta.url));
+
+    workers.push(getLedgerWorker);
+    const address = staker.address;
+
+    getLedgerWorker.postMessage({ address, chain });
+
+    getLedgerWorker.onerror = (err) => {
+      console.log(err);
+    };
+
+    getLedgerWorker.onmessage = (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const ledger: StakingLedger = e.data;
+
+      console.log('getLedger:', ledger);
+      setLedger(ledger);
+      // eslint-disable-next-line padding-line-between-statements
+      if (Number(ledger.total) > 0) {
+        // already bonded, set min extra bond to MIN_EXTRA_BOND
+        setMinNominatorBond(String(MIN_EXTRA_BOND));
+      }
+
+      getLedgerWorker.terminate();
+    };
+  }
+  
   useEffect(() => {
     if (!confirmModalOpen) return;
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -415,8 +444,6 @@ export default function ConfirmTx({
                   </MuiButton>
                 </Grid>
                 : <>
-
-
                   <Grid item xs={8}>
                     <Button
                       data-button-action=''
@@ -435,39 +462,7 @@ export default function ConfirmTx({
                         text={t('Reject').toUpperCase()}
                       />
                     </div>
-                    {/* <Button
-                      isDisabled={transfering}
-                      onClick={handleReject}
-                    >
-                      {t('Reject')}
-                    </Button> */}
                   </Grid>
-                  {/* <Grid item xs={6}>
-                    <LoadingButton
-                      color={failAlert ? 'warning' : 'primary'}
-                      disabled={confirmDisabled}
-                      fullWidth
-                      loading={transfering}
-                      loadingPosition='start'
-                      name='transferButton'
-                      onClick={handleConfirmTransfer}
-                      startIcon={
-                        <FontAwesomeIcon
-                          icon={faPaperPlane}
-                          size='lg'
-                        />}
-                      variant='contained'
-                    >
-                      {t('Confirm')}
-                    </LoadingButton>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Button color='secondary' disabled={transfering} fullWidth onClick={handleReject} variant='outlined'>
-                      {t('Reject')}
-                    </Button>
-                  </Grid> */}
-
-
                 </>}
               {txStatus.blockNumber || transactionHash
                 ? <Grid alignItems='center' container item

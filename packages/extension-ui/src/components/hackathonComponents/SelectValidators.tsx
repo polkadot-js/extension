@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line simple-import-sort/imports
 
-import type { AccountId } from '@polkadot/types/interfaces';
+import type { AccountId, StakingLedger } from '@polkadot/types/interfaces';
 
 import { ArrowBackIosRounded, ReportProblemOutlined } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -48,7 +48,7 @@ interface Props {
   validatorsName: ValidatorsName[] | null;
   setState: React.Dispatch<React.SetStateAction<string>>;
   state: string;
-  coin:string;
+  coin: string;
   ledger: StakingLedger;
 
 }
@@ -213,7 +213,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 interface EnhancedTableToolbarProps {
   numSelected: number;
-  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelected: React.Dispatch<React.SetStateAction<DeriveStakingQuery[]>>;
   stakingConsts: StakingConsts;
 }
 
@@ -295,8 +295,8 @@ interface TableRowProps {
   decimals: number;
   stakingConsts: StakingConsts;
   validatorsName: ValidatorsName[] | null;
-  selected: string[];
-  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+  selected: DeriveStakingQuery[];
+  setSelected: React.Dispatch<React.SetStateAction<DeriveStakingQuery[]>>;
 }
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -348,8 +348,8 @@ function EnhancedTable(props: TableRowProps) {
   //   setSelected([]);
   // };
 
-  const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
-    const selectedIndex = selected.indexOf(id);
+  const handleClick = (event: React.MouseEvent<unknown>, validator: DeriveStakingQuery) => {
+    const selectedIndex = selected.indexOf(validator);
 
     if (selected.length >= stakingConsts.maxNominations && selectedIndex === -1) {
       console.log('Max validators you can select reached!');
@@ -357,10 +357,10 @@ function EnhancedTable(props: TableRowProps) {
       return;
     }
 
-    let newSelected: string[] = [];
+    let newSelected: DeriveStakingQuery[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
+      newSelected = newSelected.concat(selected, validator);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -384,21 +384,24 @@ function EnhancedTable(props: TableRowProps) {
   //   setPage(0);
   // };
 
-  const isSelected = (id: string) => selected.indexOf(id) !== -1;
+  const isSelected = (v: DeriveStakingQuery) => selected.indexOf(v) !== -1;
 
-  function getAccountIdOrName(id: string) {
-    const validator = validatorsName?.find((v) => v.address === id);
+  function getAccountIdOrName(val: DeriveStakingQuery) {
+    const validator = validatorsName?.find((v) => v.address === String(val.accountId));
 
     if (validator) {
       return makeFirstLetterOfStringUpperCase(validator.name);
     }
 
-    return toShortAddress(id);
+    return toShortAddress(val.accountId);
   }
 
   return (
     <Paper sx={{ overflow: 'hidden', width: '100%' }}>
-      <EnhancedTableToolbar numSelected={selected.length} setSelected={setSelected} stakingConsts={stakingConsts} />
+      <EnhancedTableToolbar
+        numSelected={selected.length}
+        setSelected={setSelected}
+        stakingConsts={stakingConsts} />
       <TableContainer sx={{ maxHeight: 350 }}>
         <Table stickyHeader>
           <EnhancedTableHead
@@ -414,7 +417,7 @@ function EnhancedTable(props: TableRowProps) {
               rows.slice().sort(getComparator(order, orderBy))
                 // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.accountId.toString());
+                  const isItemSelected = isSelected(row);
                   const labelId = `table-checkbox-${index}`;
 
                   return (
@@ -423,7 +426,7 @@ function EnhancedTable(props: TableRowProps) {
                       hover
                       key={index}
                       // eslint-disable-next-line react/jsx-no-bind
-                      onClick={(event) => handleClick(event, row.accountId.toString())}
+                      onClick={(event) => handleClick(event, row)}
                       role='checkbox'
                       selected={isItemSelected}
                       style={{
@@ -448,7 +451,7 @@ function EnhancedTable(props: TableRowProps) {
                       >
                         <Grid container>
                           <Grid item xs={12}>
-                            {getAccountIdOrName(row.accountId)}
+                            {getAccountIdOrName(row)}
                           </Grid>
                           <Grid item sx={{ fontSize: 10 }} xs={12}>
                             {row.exposure.total ? `Total staked: ${String(row.exposure.total)}` : ''}
@@ -505,20 +508,8 @@ function EnhancedTable(props: TableRowProps) {
   );
 }
 
-export default function SelectValidators({
-  chain,
-  coin,
-  ledger,
-  setSelectValidatorsModalOpen,
-  setState,
-  showSelectValidatorsModal,
-  stakeAmount,
-  staker,
-  stakingConsts,
-  state,
-  validatorsInfo,
-  validatorsInfoFromSubscan,
-  validatorsName
+export default function SelectValidators({ chain, coin, ledger, setSelectValidatorsModalOpen, setState,
+  showSelectValidatorsModal, stakeAmount, staker, stakingConsts, state, validatorsInfo, validatorsInfoFromSubscan, validatorsName
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [validators, setValidators] = useState<DeriveStakingQuery[]>([]);
@@ -526,7 +517,8 @@ export default function SelectValidators({
   const [filterOverSubscribedsState, setFilterOverSubscribeds] = useState(true);
   const [filterNoNamesState, setFilterNoNames] = useState(false);
   const [decimal, setDecimal] = useState(1);
-  const [selected, setSelected] = React.useState<string[]>([]);
+  const [selected, setSelected] = React.useState<DeriveStakingQuery[]>([]);
+  const [showConfirmStakingModal, setConfirmStakingModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const { decimals } = getNetworkInfo(chain);
@@ -575,7 +567,7 @@ export default function SelectValidators({
   }, [setSelectValidatorsModalOpen, setState]);
 
   function handleSelectValidators() {
-    console.log(' go to confirm page');
+    setConfirmStakingModalOpen(true);
   }
 
   return (
@@ -697,25 +689,25 @@ export default function SelectValidators({
                       text={t('Cancel').toUpperCase()}
                     />
                   </Grid>
-                  {selected
+                  {selected.length >= 1
                     ? <ConfirmStaking
                       chain={chain}
                       coin={coin}
                       // handleEasyStakingModalClose={handleEasyStakingModalClose}
                       // lastFee={lastFee}
                       ledger={ledger}
-                      nominatedValidatorsInfo={nominatedValidatorsInfo}
-                      selectedValidatorsAccountId={selected}
+                      nominatedValidatorsInfo={selected}
                       setConfirmStakingModalOpen={setConfirmStakingModalOpen}
                       setState={setState}
                       showConfirmStakingModal={showConfirmStakingModal}
-                      stakeAmount={stakeAmount}
+                      stakeAmount={state === 'changeValidators' ? 0n : stakeAmount}
                       staker={staker}
-                      stakingConstsInfo={stakingConsts}
+                      stakingConsts={stakingConsts}
                       state={state}
                       validatorsInfo={validatorsInfo}
+                      validatorsName={validatorsName}
                     />
-                    : ''}
+                    : 'You need to select at least a validator'}
                 </Grid>
               </Grid>
             </Grid>

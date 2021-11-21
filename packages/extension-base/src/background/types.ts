@@ -10,7 +10,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { BalanceType } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackatonUtils';
+import { BalanceType } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackathonUtils';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
@@ -41,17 +41,14 @@ export interface AccountJson extends KeyringPair$Meta {
   suri?: string;
   type?: KeypairType;
   whenCreated?: number;
-  lastBalance?: string; // added by Kami TODOBalance
-  txHistory?: string; // added by Kami TODOBalance
-
+  // followings are added by Kami 
+  lastBalance?: string;
+  txHistory?: string;
+  stakingConsts?: string;
+  nominatedValidatorsInfo?: string;
+  validatorsName?: string;
+  validatorsInfo?: string;
 }
-
-// export type Balance = {// added by Kami
-//   address: string;
-//   chainName: string;
-//   balance?: string;
-//   lastUpdate?: Date;
-// }
 
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
@@ -95,13 +92,12 @@ export interface RequestSignatures {
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
-  // eslint-disable-next-line no-trailing-spaces
 
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
-  'pri(accounts.update)': [RequestBalanceUpdate, boolean]; // added by Kami TODOBalance
-  'pri(accounts.updateTxHistory)': [RequestTransactionHistoryUpdate, boolean]; // added by Kami TODOBalance
-
-  // eslint-disable-next-line no-trailing-spaces
+  'pri(accounts.update)': [RequestBalanceUpdate, boolean]; // added by Kami  
+  'pri(accounts.updateTxHistory)': [RequestTransactionHistoryUpdate, boolean]; // added by Kami  
+  'pri(accounts.updateStakingConsts)': [RequestStakingConstsUpdate, boolean]; // added by Kami  
+  'pri(accounts.updateMeta)': [RequestUpdateMeta, boolean]; // added by Kami  
 
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
@@ -227,13 +223,16 @@ export interface RequestAccountEdit {
   genesisHash?: string | null;
   name: string;
 }
-// added  by Kami TODOBalance
+// added  by Kami 
 export interface RequestBalanceUpdate {
   address: string;
   chainName: string;
   balance: string;
 }
-
+export interface RequestStakingConstsUpdate {
+  address: string;
+  stakingConsts: string;
+}
 export interface RequestTransactionHistoryUpdate {
   address: string;
   amount: string;
@@ -243,6 +242,11 @@ export interface RequestTransactionHistoryUpdate {
   fee: string;
   to: string;
   status: string;
+}
+
+export interface RequestUpdateMeta {
+  address: string;
+  meta: string;
 }
 
 export interface RequestAccountForget {

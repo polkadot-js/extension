@@ -34,7 +34,6 @@ import Svg from './Svg';
 
 // added by kami
 import { ClickAwayListener } from '@mui/material';
-import { accountsBalanceType } from '../util/HackathonUtilFiles/hackatonUtils';
 
 export interface Props {
   actions?: React.ReactNode;
@@ -50,8 +49,6 @@ export interface Props {
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
-  balances?: accountsBalanceType[] | null;
-  setBalances?: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
   showBalance?: boolean;
 }
 
@@ -101,7 +98,8 @@ function recodeAddress(address: string, accounts: AccountWithChildren[], chain: 
 const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address({ actions, address, balances, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, setBalances, showBalance, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName,
+   showBalance, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -134,6 +132,7 @@ function Address({ actions, address, balances, children, className, genesisHash,
       : recodeAddress(address, accounts, chain, settings);
 
     setRecoded(recoded || defaultRecoded);
+
   }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {
@@ -323,12 +322,10 @@ function Address({ actions, address, balances, children, className, genesisHash,
         (formatted || address) && showBalance
           ? <Balance
             address={address}
-            balances={balances}
             chain={chain}
             formattedAddress={formatted || address}
             givenType={givenType}
             name={name || account?.name || t('<unknown>')}
-            setBalances={setBalances}
           />
           : ''
       }

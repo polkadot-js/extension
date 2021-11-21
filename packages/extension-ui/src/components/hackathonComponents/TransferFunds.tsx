@@ -23,8 +23,10 @@ import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
 import isValidAddress from '../../util/HackathonUtilFiles/validateAddress';
 import { AccountContext, SettingsContext } from '../contexts';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { accountsBalanceType, amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackatonUtils';
+import { accountsBalanceType, amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
 import grey from '@mui/material/colors/grey';
+import { ActionText, NextStepButton } from '../';
+
 
 interface Props {
   actions?: React.ReactNode;
@@ -35,8 +37,6 @@ interface Props {
   className?: string;
   setTransferModalOpen: Dispatch<SetStateAction<boolean>>;
   givenType?: KeypairType;
-  balances?: accountsBalanceType[] | null;
-  setBalances?: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
 }
 
 interface Recoded {
@@ -47,7 +47,8 @@ interface Recoded {
   type: KeypairType;
 }
 
-export default function TransferFunds({ chain, givenType, sender, setTransferModalOpen, transferModalOpen, balances, setBalances }: Props): React.ReactElement<Props> {
+export default function TransferFunds({ chain, givenType, sender, setTransferModalOpen, transferModalOpen,
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [availableBalance, setAvailableBalance] = useState<string>('');
@@ -69,6 +70,11 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
   const [ED, setED] = useState(0);
   const [allAmountLoading, setAllAmountLoading] = useState(false);
   const [safeMaxAmountLoading, setsafeMaxAmountLoading] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log('sender : in transferfunds)', sender)
+  }, [sender]);
 
   useEffect((): void => {
     const { ED, coin } = getNetworkInfo(chain);
@@ -341,6 +347,14 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
     }
   }
 
+  function handleNext() {
+    handleConfirmModaOpen();
+  }
+
+  function handleConfirmModaOpen(): void {
+    setConfirmModalOpen(true);
+  }
+
   return (
     <Modal
       // eslint-disable-next-line react/jsx-no-bind
@@ -529,15 +543,16 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                   >
                     <TextField
                       InputLabelProps={{ shrink: true }}
-                      // eslint-disable-next-line sort-keys
                       InputProps={{ endAdornment: (<InputAdornment position='end'>{coin}</InputAdornment>) }}
                       autoFocus
+                      color='warning'
                       error={reapeAlert || noFeeAlert || zeroBalanceAlert}
                       fullWidth
                       helperText={reapeAlert
                         ? (t('Account will be reaped, existential deposit:') + String(ED) + ' ' + coin)
                         : (noFeeAlert ? t('Fee must be considered, use MAX button instead.') : (zeroBalanceAlert ? t('Available balance is zero.') : ''))}
                       label={t('Transfer Amount')}
+                      margin='dense'
                       name='transfeAmount'
                       onBlur={(event) => handleTransferAmountOnBlur(event.target.value)}
                       onChange={(event) => handleTransferAmountOnChange(event.target.value)}
@@ -550,19 +565,21 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid
-                container
-                justifyContent='space-between'
-                sx={{ padding: '40px 40px 10px' }}
-              >
-                <Grid
-                  item
-                  xs={8}
-                >
+              <Grid container justifyContent='space-between' sx={{ padding: '40px 40px 10px' }}>
+                <Grid item xs={8}>
+                  <NextStepButton
+                    data-button-action=''
+                    // isBusy={bondState === 'bonding'}
+                    isDisabled={nextButtonDisabled}
+                    onClick={handleNext}
+                  >
+                    {nextButtonCaption.toUpperCase()}
+
+                  </NextStepButton>
+
                   {recepient
                     ? <ConfirmTx
                       availableBalance={availableBalance}
-                      balances={balances}
                       chain={chain}
                       coin={coin}
                       handleTransferModalClose={handleTransferModalClose}
@@ -571,15 +588,20 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                       nextButtonDisabled={nextButtonDisabled}
                       recepient={recepient}
                       sender={sender}
-                      setBalances={setBalances}
                       transferAmount={transferAmount}
+                      setConfirmModalOpen={setConfirmModalOpen}
+                      confirmModalOpen={confirmModalOpen}
                     />
                     : ''}
                 </Grid>
-                <Grid
-                  item
-                  xs={3}
-                >
+                <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2, fontSize: 15 }}>
+                  <ActionText
+                    // className={{'margin': 'auto'}}
+                    onClick={handleTransferModalClose}
+                    text={t('CANCEL')}
+                  />
+                </Grid>
+                {/* <Grid item xs={3}>
                   <Button
                     color='secondary'
                     fullWidth
@@ -587,8 +609,8 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                     variant='outlined'
                   >
                     {t('Cancel')}
-                  </Button>
-                </Grid>
+                  </Button> */}
+                {/* </Grid> */}
               </Grid>
             </div>
             : ''}

@@ -8,13 +8,13 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import getNetworkInfo from './getNetwork';
-import { BalanceType, getFormattedAddress, handleAccountBalance } from './hackatonUtils';
+import { BalanceType, getFormattedAddress, handleAccountBalance } from './hackathonUtils';
 
 export async function getBalance(_address: string | null | undefined, _chain: Chain | null | undefined, settings: SettingsStruct):
 Promise<BalanceType | null> {
   return new Promise((resolve) => {
     try {
-      const formattedAddress = getFormattedAddress(_address, _chain, settings);
+      const formattedAddress = getFormattedAddress(_address, _chain, settings.prefix);
 
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       const { coin, decimals, url } = getNetworkInfo(_chain);

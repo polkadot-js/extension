@@ -1,10 +1,11 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line simple-import-sort/imports
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
-
-import { faPaperPlane, faQrcode, faSyncAlt, faTasks } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
+import { faCoins, faQrcode, faSyncAlt, faTasks } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Container, Grid, Link, Skeleton } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -13,12 +14,16 @@ import styled from 'styled-components';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import useTranslation from '../../hooks/useTranslation';
-import { getBalance } from '../../util/HackathonUtilFiles/getBalance';
-import { accountsBalanceType, balanceToHuman } from '../../util/HackathonUtilFiles/hackatonUtils';
-import { SettingsContext } from '../contexts';
+// import { getBalance } from '../../util/HackathonUtilFiles/getBalance';
+import { accountsBalanceType, balanceToHuman, BalanceType } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { AccountContext } from '../contexts';
 import AddressQRcode from './AddressQRcode';
+import EasyStaking from './EasyStaking';
 import TransactionHistory from './TransactionHistory';
 import TransferFunds from './TransferFunds';
+import { AccountJson } from '@polkadot/extension-base/background/types';
+import { updateBalance } from '../../messaging';
+import { grey } from '@mui/material/colors';
 
 export interface Props {
   actions?: React.ReactNode;
@@ -35,70 +40,171 @@ export interface Props {
   suri?: string;
   toggleActions?: number;
   type?: KeypairType;
-  balances?: accountsBalanceType[] | null;
-  setBalances?: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
   givenType?: KeypairType;
 }
 
-function Balance({ address, balances, chain, formattedAddress, givenType, name, setBalances }: Props): React.ReactElement<Props> {
-  const [myBalance, setMyBalance] = useState<accountsBalanceType | null>(null);
-  // const [coin, setCoin] = useState<string>('');
-  const settings = useContext(SettingsContext);
+function Balance({ address, chain, formattedAddress, givenType, name,
+}: Props): React.ReactElement<Props> {
+  const [balance, setBalance] = useState<accountsBalanceType | null>(null);
+  const { accounts } = useContext(AccountContext);
+  // const settings = useContext(SettingsContext);
   const { t } = useTranslation();
+  const [balanceChangeSubscribed, setBalanceChangeSubscribed] = useState<string>('');
+
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [showQRcodeModalOpen, setQRcodeModalOpen] = useState(false);
   const [showTxHistoryModalOpen, setTxHistoryModalOpen] = useState(false);
+  const [showStakingModalOpen, setStakingModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [account, setAccount] = useState<AccountJson | null>(null);
+
   const [sender, setSender] = useState<accountsBalanceType>({ address: String(address), chain: null, name: String(name) });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  function handleClearBalance(): void {
-    setMyBalance(null);
-    // setCoin('');
+  // async function getChainData(genesisHash?: string | null): Promise<Chain | null> {
+  //   if (genesisHash) {
+  //     const chain = await getMetadata(genesisHash, true);
+
+  //     if (chain) return chain;
+  //   }
+
+  //   return null;
+  // }
+
+  async function getBalanceFromMetaData(acc: AccountJson): Promise<accountsBalanceType | null> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const accLastBalance = acc.lastBalance ? acc.lastBalance.split('_') : null;
+
+    // console.log('accLastBalance', accLastBalance)
+    // console.log(accLastBalance[0])
+
+    if (accLastBalance === null) {
+      return null;
+    }
+
+    return {
+      address: acc.address,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      balanceInfo: accLastBalance ? JSON.parse(accLastBalance[1]) : null,
+      // chain: acc.genesisHash ? await getChainData(acc.genesisHash) : null,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      chain: accLastBalance ? accLastBalance[0] : null,
+      name: acc.name ? acc.name : ''
+    };
+  }
+
+  function subscribeToBalanceChanges() {
+    if (!chain) {
+      return;
+    }
+
+    setBalanceChangeSubscribed(chain ? chain.name : '');
+    const subscribeToBalance: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/subscribeToBalance.js', import.meta.url));
+
+    subscribeToBalance.postMessage({ address, chain, formattedAddress });
+
+    subscribeToBalance.onerror = (err) => {
+      console.log(err);
+    };
+
+    subscribeToBalance.onmessage = (e: MessageEvent<any>) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const result: { address: string, subscribedChain: Chain, balanceInfo: BalanceType } = e.data;
+
+      // console.log('balance change event result.subscribedChain', result.subscribedChain);
+
+      setBalance({
+        address: result.address,
+        balanceInfo: result.balanceInfo,
+        chain: result.subscribedChain.name,
+        name: name || ''
+      });
+
+      setRefreshing(false);
+    };
   }
 
   useEffect((): void => {
-    if (!formattedAddress) {
-      console.log('no formatted to get balances');
+    if (balance) {
+      // console.log('going to update balance', balance)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      updateBalance(
+        String(balance.address),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        JSON.stringify(balance.balanceInfo, (_key, value) => typeof value === 'bigint' ? value.toString() : value),
+        // balance.chain ? balance.chain.name : '');
+        balance.chain || '');
+    }
+  }, [balance]);
+
+  useEffect((): void => {
+    setSender({
+      address: String(formattedAddress),
+      balanceInfo: balance ? balance.balanceInfo : undefined,
+      chain: chain?.name || null,
+      name: String(name)
+    });
+  }, [balance, chain, formattedAddress, name]);
+
+  useEffect((): void => {
+    if (!accounts) {
+      console.log(' does not need to subscribe to balanceChange');
+
+      return;
+    }
+
+    if (!chain) {
+      // console.log(' does not need to subscribe to balanceChange for no chain');
+
+      return;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    showMyBalance();
+    if (!balanceChangeSubscribed) {
+      console.log('subscribing to chain', chain?.name);
 
-    // eslint-disable-next-line no-useless-return
-    return;
-
-    function showMyBalance() {
-      if (!balances) return;
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const b = balances.find((b) => b.address === address);
-
-      if (b) {
-        // console.log('setMyBalance in Balances', b);
-        setMyBalance(b);
-      } else {
-        handleClearBalance();
-      }
+      subscribeToBalanceChanges();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [balances, chain]);
+  }, [accounts, chain]);
 
-  const handleTransferModalOpen = useCallback(
+  useEffect((): void => {
+    if (!chain) {
+      // console.log('do not show balance for now chain ');
+
+      return;
+    }
+
+    const acc = accounts.find((acc) => acc.address === address);
+
+    if (!acc) {
+      console.log('account does not exist in Accounts!');
+
+      return;
+    }
+
+    setAccount(acc);
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    getBalanceFromMetaData(acc).then((bal: accountsBalanceType | null) => {
+      // console.log('chain name on saved balance was:', bal?.chain);
+      // console.log('now chain name is:', chain?.name);
+
+      if (bal?.chain === chain?.name) {
+        setBalance(bal);
+      } else {
+        setBalance(null);
+        subscribeToBalanceChanges();
+      }
+    });
+  }, [chain]);
+
+  const handleTransferFunds = useCallback(
     (): void => {
-      if (!balances) return;
-      const senderBalance = balances.find((bal) => bal.address === address);
+      if (!chain) { return; }
 
-      setSender({
-        address: String(formattedAddress),
-        balanceInfo: senderBalance ? senderBalance.balanceInfo : undefined,
-        chain: chain || null,
-        name: String(name)
-      });
       setTransferModalOpen(true);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [balances, formattedAddress, name, address]
+    [chain]
   );
 
   const handleShowQRcode = useCallback(
@@ -108,6 +214,7 @@ function Balance({ address, balances, chain, formattedAddress, givenType, name, 
     },
     [showQRcodeModalOpen]
   );
+
   const handleTxHistory = useCallback(
     (): void => {
       setTxHistoryModalOpen(true);
@@ -115,38 +222,21 @@ function Balance({ address, balances, chain, formattedAddress, givenType, name, 
     [setTxHistoryModalOpen]
   );
 
+  const handleStaking = useCallback(
+    (): void => {
+      if (!chain) { return; }
+
+      setStakingModalOpen(true);
+    },
+    [chain]
+  );
+
   const handlerefreshBalance = (): void => {
-    if (refreshing) return;
+    if (!chain || refreshing) { return; }
+
     setRefreshing(true);
-
-    setMyBalance(null);
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    getBalance(address, chain, settings).then((result) => {
-      if (result) {
-        let temp = balances;
-
-        temp = temp
-          ? temp.map((acc) => {
-            if (acc.address === address) {
-              acc.balanceInfo = result;
-            }
-
-            return acc;
-          })
-          : ([{
-            address: String(address),
-            balanceInfo: result,
-            chain: chain || null,
-            name: ''
-          }]);
-
-        if (setBalances) {
-          setBalances([...temp]);
-        }
-      }
-
-      setRefreshing(false);
-    });
+    setBalance(null);
+    subscribeToBalanceChanges();
   };
 
   function getCoin(_myBalance: accountsBalanceType): string {
@@ -164,6 +254,7 @@ function Balance({ address, balances, chain, formattedAddress, givenType, name, 
                 onClick={handleShowQRcode}
                 size='sm'
                 title={t('QR code')}
+                color={!chain ? grey[300] : grey[600]}
               />
             </Link>
           </Grid>
@@ -172,43 +263,53 @@ function Balance({ address, balances, chain, formattedAddress, givenType, name, 
       </Grid>
       <Grid alignItems='center' container>
         <Grid container direction='row' item justifyContent='center' xs={10}>
-          <Grid item sx={{ fontSize: 12, fontWeight: 'medium', textAlign: 'left', paddingLeft: '60px' }} xs={6}>
-            {'Balance: '}
-            {myBalance === null
-              ? <Skeleton sx={{ display: 'inline-block', fontWeight: 'bold', width: '70px' }} />
-              : (balanceToHuman(myBalance, 'total').toString() + ' ' + getCoin(myBalance))}
-          </Grid>
-          <Grid item sx={{ fontSize: 12, fontWeight: 'medium', textAlign: 'center' }} xs={6}>
-            {'Available: '}{myBalance === null
-              ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '70px' }} />
-              : balanceToHuman(myBalance, 'available').toString() + ' ' + getCoin(myBalance)}
-          </Grid>
+          {!chain
+            ? <Grid item xs={12}
+              sx={{ color: grey[700], fontFamily: '"Source Sans Pro", Arial, sans-serif', fontWeight: 600, fontSize: 12, textAlign: 'center', paddingLeft: '20px' }} >
+              {t('Please select a chain to view your balance.')}
+            </Grid>
+            : <>
+              <Grid item sx={{ fontSize: 12, fontWeight: 'medium', textAlign: 'left', paddingLeft: '60px' }} xs={6}>
+                {'Balance: '}
+                {balance === null
+                  ? <Skeleton sx={{ display: 'inline-block', fontWeight: 'bold', width: '70px' }} />
+                  : (balanceToHuman(balance, 'total').toString() + ' ' + getCoin(balance))}
+              </Grid>
+              <Grid item sx={{ fontSize: 12, fontWeight: 'medium', textAlign: 'center' }} xs={6}>
+                {'Available: '}{balance === null
+                  ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '70px' }} />
+                  : balanceToHuman(balance, 'available').toString() + ' ' + getCoin(balance)}
+              </Grid>
+            </>
+          }
         </Grid>
         <Grid container direction='row' item justifyContent='flex-end' xs={2}>
           <Grid item xs={3}>
             <Link color='inherit' href='#' underline='none'>
               <FontAwesomeIcon
-                className='iconDisplay'
+                className='transferIcon'
                 icon={faPaperPlane}
-                onClick={handleTransferModalOpen}
+                onClick={handleTransferFunds}
                 size='sm'
                 title={t('transfer funds')}
+                color={!chain ? grey[300] : grey[600]}
+                swapOpacity={true}
               />
             </Link>
           </Grid>
           <Grid item container xs={3}>
-            <Grid item xs={12}>
-              <Link color='inherit' href='#' underline='none'>
-                <FontAwesomeIcon
-                  className='refreshIcon'
-                  icon={faSyncAlt}
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={handlerefreshBalance}
-                  size='sm'
-                  title={t('refresh balance')}
-                />
-              </Link>
-            </Grid>
+            <Link color='inherit' href='#' underline='none'>
+              <FontAwesomeIcon
+                className='refreshIcon'
+                icon={faSyncAlt}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={handlerefreshBalance}
+                size='sm'
+                title={t('refresh balance')}
+                spin={refreshing}
+                color={!chain ? grey[300] : grey[600]}
+              />
+            </Link>
           </Grid>
           <Grid item xs={3}>
             <Link color='inherit' href='#' underline='none'>
@@ -218,44 +319,71 @@ function Balance({ address, balances, chain, formattedAddress, givenType, name, 
                 onClick={handleTxHistory}
                 size='sm'
                 title={t('transaction history')}
+                color={!chain ? grey[300] : grey[600]}
               />
             </Link>
           </Grid>
-          <Grid item xs={3}></Grid>
+          <Grid item xs={3}>
+            <Link color='inherit' href='#' underline='none'>
+              <FontAwesomeIcon
+                icon={faCoins}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={handleStaking}
+                size='sm'
+                title={t('easy staking')}
+                color={!chain ? grey[300] : grey[600]}
+              />
+            </Link>
+          </Grid>
         </Grid>
       </Grid>
 
-      {transferModalOpen
-        ? <TransferFunds
-          balances={balances}
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          chain={chain}
-          givenType={givenType}
-          sender={sender}
-          setBalances={setBalances}
-          setTransferModalOpen={setTransferModalOpen}
-          transferModalOpen={transferModalOpen}
-        />
-        : ''}
-      {showQRcodeModalOpen
-        ? <AddressQRcode
-          address={String(formattedAddress || address)}
-          chain={chain}
-          name={name}
-          setQRcodeModalOpen={setQRcodeModalOpen}
-          showQRcodeModalOpen={showQRcodeModalOpen}
-        />
-        : ''}
-      {showTxHistoryModalOpen
-        ? <TransactionHistory
-          address={String(formattedAddress || address)}
-          chain={chain}
-          name={name}
-          setTxHistoryModalOpen={setTxHistoryModalOpen}
-          showTxHistoryModalOpen={showTxHistoryModalOpen}
-        />
-        : ''}
-    </Container>
+      {
+        transferModalOpen
+          ? <TransferFunds
+            chain={chain}
+            givenType={givenType}
+            sender={sender}
+            setTransferModalOpen={setTransferModalOpen}
+            transferModalOpen={transferModalOpen}
+          />
+          : ''
+      }
+      {
+        showQRcodeModalOpen
+          ? <AddressQRcode
+            address={String(formattedAddress || address)}
+            chain={chain}
+            name={name}
+            setQRcodeModalOpen={setQRcodeModalOpen}
+            showQRcodeModalOpen={showQRcodeModalOpen}
+          />
+          : ''
+      }
+      {
+        showTxHistoryModalOpen
+          ? <TransactionHistory
+            address={String(formattedAddress || address)}
+            chain={chain}
+            name={name}
+            setTxHistoryModalOpen={setTxHistoryModalOpen}
+            showTxHistoryModalOpen={showTxHistoryModalOpen}
+          />
+          : ''
+      }
+      {
+        showStakingModalOpen && sender && account
+          ? <EasyStaking
+            account={account}
+            chain={chain}
+            name={name}
+            setStakingModalOpen={setStakingModalOpen}
+            showStakingModalOpen={showStakingModalOpen}
+            staker={sender}
+          />
+          : ''
+      }
+    </Container >
   );
 }
 
@@ -302,7 +430,7 @@ export default styled(Balance)(({ theme }: ThemeProps) => `
       top: -18px;
     }
 
-    .iconDisplay {
+    .transferIcon {
       display: flex;
     justify-content: space-between;
     position: relative;
@@ -318,7 +446,7 @@ export default styled(Balance)(({ theme }: ThemeProps) => `
   }
 }
 
-    .sendIcon {
+    .refreshIcon {
           position: absolute;
         right: 2px;
         top: +36px;

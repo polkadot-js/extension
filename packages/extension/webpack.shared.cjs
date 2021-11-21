@@ -26,6 +26,10 @@ module.exports = (entry, alias = {}) => ({
   module: {
     rules: [
       {
+        test: /\.worker\.js$/,
+        use: { loader: 'worker-loader' }
+      },
+      {
         exclude: /(node_modules)/,
         test: /\.(js|mjs|ts|tsx)$/,
         use: [

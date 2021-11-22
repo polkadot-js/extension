@@ -7,7 +7,7 @@
 import { Chain } from '@polkadot/extension-chains/types';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import { accountsBalanceType } from './pjpeTypes';
+import { AccountsBalanceType } from './pjpeTypes';
 
 // eslint-disable-next-line header/header
 export const FLOATING_POINT_DIGIT = 5;
@@ -26,7 +26,7 @@ export function fixFloatingPoint(_number: number | string): string {
   return sNumber.slice(0, dotIndex) + sNumber.slice(dotIndex, dotIndex + FLOATING_POINT_DIGIT + 1);
 }
 
-export function balanceToHuman(_balance: accountsBalanceType | null, _type: string): string {
+export function balanceToHuman(_balance: AccountsBalanceType | null, _type: string): string {
   if (!_balance || !_balance.balanceInfo) return '';
 
   const balance = _balance.balanceInfo;

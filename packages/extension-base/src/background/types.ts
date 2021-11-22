@@ -10,7 +10,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { BalanceType } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackathonUtils';
+import { BalanceType } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
@@ -45,7 +45,7 @@ export interface AccountJson extends KeyringPair$Meta {
   lastBalance?: string;
   txHistory?: string;
   stakingConsts?: string;
-  nominatedValidatorsInfo?: string;
+  nominatedValidators?: string;
   validatorsName?: string;
   validatorsInfo?: string;
 }
@@ -54,7 +54,7 @@ export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
 
-interface accountsBalanceType {
+interface AccountsBalanceType {
   address: string | null;
   chain: Chain | null;
   balance: BalanceType | null;
@@ -64,7 +64,7 @@ export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
-  balance?: accountsBalanceType[]; // added by Kami
+  balance?: AccountsBalanceType[]; // added by Kami
 }
 
 export interface AuthorizeRequest {

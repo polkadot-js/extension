@@ -1,21 +1,21 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountId, StakingLedger } from '@polkadot/types/interfaces';
+import type { StakingLedger } from '@polkadot/types/interfaces';
 
 // import type { AccountId, Balance, EraIndex, Exposure, RewardDestination, RewardPoint, StakingLedger, ValidatorPrefs } from '@polkadot/types/interfaces';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AddCircleOutlineOutlined, CheckOutlined, CloseRounded, InfoOutlined, RemoveCircleOutlineOutlined } from '@mui/icons-material';
 import { Alert, Avatar, Box, Button, Chip, CircularProgress, Container, Divider, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputAdornment, Modal, Paper, Radio, RadioGroup, Skeleton, Tab, Tabs, TextField, Typography } from '@mui/material';
-import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 
 import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
-import { accountsBalanceType, AllValidatorsFromSubscan, savedMetaData, StakingConsts, Validators, ValidatorsFromSubscan, ValidatorsName } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
-import { bondOrExtra, getAllValidatorsFromSubscan, getCurrentEraIndex, getStakingReward, nominate } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
+import { AccountsBalanceType, AllValidatorsFromSubscan, savedMetaData, StakingConsts, Validators, ValidatorsName } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
+import { getAllValidatorsFromSubscan, getStakingReward, unbond } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
 import keyring from '@polkadot/ui-keyring';
 import { formatBalance } from '@polkadot/util';
 
@@ -34,7 +34,7 @@ interface Props {
   name: string;
   showStakingModalOpen: boolean;
   setStakingModalOpen: Dispatch<SetStateAction<boolean>>;
-  staker: accountsBalanceType;
+  staker: AccountsBalanceType;
 }
 
 interface TabPanelProps {
@@ -65,6 +65,8 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   const [availableBalance, setAvailableBalance] = useState<string>('');
   const [alert, setAlert] = useState<string>('');
   const [ledger, setLedger] = useState<StakingLedger | null>(null);
+  const [ledgerActiveInHuman, setLedgerActiveInHuman] = useState<string | null>(null);
+
   const [zeroBalanceAlert, setZeroBalanceAlert] = useState(false);
   const [validatorsName, setValidatorsName] = useState<ValidatorsName[]>([]);
 
@@ -72,17 +74,39 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   const [validatorsInfo, setValidatorsInfo] = useState<Validators | null>(null);
   const [validatorsInfoIsUpdated, setValidatorsInfoIsUpdated] = useState<boolean>(false);
   const [validatorsInfoFromSubscan, setValidatorsInfoFromSubscan] = useState<AllValidatorsFromSubscan | null>(null);
-  const [selectedValidatorsAccountId, setSelectedValidatorsAcountId] = useState<string[] | null>(null);
+  const [selectedValidators, setSelectedValidatorsAcounts] = useState<DeriveStakingQuery[] | null>(null);
   const [nominatedValidatorsId, setNominatedValidatorsId] = useState<string[] | null>(null);
   const [noNominatedValidators, setNoNominatedValidators] = useState<boolean>(false);
-  const [nominatedValidatorsInfo, setNominatedValidatorsInfo] = useState<DeriveStakingQuery[] | null>(null);
+  const [nominatedValidators, setNominatedValidatorsInfo] = useState<DeriveStakingQuery[] | null>(null);
   const [validatorSelectionType, setValidatorSelectionType] = useState<string>('Auto');
-  const [state, setState] = useState<string>(''); // {'', 'stakeAuto', 'stakeManual', 'changeValidators'}
+  const [state, setState] = useState<string>(''); // {'', 'stakeAuto', 'stakeManual', 'changeValidators','confirming', 'failed,'success'}
   const [tabValue, setTabValue] = React.useState(3);
+  const [unstakeAmountInHuman, setUnstakeAmountInHuman] = React.useState<string | null>(null);
+  const [unstakeAmount, setunstakeAmount] = React.useState<bigint>(0n);
+  const [unlockingAmount, setUnlockingAmount] = React.useState<bigint>(0n);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    setAlert('');
   };
+
+  useEffect(() => {
+    if (ledger && decimals) {
+      console.log('amountToHuman(String(ledger.active), decimals)', amountToHuman(String(ledger.active), decimals));
+      console.log('ledger.active', ledger.active);
+
+      setLedgerActiveInHuman(amountToHuman(String(ledger.active), decimals));
+
+      // set unlocking
+      let unlockingValue = 0n;
+
+      if (ledger.unlocking) {
+        ledger.unlocking.forEach((u) => { unlockingValue += BigInt(String(u.value)); });
+      }
+
+      setUnlockingAmount(unlockingValue);
+    }
+  }, [ledger, decimals]);
 
   useEffect(() => {
     if (!chain) {
@@ -214,6 +238,8 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     // 6. get all validators info from subscan,
     // it is faster than getting from blockchain but is rate limited
     // --moved to next useeffects--
+
+    // getBonded(chain, account.address)
   }, []);
 
   useEffect((): void => {
@@ -222,6 +248,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
       return;
     }
+
     const chainName = chain.name.replace(' Relay Chain', '');
 
     console.log('account:', account);
@@ -244,7 +271,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
     // retrive validators name from acounts' meta data
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const nominatedValidatorsInfoFromLocalStrorage: savedMetaData = account.nominatedValidatorsInfo ? JSON.parse(account.nominatedValidatorsInfo) : null;
+    const nominatedValidatorsInfoFromLocalStrorage: savedMetaData = account.nominatedValidators ? JSON.parse(account.nominatedValidators) : null;
 
     if (nominatedValidatorsInfoFromLocalStrorage) {
       if (nominatedValidatorsInfoFromLocalStrorage.chainName === chainName) { setNominatedValidatorsInfo(nominatedValidatorsInfoFromLocalStrorage.metaData); }
@@ -332,7 +359,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
       setNominatedValidatorsInfo(nvi);
       setGettingNominatedValidatorsInfoFromBlockchain(false);
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      updateMeta(account.address, prepareMetaData(chain, 'nominatedValidatorsInfo', nvi));
+      updateMeta(account.address, prepareMetaData(chain, 'nominatedValidators', nvi));
     }
   }, [nominatedValidatorsId, validatorsInfo, chain, account.address]);
 
@@ -360,7 +387,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
       if (Number(availableBalance) <= Number(stakeAmountInHuman) && Number(stakeAmountInHuman) !== 0) {
         setNextButtonCaption(t('Insufficient Balance'));
-      } 
+      }
     } else {
       setNextButtonDisabled(false);
     }
@@ -370,9 +397,9 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   // TODO: selecting validators automatically, move to confirm page
   useEffect(() => {
     if (validatorsInfo && stakingConsts) {
-      const selectedVAccId = selectBestValidators(validatorsInfo, stakingConsts);
+      const selectedVAcc = selectBestValidators(validatorsInfo, stakingConsts);
 
-      setSelectedValidatorsAcountId(selectedVAccId);
+      setSelectedValidatorsAcounts(selectedVAcc);
       // console.log('selectedValidatorsAcountId', selectedVAccId);
     }
   }, [stakingConsts, validatorsInfo]);
@@ -397,7 +424,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
       (Number(v.validatorPrefs.commission) / (10 ** 7)) < MAX_ACCEPTED_COMMISSION && // filter high commision validators
       v.exposure.others.length < stakingConsts?.maxNominatorRewardedPerValidator // filter oversubscribed
     )
-      .map((v) => v.accountId.toString());// TODO: sort it too
+    // .map((v) => v.accountId.toString());// TODO: sort it too
 
     return nonBlockedValidatorsAccountId.slice(0, stakingConsts?.maxNominations);
   }
@@ -413,7 +440,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     [setStakingModalOpen]
   );
 
-  function callGetLedgerWorker() {
+  const callGetLedgerWorker = (): void => {
     const getLedgerWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getLedger.js', import.meta.url));
 
     workers.push(getLedgerWorker);
@@ -432,23 +459,17 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
       console.log('getLedger:', ledger);
       setLedger(ledger);
       // eslint-disable-next-line padding-line-between-statements
-      if (Number(ledger.total) > 0) {
+      if (Number(ledger.total) > 0) {// TODO: double check if this theory is correct ;)
         // already bonded, set min extra bond to MIN_EXTRA_BOND
         setMinNominatorBond(String(MIN_EXTRA_BOND));
       }
 
-      // getLedgerWorker.terminate(); stay awake, will be terminated at the end
+      getLedgerWorker.terminate(); // stay awake, will be terminated at the end
     };
   }
 
   const handleValidatorSelectionType = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
     setValidatorSelectionType(event.target.value);
-
-    // if (event.target.value === 'Auto') {
-    //   setNextButtonCaption('Stake');
-    // } else {
-    //   setNextButtonCaption(t('Select Validators'));
-    // }
   }, [setValidatorSelectionType]);
 
   const handleStakeAmountOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -463,7 +484,6 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     } else {
       setAlert('');
     }
-    console.log('Number(availableBalance):', availableBalance);
 
     if (Number(maxStake) && Number(value) > Number(maxStake) && Number(value) < Number(availableBalance)) {
       setAlert(t('Your account will be reaped!'));
@@ -473,6 +493,34 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
     setStakeAmountInHuman(fixFloatingPoint(value));
   }, [availableBalance, coin, maxStake, minNominatorBond, t]);
+
+  const handleUnstakeAmountOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    let value = event.target.value;
+
+    if (Number(value) < 0) {
+      value = String(-Number(value));
+    }
+
+    if (Number(value) > Number(ledgerActiveInHuman)) {
+      setAlert(t('It is more than you already staked!'));
+      console.log('Number(ledgerActiveInHuman)', Number(ledgerActiveInHuman))
+    } else {
+      setAlert('');
+    }
+
+    setUnstakeAmountInHuman(fixFloatingPoint(value));
+
+    // could go to onBlur event
+    let floatingPointDigit = 0;
+    const v = value.split('.');
+
+    if (v.length === 2) {
+      floatingPointDigit = v[1].length;
+      value = v[0] + v[1];
+    }
+
+    setunstakeAmount(BigInt(Number(value)) * BigInt(10 ** (decimals - floatingPointDigit)));
+  }, [decimals, ledgerActiveInHuman, t]);
 
   function handleStakeAmountOnBlur(value: string) {
     let floatingPointDigit = 0;
@@ -486,7 +534,6 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     }
 
     setStakeAmount(BigInt(Number(value)) * BigInt(10 ** (decimals - floatingPointDigit)));
-    console.log('stakeAmount 0', BigInt(Number(value)) * BigInt(10 ** (decimals - floatingPointDigit)))
   }
 
   function handleMinClicked() {
@@ -494,7 +541,6 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     setStakeAmountInHuman(minNominatorBond);
 
     setStakeAmount(amountToMachine(minNominatorBond, decimals));
-    console.log('stakeAmount 1', amountToMachine(minNominatorBond, decimals))
   }
 
   function handleMaxClicked() {
@@ -512,12 +558,18 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     }
 
     setStakeAmount(BigInt(max) * BigInt(10 ** (decimals - floatingPointDigits)));
-    console.log('stakeAmount 1', BigInt(max) * BigInt(10 ** (decimals - floatingPointDigits)))
-
   }
+
+  const handleMaxUnstakeClicked = useCallback(() => {
+    setAlert('');
+    setUnstakeAmountInHuman(ledgerActiveInHuman);
+
+    setStakeAmount(BigInt(ledger ? ledger.active.toString() : '0'));
+  }, [ledger, ledgerActiveInHuman]);
 
   function handleConfirmStakingModaOpen(): void {
     setConfirmStakingModalOpen(true);
+    console.log('handleConfirmStakingModaOpen, state:', state);
   }
 
   const handleSelectValidatorsModaOpen = useCallback((): void => {
@@ -528,18 +580,37 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
   const handleNextToStake = useCallback((): void => {
     if (Number(stakeAmountInHuman) >= Number(minNominatorBond)) {
-      if (validatorSelectionType === 'Auto') {
-        handleConfirmStakingModaOpen();
-        if (!state) setState('stakeAuto');
-      } else {
-        handleSelectValidatorsModaOpen();
-        if (!state) setState('stakeManual');
+      switch (validatorSelectionType) {
+        case ('Auto'):
+          handleConfirmStakingModaOpen();
+          if (!state) setState('stakeAuto');
+          break;
+        case ('Manual'):
+          handleSelectValidatorsModaOpen();
+          if (!state) setState('stakeManual');
+          break;
+        case ('KeepNominated'):
+          handleConfirmStakingModaOpen();
+          if (!state) setState('stakeKeepNominated');
+          break;
+        default:
+          console.log('unknown validatorSelectionType ');
       }
     }
-  }, [handleSelectValidatorsModaOpen, minNominatorBond, stakeAmountInHuman, state, validatorSelectionType]);
+  }, [handleConfirmStakingModaOpen, handleSelectValidatorsModaOpen, minNominatorBond, stakeAmountInHuman, state, validatorSelectionType]);
+
+  const handleNextToUnstake = useCallback(() => {
+    const signer = keyring.getPair(String(staker.address));
+
+    signer.unlock('Kami,12*');
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    unbond(chain, staker.address, signer, unstakeAmount).then((unbondResult) => {
+      console.log('unbond result:', unbondResult);
+    });
+  }, [chain, staker.address, unstakeAmount]);
 
   function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
+    const { children, index, value, ...other } = props;
 
     return (
       <div
@@ -634,12 +705,12 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                   <Grid item xs={6}>
                     Staked: {!ledger
                       ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
-                      : ledger.total ? amountToHuman(ledger.total.toString(), decimals) : '0.00'} {coin}
+                      : ledgerActiveInHuman || '0.00'} {coin}
                   </Grid>
                   <Grid item sx={{ textAlign: 'right' }} xs={6}>
                     Unstaking: {!ledger
                       ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
-                      : ledger.unlocking.length ? ledger.unlocking : '0.00'} {coin}
+                      : unlockingAmount ? amountToHuman(unlockingAmount, decimals) : '0.00'} {coin}
                   </Grid>
                 </Grid>
               </Paper>
@@ -649,17 +720,17 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                 <Tabs
                   textColor='secondary'
                   indicatorColor='secondary'
-                  centered value={tabValue} onChange={handleChange}>
+                  centered value={tabValue} onChange={handleTabChange}>
                   <Tab icon={<AddCircleOutlineOutlined fontSize='small' />} iconPosition='start' label='Stake' sx={{ fontSize: 11 }} />
                   <Tab icon={<RemoveCircleOutlineOutlined fontSize='small' />} iconPosition='start' label='Unstake' sx={{ fontSize: 11 }} />
-                  <Tab icon={gettingNominatedValidatorsInfoFromBlockchain
-                    ? <CircularProgress thickness={2} size={12} />
-                    : <CheckOutlined fontSize='small' />}
-                    iconPosition='start' label='Nominated Validators' sx={{ fontSize: 11 }} />
-                  <Tab icon={gettingStakingConstsFromBlockchain
-                    ? <CircularProgress thickness={2} size={12} />
-                    : <InfoOutlined fontSize='small' />}
-                    iconPosition='start' label='Info' sx={{ fontSize: 11 }} />
+                  <Tab
+                    icon={gettingNominatedValidatorsInfoFromBlockchain ? <CircularProgress thickness={2} size={12} /> : <CheckOutlined fontSize='small' />}
+                    iconPosition='start' label='Nominated Validators' sx={{ fontSize: 11 }}
+                  />
+                  <Tab
+                    icon={gettingStakingConstsFromBlockchain ? <CircularProgress thickness={2} size={12} /> : <InfoOutlined fontSize='small' />}
+                    iconPosition='start' label='Info' sx={{ fontSize: 11 }}
+                  />
                 </Tabs>
               </Box>
               <TabPanel value={tabValue} index={0}>
@@ -728,10 +799,10 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                   <Grid item xs={12}>
                     <FormControl fullWidth>
                       <Grid alignItems='center' container justifyContent='center'>
-                        <Grid item sx={{ fontSize: 12 }} xs={5}>
-                          <FormLabel sx={{ fontSize: 13, paddingRight: '20px', fontWeight: '500', color: 'black' }}>{t('Validator Selection')}:</FormLabel>
+                        <Grid item sx={{ fontSize: 12 }} xs={3}>
+                          <FormLabel sx={{ fontSize: 12, fontWeight: '500', color: 'black' }}>{t('Validator selection')}:</FormLabel>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={9} sx={{ textAlign: 'right' }}>
                           <RadioGroup
                             defaultValue='Auto'
                             onChange={handleValidatorSelectionType}
@@ -739,29 +810,37 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                             value={validatorSelectionType}
                           >
                             <FormControlLabel
-                              control={<Radio sx={{ fontSize: 12, '& .MuiSvgIcon-root': { fontSize: 15 } }} />}
-                              label={<Box fontSize='small'>Auto <Box
+                              control={<Radio sx={{ fontSize: 12, '& .MuiSvgIcon-root': { fontSize: 14 } }} />}
+                              label={<Box fontSize={12}>Auto <Box
                                 component='span'
                                 sx={{ color: 'gray' }}
                               > (best return)</Box></Box>}
                               value='Auto'
                             />
                             <FormControlLabel
-                              control={<Radio sx={{ fontSize: 12, '& .MuiSvgIcon-root': { fontSize: 15 } }} />}
-                              label={<Box fontSize='small'>Manual</Box>}
+                              control={<Radio sx={{ fontSize: 12, '& .MuiSvgIcon-root': { fontSize: 14 } }} />}
+                              label={<Box fontSize={12}>Manual</Box>}
                               sx={{ fontSize: 12 }}
                               value='Manual'
                             />
+                            {nominatedValidators
+                              ? <FormControlLabel
+                                control={<Radio sx={{ fontSize: 12, '& .MuiSvgIcon-root': { fontSize: 14 } }} />}
+                                label={<Box fontSize={12}>Keep nominated</Box>}
+                                sx={{ fontSize: 12 }}
+                                value='KeepNominated'
+                              />
+                              : ''}
                           </RadioGroup>
                         </Grid>
                       </Grid>
                     </FormControl>
                   </Grid>
-                  <Grid container item justifyContent='space-between' sx={{ padding: '20px 20px 0px' }} xs={12}>
+                  <Grid container item justifyContent='space-between' sx={{ padding: '20px 10px 0px' }} xs={12}>
                     <Grid item xs={8}>
                       <NextStepButton
                         data-button-action='next to stake'
-                        isBusy={(!validatorsInfoIsUpdated || validatorSelectionType === 'Auto') && ['stakeAuto', 'StakeManual'].includes(state)}
+                        isBusy={!validatorsInfoIsUpdated && (state === 'stakeAuto' || validatorSelectionType === 'Auto') && state}
                         isDisabled={nextButtonDisabled}
                         onClick={handleNextToStake}
                       >
@@ -775,14 +854,16 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                         text={t<string>('CANCEL')}
                       />
                     </Grid>
-                    {ledger && staker && selectedValidatorsAccountId?.length && nominatedValidatorsInfo
+                    {((ledger && staker && selectedValidators?.length && nominatedValidators && state === 'stakeAuto') ||
+                      state === 'stakeKeepNominated') && state
                       ? <ConfirmStaking
                         chain={chain}
                         coin={coin}
                         // handleEasyStakingModalClose={handleEasyStakingModalClose}
                         // lastFee={lastFee}
                         ledger={ledger}
-                        nominatedValidatorsInfo={nominatedValidatorsInfo}
+                        nominatedValidators={nominatedValidators}
+                        selectedValidators={selectedValidators}
                         setConfirmStakingModalOpen={setConfirmStakingModalOpen}
                         setState={setState}
                         showConfirmStakingModal={showConfirmStakingModal}
@@ -798,37 +879,124 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                 </Grid>
               </TabPanel>
               <TabPanel value={tabValue} index={1}>
+                <Grid container title='Unstake'>
+                  <Grid item sx={{ padding: '10px 30px 0px' }} xs={12}>
+                    <TextField
+                      InputLabelProps={{ shrink: true }}
+                      InputProps={{ endAdornment: (<InputAdornment position='end'>{coin}</InputAdornment>) }}
+                      autoFocus
+                      color='info'
+                      error={!ledgerActiveInHuman || Number(unstakeAmountInHuman) > Number(ledgerActiveInHuman)}
+                      fullWidth
+                      helperText={ledgerActiveInHuman === null
+                        ? t('fetching data from blockchain ...')
+                        : (Number(ledgerActiveInHuman) === 0
+                          ? t('Nothing to unstake')
+                          : '')
+                      }
+                      inputProps={{ step: '.01' }}
+                      label={t('Amount')}
+                      name='unstakeAmount'
+                      // onBlur={(event) => handleUnstakeAmountOnBlur(event.target.value)}
+                      onChange={handleUnstakeAmountOnChange}
+                      placeholder='0.0'
+                      type='number'
+                      value={unstakeAmountInHuman}
+                      variant='outlined'
+                    />
+                  </Grid>
+                  {ledger?.total
+                    ? <Grid container item justifyContent='space-between' sx={{ padding: '0px 30px 10px' }} xs={12}>
+                      <Grid item sx={{ fontSize: 12 }}>
+                      </Grid>
+                      <Grid item sx={{ fontSize: 12 }}>
+                        {Number(ledger?.active)
+                          ? <>
+                            Max :
+                            <Button
+                              onClick={handleMaxUnstakeClicked}
+                              variant='text'
+                            >
+                              {`${ledgerActiveInHuman} ${coin}`}
+                            </Button>
+                          </>
+                          : ''}
+                      </Grid>
+                    </Grid>
+                    : ''}
+                  <Grid item container sx={{ fontSize: 13, fontWeight: '600', textAlign: 'center', padding: '5px 30px 5px' }} xs={12}>
+                    {alert
+                      ? <Grid item xs={12}>
+                        <Alert severity='error' sx={{ fontSize: 12 }} >
+                          {alert}
+                        </Alert>
+                      </Grid>
+                      : <Grid item sx={{ paddingTop: '45px' }} xs={12}></Grid>
+                    }
+                  </Grid>
+                  <Grid container item justifyContent='space-between' sx={{ padding: '20px 10px 0px' }} xs={12}>
+                    <Grid item xs={8}>
+                      <NextStepButton
+                        data-button-action='next to unstake'
+                        // isBusy={!validatorsInfoIsUpdated && (state === 'stakeAuto' || validatorSelectionType === 'Auto') && state}
+                        isDisabled={!ledgerActiveInHuman || !unstakeAmountInHuman || Number(unstakeAmountInHuman) > Number(ledgerActiveInHuman)}
+                        onClick={handleNextToUnstake}
+                      >
+                        {t('Next').toUpperCase()}
+                      </NextStepButton>
+                    </Grid>
+                    <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2 }}>
+                      <ActionText
+                        // className={{'margin': 'auto'}}
+                        onClick={handleEasyStakingModalClose}
+                        text={t<string>('CANCEL')}
+                      />
+                    </Grid>
+                    {/* {((ledger && staker && selectedValidators?.length && nominatedValidators && state === 'stakeAuto') ||
+                      state === 'stakeKeepNominated') && state
+                      ? <ConfirmStaking
+                        chain={chain}
+                        coin={coin}
+                        // handleEasyStakingModalClose={handleEasyStakingModalClose}
+                        // lastFee={lastFee}
+                        ledger={ledger}
+                        nominatedValidators={nominatedValidators}
+                        selectedValidators={selectedValidators}
+                        setConfirmStakingModalOpen={setConfirmStakingModalOpen}
+                        setState={setState}
+                        showConfirmStakingModal={showConfirmStakingModal}
+                        stakeAmount={stakeAmount}
+                        staker={staker}
+                        stakingConsts={stakingConsts}
+                        state={state}
+                        validatorsInfo={validatorsInfo}
+                        validatorsName={validatorsName}
+                      />
+                      : ''} */}
+                  </Grid>
+                </Grid>
               </TabPanel>
               <TabPanel value={tabValue} index={2}>
-                {nominatedValidatorsInfo && stakingConsts
-                  ? <>
-                    <ValidatorsList
-                      chain={chain}
-                      stakingConsts={stakingConsts}
-                      validatorsInfo={nominatedValidatorsInfo}
-                      validatorsName={validatorsName} />
-
-                    <NextStepButton
-                      data-button-action='Change Nominated Validators'
-                      isBusy={validatorsInfo && state === 'changeValidators'}
-                      // isDisabled={nextButtonDisabled}
-                      onClick={handleSelectValidatorsModaOpen}
-                    >
-                      {t('Change Elected Validators').toUpperCase()}
-                    </NextStepButton>
-
-                    {/* <Button
-                      color='primary'
-                      // fullWidth
-                      name='Change Nominated Validators'
-                      onClick={handleSelectValidatorsModaOpen}
-                      size='medium'
-                      variant='contained'
-                      sx={{ marginTop: '10px' }}
-                    >
-                      {'Change Elected Validators'}
-                    </Button>       */}
-                  </>
+                {nominatedValidators && stakingConsts
+                  ? <Grid container>
+                    <Grid item xs={12} sx={{ paddingBottom: '20px' }}>
+                      <ValidatorsList
+                        chain={chain}
+                        stakingConsts={stakingConsts}
+                        validatorsInfo={nominatedValidators}
+                        validatorsName={validatorsName} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <NextStepButton
+                        data-button-action='Change Nominated Validators'
+                        isBusy={validatorsInfo && state === 'changeValidators'}
+                        // isDisabled={nextButtonDisabled}
+                        onClick={handleSelectValidatorsModaOpen}
+                      >
+                        {t('Change Nominated Validators').toUpperCase()}
+                      </NextStepButton>
+                    </Grid>
+                  </Grid>
                   : !noNominatedValidators
                     ? <>
                       <Grid container sx={{ paddingTop: '40px' }} >

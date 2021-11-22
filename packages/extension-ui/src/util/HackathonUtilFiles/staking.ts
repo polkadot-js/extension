@@ -15,7 +15,6 @@ import { ISubmittableResult } from '@polkadot/types/types';
 import getNetworkInfo from './getNetwork';
 import { ValidatorsFromSubscan } from './pjpeTypes';
 import { postData } from './postData';
-import { resolve } from 'path/posix';
 
 export async function getAllValidatorsFromSubscan(_chain: Chain): Promise<{ current: ValidatorsFromSubscan[] | null, waiting: ValidatorsFromSubscan[] | null } | null> {
   if (!_chain) {
@@ -27,111 +26,111 @@ export async function getAllValidatorsFromSubscan(_chain: Chain): Promise<{ curr
     getWaitingValidatorsFromSubscan(_chain)
   ]);
 
-  let current: any = [];
+  // let current: any = [];
 
-  allInfo[0]?.forEach((v) => {
-    current.push({
-      accountId: v.stash_account_display.address,//can remove
-      controllerAccount: {
-        accountIndex: v.controller_account_display?.account_index,
-        address: v.controller_account_display?.address,
-        display: v.controller_account_display?.display,
-        identity: v.controller_account_display?.identity,
-        judgements: v.controller_account_display?.judgements,
-        parent: v.controller_account_display?.parent
-      },
-      stashAccount: {
-        accountIndex: v.stash_account_display.account_index,
-        address: v.stash_account_display.address,
-        display: v.stash_account_display.display,
-        identity: v.stash_account_display.identity,
-        judgements: v.stash_account_display.judgements,
-        parent: v.stash_account_display.parent
-      },
-      exposure: {
-        total: v.bonded_total,
-        own: v.bonded_owner,
-        others: [],
-        bondedNominators: v.bonded_nominators,
-        countNominators: v.count_nominators
-      },
-      nominators: [],
-      rewardDestination: {},
-      stakingLedger: {
-        stash: v.stash_account_display.address,
-        total: null,
-        active: null,
-        unlocking: [],
-        claimedRewards: [],
-      },
-      validatorPrefs: {
-        commission: v.validator_prefs_value,
-        blocked: null
-      },
-      grandpaVote: v.grandpa_vote,
-      latestMining: v.latest_mining,
-      nodeName: v.node_name,
-      rankValidator: v.rank_validator,
-      rewardAccount: v.reward_account,
-      rewardPoint: v.reward_point,
-      rewardPotBalance: v.reward_pot_balance,
-      sessionKey: v.session_key
-    });
-  });
+  // allInfo[0]?.forEach((v) => {
+  //   current.push({
+  //     accountId: v.stash_account_display.address,//can remove
+  //     controllerAccount: {
+  //       accountIndex: v.controller_account_display?.account_index,
+  //       address: v.controller_account_display?.address,
+  //       display: v.controller_account_display?.display,
+  //       identity: v.controller_account_display?.identity,
+  //       judgements: v.controller_account_display?.judgements,
+  //       parent: v.controller_account_display?.parent
+  //     },
+  //     stashAccount: {
+  //       accountIndex: v.stash_account_display.account_index,
+  //       address: v.stash_account_display.address,
+  //       display: v.stash_account_display.display,
+  //       identity: v.stash_account_display.identity,
+  //       judgements: v.stash_account_display.judgements,
+  //       parent: v.stash_account_display.parent
+  //     },
+  //     exposure: {
+  //       total: v.bonded_total,
+  //       own: v.bonded_owner,
+  //       others: [],
+  //       bondedNominators: v.bonded_nominators,
+  //       countNominators: v.count_nominators
+  //     },
+  //     nominators: [],
+  //     rewardDestination: {},
+  //     stakingLedger: {
+  //       stash: v.stash_account_display.address,
+  //       total: null,
+  //       active: null,
+  //       unlocking: [],
+  //       claimedRewards: [],
+  //     },
+  //     validatorPrefs: {
+  //       commission: v.validator_prefs_value,
+  //       blocked: null
+  //     },
+  //     grandpaVote: v.grandpa_vote,
+  //     latestMining: v.latest_mining,
+  //     nodeName: v.node_name,
+  //     rankValidator: v.rank_validator,
+  //     rewardAccount: v.reward_account,
+  //     rewardPoint: v.reward_point,
+  //     rewardPotBalance: v.reward_pot_balance,
+  //     sessionKey: v.session_key
+  //   });
+  // });
 
-  let waiting: any = [];
+  // let waiting: any = [];
 
-  allInfo[1]?.forEach((v) => {
-    waiting.push({
-      accountId: v.stash_account_display.address,//can remove
-      controllerAccount: {
-        accountIndex: v.controller_account_display?.account_index,
-        address: v.controller_account_display?.address,
-        display: v.controller_account_display?.display,
-        identity: v.controller_account_display?.identity,
-        judgements: v.controller_account_display?.judgements,
-        parent: v.controller_account_display?.parent
-      },
-      stashAccount: {
-        accountIndex: v.stash_account_display.account_index,
-        address: v.stash_account_display.address,
-        display: v.stash_account_display.display,
-        identity: v.stash_account_display.identity,
-        judgements: v.stash_account_display.judgements,
-        parent: v.stash_account_display.parent
-      },
-      exposure: {
-        total: v.bonded_total,
-        own: v.bonded_owner,
-        others: [],
-        bondedNominators: v.bonded_nominators,
-        countNominators: v.count_nominators
-      },
-      nominators: [],
-      rewardDestination: {},
-      stakingLedger: {
-        stash: v.stash_account_display.address,
-        total: null,
-        active: null,
-        unlocking: [],
-        claimedRewards: [],
-      },
-      validatorPrefs: {
-        commission: v.validator_prefs_value,
-        blocked: null
-      },
-      grandpaVote: v.grandpa_vote,
-      latestMining: v.latest_mining,
-      nodeName: v.node_name,
-      rankValidator: v.rank_validator,
-      rewardAccount: v.reward_account,
-      rewardPoint: v.reward_point,
-      rewardPotBalance: v.reward_pot_balance,
-      sessionKey: v.session_key
-    });
-  });
+  // allInfo[1]?.forEach((v) => {
+  //   waiting.push({
+  //     accountId: v.stash_account_display.address,//can remove
+  //     controllerAccount: {
+  //       accountIndex: v.controller_account_display?.account_index,
+  //       address: v.controller_account_display?.address,
+  //       display: v.controller_account_display?.display,
+  //       identity: v.controller_account_display?.identity,
+  //       judgements: v.controller_account_display?.judgements,
+  //       parent: v.controller_account_display?.parent
+  //     },
+  //     stashAccount: {
+  //       accountIndex: v.stash_account_display.account_index,
+  //       address: v.stash_account_display.address,
+  //       display: v.stash_account_display.display,
+  //       identity: v.stash_account_display.identity,
+  //       judgements: v.stash_account_display.judgements,
+  //       parent: v.stash_account_display.parent
+  //     },
+  //     exposure: {
+  //       total: v.bonded_total,
+  //       own: v.bonded_owner,
+  //       others: [],
+  //       bondedNominators: v.bonded_nominators,
+  //       countNominators: v.count_nominators
+  //     },
+  //     nominators: [],
+  //     rewardDestination: {},
+  //     stakingLedger: {
+  //       stash: v.stash_account_display.address,
+  //       total: null,
+  //       active: null,
+  //       unlocking: [],
+  //       claimedRewards: [],
+  //     },
+  //     validatorPrefs: {
+  //       commission: v.validator_prefs_value,
+  //       blocked: null
+  //     },
+  //     grandpaVote: v.grandpa_vote,
+  //     latestMining: v.latest_mining,
+  //     nodeName: v.node_name,
+  //     rankValidator: v.rank_validator,
+  //     rewardAccount: v.reward_account,
+  //     rewardPoint: v.reward_point,
+  //     rewardPotBalance: v.reward_pot_balance,
+  //     sessionKey: v.session_key
+  //   });
+  // });
 
-  console.log(current, waiting);
+  // console.log(current, waiting);
 
   return { current: allInfo[0], waiting: allInfo[1] };
 }
@@ -189,6 +188,41 @@ export async function getWaitingValidatorsFromSubscan(_chain: Chain): Promise<Va
   });
 }
 
+export async function getBonded(_chain: Chain, _address: string): Promise<ValidatorsFromSubscan[] | null> {
+  return new Promise((resolve) => {
+    try {
+      const network = _chain ? _chain.name.replace(' Relay Chain', '') : 'westend';
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      postData('https://' + network + '.api.subscan.io/api/wallet/bond_list',
+        {
+          // key: 21,
+          // page: 1,
+          status: 'bonded',
+          address: _address
+        })
+
+        .then((data: any
+          // : { message: string; data: { count: number, list: ValidatorsFromSubscan[] | null; }; }
+        ) => {
+          console.log('getBonded', data);
+
+          // if (data.message === 'Success') {
+          //   const validators = data.data.list;
+
+          //   resolve(validators);
+          // } else {
+          //   console.log(`Fetching message ${data.message}`);
+          //   resolve(null);
+          // }
+        });
+    } catch (error) {
+      console.log('something went wrong while getting getWaitinValidators, err: ', error);
+      resolve(null);
+    }
+  });
+}
+
 export async function getStakingReward(_chain: Chain | null | undefined, _stakerAddress: string | null): Promise<string | null> {
   if (!_stakerAddress) {
     console.log('_stakerAddress is null in getting getStakingReward ');
@@ -231,16 +265,16 @@ export async function bondOrExtra(
   _stashAccountId: string | null,
   _signer: KeyringPair,
   _value: bigint,
-  _selectedValidators: AccountId[] | null,
+  // _selectedValidators: AccountId[] | null,
   _alreadyBondedAmount: bigint,
-  payee = 'Staked'): Promise<string | null> {
+  payee = 'Staked'): Promise<string> {
   try {
     console.log('bondOrExtra is called!');
 
-    if (!_stashAccountId || !_selectedValidators) {
-      console.log('bondAndNominate: validators or controller is empty!');
+    if (!_stashAccountId) {
+      console.log('bondOrExtra:  controller is empty!');
 
-      return null;
+      return 'failed';
     }
 
     /** payee:
@@ -295,6 +329,58 @@ export async function bondOrExtra(
   }
 }
 
+export async function unbond(_chain: Chain | null | undefined, _controllerAccountId: string | null,
+  _signer: KeyringPair, _value: bigint): Promise<string> {
+  try {
+    console.log('unbond is called!');
+
+    if (!_controllerAccountId) {
+      console.log('unbond:  _controllerAccountId is empty!');
+
+      return 'failed';
+    }
+
+    const { url } = getNetworkInfo(_chain);
+
+    const wsProvider = new WsProvider(url);
+    const api = await ApiPromise.create({ provider: wsProvider });
+
+    const unbonded: SubmittableExtrinsic<'promise', ISubmittableResult> = api.tx.staking.unbond(_value);
+
+    return new Promise((resolve) => {
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      unbonded.signAndSend(_signer, ({ events = [], status }) => {
+        if (status.isFinalized) {
+          console.log('unbond transaction done with hash ', status.asFinalized.toHex());
+        } else {
+          console.log('Status of unbonding: ', status.toHuman());
+        }
+
+        events.forEach(({ event: { data, method, section }, phase }) => {
+          console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
+
+          if (String(method).includes('Failed')) {
+            console.log('!!SOMTHING FAILED!!');
+
+            resolve('failed');
+
+            return;
+          }
+
+          if (String(method).includes('Success')) {
+            console.log('unbonded Successfully');
+            resolve('success');
+          }
+        });
+      });
+    });
+  } catch (error) {
+    console.log('Something went wrong while unbond', error);
+
+    return 'failed';
+  }
+}
+
 export async function getCurrentEraIndex(_chain: Chain | null | undefined): Promise<number | null> {
   try {
     console.log('getCurrentEraIndex is called!');
@@ -326,7 +412,7 @@ export async function nominate(
   _chain: Chain | null | undefined,
   _stashAccountId: string | null,
   _signer: KeyringPair,
-  _selectedValidators: AccountId[] | null): Promise<string> {
+  _selectedValidators: string[] | null): Promise<string> {
   if (!_stashAccountId || !_selectedValidators || !_chain) {
     console.log('Nominate: validators, controller, or chain is empty!');
 

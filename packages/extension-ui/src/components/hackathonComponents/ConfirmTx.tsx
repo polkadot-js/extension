@@ -13,22 +13,24 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Chain } from '@polkadot/extension-chains/types';
 import { updateTransactionHistory } from '@polkadot/extension-ui/messaging';
 import getFee from '@polkadot/extension-ui/util/HackathonUtilFiles/getFee';
+import Identicon from '@polkadot/react-identicon';
 import keyring from '@polkadot/ui-keyring';
 
 import useTranslation from '../../hooks/useTranslation';
 import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
 import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
 import { amountToHuman, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { accountsBalanceType, TransactionStatus } from '../../util/HackathonUtilFiles/pjpeTypes';
+import { AccountsBalanceType, TransactionStatus } from '../../util/HackathonUtilFiles/pjpeTypes';
 import signAndTransfer from '../../util/HackathonUtilFiles/signAndTransfer';
 import { AccountContext } from '../contexts';
 import { ActionText, Button } from '../';
 
+
 interface Props {
   availableBalance: string;
   actions?: React.ReactNode;
-  sender: accountsBalanceType;
-  recepient: accountsBalanceType;
+  sender: AccountsBalanceType;
+  recepient: AccountsBalanceType;
   chain?: Chain | null;
   children?: React.ReactNode;
   className?: string;
@@ -129,34 +131,6 @@ export default function ConfirmTx({
     }
   }
 
-  function callGetLedgerWorker() {
-    const getLedgerWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getLedger.js', import.meta.url));
-
-    workers.push(getLedgerWorker);
-    const address = staker.address;
-
-    getLedgerWorker.postMessage({ address, chain });
-
-    getLedgerWorker.onerror = (err) => {
-      console.log(err);
-    };
-
-    getLedgerWorker.onmessage = (e) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const ledger: StakingLedger = e.data;
-
-      console.log('getLedger:', ledger);
-      setLedger(ledger);
-      // eslint-disable-next-line padding-line-between-statements
-      if (Number(ledger.total) > 0) {
-        // already bonded, set min extra bond to MIN_EXTRA_BOND
-        setMinNominatorBond(String(MIN_EXTRA_BOND));
-      }
-
-      getLedgerWorker.terminate();
-    };
-  }
-  
   useEffect(() => {
     if (!confirmModalOpen) return;
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -320,20 +294,38 @@ export default function ConfirmTx({
               </Grid>
             </Grid>
             <Divider light />
-            <Grid container
-              alignItems='center'
-              justifyContent='space-around'
-            >
-              <Grid item xs={4} sx={{ fontSize: 14 }}>
-                {sender.name ? sender.name : makeAddressShort(String(sender.address))}
+            <Grid container alignItems='center' justifyContent='space-around' >
+              <Grid item container alignItems='center' justifyContent='flex-end' xs={5}>
+                <Grid item xs={4}>
+                  <Identicon
+                    size={40}
+                    theme={'polkadot'}
+                    value={sender.address}
+                  />
+                </Grid>
+                <Grid item xs={6} sx={{ fontSize: 14, textAlign: 'left' }}>
+                  {sender.name ? sender.name : makeAddressShort(String(sender.address))}
+                </Grid>
               </Grid>
-              <Divider orientation='vertical' flexItem>
-                <Avatar sx={{ bgcolor: grey[300] }}>
-                  <ArrowForwardRounded fontSize='small' />
-                </Avatar>
-              </Divider>
-              <Grid item xs={4} sx={{ fontSize: 14 }}>
-                {recepient.name != 'null' ? recepient.name : makeAddressShort(String(recepient.address))}
+              <Grid item xs={2} >
+                <Divider orientation='vertical' flexItem>
+                  <Avatar sx={{ bgcolor: grey[300] }}>
+                    <ArrowForwardRounded fontSize='small' />
+                  </Avatar>
+                </Divider>
+              </Grid>
+              <Grid item container alignItems='center' xs={5}>
+                <Grid item xs={4}  >
+                  <Identicon
+                    size={40}
+                    theme={'polkadot'}//'polkadot', 'substrate' (default), 'beachball' or 'jdenticon'
+                    value={recepient.address}
+                  />
+                </Grid> 
+                <Grid item xs={6} sx={{ fontSize: 14, textAlign: 'left' }}>
+                  {recepient.name != 'null' ? recepient.name : makeAddressShort(String(recepient.address))}
+                </Grid>
+               
               </Grid>
               <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '25px 40px 25px' }}>
                 <Grid item xs={3} sx={{ padding: '5px 10px 5px', borderRadius: '5px', border: '2px double grey', justifyContent: 'flex-start', fontSize: 15, textAlign: 'center', fontVariant: 'small-caps' }}>

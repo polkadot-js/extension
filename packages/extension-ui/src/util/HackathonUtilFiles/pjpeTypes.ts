@@ -24,7 +24,7 @@ export interface BalanceType {
 
 export const DEFAULT_ACCOUNT_BALANCE = { address: null, balanceInfo: null, chain: null, name: null };
 
-export interface accountsBalanceType {
+export interface AccountsBalanceType {
   address: string | null;
   chain: string | null;// TODO: actually it is chainName
   balanceInfo?: BalanceType;

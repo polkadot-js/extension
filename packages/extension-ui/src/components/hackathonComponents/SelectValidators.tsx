@@ -8,7 +8,7 @@ import type { AccountId, StakingLedger } from '@polkadot/types/interfaces';
 import { ArrowBackIosRounded, ReportProblemOutlined } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { Avatar, Box, Button as MuiButton, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, InputAdornment, Modal, TextField } from '@mui/material';
+import { Avatar, Box, Button as MuiButton, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, Modal, TextField } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import { alpha, styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -31,14 +31,14 @@ import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChai
 import useTranslation from '../../hooks/useTranslation';
 import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
 import { DEFAULT_VALIDATOR_COMMISION_FILTER } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { accountsBalanceType, AllValidatorsFromSubscan, StakingConsts, Validators, ValidatorsName } from '../../util/HackathonUtilFiles/pjpeTypes';
+import { AccountsBalanceType, AllValidatorsFromSubscan, StakingConsts, Validators, ValidatorsName } from '../../util/HackathonUtilFiles/pjpeTypes';
 import { ActionText, NextStepButton } from '../';
 import ConfirmStaking from './ConfirmStaking';
 
 interface Props {
   chain?: Chain | null;
   handleEasyStakingModalClose: Dispatch<SetStateAction<boolean>>;
-  staker: accountsBalanceType;
+  staker: AccountsBalanceType;
   showSelectValidatorsModal: boolean;
   setSelectValidatorsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   stakingConsts: StakingConsts;
@@ -49,7 +49,7 @@ interface Props {
   setState: React.Dispatch<React.SetStateAction<string>>;
   state: string;
   coin: string;
-  ledger: StakingLedger;
+  ledger: StakingLedger | null;
 
 }
 
@@ -219,7 +219,7 @@ interface EnhancedTableToolbarProps {
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
   const { numSelected, setSelected, stakingConsts } = props;
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
 
   return (
     <Toolbar
@@ -696,7 +696,8 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
                       // handleEasyStakingModalClose={handleEasyStakingModalClose}
                       // lastFee={lastFee}
                       ledger={ledger}
-                      nominatedValidatorsInfo={selected}
+                      nominatedValidators={null}
+                      selectedValidators={selected}
                       setConfirmStakingModalOpen={setConfirmStakingModalOpen}
                       setState={setState}
                       showConfirmStakingModal={showConfirmStakingModal}
@@ -706,6 +707,7 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
                       state={state}
                       validatorsInfo={validatorsInfo}
                       validatorsName={validatorsName}
+                      setSelectValidatorsModalOpen={setSelectValidatorsModalOpen}
                     />
                     : 'You need to select at least a validator'}
                 </Grid>

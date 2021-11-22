@@ -60,6 +60,7 @@
     "@mui/icons-material": "^5.0.1",
     "@mui/lab": "^5.0.0-alpha.49",
     "@mui/material": "^5.1.0",
+    "@polkadot/react-identicon": "^0.86.7",
     "babel": "^6.23.0",
     "babel-cli": "^6.26.0",
     "qrcode.react": "^1.0.1",

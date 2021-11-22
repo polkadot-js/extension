@@ -23,14 +23,14 @@ import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
 import isValidAddress from '../../util/HackathonUtilFiles/validateAddress';
 import { AccountContext, SettingsContext } from '../contexts';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { accountsBalanceType, amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { AccountsBalanceType } from '../../util/HackathonUtilFiles/pjpeTypes';
 import grey from '@mui/material/colors/grey';
 import { ActionText, NextStepButton } from '../';
 
-
 interface Props {
   actions?: React.ReactNode;
-  sender: accountsBalanceType;
+  sender: AccountsBalanceType;
   transferModalOpen: boolean;
   chain?: Chain | null;
   children?: React.ReactNode;
@@ -63,8 +63,8 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
   const [zeroBalanceAlert, setZeroBalanceAlert] = useState(false);
   const [nextButtonCaption, setNextButtonCaption] = useState<string>(t('Next'));
   const [recepientAddressIsValid, setRecepientAddressIsValid] = useState(false);
-  const [recepient, setRecepient] = useState<accountsBalanceType | null>();
-  const [allAddresesOnThisChain, setAllAddresesOnThisChain] = useState<accountsBalanceType[] | null>();
+  const [recepient, setRecepient] = useState<AccountsBalanceType | null>();
+  const [allAddresesOnThisChain, setAllAddresesOnThisChain] = useState<AccountsBalanceType[] | null>();
   const [transferBetweenMyAccountsButtonText, setTransferBetweenMyAccountsButtonText] = useState<string>(t('Transfer between my accounts'));
   const [coin, setCoin] = useState('');
   const [ED, setED] = useState(0);
@@ -323,7 +323,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
     setTransferBetweenMyAccountsButtonText(condition ? t('Back to all') : t('Transfer between my accounts'));
 
     if (condition) {
-      let allAddresesOnSameChain = accounts.map((acc): accountsBalanceType => {
+      let allAddresesOnSameChain = accounts.map((acc): AccountsBalanceType => {
         const accountByAddress = findAccountByAddress(accounts, acc.address);
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

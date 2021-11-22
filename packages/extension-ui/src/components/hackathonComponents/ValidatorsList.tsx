@@ -130,7 +130,7 @@ const headCells: readonly HeadCell[] = [
 interface EnhancedTableProps {
   numSelected: number;
   onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  // onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
   order: Order;
   orderBy: string;
   rowCount: number;
@@ -260,7 +260,7 @@ function EnhancedTable(props: TableRowProps) {
   return (
     <>
       {/* <EnhancedTableToolbar numSelected={selected.length} setSelected={setSelected} /> */}
-      <TableContainer sx={{ borderRadius: '5px', maxHeight: 350 }}>
+      <TableContainer sx={{ borderRadius: '5px', maxHeight: 220 }}>
         <Table
           size='small'
           stickyHeader
@@ -268,8 +268,9 @@ function EnhancedTable(props: TableRowProps) {
         >
           <EnhancedTableHead
             numSelected={selected.length}
+            // eslint-disable-next-line react/jsx-no-bind
             onRequestSort={handleRequestSort}
-            onSelectAllClick={handleSelectAllClick}
+            // onSelectAllClick={handleSelectAllClick}
             order={order}
             orderBy={orderBy}
             rowCount={rows.length}
@@ -277,7 +278,7 @@ function EnhancedTable(props: TableRowProps) {
           <TableBody>
             {
               rows.slice().sort(getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.accountId.toString());
                   const labelId = `table-checkbox-${index}`;
@@ -303,7 +304,7 @@ function EnhancedTable(props: TableRowProps) {
                           />
                         </StyledTableCell> */}
                       <StyledTableCell component='th' id={labelId} padding='normal' scope='row'>
-                        {getAccountIdOrName(row.accountId)}
+                        {getAccountIdOrName(String(row.accountId))}
                       </StyledTableCell>
                       <StyledTableCell align='right'>{Number(row.validatorPrefs.commission) / (10 ** 7)}%</StyledTableCell>
                       <StyledTableCell align='right'>
@@ -337,7 +338,7 @@ function EnhancedTable(props: TableRowProps) {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
+      {/* <TablePagination
         component='div'
         count={rows.length}
         labelRowsPerPage={''}
@@ -348,7 +349,7 @@ function EnhancedTable(props: TableRowProps) {
         rowsPerPageOptions={[5]}
         showFirstButton
         showLastButton
-      />
+      /> */}
     </>
   );
 }

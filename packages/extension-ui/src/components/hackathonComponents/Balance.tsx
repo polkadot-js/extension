@@ -14,8 +14,8 @@ import styled from 'styled-components';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import useTranslation from '../../hooks/useTranslation';
-// import { getBalance } from '../../util/HackathonUtilFiles/getBalance';
-import { accountsBalanceType, balanceToHuman, BalanceType } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { balanceToHuman } from '../../util/HackathonUtilFiles/hackathonUtils';
+import { AccountsBalanceType, BalanceType } from '../../util/HackathonUtilFiles/pjpeTypes';
 import { AccountContext } from '../contexts';
 import AddressQRcode from './AddressQRcode';
 import EasyStaking from './EasyStaking';
@@ -45,7 +45,7 @@ export interface Props {
 
 function Balance({ address, chain, formattedAddress, givenType, name,
 }: Props): React.ReactElement<Props> {
-  const [balance, setBalance] = useState<accountsBalanceType | null>(null);
+  const [balance, setBalance] = useState<AccountsBalanceType | null>(null);
   const { accounts } = useContext(AccountContext);
   // const settings = useContext(SettingsContext);
   const { t } = useTranslation();
@@ -58,7 +58,7 @@ function Balance({ address, chain, formattedAddress, givenType, name,
   const [refreshing, setRefreshing] = useState(false);
   const [account, setAccount] = useState<AccountJson | null>(null);
 
-  const [sender, setSender] = useState<accountsBalanceType>({ address: String(address), chain: null, name: String(name) });
+  const [sender, setSender] = useState<AccountsBalanceType>({ address: String(address), chain: null, name: String(name) });
 
   // async function getChainData(genesisHash?: string | null): Promise<Chain | null> {
   //   if (genesisHash) {
@@ -70,7 +70,7 @@ function Balance({ address, chain, formattedAddress, givenType, name,
   //   return null;
   // }
 
-  async function getBalanceFromMetaData(acc: AccountJson): Promise<accountsBalanceType | null> {
+  async function getBalanceFromMetaData(acc: AccountJson): Promise<AccountsBalanceType | null> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const accLastBalance = acc.lastBalance ? acc.lastBalance.split('_') : null;
 
@@ -185,7 +185,7 @@ function Balance({ address, chain, formattedAddress, givenType, name,
     setAccount(acc);
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    getBalanceFromMetaData(acc).then((bal: accountsBalanceType | null) => {
+    getBalanceFromMetaData(acc).then((bal: AccountsBalanceType | null) => {
       // console.log('chain name on saved balance was:', bal?.chain);
       // console.log('now chain name is:', chain?.name);
 
@@ -239,7 +239,7 @@ function Balance({ address, chain, formattedAddress, givenType, name,
     subscribeToBalanceChanges();
   };
 
-  function getCoin(_myBalance: accountsBalanceType): string {
+  function getCoin(_myBalance: AccountsBalanceType): string {
     return !_myBalance || !_myBalance.balanceInfo ? '' : _myBalance.balanceInfo.coin;
   }
 

@@ -5,8 +5,8 @@
 import type { StakingLedger } from '@polkadot/types/interfaces';
 
 import { ArrowBackIosRounded, CheckRounded, Clear } from '@mui/icons-material';
-import { Alert, Avatar, Button as MuiButton, Container, Divider, Grid, IconButton, InputAdornment, Modal, TextField } from '@mui/material';
-import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { Avatar, Button as MuiButton, Container, Divider, Grid, IconButton, InputAdornment, Modal, Skeleton, TextField } from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Chain } from '@polkadot/extension-chains/types';
 import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
@@ -14,7 +14,7 @@ import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import keyring from '@polkadot/ui-keyring';
 
 import useTranslation from '../../hooks/useTranslation';
-import { accountsBalanceType, StakingConsts, TransactionStatus, Validators, ValidatorsName } from '../../util/HackathonUtilFiles/pjpeTypes';
+import { AccountsBalanceType, StakingConsts, Validators, ValidatorsName } from '../../util/HackathonUtilFiles/pjpeTypes';
 import getNetworkInfo from '@polkadot/extension-ui/util/HackathonUtilFiles/getNetwork';
 import { amountToHuman } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackathonUtils';
 import ValidatorsList from './ValidatorsList';
@@ -26,34 +26,53 @@ interface Props {
   // handleEasyStakingModalClose: Dispatch<SetStateAction<boolean>>;
   state: string;
   setState: React.Dispatch<React.SetStateAction<string>>;
-  staker: accountsBalanceType;
+  staker: AccountsBalanceType;
   showConfirmStakingModal: boolean;
   setConfirmStakingModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectValidatorsModalOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   stakingConsts: StakingConsts | null;
   stakeAmount: bigint;
-  validatorsInfo: Validators | null;
-  ledger: StakingLedger;
-  nominatedValidatorsInfo: DeriveStakingQuery[];
+  validatorsInfo?: Validators | null;
+  ledger: StakingLedger | null;
+  nominatedValidators: DeriveStakingQuery[] | null;
   coin: string;
   validatorsName: ValidatorsName[] | null;
+  selectedValidators: DeriveStakingQuery[] | null;
 }
 
-export default function ConfirmStaking({ chain, coin, ledger, nominatedValidatorsInfo, setConfirmStakingModalOpen, setState,
-  showConfirmStakingModal, stakeAmount, staker, stakingConsts, state, validatorsInfo, validatorsName }: Props): React.ReactElement<Props> {
+export default function ConfirmStaking({
+  chain, coin, ledger, nominatedValidators, selectedValidators, setConfirmStakingModalOpen,
+  setSelectValidatorsModalOpen, setState, showConfirmStakingModal, stakeAmount,
+  staker, stakingConsts, state, validatorsName }
+  : Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [decimals, setDecimals] = useState<number>(1);
   const [password, setPassword] = useState<string>('');
   const [passwordIsCorrect, setPasswordIsCorrect] = useState<number>(0);// 0: no password, -1: password incorrect, 1:password correct
-  const [confirming, setConfirming] = useState<boolean>(false);
-  const [stakingResultStatus, setStakingResultStatus] = useState<string | null>(null);
+  const [currentlyStaked, setCurrentlyStaked] = useState<bigint>(0n);
+  const [validatorsToList, setvalidatorsToList] = useState<DeriveStakingQuery[] | null>(null);
+
+  useEffect(() => {
+    if (['stakeManual', 'stakeAuto', 'changeValidators'].includes(state)) {
+      setvalidatorsToList(selectedValidators);
+    } else if (['stakeKeepNominated'].includes(state)) {
+      setvalidatorsToList(nominatedValidators);
+    }
+  }, [nominatedValidators, selectedValidators, state]);
 
   useEffect(() => {
     if (!chain) { return; }
 
-    const { ED, coin, decimals, minNominatorBond } = getNetworkInfo(chain);
+    const { decimals } = getNetworkInfo(chain);
 
     setDecimals(decimals);
   }, [chain]);
+
+  useEffect(() => {
+    if (!ledger) { return; }
+
+    setCurrentlyStaked(BigInt(String(ledger.active)));
+  }, [ledger]);
 
   // useEffect((): void => {
   //   if (!bondState || bondState === 'bonding') {
@@ -81,7 +100,7 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
       // set all defaults
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       setConfirmStakingModalOpen(false);
-      if (['stakeAuto'].includes(state)) setState('');
+      if (!['stakeManual'].includes(state)) setState('');
     },
     [setConfirmStakingModalOpen, setState, state]
   );
@@ -90,69 +109,123 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
     switch (state) {
       case ('stakeAuto'):
       case ('stakeManual'):
+      case ('stakeKeepNominated'):
         return 'Staking of'.toUpperCase();
       case ('changeValidators'):
         return 'nominating'.toUpperCase();
       default:
-        return 'Unknown';
+        return state.toUpperCase();
     }
   };
 
-  const handleConfirm = (): void => {
+  const isEqual = (a1: string[] | null, a2: string[] | null): boolean => {
+    if (!a1 && !a2) {
+      return true;
+    }
+
+    if (!(a1 || a2)) {
+      return false;
+    }
+
+    const a1Sorted = a1?.slice().sort();
+    const a2Sorted = a2?.slice().sort();
+
+    return JSON.stringify(a1Sorted) === JSON.stringify(a2Sorted);
+  };
+
+  const handleConfirm = async (): Promise<void> => {
     try {
-      setConfirming(true);
+      const localState = state;
+
+      setState('confirming');
 
       const signer = keyring.getPair(String(staker.address));
 
       signer.unlock(password);
       setPasswordIsCorrect(1);
-
+      let bondResult = 'failed';
       const alreadyBondedAmount = BigInt(String(ledger?.total));
-      const selectedValidatorsAccountId = nominatedValidatorsInfo.map((v) => v.accountId);
 
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      bondOrExtra(chain, staker.address, signer, stakeAmount, selectedValidatorsAccountId, alreadyBondedAmount)
-        .then((bondResult: string | null): void => {
-          console.log('bond Result,', bondResult);
+      if (['stakeAuto', 'stakeManual', 'stakeKeepNominated'].includes(localState) && stakeAmount !== 0n) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        bondResult = await bondOrExtra(chain, staker.address, signer, stakeAmount, alreadyBondedAmount);
+        console.log('bond Result,', bondResult);
 
-          if (bondResult === 'success') {
-            console.log('bond Result 00,', bondResult);
+        if (bondResult === 'failed') {
+          setState(bondResult);
 
-            if (Number(alreadyBondedAmount) === 0) {
-              // do nominate after bond
+          return;
+        }
+      }
 
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              nominate(chain, staker.address, signer, selectedValidatorsAccountId)
-                .then((nominateResult) => {
-                  console.log('nominateResult,', nominateResult);
-                  setConfirming(false);
-                  setStakingResultStatus(nominateResult);
-                });
+      if (['changeValidators', 'stakeAuto', 'stakeManual'].includes(localState)) {
+        const nominatedValidatorsId = nominatedValidators ? nominatedValidators.map((v) => String(v.accountId)) : [];
+        const selectedValidatorsAccountId = selectedValidators ? selectedValidators.map((v) => String(v.accountId)) : [];
+
+        if (['stakeAuto'].includes(localState)) {
+          if (!selectedValidators) {
+            console.log('! there is no selectedValidators to bond at Stakeauto, so might do bondExtera');
+
+            if (alreadyBondedAmount) {
+              setState('success');
             } else {
-              console.log('bond Result 01,', bondResult);
-
-              setStakingResultStatus('success');
-              setConfirming(false);
+              setState('failed');
             }
-          } else {
-            console.log('bond Result 02,', bondResult);
-            setStakingResultStatus('failed');
-            setConfirming(false);
+
+            return;
           }
-        });
+
+          if (isEqual(selectedValidatorsAccountId, nominatedValidatorsId)) {
+            console.log('the selected and previously nominated validators are the same, no need to renominate');
+
+            setState('success');
+
+            return;
+          }
+        }
+
+        if (['stakeManual'].includes(localState)) { // TODO: more check!!
+          if (!selectedValidatorsAccountId) {
+            console.log('selectedValidatorsAccountId is empty!!');
+            setState('failed');
+
+            return;
+          }
+        }
+
+        if (['changeValidators'].includes(localState)) {
+          if (!selectedValidatorsAccountId) {
+            console.log('! there is no selectedValidatorsAccountId to changeValidators');
+            setState('failed');
+
+            return;
+          }
+
+          if (isEqual(selectedValidatorsAccountId, nominatedValidatorsId)) {
+            console.log('the selected and previously nominated validators are the same, no need to renominate');
+
+            setState('failed');
+
+            return;
+          }
+        }
+
+        const nominateResult = await nominate(chain, staker.address, signer, selectedValidatorsAccountId);
+
+        console.log('nominateResult,', nominateResult);
+        setState(nominateResult);
+      }
     } catch (e) {
       setPasswordIsCorrect(-1);
-      setConfirming(false);
+      setState('failed');
     }
   };
 
-  useEffect(() => {
-    console.log('stakingResultStatus', stakingResultStatus);
-  }, [stakingResultStatus]);
-
   const handleReject = useCallback((): void => {
     handleConfirmStakingModalClose();
-  }, [handleConfirmStakingModalClose]);
+    setState('');
+    if (setSelectValidatorsModalOpen) setSelectValidatorsModalOpen(false);
+  }, [handleConfirmStakingModalClose, setSelectValidatorsModalOpen, setState]);
 
   return (
     <>
@@ -210,12 +283,12 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
                 {stateInHuman(state)}
 
               </Grid> */}
-              <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '30px 40px 25px' }}>
-                <Grid item xs={3} sx={{ padding: '5px 10px 5px', borderRadius: '5px', border: '2px double grey', justifyContent: 'flex-start', fontSize: 15, textAlign: 'center', fontVariant: 'small-caps' }}>
+              <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '30px 40px 10px' }}>
+                <Grid item xs={3} sx={{ border: '2px double grey', borderRadius: '5px', fontSize: 15, justifyContent: 'flex-start', padding: '5px 10px 5px', textAlign: 'center', fontVariant: 'small-caps' }}>
                   {stateInHuman(state)}
                 </Grid>
-                {stakeAmount ?
-                  <Grid item container justifyContent='center' spacing={1} xs={12} sx={{ fontSize: 18, fontFamily: 'fantasy', textAlign: 'center' }} >
+                {stakeAmount
+                  ? <Grid item container justifyContent='center' spacing={1} xs={12} sx={{ fontFamily: 'fantasy', fontSize: 18, textAlign: 'center' }} >
                     <Grid item>
                       {amountToHuman(stakeAmount.toString(), decimals)}
                     </Grid>
@@ -224,19 +297,43 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
                     </Grid>
                   </Grid>
                   : ''}
+
+                <Grid item xs={12} container justifyContent='space-between' alignItems='center' sx={{ fontSize: 12, paddingTop: '30px' }} >
+                  <Grid item container xs={5}>
+                    <Grid item xs={6} sx={{ fontSize: 12, fontWeight: '600', textAlign: 'left' }}>
+                      {t('Currently staked')}:
+                    </Grid>
+                    <Grid item xs={6} sx={{ fontSize: 12, textAlign: 'left' }}>
+                      {!ledger
+                        ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
+                        : <>
+                          {currentlyStaked ? amountToHuman(currentlyStaked.toString(), decimals) : '0.00'}
+                        </>
+                      }{coin}
+                    </Grid>
+                  </Grid>
+                  <Grid item container xs={5} justifyContent='flex-end'>
+                    <Grid item xs={6} sx={{ fontSize: 12, fontWeight: '600', textAlign: 'right' }}>
+                      {t('Total')}:
+                    </Grid>
+                    <Grid item xs={6} sx={{ fontSize: 12, textAlign: 'right' }}>
+                      {amountToHuman((currentlyStaked + stakeAmount).toString(), decimals)} {coin}
+                    </Grid>
+                  </Grid>
+                </Grid>
               </Grid>
-              <Grid item sx={{ textAlign: 'left', fontSize: 14, padding: '20px 20px 0px' }} xs={12}>
+              <Grid item sx={{ textAlign: 'left', fontSize: 14, padding: '15px 20px 0px' }} xs={12}>
                 {stakingConsts
                   ? <ValidatorsList
                     chain={chain}
                     stakingConsts={stakingConsts}
-                    validatorsInfo={nominatedValidatorsInfo}
+                    validatorsInfo={validatorsToList}
                     validatorsName={validatorsName} />
                   : ''
                 }
               </Grid>
             </Grid>
-            <Grid item sx={{ margin: '10px 20px 5px' }} xs={12}>
+            <Grid item sx={{ margin: '15px 20px 5px' }} xs={12}>
               <TextField
                 InputLabelProps={{
                   shrink: true
@@ -258,13 +355,14 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
                   ),
                   style: { fontSize: 16 }
                 }}
-                autoFocus
+                autoFocus={!['confirming', 'failed', 'success'].includes(state)}
                 fullWidth
                 helperText={passwordIsCorrect === -1 ? t('Password is not correct') : t('Please enter the stake account password')}
                 label={t('Password')}
                 onChange={handleSavePassword}
                 // eslint-disable-next-line react/jsx-no-bind
                 onKeyPress={(event) => {
+                  // eslint-disable-next-line @typescript-eslint/no-floating-promises
                   if (event.key === 'Enter') { handleConfirm(); }
                 }}
                 size='medium'
@@ -272,28 +370,29 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
                 type='password'
                 value={password}
                 variant='outlined'
+                disabled={!ledger}
               />
             </Grid>
             <Grid container item justifyContent='space-between' sx={{ padding: '5px 20px 0px' }} xs={12}>
-              {stakingResultStatus !== null
+              {['success', 'failed'].includes(state)
                 ? <Grid item xs={12}>
-                  <MuiButton fullWidth onClick={handleReject} variant='contained' color={stakingResultStatus === 'success' ? 'success' : 'error'}>
-                    {stakingResultStatus === 'success' ? t('Done') : t('Failed')}
+                  <MuiButton fullWidth onClick={handleReject} variant='contained' color={state === 'success' ? 'success' : 'error'}>
+                    {state === 'success' ? t('Done') : t('Failed')}
                   </MuiButton>
                 </Grid>
                 : <>
                   <Grid item xs={8}>
                     <Button
                       data-button-action=''
-                      isBusy={confirming}
-                      isDisabled={confirming}
+                      isBusy={state === 'confirming'}
+                      isDisabled={!ledger}
                       onClick={handleConfirm}
                     >
                       {t('Confirm').toUpperCase()}
                     </Button>
                   </Grid>
                   <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2, fontSize: 15 }}>
-                    <div style={confirming ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
+                    <div style={state === 'confirming' ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
                       <ActionText
                         // className={{'margin': 'auto'}}
                         onClick={handleReject}
@@ -303,7 +402,6 @@ export default function ConfirmStaking({ chain, coin, ledger, nominatedValidator
                   </Grid>
                 </>}
             </Grid>
-
           </Container>
         </div>
       </Modal>

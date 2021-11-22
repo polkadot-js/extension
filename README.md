@@ -55,4 +55,15 @@ Entering the crypto address is error prone, so it is useful to use the QR code f
 
 ![Address QR code page screenshot](docs/pjp/addressQrCode.PNG)
 
-.
+Now, you can easily stake using the extension.
+
+![stake page screenshot](docs/pjp/stake.PNG)
+
+view your nominated validators info.
+
+![nominated validators page screenshot](docs/pjp/nominatedValidators.PNG)
+
+nominate validators automatically or manually select/filter them.
+
+![select validators page screenshot](docs/pjp/selectValidators.PNG)
+

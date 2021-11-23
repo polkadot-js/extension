@@ -698,6 +698,7 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
                       ledger={ledger}
                       nominatedValidators={null}
                       selectedValidators={selected}
+                      validatorsToList={selected}
                       setConfirmStakingModalOpen={setConfirmStakingModalOpen}
                       setState={setState}
                       showConfirmStakingModal={showConfirmStakingModal}

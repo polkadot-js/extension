@@ -91,6 +91,9 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   };
 
   useEffect(() => {
+    console.log('showConfirmStakingModallleeeeeeeeeeeeeeeeee', showConfirmStakingModal) }, [showConfirmStakingModal])
+
+  useEffect(() => {
     if (ledger && decimals) {
       console.log('amountToHuman(String(ledger.active), decimals)', amountToHuman(String(ledger.active), decimals));
       console.log('ledger.active', ledger.active);
@@ -414,7 +417,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   }
 
   // TODO: find an algorithm to select validators automatically
-  function selectBestValidators(validatorsInfo: Validators, stakingConsts: StakingConsts): string[] {
+  function selectBestValidators(validatorsInfo: Validators, stakingConsts: StakingConsts): DeriveStakingQuery[] {
     const MAX_ACCEPTED_COMMISSION = 50;
 
     // console.log(' current validators Acc Id length', validatorsInfo.current.length);
@@ -567,7 +570,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     setStakeAmount(BigInt(ledger ? ledger.active.toString() : '0'));
   }, [ledger, ledgerActiveInHuman]);
 
-  function handleConfirmStakingModaOpen(): void {
+  function handleConfirmStakingModaOpen (): void {
     setConfirmStakingModalOpen(true);
     console.log('handleConfirmStakingModaOpen, state:', state);
   }
@@ -578,7 +581,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     if (!state) setState('changeValidators');
   }, [state]);
 
-  const handleNextToStake = useCallback((): void => {
+  const handleNextToStake = (): void => {
     if (Number(stakeAmountInHuman) >= Number(minNominatorBond)) {
       switch (validatorSelectionType) {
         case ('Auto'):
@@ -597,7 +600,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
           console.log('unknown validatorSelectionType ');
       }
     }
-  }, [handleConfirmStakingModaOpen, handleSelectValidatorsModaOpen, minNominatorBond, stakeAmountInHuman, state, validatorSelectionType]);
+  };//, [handleConfirmStakingModaOpen, handleSelectValidatorsModaOpen, minNominatorBond, stakeAmountInHuman, state, validatorSelectionType]);
 
   const handleNextToUnstake = useCallback(() => {
     const signer = keyring.getPair(String(staker.address));
@@ -840,7 +843,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                     <Grid item xs={8}>
                       <NextStepButton
                         data-button-action='next to stake'
-                        isBusy={!validatorsInfoIsUpdated && (state === 'stakeAuto' || validatorSelectionType === 'Auto') && state}
+                        isBusy={!ledger && !validatorsInfoIsUpdated && (state === 'stakeAuto' || validatorSelectionType === 'Auto') && state !== ''}
                         isDisabled={nextButtonDisabled}
                         onClick={handleNextToStake}
                       >
@@ -854,8 +857,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                         text={t<string>('CANCEL')}
                       />
                     </Grid>
-                    {((ledger && staker && selectedValidators?.length && nominatedValidators && state === 'stakeAuto') ||
-                      state === 'stakeKeepNominated') && state
+                    {ledger && staker && selectedValidators && nominatedValidators && state !== ''
                       ? <ConfirmStaking
                         chain={chain}
                         coin={coin}
@@ -864,6 +866,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                         ledger={ledger}
                         nominatedValidators={nominatedValidators}
                         selectedValidators={selectedValidators}
+                        validatorsToList={selectedValidators}
                         setConfirmStakingModalOpen={setConfirmStakingModalOpen}
                         setState={setState}
                         showConfirmStakingModal={showConfirmStakingModal}
@@ -952,27 +955,6 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                         text={t<string>('CANCEL')}
                       />
                     </Grid>
-                    {/* {((ledger && staker && selectedValidators?.length && nominatedValidators && state === 'stakeAuto') ||
-                      state === 'stakeKeepNominated') && state
-                      ? <ConfirmStaking
-                        chain={chain}
-                        coin={coin}
-                        // handleEasyStakingModalClose={handleEasyStakingModalClose}
-                        // lastFee={lastFee}
-                        ledger={ledger}
-                        nominatedValidators={nominatedValidators}
-                        selectedValidators={selectedValidators}
-                        setConfirmStakingModalOpen={setConfirmStakingModalOpen}
-                        setState={setState}
-                        showConfirmStakingModal={showConfirmStakingModal}
-                        stakeAmount={stakeAmount}
-                        staker={staker}
-                        stakingConsts={stakingConsts}
-                        state={state}
-                        validatorsInfo={validatorsInfo}
-                        validatorsName={validatorsName}
-                      />
-                      : ''} */}
                   </Grid>
                 </Grid>
               </TabPanel>

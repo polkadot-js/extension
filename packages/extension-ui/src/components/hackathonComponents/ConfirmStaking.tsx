@@ -38,10 +38,11 @@ interface Props {
   coin: string;
   validatorsName: ValidatorsName[] | null;
   selectedValidators: DeriveStakingQuery[] | null;
+  validatorsToList: DeriveStakingQuery[] | null;
 }
 
 export default function ConfirmStaking({
-  chain, coin, ledger, nominatedValidators, selectedValidators, setConfirmStakingModalOpen,
+  chain, coin, ledger, nominatedValidators, selectedValidators, setConfirmStakingModalOpen, validatorsToList,
   setSelectValidatorsModalOpen, setState, showConfirmStakingModal, stakeAmount,
   staker, stakingConsts, state, validatorsName }
   : Props): React.ReactElement<Props> {
@@ -50,15 +51,15 @@ export default function ConfirmStaking({
   const [password, setPassword] = useState<string>('');
   const [passwordIsCorrect, setPasswordIsCorrect] = useState<number>(0);// 0: no password, -1: password incorrect, 1:password correct
   const [currentlyStaked, setCurrentlyStaked] = useState<bigint>(0n);
-  const [validatorsToList, setvalidatorsToList] = useState<DeriveStakingQuery[] | null>(null);
+  // const [validatorsToList, setvalidatorsToList] = useState<DeriveStakingQuery[] | null>(null);
 
-  useEffect(() => {
-    if (['stakeManual', 'stakeAuto', 'changeValidators'].includes(state)) {
-      setvalidatorsToList(selectedValidators);
-    } else if (['stakeKeepNominated'].includes(state)) {
-      setvalidatorsToList(nominatedValidators);
-    }
-  }, [nominatedValidators, selectedValidators, state]);
+  // useEffect(() => {
+  //   if (['stakeManual', 'stakeAuto', 'changeValidators'].includes(state)) {
+  //     setvalidatorsToList(selectedValidators);
+  //   } else if (['stakeKeepNominated'].includes(state)) {
+  //     setvalidatorsToList(nominatedValidators);
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (!chain) { return; }
@@ -74,36 +75,26 @@ export default function ConfirmStaking({
     setCurrentlyStaked(BigInt(String(ledger.active)));
   }, [ledger]);
 
-  // useEffect((): void => {
-  //   if (!bondState || bondState === 'bonding') {
-  //     console.log('no BondState or bonding, bondState:', bondState);
-
-  //     return;
-  //   }
-
-  //   
-  // }, [bondState, selectedValidatorsAccountId]);
-
-  const handleClearPassword = useCallback((): void => {
+  const handleClearPassword = (): void => {
     setPasswordIsCorrect(0);
     setPassword('');
-  }, []);
+  };
 
-  const handleSavePassword = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleSavePassword = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setPassword(event.target.value);
 
     if (event.target.value === '') { handleClearPassword(); }
-  }, [handleClearPassword]);
+  };
 
-  const handleConfirmStakingModalClose = useCallback(
-    (): void => {
-      // set all defaults
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      setConfirmStakingModalOpen(false);
-      if (!['stakeManual'].includes(state)) setState('');
-    },
-    [setConfirmStakingModalOpen, setState, state]
-  );
+  const handleConfirmStakingModalClose = (): void => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    // setConfirmStakingModalOpen(false);
+    if (!['stakeManual'].includes(state)) setState('');
+  };
+
+  useEffect(() => {
+    console.log('showConfirmStakingModallllllllllllllllll', showConfirmStakingModal)
+  }, [showConfirmStakingModal])
 
   const stateInHuman = (state: string): string => {
     switch (state) {
@@ -221,11 +212,11 @@ export default function ConfirmStaking({
     }
   };
 
-  const handleReject = useCallback((): void => {
+  const handleReject = (): void => {
     handleConfirmStakingModalClose();
     setState('');
     if (setSelectValidatorsModalOpen) setSelectValidatorsModalOpen(false);
-  }, [handleConfirmStakingModalClose, setSelectValidatorsModalOpen, setState]);
+  };
 
   return (
     <>

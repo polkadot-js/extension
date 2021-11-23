@@ -260,7 +260,7 @@ function EnhancedTable(props: TableRowProps) {
   return (
     <>
       {/* <EnhancedTableToolbar numSelected={selected.length} setSelected={setSelected} /> */}
-      <TableContainer sx={{ borderRadius: '5px', maxHeight: 220 }}>
+      <TableContainer sx={{ borderRadius: '5px', maxHeight: 180 }}>
         <Table
           size='small'
           stickyHeader

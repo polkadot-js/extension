@@ -799,7 +799,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                       : <Grid item sx={{ paddingTop: '45px' }} xs={12}></Grid>
                     }
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid item xs={12} justifyContent='center'>
                     <FormControl fullWidth>
                       <Grid alignItems='center' container justifyContent='center'>
                         <Grid item sx={{ fontSize: 12 }} xs={3}>

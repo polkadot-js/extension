@@ -20,6 +20,7 @@ import { amountToHuman } from '@polkadot/extension-ui/util/HackathonUtilFiles/ha
 import ValidatorsList from './ValidatorsList';
 import { ActionText, Button } from '../';
 import { bondOrExtra, nominate } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
+import { grey } from '@mui/material/colors';
 
 interface Props {
   chain?: Chain | null;
@@ -274,7 +275,7 @@ export default function ConfirmStaking({
                 {stateInHuman(state)}
 
               </Grid> */}
-              <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '30px 40px 10px' }}>
+              <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '25px 40px 10px' }}>
                 <Grid item xs={3} sx={{ border: '2px double grey', borderRadius: '5px', fontSize: 15, justifyContent: 'flex-start', padding: '5px 10px 5px', textAlign: 'center', fontVariant: 'small-caps' }}>
                   {stateInHuman(state)}
                 </Grid>
@@ -290,11 +291,11 @@ export default function ConfirmStaking({
                   : ''}
 
                 <Grid item xs={12} container justifyContent='space-between' alignItems='center' sx={{ fontSize: 12, paddingTop: '30px' }} >
-                  <Grid item container xs={5}>
-                    <Grid item xs={6} sx={{ fontSize: 12, fontWeight: '600', textAlign: 'left' }}>
+                  <Grid item container xs={5} justifyContent='flex-start' spacing={1}>
+                    <Grid item  sx={{ fontSize: 12, fontWeight: '600' }}>
                       {t('Currently staked')}:
                     </Grid>
-                    <Grid item xs={6} sx={{ fontSize: 12, textAlign: 'left' }}>
+                    <Grid item  sx={{ fontSize: 12 }}>
                       {!ledger
                         ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
                         : <>
@@ -303,17 +304,20 @@ export default function ConfirmStaking({
                       }{coin}
                     </Grid>
                   </Grid>
-                  <Grid item container xs={5} justifyContent='flex-end'>
-                    <Grid item xs={6} sx={{ fontSize: 12, fontWeight: '600', textAlign: 'right' }}>
+                  <Grid item container xs={5} spacing={1} justifyContent='flex-end'>
+                    <Grid item sx={{ fontSize: 12, fontWeight: '600' }}>
                       {t('Total')}:
                     </Grid>
-                    <Grid item xs={6} sx={{ fontSize: 12, textAlign: 'right' }}>
+                    <Grid item sx={{ fontSize: 12 }}>
                       {amountToHuman((currentlyStaked + stakeAmount).toString(), decimals)} {coin}
                     </Grid>
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item sx={{ textAlign: 'left', fontSize: 14, padding: '15px 20px 0px' }} xs={12}>
+              <Grid item sx={{ textAlign: 'center', color: grey[600], fontFamily: 'fantasy', fontSize: 16, padding: '15px 50px 5px' }} xs={12}>
+                {t('VALIDATORS')}
+              </Grid>
+              <Grid item sx={{ textAlign: 'left', fontSize: 14, padding: '1px 20px 0px' }} xs={12}>
                 {stakingConsts
                   ? <ValidatorsList
                     chain={chain}
@@ -324,7 +328,7 @@ export default function ConfirmStaking({
                 }
               </Grid>
             </Grid>
-            <Grid item sx={{ margin: '15px 20px 5px' }} xs={12}>
+            <Grid item sx={{ margin: '30px 20px 5px' }} xs={12}>
               <TextField
                 InputLabelProps={{
                   shrink: true

@@ -268,8 +268,6 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         size='small'
         sx={{ fontSize: 12 }}
       />
-
-
       {numSelected > 0
         ? (
           <Tooltip title='Delete'>
@@ -528,6 +526,8 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
   }, []);
 
   useEffect(() => {
+    // setSelected([]);
+
     let filteredValidators = validatorsInfo.current.concat(validatorsInfo.waiting);
 
     if (filterOverSubscribedsState) {
@@ -541,6 +541,17 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
     if (filterNoNamesState && validatorsName) {
       filteredValidators = filteredValidators?.filter((v) => validatorsName.find((vn) => vn.address === String(v.accountId)));
     }
+
+    // remove filtered validators from the selected list
+    const selectedTemp = [...selected];
+
+    selectedTemp.forEach((s, index) => {
+      if (!filteredValidators.find((f) => f === s)) {
+        selectedTemp.splice(index, 1);
+      }
+    });
+
+    setSelected(selectedTemp);
 
     setValidators(filteredValidators);
   }, [filterHighCommissionsState, filterNoNamesState, filterOverSubscribedsState, stakingConsts, validatorsInfo, validatorsName]);
@@ -567,7 +578,7 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
   }, [setSelectValidatorsModalOpen, setState]);
 
   function handleSelectValidators() {
-    setConfirmStakingModalOpen(true);
+    if (selected.length >= 1) { setConfirmStakingModalOpen(true); }
   }
 
   return (
@@ -676,7 +687,7 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
                   <Grid item xs={8}>
                     <NextStepButton
                       data-button-action='select validators manually'
-                      // isDisabled={confirmDisabled}
+                      isDisabled={!selected.length}
                       onClick={handleSelectValidators}
                     >
                       {t('Next').toUpperCase()}

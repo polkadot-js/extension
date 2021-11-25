@@ -116,7 +116,7 @@ const headCells: readonly HeadCell[] = [
   {
     disablePadding: false,
     id: 'nominator',
-    label: 'Nominator',
+    label: '#Nominator',
     numeric: true
   }
   // , {

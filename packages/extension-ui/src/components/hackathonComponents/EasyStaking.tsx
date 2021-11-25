@@ -91,9 +91,6 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   };
 
   useEffect(() => {
-    console.log('showConfirmStakingModallleeeeeeeeeeeeeeeeee', showConfirmStakingModal) }, [showConfirmStakingModal])
-
-  useEffect(() => {
     if (ledger && decimals) {
       console.log('amountToHuman(String(ledger.active), decimals)', amountToHuman(String(ledger.active), decimals));
       console.log('ledger.active', ledger.active);
@@ -473,6 +470,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
   const handleValidatorSelectionType = useCallback((event: React.ChangeEvent<HTMLInputElement>): void => {
     setValidatorSelectionType(event.target.value);
+    setConfirmStakingModalOpen(false);
   }, [setValidatorSelectionType]);
 
   const handleStakeAmountOnChange = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
@@ -570,7 +568,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     setStakeAmount(BigInt(ledger ? ledger.active.toString() : '0'));
   }, [ledger, ledgerActiveInHuman]);
 
-  function handleConfirmStakingModaOpen (): void {
+  function handleConfirmStakingModaOpen(): void {
     setConfirmStakingModalOpen(true);
     console.log('handleConfirmStakingModaOpen, state:', state);
   }
@@ -654,12 +652,8 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
         width: '560px'
       }}
       >
-        <Container>
-          <Grid
-            container
-            justifyContent='flex-start'
-            sx={{ padding: '5px 0px 10px' }}
-          >
+        <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
+          <Grid container justifyContent='flex-start'>
             <Grid alignItems='center' container justifyContent='space-between'>
               <Grid item xs={2}>
                 <IconButton
@@ -843,7 +837,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                     <Grid item xs={8}>
                       <NextStepButton
                         data-button-action='next to stake'
-                        isBusy={!ledger && !validatorsInfoIsUpdated && (state === 'stakeAuto' || validatorSelectionType === 'Auto') && state !== ''}
+                        isBusy={!ledger && !validatorsInfoIsUpdated && ['KeepNominated','Auto'].includes(validatorSelectionType) && state !== ''}
                         isDisabled={nextButtonDisabled}
                         onClick={handleNextToStake}
                       >
@@ -941,7 +935,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                     <Grid item xs={8}>
                       <NextStepButton
                         data-button-action='next to unstake'
-                        // isBusy={!validatorsInfoIsUpdated && (state === 'stakeAuto' || validatorSelectionType === 'Auto') && state}
+                        // isBusy={ && state}
                         isDisabled={!ledgerActiveInHuman || !unstakeAmountInHuman || Number(unstakeAmountInHuman) > Number(ledgerActiveInHuman)}
                         onClick={handleNextToUnstake}
                       >
@@ -996,29 +990,29 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                 }
               </TabPanel>
               <TabPanel value={tabValue} index={3}>
-                <Grid container>
+                <Grid container sx={{ paddingTop: '20px' }}>
                   <Grid xs={12}>
                     {t('Welcome to Staking')}
                   </Grid>
-                  <Grid xs={12} sx={{ fontSize: 12, paddingBottom: '20px' }}>
-                    {t('Information you should know about it.')}
+                  <Grid xs={12} sx={{ fontSize: 12, paddingBottom: '30px' }}>
+                    {t('Information you need to know about')}
                   </Grid>
                   {stakingConsts
                     ? <>
                       <Grid xs={12} sx={{ fontSize: 11 }}>
-                        {t('Maximum validators you can select: ')} {stakingConsts?.maxNominations}
+                        {t('Maximum validators you can select: ')}<Box component='span' sx={{ fontWeight: 'bold' }}>  {stakingConsts?.maxNominations}</Box>
                       </Grid>
                       <Grid xs={12} sx={{ fontSize: 11 }}>
-                        {t('Minimum')} {coin}s {t('that you can stake: ')} {minNominatorBond} {coin}s
+                        {t('Minimum')} {coin}s {t('that you can stake: ')} <Box component='span' sx={{ fontWeight: 'bold' }}> {minNominatorBond}</Box> {coin}s
                       </Grid>
                       <Grid xs={12} sx={{ fontSize: 11 }}>
-                        {t('Maximum stakers of a validator, who receives rewards: ')} {stakingConsts?.maxNominatorRewardedPerValidator}
+                        {t('Maximum stakers of a validator, who receives rewards: ')} <Box component='span' sx={{ fontWeight: 'bold' }}> {stakingConsts?.maxNominatorRewardedPerValidator}</Box>
                       </Grid>
                       <Grid xs={12} sx={{ fontSize: 11 }}>
-                        {t('Days it takes to receive your funds back after unstaking:  ')} {stakingConsts?.bondingDuration}  {t('days')}
+                        {t('Days it takes to receive your funds back after unstaking:  ')}<Box component='span' sx={{ fontWeight: 'bold' }}>  {stakingConsts?.bondingDuration}</Box>  {t('days')}
                       </Grid>
                       <Grid xs={12} sx={{ fontSize: 11 }}>
-                        {t('Minimum')} {coin}s {t('that must remain in you account: ')} {amountToHuman(String(stakingConsts?.existentialDeposit), decimals)} {coin}s {t('plus some fees')}
+                        {t('Minimum')} {coin}s {t('that must remain in you account: ')} <Box component='span' sx={{ fontWeight: 'bold' }}> {amountToHuman(String(stakingConsts?.existentialDeposit), decimals)}</Box> {coin}s {t('plus some fees')}
                       </Grid>
                     </>
                     : <>

@@ -88,14 +88,13 @@ export default function ConfirmStaking({
   };
 
   const handleConfirmStakingModalClose = (): void => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    // setConfirmStakingModalOpen(false);
-    if (!['stakeManual'].includes(state)) setState('');
+    setConfirmStakingModalOpen(false);
   };
 
-  useEffect(() => {
-    console.log('showConfirmStakingModallllllllllllllllll', showConfirmStakingModal)
-  }, [showConfirmStakingModal])
+  const handleConfirmStakingModalBack = (): void => {
+    if (!['stakeManual', 'changeValidators'].includes(state)) setState('');
+    handleConfirmStakingModalClose();
+  };
 
   const stateInHuman = (state: string): string => {
     switch (state) {
@@ -143,7 +142,7 @@ export default function ConfirmStaking({
         bondResult = await bondOrExtra(chain, staker.address, signer, stakeAmount, alreadyBondedAmount);
         console.log('bond Result,', bondResult);
 
-        if (bondResult === 'failed') {
+        if (bondResult === 'failed' || localState==='stakeKeepNominated') {
           setState(bondResult);
 
           return;
@@ -214,9 +213,9 @@ export default function ConfirmStaking({
   };
 
   const handleReject = (): void => {
-    handleConfirmStakingModalClose();
     setState('');
     if (setSelectValidatorsModalOpen) setSelectValidatorsModalOpen(false);
+    handleConfirmStakingModalClose();
   };
 
   return (
@@ -242,16 +241,12 @@ export default function ConfirmStaking({
           width: '560px'
         }}
         >
-          <Container
-            disableGutters
-            maxWidth='md'
-            sx={{ marginTop: 2 }}
-          >
+          <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
             <Grid alignItems='center' container justifyContent='space-between'>
               <Grid item xs={2}>
                 <MuiButton
                   // eslint-disable-next-line react/jsx-no-bind
-                  onClick={handleConfirmStakingModalClose}
+                  onClick={handleConfirmStakingModalBack}
                   startIcon={<ArrowBackIosRounded />}
                 >
                   {t('Edit')}
@@ -292,10 +287,10 @@ export default function ConfirmStaking({
 
                 <Grid item xs={12} container justifyContent='space-between' alignItems='center' sx={{ fontSize: 12, paddingTop: '30px' }} >
                   <Grid item container xs={5} justifyContent='flex-start' spacing={1}>
-                    <Grid item  sx={{ fontSize: 12, fontWeight: '600' }}>
+                    <Grid item sx={{ fontSize: 12, fontWeight: '600' }}>
                       {t('Currently staked')}:
                     </Grid>
-                    <Grid item  sx={{ fontSize: 12 }}>
+                    <Grid item sx={{ fontSize: 12 }}>
                       {!ledger
                         ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
                         : <>
@@ -309,7 +304,12 @@ export default function ConfirmStaking({
                       {t('Total')}:
                     </Grid>
                     <Grid item sx={{ fontSize: 12 }}>
-                      {amountToHuman((currentlyStaked + stakeAmount).toString(), decimals)} {coin}
+                      {!ledger
+                        ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
+                        : <>
+                          {amountToHuman((currentlyStaked + stakeAmount).toString(), decimals)}
+                        </>
+                      }{coin}
                     </Grid>
                   </Grid>
                 </Grid>

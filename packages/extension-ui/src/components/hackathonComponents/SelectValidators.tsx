@@ -177,8 +177,8 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   };
 
   return (
-    <TableHead>
-      <TableRow sx={{ height: 30, maxHeight: '20px' }}>
+    <TableHead sx={{ height: '15px' }}>
+      <TableRow sx={{ height: '10px' }}>
         <StyledTableCell padding='checkbox'>
           {/* <Checkbox
             checked={rowCount > 0 && numSelected === rowCount}
@@ -194,7 +194,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
           <StyledTableCell
             align={headCell.numeric ? 'right' : 'left'}
             key={headCell.id}
-            padding={headCell.disablePadding ? 'none' : 'normal'}
+            // padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
@@ -214,16 +214,38 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 interface EnhancedTableToolbarProps {
   numSelected: number;
   setSelected: React.Dispatch<React.SetStateAction<DeriveStakingQuery[]>>;
+  setSearchedValidators: React.Dispatch<React.SetStateAction<DeriveStakingQuery[]>>;
   stakingConsts: StakingConsts;
+  validators: DeriveStakingQuery[];
+  setSearching: React.Dispatch<React.SetStateAction<boolean>>;
+  validatorsName: ValidatorsName[] | null;
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-  const { numSelected, setSelected, stakingConsts } = props;
+  const { numSelected, setSearchedValidators, setSearching, setSelected, stakingConsts, validators, validatorsName } = props;
   // const { t } = useTranslation();
+
+  const handleValidatorSearch = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const keyWord = event.target.value;
+
+    setSearching(!!keyWord);
+
+    const founds = validators.filter((item) => String(item.accountId).toLowerCase().includes(keyWord.toLowerCase()));
+    const foundsOnName = validatorsName?.filter((item) => item.name.toLowerCase().includes(keyWord.toLowerCase()));
+
+    foundsOnName?.forEach((item) => {
+      const f = validators.find((v) => String(v.accountId) === item.address)
+
+      if (f) founds.push(f);
+    });
+
+    setSearchedValidators(founds);
+  }
 
   return (
     <Toolbar
       sx={{
+        borderRadius: '5px',
         pl: { sm: 2 },
         pr: { sm: 1, xs: 1 },
         ...(numSelected > 0 && {
@@ -252,7 +274,6 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
           </Typography>
         )
       }
-
       <TextField
         autoComplete='off'
         // InputProps={{ endAdornment: (<InputAdornment position='end'>{coin}</InputAdornment>) }}
@@ -261,7 +282,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         // helperText={zeroBalanceAlert ? t('Available balance is zero.') : ''}
         // label={t('Search')}
         name='search'
-        // onChange={handleStakeAmountOnChange}
+        onChange={handleValidatorSearch}
         placeholder='Filter with Address/Name'
         type='text'
         variant='outlined'
@@ -293,8 +314,12 @@ interface TableRowProps {
   decimals: number;
   stakingConsts: StakingConsts;
   validatorsName: ValidatorsName[] | null;
+  searchedValidators: DeriveStakingQuery[];
+  setSearchedValidators: React.Dispatch<React.SetStateAction<DeriveStakingQuery[]>>;
   selected: DeriveStakingQuery[];
   setSelected: React.Dispatch<React.SetStateAction<DeriveStakingQuery[]>>;
+  searching: boolean;
+  setSearching: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -311,40 +336,22 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 function EnhancedTable(props: TableRowProps) {
-  // const { t } = useTranslation();
-  const rows = props.validators;
+  const rows = props.searching ? props.searchedValidators : props.validators;
+  const setSearchedValidators = props.setSearchedValidators;
   const stakingConsts = props.stakingConsts;
   const validatorsName = props.validatorsName;
   const selected = props.selected;
   const setSelected = props.setSelected;
-
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof Data>('name');
-  // const [selected, setSelected] = React.useState<readonly string[]>([]);
-  // const [page, setPage] = React.useState(0);
-  // const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [emptyRows, setEmptyRows] = React.useState<number>(0);
 
-  const handleRequestSort = (
-    event: React.MouseEvent<unknown>,
-    property: keyof Data
-  ) => {
+  const handleRequestSort = (_event: React.MouseEvent<unknown>, property: keyof Data) => {
     const isAsc = orderBy === property && order === 'asc';
 
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-
-  // const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (event.target.checked) {
-  //     const newSelecteds = rows.slice(stakingConsts.maxNominations - 1).map((v) => String(v.accountId));
-
-  //     setSelected(newSelecteds);
-
-  //     return;
-  //   }
-
-  //   setSelected([]);
-  // };
 
   const handleClick = (event: React.MouseEvent<unknown>, validator: DeriveStakingQuery) => {
     const selectedIndex = selected.indexOf(validator);
@@ -373,15 +380,6 @@ function EnhancedTable(props: TableRowProps) {
     setSelected(newSelected);
   };
 
-  // const handleChangePage = (event: unknown, newPage: number) => {
-  //   setPage(newPage);
-  // };
-
-  // const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
-
   const isSelected = (v: DeriveStakingQuery) => selected.indexOf(v) !== -1;
 
   function getAccountIdOrName(val: DeriveStakingQuery) {
@@ -394,13 +392,21 @@ function EnhancedTable(props: TableRowProps) {
     return toShortAddress(val.accountId);
   }
 
+  useEffect(() => {
+    setEmptyRows(8 - rows.length);
+  }, [rows]);
+
   return (
-    <Paper sx={{ overflow: 'hidden', width: '100%' }}>
+    <Container sx={{ overflow: 'hidden', padding: '5px 10px', width: '100%' }}>
       <EnhancedTableToolbar
         numSelected={selected.length}
+        setSearchedValidators={setSearchedValidators}
+        setSearching={props.setSearching}
         setSelected={setSelected}
-        stakingConsts={stakingConsts} />
-      <TableContainer sx={{ maxHeight: 350 }}>
+        stakingConsts={stakingConsts}
+        validators={rows}
+        validatorsName={validatorsName} />
+      <TableContainer sx={{ borderRadius: '5px', maxHeight: 350 }}>
         <Table stickyHeader>
           <EnhancedTableHead
             numSelected={selected.length}
@@ -439,6 +445,7 @@ function EnhancedTable(props: TableRowProps) {
                           inputProps={{
                             'aria-labelledby': labelId
                           }}
+                          size='small'
                         />
                       </StyledTableCell>
                       <StyledTableCell
@@ -478,7 +485,7 @@ function EnhancedTable(props: TableRowProps) {
                     </TableRow>
                   );
                 })}
-            {/* {emptyRows > 0 && (
+            {emptyRows > 0 && (
               <TableRow
                 style={{
                   height: 53 * emptyRows// (dense ? 33 : 53) * emptyRows,
@@ -486,23 +493,11 @@ function EnhancedTable(props: TableRowProps) {
               >
                 <StyledTableCell colSpan={6} />
               </TableRow>
-            )} */}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
-      {/* <TablePagination
-          component='div'
-          count={rows.length}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          labelRowsPerPage={''}
-          rowsPerPageOptions={[5]}
-          showFirstButton
-          showLastButton
-        /> */}
-    </Paper>
+    </Container>
   );
 }
 
@@ -511,6 +506,8 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [validators, setValidators] = useState<DeriveStakingQuery[]>([]);
+  const [searchedValidators, setSearchedValidators] = useState<DeriveStakingQuery[]>([]);
+  const [searching, setSearching] = useState<boolean>(false);
   const [filterHighCommissionsState, setFilterHighCommissions] = useState(true);
   const [filterOverSubscribedsState, setFilterOverSubscribeds] = useState(true);
   const [filterNoNamesState, setFilterNoNames] = useState(false);
@@ -526,8 +523,6 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
   }, []);
 
   useEffect(() => {
-    // setSelected([]);
-
     let filteredValidators = validatorsInfo.current.concat(validatorsInfo.waiting);
 
     if (filterOverSubscribedsState) {
@@ -605,21 +600,28 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
         }}
         >
           <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
-            <Grid alignItems='center' container justifyContent='space-between' >
-              <Grid item xs={2}>
-                <MuiButton
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={handleCancel}
-                  startIcon={<ArrowBackIosRounded />}
-                >
-                  {''}
-                </MuiButton>
-              </Grid>
-              <Grid item xs={2}>
-                <Avatar
-                  alt={'logo'}
-                  src={getChainLogo(chain)}
-                />
+            <Grid alignItems='center' container>
+              <Grid item alignItems='center' container justifyContent='space-between' sx={{ padding: '0px 20px' }}>
+                <Grid item>
+                  {/* <MuiButton
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onClick={handleCancel}
+                    startIcon={<ArrowBackIosRounded />}
+                  >
+                    {''}
+                  </MuiButton> */}
+                  <Avatar
+                    alt={'logo'}
+                    src={getChainLogo(chain)}
+                  />
+                </Grid>
+                <Grid item sx={{ fontSize: 15 }}>
+                  <ActionText
+                    // className={{'margin': 'auto'}}
+                    onClick={handleCancel}
+                    text={t('Cancel')}
+                  />
+                </Grid>
               </Grid>
               <Grid item xs={12}>
                 <Box fontSize={12} fontWeight='fontWeightBold'>
@@ -638,7 +640,11 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
                 {validatorsInfo
                   ? <EnhancedTable
                     decimals={decimal}
+                    searchedValidators={searchedValidators}
+                    searching={searching}
                     selected={selected}
+                    setSearchedValidators={setSearchedValidators}
+                    setSearching={setSearching}
                     setSelected={setSelected}
                     stakingConsts={stakingConsts}
                     validators={validators}
@@ -683,43 +689,43 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
                     label={<Box fontSize={12} sx={{ color: 'red' }}>{t('no oversubscribeds')}</Box>}
                   />
                 </Grid>
-                <Grid item xs={12} container sx={{ padding: '20px 20px' }}>
-                  <Grid item xs={8}>
+                <Grid item xs={12} container sx={{ padding: '10px 20px' }}>
+                  <Grid item xs={12}>
                     <NextStepButton
                       data-button-action='select validators manually'
                       isDisabled={!selected.length}
                       onClick={handleSelectValidators}
                     >
-                      {t('Next').toUpperCase()}
+                      {t('Next')}
                     </NextStepButton>
                   </Grid>
-                  <Grid item xs={4} justifyContent='center' sx={{ fontSize: 15, paddingTop: 2 }}>
+                  {/* <Grid item xs={4} justifyContent='center' sx={{ fontSize: 15, paddingTop: 2 }}>
                     <ActionText
                       // className={{'margin': 'auto'}}
                       onClick={handleCancel}
-                      text={t('Cancel').toUpperCase()}
+                      text={t('Cancel') }
                     />
-                  </Grid>
+                  </Grid> */}
                   {selected.length >= 1
                     ? <ConfirmStaking
+                      amount={state === 'changeValidators' ? 0n : stakeAmount}
                       chain={chain}
-                      coin={coin}
                       // handleEasyStakingModalClose={handleEasyStakingModalClose}
                       // lastFee={lastFee}
+                      coin={coin}
                       ledger={ledger}
                       nominatedValidators={null}
                       selectedValidators={selected}
-                      validatorsToList={selected}
                       setConfirmStakingModalOpen={setConfirmStakingModalOpen}
+                      setSelectValidatorsModalOpen={setSelectValidatorsModalOpen}
                       setState={setState}
                       showConfirmStakingModal={showConfirmStakingModal}
-                      stakeAmount={state === 'changeValidators' ? 0n : stakeAmount}
                       staker={staker}
                       stakingConsts={stakingConsts}
                       state={state}
                       validatorsInfo={validatorsInfo}
                       validatorsName={validatorsName}
-                      setSelectValidatorsModalOpen={setSelectValidatorsModalOpen}
+                      validatorsToList={selected}
                     />
                     : 'You need to select at least a validator'}
                 </Grid>

@@ -23,7 +23,7 @@ import { amountToHuman, fixFloatingPoint } from '../../util/HackathonUtilFiles/h
 import { AccountsBalanceType, TransactionStatus } from '../../util/HackathonUtilFiles/pjpeTypes';
 import signAndTransfer from '../../util/HackathonUtilFiles/signAndTransfer';
 import { AccountContext } from '../contexts';
-import { ActionText, Button } from '../';
+import { ActionText, BackButton, Button } from '../';
 
 
 interface Props {
@@ -276,24 +276,36 @@ export default function ConfirmTx({
         }}
         >
           <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
-            <Grid alignItems='center' container justifyContent='space-between'>
-              <Grid item xs={2}>
-                <MuiButton
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={handleConfirmModaClose}
-                  startIcon={<ArrowBackIosRounded />}>
-                  {t('Edit')}
-                </MuiButton>
+            <Grid container alignItems='center' >
+              <Grid item xs={12} alignItems='center' container justifyContent='space-between' sx={{ padding: '0px 20px' }}>
+                <Grid item sx={{ textAlign: 'right' }}>
+                  <Avatar
+                    alt={'logo'}
+                    src={getChainLogo(chain)}
+                  />
+                </Grid>
+                <Grid item justifyContent='center' sx={{ fontSize: 15 }}>
+                  <div style={transfering ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
+                    <ActionText
+                      // className={{'margin': 'auto'}}
+                      onClick={handleReject}
+                      text={t('Reject')}
+                    />
+                  </div>
+                </Grid>
               </Grid>
-              <Grid item xs={2}>
-                <Avatar
-                  alt={'logo'}
-                  src={getChainLogo(chain)}
-                // sx={{ height: 45, width: 45 }}
-                />
+              <Grid item xs={12}>
+                <Box fontSize={12} fontWeight='fontWeightBold'>
+                  <Divider>
+                    {/* <Chip
+                      icon={<FontAwesomeIcon icon={faCoins} size='sm' />}
+                      label={t('Select Validators')}
+                      variant='outlined'
+                    /> */}
+                  </Divider>
+                </Box>
               </Grid>
             </Grid>
-            <Divider light />
             <Grid container alignItems='center' justifyContent='space-around' >
               <Grid item container alignItems='center' justifyContent='flex-end' xs={5}>
                 <Grid item xs={4}>
@@ -321,11 +333,11 @@ export default function ConfirmTx({
                     theme={'polkadot'}//'polkadot', 'substrate' (default), 'beachball' or 'jdenticon'
                     value={recepient.address}
                   />
-                </Grid> 
+                </Grid>
                 <Grid item xs={6} sx={{ fontSize: 14, textAlign: 'left' }}>
                   {recepient.name != 'null' ? recepient.name : makeAddressShort(String(recepient.address))}
                 </Grid>
-               
+
               </Grid>
               <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '25px 40px 25px' }}>
                 <Grid item xs={3} sx={{ padding: '5px 10px 5px', borderRadius: '5px', border: '2px double grey', justifyContent: 'flex-start', fontSize: 15, textAlign: 'center', fontVariant: 'small-caps' }}>
@@ -436,24 +448,19 @@ export default function ConfirmTx({
                   </MuiButton>
                 </Grid>
                 : <>
-                  <Grid item xs={8}>
+
+                  <Grid item xs={2}>
+                    <BackButton onClick={handleConfirmModaClose} />
+                  </Grid>
+                  <Grid item xs={10}>
                     <Button
                       data-button-action=''
                       isBusy={transfering}
                       isDisabled={confirmDisabled}
                       onClick={handleConfirmTransfer}
                     >
-                      {t('Confirm').toUpperCase()}
+                      {t('Confirm')}
                     </Button>
-                  </Grid>
-                  <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2, fontSize: 15 }}>
-                    <div style={transfering ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
-                      <ActionText
-                        // className={{'margin': 'auto'}}
-                        onClick={handleReject}
-                        text={t('Reject').toUpperCase()}
-                      />
-                    </div>
                   </Grid>
                 </>}
               {txStatus.blockNumber || transactionHash

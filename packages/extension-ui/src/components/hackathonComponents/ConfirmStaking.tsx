@@ -4,9 +4,9 @@
 // eslint-disable-next-line simple-import-sort/imports
 import type { StakingLedger } from '@polkadot/types/interfaces';
 
-import { ArrowBackIosRounded, CheckRounded, Clear } from '@mui/icons-material';
+import { CheckRounded, Clear } from '@mui/icons-material';
 import { Avatar, Button as MuiButton, Container, Divider, Grid, IconButton, InputAdornment, Modal, Skeleton, TextField } from '@mui/material';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Chain } from '@polkadot/extension-chains/types';
 import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
@@ -18,8 +18,8 @@ import { AccountsBalanceType, StakingConsts, Validators, ValidatorsName } from '
 import getNetworkInfo from '@polkadot/extension-ui/util/HackathonUtilFiles/getNetwork';
 import { amountToHuman } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackathonUtils';
 import ValidatorsList from './ValidatorsList';
-import { ActionText, Button } from '../';
-import { bondOrExtra, nominate } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
+import { ActionText, BackButton, Button } from '../';
+import { bondOrExtra, nominate, unbond } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
 import { grey } from '@mui/material/colors';
 
 interface Props {
@@ -32,7 +32,7 @@ interface Props {
   setConfirmStakingModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectValidatorsModalOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   stakingConsts: StakingConsts | null;
-  stakeAmount: bigint;
+  amount: bigint;
   validatorsInfo?: Validators | null;
   ledger: StakingLedger | null;
   nominatedValidators: DeriveStakingQuery[] | null;
@@ -43,24 +43,29 @@ interface Props {
 }
 
 export default function ConfirmStaking({
-  chain, coin, ledger, nominatedValidators, selectedValidators, setConfirmStakingModalOpen, validatorsToList,
-  setSelectValidatorsModalOpen, setState, showConfirmStakingModal, stakeAmount,
-  staker, stakingConsts, state, validatorsName }
+  amount, chain, coin, ledger, nominatedValidators, selectedValidators, setConfirmStakingModalOpen,
+  setSelectValidatorsModalOpen, setState, showConfirmStakingModal, staker, stakingConsts, state, validatorsName, validatorsToList }
   : Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [decimals, setDecimals] = useState<number>(1);
   const [password, setPassword] = useState<string>('');
   const [passwordIsCorrect, setPasswordIsCorrect] = useState<number>(0);// 0: no password, -1: password incorrect, 1:password correct
   const [currentlyStaked, setCurrentlyStaked] = useState<bigint>(0n);
-  // const [validatorsToList, setvalidatorsToList] = useState<DeriveStakingQuery[] | null>(null);
+  const [totalStakedInHuman, setTotalStakedInHuman] = useState<string>('');
 
-  // useEffect(() => {
-  //   if (['stakeManual', 'stakeAuto', 'changeValidators'].includes(state)) {
-  //     setvalidatorsToList(selectedValidators);
-  //   } else if (['stakeKeepNominated'].includes(state)) {
-  //     setvalidatorsToList(nominatedValidators);
-  //   }
-  // }, []);
+  useEffect(() => {
+    console.log('amount is :', amount);
+    
+    if (['confirming', 'success', 'failed'].includes(state)) {
+      return;
+    }
+
+    if (state === 'unstake') {
+      setTotalStakedInHuman(amountToHuman((currentlyStaked - amount).toString(), decimals));
+    } else {
+      setTotalStakedInHuman(amountToHuman((currentlyStaked + amount).toString(), decimals));
+    }
+  }, [amount, currentlyStaked, decimals, state]);
 
   useEffect(() => {
     if (!chain) { return; }
@@ -137,12 +142,12 @@ export default function ConfirmStaking({
       let bondResult = 'failed';
       const alreadyBondedAmount = BigInt(String(ledger?.total));
 
-      if (['stakeAuto', 'stakeManual', 'stakeKeepNominated'].includes(localState) && stakeAmount !== 0n) {
+      if (['stakeAuto', 'stakeManual', 'stakeKeepNominated'].includes(localState) && amount !== 0n) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        bondResult = await bondOrExtra(chain, staker.address, signer, stakeAmount, alreadyBondedAmount);
+        bondResult = await bondOrExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
         console.log('bond Result,', bondResult);
 
-        if (bondResult === 'failed' || localState==='stakeKeepNominated') {
+        if (bondResult === 'failed' || localState === 'stakeKeepNominated') {
           setState(bondResult);
 
           return;
@@ -206,6 +211,14 @@ export default function ConfirmStaking({
         console.log('nominateResult,', nominateResult);
         setState(nominateResult);
       }
+
+      if (localState === 'unstake' && amount >= 0n) {
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        unbond(chain, staker.address, signer, amount).then((unbondResult) => {
+          console.log('unbond result:', unbondResult);
+          setState(unbondResult);
+        });
+      }
     } catch (e) {
       setPasswordIsCorrect(-1);
       setState('failed');
@@ -242,24 +255,20 @@ export default function ConfirmStaking({
         }}
         >
           <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
-            <Grid alignItems='center' container justifyContent='space-between'>
-              <Grid item xs={2}>
-                <MuiButton
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={handleConfirmStakingModalBack}
-                  startIcon={<ArrowBackIosRounded />}
-                >
-                  {t('Edit')}
-                </MuiButton>
-              </Grid>
-              <Grid
-                item
-                xs={2}
-              >
+            <Grid item alignItems='center' container justifyContent='space-between' sx={{ padding: '0px 20px' }}>
+              <Grid item >
                 <Avatar
                   alt={'logo'}
                   src={getChainLogo(chain)}
                 />
+              </Grid>
+              <Grid item sx={{ fontSize: 15 }}>
+                <div style={state === 'confirming' ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
+                  <ActionText
+                    onClick={handleReject}
+                    text={t('Reject')}
+                  />
+                </div>
               </Grid>
               <Grid item xs={12}>
                 <Divider />
@@ -274,10 +283,10 @@ export default function ConfirmStaking({
                 <Grid item xs={3} sx={{ border: '2px double grey', borderRadius: '5px', fontSize: 15, justifyContent: 'flex-start', padding: '5px 10px 5px', textAlign: 'center', fontVariant: 'small-caps' }}>
                   {stateInHuman(state)}
                 </Grid>
-                {stakeAmount
+                {amount
                   ? <Grid item container justifyContent='center' spacing={1} xs={12} sx={{ fontFamily: 'fantasy', fontSize: 18, textAlign: 'center' }} >
                     <Grid item>
-                      {amountToHuman(stakeAmount.toString(), decimals)}
+                      {amountToHuman(amount.toString(), decimals)}
                     </Grid>
                     <Grid item>
                       {coin}
@@ -299,7 +308,7 @@ export default function ConfirmStaking({
                       }{coin}
                     </Grid>
                   </Grid>
-                  <Grid item container xs={5} spacing={1} justifyContent='flex-end'>
+                  <Grid container item justifyContent='flex-end' spacing={1} xs={5}>
                     <Grid item sx={{ fontSize: 12, fontWeight: '600' }}>
                       {t('Total')}:
                     </Grid>
@@ -307,7 +316,7 @@ export default function ConfirmStaking({
                       {!ledger
                         ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
                         : <>
-                          {amountToHuman((currentlyStaked + stakeAmount).toString(), decimals)}
+                          {totalStakedInHuman}
                         </>
                       }{coin}
                     </Grid>
@@ -317,14 +326,13 @@ export default function ConfirmStaking({
               <Grid item sx={{ textAlign: 'center', color: grey[600], fontFamily: 'fantasy', fontSize: 16, padding: '15px 50px 5px' }} xs={12}>
                 {t('VALIDATORS')}
               </Grid>
-              <Grid item sx={{ textAlign: 'left', fontSize: 14, padding: '1px 20px 0px' }} xs={12}>
-                {stakingConsts
-                  ? <ValidatorsList
+              <Grid item sx={{ fontSize: 14, padding: '1px 20px 0px' }} xs={12}>
+                {stakingConsts &&
+                  <ValidatorsList
                     chain={chain}
                     stakingConsts={stakingConsts}
                     validatorsInfo={validatorsToList}
                     validatorsName={validatorsName} />
-                  : ''
                 }
               </Grid>
             </Grid>
@@ -371,30 +379,34 @@ export default function ConfirmStaking({
             <Grid container item justifyContent='space-between' sx={{ padding: '5px 20px 0px' }} xs={12}>
               {['success', 'failed'].includes(state)
                 ? <Grid item xs={12}>
-                  <MuiButton fullWidth onClick={handleReject} variant='contained' color={state === 'success' ? 'success' : 'error'}>
+                  <MuiButton fullWidth onClick={handleReject} variant='contained'
+                    color={state === 'success' ? 'success' : 'error'} size='large'>
                     {state === 'success' ? t('Done') : t('Failed')}
                   </MuiButton>
                 </Grid>
                 : <>
-                  <Grid item xs={8}>
+                  <Grid item xs={2}>
+                    <BackButton onClick={handleConfirmStakingModalBack} />
+                  </Grid>
+                  <Grid item xs={10}>
                     <Button
                       data-button-action=''
                       isBusy={state === 'confirming'}
                       isDisabled={!ledger}
                       onClick={handleConfirm}
                     >
-                      {t('Confirm').toUpperCase()}
+                      {t('Confirm')}
                     </Button>
                   </Grid>
-                  <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2, fontSize: 15 }}>
+                  {/* <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2, fontSize: 15 }}>
                     <div style={state === 'confirming' ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
                       <ActionText
                         // className={{'margin': 'auto'}}
                         onClick={handleReject}
-                        text={t('Reject').toUpperCase()}
+                        text={t('Reject') }
                       />
                     </div>
-                  </Grid>
+                  </Grid> */}
                 </>}
             </Grid>
           </Container>

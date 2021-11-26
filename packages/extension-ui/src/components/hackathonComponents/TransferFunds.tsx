@@ -377,25 +377,15 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
       }}
       >
 
-        <Container>
-          <Grid
-            container
-            justifyContent='flex-start'
-            sx={{ paddingTop: '10px' }}
-            xs={12}
-          >
-            <IconButton
-              edge='start'
+        <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
+          <Grid container justifyContent='flex-end' sx={{ fontSize: 15, paddingRight: '20px' }} xs={12}>
+            <ActionText
+              // className={{'margin': 'auto'}}
               onClick={handleTransferModalClose}
-              size='small'
-            >
-              <CloseRounded fontSize='small' />
-            </IconButton>
+              text={t('Cancel')}
+            />
           </Grid>
-          <Grid
-            sx={{ paddingBottom: '10px' }}
-            xs={12}
-          >
+          <Grid sx={{ paddingBottom: '10px' }} xs={12}>
             <Box
               fontSize={12}
               fontWeight='fontWeightBold'
@@ -414,8 +404,8 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
             </Box>
           </Grid>
 
-          <Grid alignItems='center' container justifyContent='center'>
-            <Grid item sx={{ paddingTop: '30px' }} xs={12}>
+          <Grid alignItems='center' container justifyContent='center' sx={{ padding: '30px 20px' }}>
+            <Grid item xs={12}>
               <TextField
                 InputProps={{
                   endAdornment: (
@@ -454,25 +444,26 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
               }
 
             </Grid>
-          </Grid>
-          {!recepientAddressIsValid
-            ? <>
-              <Button
-                fullWidth
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={showAlladdressesOnThisChain}
-                startIcon={transferBetweenMyAccountsButtonText === t('Back to all') ? <ArrowBackIosRounded /> : null}
-                sx={{ justifyContent: 'flex-start', marginTop: 2, textAlign: 'left' }}
-                variant='text'
-              >
-                {transferBetweenMyAccountsButtonText}
-              </Button>
+            {!recepientAddressIsValid &&
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={showAlladdressesOnThisChain}
+                  startIcon={transferBetweenMyAccountsButtonText === t('Back to all') ? <ArrowBackIosRounded /> : null}
+                  sx={{ justifyContent: 'flex-start', marginTop: 2, textAlign: 'left' }}
+                  variant='text'
+                >
+                  {transferBetweenMyAccountsButtonText}
+                </Button>
 
-              {acountList}
-            </>
-            : ''}
-          {recepientAddressIsValid
-            ? <div id='transferBody'>
+                {acountList}
+              </Grid>
+            }
+          </Grid>
+
+          {recepientAddressIsValid &&
+            <div id='transferBody'>
               <Grid
                 container
                 justifyContent='space-between'
@@ -501,34 +492,41 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
 
                 <Grid item sx={{ fontSize: '15px', fontWeight: '600', color: grey[800], marginTop: 1, textAlign: 'left' }} xs={3}>
                   {t('Amount:')}
-                  <Tooltip placement='right-end' title='Transfer all amount and deactivate the account.' arrow>
-                    <LoadingButton
-                      color='primary'
-                      disabled={safeMaxAmountLoading}
-                      loading={allAmountLoading}
-                      name='All'
-                      onClick={HandleSetMax}
-                      size='small'
-                      sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
-                      variant='outlined'
-                    >
-                      {t('All')}
-                    </LoadingButton>
-                  </Tooltip>
-                  <Tooltip placement='right-end' title='Transfer max amount where the account remains active.' arrow>
-                    <LoadingButton
-                      color='primary'
-                      disabled={allAmountLoading}
-                      loading={safeMaxAmountLoading}
-                      name='safeMax'
-                      onClick={HandleSetMax}
-                      size='small'
-                      sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
-                      variant='outlined'
-                    >
-                      {t('Safe max')}
-                    </LoadingButton>
-                  </Tooltip>
+                 
+                  <Grid item>
+                    <Tooltip placement='right-end' title='Transfer all amount and deactivate the account.' arrow>
+                      <LoadingButton
+                        color='primary'
+                        disabled={safeMaxAmountLoading}
+                        loading={allAmountLoading}
+                        name='All'
+                        onClick={HandleSetMax}
+                        size='small'
+                        sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
+                        variant='outlined'
+                      >
+                        {t('All')}
+                      </LoadingButton>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item>
+                    <Tooltip placement='right-end' title='Transfer max amount where the account remains active.' arrow>
+                      <LoadingButton
+                        color='primary'
+                        disabled={allAmountLoading}
+                        loading={safeMaxAmountLoading}
+                        name='safeMax'
+                        onClick={HandleSetMax}
+                        size='small'
+                        sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
+                        variant='outlined'
+                      >
+                        {t('Safe max')}
+                      </LoadingButton>
+                    </Tooltip>
+                  </Grid>
+                  
                 </Grid>
                 <Grid
                   container
@@ -566,14 +564,14 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                 </Grid>
               </Grid>
               <Grid container justifyContent='space-between' sx={{ padding: '40px 40px 10px' }}>
-                <Grid item xs={8}>
+                <Grid item xs={12}>
                   <NextStepButton
                     data-button-action=''
                     // isBusy={bondState === 'bonding'}
                     isDisabled={nextButtonDisabled}
                     onClick={handleNext}
                   >
-                    {nextButtonCaption.toUpperCase()}
+                    {nextButtonCaption}
 
                   </NextStepButton>
 
@@ -594,26 +592,9 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                     />
                     : ''}
                 </Grid>
-                <Grid item xs={3} justifyContent='center' sx={{ paddingTop: 2, fontSize: 15 }}>
-                  <ActionText
-                    // className={{'margin': 'auto'}}
-                    onClick={handleTransferModalClose}
-                    text={t('CANCEL')}
-                  />
-                </Grid>
-                {/* <Grid item xs={3}>
-                  <Button
-                    color='secondary'
-                    fullWidth
-                    onClick={handleTransferModalClose}
-                    variant='outlined'
-                  >
-                    {t('Cancel')}
-                  </Button> */}
-                {/* </Grid> */}
               </Grid>
             </div>
-            : ''}
+          }
         </Container>
       </div>
     </Modal>

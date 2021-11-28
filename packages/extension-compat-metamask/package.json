@@ -20,7 +20,7 @@
     "@babel/runtime": "^7.16.3",
     "@metamask/detect-provider": "^1.2.0",
     "@polkadot/extension-inject": "^0.41.2-2",
-    "@polkadot/util": "^7.8.3-27",
+    "@polkadot/util": "^8.0.2",
     "web3": "^1.6.1"
   },
   "peerDependencies": {

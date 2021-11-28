@@ -18,11 +18,11 @@
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.3",
-    "@polkadot/api": "^6.8.2-12",
+    "@polkadot/api": "^6.9.3-5",
     "@polkadot/extension-dapp": "^0.41.2-2",
     "@polkadot/extension-inject": "^0.41.2-2",
-    "@polkadot/keyring": "^7.8.3-27",
-    "@polkadot/phishing": "^0.6.442",
-    "@polkadot/ui-keyring": "^0.86.6-0"
+    "@polkadot/keyring": "^8.0.2",
+    "@polkadot/phishing": "^0.6.476",
+    "@polkadot/ui-keyring": "^0.87.1"
   }
 }

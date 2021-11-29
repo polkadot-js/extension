@@ -99,15 +99,14 @@ function SeedAndPath ({ className, genesisHash, onAccountChange, onNextStep, typ
           ? <CreateEthDerivationPath
             derivePath={customEthDerivationPath}
             onChange={setCustomEthDerivationPath}
-            />
+          />
           : <InputWithLabel
             className='derivationPath'
             isError={!!path && !!error}
             label={t<string>('derivation path')}
             onChange={setPath}
             value={path || ''}
-            />
-
+          />
         )}
         {!!error && !!seed && (
           <Warning

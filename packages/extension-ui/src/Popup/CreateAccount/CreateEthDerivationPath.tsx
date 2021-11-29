@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BN from 'bn.js';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 
 import useTranslation from '@polkadot/extension-ui/hooks/useTranslation';
 
@@ -32,9 +32,9 @@ function CreateEthDerivationPath ({ className,
   const [useCustomPath, setUseCustomPath] = useState(false);
   const [useCustomIndex, setUseCustomIndex] = useState(false);
 
-  function setCustomIndexText (inp: string) {
+  const setCustomIndexText = useCallback((inp: string) => {
     setCustomIndex(new BN(inp));
-  }
+  }, [setCustomIndex]);
 
   useEffect((): void => {
     onChange(`m/44'/60'/0'/0/${useCustomIndex ? Number(customIndex) : addIndex}`);

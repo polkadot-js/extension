@@ -14,14 +14,14 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.41.2-0",
+  "version": "0.41.2-3",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.15.4",
+    "@babel/runtime": "^7.16.3",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.41.2-0",
-    "@polkadot/util": "^7.8.2",
-    "web3": "^1.6.0"
+    "@polkadot/extension-inject": "^0.41.2-3",
+    "@polkadot/util": "^8.0.2",
+    "web3": "^1.6.1"
   },
   "peerDependencies": {
     "@polkadot/util": "*"

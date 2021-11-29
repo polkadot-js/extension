@@ -21,7 +21,7 @@ import { formatBalance } from '@polkadot/util';
 import useTranslation from '../../hooks/useTranslation';
 import { updateMeta, updateStakingConsts } from '../../messaging';
 import getNetworkInfo from '../../util/newUtils/getNetwork';
-import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint, MIN_EXTRA_BOND } from '../../util/newUtils/pjpeUtils';
+import { prepareMetaData, amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint, MIN_EXTRA_BOND } from '../../util/newUtils/pjpeUtils';
 import { ActionText, NextStepButton } from '..';
 import ConfirmStaking from './ConfirmStaking';
 import SelectValidators from './SelectValidators';
@@ -403,14 +403,14 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     }
   }, [stakingConsts, validatorsInfo]);
 
-  function prepareMetaData(chain: Chain, label: string, data: any): string {
-    const chainName = chain.name.replace(' Relay Chain', '');
+  // function prepareMetaData(chain: Chain, label: string, data: any): string {
+  //   const chainName = chain.name.replace(' Relay Chain', '');
 
-    return JSON.stringify({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      [label]: JSON.stringify({ chainName: chainName, metaData: data })
-    });
-  }
+  //   return JSON.stringify({
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  //     [label]: JSON.stringify({ chainName: chainName, metaData: data })
+  //   });
+  // }
 
   // TODO: find an algorithm to select validators automatically
   function selectBestValidators(validatorsInfo: Validators, stakingConsts: StakingConsts): DeriveStakingQuery[] {
@@ -720,19 +720,19 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
             </Grid>
             <Grid item xs={12}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs
+                <Tabs
                   textColor='secondary'
                   indicatorColor='secondary'
                   centered value={tabValue} onChange={handleTabChange}>
-                  <Tab icon={<AddCircleOutlineOutlined fontSize='small' />}  label='Stake' sx={{ fontSize: 11 }} />
-                  <Tab icon={<RemoveCircleOutlineOutlined fontSize='small' />}  label='Unstake' sx={{ fontSize: 11 }} />
+                  <Tab icon={<AddCircleOutlineOutlined fontSize='small' />} iconPosition='start' label='Stake' sx={{ fontSize: 11 }} />
+                  <Tab icon={<RemoveCircleOutlineOutlined fontSize='small' />} iconPosition='start' label='Unstake' sx={{ fontSize: 11 }} />
                   <Tab
                     icon={gettingNominatedValidatorsInfoFromBlockchain ? <CircularProgress thickness={2} size={12} /> : <CheckOutlined fontSize='small' />}
-                     label='Nominated Validators' sx={{ fontSize: 11 }}
+                    iconPosition='start' label='Nominated Validators' sx={{ fontSize: 11 }}
                   />
                   <Tab
                     icon={gettingStakingConstsFromBlockchain ? <CircularProgress thickness={2} size={12} /> : <InfoOutlined fontSize='small' />}
-                    label='Info' sx={{ fontSize: 11 }}
+                    iconPosition='start' label='Info' sx={{ fontSize: 11 }}
                   />
                 </Tabs>
               </Box>

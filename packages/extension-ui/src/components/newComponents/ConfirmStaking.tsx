@@ -6,21 +6,23 @@ import type { StakingLedger } from '@polkadot/types/interfaces';
 
 import { CheckRounded, Clear } from '@mui/icons-material';
 import { Avatar, Button as MuiButton, Container, Divider, Grid, IconButton, InputAdornment, Modal, Skeleton, TextField } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { Chain } from '@polkadot/extension-chains/types';
-import getChainLogo from '@polkadot/extension-ui/util/newUtils/getChainLogo';
+import getChainLogo from '../../util/newUtils/getChainLogo';
 import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import keyring from '@polkadot/ui-keyring';
 
 import useTranslation from '../../hooks/useTranslation';
-import { AccountsBalanceType, StakingConsts, Validators, ValidatorsName } from '../../util/newUtils/pjpeTypes';
-import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
-import { amountToHuman } from '@polkadot/extension-ui/util/newUtils/pjpeUtils';
+import { AccountsBalanceType, StakingConsts, TransactionDetail, Validators, ValidatorsName } from '../../util/newUtils/pjpeTypes';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import { amountToHuman, getSubstrateAddress, getTransactionHistoryFromLocalStorage, prepareMetaData } from '../../util/newUtils/pjpeUtils';
 import ValidatorsList from './ValidatorsList';
-import { ActionText, BackButton, Button } from '..';
+import { AccountContext, ActionText, BackButton, Button } from '..';
 import { bondOrExtra, nominate, unbond } from '@polkadot/extension-ui/util/newUtils/staking';
 import { grey } from '@mui/material/colors';
+import { AccountWithChildren } from '@polkadot/extension-base/background/types';
+import { updateMeta } from '@polkadot/extension-ui/messaging';
 
 interface Props {
   chain?: Chain | null;
@@ -47,15 +49,25 @@ export default function ConfirmStaking({
   setSelectValidatorsModalOpen, setState, showConfirmStakingModal, staker, stakingConsts, state, validatorsName, validatorsToList }
   : Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { hierarchy } = useContext(AccountContext);
   const [decimals, setDecimals] = useState<number>(1);
   const [password, setPassword] = useState<string>('');
   const [passwordIsCorrect, setPasswordIsCorrect] = useState<number>(0);// 0: no password, -1: password incorrect, 1:password correct
   const [currentlyStaked, setCurrentlyStaked] = useState<bigint>(0n);
   const [totalStakedInHuman, setTotalStakedInHuman] = useState<string>('');
 
+  async function saveHistory(chain: Chain, hierarchy: AccountWithChildren[], address: string, currentTransactionDetail: TransactionDetail): Promise<boolean> {
+    const accountSubstrateAddress = getSubstrateAddress(address);
+    const savedHistory: TransactionDetail[] = getTransactionHistoryFromLocalStorage(chain, hierarchy, accountSubstrateAddress);
+
+    savedHistory.push(currentTransactionDetail);
+
+    return updateMeta(accountSubstrateAddress, prepareMetaData(chain, 'history', savedHistory));
+  }
+
   useEffect(() => {
     console.log('amount is :', amount);
-    
+
     if (['confirming', 'success', 'failed'].includes(state)) {
       return;
     }
@@ -130,25 +142,39 @@ export default function ConfirmStaking({
   };
 
   const handleConfirm = async (): Promise<void> => {
-    try {
-      const localState = state;
+    const localState = state;
 
+    try {
       setState('confirming');
 
       const signer = keyring.getPair(String(staker.address));
 
       signer.unlock(password);
       setPasswordIsCorrect(1);
-      let bondResult = 'failed';
       const alreadyBondedAmount = BigInt(String(ledger?.total));
 
       if (['stakeAuto', 'stakeManual', 'stakeKeepNominated'].includes(localState) && amount !== 0n) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        bondResult = await bondOrExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
-        console.log('bond Result,', bondResult);
+        const { status, txHash } = await bondOrExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
 
-        if (bondResult === 'failed' || localState === 'stakeKeepNominated') {
-          setState(bondResult);
+        console.log('bond Result,', status);
+
+        if (status === 'failed' || localState === 'stakeKeepNominated') {
+          setState(status);
+          const history: TransactionDetail = {
+            action: alreadyBondedAmount ? 'bond_extra' : 'bond',
+            amount: amountToHuman(String(amount), decimals),
+            date: Date.now(),
+            fee: '',
+            from: staker.address,
+            hash: txHash || '',
+            status: status,
+            to: ''
+          };
+
+          if (chain) {
+            saveHistory(chain, hierarchy, staker.address, history);
+          }
 
           return;
         }
@@ -221,7 +247,7 @@ export default function ConfirmStaking({
       }
     } catch (e) {
       setPasswordIsCorrect(-1);
-      setState('failed');
+      setState(localState);
     }
   };
 
@@ -361,6 +387,7 @@ export default function ConfirmStaking({
                 autoFocus={!['confirming', 'failed', 'success'].includes(state)}
                 fullWidth
                 helperText={passwordIsCorrect === -1 ? t('Password is not correct') : t('Please enter the stake account password')}
+                error={passwordIsCorrect === -1}
                 label={t('Password')}
                 onChange={handleSavePassword}
                 // eslint-disable-next-line react/jsx-no-bind

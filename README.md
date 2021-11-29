@@ -27,7 +27,7 @@ Once added, you can create an account (via a generated seed) or import via an ex
 
 ## How Tos
 
-Accounts page, shows the list of all accounts an their balances which you have created/imported on polkadot/kusama blockchain and parachains.
+Accounts page, shows the list of all accounts and their balances which you have created/imported on polkadot/kusama blockchain and parachains.
 
 ![accounts page screenshot](docs/pjp/accountsPage.PNG)
 
@@ -35,7 +35,7 @@ To Transfer funds, first add a recepient, you can even choose a recepient from y
 
 ![add recepient page screenshot](docs/pjp/addRecepiet.PNG)
 
-While Choosing an amount want to transfer, the extension shows appropriate alerts based on your selected amount. Click on Safe Max to withdraw all from your account while still keep your account active.
+While Choosing an amount to transfer, the extension shows appropriate alerts based on your input. Click on Safe Max to withdraw all from your account while still keeping your account active.
 
 ![transfer funds page screenshot](docs/pjp/transferFunds.PNG)
 

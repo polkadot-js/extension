@@ -3,7 +3,8 @@
 
 // eslint-disable-next-line header/header
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
+
+import getNetworkInfo from '../getNetwork.ts';
 
 async function getLedger (_address, _chain) {
   if (!_address) {

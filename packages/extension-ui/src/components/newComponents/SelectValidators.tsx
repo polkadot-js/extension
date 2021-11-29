@@ -8,7 +8,7 @@ import type { AccountId, StakingLedger } from '@polkadot/types/interfaces';
 import { ReportProblemOutlined } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { Avatar, Box,Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, Modal, TextField } from '@mui/material';
+import { Avatar, Box, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, Modal, TextField } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';

@@ -3,7 +3,8 @@
 
 // eslint-disable-next-line header/header
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
+
+import getNetworkInfo from '../getNetwork';
 
 async function getFee (_senderKeyring, _receiverAddress, _amount, _chain) {
   const { decimals, url } = getNetworkInfo(_chain);

@@ -4,7 +4,6 @@
 // eslint-disable-next-line header/header
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-// import getMetadata from '@polkadot/extension-ui/messaging';
 import getNetworkInfo from '../getNetwork.ts';
 import {handleAccountBalance} from '../pjpeUtils.ts';
 

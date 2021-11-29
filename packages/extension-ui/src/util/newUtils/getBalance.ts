@@ -8,8 +8,8 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import getNetworkInfo from './getNetwork';
+import { BalanceType } from './pjpeTypes';
 import { getFormattedAddress, handleAccountBalance } from './pjpeUtils';
-import { BalanceType} from './pjpeTypes';
 
 export async function getBalance(_address: string | null | undefined, _chain: Chain | null | undefined, settings: SettingsStruct):
 Promise<BalanceType | null> {

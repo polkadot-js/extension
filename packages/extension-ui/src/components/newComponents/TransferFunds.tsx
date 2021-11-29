@@ -335,7 +335,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
 
         return {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          address: recoded.formatted,
+          address: String(recoded.formatted),
           // balanceInfo: null,
           chain: null,
           name: String(acc.name)
@@ -492,7 +492,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
 
                 <Grid item sx={{ fontSize: '15px', fontWeight: '600', color: grey[800], marginTop: 1, textAlign: 'left' }} xs={3}>
                   {t('Amount:')}
-                 
+
                   <Grid item>
                     <Tooltip placement='right-end' title='Transfer all amount and deactivate the account.' arrow>
                       <LoadingButton
@@ -526,7 +526,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                       </LoadingButton>
                     </Tooltip>
                   </Grid>
-                  
+
                 </Grid>
                 <Grid
                   container
@@ -582,8 +582,6 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                       coin={coin}
                       handleTransferModalClose={handleTransferModalClose}
                       lastFee={lastFee}
-                      nextButtonCaption={nextButtonCaption}
-                      nextButtonDisabled={nextButtonDisabled}
                       recepient={recepient}
                       sender={sender}
                       transferAmount={transferAmount}

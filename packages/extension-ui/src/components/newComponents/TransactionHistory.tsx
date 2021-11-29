@@ -10,6 +10,9 @@ import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, us
 import { Chain } from '@polkadot/extension-chains/types';
 
 import useTranslation from '../../hooks/useTranslation';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import { TransactionDetail } from '../../util/newUtils/pjpeTypes';
+import { getTransactionHistoryFromLocalStorage } from '../../util/newUtils/pjpeUtils';
 import { AccountContext } from '../contexts';
 
 interface Props {
@@ -25,37 +28,65 @@ const TRANSACTION_HISTROY_DEFAULT_ROWS = 6;
 export default function TransactionHistory({ address, chain, name, setTxHistoryModalOpen, showTxHistoryModalOpen }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
-  const [transactionHistoryList, setTransactionHistoryList] = useState<string[][] | null>(null);
+  const [historyList, setHistoryList] = useState<TransactionDetail[] | []>([]);
   const [moreLoaded, setLoadMore] = useState(false);
   const [hasMoreToLoad, setHasMoreToLoad] = useState(false);
+  const [coin, setCoin] = useState<string>('');
 
   useEffect(() => {
-    const txHistory = hierarchy.find((h) => h.address === address)?.txHistory;
+    if (!chain) {
+      console.log('no chain in TransactionHistory');
 
-    const history = makeTxHistoryArray();
-
-    setTransactionHistoryList(history);
-
-    function makeTxHistoryArray(): string[][] | null {
-      let txH = txHistory?.split(',');
-
-      txH = txH?.reverse(); //`${coin}_${amount}_${fee}_${to}_${status}_${hash}_${date}
-
-      if ((txH?.length || 0) > TRANSACTION_HISTROY_DEFAULT_ROWS) {
-        setHasMoreToLoad(true);
-      }
-
-      if (!moreLoaded) {
-        txH = txH?.slice(0, TRANSACTION_HISTROY_DEFAULT_ROWS);
-      }
-
-      if (txH) {
-        return txH.map((h) => h.split('_'));
-      }
-
-      return null;
+      return;
     }
-  }, [address, hierarchy, moreLoaded]);
+
+    const { coin } = getNetworkInfo(chain);
+    setCoin(coin);
+
+    let history: TransactionDetail[] = getTransactionHistoryFromLocalStorage(chain, hierarchy, address);
+
+    history = history.reverse();
+    console.log('new history', history);
+
+    if (history.length > TRANSACTION_HISTROY_DEFAULT_ROWS) {
+      setHasMoreToLoad(true);
+    }
+
+    if (!moreLoaded) {
+      history = history.slice(0, TRANSACTION_HISTROY_DEFAULT_ROWS);
+    }
+
+    setHistoryList(history);
+
+
+    console.log('new history2', history);
+
+    // const txHistory = hierarchy.find((h) => h.address === address)?.txHistory;
+
+    // const history = makeTxHistoryArray();
+
+    // setHistoryList(history);
+
+    // function makeTxHistoryArray(): string[][] | null {
+    //   let txH = txHistory?.split(',');
+
+    //   txH = txH?.reverse(); //`${coin}_${amount}_${fee}_${to}_${status}_${hash}_${date}
+
+    //   if ((txH?.length || 0) > TRANSACTION_HISTROY_DEFAULT_ROWS) {
+    //     setHasMoreToLoad(true);
+    //   }
+
+    //   if (!moreLoaded) {
+    //     txH = txH?.slice(0, TRANSACTION_HISTROY_DEFAULT_ROWS);
+    //   }
+
+    //   if (txH) {
+    //     return txH.map((h) => h.split('_'));
+    //   }
+
+    //   return null;
+    // }
+  }, [address, hierarchy, moreLoaded, chain]);
 
   const handleTxHistoryModalClose = useCallback(
     (): void => {
@@ -118,38 +149,38 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
             </Box>
           </Grid>
           <Grid alignItems='center' container justifyContent='center' sx={{ padding: '0px 30px 1px' }}>
-            {transactionHistoryList?.map((h) => (
+            {historyList?.map((h) => (
               <>
                 <Grid item container xs={12} sx={{ paddingTop: '10px' }}>
-                  <Grid xs={4} sx={{ textAlign: 'left', fontVariant: 'small-caps' }}>
-                    {t('Transfer of')}
+                  <Grid xs={4} sx={{ fontSize: 15, textAlign: 'left', fontVariant: 'small-caps' }}>
+                    {h.action}
                   </Grid>
                   <Grid item xs={3} sx={{ textAlign: 'left', fontWeight: 'bold' }}>
-                    {h[1]} {' '}{h[0]}
+                    {h.amount} {' '}{coin}
                   </Grid>
                   <Grid item container xs={4} justifyContent='center' >
-                    <Box fontSize={11} sx={{ color: h[4] === 'FINALIZED' ? 'green' : 'red' }}>
-                      {h[4] === 'FINALIZED' ? t('Success') : t('Failed')}
+                    <Box fontSize={11} sx={{ color: ['finalized','success'].includes(h.status.toLowerCase()) ? 'green' : 'red' }}>
+                      {['finalized','success'].includes(h.status.toLowerCase()) ? t('Success') : t('Failed')}
                       <Box fontSize={9} sx={{ color: 'gray' }}>
-                        {h[4] !== 'FINALIZED' ? h[4] : ''}
+                        {!['finalized','success'].includes(h.status.toLowerCase()) ? h.status : ''}
                       </Box>
                     </Box>
                   </Grid>
                   <Grid item xs={1} sx={{ textAlign: 'right' }}>
-                    <IconButton size='small' edge='end' onClick={() => openTxOnExplorer(h[5])}>
+                    <IconButton size='small' edge='end' onClick={() => openTxOnExplorer(h.hash)}>
                       <LaunchRounded fontSize='small' />
                     </IconButton>
                   </Grid>
                 </Grid>
                 <Grid item container xs={12} sx={{ color: 'gray', fontSize: '10px', paddingBottom: '10px' }}>
                   <Grid item xs={4} sx={{ textAlign: 'left' }}>
-                    {t('To:')} {' '}{makeAddressShort(h[3])}
+                    {h.to && t('To:')} {' '}{makeAddressShort(h.to)}
                   </Grid>
                   <Grid item xs={3} sx={{ fontVariant: 'small-caps', textAlign: 'left' }}>
-                    {t('Fee ')} {' '} {h[2]}
+                    {h.fee && t('Fee ')} {' '} {h.fee}
                   </Grid>
                   <Grid item xs={4} sx={{ textAlign: 'center' }}>
-                    {new Date(parseInt(h[6])).toDateString()}{' '}{(new Date(parseInt(h[6]))).toLocaleTimeString()}
+                    {new Date(h.date).toDateString()}{' '}{new Date(h.date).toLocaleTimeString()}
                   </Grid>
                   <Grid item xs={1}></Grid>
                 </Grid>

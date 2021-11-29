@@ -25,20 +25,11 @@ export interface BalanceType {
 export const DEFAULT_ACCOUNT_BALANCE = { address: null, balanceInfo: null, chain: null, name: null };
 
 export interface AccountsBalanceType {
-  address: string | null;
+  address: string; //formatted address
   chain: string | null;// TODO: actually it is chainName
   balanceInfo?: BalanceType;
   name: string | null;
   txHistory?: string;
-}
-
-export interface transactionHistory {
-  amount: string;
-  coin: string;
-  hash: string;
-  fee: string;
-  to: string;
-  status: string;
 }
 
 export interface StakingConsts {
@@ -92,4 +83,15 @@ interface stashAccountDisplay {
   identity: boolean;
   judgements: any;
   parent: any;
+}
+
+export interface TransactionDetail {
+  action: string; // send, bond, bond_extra, unbound, nominate ...
+  from: string;
+  amount: string;
+  date: number;
+  hash: string;
+  fee: string;
+  to: string;
+  status: string; // failed, success
 }

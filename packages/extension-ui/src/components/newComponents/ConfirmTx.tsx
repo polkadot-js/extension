@@ -3,15 +3,12 @@
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import {  ArrowForwardRounded, CheckRounded, Clear, InfoTwoTone as InfoTwoToneIcon, LaunchRounded, RefreshRounded } from '@mui/icons-material';
+import { ArrowForwardRounded, CheckRounded, Clear, InfoTwoTone as InfoTwoToneIcon, LaunchRounded, RefreshRounded } from '@mui/icons-material';
 import { Alert, Avatar, Box, Button as MuiButton, CircularProgress, Container, Divider, Grid, IconButton, InputAdornment, Modal, TextField, Tooltip } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-// import { ApiPromise, WsProvider } from '@polkadot/api';
-// import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import { updateTransactionHistory } from '@polkadot/extension-ui/messaging';
 import getFee from '@polkadot/extension-ui/util/newUtils/getFee';
 import Identicon from '@polkadot/react-identicon';
 import keyring from '@polkadot/ui-keyring';
@@ -19,11 +16,13 @@ import keyring from '@polkadot/ui-keyring';
 import useTranslation from '../../hooks/useTranslation';
 import getChainLogo from '../../util/newUtils/getChainLogo';
 import getNetworkInfo from '../../util/newUtils/getNetwork';
-import { amountToHuman, fixFloatingPoint } from '../../util/newUtils/pjpeUtils';
-import { AccountsBalanceType, TransactionStatus } from '../../util/newUtils/pjpeTypes';
+import { AccountsBalanceType, TransactionDetail, TransactionStatus } from '../../util/newUtils/pjpeTypes';
+import { amountToHuman, fixFloatingPoint, getSubstrateAddress, getTransactionHistoryFromLocalStorage, prepareMetaData } from '../../util/newUtils/pjpeUtils';
 import signAndTransfer from '../../util/newUtils/signAndTransfer';
 import { AccountContext } from '../contexts';
 import { ActionText, BackButton, Button } from '..';
+import { AccountWithChildren } from '@polkadot/extension-base/background/types';
+import { updateMeta } from '@polkadot/extension-ui/messaging';
 
 
 interface Props {
@@ -47,8 +46,6 @@ interface Props {
   type?: KeypairType;
   transferAmount: bigint;
   coin: string;
-  nextButtonDisabled: boolean;
-  nextButtonCaption: string;
   handleTransferModalClose: any;
 }
 
@@ -59,8 +56,6 @@ export default function ConfirmTx({
   confirmModalOpen,
   handleTransferModalClose,
   lastFee,
-  nextButtonCaption,
-  nextButtonDisabled,
   recepient,
   sender,
   setConfirmModalOpen,
@@ -68,7 +63,6 @@ export default function ConfirmTx({
 }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const network = chain ? chain.name.replace(' Relay Chain', '') : 'westend';
-  // const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
   const [fee, setFee] = useState<string>();
   const [total, setTotal] = useState<string | null>(null);
   const [confirmDisabled, setConfirmDisabled] = useState<boolean>(true);
@@ -89,28 +83,39 @@ export default function ConfirmTx({
     setTransferAmountInHuman(amountToHuman(String(transferAmount), decimals));
   }, [chain, transferAmount]);
 
+  async function saveHistory(chain: Chain, hierarchy: AccountWithChildren[], address: string, currentTransactionDetail: TransactionDetail): Promise<boolean> {
+    const accountSubstrateAddress = getSubstrateAddress(address);
+    const savedHistory: TransactionDetail[] = getTransactionHistoryFromLocalStorage(chain, hierarchy, accountSubstrateAddress);
+
+    savedHistory.push(currentTransactionDetail);
+
+    return updateMeta(accountSubstrateAddress, prepareMetaData(chain, 'history', savedHistory));
+  }
+
   useEffect(() => {
-    if (!transactionHash) {
+    if (!transactionHash || !chain) {
       return;
     }
 
     const { decimals } = getNetworkInfo(chain);
 
+    const currentTransactionDetail: TransactionDetail = {
+      action: 'send',
+      amount: amountToHuman(String(transferAmount), decimals),
+      date: Date.now(),
+      fee: String(fee),
+      from: String(sender.address),
+      hash: transactionHash,
+      status: String(txStatus.text),
+      to: String(recepient.address)
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    updateTransactionHistory(
-      String(sender.address),
-      amountToHuman(String(transferAmount), decimals),
-      String(sender.balanceInfo?.coin),
-      String(fee),
-      transactionHash,
-      String(txStatus.text),
-      String(recepient.address),
-      null || getSenderTxHistory());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactionHash, txStatus]);
+    saveHistory(chain, hierarchy, sender.address, currentTransactionDetail);
+  }, [transactionHash, txStatus, chain]);
 
   function handleConfirmTransfer() {
-    console.log('handleConfirmTransfer is runing ...')
+    // console.log('handleConfirmTransfer is runing ...')
     setTransfering(true);
 
     try {
@@ -141,14 +146,6 @@ export default function ConfirmTx({
   useEffect(() => {
     setFailAlert(Number(total) > Number(availableBalance));
   }, [total, availableBalance]);
-
-  function getSenderTxHistory(): string | null {
-    const txH = hierarchy.find((h) => h.address === sender.address);
-
-    if (!txH) return null;
-
-    return txH.txHistory ? txH.txHistory : null;
-  }
 
   function makeAddressShort(_address: string): React.ReactElement {
     return (
@@ -246,18 +243,6 @@ export default function ConfirmTx({
 
   return (
     <>
-      {/* <Button
-        color='primary'
-        disabled={nextButtonDisabled}
-        fullWidth
-        name='Next Button'
-        // eslint-disable-next-line react/jsx-no-bind
-        onClick={handleNext}
-        size='large'
-        variant='contained'
-      >
-        {nextButtonCaption}
-      </Button> */}
       <Modal
         hideBackdrop
         // eslint-disable-next-line react/jsx-no-bind

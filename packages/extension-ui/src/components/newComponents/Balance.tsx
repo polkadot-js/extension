@@ -363,7 +363,7 @@ function Balance({ address, chain, formattedAddress, givenType, name,
       {
         showTxHistoryModalOpen
           ? <TransactionHistory
-            address={String(formattedAddress || address)}
+            address={String(address)}
             chain={chain}
             name={name}
             setTxHistoryModalOpen={setTxHistoryModalOpen}

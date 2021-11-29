@@ -1,11 +1,7 @@
 /* eslint-disable camelcase */
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
-
 // eslint-disable-next-line header/header
-// import type { AccountId } from '@polkadot/types/interfaces';
-
-// import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { Chain } from '@polkadot/extension-chains/types';
@@ -267,14 +263,14 @@ export async function bondOrExtra(
   _value: bigint,
   // _selectedValidators: AccountId[] | null,
   _alreadyBondedAmount: bigint,
-  payee = 'Staked'): Promise<string> {
+  payee = 'Staked'): Promise<{ status: string, txHash?: string }> {
   try {
     console.log('bondOrExtra is called!');
 
     if (!_stashAccountId) {
       console.log('bondOrExtra:  controller is empty!');
 
-      return 'failed';
+      return { status: 'failed' };
     }
 
     /** payee:
@@ -284,6 +280,7 @@ export async function bondOrExtra(
      * Controller - Pay into the controller account.
      */
     const { url } = getNetworkInfo(_chain);
+    let txHash = '';
 
     const wsProvider = new WsProvider(url);
     const api = await ApiPromise.create({ provider: wsProvider });
@@ -299,9 +296,10 @@ export async function bondOrExtra(
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       bonded.signAndSend(_signer, ({ events = [], status }) => {
         if (status.isFinalized) {
-          console.log('transaction done with hash ', status.asFinalized.toHex());
+          txHash = status.asFinalized.toHex();
+          console.log('transaction done with hash ', txHash);
         } else {
-          console.log('Status of Bonding Transfer: ', status);
+          console.log('Status of Bonding Transfer: ', status.toHuman());
         }
 
         events.forEach(({ event: { data, method, section }, phase }) => {
@@ -310,14 +308,14 @@ export async function bondOrExtra(
           if (String(method).includes('Failed')) {
             console.log('!!SOMTHING FAILED!!');
 
-            resolve('failed');
+            resolve({ status: 'failed', txHash: txHash });
 
             return;
           }
 
           if (String(method).includes('Success')) {
             console.log('Bonded Successfully');
-            resolve('success');
+            resolve({ status: 'success', txHash: txHash });
           }
         });
       });
@@ -325,7 +323,7 @@ export async function bondOrExtra(
   } catch (error) {
     console.log('Something went wrong while bond/nominate', error);
 
-    return 'failed';
+    return { status: 'failed' };
   }
 }
 

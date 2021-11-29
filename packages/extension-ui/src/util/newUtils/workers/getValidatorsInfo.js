@@ -3,8 +3,8 @@
 
 // eslint-disable-next-line header/header
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import getNetworkInfo from '@polkadot/extension-ui/util/HackathonUtilFiles/getNetwork';
-import { amountToHuman } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackathonUtils';
+import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
+import { amountToHuman } from '@polkadot/extension-ui/util/newUtils/pjpeUtils';
 
 async function getAllValidators (_chain) {
   try {

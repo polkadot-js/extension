@@ -26,7 +26,7 @@ import useTranslation from '../hooks/useTranslation';
 import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
-import Balance from './hackathonComponents/Balance';
+import Balance from './newComponents/Balance';
 import { AccountContext, SettingsContext } from './contexts';
 import Identicon from './Identicon';
 import Menu from './Menu';

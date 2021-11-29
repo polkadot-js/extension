@@ -10,7 +10,7 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { BalanceType } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
+import { BalanceType } from '@polkadot/extension-ui/util/newUtils/pjpeTypes';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';

@@ -9,17 +9,17 @@ import { Avatar, Button as MuiButton, Container, Divider, Grid, IconButton, Inpu
 import React, { useEffect, useState } from 'react';
 
 import { Chain } from '@polkadot/extension-chains/types';
-import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
+import getChainLogo from '@polkadot/extension-ui/util/newUtils/getChainLogo';
 import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import keyring from '@polkadot/ui-keyring';
 
 import useTranslation from '../../hooks/useTranslation';
-import { AccountsBalanceType, StakingConsts, Validators, ValidatorsName } from '../../util/HackathonUtilFiles/pjpeTypes';
-import getNetworkInfo from '@polkadot/extension-ui/util/HackathonUtilFiles/getNetwork';
-import { amountToHuman } from '@polkadot/extension-ui/util/HackathonUtilFiles/hackathonUtils';
+import { AccountsBalanceType, StakingConsts, Validators, ValidatorsName } from '../../util/newUtils/pjpeTypes';
+import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
+import { amountToHuman } from '@polkadot/extension-ui/util/newUtils/pjpeUtils';
 import ValidatorsList from './ValidatorsList';
-import { ActionText, BackButton, Button } from '../';
-import { bondOrExtra, nominate, unbond } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
+import { ActionText, BackButton, Button } from '..';
+import { bondOrExtra, nominate, unbond } from '@polkadot/extension-ui/util/newUtils/staking';
 import { grey } from '@mui/material/colors';
 
 interface Props {

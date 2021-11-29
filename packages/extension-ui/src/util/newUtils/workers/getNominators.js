@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line header/header
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import getNetworkInfo from '@polkadot/extension-ui/util/HackathonUtilFiles/getNetwork';
+import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
 
 // get all nominated/elected validators of an address
 export async function getNominators (_chain, _address) {

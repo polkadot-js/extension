@@ -5,11 +5,10 @@
 
 import type { AccountId, StakingLedger } from '@polkadot/types/interfaces';
 
-import { ArrowBackIosRounded, ReportProblemOutlined } from '@mui/icons-material';
+import { ReportProblemOutlined } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { Avatar, Box, Button as MuiButton, Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, Modal, TextField } from '@mui/material';
-import Paper from '@mui/material/Paper';
+import { Avatar, Box,Checkbox, Container, Divider, FormControlLabel, Grid, IconButton, Modal, TextField } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -26,13 +25,13 @@ import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } fro
 
 import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
+import getChainLogo from '@polkadot/extension-ui/util/newUtils/getChainLogo';
 
 import useTranslation from '../../hooks/useTranslation';
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import { DEFAULT_VALIDATOR_COMMISION_FILTER } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { AccountsBalanceType, AllValidatorsFromSubscan, StakingConsts, Validators, ValidatorsName } from '../../util/HackathonUtilFiles/pjpeTypes';
-import { ActionText, NextStepButton } from '../';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import { DEFAULT_VALIDATOR_COMMISION_FILTER } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType, AllValidatorsFromSubscan, StakingConsts, Validators, ValidatorsName } from '../../util/newUtils/pjpeTypes';
+import { ActionText, NextStepButton } from '..';
 import ConfirmStaking from './ConfirmStaking';
 
 interface Props {

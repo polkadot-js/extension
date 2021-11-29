@@ -14,8 +14,8 @@ import styled from 'styled-components';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import useTranslation from '../../hooks/useTranslation';
-import { balanceToHuman } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { AccountsBalanceType, BalanceType } from '../../util/HackathonUtilFiles/pjpeTypes';
+import { balanceToHuman } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType, BalanceType } from '../../util/newUtils/pjpeTypes';
 import { AccountContext } from '../contexts';
 import AddressQRcode from './AddressQRcode';
 import EasyStaking from './EasyStaking';
@@ -98,7 +98,7 @@ function Balance({ address, chain, formattedAddress, givenType, name,
     }
 
     setBalanceChangeSubscribed(chain ? chain.name : '');
-    const subscribeToBalance: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/subscribeToBalance.js', import.meta.url));
+    const subscribeToBalance: Worker = new Worker(new URL('../../util/newUtils/workers/subscribeToBalance.js', import.meta.url));
 
     subscribeToBalance.postMessage({ address, chain, formattedAddress });
 

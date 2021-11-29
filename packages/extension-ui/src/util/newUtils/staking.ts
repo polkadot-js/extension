@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import type { AccountId } from '@polkadot/types/interfaces';
+// import type { AccountId } from '@polkadot/types/interfaces';
 
 // import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { ApiPromise, WsProvider } from '@polkadot/api';

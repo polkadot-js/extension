@@ -3,7 +3,7 @@
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { ArrowBackIosRounded, ArrowForwardRounded, CheckRounded, Clear, InfoTwoTone as InfoTwoToneIcon, LaunchRounded, RefreshRounded } from '@mui/icons-material';
+import {  ArrowForwardRounded, CheckRounded, Clear, InfoTwoTone as InfoTwoToneIcon, LaunchRounded, RefreshRounded } from '@mui/icons-material';
 import { Alert, Avatar, Box, Button as MuiButton, CircularProgress, Container, Divider, Grid, IconButton, InputAdornment, Modal, TextField, Tooltip } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -12,18 +12,18 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 // import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import { updateTransactionHistory } from '@polkadot/extension-ui/messaging';
-import getFee from '@polkadot/extension-ui/util/HackathonUtilFiles/getFee';
+import getFee from '@polkadot/extension-ui/util/newUtils/getFee';
 import Identicon from '@polkadot/react-identicon';
 import keyring from '@polkadot/ui-keyring';
 
 import useTranslation from '../../hooks/useTranslation';
-import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import { amountToHuman, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { AccountsBalanceType, TransactionStatus } from '../../util/HackathonUtilFiles/pjpeTypes';
-import signAndTransfer from '../../util/HackathonUtilFiles/signAndTransfer';
+import getChainLogo from '../../util/newUtils/getChainLogo';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import { amountToHuman, fixFloatingPoint } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType, TransactionStatus } from '../../util/newUtils/pjpeTypes';
+import signAndTransfer from '../../util/newUtils/signAndTransfer';
 import { AccountContext } from '../contexts';
-import { ActionText, BackButton, Button } from '../';
+import { ActionText, BackButton, Button } from '..';
 
 
 interface Props {

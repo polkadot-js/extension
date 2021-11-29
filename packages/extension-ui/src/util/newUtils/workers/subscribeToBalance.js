@@ -6,7 +6,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 // import getMetadata from '@polkadot/extension-ui/messaging';
 import getNetworkInfo from '../getNetwork.ts';
-import {handleAccountBalance} from '../hackathonUtils.ts';
+import {handleAccountBalance} from '../pjpeUtils.ts';
 
 async function subscribeToBalance (_address, _chain, _formattedAddress) {
   const { coin, decimals, url } = getNetworkInfo(_chain);

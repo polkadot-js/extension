@@ -7,23 +7,22 @@ import type { StakingLedger } from '@polkadot/types/interfaces';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AddCircleOutlineOutlined, CheckOutlined, InfoOutlined, RemoveCircleOutlineOutlined } from '@mui/icons-material';
-import { Alert, Avatar, Box, Button, Chip, CircularProgress, Container, Divider, FormControl, FormControlLabel, FormLabel, Grid, IconButton, InputAdornment, Modal, Paper, Radio, RadioGroup, Skeleton, Tab, Tabs, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, Chip, CircularProgress, Container, Divider, FormControl, FormControlLabel, FormLabel, Grid, InputAdornment, Modal, Paper, Radio, RadioGroup, Skeleton, Tab, Tabs, TextField, Typography } from '@mui/material';
 import React, { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 
 import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import getChainLogo from '@polkadot/extension-ui/util/HackathonUtilFiles/getChainLogo';
-import { AccountsBalanceType, AllValidatorsFromSubscan, savedMetaData, StakingConsts, Validators, ValidatorsName } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
-import { getAllValidatorsFromSubscan, getStakingReward } from '@polkadot/extension-ui/util/HackathonUtilFiles/staking';
-import keyring from '@polkadot/ui-keyring';
+import getChainLogo from '@polkadot/extension-ui/util/newUtils/getChainLogo';
+import { AccountsBalanceType, AllValidatorsFromSubscan, savedMetaData, StakingConsts, Validators, ValidatorsName } from '@polkadot/extension-ui/util/newUtils/pjpeTypes';
+import { getAllValidatorsFromSubscan, getStakingReward } from '@polkadot/extension-ui/util/newUtils/staking';
 import { formatBalance } from '@polkadot/util';
 
 import useTranslation from '../../hooks/useTranslation';
 import { updateMeta, updateStakingConsts } from '../../messaging';
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint, MIN_EXTRA_BOND } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { ActionText, NextStepButton } from '../';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint, MIN_EXTRA_BOND } from '../../util/newUtils/pjpeUtils';
+import { ActionText, NextStepButton } from '..';
 import ConfirmStaking from './ConfirmStaking';
 import SelectValidators from './SelectValidators';
 import ValidatorsList from './ValidatorsList';
@@ -137,7 +136,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     setMinNominatorBond(formattedMinNominatorBond);
 
     // 1. get some staking constant like minNominatorBond ,...
-    const getStakingConstsWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getStakingConsts.js', import.meta.url));
+    const getStakingConstsWorker: Worker = new Worker(new URL('../../util/newUtils/workers/getStakingConsts.js', import.meta.url));
 
     workers.push(getStakingConstsWorker);
 
@@ -174,7 +173,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
     callGetLedgerWorker();
 
     // 3. get validators info, including current and waiting
-    const getValidatorsInfoWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getValidatorsInfo.js', import.meta.url));
+    const getValidatorsInfoWorker: Worker = new Worker(new URL('../../util/newUtils/workers/getValidatorsInfo.js', import.meta.url));
 
     workers.push(getValidatorsInfoWorker);
 
@@ -213,7 +212,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
 
     // 5. get nominated validators list
 
-    const getNominatorsWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getNominators.js', import.meta.url));
+    const getNominatorsWorker: Worker = new Worker(new URL('../../util/newUtils/workers/getNominators.js', import.meta.url));
 
     workers.push(getNominatorsWorker);
 
@@ -441,7 +440,7 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
   );
 
   const callGetLedgerWorker = (): void => {
-    const getLedgerWorker: Worker = new Worker(new URL('../../util/HackathonUtilFiles/workers/getLedger.js', import.meta.url));
+    const getLedgerWorker: Worker = new Worker(new URL('../../util/newUtils/workers/getLedger.js', import.meta.url));
 
     workers.push(getLedgerWorker);
     const address = staker.address;
@@ -714,26 +713,26 @@ export default function EasyStaking({ account, chain, setStakingModalOpen, showS
                   <Grid item sx={{ textAlign: 'right' }} xs={6}>
                     Unstaking: {!ledger
                       ? <Skeleton sx={{ display: 'inline-block', fontWeight: '600', width: '60px' }} />
-                      : unlockingAmount ? amountToHuman(unlockingAmount, decimals) : '0.00'} {coin}
+                      : unlockingAmount ? amountToHuman(String(unlockingAmount), decimals) : '0.00'} {coin}
                   </Grid>
                 </Grid>
               </Paper>
             </Grid>
             <Grid item xs={12}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs
+              <Tabs
                   textColor='secondary'
                   indicatorColor='secondary'
                   centered value={tabValue} onChange={handleTabChange}>
-                  <Tab icon={<AddCircleOutlineOutlined fontSize='small' />} iconPosition='start' label='Stake' sx={{ fontSize: 11 }} />
-                  <Tab icon={<RemoveCircleOutlineOutlined fontSize='small' />} iconPosition='start' label='Unstake' sx={{ fontSize: 11 }} />
+                  <Tab icon={<AddCircleOutlineOutlined fontSize='small' />}  label='Stake' sx={{ fontSize: 11 }} />
+                  <Tab icon={<RemoveCircleOutlineOutlined fontSize='small' />}  label='Unstake' sx={{ fontSize: 11 }} />
                   <Tab
                     icon={gettingNominatedValidatorsInfoFromBlockchain ? <CircularProgress thickness={2} size={12} /> : <CheckOutlined fontSize='small' />}
-                    iconPosition='start' label='Nominated Validators' sx={{ fontSize: 11 }}
+                     label='Nominated Validators' sx={{ fontSize: 11 }}
                   />
                   <Tab
                     icon={gettingStakingConstsFromBlockchain ? <CircularProgress thickness={2} size={12} /> : <InfoOutlined fontSize='small' />}
-                    iconPosition='start' label='Info' sx={{ fontSize: 11 }}
+                    label='Info' sx={{ fontSize: 11 }}
                   />
                 </Tabs>
               </Box>

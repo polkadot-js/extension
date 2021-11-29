@@ -7,7 +7,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowBackIosRounded, CheckRounded as CheckRoundedIcon, Clear as ClearIcon, CloseRounded } from '@mui/icons-material';
+import { ArrowBackIosRounded, CheckRounded as CheckRoundedIcon, Clear as ClearIcon } from '@mui/icons-material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Avatar, Box, Button, Chip, Container, Divider, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Modal, TextField, Tooltip } from '@mui/material';
 import keyring from '@polkadot/ui-keyring';
@@ -17,16 +17,16 @@ import { Chain } from '@polkadot/extension-chains/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import useTranslation from '../../hooks/useTranslation';
-import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
-import getFee from '../../util/HackathonUtilFiles/getFee';
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import isValidAddress from '../../util/HackathonUtilFiles/validateAddress';
+import getChainLogo from '../../util/newUtils/getChainLogo';
+import getFee from '../../util/newUtils/getFee';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import isValidAddress from '../../util/newUtils/validateAddress';
 import { AccountContext, SettingsContext } from '../contexts';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackathonUtils';
-import { AccountsBalanceType } from '../../util/HackathonUtilFiles/pjpeTypes';
+import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType } from '../../util/newUtils/pjpeTypes';
 import grey from '@mui/material/colors/grey';
-import { ActionText, NextStepButton } from '../';
+import { ActionText, NextStepButton } from '..';
 
 interface Props {
   actions?: React.ReactNode;

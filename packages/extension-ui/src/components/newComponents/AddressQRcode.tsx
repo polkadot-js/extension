@@ -11,7 +11,7 @@ import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import useTranslation from '../../hooks/useTranslation';
-import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
+import getChainLogo from '../../util/newUtils/getChainLogo';
 
 interface Props {
   address: string;

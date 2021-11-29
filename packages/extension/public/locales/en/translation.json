@@ -257,5 +257,14 @@
   "Search": "",
   "only have a name": "",
   "no ": "",
-  "no oversubscribeds": ""
+  "no oversubscribeds": "",
+  "Currently staked": "",
+  "Total": "",
+  "VALIDATORS": "",
+  "It is more than you already staked!": "",
+  "Validator selection": "",
+  "Fetching data from blockchain ...": "",
+  "Nothing to unstake": "",
+  "Change nominated validators": "",
+  "Information you need to know about": ""
 }

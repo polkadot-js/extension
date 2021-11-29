@@ -10,7 +10,7 @@ import styled from 'styled-components';
 // import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 // import { Chain } from '@polkadot/extension-chains/types';
-// import getNetworkInfo from '@polkadot/extension-ui/util/HackathonUtilFiles/getNetwork';
+// import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 

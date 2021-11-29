@@ -13,16 +13,15 @@ import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import React, { useEffect, useState } from 'react';
 
 import { DeriveStakingQuery } from '@polkadot/api-derive/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import { StakingConsts, ValidatorsName } from '@polkadot/extension-ui/util/HackathonUtilFiles/pjpeTypes';
+import { StakingConsts, ValidatorsName } from '@polkadot/extension-ui/util/newUtils/pjpeTypes';
 
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
 
 interface Props {
   chain?: Chain | null;
@@ -185,8 +184,8 @@ function EnhancedTable(props: TableRowProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof Data>('name');
   const [selected, setSelected] = React.useState<readonly string[]>([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  // const [page, setPage] = React.useState(0);
+  // const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -198,17 +197,17 @@ function EnhancedTable(props: TableRowProps) {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((v) => String(v.accountId));
+  // const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (event.target.checked) {
+  //     const newSelecteds = rows.map((v) => String(v.accountId));
 
-      setSelected(newSelecteds);
+  //     setSelected(newSelecteds);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    setSelected([]);
-  };
+  //   setSelected([]);
+  // };
 
   const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
     const selectedIndex = selected.indexOf(name);
@@ -230,20 +229,20 @@ function EnhancedTable(props: TableRowProps) {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  // const handleChangePage = (event: unknown, newPage: number) => {
+  //   setPage(newPage);
+  // };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  // const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
 
   const isSelected = (name: string) => selected.indexOf(name) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+  // const emptyRows =
+  //   page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
   function getAccountIdOrName(id: string) {
     if (validatorsName) {
@@ -326,7 +325,7 @@ function EnhancedTable(props: TableRowProps) {
                     </TableRow>
                   );
                 })}
-            {emptyRows > 0 && (
+            {/* {emptyRows > 0 && (
               <TableRow
                 style={{
                   height: 30 * emptyRows// (dense ? 33 : 53) * emptyRows,
@@ -334,7 +333,7 @@ function EnhancedTable(props: TableRowProps) {
               >
                 <StyledTableCell colSpan={6} />
               </TableRow>
-            )}
+            )} */}
           </TableBody>
         </Table>
       </TableContainer>

@@ -3,36 +3,39 @@
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowBackIosRounded, ArrowForwardRounded, CheckRounded, Clear, InfoTwoTone as InfoTwoToneIcon, LaunchRounded, RefreshRounded } from '@mui/icons-material';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Avatar, Box, Button, CircularProgress, Container, Divider, Grid, IconButton, InputAdornment, Modal, TextField, Tooltip } from '@mui/material';
+import {  ArrowForwardRounded, CheckRounded, Clear, InfoTwoTone as InfoTwoToneIcon, LaunchRounded, RefreshRounded } from '@mui/icons-material';
+import { Alert, Avatar, Box, Button as MuiButton, CircularProgress, Container, Divider, Grid, IconButton, InputAdornment, Modal, TextField, Tooltip } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
+// import { ApiPromise, WsProvider } from '@polkadot/api';
+// import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
-import { getMetadata, updateTransactionHistory } from '@polkadot/extension-ui/messaging';
-import getFee from '@polkadot/extension-ui/util/HackathonUtilFiles/getFee';
+import { updateTransactionHistory } from '@polkadot/extension-ui/messaging';
+import getFee from '@polkadot/extension-ui/util/newUtils/getFee';
+import Identicon from '@polkadot/react-identicon';
 import keyring from '@polkadot/ui-keyring';
 
 import useTranslation from '../../hooks/useTranslation';
-import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import { accountsBalanceType, amountToHuman, fixFloatingPoint, getFormattedAddress, handleAccountBalance, TransactionStatus } from '../../util/HackathonUtilFiles/hackatonUtils';
-import signAndTransfer from '../../util/HackathonUtilFiles/signAndTransfer';
-import { AccountContext, SettingsContext } from '../contexts';
+import getChainLogo from '../../util/newUtils/getChainLogo';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import { amountToHuman, fixFloatingPoint } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType, TransactionStatus } from '../../util/newUtils/pjpeTypes';
+import signAndTransfer from '../../util/newUtils/signAndTransfer';
+import { AccountContext } from '../contexts';
+import { ActionText, BackButton, Button } from '..';
+
 
 interface Props {
   availableBalance: string;
   actions?: React.ReactNode;
-  sender: accountsBalanceType;
-  recepient: accountsBalanceType;
+  sender: AccountsBalanceType;
+  recepient: AccountsBalanceType;
   chain?: Chain | null;
   children?: React.ReactNode;
   className?: string;
+  confirmModalOpen: boolean;
+  setConfirmModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   genesisHash?: string | null;
   isExternal?: boolean | null;
   isHardware?: boolean | null;
@@ -47,26 +50,25 @@ interface Props {
   nextButtonDisabled: boolean;
   nextButtonCaption: string;
   handleTransferModalClose: any;
-  balances?: accountsBalanceType[] | null;
-  setBalances?: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
 }
 
 export default function ConfirmTx({
   availableBalance,
   chain,
   coin,
+  confirmModalOpen,
   handleTransferModalClose,
   lastFee,
   nextButtonCaption,
   nextButtonDisabled,
   recepient,
   sender,
-  transferAmount,
-  balances,
-  setBalances }: Props): React.ReactElement<Props> {
+  setConfirmModalOpen,
+  transferAmount
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const network = chain ? chain.name.replace(' Relay Chain', '') : 'westend';
-  const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
+  // const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
   const [fee, setFee] = useState<string>();
   const [total, setTotal] = useState<string | null>(null);
   const [confirmDisabled, setConfirmDisabled] = useState<boolean>(true);
@@ -79,61 +81,13 @@ export default function ConfirmTx({
   const [transferAmountInHuman, setTransferAmountInHuman] = useState('');
 
   const { hierarchy } = useContext(AccountContext);
-  const settings = useContext(SettingsContext);
-
-  function getSenderTxHistory(): string | null {
-    const txH = hierarchy.find((h) => h.address === sender.address);
-
-    if (!txH) return null;
-
-    return txH.txHistory ? txH.txHistory : null;
-  }
-
-  function makeAddressShort(_address: string): React.ReactElement {
-    return (
-      <Box
-        component='span'
-        fontFamily='Monospace'
-      // fontStyle='oblique'
-      // fontWeight='fontWeightBold'
-      >
-        {_address.slice(0, 4) +
-          '...' +
-          _address.slice(-4)}
-      </Box>
-    );
-    // return _address.slice(0, 4) + '...' + _address.slice(-4);
-  }
+  // const settings = useContext(SettingsContext);
 
   useEffect(() => {
     const { decimals } = getNetworkInfo(chain);
 
     setTransferAmountInHuman(amountToHuman(String(transferAmount), decimals));
   }, [chain, transferAmount]);
-
-  // useEffect(() => {
-  //   // try {
-  //   //   if (transfering) {
-  //   //     const pair = keyring.getPair(String(sender.address));
-
-  //   //     pair.unlock(password);
-  //   //     setPasswordIsCorrect(1);
-
-  //   //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  //   //     signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
-  //   //       .then((hash) => {
-  //   //         setTransactionHash(hash);
-  //   //         setTransfering(false);
-  //   //       });
-
-  //   //     subscribeAllAccounts();
-  //   //   }
-  //   // } catch (e) {
-  //   //   setPasswordIsCorrect(-1);
-  //   //   setTransfering(false);
-  //   // }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [transfering]);
 
   useEffect(() => {
     if (!transactionHash) {
@@ -165,16 +119,12 @@ export default function ConfirmTx({
       pair.unlock(password);
       setPasswordIsCorrect(1);
 
-      console.log('calling signAndTransfer.');
-
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
         .then((hash) => {
           setTransactionHash(hash);
           setTransfering(false);
         });
-
-      setTimeout(subscribeAllAccounts, 1000);
     } catch (e) {
       setPasswordIsCorrect(-1);
       setTransfering(false);
@@ -183,29 +133,51 @@ export default function ConfirmTx({
 
   useEffect(() => {
     if (!confirmModalOpen) return;
-
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     getDefaultFeeAndSetTotal(lastFee);
-
-    function getDefaultFeeAndSetTotal(lastFee?: string): void {
-      const { decimals, defaultFee } = getNetworkInfo(chain);
-
-      lastFee = lastFee || defaultFee;
-
-      setFee(amountToHuman(lastFee, decimals));
-
-      const total = (Number(lastFee) + Number(transferAmount)) / (10 ** decimals);
-
-      setTotal(fixFloatingPoint(total));
-
-      setConfirmDisabled(false);
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [confirmModalOpen, lastFee]);
 
   useEffect(() => {
     setFailAlert(Number(total) > Number(availableBalance));
   }, [total, availableBalance]);
+
+  function getSenderTxHistory(): string | null {
+    const txH = hierarchy.find((h) => h.address === sender.address);
+
+    if (!txH) return null;
+
+    return txH.txHistory ? txH.txHistory : null;
+  }
+
+  function makeAddressShort(_address: string): React.ReactElement {
+    return (
+      <Box
+        component='span'
+        fontFamily='Monospace'
+      // fontStyle='oblique'
+      // fontWeight='fontWeightBold'
+      >
+        {_address.slice(0, 4) +
+          '...' +
+          _address.slice(-4)}
+      </Box>
+    );
+  }
+
+  function getDefaultFeeAndSetTotal(lastFee?: string): void {
+    const { decimals, defaultFee } = getNetworkInfo(chain);
+
+    lastFee = lastFee || defaultFee;
+
+    setFee(amountToHuman(lastFee, decimals));
+
+    const total = (Number(lastFee) + Number(transferAmount)) / (10 ** decimals);
+
+    setTotal(fixFloatingPoint(total));
+
+    setConfirmDisabled(false);
+  }
 
   function handleClearPassword() {
     setPasswordIsCorrect(0);
@@ -232,13 +204,13 @@ export default function ConfirmTx({
   const openTxOnExplorer = useCallback(() => window.open('https://' + network + '.subscan.io/extrinsic/' + String(transactionHash), '_blank')
     , [network, transactionHash]);
 
-  function handleConfirmModaOpen(): void {
-    setConfirmModalOpen(true);
-  }
+  // function handleConfirmModaOpen(): void {
+  //   setConfirmModalOpen(true);
+  // }
 
-  function handleNext() {
-    handleConfirmModaOpen();
-  }
+  // function handleNext() {
+  //   handleConfirmModaOpen();
+  // }
 
   const refreshNetworkFee = (): void => {
     setFee('');
@@ -265,83 +237,27 @@ export default function ConfirmTx({
       });
   };
 
-  async function getChainData(genesisHash?: string | null): Promise<Chain | null> {
-    if (genesisHash) {
-      const chain = await getMetadata(genesisHash, true);
-
-      if (chain) return chain;
-    }
-
-    return null;
-  }
-
-  function subscribeAllAccounts() {
-    console.log('calling subscribeToBalanceChange for all accounts.')
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    hierarchy.forEach((h) => subscribeToBalanceChange(h));
-  }
-
-  async function subscribeToBalanceChange(_acc: AccountWithChildren) {
-    const chain = _acc.genesisHash ? await getChainData(_acc.genesisHash) : null;
-    const { coin, decimals, url } = getNetworkInfo(chain);
-    const formattedAddress = getFormattedAddress(_acc.address, chain, settings);
-    const wsProvider = new WsProvider(url);
-    const api = await ApiPromise.create({ provider: wsProvider });
-
-    const unsubscribe = await api.query.system.account(formattedAddress, ({ data: balance }) => {
-      if (balance) {
-        const result = {
-          coin: coin,
-          decimals: decimals,
-          ...handleAccountBalance(balance)
-        };
-        let temp = [];
-
-        if (balances) {
-          temp = balances;
-          const index = temp.findIndex((b) => b.address === _acc.address);
-
-          if (index >= 0) {
-            temp[index].balanceInfo = result;
-            temp[index].chain = chain;
-            temp[index].name = _acc.name || '';
-          }
-        } else {
-          temp.push({
-            address: _acc.address,
-            balanceInfo: result,
-            chain: chain,
-            name: _acc.name || ''
-          });
-        }
-
-        if (setBalances) {
-          setBalances([...temp]);
-        }
-      }
-
-      setTimeout(() => {
-        unsubscribe();
-        console.log('Unsubscribed');
-      }, 60000); // unsubscribe after 20 sec.
-    });
-  }
+  // function disable(flag: boolean) {
+  //   return {
+  //     opacity: flag ? '0.15' : '1',
+  //     pointerEvents: flag ? 'none' : 'initial'
+  //   };
+  // }
 
   return (
     <>
-      <Button
+      {/* <Button
         color='primary'
         disabled={nextButtonDisabled}
         fullWidth
         name='Next Button'
         // eslint-disable-next-line react/jsx-no-bind
         onClick={handleNext}
-        variant='contained'
         size='large'
+        variant='contained'
       >
         {nextButtonCaption}
-      </Button>
+      </Button> */}
       <Modal
         hideBackdrop
         // eslint-disable-next-line react/jsx-no-bind
@@ -360,38 +276,68 @@ export default function ConfirmTx({
         }}
         >
           <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
-            <Grid alignItems='center' container justifyContent='space-between'>
-              <Grid item xs={2}>
-                <Button
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={handleConfirmModaClose}
-                  startIcon={<ArrowBackIosRounded />}>
-                  {t('Edit')}
-                </Button>
+            <Grid container alignItems='center' >
+              <Grid item xs={12} alignItems='center' container justifyContent='space-between' sx={{ padding: '0px 20px' }}>
+                <Grid item sx={{ textAlign: 'right' }}>
+                  <Avatar
+                    alt={'logo'}
+                    src={getChainLogo(chain)}
+                  />
+                </Grid>
+                <Grid item justifyContent='center' sx={{ fontSize: 15 }}>
+                  <div style={transfering ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
+                    <ActionText
+                      // className={{'margin': 'auto'}}
+                      onClick={handleReject}
+                      text={t('Reject')}
+                    />
+                  </div>
+                </Grid>
               </Grid>
-              <Grid item xs={2}>
-                <Avatar
-                  alt={'logo'}
-                  src={getChainLogo(chain)}
-                // sx={{ height: 45, width: 45 }}
-                />
+              <Grid item xs={12}>
+                <Box fontSize={12} fontWeight='fontWeightBold'>
+                  <Divider>
+                    {/* <Chip
+                      icon={<FontAwesomeIcon icon={faCoins} size='sm' />}
+                      label={t('Select Validators')}
+                      variant='outlined'
+                    /> */}
+                  </Divider>
+                </Box>
               </Grid>
             </Grid>
-            <Divider light />
-            <Grid container
-              alignItems='center'
-              justifyContent='space-around'
-            >
-              <Grid item xs={4} sx={{ fontSize: 14 }}>
-                {sender.name ? sender.name : makeAddressShort(String(sender.address))}
+            <Grid container alignItems='center' justifyContent='space-around' >
+              <Grid item container alignItems='center' justifyContent='flex-end' xs={5}>
+                <Grid item xs={4}>
+                  <Identicon
+                    size={40}
+                    theme={'polkadot'}
+                    value={sender.address}
+                  />
+                </Grid>
+                <Grid item xs={6} sx={{ fontSize: 14, textAlign: 'left' }}>
+                  {sender.name ? sender.name : makeAddressShort(String(sender.address))}
+                </Grid>
               </Grid>
-              <Divider orientation='vertical' flexItem>
-                <Avatar sx={{ bgcolor: grey[300] }}>
-                  <ArrowForwardRounded fontSize='small' />
-                </Avatar>
-              </Divider>
-              <Grid item xs={4} sx={{ fontSize: 14 }}>
-                {recepient.name != 'null' ? recepient.name : makeAddressShort(String(recepient.address))}
+              <Grid item xs={2} >
+                <Divider orientation='vertical' flexItem>
+                  <Avatar sx={{ bgcolor: grey[300] }}>
+                    <ArrowForwardRounded fontSize='small' />
+                  </Avatar>
+                </Divider>
+              </Grid>
+              <Grid item container alignItems='center' xs={5}>
+                <Grid item xs={4}  >
+                  <Identicon
+                    size={40}
+                    theme={'polkadot'}//'polkadot', 'substrate' (default), 'beachball' or 'jdenticon'
+                    value={recepient.address}
+                  />
+                </Grid>
+                <Grid item xs={6} sx={{ fontSize: 14, textAlign: 'left' }}>
+                  {recepient.name != 'null' ? recepient.name : makeAddressShort(String(recepient.address))}
+                </Grid>
+
               </Grid>
               <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '25px 40px 25px' }}>
                 <Grid item xs={3} sx={{ padding: '5px 10px 5px', borderRadius: '5px', border: '2px double grey', justifyContent: 'flex-start', fontSize: 15, textAlign: 'center', fontVariant: 'small-caps' }}>
@@ -479,7 +425,7 @@ export default function ConfirmTx({
                     if (event.key === 'Enter') { handleConfirmTransfer(); }
                   }}
                   size='medium'
-                  // sx={{ fontSize: 20 }}
+                  color='warning'
                   type='password'
                   value={password}
                   variant='outlined'
@@ -496,34 +442,24 @@ export default function ConfirmTx({
             <Grid container justifyContent='space-between' sx={{ padding: '20px 40px 10px' }}>
               {txStatus && (txStatus.success !== null)
                 ? <Grid item xs={12}>
-                  <Button fullWidth onClick={handleReject} variant='contained' color={txStatus.success ? 'success' : 'error'}>
+                  <MuiButton fullWidth onClick={handleReject} variant='contained' color={txStatus.success ? 'success' : 'error'}>
                     {txStatus.success ? t('Done') : t('Failed')}
 
-                  </Button>
+                  </MuiButton>
                 </Grid>
                 : <>
-                  <Grid item xs={6}>
-                    <LoadingButton
-                      color={failAlert ? 'warning' : 'primary'}
-                      disabled={confirmDisabled}
-                      fullWidth
-                      loading={transfering}
-                      loadingPosition='start'
-                      name='transferButton'
+
+                  <Grid item xs={2}>
+                    <BackButton onClick={handleConfirmModaClose} />
+                  </Grid>
+                  <Grid item xs={10}>
+                    <Button
+                      data-button-action=''
+                      isBusy={transfering}
+                      isDisabled={confirmDisabled}
                       onClick={handleConfirmTransfer}
-                      startIcon={
-                        <FontAwesomeIcon
-                          icon={faPaperPlane}
-                          size='lg'
-                        />}
-                      variant='contained'
                     >
                       {t('Confirm')}
-                    </LoadingButton>
-                  </Grid>
-                  <Grid item xs={3}>
-                    <Button color='secondary' disabled={transfering} fullWidth onClick={handleReject} variant='outlined'>
-                      {t('Reject')}
                     </Button>
                   </Grid>
                 </>}

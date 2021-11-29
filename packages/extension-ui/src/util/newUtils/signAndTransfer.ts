@@ -11,7 +11,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 import getNetworkInfo from './getNetwork';
-import { TransactionStatus } from './hackatonUtils';
+import { TransactionStatus } from './pjpeTypes';
 
 export default async function signAndTransfer(
   _senderKeyring: KeyringPair,

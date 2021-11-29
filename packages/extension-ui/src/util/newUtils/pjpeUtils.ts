@@ -1,59 +1,21 @@
+/* eslint-disable camelcase */
 
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import type { SettingsStruct } from '@polkadot/ui-settings/types';
-
 import { Chain } from '@polkadot/extension-chains/types';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-// import allChains from '../chains';
+import { AccountsBalanceType } from './pjpeTypes';
 
 // eslint-disable-next-line header/header
-export const FLOATING_POINT_DIGIT = 4;
+export const FLOATING_POINT_DIGIT = 5;
 export const DEFAULT_TOKEN_DECIMALS = 12;
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+export const MIN_EXTRA_BOND = 0.01;
 export const DEFAULT_COIN = 'WND';
-
-export interface TransactionStatus {
-  blockNumber: string | null;
-  success: boolean | null;
-  text: string | null;
-}
-
-export interface BalanceType {
-  coin: string,
-  available: bigint,
-  total: bigint,
-  reserved?: bigint,
-  miscFrozen?: bigint,
-  feeFrozen?: bigint,
-  decimals: number
-}
-
-// interface BalanceType {
-//   coin: string, availableBalance: string, balance: string, reserved: string, miscFrozen: string, feeFrozen: string
-// }
-
-export const DEFAULT_ACCOUNT_BALANCE = { address: null, balanceInfo: null, chain: null, name: null };
-
-export interface accountsBalanceType {
-  address: string | null;
-  chain: Chain | null;
-  balanceInfo?: BalanceType;
-  name: string | null;
-  txHistory?: string;
-}
-
-export interface transactionHistory {
-  amount: string;
-  coin: string;
-  hash: string;
-  fee: string;
-  to: string;
-  status: string;
-}
+export const DEFAULT_CHAIN_NAME = 'Westend';
+export const DEFAULT_VALIDATOR_COMMISION_FILTER = 20;
 
 export function fixFloatingPoint(_number: number | string): string {
   const sNumber = String(_number);
@@ -64,7 +26,7 @@ export function fixFloatingPoint(_number: number | string): string {
   return sNumber.slice(0, dotIndex) + sNumber.slice(dotIndex, dotIndex + FLOATING_POINT_DIGIT + 1);
 }
 
-export function balanceToHuman(_balance: accountsBalanceType | null, _type: string): string {
+export function balanceToHuman(_balance: AccountsBalanceType | null, _type: string): string {
   if (!_balance || !_balance.balanceInfo) return '';
 
   const balance = _balance.balanceInfo;
@@ -76,7 +38,7 @@ export function balanceToHuman(_balance: accountsBalanceType | null, _type: stri
     case 'available':
       return fixFloatingPoint(Number(balance.available) / x);
     default:
-      console.log('_type in unknown in balanceToHuman!');
+      console.log('_type is unknown in balanceToHuman!');
 
       return '';
   }
@@ -84,6 +46,8 @@ export function balanceToHuman(_balance: accountsBalanceType | null, _type: stri
 
 export function amountToHuman(_amount: string | undefined, _decimals: number): string {
   if (!_amount) return '';
+
+  _amount = String(_amount).replaceAll(',', '');
 
   const x = 10 ** _decimals;
 
@@ -108,9 +72,9 @@ export function amountToMachine(_amount: string | undefined, _decimals: number):
   return BigInt(_amount) * BigInt(x);
 }
 
-export function getFormattedAddress(_address: string | null | undefined, _chain: Chain | null | undefined, settings: SettingsStruct): string {
+export function getFormattedAddress(_address: string | null | undefined, _chain: Chain | null | undefined, settingsPrefix: number): string {
   const publicKey = decodeAddress(_address);
-  const prefix = _chain ? _chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
+  const prefix = _chain ? _chain.ss58Format : (settingsPrefix === -1 ? 42 : settingsPrefix);
 
   return encodeAddress(publicKey, prefix);
 }
@@ -129,13 +93,3 @@ export function handleAccountBalance(balance: any): { available: bigint, feeFroz
     total: BigInt(String(balance.free)) + BigInt(String(balance.reserved))
   };
 }
-
-// export function getChain(_genesisHash?: string | null): Chain | null | undefined {
-//   if (!_genesisHash) {
-//     return null;
-//   }
-
-//   const chain = allChains.find((chain) => chain.genesisHash === _genesisHash);
-
-//   return chain;
-// }

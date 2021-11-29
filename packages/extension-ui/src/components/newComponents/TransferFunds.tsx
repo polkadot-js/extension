@@ -7,7 +7,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowBackIosRounded, CheckRounded as CheckRoundedIcon, Clear as ClearIcon, CloseRounded } from '@mui/icons-material';
+import { ArrowBackIosRounded, CheckRounded as CheckRoundedIcon, Clear as ClearIcon } from '@mui/icons-material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Avatar, Box, Button, Chip, Container, Divider, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Modal, TextField, Tooltip } from '@mui/material';
 import keyring from '@polkadot/ui-keyring';
@@ -17,26 +17,26 @@ import { Chain } from '@polkadot/extension-chains/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import useTranslation from '../../hooks/useTranslation';
-import getChainLogo from '../../util/HackathonUtilFiles/getChainLogo';
-import getFee from '../../util/HackathonUtilFiles/getFee';
-import getNetworkInfo from '../../util/HackathonUtilFiles/getNetwork';
-import isValidAddress from '../../util/HackathonUtilFiles/validateAddress';
+import getChainLogo from '../../util/newUtils/getChainLogo';
+import getFee from '../../util/newUtils/getFee';
+import getNetworkInfo from '../../util/newUtils/getNetwork';
+import isValidAddress from '../../util/newUtils/validateAddress';
 import { AccountContext, SettingsContext } from '../contexts';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-import { accountsBalanceType, amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/HackathonUtilFiles/hackatonUtils';
+import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType } from '../../util/newUtils/pjpeTypes';
 import grey from '@mui/material/colors/grey';
+import { ActionText, NextStepButton } from '..';
 
 interface Props {
   actions?: React.ReactNode;
-  sender: accountsBalanceType;
+  sender: AccountsBalanceType;
   transferModalOpen: boolean;
   chain?: Chain | null;
   children?: React.ReactNode;
   className?: string;
   setTransferModalOpen: Dispatch<SetStateAction<boolean>>;
   givenType?: KeypairType;
-  balances?: accountsBalanceType[] | null;
-  setBalances?: React.Dispatch<React.SetStateAction<accountsBalanceType[]>>;
 }
 
 interface Recoded {
@@ -47,7 +47,8 @@ interface Recoded {
   type: KeypairType;
 }
 
-export default function TransferFunds({ chain, givenType, sender, setTransferModalOpen, transferModalOpen, balances, setBalances }: Props): React.ReactElement<Props> {
+export default function TransferFunds({ chain, givenType, sender, setTransferModalOpen, transferModalOpen,
+}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [availableBalance, setAvailableBalance] = useState<string>('');
@@ -62,13 +63,18 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
   const [zeroBalanceAlert, setZeroBalanceAlert] = useState(false);
   const [nextButtonCaption, setNextButtonCaption] = useState<string>(t('Next'));
   const [recepientAddressIsValid, setRecepientAddressIsValid] = useState(false);
-  const [recepient, setRecepient] = useState<accountsBalanceType | null>();
-  const [allAddresesOnThisChain, setAllAddresesOnThisChain] = useState<accountsBalanceType[] | null>();
+  const [recepient, setRecepient] = useState<AccountsBalanceType | null>();
+  const [allAddresesOnThisChain, setAllAddresesOnThisChain] = useState<AccountsBalanceType[] | null>();
   const [transferBetweenMyAccountsButtonText, setTransferBetweenMyAccountsButtonText] = useState<string>(t('Transfer between my accounts'));
   const [coin, setCoin] = useState('');
   const [ED, setED] = useState(0);
   const [allAmountLoading, setAllAmountLoading] = useState(false);
   const [safeMaxAmountLoading, setsafeMaxAmountLoading] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log('sender : in transferfunds)', sender)
+  }, [sender]);
 
   useEffect((): void => {
     const { ED, coin } = getNetworkInfo(chain);
@@ -317,7 +323,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
     setTransferBetweenMyAccountsButtonText(condition ? t('Back to all') : t('Transfer between my accounts'));
 
     if (condition) {
-      let allAddresesOnSameChain = accounts.map((acc): accountsBalanceType => {
+      let allAddresesOnSameChain = accounts.map((acc): AccountsBalanceType => {
         const accountByAddress = findAccountByAddress(accounts, acc.address);
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -339,6 +345,14 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
       allAddresesOnSameChain = allAddresesOnSameChain.filter((acc) => acc.address !== (sender.address));
       setAllAddresesOnThisChain(allAddresesOnSameChain);
     }
+  }
+
+  function handleNext() {
+    handleConfirmModaOpen();
+  }
+
+  function handleConfirmModaOpen(): void {
+    setConfirmModalOpen(true);
   }
 
   return (
@@ -363,25 +377,15 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
       }}
       >
 
-        <Container>
-          <Grid
-            container
-            justifyContent='flex-start'
-            sx={{ paddingTop: '10px' }}
-            xs={12}
-          >
-            <IconButton
-              edge='start'
+        <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
+          <Grid container justifyContent='flex-end' sx={{ fontSize: 15, paddingRight: '20px' }} xs={12}>
+            <ActionText
+              // className={{'margin': 'auto'}}
               onClick={handleTransferModalClose}
-              size='small'
-            >
-              <CloseRounded fontSize='small' />
-            </IconButton>
+              text={t('Cancel')}
+            />
           </Grid>
-          <Grid
-            sx={{ paddingBottom: '10px' }}
-            xs={12}
-          >
+          <Grid sx={{ paddingBottom: '10px' }} xs={12}>
             <Box
               fontSize={12}
               fontWeight='fontWeightBold'
@@ -400,8 +404,8 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
             </Box>
           </Grid>
 
-          <Grid alignItems='center' container justifyContent='center'>
-            <Grid item sx={{ paddingTop: '30px' }} xs={12}>
+          <Grid alignItems='center' container justifyContent='center' sx={{ padding: '30px 20px' }}>
+            <Grid item xs={12}>
               <TextField
                 InputProps={{
                   endAdornment: (
@@ -440,25 +444,26 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
               }
 
             </Grid>
-          </Grid>
-          {!recepientAddressIsValid
-            ? <>
-              <Button
-                fullWidth
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={showAlladdressesOnThisChain}
-                startIcon={transferBetweenMyAccountsButtonText === t('Back to all') ? <ArrowBackIosRounded /> : null}
-                sx={{ justifyContent: 'flex-start', marginTop: 2, textAlign: 'left' }}
-                variant='text'
-              >
-                {transferBetweenMyAccountsButtonText}
-              </Button>
+            {!recepientAddressIsValid &&
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={showAlladdressesOnThisChain}
+                  startIcon={transferBetweenMyAccountsButtonText === t('Back to all') ? <ArrowBackIosRounded /> : null}
+                  sx={{ justifyContent: 'flex-start', marginTop: 2, textAlign: 'left' }}
+                  variant='text'
+                >
+                  {transferBetweenMyAccountsButtonText}
+                </Button>
 
-              {acountList}
-            </>
-            : ''}
-          {recepientAddressIsValid
-            ? <div id='transferBody'>
+                {acountList}
+              </Grid>
+            }
+          </Grid>
+
+          {recepientAddressIsValid &&
+            <div id='transferBody'>
               <Grid
                 container
                 justifyContent='space-between'
@@ -487,34 +492,41 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
 
                 <Grid item sx={{ fontSize: '15px', fontWeight: '600', color: grey[800], marginTop: 1, textAlign: 'left' }} xs={3}>
                   {t('Amount:')}
-                  <Tooltip placement='right-end' title='Transfer all amount and deactivate the account.' arrow>
-                    <LoadingButton
-                      color='primary'
-                      disabled={safeMaxAmountLoading}
-                      loading={allAmountLoading}
-                      name='All'
-                      onClick={HandleSetMax}
-                      size='small'
-                      sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
-                      variant='outlined'
-                    >
-                      {t('All')}
-                    </LoadingButton>
-                  </Tooltip>
-                  <Tooltip placement='right-end' title='Transfer max amount where the account remains active.' arrow>
-                    <LoadingButton
-                      color='primary'
-                      disabled={allAmountLoading}
-                      loading={safeMaxAmountLoading}
-                      name='safeMax'
-                      onClick={HandleSetMax}
-                      size='small'
-                      sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
-                      variant='outlined'
-                    >
-                      {t('Safe max')}
-                    </LoadingButton>
-                  </Tooltip>
+                 
+                  <Grid item>
+                    <Tooltip placement='right-end' title='Transfer all amount and deactivate the account.' arrow>
+                      <LoadingButton
+                        color='primary'
+                        disabled={safeMaxAmountLoading}
+                        loading={allAmountLoading}
+                        name='All'
+                        onClick={HandleSetMax}
+                        size='small'
+                        sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
+                        variant='outlined'
+                      >
+                        {t('All')}
+                      </LoadingButton>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item>
+                    <Tooltip placement='right-end' title='Transfer max amount where the account remains active.' arrow>
+                      <LoadingButton
+                        color='primary'
+                        disabled={allAmountLoading}
+                        loading={safeMaxAmountLoading}
+                        name='safeMax'
+                        onClick={HandleSetMax}
+                        size='small'
+                        sx={{ display: 'inline-block', fontSize: '11px', padding: 0 }}
+                        variant='outlined'
+                      >
+                        {t('Safe max')}
+                      </LoadingButton>
+                    </Tooltip>
+                  </Grid>
+                  
                 </Grid>
                 <Grid
                   container
@@ -529,15 +541,16 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                   >
                     <TextField
                       InputLabelProps={{ shrink: true }}
-                      // eslint-disable-next-line sort-keys
                       InputProps={{ endAdornment: (<InputAdornment position='end'>{coin}</InputAdornment>) }}
                       autoFocus
+                      color='warning'
                       error={reapeAlert || noFeeAlert || zeroBalanceAlert}
                       fullWidth
                       helperText={reapeAlert
                         ? (t('Account will be reaped, existential deposit:') + String(ED) + ' ' + coin)
                         : (noFeeAlert ? t('Fee must be considered, use MAX button instead.') : (zeroBalanceAlert ? t('Available balance is zero.') : ''))}
                       label={t('Transfer Amount')}
+                      margin='dense'
                       name='transfeAmount'
                       onBlur={(event) => handleTransferAmountOnBlur(event.target.value)}
                       onChange={(event) => handleTransferAmountOnChange(event.target.value)}
@@ -550,19 +563,21 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid
-                container
-                justifyContent='space-between'
-                sx={{ padding: '40px 40px 10px' }}
-              >
-                <Grid
-                  item
-                  xs={8}
-                >
+              <Grid container justifyContent='space-between' sx={{ padding: '40px 40px 10px' }}>
+                <Grid item xs={12}>
+                  <NextStepButton
+                    data-button-action=''
+                    // isBusy={bondState === 'bonding'}
+                    isDisabled={nextButtonDisabled}
+                    onClick={handleNext}
+                  >
+                    {nextButtonCaption}
+
+                  </NextStepButton>
+
                   {recepient
                     ? <ConfirmTx
                       availableBalance={availableBalance}
-                      balances={balances}
                       chain={chain}
                       coin={coin}
                       handleTransferModalClose={handleTransferModalClose}
@@ -571,27 +586,15 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                       nextButtonDisabled={nextButtonDisabled}
                       recepient={recepient}
                       sender={sender}
-                      setBalances={setBalances}
                       transferAmount={transferAmount}
+                      setConfirmModalOpen={setConfirmModalOpen}
+                      confirmModalOpen={confirmModalOpen}
                     />
                     : ''}
                 </Grid>
-                <Grid
-                  item
-                  xs={3}
-                >
-                  <Button
-                    color='secondary'
-                    fullWidth
-                    onClick={handleTransferModalClose}
-                    variant='outlined'
-                  >
-                    {t('Cancel')}
-                  </Button>
-                </Grid>
               </Grid>
             </div>
-            : ''}
+          }
         </Container>
       </div>
     </Modal>

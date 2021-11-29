@@ -5,8 +5,8 @@ import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-// added by Kami TODOBalance
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBalanceUpdate, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTransactionHistoryUpdate, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+// added by Kami TODOBalance:RequestBalanceUpdate, RequestTransactionHistoryUpdate, RequestStakingConstsUpdate
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestStakingConstsUpdate, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBalanceUpdate, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTransactionHistoryUpdate, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest, RequestUpdateMeta } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -97,7 +97,7 @@ export default class Extension {
     return true;
   }
 
-  // added by Kami TODOBalance
+  // added by Kami to save last balance
   private accountsUpdateBalance({ address, balance, chainName }: RequestBalanceUpdate): boolean {
     const pair = keyring.getPair(address);
 
@@ -111,7 +111,31 @@ export default class Extension {
     return true;
   }
 
-  // added by Kami TODOBalance
+  // added by kami to save stakingConsts
+  private accountsUpdateStakingConsts({ address, stakingConsts }: RequestStakingConstsUpdate): boolean {
+    const pair = keyring.getPair(address);
+
+    assert(pair, 'Unable to find pair');
+
+    keyring.saveAccountMeta(pair, { ...pair.meta, stakingConsts });
+
+    return true;
+  }
+
+  // added by kami to update meta generally
+  private accountsUpdateMeta({ address, meta }: RequestUpdateMeta): boolean {
+    const pair = keyring.getPair(address);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const metadata = JSON.parse(meta);
+
+    assert(pair, 'Unable to find pair');
+
+    keyring.saveAccountMeta(pair, { ...pair.meta, ...metadata });
+
+    return true;
+  }
+
+  // added by Kami to save transaction history
   private accountsUpdateTxHistory({ address, amount, coin, fee, hash, status, to, txHistory }: RequestTransactionHistoryUpdate): boolean {
     const pair = keyring.getPair(address);
 
@@ -563,10 +587,16 @@ export default class Extension {
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);
 
-      case 'pri(accounts.update)': // added by Kami TODOBalance
+      case 'pri(accounts.update)': // added by Kami 
         return this.accountsUpdateBalance(request as RequestBalanceUpdate);
 
-      case 'pri(accounts.updateTxHistory)': // added by Kami TODOBalance
+      case 'pri(accounts.updateStakingConsts)': // added by Kami 
+        return this.accountsUpdateStakingConsts(request as RequestStakingConstsUpdate);
+
+      case 'pri(accounts.updateMeta)': // added by Kami 
+        return this.accountsUpdateMeta(request as RequestUpdateMeta);
+
+      case 'pri(accounts.updateTxHistory)': // added by Kami 
         return this.accountsUpdateTxHistory(request as RequestTransactionHistoryUpdate);
 
       case 'pri(accounts.export)':

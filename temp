@@ -1,0 +1,64 @@
+{
+  "repository": "https://github.com/polkadot-js/extension",
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "license": "Apache-2",
+  "version": "0.40.3",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "resolutions": {
+    "@polkadot/api": "^6.0.1",
+    "@polkadot/keyring": "^7.4.1",
+    "@polkadot/networks": "^7.4.1",
+    "@polkadot/types": "^6.0.1",
+    "@polkadot/util": "^7.4.1",
+    "@polkadot/util-crypto": "^7.4.1",
+    "@polkadot/x-fetch": "^7.4.1",
+    "babel-core": "^7.0.0-bridge.0",
+    "safe-buffer": "^5.2.1",
+    "typescript": "^4.4.3",
+    "webpack": "5.41.1"
+  },
+  "scripts": {
+    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
+    "build:extra": "yarn build:i18n && yarn build:ui",
+    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
+    "build:release": "polkadot-ci-ghact-build",
+    "build:rollup": "polkadot-exec-rollup --config",
+    "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
+    "build:zip": "yarn build:zip:dst && yarn build:zip:src",
+    "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
+    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js jest.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock",
+    "lint": "polkadot-dev-run-lint",
+    "lint:css": "stylelint './packages/**/src/**/*.tsx'",
+    "clean": "polkadot-dev-clean-build",
+    "postinstall": "polkadot-dev-yarn-only",
+    "start": "yarn watch",
+    "test": "polkadot-dev-run-test --detectOpenHandles",
+    "test:one": "polkadot-dev-run-test --detectOpenHandles",
+    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@polkadot/dev": "^0.62.67",
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.10.1",
+    "i18next-scanner": "^3.0.0",
+    "sinon-chrome": "^3.0.1",
+    "stylelint": "^13.13.1",
+    "stylelint-config-recommended": "^5.0.0",
+    "stylelint-config-styled-components": "^0.1.1",
+    "tslib": "^2.3.1",
+    "webpack": "^5.54.0"
+  },
+  "packageManager": "yarn@3.0.1",
+  "dependencies": {
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
+    "@mui/icons-material": "^5.0.1",
+    "@mui/lab": "^5.0.0-alpha.49",
+    "@mui/material": "^5.0.2",
+    "qrcode.react": "^1.0.1"
+  }
+}

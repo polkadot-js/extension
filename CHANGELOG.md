@@ -1,10 +1,14 @@
 # CHANGELOG
 
-## master
+## 0.41.2 Nov 30, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
 - Expand error messaging for non-compatible Ledger chains
+- Bump `@polkadot/util` to 8.0.4
+- Bump `@polkadot/api` to 6.10.2
 
 
 ## 0.41.1 Nov 8, 2021

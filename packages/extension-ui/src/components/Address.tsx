@@ -74,15 +74,11 @@ function findAccountByAddress (accounts: AccountJson[], _address: string): Accou
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
 function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
-  console.log('address', address);
   const publicKey = decodeAddress(address);
 
   // find our account using the actual publicKey, and then find the associated chain
   const account = findSubstrateAccount(accounts, publicKey);
   const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
-
-  console.log('publicKey', publicKey);
-  console.log('prefix', prefix);
 
   // always allow the actual settings to override the display
   return {
@@ -121,17 +117,6 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     }
 
     const accountByAddress = findAccountByAddress(accounts, address);
-
-    // console.log(
-    //   address,
-    //   (
-    //     chain?.definition.chainType === 'ethereum' ||
-    //     accountByAddress?.type === 'ethereum' ||
-    //     (!accountByAddress && givenType === 'ethereum')
-    //   )
-    //     ? { account: accountByAddress, formatted: address, type: 'ethereum' }
-    //     : recodeAddress(address, accounts, chain, settings)
-    // );
 
     setRecoded(
       (

@@ -243,7 +243,6 @@ describe('Derive', () => {
     it('selects internal root accounts as other options, no external and no Ethereum account', () => {
       const options = wrapper.find('[data-parent-option] [data-field="name"]').map((el) => el.text());
 
-      console.log('options', options);
       expect(options).toEqual(['A', 'B', 'D']);
     });
 

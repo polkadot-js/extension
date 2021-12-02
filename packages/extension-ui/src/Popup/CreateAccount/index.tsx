@@ -43,10 +43,14 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   }, [type, ethDerivePath]);
 
   useEffect((): void => {
+    console.log("CHAIN ",chain)
+    console.log(JSON.stringify(chain,null,2))
     if (seed) {
+      // const chain = useMetadata(genesisHash, true);
       const type = chain && chain.definition.chainType === 'ethereum'
         ? 'ethereum'
         : DEFAULT_TYPE;
+        console.log(" set tupeTYPE")
 
       setType(type);
       validateSeed(seed, type, ethDerivePath)
@@ -83,7 +87,8 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   );
 
   const _onChangeNetwork = useCallback(
-    (newGenesisHash: string) => setGenesis(newGenesisHash),
+    (newGenesisHash: string) => {console.log("_onChangeNetwork",newGenesisHash)
+      setGenesis(newGenesisHash)},
     []
   );
 

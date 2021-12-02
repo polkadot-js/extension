@@ -160,5 +160,6 @@
   "password for encrypting all accounts": "",
   "I want to export all my accounts": "",
   "Notifications": "",
-  "Search by name or network...": ""
+  "Search by name or network...": "",
+  "Message signing is not supported for hardware wallets.": ""
 }

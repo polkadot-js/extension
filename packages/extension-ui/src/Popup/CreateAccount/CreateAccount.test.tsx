@@ -9,6 +9,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
+import { Registry } from '@polkadot/types/types';
+
 import { ActionContext, ActionText, Button, themes } from '../../components';
 import * as messaging from '../../messaging';
 import { Header } from '../../partials';
@@ -91,6 +93,7 @@ describe('Create Account', () => {
 
   describe('Phase 2', () => {
     const kusamaGenesis = '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe';
+
     beforeEach(async () => {
       // the network dropdown is in the first screen
       wrapper.find('select').simulate('change', { target: { value: kusamaGenesis } });
@@ -104,7 +107,6 @@ describe('Create Account', () => {
     });
 
     it('saves account with provided network, name and password', async () => {
-
       await enterName('abc').then(password('abcdef')).then(repeat('abcdef'));
       wrapper.find('[data-button-action="add new root"] button').simulate('click');
       await act(flushAllPromises);
@@ -114,7 +116,6 @@ describe('Create Account', () => {
     });
   });
 });
-
 
 describe('Create Account - Ethereum', () => {
   let wrapper: ReactWrapper;
@@ -128,37 +129,37 @@ describe('Create Account - Ethereum', () => {
     seed: 'bottom drive obey lake curtain smoke basket hold race lonely fit walk'
   };
   const moonriverGenesis = '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b';
-  const moonriverChain= {
-    "definition": {
-      "chain": "Moonriver",
-      "chainType": "ethereum"as "ethereum" ,
-      "genesisHash": "0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b",
+  const moonriverChain = {
+    definition: {
+      chain: 'Moonriver',
+      chainType: 'ethereum' as const,
+      color: '#0E132E',
+      genesisHash: '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b',
       icon: 'substrate',
-      color: "#0E132E",
-      "ss58Format": 1285,
-      "specVersion": 0,
-      "tokenDecimals": 18,
-      "tokenSymbol": "Unit",
-      "types": {}
+      specVersion: 0,
+      ss58Format: 1285,
+      tokenDecimals: 18,
+      tokenSymbol: 'Unit',
+      types: {}
     },
-    "genesisHash": "0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b",
-    "hasMetadata": false,
-    "icon": "substrate",
-    "isUnknown": false,
-    "name": "Moonriver",
-    "registry": {} as any,
-    "specVersion": 1285,
-    "ss58Format": 2,
-    "tokenDecimals": 18,
-    "tokenSymbol": "Unit"
-  }
-  const kusamaChain= {
+    genesisHash: '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b',
+    hasMetadata: false,
+    icon: 'substrate',
+    isUnknown: false,
+    name: 'Moonriver',
+    registry: {} as Registry,
+    specVersion: 1285,
+    ss58Format: 2,
+    tokenDecimals: 18,
+    tokenSymbol: 'Unit'
+  };
+  const kusamaChain = {
     definition: {
       chain: 'Kusama Relay Chain',
       genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
       icon: 'polkadot',
-      ss58Format: 2,
       specVersion: 0,
+      ss58Format: 2,
       tokenDecimals: 15,
       tokenSymbol: 'Unit',
       types: {}
@@ -168,12 +169,12 @@ describe('Create Account - Ethereum', () => {
     icon: 'polkadot',
     isUnknown: false,
     name: 'Kusama Relay Chain',
-    registry: {} as any,
+    registry: {} as Registry,
     specVersion: 0,
     ss58Format: 2,
     tokenDecimals: 15,
     tokenSymbol: 'Unit'
-  }
+  };
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>
@@ -197,25 +198,24 @@ describe('Create Account - Ethereum', () => {
 
   beforeEach(async () => {
     onActionStub = jest.fn();
-    jest.spyOn(messaging, 'createSeed').mockImplementation((length, type, customEthDerivationPath)=>{
-      return new Promise((res)=>{
-        if (type=="ethereum"){
-          res(exampleAccountEth)
+    jest.spyOn(messaging, 'createSeed').mockImplementation((length, type, customEthDerivationPath) => {
+      return new Promise((resolve) => {
+        if (type === 'ethereum') {
+          resolve(exampleAccountEth);
         } else {
-          res(exampleAccountSubstrate) 
+          resolve(exampleAccountSubstrate);
         }
-      })
-
-    })
-    jest.spyOn(messaging, 'getMetadata').mockImplementation((genesisHash)=>{
-      return new Promise((res)=>{
-        if (genesisHash=="0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b"){
-          res(moonriverChain)
+      });
+    });
+    jest.spyOn(messaging, 'getMetadata').mockImplementation((genesisHash) => {
+      return new Promise((resolve) => {
+        if (genesisHash === '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b') {
+          resolve(moonriverChain);
         } else {
-          res(kusamaChain) 
+          resolve(kusamaChain);
         }
-      })
-    })
+      });
+    });
     jest.spyOn(messaging, 'createAccountSuri').mockResolvedValue(true);
     wrapper = mountComponent();
     await act(flushAllPromises);

@@ -11,7 +11,6 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
   const [chain, setChain] = useState<Chain | null>(null);
 
   useEffect((): void => {
-    console.log("useMetadata",genesisHash)
     if (genesisHash) {
       getMetadata(genesisHash, isPartial)
         .then(setChain)

@@ -25,7 +25,17 @@ Steps to build the extension and view your changes in a browser:
 
 Once added, you can create an account (via a generated seed) or import via an existing seed.
 
-## How Tos
+
+## New functinalities
+
+Currently, the following features are added:
+  - View balances
+  - Transfer funds
+  - View an address as QR code
+  - Staking / unstaking
+
+
+## How To's
 
 Accounts page, shows the list of all accounts and their balances which you have created/imported on polkadot/kusama blockchain and parachains.
 
@@ -45,7 +55,8 @@ In transaction confirmation page, confirm the transaction to broadcast it on the
 
 After a little while, depend on the network response time, transaction will be done, you see the following page and your balance(s) are updated.
 
-![transaction done page screenshot](docs/pjp/transactionDone.PNG)
+![transaction done page screenshot](docs/pjp/transactionDone01.PNG)
+![transaction done page screenshot](docs/pjp/transactionDone02.PNG)
 
 Transactions' histroy can be seen from the account page, which shows transactions detail, status, failure reason  if transaction failed, and a link to subscan for more info.
 
@@ -59,11 +70,15 @@ Now, you can easily stake using the extension.
 
 ![stake page screenshot](docs/pjp/stake.PNG)
 
-view your nominated validators info.
+View your nominated validators info.
 
 ![nominated validators page screenshot](docs/pjp/nominatedValidators.PNG)
 
-nominate validators automatically or manually select/filter them.
+Nominate validators automatically or select them yourself.
 
 ![select validators page screenshot](docs/pjp/selectValidators.PNG)
+
+Confirm staking.
+
+![confirm staking page screenshot](docs/pjp/confirmStaking.PNG)
 

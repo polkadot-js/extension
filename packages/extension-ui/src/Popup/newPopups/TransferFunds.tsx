@@ -21,12 +21,12 @@ import getChainLogo from '../../util/newUtils/getChainLogo';
 import getFee from '../../util/newUtils/getFee';
 import getNetworkInfo from '../../util/newUtils/getNetwork';
 import isValidAddress from '../../util/newUtils/validateAddress';
-import { AccountContext, SettingsContext } from '../contexts';
+import { AccountContext, SettingsContext } from '../../components/contexts';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 import { amountToHuman, amountToMachine, balanceToHuman, DEFAULT_COIN, fixFloatingPoint } from '../../util/newUtils/pjpeUtils';
 import { AccountsBalanceType } from '../../util/newUtils/pjpeTypes';
 import grey from '@mui/material/colors/grey';
-import { ActionText, NextStepButton } from '..';
+import { ActionText, NextStepButton } from '../../components';
 
 interface Props {
   actions?: React.ReactNode;
@@ -347,9 +347,9 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
     }
   }
 
-  function handleNext() {
+  const handleNext = useCallback((): void => {
     handleConfirmModaOpen();
-  }
+  }, []);
 
   function handleConfirmModaOpen(): void {
     setConfirmModalOpen(true);
@@ -563,34 +563,30 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid container justifyContent='space-between' sx={{ padding: '40px 40px 10px' }}>
-                <Grid item xs={12}>
-                  <NextStepButton
-                    data-button-action=''
-                    // isBusy={bondState === 'bonding'}
-                    isDisabled={nextButtonDisabled}
-                    onClick={handleNext}
-                  >
-                    {nextButtonCaption}
-
-                  </NextStepButton>
-
-                  {recepient
-                    ? <ConfirmTx
-                      availableBalance={availableBalance}
-                      chain={chain}
-                      coin={coin}
-                      handleTransferModalClose={handleTransferModalClose}
-                      lastFee={lastFee}
-                      recepient={recepient}
-                      sender={sender}
-                      transferAmount={transferAmount}
-                      setConfirmModalOpen={setConfirmModalOpen}
-                      confirmModalOpen={confirmModalOpen}
-                    />
-                    : ''}
-                </Grid>
+              <Grid sx={{ padding: '40px 40px 10px' }}>
+                <NextStepButton
+                  data-button-action=''
+                  // isBusy={}
+                  isDisabled={nextButtonDisabled}
+                  onClick={handleNext}
+                >
+                  {nextButtonCaption}
+                </NextStepButton>
               </Grid>
+              {recepient
+                ? <ConfirmTx
+                  availableBalance={availableBalance}
+                  chain={chain}
+                  coin={coin}
+                  handleTransferModalClose={handleTransferModalClose}
+                  lastFee={lastFee}
+                  recepient={recepient}
+                  sender={sender}
+                  transferAmount={transferAmount}
+                  setConfirmModalOpen={setConfirmModalOpen}
+                  confirmModalOpen={confirmModalOpen}
+                />
+                : ''}
             </div>
           }
         </Container>

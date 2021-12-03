@@ -256,86 +256,86 @@ export async function getStakingReward(_chain: Chain | null | undefined, _staker
   });
 }
 
-export async function bondOrExtra(
-  _chain: Chain | null | undefined,
-  _stashAccountId: string | null,
-  _signer: KeyringPair,
-  _value: bigint,
-  // _selectedValidators: AccountId[] | null,
-  _alreadyBondedAmount: bigint,
-  payee = 'Staked'): Promise<{ status: string, txHash?: string }> {
-  try {
-    console.log('bondOrExtra is called!');
+// export async function bondOrBondExtra(
+//   _chain: Chain | null | undefined,
+//   _stashAccountId: string | null,
+//   _signer: KeyringPair,
+//   _value: bigint,
+//   // _selectedValidators: AccountId[] | null,
+//   _alreadyBondedAmount: bigint,
+//   payee = 'Staked'): Promise<{ status: string, txHash?: string }> {
+//   try {
+//     console.log('bondOrBondExtra is called!');
 
-    if (!_stashAccountId) {
-      console.log('bondOrExtra:  controller is empty!');
+//     if (!_stashAccountId) {
+//       console.log('bondOrBondExtra:  controller is empty!');
 
-      return { status: 'failed' };
-    }
+//       return { status: 'failed' };
+//     }
 
-    /** payee:
-     * Staked - Pay into the stash account, increasing the amount at stake accordingly.
-     * Stash - Pay into the stash account, not increasing the amount at stake.
-     * Account - Pay into a custom account.
-     * Controller - Pay into the controller account.
-     */
-    const { url } = getNetworkInfo(_chain);
-    let txHash = '';
+//     /** payee:
+//      * Staked - Pay into the stash account, increasing the amount at stake accordingly.
+//      * Stash - Pay into the stash account, not increasing the amount at stake.
+//      * Account - Pay into a custom account.
+//      * Controller - Pay into the controller account.
+//      */
+//     const { url } = getNetworkInfo(_chain);
+//     let txHash = '';
 
-    const wsProvider = new WsProvider(url);
-    const api = await ApiPromise.create({ provider: wsProvider });
-    let bonded: SubmittableExtrinsic<'promise', ISubmittableResult>;
+//     const wsProvider = new WsProvider(url);
+//     const api = await ApiPromise.create({ provider: wsProvider });
+//     let bonded: SubmittableExtrinsic<'promise', ISubmittableResult>;
 
-    if (Number(_alreadyBondedAmount) > 0) {
-      bonded = api.tx.staking.bondExtra(_value);
-    } else {
-      bonded = api.tx.staking.bond(_stashAccountId, _value, payee);
-    }
+//     if (Number(_alreadyBondedAmount) > 0) {
+//       bonded = api.tx.staking.bondExtra(_value);
+//     } else {
+//       bonded = api.tx.staking.bond(_stashAccountId, _value, payee);
+//     }
 
-    return new Promise((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      bonded.signAndSend(_signer, ({ events = [], status }) => {
-        if (status.isFinalized) {
-          txHash = status.asFinalized.toHex();
-          console.log('transaction done with hash ', txHash);
-        } else {
-          console.log('Status of Bonding Transfer: ', status.toHuman());
-        }
+//     return new Promise((resolve) => {
+//       // eslint-disable-next-line @typescript-eslint/no-floating-promises
+//       bonded.signAndSend(_signer, ({ events = [], status }) => {
+//         if (status.isFinalized) {
+//           txHash = status.asFinalized.toHex();
+//           console.log('transaction done with hash ', txHash);
+//         } else {
+//           console.log('Status of Bonding Transfer: ', status.toHuman());
+//         }
 
-        events.forEach(({ event: { data, method, section }, phase }) => {
-          console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
+//         events.forEach(({ event: { data, method, section }, phase }) => {
+//           console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
 
-          if (String(method).includes('Failed')) {
-            console.log('!!SOMTHING FAILED!!');
+//           if (String(method).includes('Failed')) {
+//             console.log('!!SOMTHING FAILED!!');
 
-            resolve({ status: 'failed', txHash: txHash });
+//             resolve({ status: 'failed', txHash: txHash });
 
-            return;
-          }
+//             return;
+//           }
 
-          if (String(method).includes('Success')) {
-            console.log('Bonded Successfully');
-            resolve({ status: 'success', txHash: txHash });
-          }
-        });
-      });
-    });
-  } catch (error) {
-    console.log('Something went wrong while bond/nominate', error);
+//           if (String(method).includes('Success')) {
+//             console.log('Bonded Successfully');
+//             resolve({ status: 'success', txHash: txHash });
+//           }
+//         });
+//       });
+//     });
+//   } catch (error) {
+//     console.log('Something went wrong while bond/nominate', error);
 
-    return { status: 'failed' };
-  }
-}
+//     return { status: 'failed' };
+//   }
+// }
 
-export async function unbond(_chain: Chain | null | undefined, _controllerAccountId: string | null,
-  _signer: KeyringPair, _value: bigint): Promise<string> {
+export async function unbond(_chain: Chain | null | undefined, _controllerAccountId: string | null, _signer: KeyringPair, _value: bigint)
+  : Promise<{ status: string, txHash?: string, failureText?: string }> {
   try {
     console.log('unbond is called!');
 
     if (!_controllerAccountId) {
       console.log('unbond:  _controllerAccountId is empty!');
 
-      return 'failed';
+      return { status: 'failed' };
     }
 
     const { url } = getNetworkInfo(_chain);
@@ -343,39 +343,94 @@ export async function unbond(_chain: Chain | null | undefined, _controllerAccoun
     const wsProvider = new WsProvider(url);
     const api = await ApiPromise.create({ provider: wsProvider });
 
-    const unbonded: SubmittableExtrinsic<'promise', ISubmittableResult> = api.tx.staking.unbond(_value);
+    const unbonded = api.tx.staking.unbond(_value);
 
-    return new Promise((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      unbonded.signAndSend(_signer, ({ events = [], status }) => {
-        if (status.isFinalized) {
-          console.log('unbond transaction done with hash ', status.asFinalized.toHex());
-        } else {
-          console.log('Status of unbonding: ', status.toHuman());
-        }
+    return signAndSend(api, unbonded, _signer);
+    // return new Promise((resolve) => {
+    //   // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    //   unbonded.signAndSend(_signer, ({ events = [], status }) => {
+    //     if (status.isFinalized) {
+    //       txHash = status.asFinalized.toHex();
+    //       console.log('unbond transaction done with hash ', status.asFinalized.toHex());
+    //     } else {
+    //       console.log('Status of unbonding: ', status.toHuman());
+    //     }
 
-        events.forEach(({ event: { data, method, section }, phase }) => {
-          console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
+    //     events.forEach(({ event: { data, method, section }, phase }) => {
+    //       console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
 
-          if (String(method).includes('Failed')) {
-            console.log('!!SOMTHING FAILED!!');
+    //       if (String(method).includes('Failed')) {
+    //         console.log('!!SOMTHING FAILED!!');
 
-            resolve('failed');
+    //         resolve({ status: 'failed', txHash: txHash });
 
-            return;
-          }
+    //         return;
+    //       }
 
-          if (String(method).includes('Success')) {
-            console.log('unbonded Successfully');
-            resolve('success');
-          }
-        });
-      });
-    });
+    //       if (String(method).includes('Success')) {
+    //         console.log('unbonded Successfully');
+    //         resolve({ status: 'success', txHash: txHash });
+    //       }
+    //     });
+    //   });
+    // });
   } catch (error) {
     console.log('Something went wrong while unbond', error);
 
-    return 'failed';
+    return { status: 'failed' };
+  }
+}
+
+export async function nominate(
+  _chain: Chain | null | undefined,
+  _stashAccountId: string | null,
+  _signer: KeyringPair,
+  _selectedValidators: string[] | null)
+  : Promise<{ status: string, txHash?: string, failureText?: string }> {
+  try {
+    if (!_stashAccountId || !_selectedValidators || !_chain) {
+      console.log('Nominate: validators, controller, or chain is empty!');
+
+      return { status: 'failed' };
+    }
+
+    const { url } = getNetworkInfo(_chain);
+
+    const wsProvider = new WsProvider(url);
+    const api = await ApiPromise.create({ provider: wsProvider });
+    const nominated = api.tx.staking.nominate(_selectedValidators);
+
+    return signAndSend(api, nominated, _signer);
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    // nominated.signAndSend(_signer, ({ events = [], status }) => {
+    //   if (status.isFinalized) {
+    //     txHash = status.asFinalized.toHex();
+    //     console.log('nominate transaction done with hash ', status.asFinalized.toHex());
+    //   } else {
+    //     console.log('Status of Nomination Transfer: ', status.toHuman());
+    //   }
+
+    //   events.forEach(({ event: { data, method, section }, phase }) => {
+    //     console.log(phase.toString() + ' : ' + section + '.' + method + ' ' + data.toString());
+
+    //     if (method.includes('Failed')) {
+    //       console.log('!!SOMTHING FAILED while nominate!!');
+
+    //       resolve({ status: 'failed', txHash: txHash });
+    //     }
+
+    //     if (method.includes('Success')) {
+    //       console.log('nominated Successfully');
+
+    //       resolve({ status: 'success', txHash: txHash });
+    //     }
+    //   });
+    // });
+  } catch (error) {
+    console.log('Something went wrong while bond/nominate', error);
+
+    return { status: 'failed' };
   }
 }
 
@@ -406,53 +461,88 @@ export async function getCurrentEraIndex(_chain: Chain | null | undefined): Prom
   }
 }
 
-export async function nominate(
-  _chain: Chain | null | undefined,
-  _stashAccountId: string | null,
-  _signer: KeyringPair,
-  _selectedValidators: string[] | null): Promise<string> {
-  if (!_stashAccountId || !_selectedValidators || !_chain) {
-    console.log('Nominate: validators, controller, or chain is empty!');
-
-    return 'failed';
-  }
-
-  const { url } = getNetworkInfo(_chain);
-
-  const wsProvider = new WsProvider(url);
-  const api = await ApiPromise.create({ provider: wsProvider });
-  const nominated = api.tx.staking.nominate(_selectedValidators);
-
+export async function bondOrBondExtra(_chain: Chain | null | undefined, _stashAccountId: string | null, _signer: KeyringPair, _value: bigint, _alreadyBondedAmount: bigint, payee = 'Staked')
+  : Promise<{ status: string, txHash?: string, failureText?: string }> {
   try {
-    return new Promise((resolve) => {
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      nominated.signAndSend(_signer, ({ events = [], status }) => {
-        if (status.isFinalized) {
-          console.log('nominate transaction done with hash ', status.asFinalized.toHex());
-        } else {
-          console.log('Status of Nomination Transfer: ', status);
-        }
+    console.log('bondOrBondExtra is called!');
 
-        events.forEach(({ event: { data, method, section }, phase }) => {
-          console.log(phase.toString() + ' : ' + section + '.' + method + ' ' + data.toString());
+    if (!_stashAccountId) {
+      console.log('bondOrBondExtra:  controller is empty!');
 
-          if (method.includes('Failed')) {
-            console.log('!!SOMTHING FAILED while nominate!!');
+      return { status: 'failed' };
+    }
 
-            resolve('failed');
-          }
+    /** payee:
+     * Staked - Pay into the stash account, increasing the amount at stake accordingly.
+     * Stash - Pay into the stash account, not increasing the amount at stake.
+     * Account - Pay into a custom account.
+     * Controller - Pay into the controller account.
+     */
+    const { url } = getNetworkInfo(_chain);
 
-          if (method.includes('Success')) {
-            console.log('nominated Successfully');
+    const wsProvider = new WsProvider(url);
+    const api = await ApiPromise.create({ provider: wsProvider });
+    let bonded: SubmittableExtrinsic<'promise', ISubmittableResult>;
 
-            resolve('success');
-          }
-        });
-      });
-    });
+    if (Number(_alreadyBondedAmount) > 0) {
+      bonded = api.tx.staking.bondExtra(_value);
+    } else {
+      bonded = api.tx.staking.bond(_stashAccountId, _value, payee);
+    }
+
+    return signAndSend(api, bonded, _signer);
   } catch (error) {
     console.log('Something went wrong while bond/nominate', error);
 
-    return 'failed';
+    return { status: 'failed' };
   }
+}
+
+async function signAndSend(api: ApiPromise, submittable: SubmittableExtrinsic<'promise', ISubmittableResult>, _signer: KeyringPair)
+  : Promise<{ status: string, txHash?: string, failureText?: string }> {
+  return new Promise((resolve) => {
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    submittable.signAndSend(_signer, async (result) => {
+      let txFailed = false;
+      let failureText;
+
+      if (result.dispatchError) {
+        if (result.dispatchError.isModule) {
+          // for module errors, we have the section indexed, lookup
+          const decoded = api.registry.findMetaError(result.dispatchError.asModule);
+          const { docs, name, section } = decoded;
+
+          txFailed = true;
+          failureText = `${docs.join(' ')}`;
+
+          console.log(` ${section}.${name}: ${docs.join(' ')}`);
+        } else {
+          // Other, CannotLookup, BadOrigin, no extra info
+          // failedTxStatusText = result.dispatchError.toString();
+          console.log(result.dispatchError.toString());
+        }
+      }
+
+      if (result.status.isFinalized) {
+        const signedBlock = await api.rpc.chain.getBlock(result.status.asFinalized);
+
+        console.log('failedTxStatusText', failureText);
+
+        const senderAddres = _signer.address;
+
+        let txHash = '';
+
+        // seatch for the hash of the extrinsic in the block
+        signedBlock.block.extrinsics.forEach((ex) => {
+          if (ex.isSigned) {
+            if (ex.signer.toString() === senderAddres) {
+              txHash = ex.hash.toHex();
+            }
+          }
+        });
+        resolve({ failureText: failureText, status: txFailed ? 'failed' : 'success', txHash: txHash });
+      }
+    });
+  });
 }

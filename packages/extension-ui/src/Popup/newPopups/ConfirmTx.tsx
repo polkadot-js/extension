@@ -8,21 +8,21 @@ import { Alert, Avatar, Box, Button as MuiButton, CircularProgress, Container, D
 import { grey } from '@mui/material/colors';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
+import { updateMeta } from '@polkadot/extension-ui/messaging';
 import getFee from '@polkadot/extension-ui/util/newUtils/getFee';
 import Identicon from '@polkadot/react-identicon';
 import keyring from '@polkadot/ui-keyring';
 
+import { ActionText, BackButton, Button } from '../../components';
+import { AccountContext } from '../../components/contexts';
 import useTranslation from '../../hooks/useTranslation';
 import getChainLogo from '../../util/newUtils/getChainLogo';
 import getNetworkInfo from '../../util/newUtils/getNetwork';
 import { AccountsBalanceType, TransactionDetail, TransactionStatus } from '../../util/newUtils/pjpeTypes';
 import { amountToHuman, fixFloatingPoint, getSubstrateAddress, getTransactionHistoryFromLocalStorage, prepareMetaData } from '../../util/newUtils/pjpeUtils';
 import signAndTransfer from '../../util/newUtils/signAndTransfer';
-import { AccountContext } from '../contexts';
-import { ActionText, BackButton, Button } from '..';
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { updateMeta } from '@polkadot/extension-ui/messaging';
 
 
 interface Props {
@@ -81,6 +81,7 @@ export default function ConfirmTx({
     const { decimals } = getNetworkInfo(chain);
 
     setTransferAmountInHuman(amountToHuman(String(transferAmount), decimals));
+    console.log('chain:',chain);
   }, [chain, transferAmount]);
 
   async function saveHistory(chain: Chain, hierarchy: AccountWithChildren[], address: string, currentTransactionDetail: TransactionDetail): Promise<boolean> {
@@ -291,12 +292,13 @@ export default function ConfirmTx({
                 </Box>
               </Grid>
             </Grid>
-            <Grid container alignItems='center' justifyContent='space-around' >
+            <Grid container alignItems='center' justifyContent='space-around'>
               <Grid item container alignItems='center' justifyContent='flex-end' xs={5}>
                 <Grid item xs={4}>
                   <Identicon
                     size={40}
                     theme={'polkadot'}
+                    prefix={42}
                     value={sender.address}
                   />
                 </Grid>
@@ -402,7 +404,10 @@ export default function ConfirmTx({
                   }}
                   autoFocus
                   fullWidth
-                  helperText={t('Please enter the password of the sender account')}
+                  error={passwordIsCorrect === -1}
+                  helperText={passwordIsCorrect === -1
+                    ? t('Password is not correct')
+                    : t('Please enter the password of the sender account')}
                   label={t('Password')}
                   onChange={handleSavePassword}
                   // eslint-disable-next-line react/jsx-no-bind
@@ -415,13 +420,11 @@ export default function ConfirmTx({
                   value={password}
                   variant='outlined'
                 />
-                {passwordIsCorrect === -1
+                {/* {passwordIsCorrect === -1
                   ? <Alert severity='error'>
                     {t('Password is not correct')}
                   </Alert>
-                  : ''
-                }
-
+                  : '' */}
               </Grid>
             </Grid>
             <Grid container justifyContent='space-between' sx={{ padding: '20px 40px 10px' }}>

@@ -25,7 +25,7 @@ export interface BalanceType {
 export const DEFAULT_ACCOUNT_BALANCE = { address: null, balanceInfo: null, chain: null, name: null };
 
 export interface AccountsBalanceType {
-  address: string; //formatted address
+  address: string; // formatted address
   chain: string | null;// TODO: actually it is chainName
   balanceInfo?: BalanceType;
   name: string | null;

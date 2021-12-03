@@ -266,5 +266,7 @@
   "Fetching data from blockchain ...": "",
   "Nothing to unstake": "",
   "Change nominated validators": "",
-  "Information you need to know about": ""
+  "Information you need to know about": "",
+  "It is more than already staked!": "",
+  "Close": ""
 }

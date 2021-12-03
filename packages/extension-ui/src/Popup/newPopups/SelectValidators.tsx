@@ -31,7 +31,7 @@ import useTranslation from '../../hooks/useTranslation';
 import getNetworkInfo from '../../util/newUtils/getNetwork';
 import { DEFAULT_VALIDATOR_COMMISION_FILTER } from '../../util/newUtils/pjpeUtils';
 import { AccountsBalanceType, AllValidatorsFromSubscan, StakingConsts, Validators, ValidatorsName } from '../../util/newUtils/pjpeTypes';
-import { ActionText, NextStepButton } from '..';
+import { ActionText, NextStepButton } from '../../components';
 import ConfirmStaking from './ConfirmStaking';
 
 interface Props {

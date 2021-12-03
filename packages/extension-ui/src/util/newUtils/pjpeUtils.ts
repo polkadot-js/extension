@@ -17,6 +17,7 @@ export const MIN_EXTRA_BOND = 0.01;
 export const DEFAULT_COIN = 'WND';
 export const DEFAULT_CHAIN_NAME = 'Westend';
 export const DEFAULT_VALIDATOR_COMMISION_FILTER = 20;
+export const TRANSACTION_HISTROY_DEFAULT_ROWS = 7;
 
 export function fixFloatingPoint(_number: number | string): string {
   const sNumber = String(_number);
@@ -56,7 +57,7 @@ export function amountToHuman(_amount: string | undefined, _decimals: number): s
 }
 
 export function amountToMachine(_amount: string | undefined, _decimals: number): bigint {
-  if (!_amount) return BigInt(0);
+  if (!_amount || !Number(_amount)) return BigInt(0);
 
   const dotIndex = _amount.indexOf('.');
 

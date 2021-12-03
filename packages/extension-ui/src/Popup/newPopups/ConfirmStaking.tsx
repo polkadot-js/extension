@@ -18,8 +18,8 @@ import { AccountsBalanceType, StakingConsts, TransactionDetail, Validators, Vali
 import getNetworkInfo from '../../util/newUtils/getNetwork';
 import { amountToHuman, getSubstrateAddress, getTransactionHistoryFromLocalStorage, prepareMetaData } from '../../util/newUtils/pjpeUtils';
 import ValidatorsList from './ValidatorsList';
-import { AccountContext, ActionText, BackButton, Button } from '..';
-import { bondOrExtra, nominate, unbond } from '@polkadot/extension-ui/util/newUtils/staking';
+import { AccountContext, ActionText, BackButton, Button } from '../../components';
+import { bondOrBondExtra, nominate, unbond } from '@polkadot/extension-ui/util/newUtils/staking';
 import { grey } from '@mui/material/colors';
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { updateMeta } from '@polkadot/extension-ui/messaging';
@@ -51,6 +51,7 @@ export default function ConfirmStaking({
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
   const [decimals, setDecimals] = useState<number>(1);
+  const [confirmingState, setConfirmingState] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [passwordIsCorrect, setPasswordIsCorrect] = useState<number>(0);// 0: no password, -1: password incorrect, 1:password correct
   const [currentlyStaked, setCurrentlyStaked] = useState<bigint>(0n);
@@ -68,7 +69,7 @@ export default function ConfirmStaking({
   useEffect(() => {
     console.log('amount is :', amount);
 
-    if (['confirming', 'success', 'failed'].includes(state)) {
+    if (['confirming', 'success', 'failed'].includes(confirmingState)) {
       return;
     }
 
@@ -109,7 +110,11 @@ export default function ConfirmStaking({
   };
 
   const handleConfirmStakingModalBack = (): void => {
-    if (!['stakeManual', 'changeValidators'].includes(state)) setState('');
+    if (!['stakeManual', 'changeValidators'].includes(state)) {
+      setState('');
+      setConfirmingState('');
+    }
+
     handleConfirmStakingModalClose();
   };
 
@@ -121,6 +126,8 @@ export default function ConfirmStaking({
         return 'Staking of'.toUpperCase();
       case ('changeValidators'):
         return 'nominating'.toUpperCase();
+      case ('unstake'):
+        return 'unstaking'.toUpperCase();
       default:
         return state.toUpperCase();
     }
@@ -145,7 +152,7 @@ export default function ConfirmStaking({
     const localState = state;
 
     try {
-      setState('confirming');
+      setConfirmingState('confirming');
 
       const signer = keyring.getPair(String(staker.address));
 
@@ -155,26 +162,28 @@ export default function ConfirmStaking({
 
       if (['stakeAuto', 'stakeManual', 'stakeKeepNominated'].includes(localState) && amount !== 0n) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        const { status, txHash } = await bondOrExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
+        const { failureText, status, txHash } = await bondOrBondExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
 
         console.log('bond Result,', status);
 
-        if (status === 'failed' || localState === 'stakeKeepNominated') {
-          setState(status);
-          const history: TransactionDetail = {
-            action: alreadyBondedAmount ? 'bond_extra' : 'bond',
-            amount: amountToHuman(String(amount), decimals),
-            date: Date.now(),
-            fee: '',
-            from: staker.address,
-            hash: txHash || '',
-            status: status,
-            to: ''
-          };
+        const history: TransactionDetail = {
+          action: alreadyBondedAmount ? 'bond_extra' : 'bond',
+          amount: amountToHuman(String(amount), decimals),
+          date: Date.now(),
+          fee: '',
+          from: staker.address,
+          hash: txHash || '',
+          status: failureText || status,
+          to: ''
+        };
 
-          if (chain) {
-            saveHistory(chain, hierarchy, staker.address, history);
-          }
+        if (chain) {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          saveHistory(chain, hierarchy, staker.address, history);
+        }
+
+        if (status === 'failed' || localState === 'stakeKeepNominated') {
+          setConfirmingState(status);
 
           return;
         }
@@ -189,9 +198,9 @@ export default function ConfirmStaking({
             console.log('! there is no selectedValidators to bond at Stakeauto, so might do bondExtera');
 
             if (alreadyBondedAmount) {
-              setState('success');
+              setConfirmingState('success');
             } else {
-              setState('failed');
+              setConfirmingState('failed');
             }
 
             return;
@@ -200,7 +209,7 @@ export default function ConfirmStaking({
           if (isEqual(selectedValidatorsAccountId, nominatedValidatorsId)) {
             console.log('the selected and previously nominated validators are the same, no need to renominate');
 
-            setState('success');
+            setConfirmingState('success');
 
             return;
           }
@@ -209,7 +218,7 @@ export default function ConfirmStaking({
         if (['stakeManual'].includes(localState)) { // TODO: more check!!
           if (!selectedValidatorsAccountId) {
             console.log('selectedValidatorsAccountId is empty!!');
-            setState('failed');
+            setConfirmingState('failed');
 
             return;
           }
@@ -218,7 +227,7 @@ export default function ConfirmStaking({
         if (['changeValidators'].includes(localState)) {
           if (!selectedValidatorsAccountId) {
             console.log('! there is no selectedValidatorsAccountId to changeValidators');
-            setState('failed');
+            setConfirmingState('failed');
 
             return;
           }
@@ -226,33 +235,67 @@ export default function ConfirmStaking({
           if (isEqual(selectedValidatorsAccountId, nominatedValidatorsId)) {
             console.log('the selected and previously nominated validators are the same, no need to renominate');
 
-            setState('failed');
+            setConfirmingState('failed');
 
             return;
           }
         }
 
-        const nominateResult = await nominate(chain, staker.address, signer, selectedValidatorsAccountId);
+        const { failureText, status, txHash } = await nominate(chain, staker.address, signer, selectedValidatorsAccountId);
 
-        console.log('nominateResult,', nominateResult);
-        setState(nominateResult);
+        const history: TransactionDetail = {
+          action: 'nominate',
+          amount: '',
+          date: Date.now(),
+          fee: '',
+          from: staker.address,
+          hash: txHash || '',
+          status: failureText || status,
+          to: ''
+        };
+
+        if (chain) {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          saveHistory(chain, hierarchy, staker.address, history);
+        }
+
+        console.log('nominateResult,', status);
+        setConfirmingState(status);
       }
 
-      if (localState === 'unstake' && amount >= 0n) {
+      if (localState === 'unstake' && amount > 0n) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        unbond(chain, staker.address, signer, amount).then((unbondResult) => {
-          console.log('unbond result:', unbondResult);
-          setState(unbondResult);
-        });
+        const { failureText, status, txHash } = await unbond(chain, staker.address, signer, amount);
+
+        const history: TransactionDetail = {
+          action: 'unbond',
+          amount: amountToHuman(String(amount), decimals),
+          date: Date.now(),
+          fee: '',
+          from: staker.address,
+          hash: txHash || '',
+          status: failureText || status,
+          to: ''
+        };
+
+        if (chain) {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          saveHistory(chain, hierarchy, staker.address, history);
+        }
+
+        console.log('unbond result:', status);
+        setConfirmingState(status);
       }
     } catch (e) {
       setPasswordIsCorrect(-1);
       setState(localState);
+      setConfirmingState('');
     }
   };
 
   const handleReject = (): void => {
     setState('');
+    setConfirmingState('');
     if (setSelectValidatorsModalOpen) setSelectValidatorsModalOpen(false);
     handleConfirmStakingModalClose();
   };
@@ -289,7 +332,7 @@ export default function ConfirmStaking({
                 />
               </Grid>
               <Grid item sx={{ fontSize: 15 }}>
-                <div style={state === 'confirming' ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
+                <div style={confirmingState === 'confirming' ? { opacity: '0.4', pointerEvents: 'none' } : {}}>
                   <ActionText
                     onClick={handleReject}
                     text={t('Reject')}
@@ -307,7 +350,7 @@ export default function ConfirmStaking({
               </Grid> */}
               <Grid item container xs={12} sx={{ backgroundColor: '#f7f7f7', padding: '25px 40px 10px' }}>
                 <Grid item xs={3} sx={{ border: '2px double grey', borderRadius: '5px', fontSize: 15, justifyContent: 'flex-start', padding: '5px 10px 5px', textAlign: 'center', fontVariant: 'small-caps' }}>
-                  {stateInHuman(state)}
+                  {stateInHuman(confirmingState || state)}
                 </Grid>
                 {amount
                   ? <Grid item container justifyContent='center' spacing={1} xs={12} sx={{ fontFamily: 'fantasy', fontSize: 18, textAlign: 'center' }} >
@@ -384,31 +427,29 @@ export default function ConfirmStaking({
                   ),
                   style: { fontSize: 16 }
                 }}
-                autoFocus={!['confirming', 'failed', 'success'].includes(state)}
+                autoFocus={!['confirming', 'failed', 'success'].includes(confirmingState)}
+                color='warning'
+                disabled={!ledger}
+                error={passwordIsCorrect === -1}
                 fullWidth
                 helperText={passwordIsCorrect === -1 ? t('Password is not correct') : t('Please enter the stake account password')}
-                error={passwordIsCorrect === -1}
                 label={t('Password')}
                 onChange={handleSavePassword}
-                // eslint-disable-next-line react/jsx-no-bind
                 onKeyPress={(event) => {
-                  // eslint-disable-next-line @typescript-eslint/no-floating-promises
                   if (event.key === 'Enter') { handleConfirm(); }
                 }}
                 size='medium'
-                color='warning'
                 type='password'
                 value={password}
                 variant='outlined'
-                disabled={!ledger}
               />
             </Grid>
             <Grid container item justifyContent='space-between' sx={{ padding: '5px 20px 0px' }} xs={12}>
-              {['success', 'failed'].includes(state)
+              {['success', 'failed'].includes(confirmingState)
                 ? <Grid item xs={12}>
                   <MuiButton fullWidth onClick={handleReject} variant='contained'
-                    color={state === 'success' ? 'success' : 'error'} size='large'>
-                    {state === 'success' ? t('Done') : t('Failed')}
+                    color={confirmingState === 'success' ? 'success' : 'error'} size='large'>
+                    {confirmingState === 'success' ? t('Done') : t('Failed')}
                   </MuiButton>
                 </Grid>
                 : <>
@@ -418,7 +459,7 @@ export default function ConfirmStaking({
                   <Grid item xs={10}>
                     <Button
                       data-button-action=''
-                      isBusy={state === 'confirming'}
+                      isBusy={confirmingState === 'confirming'}
                       isDisabled={!ledger}
                       onClick={handleConfirm}
                     >

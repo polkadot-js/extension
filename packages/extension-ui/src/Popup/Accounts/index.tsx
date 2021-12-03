@@ -6,17 +6,12 @@ import type { ThemeProps } from '../../types';
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-// import { ApiPromise, WsProvider } from '@polkadot/api';
-// import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { AccountsStore } from '@polkadot/extension-base/stores';
-// import { Chain } from '@polkadot/extension-chains/types';
-// import getNetworkInfo from '@polkadot/extension-ui/util/newUtils/getNetwork';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-// import { getMetadata } from '../../messaging';
 import { Header } from '../../partials';
 import AccountsTree from './AccountsTree';
 import AddAccount from './AddAccount';
@@ -25,7 +20,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function Accounts({ className }: Props): React.ReactElement {
+function Accounts ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
 
@@ -71,5 +66,4 @@ export default styled(Accounts)`
 
   &:: -webkit - scrollbar {
     display: none;
-  }
-  `;
+  }`;

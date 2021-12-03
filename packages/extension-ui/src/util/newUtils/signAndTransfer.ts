@@ -81,7 +81,6 @@ export default async function signAndTransfer(
             signedBlock.block.extrinsics.forEach((ex) => {
               if (ex.isSigned) {
                 if (ex.signer.toString() === senderAddres) {
-
                   console.log('extrinsic', ex);
                   console.log(ex.toHuman());
 

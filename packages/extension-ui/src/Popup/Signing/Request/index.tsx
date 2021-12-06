@@ -12,13 +12,13 @@ import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
 import { AccountContext, ActionContext, Address, VerticalSpace, Warning } from '../../../components';
+import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
-import { useTranslation } from '../../../components/translate';
 
 interface Props {
   account: AccountJson;
@@ -163,9 +163,9 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
         }
         <VerticalSpace />
         {isHardware && <>
-            <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
-            <VerticalSpace />
-          </>}
+          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+          <VerticalSpace />
+        </>}
         <SignArea
           buttonText={buttonText}
           error={error}

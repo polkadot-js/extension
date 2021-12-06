@@ -18,7 +18,7 @@ import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
-import { useTranslation } from "../../../components/translate";
+import { useTranslation } from '../../../components/translate';
 
 interface Props {
   account: AccountJson;

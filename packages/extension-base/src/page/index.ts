@@ -3,6 +3,8 @@
 
 import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, RequestTypes, ResponseTypes, SubscriptionMessageTypes, TransportRequestMessage, TransportResponseMessage } from '../background/types';
 
+import { MESSAGE_ORIGIN_PAGE } from '../defaults';
+import { getId } from '../utils/getId';
 import Injected from './Injected';
 
 // when sending a message from the injector to the extension, we
@@ -23,7 +25,6 @@ export interface Handler {
 export type Handlers = Record<string, Handler>;
 
 const handlers: Handlers = {};
-let idCounter = 0;
 
 // a generic message sender that creates an event, returning a promise that will
 // resolve once the event is resolved (by the response listener just below this)
@@ -33,14 +34,14 @@ export function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(
 
 export function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
-    const id = `${Date.now()}.${++idCounter}`;
+    const id = getId();
 
     handlers[id] = { reject, resolve, subscriber };
 
     const transportRequestMessage: TransportRequestMessage<TMessageType> = {
       id,
       message,
-      origin: 'page',
+      origin: MESSAGE_ORIGIN_PAGE,
       request: request || null as RequestTypes[TMessageType]
     };
 

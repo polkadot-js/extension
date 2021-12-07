@@ -10,6 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import chrome from '@polkadot/extension-inject/chrome';
 import { MetadataDef } from '@polkadot/extension-inject/types';
@@ -29,7 +30,6 @@ type Handlers = Record<string, Handler>;
 
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
 const handlers: Handlers = {};
-let idCounter = 0;
 
 // setup a listener for messages, any incoming resolves the promise
 port.onMessage.addListener((data: Message['data']): void => {
@@ -60,7 +60,7 @@ function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(messa
 function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
-    const id = `${Date.now()}.${++idCounter}`;
+    const id = getId();
 
     handlers[id] = { reject, resolve, subscriber };
 

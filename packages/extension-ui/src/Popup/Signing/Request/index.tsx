@@ -11,7 +11,8 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, ActionContext, Address, VerticalSpace } from '../../../components';
+import { AccountContext, ActionContext, Address, VerticalSpace, Warning } from '../../../components';
+import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
@@ -48,6 +49,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const { accounts } = useContext(AccountContext);
+  const { t } = useTranslation();
 
   useEffect((): void => {
     const payload = request.payload;
@@ -160,6 +162,10 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
           )
         }
         <VerticalSpace />
+        {isHardware && <>
+          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+          <VerticalSpace />
+        </>}
         <SignArea
           buttonText={buttonText}
           error={error}

@@ -164,5 +164,6 @@
   "Use custom address index": "",
   "Custom index": "",
   "Use custom derivation index": "",
-  "secret derivation path": ""
+  "secret derivation path": "",
+  "Message signing is not supported for hardware wallets.": ""
 }

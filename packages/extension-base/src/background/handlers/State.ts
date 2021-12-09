@@ -7,6 +7,7 @@ import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTa
 
 import { BehaviorSubject } from 'rxjs';
 
+import { getId } from '@polkadot/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
 import chrome from '@polkadot/extension-inject/chrome';
 import settings from '@polkadot/ui-settings';
@@ -58,8 +59,6 @@ interface SignRequest extends Resolver<ResponseSigning> {
   url: string;
 }
 
-let idCounter = 0;
-
 const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
@@ -85,10 +84,6 @@ export enum NotificationOptions {
 }
 
 const AUTH_URLS_KEY = 'authUrls';
-
-function getId (): string {
-  return `${Date.now()}.${++idCounter}`;
-}
 
 export default class State {
   readonly #authUrls: AuthUrls = {};

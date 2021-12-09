@@ -14,11 +14,11 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.41.3-4",
+  "version": "0.41.3-5",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.3",
-    "@polkadot/extension-inject": "^0.41.3-4",
+    "@polkadot/extension-inject": "^0.41.3-5",
     "@polkadot/util": "^8.1.2",
     "@polkadot/util-crypto": "^8.1.2"
   },

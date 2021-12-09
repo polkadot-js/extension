@@ -15,6 +15,7 @@ checks:
 exclude_patterns:
 - "**/*.spec.js"
 - "**/*.spec.ts"
+- "**/*.spec.tsx"
 - "**/*.test.js"
 - "**/*.test.ts"
-- "docs/**/*.js"
+- "**/*.test.tsx"

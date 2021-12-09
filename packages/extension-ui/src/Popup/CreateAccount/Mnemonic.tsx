@@ -45,6 +45,7 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
       <VerticalSpace />
       <Checkbox
         checked={isMnemonicSaved}
+        className={'mnemonicCheck'}
         label={t<string>('I have saved my mnemonic seed safely.')}
         onChange={setIsMnemonicSaved}
       />

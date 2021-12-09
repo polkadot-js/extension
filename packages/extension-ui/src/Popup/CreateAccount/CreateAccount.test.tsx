@@ -184,7 +184,11 @@ describe('Create Account - Ethereum', () => {
     </ActionContext.Provider>
   );
 
-  const check = (input: ReactWrapper): unknown => input.simulate('change', { target: { checked: true } });
+  const check = (input: ReactWrapper): unknown => {
+    console.log('INPUT', input);
+
+    return input.simulate('change', { target: { checked: true } });
+  };
 
   const type = async (input: ReactWrapper, value: string): Promise<void> => {
     input.simulate('change', { target: { value } });
@@ -198,7 +202,7 @@ describe('Create Account - Ethereum', () => {
 
   beforeEach(async () => {
     onActionStub = jest.fn();
-    jest.spyOn(messaging, 'createSeed').mockImplementation((length, type, customEthDerivationPath) => {
+    jest.spyOn(messaging, 'createSeed').mockImplementation((length, type, _) => {
       return new Promise((resolve) => {
         if (type === 'ethereum') {
           resolve(exampleAccountEth);
@@ -244,13 +248,13 @@ describe('Create Account - Ethereum', () => {
     });
 
     it('checking the checkbox enables the Next button', () => {
-      check(wrapper.find('input[type="checkbox"]'));
+      check(wrapper.find('input[type="checkbox"]').last());
 
       expect(wrapper.find(Button).prop('isDisabled')).toBe(false);
     });
 
     it('clicking on Next activates phase 2', () => {
-      check(wrapper.find('input[type="checkbox"]'));
+      check(wrapper.find('input[type="checkbox"]').last());
       wrapper.find('button').simulate('click');
       expect(wrapper.find(Header).text()).toBe('Create an account2/2Cancel');
     });
@@ -258,7 +262,7 @@ describe('Create Account - Ethereum', () => {
 
   describe('Phase 2', () => {
     beforeEach(async () => {
-      check(wrapper.find('input[type="checkbox"]'));
+      check(wrapper.find('input[type="checkbox"]').last());
       wrapper.find('button').simulate('click');
       await act(flushAllPromises);
       wrapper.update();

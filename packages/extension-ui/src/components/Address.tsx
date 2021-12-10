@@ -111,21 +111,20 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
   useEffect((): void => {
     if (!address) {
-      setRecoded(defaultRecoded);
-
-      return;
+      return setRecoded(defaultRecoded);
     }
 
-    const accountByAddress = findAccountByAddress(accounts, address);
+    const account = findAccountByAddress(accounts, address);
 
     setRecoded(
       (
         chain?.definition.chainType === 'ethereum' ||
-        accountByAddress?.type === 'ethereum' ||
-        (!accountByAddress && givenType === 'ethereum')
+        account?.type === 'ethereum' ||
+        (!account && givenType === 'ethereum')
       )
-        ? { account: accountByAddress, formatted: address, type: 'ethereum' }
-        : recodeAddress(address, accounts, chain, settings));
+        ? { account, formatted: address, type: 'ethereum' }
+        : recodeAddress(address, accounts, chain, settings)
+    );
   }, [accounts, address, chain, givenType, settings]);
 
   useEffect(() => {

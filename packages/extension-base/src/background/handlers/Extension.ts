@@ -304,8 +304,8 @@ export default class Extension {
     }
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, type }: RequestSeedCreate): ResponseSeedCreate {
-    const seed = mnemonicGenerate(length);
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, seed: _seed, type }: RequestSeedCreate): ResponseSeedCreate {
+    const seed = _seed || mnemonicGenerate(length);
 
     return {
       address: keyring.createFromUri(getSuri(seed, type), {}, type).address,

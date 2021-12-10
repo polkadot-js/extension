@@ -150,10 +150,9 @@ export default class Tabs {
       tabs
         .map(({ id }) => id)
         .filter((id): id is number => isNumber(id))
-        .forEach((id) =>
-          // eslint-disable-next-line no-void
-          void chrome.tabs.update(id, { url })
-        );
+        .forEach((id): void => {
+          chrome.tabs.update(id, { url }).catch(console.error);
+        });
     });
   }
 

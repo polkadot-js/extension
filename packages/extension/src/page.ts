@@ -1,6 +1,8 @@
 // Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import '@polkadot/extension-inject/crossenv';
+
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 

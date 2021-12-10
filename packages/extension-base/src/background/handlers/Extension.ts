@@ -9,7 +9,6 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
-import chrome from '@polkadot/extension-inject/chrome';
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -457,10 +456,7 @@ export default class Extension {
       return false;
     }
 
-    console.log('open', url);
-
-    // eslint-disable-next-line no-void
-    void chrome.tabs.create({ url });
+    chrome.tabs.create({ url }).catch(console.error);
 
     return true;
   }

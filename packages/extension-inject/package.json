@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/polkadot-js/extension.git"
   },
-  "sideEffects": false,
+  "sideEffects": true,
   "type": "module",
   "version": "0.41.3-6",
   "main": "index.js",

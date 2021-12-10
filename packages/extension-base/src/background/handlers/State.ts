@@ -9,7 +9,6 @@ import { BehaviorSubject } from 'rxjs';
 
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
-import chrome from '@polkadot/extension-inject/chrome';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
@@ -165,10 +164,9 @@ export default class State {
   }
 
   private popupClose (): void {
-    this.#windows.forEach((id: number): void =>
-      // eslint-disable-next-line no-void
-      void chrome.windows.remove(id)
-    );
+    this.#windows.forEach((id: number): void => {
+      chrome.windows.remove(id).catch(console.error);
+    });
     this.#windows = [];
   }
 
@@ -275,8 +273,7 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    // eslint-disable-next-line no-void
-    void chrome.browserAction.setBadgeText({ text });
+    chrome.browserAction.setBadgeText({ text }).catch(console.error);
 
     if (shouldClose && text === '') {
       this.popupClose();

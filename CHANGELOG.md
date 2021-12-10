@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 0.42.1 Dec 10, 2021
+
+Contributed:
+
+- Allow for configuration of base ports (Thanks to https://github.com/AndreiEres)
+- Adjust messaging for non-signRaw accounts (Thanks to https://github.com/BigBadAlien)
+- Additional tests for Ethereum derivation (Thanks to https://github.com/joelamouche)
+
+Changes:
+
+- Adjust `chrome.*` location via polyfill on non-Chrome browsers
+- Allow import of account via QR (where seed is provided)
+- Expand error messaging for non-compatible Ledger chains
+- Bump `@polkadot/util` to 8.1.2
+- Bump `@polkadot/api` to 6.11.1
+
+
 ## 0.41.2 Nov 30, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.

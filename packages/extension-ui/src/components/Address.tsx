@@ -118,16 +118,6 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
     const accountByAddress = findAccountByAddress(accounts, address);
 
-    // console.log(
-    //   address,
-    //   (
-    //     chain?.definition.chainType === 'ethereum' ||
-    //     accountByAddress?.type === 'ethereum' ||
-    //     (!accountByAddress && givenType === 'ethereum')
-    //   )
-    //     ? { account: accountByAddress, formatted: address, type: 'ethereum' }
-    //     : recodeAddress(address, accounts, chain, settings)
-    // );
 
     setRecoded(
       (

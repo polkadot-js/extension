@@ -12,7 +12,6 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
-import chrome from '@polkadot/extension-inject/chrome';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import allChains from './util/chains';

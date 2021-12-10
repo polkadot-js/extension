@@ -6,8 +6,6 @@ import '../../../__mocks__/chrome';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure } from 'enzyme';
 
-import chrome from '@polkadot/extension-inject/chrome';
-
 import { exportAccount } from './messaging';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call

@@ -118,7 +118,6 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
     const accountByAddress = findAccountByAddress(accounts, address);
 
-
     setRecoded(
       (
         chain?.definition.chainType === 'ethereum' ||

@@ -22,7 +22,7 @@
     "@polkadot/extension-dapp": "^0.42.2",
     "@polkadot/extension-inject": "^0.42.2",
     "@polkadot/keyring": "^8.1.2",
-    "@polkadot/phishing": "^0.6.510",
+    "@polkadot/phishing": "^0.6.522",
     "@polkadot/ui-keyring": "^0.87.5"
   }
 }

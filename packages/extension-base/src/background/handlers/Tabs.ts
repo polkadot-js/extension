@@ -17,6 +17,7 @@ import { assert, isNumber } from '@polkadot/util';
 
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
+import { withErrorLog } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -118,7 +119,7 @@ export default class Tabs {
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      this.rpcUnsubscribe({ ...request, subscriptionId }, port).catch(console.error);
+      withErrorLog(this.rpcUnsubscribe({ ...request, subscriptionId }, port));
     });
 
     return true;
@@ -150,9 +151,9 @@ export default class Tabs {
       tabs
         .map(({ id }) => id)
         .filter((id): id is number => isNumber(id))
-        .forEach((id): void => {
-          chrome.tabs.update(id, { url }).catch(console.error);
-        });
+        .forEach((id) =>
+          withErrorLog(chrome.tabs.update(id, { url }))
+        );
     });
   }
 

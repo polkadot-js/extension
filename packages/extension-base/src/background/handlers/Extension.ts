@@ -15,6 +15,7 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import { withErrorLog } from './helpers';
 import State from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
@@ -456,7 +457,7 @@ export default class Extension {
       return false;
     }
 
-    chrome.tabs.create({ url }).catch(console.error);
+    withErrorLog(chrome.tabs.create({ url }));
 
     return true;
   }

@@ -13,6 +13,7 @@ import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import { MetadataStore } from '../../stores';
+import { withErrorLog } from './helpers';
 
 interface Resolver <T> {
   reject: (error: Error) => void;
@@ -164,9 +165,9 @@ export default class State {
   }
 
   private popupClose (): void {
-    this.#windows.forEach((id: number): void => {
-      chrome.windows.remove(id).catch(console.error);
-    });
+    this.#windows.forEach((id: number) =>
+      withErrorLog(chrome.windows.remove(id))
+    );
     this.#windows = [];
   }
 
@@ -273,7 +274,7 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    chrome.browserAction.setBadgeText({ text }).catch(console.error);
+    withErrorLog(chrome.browserAction.setBadgeText({ text }));
 
     if (shouldClose && text === '') {
       this.popupClose();
@@ -408,7 +409,7 @@ export default class State {
       const provider = this.#injectedProviders.get(port);
 
       if (provider) {
-        provider.disconnect().catch(console.error);
+        withErrorLog(provider.disconnect());
       }
 
       this.#injectedProviders.delete(port);

@@ -166,7 +166,7 @@ export default class State {
 
   private popupClose (): void {
     this.#windows.forEach((id: number) =>
-      withErrorLog(chrome.windows.remove(id))
+      withErrorLog(() => chrome.windows.remove(id))
     );
     this.#windows = [];
   }
@@ -274,7 +274,7 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    withErrorLog(chrome.browserAction.setBadgeText({ text }));
+    withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
 
     if (shouldClose && text === '') {
       this.popupClose();
@@ -409,7 +409,7 @@ export default class State {
       const provider = this.#injectedProviders.get(port);
 
       if (provider) {
-        withErrorLog(provider.disconnect());
+        withErrorLog(() => provider.disconnect());
       }
 
       this.#injectedProviders.delete(port);

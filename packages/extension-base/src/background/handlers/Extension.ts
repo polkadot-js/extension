@@ -457,7 +457,7 @@ export default class Extension {
       return false;
     }
 
-    withErrorLog(chrome.tabs.create({ url }));
+    withErrorLog(() => chrome.tabs.create({ url }));
 
     return true;
   }

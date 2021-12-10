@@ -119,7 +119,7 @@ export default class Tabs {
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
-      withErrorLog(this.rpcUnsubscribe({ ...request, subscriptionId }, port));
+      withErrorLog(() => this.rpcUnsubscribe({ ...request, subscriptionId }, port));
     });
 
     return true;
@@ -152,7 +152,7 @@ export default class Tabs {
         .map(({ id }) => id)
         .filter((id): id is number => isNumber(id))
         .forEach((id) =>
-          withErrorLog(chrome.tabs.update(id, { url }))
+          withErrorLog(() => chrome.tabs.update(id, { url }))
         );
     });
   }

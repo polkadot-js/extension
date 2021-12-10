@@ -297,6 +297,7 @@ export type RequestSigningSubscribe = null;
 
 export interface RequestSeedCreate {
   length?: SeedLengths;
+  seed?: string;
   type?: KeypairType;
 }
 

@@ -132,8 +132,8 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createSeed (length?: SeedLengths, type?: KeypairType): Promise<{ address: string; seed: string }> {
-  return sendMessage('pri(seed.create)', { length, type });
+export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
+  return sendMessage('pri(seed.create)', { length, seed, type });
 }
 
 export async function getAllMetatdata (): Promise<MetadataDef[]> {

@@ -7,14 +7,15 @@ import { Name, Password } from '../partials';
 import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '.';
 
 interface Props {
-  buttonLabel: string;
+  buttonLabel?: string;
   isBusy: boolean;
-  onBackClick: () => void;
+  onBackClick?: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
+  onPasswordChange?: (password: string) => void;
 }
 
-function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCreate, onNameChange, onPasswordChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
@@ -31,11 +32,19 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
     [onNameChange]
   );
 
+  const _onPasswordChange = useCallback(
+    (password: string | null) => {
+      onPasswordChange && onPasswordChange(password || '');
+      setPassword(password);
+    },
+    [onPasswordChange]
+  );
+
   const _onBackClick = useCallback(
     () => {
       _onNameChange(null);
       setPassword(null);
-      onBackClick();
+      onBackClick && onBackClick();
     },
     [_onNameChange, onBackClick]
   );
@@ -46,19 +55,21 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
         isFocused
         onChange={_onNameChange}
       />
-      <Password onChange={setPassword} />
+      <Password onChange={_onPasswordChange} />
       <VerticalSpace />
-      <ButtonArea>
-        <BackButton onClick={_onBackClick} />
-        <NextStepButton
-          data-button-action='add new root'
-          isBusy={isBusy}
-          isDisabled={!password || !name}
-          onClick={_onCreate}
-        >
-          {buttonLabel}
-        </NextStepButton>
-      </ButtonArea>
+      {onBackClick && buttonLabel && (
+        <ButtonArea>
+          <BackButton onClick={_onBackClick} />
+          <NextStepButton
+            data-button-action='add new root'
+            isBusy={isBusy}
+            isDisabled={!password || !name}
+            onClick={_onCreate}
+          >
+            {buttonLabel}
+          </NextStepButton>
+        </ButtonArea>
+      )}
     </>
   );
 }

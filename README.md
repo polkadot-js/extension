@@ -83,7 +83,7 @@ Finaly confirm staking/unstaking/redeem.
 
 ![confirm staking page screenshot](docs/pjp/confirmStaking.PNG)
 
-Contribution in crowdloans now is possible via the extension, go to 'contribute in crowdloans' menue:
+Contribution in crowdloans now is possible via the extension, go to 'contribute in crowdloans' menu:
 
 ![contibute in crowdloans page screenshot](docs/pjp/contributeInCrowdloans.PNG)
  

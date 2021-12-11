@@ -32,7 +32,8 @@ Currently, the following features are added:
   - View balances
   - Transfer funds
   - View an address as QR code
-  - Staking / unstaking
+  - Staking / unstaking / redeem / and edit nominated validator list
+  - Contribute in crowdloans
 
 
 ## How To's
@@ -66,11 +67,11 @@ Entering the crypto address is error prone, so it is useful to use the QR code f
 
 ![Address QR code page screenshot](docs/pjp/addressQrCode.PNG)
 
-Now, you can easily stake using the extension.
+Now, you can easily stake using the polkadot JS Plus extension. you just need enter the amount you want to stake and choose auto mode, it will do the rest.
 
 ![stake page screenshot](docs/pjp/stake.PNG)
 
-View your nominated validators info.
+View your nominated validators info, even edit the list of the validators.
 
 ![nominated validators page screenshot](docs/pjp/nominatedValidators.PNG)
 
@@ -78,7 +79,21 @@ Nominate validators automatically or select them yourself.
 
 ![select validators page screenshot](docs/pjp/selectValidators.PNG)
 
-Confirm staking.
+Finaly confirm staking/unstaking/redeem.
 
 ![confirm staking page screenshot](docs/pjp/confirmStaking.PNG)
+
+Contribution in crowdloans now is possible via the extension, go to 'contribute in crowdloans' menue:
+
+![contibute in crowdloans page screenshot](docs/pjp/contributeInCrowdloans.PNG)
+ 
+Choose the relay chain, view the active crwdloans, select one:
+
+![view available crowdloans page screenshot](docs/pjp/crowdloans.PNG)
+ 
+Do contribute and confirm it.
+
+![confirm contribution page screenshot](docs/pjp/confirmContribute.PNG)
+
+
 

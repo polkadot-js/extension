@@ -26,9 +26,6 @@ async function getLedger (_address, _chain) {
 
   const data = await api.query.staking.ledger(_address);
 
-  // console.log('get ledger data:');
-  // console.log(data);
-
   if (data.toString() == '') {
     return defaultOutput;
   }

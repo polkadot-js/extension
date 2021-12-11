@@ -94,8 +94,7 @@ export interface RequestSignatures {
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
 
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
-  'pri(accounts.update)': [RequestBalanceUpdate, boolean]; // added by Kami  
-  'pri(accounts.updateTxHistory)': [RequestTransactionHistoryUpdate, boolean]; // added by Kami  
+  // 'pri(accounts.update)': [RequestBalanceUpdate, boolean]; // added by Kami  
   'pri(accounts.updateStakingConsts)': [RequestStakingConstsUpdate, boolean]; // added by Kami  
   'pri(accounts.updateMeta)': [RequestUpdateMeta, boolean]; // added by Kami  
 
@@ -223,31 +222,6 @@ export interface RequestAccountEdit {
   genesisHash?: string | null;
   name: string;
 }
-// added  by Kami 
-export interface RequestBalanceUpdate {
-  address: string;
-  chainName: string;
-  balance: string;
-}
-export interface RequestStakingConstsUpdate {
-  address: string;
-  stakingConsts: string;
-}
-export interface RequestTransactionHistoryUpdate {
-  address: string;
-  amount: string;
-  coin: string;
-  hash: string;
-  txHistory: string | null;
-  fee: string;
-  to: string;
-  status: string;
-}
-
-export interface RequestUpdateMeta {
-  address: string;
-  meta: string;
-}
 
 export interface RequestAccountForget {
   address: string;
@@ -348,6 +322,25 @@ export interface RequestSeedCreate {
 export interface RequestSeedValidate {
   suri: string;
   type?: KeypairType;
+}
+
+// added  by Kami 
+// export interface RequestBalanceUpdate {
+//   address: string;
+//   chainName: string;
+//   balance: string;
+// }
+
+// added  by Kami 
+export interface RequestStakingConstsUpdate {
+  address: string;
+  stakingConsts: string;
+}
+
+// added by kami
+export interface RequestUpdateMeta {
+  address: string;
+  meta: string;
 }
 
 // Responses

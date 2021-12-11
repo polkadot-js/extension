@@ -9,7 +9,7 @@ import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowBackIosRounded, CheckRounded as CheckRoundedIcon, Clear as ClearIcon } from '@mui/icons-material';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Avatar, Box, Button, Chip, Container, Divider, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Modal, TextField, Tooltip } from '@mui/material';
+import { Alert, Avatar, Box, Button, Container, Divider, Grid, IconButton, InputAdornment, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Modal, TextField, Tooltip } from '@mui/material';
 import keyring from '@polkadot/ui-keyring';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useState } from 'react';
 import ConfirmTx from './ConfirmTx';
@@ -378,33 +378,34 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
       >
 
         <Container disableGutters maxWidth='md' sx={{ marginTop: 2 }}>
-          <Grid container justifyContent='flex-end' sx={{ fontSize: 15, paddingRight: '20px' }} xs={12}>
-            <ActionText
-              // className={{'margin': 'auto'}}
-              onClick={handleTransferModalClose}
-              text={t('Cancel')}
-            />
-          </Grid>
-          <Grid sx={{ paddingBottom: '10px' }} xs={12}>
-            <Box
-              fontSize={12}
-              fontWeight='fontWeightBold'
-            >
-              <Divider>
-                <Chip
-                  icon={<FontAwesomeIcon
-                    className='sendIcon'
-                    icon={faPaperPlane}
-                    size='lg'
-                  />}
-                  label={t('Transfer Funds')}
-                  variant='outlined'
-                />
-              </Divider>
-            </Box>
+          <Grid item alignItems='center' container justifyContent='space-between' sx={{ padding: '0px 20px' }}>
+            <Grid item>
+              <Avatar
+                alt={'logo'}
+                src={getChainLogo(chain)}
+              />
+            </Grid>
+            <Grid item sx={{ fontSize: 15, fontWeight: 600 }}>
+              <FontAwesomeIcon
+                className='sendIcon'
+                icon={faPaperPlane}
+                size='sm'
+              />
+              {' '} {t('Transfer Funds')}
+            </Grid>
+            <Grid item sx={{ fontSize: 15 }}>
+              <ActionText
+                onClick={handleTransferModalClose}
+                text={t('Close')}
+              />
+            </Grid>
           </Grid>
 
-          <Grid alignItems='center' container justifyContent='center' sx={{ padding: '30px 20px' }}>
+          <Grid xs={12}>
+            <Divider />
+          </Grid>
+
+          <Grid alignItems='center' container justifyContent='center' sx={{ padding: '45px 20px' }}>
             <Grid item xs={12}>
               <TextField
                 InputProps={{
@@ -490,7 +491,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                   </Box>
                 </Grid>
 
-                <Grid item sx={{ fontSize: '15px', fontWeight: '600', color: grey[800], marginTop: 1, textAlign: 'left' }} xs={3}>
+                <Grid item sx={{ fontSize: '15px', fontWeight: '600', color: grey[800], marginTop: '30px', textAlign: 'left' }} xs={3}>
                   {t('Amount:')}
 
                   <Grid item>
@@ -554,7 +555,7 @@ export default function TransferFunds({ chain, givenType, sender, setTransferMod
                       name='transfeAmount'
                       onBlur={(event) => handleTransferAmountOnBlur(event.target.value)}
                       onChange={(event) => handleTransferAmountOnChange(event.target.value)}
-                      placeholder='0.0'
+                      placeholder='0.00'
                       size='medium'
                       type='number'
                       value={transferAmountInHuman}

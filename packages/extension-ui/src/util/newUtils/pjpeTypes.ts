@@ -95,3 +95,53 @@ export interface TransactionDetail {
   to: string;
   status: string; // failed, success
 }
+
+export interface TxInfo {
+  fee?: string,
+  status: string,
+  txHash?: string,
+  failureText?: string
+}
+
+export interface Auction {
+  auctionCounter: number;
+  auctionInfo: [string, string];
+  blockchain: string;
+  crowdloans: Crowdloans[];
+  minContribution: string;
+  winning: string;
+}
+export interface Crowdloans {
+  fund: Fund;
+  identity: Identity;
+}
+
+interface Fund {
+  depositor: string;
+  verifier: string | null;
+  deposit: string;
+  raised: string;
+  end: bigint;
+  cap: string;
+  lastContribution: { ending: bigint };
+  firstPeriod: number;
+  lastPeriod: number;
+  trieIndex: number;
+  paraId: string;
+}
+
+interface Identity {
+  // 'judgements': [],
+  //  'deposit':202580000000,
+  'info': {
+    // 'additional':[],
+    'display'?: string;
+    'legal'?: string;
+    'web'?: string;
+    //  'riot':{'none':null},
+    'email'?: string;
+    //  'pgpFingerprint':null,
+    //  'image':{'none':null},
+    'twitter'?: string;
+  }
+}

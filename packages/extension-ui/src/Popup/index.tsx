@@ -20,6 +20,7 @@ import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
+import CrowdLoans from './CrowdLoans';
 import Derive from './Derive';
 import Export from './Export';
 import ExportAll from './ExportAll';
@@ -138,6 +139,8 @@ export default function Popup (): React.ReactElement {
                     <ToastProvider>
                       <Switch>
                         <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
+                         {/* add by Kami */}
+                        <Route path='/crowd-loan-list'>{wrapWithErrorBoundary(<CrowdLoans />, 'crowd-loan-list')}</Route>
                         <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
                         <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                         <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>

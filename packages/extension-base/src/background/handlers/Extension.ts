@@ -5,8 +5,8 @@ import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-// added by Kami TODOBalance:RequestBalanceUpdate, RequestTransactionHistoryUpdate, RequestStakingConstsUpdate
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestStakingConstsUpdate, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBalanceUpdate, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTransactionHistoryUpdate, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest, RequestUpdateMeta } from '../types';
+// added by Kami : RequestStakingConstsUpdate,RequestUpdateMeta
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestStakingConstsUpdate, RequestTypes, RequestUpdateMeta,ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
@@ -97,21 +97,7 @@ export default class Extension {
     return true;
   }
 
-  // added by Kami to save last balance
-  private accountsUpdateBalance({ address, balance, chainName }: RequestBalanceUpdate): boolean {
-    const pair = keyring.getPair(address);
-
-    assert(pair, 'Unable to find pair');
-    // const date = Date.now();
-    // const lastBalance = `${chainName}_${balance}_${date}`;
-    const lastBalance = `${chainName}_${balance}`;
-
-    keyring.saveAccountMeta(pair, { ...pair.meta, lastBalance });
-
-    return true;
-  }
-
-  // added by kami to save stakingConsts
+  // TODO, use accountsUpdateMeta instead, added by kami to save stakingConsts
   private accountsUpdateStakingConsts({ address, stakingConsts }: RequestStakingConstsUpdate): boolean {
     const pair = keyring.getPair(address);
 
@@ -131,21 +117,6 @@ export default class Extension {
     assert(pair, 'Unable to find pair');
 
     keyring.saveAccountMeta(pair, { ...pair.meta, ...metadata });
-
-    return true;
-  }
-
-  // added by Kami to save transaction history
-  private accountsUpdateTxHistory({ address, amount, coin, fee, hash, status, to, txHistory }: RequestTransactionHistoryUpdate): boolean {
-    const pair = keyring.getPair(address);
-
-    assert(pair, 'Unable to find pair');
-    const date = Date.now();
-    const txH = txHistory
-      ? txHistory + ',' + `${coin}_${amount}_${fee}_${to}_${status}_${hash}_${date}`
-      : `${coin}_${amount}_${fee}_${to}_${status}_${hash}_${date}`;
-
-    keyring.saveAccountMeta(pair, { ...pair.meta, txHistory: txH });
 
     return true;
   }
@@ -587,17 +558,11 @@ export default class Extension {
       case 'pri(accounts.edit)':
         return this.accountsEdit(request as RequestAccountEdit);
 
-      case 'pri(accounts.update)': // added by Kami 
-        return this.accountsUpdateBalance(request as RequestBalanceUpdate);
-
       case 'pri(accounts.updateStakingConsts)': // added by Kami 
         return this.accountsUpdateStakingConsts(request as RequestStakingConstsUpdate);
 
       case 'pri(accounts.updateMeta)': // added by Kami 
         return this.accountsUpdateMeta(request as RequestUpdateMeta);
-
-      case 'pri(accounts.updateTxHistory)': // added by Kami 
-        return this.accountsUpdateTxHistory(request as RequestTransactionHistoryUpdate);
 
       case 'pri(accounts.export)':
         return this.accountsExport(request as RequestAccountExport);

@@ -19,7 +19,7 @@ import getNetworkInfo from '../../util/newUtils/getNetwork';
 import { amountToHuman, getSubstrateAddress, getTransactionHistoryFromLocalStorage, prepareMetaData } from '../../util/newUtils/pjpeUtils';
 import ValidatorsList from './ValidatorsList';
 import { AccountContext, ActionText, BackButton, Button } from '../../components';
-import { bondOrBondExtra, nominate, unbond } from '@polkadot/extension-ui/util/newUtils/staking';
+import { bondOrBondExtra, chill, nominate, unbond, withdrawUnbonded } from '@polkadot/extension-ui/util/newUtils/staking';
 import { grey } from '@mui/material/colors';
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { updateMeta } from '@polkadot/extension-ui/messaging';
@@ -57,7 +57,7 @@ export default function ConfirmStaking({
   const [currentlyStaked, setCurrentlyStaked] = useState<bigint>(0n);
   const [totalStakedInHuman, setTotalStakedInHuman] = useState<string>('');
 
-  async function saveHistory(chain: Chain, hierarchy: AccountWithChildren[], address: string, currentTransactionDetail: TransactionDetail): Promise<boolean> {
+  async function saveHistory(chain: Chain | null, hierarchy: AccountWithChildren[], address: string, currentTransactionDetail: TransactionDetail): Promise<boolean> {
     const accountSubstrateAddress = getSubstrateAddress(address);
     const savedHistory: TransactionDetail[] = getTransactionHistoryFromLocalStorage(chain, hierarchy, accountSubstrateAddress);
 
@@ -68,15 +68,24 @@ export default function ConfirmStaking({
 
   useEffect(() => {
     console.log('amount is :', amount);
+    console.log('state is :', state);
 
     if (['confirming', 'success', 'failed'].includes(confirmingState)) {
       return;
     }
 
-    if (state === 'unstake') {
-      setTotalStakedInHuman(amountToHuman((currentlyStaked - amount).toString(), decimals));
-    } else {
-      setTotalStakedInHuman(amountToHuman((currentlyStaked + amount).toString(), decimals));
+    switch (state) {
+      case ('stakeAuto'):
+      case ('stakeManual'):
+      case ('stakeKeepNominated'):
+        setTotalStakedInHuman(amountToHuman((currentlyStaked + amount).toString(), decimals));
+        break;
+      case ('unstake'):
+        setTotalStakedInHuman(amountToHuman((currentlyStaked - amount).toString(), decimals));
+        break;
+      default:
+        setTotalStakedInHuman(amountToHuman((currentlyStaked).toString(), decimals));
+        break;
     }
   }, [amount, currentlyStaked, decimals, state]);
 
@@ -128,6 +137,8 @@ export default function ConfirmStaking({
         return 'nominating'.toUpperCase();
       case ('unstake'):
         return 'unstaking'.toUpperCase();
+      case ('withdrawUnbound'):
+        return 'redeem'.toUpperCase();
       default:
         return state.toUpperCase();
     }
@@ -162,7 +173,7 @@ export default function ConfirmStaking({
 
       if (['stakeAuto', 'stakeManual', 'stakeKeepNominated'].includes(localState) && amount !== 0n) {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        const { failureText, status, txHash } = await bondOrBondExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
+        const { failureText, fee, status, txHash } = await bondOrBondExtra(chain, staker.address, signer, amount, alreadyBondedAmount);
 
         console.log('bond Result,', status);
 
@@ -170,7 +181,7 @@ export default function ConfirmStaking({
           action: alreadyBondedAmount ? 'bond_extra' : 'bond',
           amount: amountToHuman(String(amount), decimals),
           date: Date.now(),
-          fee: '',
+          fee: fee || '',
           from: staker.address,
           hash: txHash || '',
           status: failureText || status,
@@ -241,13 +252,13 @@ export default function ConfirmStaking({
           }
         }
 
-        const { failureText, status, txHash } = await nominate(chain, staker.address, signer, selectedValidatorsAccountId);
+        const { failureText, fee, status, txHash } = await nominate(chain, staker.address, signer, selectedValidatorsAccountId);
 
         const history: TransactionDetail = {
           action: 'nominate',
           amount: '',
           date: Date.now(),
-          fee: '',
+          fee: fee || '',
           from: staker.address,
           hash: txHash || '',
           status: failureText || status,
@@ -264,14 +275,42 @@ export default function ConfirmStaking({
       }
 
       if (localState === 'unstake' && amount > 0n) {
+        if (amount === currentlyStaked) {
+          // if you are unstaking all, should chill first
+          const { failureText, fee, status, txHash } = await chill(chain, staker.address, signer);
+
+          const history: TransactionDetail = {
+            action: 'chill',
+            amount: '',
+            date: Date.now(),
+            fee: fee || '',
+            from: staker.address,
+            hash: txHash || '',
+            status: failureText || status,
+            to: ''
+          };
+
+          if (chain) {
+            // eslint-disable-next-line no-void
+            void saveHistory(chain, hierarchy, staker.address, history);
+          }
+
+          if (state === 'failed') {
+            console.log('chilling failed:', failureText);
+            setConfirmingState(status);
+
+            return;
+          }
+        }
+
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        const { failureText, status, txHash } = await unbond(chain, staker.address, signer, amount);
+        const { failureText, fee, status, txHash } = await unbond(chain, staker.address, signer, amount);
 
         const history: TransactionDetail = {
           action: 'unbond',
           amount: amountToHuman(String(amount), decimals),
           date: Date.now(),
-          fee: '',
+          fee: fee || '',
           from: staker.address,
           hash: txHash || '',
           status: failureText || status,
@@ -283,10 +322,34 @@ export default function ConfirmStaking({
           saveHistory(chain, hierarchy, staker.address, history);
         }
 
-        console.log('unbond result:', status);
+        console.log('unbond:', status);
+        setConfirmingState(status);
+      }
+
+      if (localState === 'withdrawUnbound' && amount > 0n) {
+        const { failureText, fee, status, txHash } = await withdrawUnbonded(chain, staker.address, signer);
+
+        const history: TransactionDetail = {
+          action: 'redeem',
+          amount: amountToHuman(String(amount), decimals),
+          date: Date.now(),
+          fee: fee || '',
+          from: staker.address,
+          hash: txHash || '',
+          status: failureText || status,
+          to: ''
+        };
+
+        if (chain) {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          saveHistory(chain, hierarchy, staker.address, history);
+        }
+
+        console.log('withdrawUnbound:', status);
         setConfirmingState(status);
       }
     } catch (e) {
+      console.log('error:', e);
       setPasswordIsCorrect(-1);
       setState(localState);
       setConfirmingState('');
@@ -392,20 +455,25 @@ export default function ConfirmStaking({
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item sx={{ textAlign: 'center', color: grey[600], fontFamily: 'fantasy', fontSize: 16, padding: '15px 50px 5px' }} xs={12}>
-                {t('VALIDATORS')}
-              </Grid>
-              <Grid item sx={{ fontSize: 14, padding: '1px 20px 0px' }} xs={12}>
-                {stakingConsts &&
-                  <ValidatorsList
-                    chain={chain}
-                    stakingConsts={stakingConsts}
-                    validatorsInfo={validatorsToList}
-                    validatorsName={validatorsName} />
-                }
-              </Grid>
+              {stakingConsts && !['withdrawUnbound', 'unstake'].includes(state)
+                ? <>
+                  <Grid item sx={{ textAlign: 'center', color: grey[600], fontFamily: 'fantasy', fontSize: 16, padding: '15px 50px 5px' }} xs={12}>
+                    {t('VALIDATORS')}
+                  </Grid>
+                  <Grid item sx={{ fontSize: 14, padding: '1px 20px 0px' }} xs={12}>
+
+                    <ValidatorsList
+                      chain={chain}
+                      stakingConsts={stakingConsts}
+                      validatorsInfo={validatorsToList}
+                      validatorsName={validatorsName} />
+
+                  </Grid>
+                </>
+                : <Grid sx={{ margin: '110px' }}>{' '}</Grid>
+              }
             </Grid>
-            <Grid item sx={{ margin: '30px 20px 5px' }} xs={12}>
+            <Grid item sx={{ margin: '30px 30px 5px' }} xs={12}>
               <TextField
                 InputLabelProps={{
                   shrink: true
@@ -444,7 +512,7 @@ export default function ConfirmStaking({
                 variant='outlined'
               />
             </Grid>
-            <Grid container item justifyContent='space-between' sx={{ padding: '5px 20px 0px' }} xs={12}>
+            <Grid container item justifyContent='space-between' sx={{ padding: '5px 30px 0px' }} xs={12}>
               {['success', 'failed'].includes(confirmingState)
                 ? <Grid item xs={12}>
                   <MuiButton fullWidth onClick={handleReject} variant='contained'
@@ -453,10 +521,10 @@ export default function ConfirmStaking({
                   </MuiButton>
                 </Grid>
                 : <>
-                  <Grid item xs={2}>
+                  <Grid item xs={1}>
                     <BackButton onClick={handleConfirmStakingModalBack} />
                   </Grid>
-                  <Grid item xs={10}>
+                  <Grid item xs={11} sx={{ paddingLeft: '10px' }}>
                     <Button
                       data-button-action=''
                       isBusy={confirmingState === 'confirming'}

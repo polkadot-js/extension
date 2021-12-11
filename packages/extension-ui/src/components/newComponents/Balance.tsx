@@ -14,15 +14,15 @@ import styled from 'styled-components';
 import { Chain } from '@polkadot/extension-chains/types';
 
 import useTranslation from '../../hooks/useTranslation';
-import { balanceToHuman } from '../../util/newUtils/pjpeUtils';
-import { AccountsBalanceType, BalanceType } from '../../util/newUtils/pjpeTypes';
+import { balanceToHuman, prepareMetaData } from '../../util/newUtils/pjpeUtils';
+import { AccountsBalanceType, BalanceType, savedMetaData } from '../../util/newUtils/pjpeTypes';
 import { AccountContext } from '../contexts';
 import AddressQRcode from '../../Popup/newPopups/AddressQRcode';
 import EasyStaking from '../../Popup/newPopups/EasyStaking';
 import TransactionHistory from '../../Popup/newPopups/TransactionHistory';
 import TransferFunds from '../../Popup/newPopups/TransferFunds';
 import { AccountJson } from '@polkadot/extension-base/background/types';
-import { updateBalance } from '../../messaging';
+import { updateMeta } from '../../messaging';
 import { grey } from '@mui/material/colors';
 
 export interface Props {
@@ -70,25 +70,23 @@ function Balance({ address, chain, formattedAddress, givenType, name,
   //   return null;
   // }
 
-  async function getBalanceFromMetaData(acc: AccountJson): Promise<AccountsBalanceType | null> {
+  function getBalanceFromMetaData(_account: AccountJson, _chain: Chain): AccountsBalanceType | null {
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const accLastBalance = acc.lastBalance ? acc.lastBalance.split('_') : null;
+    const accLastBalance: savedMetaData = _account.lastBalance ? JSON.parse(_account.lastBalance) : null;
+    
+    if (!accLastBalance) { return null; }
 
-    // console.log('accLastBalance', accLastBalance)
-    // console.log(accLastBalance[0])
+    const chainName = _chain.name.replace(' Relay Chain', '');
 
-    if (accLastBalance === null) {
-      return null;
-    }
+    if (chainName !== accLastBalance.chainName) { return null; }
 
     return {
-      address: acc.address,
+      address: _account.address,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      balanceInfo: accLastBalance ? JSON.parse(accLastBalance[1]) : null,
-      // chain: acc.genesisHash ? await getChainData(acc.genesisHash) : null,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      chain: accLastBalance ? accLastBalance[0] : null,
-      name: acc.name ? acc.name : ''
+      balanceInfo: accLastBalance ? JSON.parse(accLastBalance.metaData) : null,
+      chain: accLastBalance ? accLastBalance.chainName : null,
+      name: _account.name ? _account.name : ''
     };
   }
 
@@ -124,15 +122,12 @@ function Balance({ address, chain, formattedAddress, givenType, name,
   }
 
   useEffect((): void => {
-    if (balance) {
-      // console.log('going to update balance', balance)
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      updateBalance(
-        String(balance.address),
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        JSON.stringify(balance.balanceInfo, (_key, value) => typeof value === 'bigint' ? value.toString() : value),
-        // balance.chain ? balance.chain.name : '');
-        balance.chain || '');
+    if (balance && chain) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      const stringifiedBalanceInfo = JSON.stringify(balance.balanceInfo, (_key, value) => typeof value === 'bigint' ? value.toString() : value);
+
+      // eslint-disable-next-line no-void
+      void updateMeta(balance.address, prepareMetaData(chain, 'lastBalance',stringifiedBalanceInfo));
     }
   }, [balance]);
 
@@ -184,18 +179,14 @@ function Balance({ address, chain, formattedAddress, givenType, name,
 
     setAccount(acc);
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    getBalanceFromMetaData(acc).then((bal: AccountsBalanceType | null) => {
-      // console.log('chain name on saved balance was:', bal?.chain);
-      // console.log('now chain name is:', chain?.name);
+    const lastSavedBalance = getBalanceFromMetaData(acc, chain);
 
-      if (bal?.chain === chain?.name) {
-        setBalance(bal);
-      } else {
-        setBalance(null);
-        subscribeToBalanceChanges();
-      }
-    });
+    if (lastSavedBalance) {
+      setBalance(lastSavedBalance);
+    } else {
+      setBalance(null);
+      subscribeToBalanceChanges();
+    }
   }, [chain]);
 
   const handleTransferFunds = useCallback(

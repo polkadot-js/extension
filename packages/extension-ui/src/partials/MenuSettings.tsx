@@ -3,7 +3,7 @@
 
 import type { Theme, ThemeProps } from '../types';
 
-import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
+import { faCompass, faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -32,7 +32,7 @@ const prefixOptions = settings.availablePrefixes
   .filter(({ value }) => value !== -1)
   .map(({ text, value }): Option => ({ text, value: `${value}` }));
 
-function MenuSettings ({ className, reference }: Props): React.ReactElement<Props> {
+function MenuSettings({ className, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [prefix, setPrefix] = useState(`${settings.prefix === -1 ? 42 : settings.prefix}`);
@@ -85,6 +85,13 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const _goToAuthList = useCallback(
     () => {
       onAction('auth-list');
+    }, [onAction]
+  );
+
+  // added by Kami
+  const _goToCrowdLoansList = useCallback(
+    () => {
+      onAction('crowd-loan-list');
     }, [onAction]
   );
 
@@ -160,6 +167,14 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           text={t<string>('Manage Website Access')}
         />
       </MenuItem>
+      <MenuItem className='setting'>
+        <ActionText
+          className='contibuteInCrowdloans'
+          icon={faCompass}
+          onClick={_goToCrowdLoansList}
+          text={t<string>('Contribute in Crowdloans')}
+        />
+      </MenuItem>
       {isPopup && (
         <MenuItem className='setting'>
           <ActionText
@@ -179,6 +194,14 @@ export default React.memo(styled(MenuSettings)(({ theme }: Props) => `
   right: 24px;
   user-select: none;
 
+  .contibuteInCrowdloans{
+    span {
+      color: ${theme.textColorDanger};
+      font-size: ${theme.fontSize};
+      line-height: ${theme.lineHeight};
+      text-decoration: none;
+      vertical-align: middle;
+    }
   .openWindow, .manageWebsiteAccess{
     span {
       color: ${theme.textColor};

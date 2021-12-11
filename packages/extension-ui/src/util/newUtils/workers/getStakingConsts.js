@@ -16,13 +16,12 @@ async function getStackingConsts (_chain) {
     const maxNominations = api.consts.staking.maxNominations.toHuman();
     const maxNominatorRewardedPerValidator = api.consts.staking.maxNominatorRewardedPerValidator.toHuman();
     const existentialDeposit = api.consts.balances.existentialDeposit.toHuman();
-    const bondingDuration =api.consts.staking.bondingDuration.toHuman()
+    const bondingDuration = api.consts.staking.bondingDuration.toHuman();
     const minNominatorBond = await api.query.staking.minNominatorBond();
 
     // console.log('maxNominations in worker:', maxNominations);
     // console.log('maxNominatorRewardedPerValidator:', maxNominatorRewardedPerValidator);
     // console.log('existentialDeposit:', existentialDeposit);
-    console.log('api.consts.staking.bondingDuration:', );
 
     return {
       bondingDuration: bondingDuration,
@@ -43,7 +42,7 @@ onmessage = (e) => {
 
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   getStackingConsts(chain).then((consts) => {
-    console.log('getStackingConsts:', consts);
+    console.log('getStackingConsts: %o', consts);
     postMessage(consts);
   });
 };

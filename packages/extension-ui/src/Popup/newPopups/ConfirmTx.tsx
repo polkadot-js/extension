@@ -81,7 +81,7 @@ export default function ConfirmTx({
     const { decimals } = getNetworkInfo(chain);
 
     setTransferAmountInHuman(amountToHuman(String(transferAmount), decimals));
-    console.log('chain:',chain);
+    console.log('chain:', chain);
   }, [chain, transferAmount]);
 
   async function saveHistory(chain: Chain, hierarchy: AccountWithChildren[], address: string, currentTransactionDetail: TransactionDetail): Promise<boolean> {
@@ -98,24 +98,24 @@ export default function ConfirmTx({
       return;
     }
 
-    const { decimals } = getNetworkInfo(chain);
+    // const { decimals } = getNetworkInfo(chain);
 
-    const currentTransactionDetail: TransactionDetail = {
-      action: 'send',
-      amount: amountToHuman(String(transferAmount), decimals),
-      date: Date.now(),
-      fee: String(fee),
-      from: String(sender.address),
-      hash: transactionHash,
-      status: String(txStatus.text),
-      to: String(recepient.address)
-    };
+    // const currentTransactionDetail: TransactionDetail = {
+    //   action: 'send',
+    //   amount: amountToHuman(String(transferAmount), decimals),
+    //   date: Date.now(),
+    //   fee: String(fee),
+    //   from: String(sender.address),
+    //   hash: transactionHash,
+    //   status: String(txStatus.text),
+    //   to: String(recepient.address)
+    // };
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    saveHistory(chain, hierarchy, sender.address, currentTransactionDetail);
+    // // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    // saveHistory(chain, hierarchy, sender.address, currentTransactionDetail);
   }, [transactionHash, txStatus, chain]);
 
-  function handleConfirmTransfer() {
+  async function handleConfirmTransfer() {
     // console.log('handleConfirmTransfer is runing ...')
     setTransfering(true);
 
@@ -126,11 +126,27 @@ export default function ConfirmTx({
       setPasswordIsCorrect(1);
 
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
-        .then((hash) => {
-          setTransactionHash(hash);
-          setTransfering(false);
-        });
+      const { failureText, fee, status, txHash } = await signAndTransfer(pair, String(recepient.address), transferAmount, chain, setTxStatus)
+
+      const { decimals } = getNetworkInfo(chain);
+
+      const currentTransactionDetail: TransactionDetail = {
+        action: 'send',
+        amount: amountToHuman(String(transferAmount), decimals),
+        date: Date.now(),
+        fee: fee || '',
+        from: String(sender.address),
+        hash: txHash || '',
+        status: failureText || status,
+        to: String(recepient.address)
+      };
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      if (chain) { saveHistory(chain, hierarchy, sender.address, currentTransactionDetail); }
+
+      setTransactionHash(txHash);
+      setTransfering(false);
+
     } catch (e) {
       setPasswordIsCorrect(-1);
       setTransfering(false);
@@ -436,11 +452,10 @@ export default function ConfirmTx({
                   </MuiButton>
                 </Grid>
                 : <>
-
-                  <Grid item xs={2}>
+                  <Grid item xs={1}>
                     <BackButton onClick={handleConfirmModaClose} />
                   </Grid>
-                  <Grid item xs={10}>
+                  <Grid item xs={11} sx={{paddingLeft:'10px'}}>
                     <Button
                       data-button-action=''
                       isBusy={transfering}

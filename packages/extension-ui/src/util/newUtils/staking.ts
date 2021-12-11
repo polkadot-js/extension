@@ -9,8 +9,9 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { ISubmittableResult } from '@polkadot/types/types';
 
 import getNetworkInfo from './getNetwork';
-import { ValidatorsFromSubscan } from './pjpeTypes';
+import { TxInfo, ValidatorsFromSubscan } from './pjpeTypes';
 import { postData } from './postData';
+import { signAndSend } from './signAndSend';
 
 export async function getAllValidatorsFromSubscan(_chain: Chain): Promise<{ current: ValidatorsFromSubscan[] | null, waiting: ValidatorsFromSubscan[] | null } | null> {
   if (!_chain) {
@@ -256,79 +257,13 @@ export async function getStakingReward(_chain: Chain | null | undefined, _staker
   });
 }
 
-// export async function bondOrBondExtra(
-//   _chain: Chain | null | undefined,
-//   _stashAccountId: string | null,
-//   _signer: KeyringPair,
-//   _value: bigint,
-//   // _selectedValidators: AccountId[] | null,
-//   _alreadyBondedAmount: bigint,
-//   payee = 'Staked'): Promise<{ status: string, txHash?: string }> {
-//   try {
-//     console.log('bondOrBondExtra is called!');
 
-//     if (!_stashAccountId) {
-//       console.log('bondOrBondExtra:  controller is empty!');
 
-//       return { status: 'failed' };
-//     }
-
-//     /** payee:
-//      * Staked - Pay into the stash account, increasing the amount at stake accordingly.
-//      * Stash - Pay into the stash account, not increasing the amount at stake.
-//      * Account - Pay into a custom account.
-//      * Controller - Pay into the controller account.
-//      */
-//     const { url } = getNetworkInfo(_chain);
-//     let txHash = '';
-
-//     const wsProvider = new WsProvider(url);
-//     const api = await ApiPromise.create({ provider: wsProvider });
-//     let bonded: SubmittableExtrinsic<'promise', ISubmittableResult>;
-
-//     if (Number(_alreadyBondedAmount) > 0) {
-//       bonded = api.tx.staking.bondExtra(_value);
-//     } else {
-//       bonded = api.tx.staking.bond(_stashAccountId, _value, payee);
-//     }
-
-//     return new Promise((resolve) => {
-//       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-//       bonded.signAndSend(_signer, ({ events = [], status }) => {
-//         if (status.isFinalized) {
-//           txHash = status.asFinalized.toHex();
-//           console.log('transaction done with hash ', txHash);
-//         } else {
-//           console.log('Status of Bonding Transfer: ', status.toHuman());
-//         }
-
-//         events.forEach(({ event: { data, method, section }, phase }) => {
-//           console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
-
-//           if (String(method).includes('Failed')) {
-//             console.log('!!SOMTHING FAILED!!');
-
-//             resolve({ status: 'failed', txHash: txHash });
-
-//             return;
-//           }
-
-//           if (String(method).includes('Success')) {
-//             console.log('Bonded Successfully');
-//             resolve({ status: 'success', txHash: txHash });
-//           }
-//         });
-//       });
-//     });
-//   } catch (error) {
-//     console.log('Something went wrong while bond/nominate', error);
-
-//     return { status: 'failed' };
-//   }
-// }
-
-export async function unbond(_chain: Chain | null | undefined, _controllerAccountId: string | null, _signer: KeyringPair, _value: bigint)
-  : Promise<{ status: string, txHash?: string, failureText?: string }> {
+export async function unbond(
+  _chain: Chain | null | undefined,
+  _controllerAccountId: string | null,
+  _signer: KeyringPair,
+  _value: bigint): Promise<TxInfo> {
   try {
     console.log('unbond is called!');
 
@@ -346,34 +281,6 @@ export async function unbond(_chain: Chain | null | undefined, _controllerAccoun
     const unbonded = api.tx.staking.unbond(_value);
 
     return signAndSend(api, unbonded, _signer);
-    // return new Promise((resolve) => {
-    //   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    //   unbonded.signAndSend(_signer, ({ events = [], status }) => {
-    //     if (status.isFinalized) {
-    //       txHash = status.asFinalized.toHex();
-    //       console.log('unbond transaction done with hash ', status.asFinalized.toHex());
-    //     } else {
-    //       console.log('Status of unbonding: ', status.toHuman());
-    //     }
-
-    //     events.forEach(({ event: { data, method, section }, phase }) => {
-    //       console.log(String(phase) + ' :: ' + section + ':::' + method + ' ::::' + String(data));
-
-    //       if (String(method).includes('Failed')) {
-    //         console.log('!!SOMTHING FAILED!!');
-
-    //         resolve({ status: 'failed', txHash: txHash });
-
-    //         return;
-    //       }
-
-    //       if (String(method).includes('Success')) {
-    //         console.log('unbonded Successfully');
-    //         resolve({ status: 'success', txHash: txHash });
-    //       }
-    //     });
-    //   });
-    // });
   } catch (error) {
     console.log('Something went wrong while unbond', error);
 
@@ -386,7 +293,7 @@ export async function nominate(
   _stashAccountId: string | null,
   _signer: KeyringPair,
   _selectedValidators: string[] | null)
-  : Promise<{ status: string, txHash?: string, failureText?: string }> {
+  : Promise<TxInfo> {
   try {
     if (!_stashAccountId || !_selectedValidators || !_chain) {
       console.log('Nominate: validators, controller, or chain is empty!');
@@ -401,32 +308,6 @@ export async function nominate(
     const nominated = api.tx.staking.nominate(_selectedValidators);
 
     return signAndSend(api, nominated, _signer);
-
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    // nominated.signAndSend(_signer, ({ events = [], status }) => {
-    //   if (status.isFinalized) {
-    //     txHash = status.asFinalized.toHex();
-    //     console.log('nominate transaction done with hash ', status.asFinalized.toHex());
-    //   } else {
-    //     console.log('Status of Nomination Transfer: ', status.toHuman());
-    //   }
-
-    //   events.forEach(({ event: { data, method, section }, phase }) => {
-    //     console.log(phase.toString() + ' : ' + section + '.' + method + ' ' + data.toString());
-
-    //     if (method.includes('Failed')) {
-    //       console.log('!!SOMTHING FAILED while nominate!!');
-
-    //       resolve({ status: 'failed', txHash: txHash });
-    //     }
-
-    //     if (method.includes('Success')) {
-    //       console.log('nominated Successfully');
-
-    //       resolve({ status: 'success', txHash: txHash });
-    //     }
-    //   });
-    // });
   } catch (error) {
     console.log('Something went wrong while bond/nominate', error);
 
@@ -461,8 +342,14 @@ export async function getCurrentEraIndex(_chain: Chain | null | undefined): Prom
   }
 }
 
-export async function bondOrBondExtra(_chain: Chain | null | undefined, _stashAccountId: string | null, _signer: KeyringPair, _value: bigint, _alreadyBondedAmount: bigint, payee = 'Staked')
-  : Promise<{ status: string, txHash?: string, failureText?: string }> {
+export async function bondOrBondExtra(
+  _chain: Chain | null | undefined,
+  _stashAccountId: string | null,
+  _signer: KeyringPair,
+  _value: bigint,
+  _alreadyBondedAmount: bigint,
+  payee = 'Staked')
+  : Promise<TxInfo> {
   try {
     console.log('bondOrBondExtra is called!');
 
@@ -498,51 +385,58 @@ export async function bondOrBondExtra(_chain: Chain | null | undefined, _stashAc
   }
 }
 
-async function signAndSend(api: ApiPromise, submittable: SubmittableExtrinsic<'promise', ISubmittableResult>, _signer: KeyringPair)
-  : Promise<{ status: string, txHash?: string, failureText?: string }> {
-  return new Promise((resolve) => {
+export async function chill(
+  _chain: Chain | null | undefined,
+  _controllerId: string | null,
+  _signer: KeyringPair): Promise<TxInfo> {
+  try {
+    console.log('chill is called!');
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    submittable.signAndSend(_signer, async (result) => {
-      let txFailed = false;
-      let failureText;
+    if (!_controllerId) {
+      console.log('chill:  controller is empty!');
 
-      if (result.dispatchError) {
-        if (result.dispatchError.isModule) {
-          // for module errors, we have the section indexed, lookup
-          const decoded = api.registry.findMetaError(result.dispatchError.asModule);
-          const { docs, name, section } = decoded;
+      return { status: 'failed' };
+    }
 
-          txFailed = true;
-          failureText = `${docs.join(' ')}`;
+    const { url } = getNetworkInfo(_chain);
+    const wsProvider = new WsProvider(url);
+    const api = await ApiPromise.create({ provider: wsProvider });
+    const chilled = api.tx.staking.chill();
 
-          console.log(` ${section}.${name}: ${docs.join(' ')}`);
-        } else {
-          // Other, CannotLookup, BadOrigin, no extra info
-          // failedTxStatusText = result.dispatchError.toString();
-          console.log(result.dispatchError.toString());
-        }
-      }
+    return signAndSend(api, chilled, _signer);
+  } catch (error) {
+    console.log('Something went wrong while chill', error);
 
-      if (result.status.isFinalized) {
-        const signedBlock = await api.rpc.chain.getBlock(result.status.asFinalized);
+    return { status: 'failed' };
+  }
+}
 
-        console.log('failedTxStatusText', failureText);
+export async function withdrawUnbonded(
+  _chain: Chain | null | undefined,
+  _controllerId: string | null,
+  _signer: KeyringPair): Promise<TxInfo> {
+  try {
+    console.log('withdrawUnbonded is called!');
 
-        const senderAddres = _signer.address;
+    if (!_controllerId) {
+      console.log('withdrawUnbonded:  controller is empty!');
 
-        let txHash = '';
+      return { status: 'failed' };
+    }
 
-        // seatch for the hash of the extrinsic in the block
-        signedBlock.block.extrinsics.forEach((ex) => {
-          if (ex.isSigned) {
-            if (ex.signer.toString() === senderAddres) {
-              txHash = ex.hash.toHex();
-            }
-          }
-        });
-        resolve({ failureText: failureText, status: txFailed ? 'failed' : 'success', txHash: txHash });
-      }
-    });
-  });
+    const { url } = getNetworkInfo(_chain);
+    const wsProvider = new WsProvider(url);
+    const api = await ApiPromise.create({ provider: wsProvider });
+
+    const optSpans = await api.query.staking.slashingSpans(_controllerId);
+    const spanCount = optSpans.isNone ? 0 : optSpans.unwrap().prior.length + 1;
+
+    const withdraw = api.tx.staking.withdrawUnbonded(spanCount || 0);
+
+    return signAndSend(api, withdraw, _signer);
+  } catch (error) {
+    console.log('Something went wrong while withdrawUnbonded', error);
+
+    return { status: 'failed' };
+  }
 }

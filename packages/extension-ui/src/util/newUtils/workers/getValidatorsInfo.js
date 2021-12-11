@@ -52,9 +52,8 @@ async function getAllValidators (_chain) {
     // eslint-disable-next-line sort-keys
     const output = JSON.parse(JSON.stringify({ current: nextElectedInfo, waiting: waitingInfo, currentEraIndex: currentEra.toHuman() }));
 
-    console.log('a sample current validator:', nextElectedInfo[0]);
-
-    console.log('a sample waiting validator:', waitingInfo[0]);
+    // console.log('a sample current validator:', nextElectedInfo[0]);
+    // console.log('a sample waiting validator:', waitingInfo[0]);
 
     return output;
   } catch (error) {

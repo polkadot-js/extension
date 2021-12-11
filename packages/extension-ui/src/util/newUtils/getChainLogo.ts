@@ -9,15 +9,18 @@ import KSM from '../../assets/hackathonAssets/logos/KSM.svg';
 import WSN from '../../assets/hackathonAssets/logos/WSN.svg';
 import getNetworkInfo from './getNetwork';
 
-export default function getChainLogo (chain: Chain | null | undefined): string {
-  const { coin } = getNetworkInfo(chain);
+export default function getChainLogo(chain?: Chain | null | undefined, chainName?: string): string {
+  const coin = chain ? getNetworkInfo(chain).coin : chainName;
 
   switch (coin) {
     case ('WSN'):
+    case ('westend'):
       return WSN;
     case ('DOT'):
+    case ('polkadot'):
       return DOT;
     case ('KSM'):
+    case ('kusama'):
       return KSM;
     default:
       return WSN;

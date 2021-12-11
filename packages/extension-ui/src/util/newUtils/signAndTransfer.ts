@@ -11,14 +11,15 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 import getNetworkInfo from './getNetwork';
-import { TransactionStatus } from './pjpeTypes';
+import { TransactionStatus, TxInfo } from './pjpeTypes';
 
 export default async function signAndTransfer(
   _senderKeyring: KeyringPair,
   _receiverAddress: string,
   _amount: bigint,
   _chain: Chain | null | undefined,
-  setTxStatus: Dispatch<SetStateAction<TransactionStatus>>): Promise<string> {
+  setTxStatus: Dispatch<SetStateAction<TransactionStatus>>): Promise<TxInfo> {
+
   const { url } = getNetworkInfo(_chain);
   const wsProvider = new WsProvider(url);
   const api = await ApiPromise.create({ provider: wsProvider });
@@ -27,7 +28,7 @@ export default async function signAndTransfer(
     try {
       if (!_amount) {
         console.log('transfer value:', _amount);
-        resolve('');
+        resolve({ failureText: 'Transfer amount is zero!', status: 'failed' });
 
         return;
       }
@@ -37,9 +38,10 @@ export default async function signAndTransfer(
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       api.tx.balances
         .transfer(_receiverAddress, _amount)
+
         .signAndSend(_senderKeyring, async (result) => {
           let txFailed = false;
-          let failedTxStatusText = '';
+          let failureText = '';
 
           if (result.dispatchError) {
             if (result.dispatchError.isModule) {
@@ -48,12 +50,12 @@ export default async function signAndTransfer(
               const { docs, name, section } = decoded;
 
               txFailed = true;
-              failedTxStatusText = `${docs.join(' ')}`;
+              failureText = `${docs.join(' ')}`;
 
               console.log(` ${section}.${name}: ${docs.join(' ')}`);
             } else {
               // Other, CannotLookup, BadOrigin, no extra info
-              // failedTxStatusText = result.dispatchError.toString();
+              // failureText = result.dispatchError.toString();
               console.log(result.dispatchError.toString());
             }
           }
@@ -70,7 +72,7 @@ export default async function signAndTransfer(
             const blockNumber = signedBlock.block.header.number.toHuman();
 
             if (txFailed) {
-              setTxStatus({ blockNumber: String(blockNumber), success: false, text: failedTxStatusText });
+              setTxStatus({ blockNumber: String(blockNumber), success: false, text: failureText });
             } else {
               setTxStatus({ blockNumber: String(blockNumber), success: true, text: 'FINALIZED' });
             }
@@ -78,15 +80,15 @@ export default async function signAndTransfer(
             const senderAddres = _senderKeyring.address;
 
             // the hash for each extrinsic in the block
-            signedBlock.block.extrinsics.forEach((ex) => {
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            signedBlock.block.extrinsics.forEach(async (ex) => {
               if (ex.isSigned) {
                 if (ex.signer.toString() === senderAddres) {
-                  console.log('extrinsic', ex);
-                  console.log(ex.toHuman());
-
+                  const queryInfo = await api.rpc.payment.queryInfo(ex.toHex(), signedBlock.block.hash);
+                  const fee = queryInfo.partialFee.toString();
                   const txHash = ex.hash.toHex();
 
-                  resolve(txHash);
+                  resolve({ failureText: failureText, fee: fee, status: txFailed ? 'failed' : 'success', txHash: txHash });
                 }
               }
             });
@@ -95,7 +97,7 @@ export default async function signAndTransfer(
     } catch (e) {
       console.log('something went wrong while sign and transfe!');
       setTxStatus({ blockNumber: null, success: false, text: `Failed: ${e}` });
-      resolve('');
+      resolve({ failureText: String(e), status: 'failed' });
     }
   });
 }

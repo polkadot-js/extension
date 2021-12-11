@@ -524,6 +524,9 @@ export default function SelectValidators({ chain, coin, ledger, setSelectValidat
   useEffect(() => {
     let filteredValidators = validatorsInfo.current.concat(validatorsInfo.waiting);
 
+    // at first filtered blocked validatorsInfo
+    filteredValidators = filteredValidators?.filter((v) => !v.validatorPrefs.blocked);
+
     if (filterOverSubscribedsState) {
       filteredValidators = filteredValidators?.filter((v) => v.exposure.others.length < stakingConsts.maxNominatorRewardedPerValidator);
     }

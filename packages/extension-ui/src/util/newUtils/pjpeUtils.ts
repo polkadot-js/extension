@@ -13,11 +13,12 @@ import { AccountsBalanceType, savedMetaData, TransactionDetail } from './pjpeTyp
 // eslint-disable-next-line header/header
 export const FLOATING_POINT_DIGIT = 5;
 export const DEFAULT_TOKEN_DECIMALS = 12;
-export const MIN_EXTRA_BOND = 0.01;
+export const MIN_EXTRA_BOND = 1 / (10 ** FLOATING_POINT_DIGIT);
 export const DEFAULT_COIN = 'WND';
 export const DEFAULT_CHAIN_NAME = 'Westend';
 export const DEFAULT_VALIDATOR_COMMISION_FILTER = 20;
-export const TRANSACTION_HISTROY_DEFAULT_ROWS = 7;
+export const TRANSACTION_HISTROY_DEFAULT_ROWS = 6;
+export const MAX_ACCEPTED_COMMISSION = 50;
 
 export function fixFloatingPoint(_number: number | string): string {
   const sNumber = String(_number);
@@ -102,19 +103,20 @@ export function getSubstrateAddress(address: string): string {
   return encodeAddress(publicKey, 42);
 }
 
-export function prepareMetaData(chain: Chain, label: string, data: any): string {
-  const chainName = chain.name.replace(' Relay Chain', '');
+export function prepareMetaData(chain: Chain | null, label: string, metaData: any, _chainName?: string): string {
+  const chainName = chain ? chain.name.replace(' Relay Chain', '') : _chainName;
 
   return JSON.stringify({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    [label]: JSON.stringify({ chainName: chainName, metaData: data })
+    [label]: JSON.stringify({ chainName: chainName, metaData: metaData })
   });
 }
 
 export function getTransactionHistoryFromLocalStorage(
-  chain: Chain,
+  chain: Chain | null,
   hierarchy: AccountWithChildren[],
-  accountSubstrateAddress: string): TransactionDetail[] {
+  accountSubstrateAddress: string,
+  _chainName?: string): TransactionDetail[] {
   const account = hierarchy.find((h) => h.address === accountSubstrateAddress);
 
   if (!account) {
@@ -123,7 +125,7 @@ export function getTransactionHistoryFromLocalStorage(
     return [];
   }
 
-  const chainName = chain?.name.replace(' Relay Chain', '');
+  const chainName = chain ? chain.name.replace(' Relay Chain', '') : _chainName;
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const transactionHistoryFromLocalStorage: savedMetaData = account?.history ? JSON.parse(String(account.history)) : null;
@@ -146,3 +148,7 @@ export function getTransactionHistoryFromLocalStorage(
 
 //   return updateMeta(accountSubstrateAddress, prepareMetaData(chain, 'history', savedHistory));
 // }
+
+export const getWebsiteFavico = (url: string): string => {
+  return 'https://s2.googleusercontent.com/s2/favicons?domain=' + url;
+}

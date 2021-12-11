@@ -3,10 +3,10 @@
 
 // eslint-disable-next-line simple-import-sort/imports
 
-import { faBorderNone, faCheck, faCoins, faMinus, faPaperPlane, faPlus, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faBorderNone, faCheck, faCoins, faMinus, faLevelUpAlt, faLevelDownAlt, faPlus, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { HistoryRounded, LaunchRounded } from '@mui/icons-material';
-import { Avatar, Box, Button, Chip, Container, Divider, Grid, IconButton, Modal } from '@mui/material';
+import { AllInclusive, BlurOff, CallMade, HistoryRounded, LaunchRounded } from '@mui/icons-material';
+import { Avatar, Box, Button, Container, Divider, Grid, IconButton, Modal, Tab, Tabs, Tooltip } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -18,7 +18,7 @@ import { AccountContext } from '../../components/contexts';
 import useTranslation from '../../hooks/useTranslation';
 import getNetworkInfo from '../../util/newUtils/getNetwork';
 import { TransactionDetail } from '../../util/newUtils/pjpeTypes';
-import { getTransactionHistoryFromLocalStorage, TRANSACTION_HISTROY_DEFAULT_ROWS } from '../../util/newUtils/pjpeUtils';
+import { amountToHuman, getTransactionHistoryFromLocalStorage, TRANSACTION_HISTROY_DEFAULT_ROWS } from '../../util/newUtils/pjpeUtils';
 
 interface Props {
   address: string;
@@ -32,9 +32,12 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
   const [historyList, setHistoryList] = useState<TransactionDetail[] | []>([]);
+  // const [historyList, setFilteredHistoryList] = useState<TransactionDetail[] | []>([]);
   const [moreLoaded, setLoadMore] = useState(false);
   const [hasMoreToLoad, setHasMoreToLoad] = useState(false);
   const [coin, setCoin] = useState<string>('');
+  const [decimals, setDecimals] = useState<number>(1);
+  const [tabValue, setTabValue] = React.useState(0);
 
   useEffect(() => {
     if (!chain) {
@@ -43,8 +46,9 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
       return;
     }
 
-    const { coin } = getNetworkInfo(chain);
+    const { coin, decimals } = getNetworkInfo(chain);
 
+    setDecimals(decimals);
     setCoin(coin);
 
     let history: TransactionDetail[] = getTransactionHistoryFromLocalStorage(chain, hierarchy, address);
@@ -52,16 +56,30 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
     history = history.reverse();
     console.log('new history', history);
 
+    switch (tabValue) {
+      case (1): // transferes
+        history = history.filter((h) => ['send', 'receive'].includes(h.action.toLowerCase()));
+        break;
+      case (2): // staking
+        history = history.filter((h) => ['bond', 'unbond', 'bond_extra', 'nominate', 'redeem'].includes(h.action.toLowerCase()));
+        break;
+      default:
+        break;
+    };
+
     if (history.length > TRANSACTION_HISTROY_DEFAULT_ROWS) {
       setHasMoreToLoad(true);
+    } else {
+      setHasMoreToLoad(false);
     }
+
 
     if (!moreLoaded) {
       history = history.slice(0, TRANSACTION_HISTROY_DEFAULT_ROWS);
     }
 
     setHistoryList(history);
-  }, [address, hierarchy, moreLoaded, chain]);
+  }, [address, hierarchy, moreLoaded, chain, tabValue]);
 
   const handleTxHistoryModalClose = useCallback(
     (): void => {
@@ -91,7 +109,7 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
   function getIcon(action: string): IconDefinition {
     switch (action.toLowerCase()) {
       case ('send'):
-        return faPaperPlane;
+        return faLevelUpAlt;
       case ('bond'):
         return faCoins;
       case ('unbond'):
@@ -100,13 +118,27 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
         return faPlus;
       case ('nominate'):
         return faCheck;
+      case ('redeem'):
+        return faLevelDownAlt;
       default:
         return faBorderNone;
     }
   }
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  }
+
+  function makePhraseShort(_phrase: string): string {
+    // eslint-disable-next-line camelcase
+    const MAX_FAILED_PHRASE_TO_SHOw = 30;
+
+    return _phrase.substr(0, MAX_FAILED_PHRASE_TO_SHOw) + '...';
+  }
+
   return (
     <Modal
+      keepMounted
       // eslint-disable-next-line react/jsx-no-bind
       onClose={(_event, reason) => {
         if (reason !== 'backdropClick') {
@@ -135,6 +167,9 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
                 src={getChainLogo(chain)}
               />
             </Grid>
+            <Grid item sx={{ fontSize: 15, fontWeight: 600 }}>
+              <HistoryRounded /> {t('Transaction History')}
+            </Grid>
             <Grid item sx={{ fontSize: 15 }}>
               <ActionText
                 onClick={handleTxHistoryModalClose}
@@ -142,14 +177,28 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
               />
             </Grid>
           </Grid>
-          <Grid xs={12} sx={{ paddingBottom: '10px' }}>
-            <Box fontSize={12} fontWeight='fontWeightBold'>
-              <Divider>
-                <Chip icon={<HistoryRounded />} label={t('Transaction History')} variant='outlined' />
-              </Divider>
+          <Grid xs={12}>
+            <Divider />
+          </Grid>
+          <Grid item xs={12} >
+            <Box>
+              <Tabs
+                textColor='secondary'
+                indicatorColor='secondary'
+                // centered
+                variant='fullWidth'
+                value={tabValue}
+                onChange={handleTabChange}
+              >
+                <Tab icon={<AllInclusive fontSize='small' />} iconPosition='start' label='All' sx={{ fontSize: 10 }} />
+                <Tab icon={<CallMade fontSize='small' />} iconPosition='start' label='Transfers' sx={{ fontSize: 10 }} />
+                <Tab icon={<FontAwesomeIcon icon={faCoins} size='lg' />} iconPosition='start' label='Staking' sx={{ fontSize: 10 }} />
+              </Tabs>
             </Box>
           </Grid>
-          <Grid alignItems='center' container justifyContent='center' sx={{ padding: '20px 30px 1px' }}>
+
+
+          <Grid alignItems='center' container justifyContent='center' sx={{ padding: '0px 30px 5px' }}>
             {historyList?.map((h) => (
               <>
                 <Grid item xs={1}>
@@ -161,18 +210,24 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
                 </Grid>
                 <Grid item container xs={10}>
                   <Grid item container xs={12} sx={{ paddingTop: '10px' }}>
-                    <Grid xs={4} sx={{ fontSize: 15, textAlign: 'left', fontVariant: 'small-caps' }}>
+                    <Grid xs={4} sx={{ fontSize: 15, fontVariant: 'small-caps', textAlign: 'left' }}>
                       {h.action}
                     </Grid>
-                    <Grid item xs={4} sx={{ textAlign: 'right', fontWeight: 'bold', paddingRight:'40px' }}>
-                      {h.amount} {' '}{coin}
+                    <Grid item xs={4} sx={{ fontWeight: '600', paddingRight: '40px', textAlign: 'right' }}>
+                      {h.amount || '--- '} {' '}{coin}
                     </Grid>
                     <Grid item container xs={4} justifyContent='center'>
-                      <Box fontSize={11} sx={{ color: ['finalized', 'success'].includes(h.status.toLowerCase()) ? 'green' : 'red' }}>
-                        {['finalized', 'success'].includes(h.status.toLowerCase()) ? t('Success') : t('Failed')}
-                        <Box fontSize={9} sx={{ color: 'gray' }}>
-                          {!['finalized', 'success'].includes(h.status.toLowerCase()) ? h.status : ''}
-                        </Box>
+                      <Box fontSize={11} sx={{ color: ['success'].includes(h.status.toLowerCase()) ? 'green' : 'red' }}>
+                        {['success'].includes(h.status.toLowerCase()) ? t('Success') : t('Failed')}
+                        <Tooltip
+                          placement='right-end'
+                          arrow
+                          title={!['success'].includes(h.status.toLowerCase()) ? h.status : ''}
+                        >
+                          <Box fontSize={9} sx={{ color: 'gray' }}>
+                            {!['success'].includes(h.status.toLowerCase()) ? makePhraseShort(h.status) : ''}
+                          </Box>
+                        </Tooltip>
                       </Box>
                     </Grid>
                   </Grid>
@@ -180,8 +235,8 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
                     <Grid item xs={4} sx={{ textAlign: 'left' }}>
                       {h.to && t('To:')} {' '}{makeAddressShort(h.to)}
                     </Grid>
-                    <Grid item xs={4} sx={{ fontVariant: 'small-caps', textAlign: 'right', paddingRight:'50px' }}>
-                      {h.fee && t('Fee ')} {' '} {h.fee}
+                    <Grid item xs={4} sx={{ fontVariant: 'small-caps', paddingRight: '50px', textAlign: 'right' }}>
+                      {h.fee && t('Fee ')} {' '} {amountToHuman(h.fee, decimals)}
                     </Grid>
                     <Grid item xs={4} sx={{ textAlign: 'center' }}>
                       {new Date(h.date).toDateString()}{' '}{new Date(h.date).toLocaleTimeString()}
@@ -199,8 +254,20 @@ export default function TransactionHistory({ address, chain, name, setTxHistoryM
                 </Grid>
               </>
             ))}
+            {historyList.length === 0
+              ?
+              <>
+                <Grid item xs={12} sx={{ padding: '80px 0px 40px' }}>
+                  <BlurOff fontSize='large' color='disabled' />
+                </Grid>
+
+                <Grid item xs={12} sx={{ fontSize: 14 }}>
+                  Nothing to show
+                </Grid>
+              </>
+              : ''}
             {!moreLoaded && hasMoreToLoad
-              ? <Grid item display='flex' justifyContent='center' xs={12} sx={{ paddingTop: '30px' }}>
+              ? <Grid item display='flex' justifyContent='center' xs={12} sx={{ paddingTop: '20px' }}>
                 <Button color='primary' onClick={() => setLoadMore(true)} variant='text'>
                   {t('View More')}
                 </Button>

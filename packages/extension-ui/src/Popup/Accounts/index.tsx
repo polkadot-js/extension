@@ -20,7 +20,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function Accounts ({ className }: Props): React.ReactElement {
+function Accounts({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { hierarchy } = useContext(AccountContext);
 
@@ -29,7 +29,30 @@ function Accounts ({ className }: Props): React.ReactElement {
     cryptoWaitReady().then(() => {
       keyring.loadAll({ store: new AccountsStore() });
     });
+
+    // getCrowdLoands();
   }, []);
+
+  // function getCrowdLoands() {
+  //   const crowdloanWorker: Worker = new Worker(new URL('../../util/newUtils/workers/getCrowdloans.js', import.meta.url));
+
+  //   const chain='dummy';// TODO: change it
+
+  //   crowdloanWorker.postMessage({ chain });
+
+  //   crowdloanWorker.onerror = (err) => {
+  //     console.log(err);
+  //   };
+
+  //   crowdloanWorker.onmessage = (e: MessageEvent<any>) => {
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  //     const result: { crowdloans: Auction } = e.data;
+
+  //     console.log('crowd loans ', result);
+  //   };
+  // }
+
+  console.log('hierarchy:', hierarchy);
 
   return (
     <>

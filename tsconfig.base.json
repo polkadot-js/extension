@@ -14,6 +14,7 @@
       "@polkadot/extension-dapp/*": ["extension-dapp/src/*"],
       "@polkadot/extension-inject": ["extension-inject/src"],
       "@polkadot/extension-inject/*": ["extension-inject/src/*"],
+      "@polkadot/extension-mocks/*": ["extension-mocks/src/*"],
       "@polkadot/extension-ui": ["extension-ui/src"],
       "@polkadot/extension-ui/*": ["extension-ui/src/*"]
     },

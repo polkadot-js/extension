@@ -17,6 +17,6 @@
   "version": "0.42.3-1",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.16.3"
+    "@babel/runtime": "^7.16.5"
   }
 }

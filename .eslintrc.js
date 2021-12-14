@@ -6,7 +6,8 @@ const base = require('@polkadot/dev/config/eslint.cjs');
 module.exports = {
   ...base,
   ignorePatterns: [
-    ...base.ignorePatterns
+    ...base.ignorePatterns,
+    "i18next-scanner.config.js"
   ],
   parserOptions: {
     ...base.parserOptions,

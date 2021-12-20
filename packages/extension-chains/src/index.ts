@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { ChainProperties } from '@polkadot/types/interfaces';
 import type { Chain } from './types';
 
 import { Metadata, TypeRegistry } from '@polkadot/types';
@@ -35,7 +34,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     ss58Format,
     tokenDecimals,
     tokenSymbol
-  }) as ChainProperties);
+  }));
 
   const hasMetadata = !!metaCalls && !isPartial;
 

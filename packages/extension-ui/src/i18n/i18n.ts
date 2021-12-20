@@ -22,9 +22,6 @@ i18next
     lng: uiSettings.i18nLang,
     load: 'languageOnly',
     nsSeparator: false,
-    react: {
-      wait: true
-    },
     returnEmptyString: false,
     returnNull: false
   })

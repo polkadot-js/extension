@@ -85,7 +85,7 @@ export enum NotificationOptions {
 
 const AUTH_URLS_KEY = 'authUrls';
 
-const AUTHORIZED_URL_SCHEMES = ['http', 'https', 'ipfs', 'ipns', 'chrome-extension'];
+const AUTHORIZED_URL_SCHEMES = ['http', 'https', 'ipfs', 'ipns', 'chrome-extension', 'moz-extension'];
 
 export default class State {
   readonly #authUrls: AuthUrls = {};

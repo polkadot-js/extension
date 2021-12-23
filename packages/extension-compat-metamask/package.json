@@ -14,12 +14,12 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.42.3-6",
+  "version": "0.42.3-7",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.5",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.42.3-6",
+    "@polkadot/extension-inject": "^0.42.3-7",
     "@polkadot/types": "^7.0.3-7",
     "@polkadot/util": "^8.2.2",
     "web3": "^1.6.1"

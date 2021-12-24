@@ -23,7 +23,7 @@
     "@polkadot/util-crypto": "^8.2.2"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.171",
+    "@types/chrome": "^0.0.172",
     "@types/firefox-webext-browser": "^94.0.0"
   },
   "peerDependencies": {

@@ -10,5 +10,7 @@
     "packages/**/*.js",
     "packages/**/*.cjs"
   ],
-  "exclue": ["**/node_modules/**/*"]
+  "exclude": [
+    "**/node_modules/**/*"
+  ]
 }

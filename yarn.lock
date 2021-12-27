@@ -2505,6 +2505,7 @@ __metadata:
     "@babel/runtime": ^7.16.5
     "@polkadot/extension-inject": ^0.42.4
     "@polkadot/networks": ^8.2.2
+    "@polkadot/util": ^8.2.2
     "@polkadot/util-crypto": ^8.2.2
   peerDependencies:
     "@polkadot/api": "*"
@@ -2549,6 +2550,7 @@ __metadata:
     "@babel/runtime": ^7.16.5
     "@polkadot/rpc-provider": ^7.1.1
     "@polkadot/types": ^7.1.1
+    "@polkadot/util": ^8.2.2
     "@polkadot/util-crypto": ^8.2.2
     "@types/chrome": ^0.0.173
     "@types/firefox-webext-browser": ^94.0.0

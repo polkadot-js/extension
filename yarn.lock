@@ -2580,6 +2580,7 @@ __metadata:
     "@polkadot/extension-chains": ^0.42.4-0
     "@polkadot/extension-dapp": ^0.42.4-0
     "@polkadot/extension-inject": ^0.42.4-0
+    "@polkadot/extension-mocks": ^0.42.4-0
     "@polkadot/hw-ledger": ^8.2.2
     "@polkadot/keyring": ^8.2.2
     "@polkadot/networks": ^8.2.2

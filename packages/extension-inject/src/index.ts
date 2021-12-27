@@ -1,7 +1,11 @@
 // Copyright 2019-2021 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import './detectPackage';
+
 import type { Injected, InjectedWindow, InjectOptions } from './types';
+
+export { packageInfo } from './packageInfo';
 
 // It is recommended to always use the function below to shield the extension and dapp from
 // any future changes. The exposed interface will manage access between the 2 environments,

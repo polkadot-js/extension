@@ -1,12 +1,16 @@
 // Copyright 2019-2021 @polkadot/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import './detectPackage';
+
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { ChainProperties } from '@polkadot/types/interfaces';
 import type { Chain } from './types';
 
 import { Metadata, TypeRegistry } from '@polkadot/types';
 import { base64Decode } from '@polkadot/util-crypto';
+
+export { packageInfo } from './packageInfo';
 
 // imports chain details, generally metadata. For the generation of these,
 // inside the api, run `yarn chain:info --ws <url>`

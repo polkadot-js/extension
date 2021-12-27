@@ -2486,7 +2486,7 @@ __metadata:
     "@polkadot/extension-inject": ^0.42.3
     "@polkadot/extension-mocks": ^0.42.3
     "@polkadot/keyring": ^8.2.2
-    "@polkadot/phishing": ^0.6.581
+    "@polkadot/phishing": ^0.6.582
     "@polkadot/rpc-provider": ^7.1.1
     "@polkadot/types": ^7.1.1
     "@polkadot/ui-keyring": ^0.87.7
@@ -2550,7 +2550,7 @@ __metadata:
     "@polkadot/rpc-provider": ^7.1.1
     "@polkadot/types": ^7.1.1
     "@polkadot/util-crypto": ^8.2.2
-    "@types/chrome": ^0.0.172
+    "@types/chrome": ^0.0.173
     "@types/firefox-webext-browser": ^94.0.0
   peerDependencies:
     "@polkadot/api": "*"
@@ -2697,15 +2697,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.6.581":
-  version: 0.6.581
-  resolution: "@polkadot/phishing@npm:0.6.581"
+"@polkadot/phishing@npm:^0.6.582":
+  version: 0.6.582
+  resolution: "@polkadot/phishing@npm:0.6.582"
   dependencies:
     "@babel/runtime": ^7.16.5
     "@polkadot/util": ^8.2.2
     "@polkadot/util-crypto": ^8.2.2
     "@polkadot/x-fetch": ^8.2.2
-  checksum: 5d9323cc393200e54c6a25b571db00a4d6a910a6dc40bcbf60b7bf9b10017802757e54f3ff5fe4e8b8be517b40c65e710bbee1f835bdcd51620eba7c48519817
+  checksum: b6c5a33956b2ca4eca0d3137922010b5dbf68d925a6776aafd6f015cecb15361afd2538f656653d3e89c39a4bb76704f675b66ea97487fdcfd9410108840123e
   languageName: node
   linkType: hard
 
@@ -3303,13 +3303,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:*, @types/chrome@npm:^0.0.172":
-  version: 0.0.172
-  resolution: "@types/chrome@npm:0.0.172"
+"@types/chrome@npm:*, @types/chrome@npm:^0.0.173":
+  version: 0.0.173
+  resolution: "@types/chrome@npm:0.0.173"
   dependencies:
     "@types/filesystem": "*"
     "@types/har-format": "*"
-  checksum: 6bac189062ca2efc7c4eaaac18946234e3a522c071534618722326a45dc69ec0da413227d7eb3c7ae630173c538975671cfccabfd8c2abcca8b8b0afe47b2179
+  checksum: cdaf0d4ba0d533e55b8d0c475b73fd01a7b239e2abcae29bf818bf076fa5369e3c536b5cd47e000a4fd60aa81e92edb3a0bb0dbaa4e1268773641d67b5591c4e
   languageName: node
   linkType: hard
 

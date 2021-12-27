@@ -304,7 +304,7 @@ export default class Extension {
     }
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, seed: _seed, type, customEthDerivationPath  }: RequestSeedCreate): ResponseSeedCreate {
+  private seedCreate ({ length = SEED_DEFAULT_LENGTH, seed: _seed, type, customEthDerivationPath }: RequestSeedCreate): ResponseSeedCreate {
     const seed = _seed || mnemonicGenerate(length);
 
     return {

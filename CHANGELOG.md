@@ -1,6 +1,15 @@
 # CHANGELOG
 
-## 0.43.3 Dec 27, 2021
+## 0.42.4 Dec 27, 2021
+
+**Important** As 0.42.3, not published to the stores, fixes dependency issue in 0.42.4.
+
+Changes:
+
+- Ensure `@polkadot/extension-mocks` is correctly listed as devDependency
+
+
+## 0.42.3 Dec 27, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.
 

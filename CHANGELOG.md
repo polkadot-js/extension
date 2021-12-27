@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.43.3 Dec 27, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Fix typo on https://polkadot.js.org/docs/ (Thanks to https://github.com/michaelhealyco)
+
+Changes:
+
+- Bump `@polkadot/util` to 8.2.2
+- Bump `@polkadot/api` to 7.1.1
+
+
 ## 0.42.2 Dec 10, 2021
 
 Changes:

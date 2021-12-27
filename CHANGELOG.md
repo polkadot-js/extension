@@ -4,6 +4,10 @@
 
 **Important** Not published to the stores, aligns with latest released packages.
 
+Contributed:
+
+- Fix typo on https://polkadot.js.org/docs/ (Thanks to https://github.com/michaelhealyco)
+
 Changes:
 
 - Bump `@polkadot/util` to 8.2.2

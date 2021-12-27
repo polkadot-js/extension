@@ -6,7 +6,7 @@ const config = require('@polkadot/dev/config/jest.cjs');
 module.exports = {
   ...config,
   moduleNameMapper: {
-    '@polkadot/extension-(base|chains|compat-metamask|dapp|inject|ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
+    '@polkadot/extension-(base|chains|compat-metamask|dapp|inject|mocks|ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
     // eslint-disable-next-line sort-keys
     '@polkadot/extension(.*)$': '<rootDir>/packages/extension/src/$1',
     '\\.(css|less)$': 'empty/object',

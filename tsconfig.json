@@ -1,27 +1,16 @@
 {
-  "extends": "@polkadot/dev/config/tsconfig.json",
-  "exclude": [
-    "build/**/*",
-    "**/build/*",
-    "**/build/**/*"
-  ],
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@polkadot/extension": ["packages/extension/src"],
-      "@polkadot/extension/*": ["packages/extension/src/*"],
-      "@polkadot/extension-base": ["packages/extension-base/src"],
-      "@polkadot/extension-base/*": ["packages/extension-base/src/*"],
-      "@polkadot/extension-chains": ["packages/extension-chains/src"],
-      "@polkadot/extension-chains/*": ["packages/extension-chains/src/*"],
-      "@polkadot/extension-compat-metamask": ["packages/extension-compat-metamask/src"],
-      "@polkadot/extension-dapp": ["packages/extension-dapp/src"],
-      "@polkadot/extension-dapp/*": ["packages/extension-dapp/src/*"],
-      "@polkadot/extension-inject": ["packages/extension-inject/src"],
-      "@polkadot/extension-inject/*": ["packages/extension-inject/src/*"],
-      "@polkadot/extension-ui": ["packages/extension-ui/src"],
-      "@polkadot/extension-ui/*": ["packages/extension-ui/src/*"]
-    },
-    "skipLibCheck": true
-  }
+    "composite": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/extension" },
+    { "path": "./packages/extension-base" },
+    { "path": "./packages/extension-chains" },
+    { "path": "./packages/extension-compat-metamask" },
+    { "path": "./packages/extension-dapp" },
+    { "path": "./packages/extension-inject" },
+    { "path": "./packages/extension-mocks" },
+    { "path": "./packages/extension-ui" }
+  ]
 }

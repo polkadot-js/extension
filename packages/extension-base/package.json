@@ -12,17 +12,31 @@
     "type": "git",
     "url": "https://github.com/polkadot-js/extension.git"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./detectPackage.js",
+    "./detectPackage.cjs"
+  ],
   "type": "module",
-  "version": "0.41.3-6",
+  "version": "0.42.5-0",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.16.3",
-    "@polkadot/api": "^6.11.1",
-    "@polkadot/extension-dapp": "^0.41.3-6",
-    "@polkadot/extension-inject": "^0.41.3-6",
-    "@polkadot/keyring": "^8.1.2",
-    "@polkadot/phishing": "^0.6.510",
-    "@polkadot/ui-keyring": "^0.87.5"
+    "@babel/runtime": "^7.16.5",
+    "@polkadot/api": "^7.1.1",
+    "@polkadot/extension-chains": "^0.42.5-0",
+    "@polkadot/extension-dapp": "^0.42.5-0",
+    "@polkadot/extension-inject": "^0.42.5-0",
+    "@polkadot/keyring": "^8.2.2",
+    "@polkadot/phishing": "^0.6.582",
+    "@polkadot/rpc-provider": "^7.1.1",
+    "@polkadot/types": "^7.1.1",
+    "@polkadot/ui-keyring": "^0.87.7",
+    "@polkadot/ui-settings": "^0.87.7",
+    "@polkadot/util": "^8.2.2",
+    "@polkadot/util-crypto": "^8.2.2",
+    "eventemitter3": "^4.0.7",
+    "rxjs": "^7.4.0"
+  },
+  "devDependencies": {
+    "@polkadot/extension-mocks": "^0.42.5-0"
   }
 }

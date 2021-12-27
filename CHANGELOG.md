@@ -1,5 +1,52 @@
 # CHANGELOG
 
+## 0.42.4 Dec 27, 2021
+
+**Important** As 0.42.3, not published to the stores, fixes dependency issue in 0.42.4.
+
+Changes:
+
+- Ensure `@polkadot/extension-mocks` is correctly listed as devDependency
+
+
+## 0.42.3 Dec 27, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Fix typo on https://polkadot.js.org/docs/ (Thanks to https://github.com/michaelhealyco)
+
+Changes:
+
+- Bump `@polkadot/util` to 8.2.2
+- Bump `@polkadot/api` to 7.1.1
+
+
+## 0.42.2 Dec 10, 2021
+
+Changes:
+
+- Fix bug introduced in 0.42.1 where account storage is not portable after the base port update
+
+
+## 0.42.1 Dec 10, 2021
+
+Contributed:
+
+- Allow for configuration of base ports (Thanks to https://github.com/AndreiEres)
+- Adjust messaging for non-signRaw accounts (Thanks to https://github.com/BigBadAlien)
+- Additional tests for Ethereum derivation (Thanks to https://github.com/joelamouche)
+
+Changes:
+
+- Adjust `chrome.*` location via polyfill on non-Chrome browsers
+- Allow import of account via QR (where seed is provided)
+- Expand error messaging for non-compatible Ledger chains
+- Bump `@polkadot/util` to 8.1.2
+- Bump `@polkadot/api` to 6.11.1
+
+
 ## 0.41.2 Nov 30, 2021
 
 **Important** Not published to the stores, aligns with latest released packages.

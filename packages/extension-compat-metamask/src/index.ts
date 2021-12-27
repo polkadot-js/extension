@@ -1,5 +1,7 @@
-// Copyright 2019-2020 @polkadot/extension-dapp authors & contributors
+// Copyright 2019-2020 @polkadot/extension-compat-metamask authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+import './detectPackage';
 
 import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
 import type { SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
@@ -9,6 +11,8 @@ import detectEthereumProvider from '@metamask/detect-provider';
 import Web3 from 'web3';
 
 import { assert } from '@polkadot/util';
+
+export { packageInfo } from './packageInfo';
 
 interface RequestArguments {
   method: string;

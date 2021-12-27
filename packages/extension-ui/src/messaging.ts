@@ -12,7 +12,6 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
-import chrome from '@polkadot/extension-inject/chrome';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import allChains from './util/chains';
@@ -132,8 +131,8 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createSeed (length?: SeedLengths, type?: KeypairType, customEthDerivationPath?: string): Promise<{ address: string; seed: string }> {
-  return sendMessage('pri(seed.create)', { customEthDerivationPath, length, type });
+export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType, customEthDerivationPath?: string): Promise<{ address: string; seed: string }> {
+  return sendMessage('pri(seed.create)', { customEthDerivationPath, length, seed, type });
 }
 
 export async function getAllMetatdata (): Promise<MetadataDef[]> {

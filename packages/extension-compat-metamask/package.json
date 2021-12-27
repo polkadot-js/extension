@@ -12,15 +12,19 @@
     "type": "git",
     "url": "https://github.com/polkadot-js/extension.git"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./detectPackage.js",
+    "./detectPackage.cjs"
+  ],
   "type": "module",
-  "version": "0.41.3-6",
+  "version": "0.42.5-0",
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": "^7.16.3",
+    "@babel/runtime": "^7.16.5",
     "@metamask/detect-provider": "^1.2.0",
-    "@polkadot/extension-inject": "^0.41.3-6",
-    "@polkadot/util": "^8.1.2",
+    "@polkadot/extension-inject": "^0.42.5-0",
+    "@polkadot/types": "^7.1.1",
+    "@polkadot/util": "^8.2.2",
     "web3": "^1.6.1"
   },
   "peerDependencies": {

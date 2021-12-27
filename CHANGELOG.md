@@ -2,7 +2,7 @@
 
 ## 0.42.4 Dec 27, 2021
 
-**Important** As 0.42.3, not published to the stores, aligns with latest released packages.
+**Important** As 0.42.3, not published to the stores, fixes dependency issue in 0.42.4.
 
 Changes:
 

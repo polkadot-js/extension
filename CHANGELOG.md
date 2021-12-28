@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Ensure that only latest metadata is applied (when multiple genesis)
+- Rename all `*.test.ts` to `*.spec.ts` (cross-repo consistency)
+
+
 ## 0.42.4 Dec 27, 2021
 
 **Important** As 0.42.3, not published to the stores, fixes dependency issue in 0.42.4.

@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
+import { knownGenesis } from '@polkadot/networks/defaults';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
@@ -85,6 +86,33 @@ export enum NotificationOptions {
 
 const AUTH_URLS_KEY = 'authUrls';
 
+function extractMetadata (store: MetadataStore): void {
+  const knownEntries = Object.entries(knownGenesis);
+  const defs: Record<string, { def: MetadataDef, index: number }> = {};
+
+  store.all((key: string, def: MetadataDef): void => {
+    const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+
+    if (entry) {
+      const [name, hashes] = entry;
+      const index = hashes.indexOf(def.genesisHash);
+
+      // flatten the known metadata based on the genesis index
+      // (lower is better/newer)
+      if (!defs[name] || (defs[name].index > index)) {
+        defs[name] = { def, index };
+      }
+    } else {
+      // this is not a known entry, so we will just apply it
+      defs[key] = { def, index: 0 };
+    }
+  });
+
+  Object.values(defs).forEach(({ def }): void => {
+    addMetadata(def);
+  });
+}
+
 export default class State {
   readonly #authUrls: AuthUrls = {};
 
@@ -115,9 +143,7 @@ export default class State {
   constructor (providers: Providers = {}) {
     this.#providers = providers;
 
-    this.#metaStore.all((_key: string, def: MetadataDef): void => {
-      addMetadata(def);
-    });
+    extractMetadata(this.#metaStore);
 
     // retrieve previously set authorizations
     const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';

@@ -23,7 +23,7 @@
     "@babel/runtime": "^7.16.5",
     "@metamask/detect-provider": "^1.2.0",
     "@polkadot/extension-inject": "^0.42.5-0",
-    "@polkadot/types": "^7.1.1",
+    "@polkadot/types": "^7.1.2-0",
     "@polkadot/util": "^8.2.2",
     "web3": "^1.6.1"
   },

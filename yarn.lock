@@ -2486,6 +2486,7 @@ __metadata:
     "@polkadot/extension-inject": ^0.42.5-1
     "@polkadot/extension-mocks": ^0.42.5-1
     "@polkadot/keyring": ^8.2.2
+    "@polkadot/networks": ^8.2.2
     "@polkadot/phishing": ^0.6.585
     "@polkadot/rpc-provider": ^7.1.2-0
     "@polkadot/types": ^7.1.2-0

@@ -26,6 +26,7 @@
     "@polkadot/extension-dapp": "^0.42.5-0",
     "@polkadot/extension-inject": "^0.42.5-0",
     "@polkadot/keyring": "^8.2.2",
+    "@polkadot/networks": "^8.2.2",
     "@polkadot/phishing": "^0.6.582",
     "@polkadot/rpc-provider": "^7.1.1",
     "@polkadot/types": "^7.1.1",

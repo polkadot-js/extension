@@ -117,8 +117,6 @@ function extractMetadata (store: MetadataStore): void {
         }
       });
 
-    console.log(Object.keys(defs), Object.values(defs), JSON.stringify(defs));
-
     removals.forEach((key) => store.remove(key));
     Object.values(defs).forEach(({ def }) => addMetadata(def));
   });

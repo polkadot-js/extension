@@ -4,6 +4,7 @@
 import { packageInfo as injectInfo } from '@polkadot/extension-inject/packageInfo';
 import { detectPackage } from '@polkadot/util';
 
+import __dirname from './cjs/dirname';
 import { packageInfo } from './packageInfo';
 
 detectPackage(packageInfo, typeof __dirname !== 'undefined' && __dirname, [injectInfo]);

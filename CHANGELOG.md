@@ -6,6 +6,7 @@ Changes:
 
 - Ensure that only latest metadata is applied (when multiple genesis)
 - Rename all `*.test.ts` to `*.spec.ts` (cross-repo consistency)
+- Ensure package path is availble under ESM & CJS
 
 
 ## 0.42.4 Dec 27, 2021

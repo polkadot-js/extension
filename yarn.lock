@@ -2385,9 +2385,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.64.27":
-  version: 0.64.27
-  resolution: "@polkadot/dev@npm:0.64.27"
+"@polkadot/dev@npm:^0.65.2":
+  version: 0.65.2
+  resolution: "@polkadot/dev@npm:0.65.2"
   dependencies:
     "@babel/cli": ^7.16.7
     "@babel/core": ^7.16.7
@@ -2472,7 +2472,7 @@ __metadata:
     polkadot-exec-rollup: scripts/polkadot-exec-rollup.mjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
-  checksum: 9fd3c48aa9fcfeae71bafb110abbdd6668076d3bd92af9c72d355b720575f1091ec34e5ccb71769d6ebb2868fda8ef544c73d8d0951966b867148c836ea29330
+  checksum: 7ce4e87bd8d47265b2c7bbdf447693c316b7b3de6016ce785c8c7795764a71fb2da9bdd7716ef89766e8c1bc4bcbd791cdd4cbcde62e94c8e1e88cc14fc48e3b
   languageName: node
   linkType: hard
 
@@ -2488,7 +2488,7 @@ __metadata:
     "@polkadot/extension-mocks": ^0.42.5-9
     "@polkadot/keyring": ^8.2.2
     "@polkadot/networks": ^8.2.2
-    "@polkadot/phishing": ^0.6.597
+    "@polkadot/phishing": ^0.7.3
     "@polkadot/rpc-provider": ^7.1.2-1
     "@polkadot/types": ^7.1.2-1
     "@polkadot/ui-keyring": ^0.87.8-2
@@ -2597,7 +2597,7 @@ __metadata:
     "@polkadot/util": ^8.2.2
     "@polkadot/util-crypto": ^8.2.2
     "@types/bn.js": ^4.11.6
-    "@types/enzyme": ^3.10.10
+    "@types/enzyme": ^3.10.11
     "@types/enzyme-adapter-react-16": ^1.0.6
     "@types/file-saver": ^2.0.4
     "@types/react-copy-to-clipboard": ^5.0.2
@@ -2628,7 +2628,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@babel/runtime": ^7.16.7
-    "@polkadot/dev": ^0.64.27
+    "@polkadot/dev": ^0.65.2
     "@polkadot/extension-base": ^0.42.5-9
     "@polkadot/extension-inject": ^0.42.5-9
     "@polkadot/extension-ui": ^0.42.5-9
@@ -2702,15 +2702,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.6.597":
-  version: 0.6.597
-  resolution: "@polkadot/phishing@npm:0.6.597"
+"@polkadot/phishing@npm:^0.7.3":
+  version: 0.7.3
+  resolution: "@polkadot/phishing@npm:0.7.3"
   dependencies:
-    "@babel/runtime": ^7.16.5
+    "@babel/runtime": ^7.16.7
     "@polkadot/util": ^8.2.2
     "@polkadot/util-crypto": ^8.2.2
     "@polkadot/x-fetch": ^8.2.2
-  checksum: 1b25c54244804bfa60c5cd502f4e9f8af62506aa4e82315d2bc99080767bd3f1560e7a1f0fa246d098ae52f4694f114365dff8b16f53235a6e7bc7385478bade
+  checksum: bc39625ca087668fc1400a75b265b973838877f1bd8cd25c32d25a6ed54a13167287209da852ced5c033dd3b73684ebd92e08abec735dee0e83fc781f1be1117
   languageName: node
   linkType: hard
 
@@ -3327,13 +3327,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/enzyme@npm:*, @types/enzyme@npm:^3.10.10":
-  version: 3.10.10
-  resolution: "@types/enzyme@npm:3.10.10"
+"@types/enzyme@npm:*, @types/enzyme@npm:^3.10.11":
+  version: 3.10.11
+  resolution: "@types/enzyme@npm:3.10.11"
   dependencies:
     "@types/cheerio": "*"
     "@types/react": "*"
-  checksum: e2393f87d6737d643789fb1a83c53c5cb6cb9eaebf1e1c8a3163d95f778f3741a9734fea47761a7648d9c778166ffd531f61c0aa4c5bf97b0d8018cacad05a49
+  checksum: 4085899b16e691e715f374345fae2963dc89a002c55a249381e37f94d93c8d016ad7208a8d11cc0f2d8c7cdfa6fa9f5590f0bfae984e51571f5d1e9c2d6ee782
   languageName: node
   linkType: hard
 
@@ -14220,7 +14220,7 @@ resolve@^2.0.0-next.3:
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
     "@babel/core": ^7.16.7
-    "@polkadot/dev": ^0.64.27
+    "@polkadot/dev": ^0.65.2
     "@types/jest": ^27.4.0
     i18next-scanner: ^3.1.0
     sinon-chrome: ^3.0.1

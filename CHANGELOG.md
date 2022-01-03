@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Ensure that only latest metadata is applied (when multiple genesis)
+- Rename all `*.test.ts` to `*.spec.ts` (cross-repo consistency)
+- Ensure package path is availble under ESM & CJS
+
+
+## 0.42.4 Dec 27, 2021
+
+**Important** As 0.42.3, not published to the stores, fixes dependency issue in 0.42.4.
+
+Changes:
+
+- Ensure `@polkadot/extension-mocks` is correctly listed as devDependency
+
+
+## 0.42.3 Dec 27, 2021
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Fix typo on https://polkadot.js.org/docs/ (Thanks to https://github.com/michaelhealyco)
+
+Changes:
+
+- Bump `@polkadot/util` to 8.2.2
+- Bump `@polkadot/api` to 7.1.1
+
+
 ## 0.42.2 Dec 10, 2021
 
 Changes:

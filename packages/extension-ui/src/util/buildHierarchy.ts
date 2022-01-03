@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';

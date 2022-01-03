@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension authors & contributors
+// Copyright 2019-2022 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { EXTENSION_PREFIX } from '../defaults';

@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-bg authors & contributors
+// Copyright 2019-2022 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
+import { knownGenesis } from '@polkadot/networks/defaults';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
@@ -87,6 +88,42 @@ const AUTH_URLS_KEY = 'authUrls';
 
 const AUTHORIZED_URL_SCHEMES = ['http', 'https', 'ipfs', 'ipns', 'chrome-extension', 'moz-extension'];
 
+function extractMetadata (store: MetadataStore): void {
+  store.allMap((map): void => {
+    const knownEntries = Object.entries(knownGenesis);
+    const defs: Record<string, { def: MetadataDef, index: number, key: string }> = {};
+    const removals: string[] = [];
+
+    Object
+      .entries(map)
+      .forEach(([key, def]): void => {
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+
+        if (entry) {
+          const [name, hashes] = entry;
+          const index = hashes.indexOf(def.genesisHash);
+
+          // flatten the known metadata based on the genesis index
+          // (lower is better/newer)
+          if (!defs[name] || (defs[name].index > index)) {
+            if (defs[name]) {
+              // remove the old version of the metadata
+              removals.push(defs[name].key);
+            }
+
+            defs[name] = { def, index, key };
+          }
+        } else {
+          // this is not a known entry, so we will just apply it
+          defs[key] = { def, index: 0, key };
+        }
+      });
+
+    removals.forEach((key) => store.remove(key));
+    Object.values(defs).forEach(({ def }) => addMetadata(def));
+  });
+}
+
 export default class State {
   readonly #authUrls: AuthUrls = {};
 
@@ -117,9 +154,7 @@ export default class State {
   constructor (providers: Providers = {}) {
     this.#providers = providers;
 
-    this.#metaStore.all((_key: string, def: MetadataDef): void => {
-      addMetadata(def);
-    });
+    extractMetadata(this.#metaStore);
 
     // retrieve previously set authorizations
     const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';

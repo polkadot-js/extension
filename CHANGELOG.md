@@ -6,6 +6,7 @@ Changes:
 
 - Ensure that only latest metadata is applied (when multiple genesis)
 - Rename all `*.test.ts` to `*.spec.ts` (cross-repo consistency)
+- Only apply cross-browser environment globally in non-content scripts
 - Ensure package path is availble under ESM & CJS
 
 

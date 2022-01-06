@@ -21,7 +21,8 @@
     "@polkadot/rpc-provider": "^7.2.1",
     "@polkadot/types": "^7.2.1",
     "@polkadot/util": "^8.2.2",
-    "@polkadot/util-crypto": "^8.2.2"
+    "@polkadot/util-crypto": "^8.2.2",
+    "@polkadot/x-global": "^8.2.2"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.174",

@@ -22,9 +22,9 @@
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@polkadot/extension-inject": "^0.42.5-15",
-    "@polkadot/networks": "^8.2.2",
-    "@polkadot/util": "^8.2.2",
-    "@polkadot/util-crypto": "^8.2.2"
+    "@polkadot/networks": "^8.2.3-29",
+    "@polkadot/util": "^8.2.3-29",
+    "@polkadot/util-crypto": "^8.2.3-29"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

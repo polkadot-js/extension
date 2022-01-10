@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## master
+## 0.42.5 Jan 10, 2022
+
+**Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
@@ -8,6 +10,8 @@ Changes:
 - Rename all `*.test.ts` to `*.spec.ts` (cross-repo consistency)
 - Only apply cross-browser environment globally in non-content scripts
 - Ensure package path is availble under ESM & CJS
+- Bump `@polkadot/util` to 8.3.1
+- Bump `@polkadot/api` to 7.3.1
 
 
 ## 0.42.4 Dec 27, 2021

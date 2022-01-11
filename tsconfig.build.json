@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "composite": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/extension" },
+    { "path": "./packages/extension-base" },
+    { "path": "./packages/extension-chains" },
+    { "path": "./packages/extension-compat-metamask" },
+    { "path": "./packages/extension-dapp" },
+    { "path": "./packages/extension-inject" },
+    { "path": "./packages/extension-mocks" },
+    { "path": "./packages/extension-ui" }
+  ]
+}

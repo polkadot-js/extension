@@ -34,7 +34,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
-    createSeed(undefined, type, ethDerivePath)
+    createSeed(undefined, undefined, type, ethDerivePath)
       .then(({ address, seed }): void => {
         setAddress(address);
         setSeed(seed);

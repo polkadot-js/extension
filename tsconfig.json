@@ -1,16 +1,13 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true
+    "baseUrl": "./packages",
+    "composite": false
   },
-  "files": [],
-  "references": [
-    { "path": "./packages/extension" },
-    { "path": "./packages/extension-base" },
-    { "path": "./packages/extension-chains" },
-    { "path": "./packages/extension-compat-metamask" },
-    { "path": "./packages/extension-dapp" },
-    { "path": "./packages/extension-inject" },
-    { "path": "./packages/extension-mocks" },
-    { "path": "./packages/extension-ui" }
+  "include": [
+    "packages/**/src/**/*"
+  ],
+  "exclude": [
+    "**/node_modules/**/*"
   ]
 }

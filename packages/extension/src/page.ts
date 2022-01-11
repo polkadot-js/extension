@@ -1,7 +1,5 @@
-// Copyright 2019-2021 @polkadot/extension authors & contributors
+// Copyright 2019-2022 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import '@polkadot/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
@@ -9,6 +7,13 @@ import type { Message } from '@polkadot/extension-base/types';
 import { MESSAGE_ORIGIN_CONTENT } from '@polkadot/extension-base/defaults';
 import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
+
+function inject () {
+  injectExtension(enable, {
+    name: 'polkadot-js',
+    version: process.env.PKG_VERSION as string
+  });
+}
 
 // setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -32,10 +37,3 @@ redirectIfPhishing().then((gotRedirected) => {
   console.warn(`Unable to determine if the site is in the phishing list: ${(e as Error).message}`);
   inject();
 });
-
-function inject () {
-  injectExtension(enable, {
-    name: 'polkadot-js',
-    version: process.env.PKG_VERSION as string
-  });
-}

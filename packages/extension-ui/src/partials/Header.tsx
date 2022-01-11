@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -197,7 +197,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     }
 
     .popupMenus, .searchBarWrapper {
-      align-self: center;     
+      align-self: center;
     }
 
     .searchBarWrapper {
@@ -208,21 +208,21 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
 
       .searchIcon {
         margin-right: 8px;
-        
+
         &:hover {
           cursor: pointer;
         }
       }
     }
-  
+
     .popupToggle {
       display: inline-block;
       vertical-align: middle;
-  
+
       &:last-child {
         margin-right: 24px;
       }
-   
+
       &:hover {
         cursor: pointer;
       }
@@ -231,7 +231,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     .inputFilter {
       width: 100%
     }
-  
+
     .popupToggle+.popupToggle {
       margin-left: 8px;
     }

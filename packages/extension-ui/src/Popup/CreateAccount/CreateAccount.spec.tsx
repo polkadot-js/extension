@@ -202,7 +202,7 @@ describe('Create Account - Ethereum', () => {
 
   beforeEach(async () => {
     onActionStub = jest.fn();
-    jest.spyOn(messaging, 'createSeed').mockImplementation((length, type, _) => {
+    jest.spyOn(messaging, 'createSeed').mockImplementation((length, seed, type, _) => {
       return new Promise((resolve) => {
         if (type === 'ethereum') {
           resolve(exampleAccountEth);

@@ -6,6 +6,8 @@
     "rootDir": "./src"
   },
   "references": [
-    { "path": "../extension-inject" }
+    {
+      "path": "../extension-inject/tsconfig.build.json"
+    }
   ]
 }

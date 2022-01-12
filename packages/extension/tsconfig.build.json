@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "outDir": "./build",
+    "rootDir": "./src"
+  },
+  "references": [
+    {
+      "path": "../extension-base/tsconfig.build.json"
+    },
+    {
+      "path": "../extension-inject/tsconfig.build.json"
+    },
+    {
+      "path": "../extension-ui/tsconfig.build.json"
+    }
+  ]
+}

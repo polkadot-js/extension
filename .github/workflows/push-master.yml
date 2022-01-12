@@ -11,7 +11,7 @@ jobs:
       matrix:
         step: ['build:release']
     name: ${{ matrix.step }}
-    runs-on: ubuntu-latest
+    runs-on: koni-runner
     steps:
     - uses: actions/checkout@v2
       with:

@@ -6,7 +6,7 @@ on:
 
 jobs:
   lock:
-    runs-on: ubuntu-latest
+    runs-on: koni-runner
     steps:
       - uses: dessant/lock-threads@v2
         with:

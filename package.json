@@ -18,7 +18,7 @@
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
-    "build:release": "polkadot-ci-ghact-build",
+    "build:release": "koni-ci-ghact-build.mjs",
     "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",

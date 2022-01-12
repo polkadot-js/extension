@@ -7,7 +7,8 @@ module.exports = {
   ...base,
   ignorePatterns: [
     ...base.ignorePatterns,
-    "i18next-scanner.config.js"
+    "i18next-scanner.config.js",
+    "koni-ci-ghact-build.mjs"
   ],
   parserOptions: {
     ...base.parserOptions,

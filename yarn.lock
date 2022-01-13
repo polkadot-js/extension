@@ -14290,6 +14290,8 @@ resolve@^2.0.0-next.3:
     "@types/jest": ^27.4.0
     i18next-scanner: ^3.1.0
     sinon-chrome: ^3.0.1
+  bin:
+    koni-ci-ghact-build: ./scripts/koni-ci-ghact-build.mjs
   languageName: unknown
   linkType: soft
 

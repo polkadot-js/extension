@@ -10,15 +10,18 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.42.6-0",
+  "version": "0.42.6-2",
   "workspaces": [
     "packages/*"
   ],
+  "bin": {
+    "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs"
+  },
   "scripts": {
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
-    "build:release": "koni-ci-ghact-build.mjs",
+    "build:release": "koni-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",

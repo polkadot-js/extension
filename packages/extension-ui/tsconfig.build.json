@@ -6,20 +6,15 @@
     "rootDir": "./src"
   },
   "references": [
-    {
-      "path": "../extension-base/tsconfig.build.json"
+    { "path": "../extension-base/tsconfig.build.json"
     },
-    {
-      "path": "../extension-chains/tsconfig.build.json"
+    { "path": "../extension-chains/tsconfig.build.json"
     },
-    {
-      "path": "../extension-dapp/tsconfig.build.json"
+    { "path": "../extension-dapp/tsconfig.build.json"
     },
-    {
-      "path": "../extension-inject/tsconfig.build.json"
+    { "path": "../extension-inject/tsconfig.build.json"
     },
-    {
-      "path": "../extension-mocks/tsconfig.build.json"
+    { "path": "../extension-mocks/tsconfig.build.json"
     }
   ]
 }

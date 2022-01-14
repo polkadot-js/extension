@@ -4,13 +4,14 @@
   },
   "files": [],
   "references": [
-    { "path": "./packages/extension" },
     { "path": "./packages/extension-base" },
     { "path": "./packages/extension-chains" },
     { "path": "./packages/extension-compat-metamask" },
     { "path": "./packages/extension-dapp" },
     { "path": "./packages/extension-inject" },
     { "path": "./packages/extension-mocks" },
-    { "path": "./packages/extension-ui" }
+    { "path": "./packages/extension-koni" },
+    { "path": "./packages/extension-koni-base" },
+    { "path": "./packages/extension-koni-ui" }
   ]
 }

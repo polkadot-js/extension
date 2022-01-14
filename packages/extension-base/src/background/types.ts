@@ -15,6 +15,7 @@ import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
+import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -73,7 +74,7 @@ export interface SigningRequest {
 }
 
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
-export interface RequestSignatures {
+export interface RequestSignatures extends KoniRequestSignatures {
   // private/internal requests, i.e. from a popup
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];

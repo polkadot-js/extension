@@ -16,7 +16,7 @@ const external = [
   '@polkadot/util-crypto'
 ];
 
-const entries = ['extension-base', 'extension-chains', 'extension-inject'].reduce((all, p) => ({
+const entries = ['extension-base', 'extension-chains', 'extension-inject', 'extension-koni-base'].reduce((all, p) => ({
   ...all,
   [`@polkadot/${p}`]: path.resolve(process.cwd(), `packages/${p}/build`)
 }), {});

@@ -1,0 +1,42 @@
+{
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "contributors": [],
+  "description": "Functions, classes and other utilities used in @polkadot/extension",
+  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-koni-base#readme",
+  "license": "Apache-2",
+  "maintainers": [],
+  "name": "@polkadot/extension-koni-base",
+  "repository": {
+    "directory": "packages/extension-koni-base",
+    "type": "git",
+    "url": "https://github.com/polkadot-js/extension.git"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "version": "0.42.6-3",
+  "main": "index.js",
+  "dependencies": {
+    "@babel/runtime": "^7.16.7",
+    "@polkadot/api": "^7.3.1",
+    "@polkadot/extension-base": "^0.42.6-3",
+    "@polkadot/extension-chains": "^0.42.6-3",
+    "@polkadot/extension-dapp": "^0.42.6-3",
+    "@polkadot/extension-inject": "^0.42.6-3",
+    "@polkadot/keyring": "^8.3.1",
+    "@polkadot/networks": "^8.3.1",
+    "@polkadot/phishing": "^0.8.7",
+    "@polkadot/rpc-provider": "^7.3.1",
+    "@polkadot/types": "^7.3.1",
+    "@polkadot/ui-keyring": "^0.89.1",
+    "@polkadot/ui-settings": "^0.89.1",
+    "@polkadot/util": "^8.3.1",
+    "@polkadot/util-crypto": "^8.3.1",
+    "axios": "^0.24.0",
+    "eventemitter3": "^4.0.7",
+    "rxjs": "^7.5.1"
+  },
+  "devDependencies": {
+    "@polkadot/extension-mocks": "^0.42.6-3"
+  }
+}

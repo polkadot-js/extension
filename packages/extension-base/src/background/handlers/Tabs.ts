@@ -157,7 +157,7 @@ export default class Tabs {
     });
   }
 
-  private async redirectIfPhishing (url: string): Promise<boolean> {
+  protected async redirectIfPhishing (url: string): Promise<boolean> {
     const isInDenyList = await checkIfDenied(url);
 
     if (isInDenyList) {

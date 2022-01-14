@@ -1,22 +1,24 @@
 {
   "extends": "@polkadot/dev/config/tsconfig.json",
 	"compilerOptions": {
-		"composite": true,
-		"paths": {
-      "@polkadot/extension": ["extension/src"],
-      "@polkadot/extension/*": ["extension/src/*"],
-      "@polkadot/extension-base": ["extension-base/src"],
-      "@polkadot/extension-base/*": ["extension-base/src/*"],
-      "@polkadot/extension-chains": ["extension-chains/src"],
-      "@polkadot/extension-chains/*": ["extension-chains/src/*"],
-      "@polkadot/extension-compat-metamask": ["extension-compat-metamask/src"],
-      "@polkadot/extension-dapp": ["extension-dapp/src"],
-      "@polkadot/extension-dapp/*": ["extension-dapp/src/*"],
-      "@polkadot/extension-inject": ["extension-inject/src"],
-      "@polkadot/extension-inject/*": ["extension-inject/src/*"],
-      "@polkadot/extension-mocks/*": ["extension-mocks/src/*"],
-      "@polkadot/extension-ui": ["extension-ui/src"],
-      "@polkadot/extension-ui/*": ["extension-ui/src/*"]
+      "composite": true,
+      "paths": {
+        "@polkadot/extension-base": ["extension-base/src"],
+        "@polkadot/extension-base/*": ["extension-base/src/*"],
+        "@polkadot/extension-chains": ["extension-chains/src"],
+        "@polkadot/extension-chains/*": ["extension-chains/src/*"],
+        "@polkadot/extension-compat-metamask": ["extension-compat-metamask/src"],
+        "@polkadot/extension-dapp": ["extension-dapp/src"],
+        "@polkadot/extension-dapp/*": ["extension-dapp/src/*"],
+        "@polkadot/extension-inject": ["extension-inject/src"],
+        "@polkadot/extension-inject/*": ["extension-inject/src/*"],
+        "@polkadot/extension-mocks/*": ["extension-mocks/src/*"],
+        "@polkadot/extension-koni": ["extension-koni/src"],
+        "@polkadot/extension-koni/*": ["extension-koni/src/*"],
+        "@polkadot/extension-koni-base": ["extension-koni-base/src"],
+        "@polkadot/extension-koni-base/*": ["extension-koni-base/src/*"],
+        "@polkadot/extension-koni-ui": ["extension-koni-ui/src"],
+        "@polkadot/extension-koni-ui/*": ["extension-koni-ui/src/*"]
     },
     "skipLibCheck": true
 	}

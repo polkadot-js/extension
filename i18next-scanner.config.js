@@ -26,7 +26,7 @@ function transform (file, enc, done) {
 
 module.exports = {
   input: [
-    'packages/extension-ui/src/**/*.{ts,tsx}',
+    'packages/extension-koni-ui/src/**/*.{ts,tsx}',
     // Use ! to filter out files or directories
     '!packages/*/src/**/*.spec.{ts,tsx}',
     '!packages/*/src/i18n/**',
@@ -45,8 +45,8 @@ module.exports = {
     resource: {
       jsonIndent: 2,
       lineEnding: '\n',
-      loadPath: 'packages/extension/public/locales/{{lng}}/{{ns}}.json',
-      savePath: 'packages/extension/public/locales/{{lng}}/{{ns}}.json'
+      loadPath: 'packages/extension-koni/public/locales/{{lng}}/{{ns}}.json',
+      savePath: 'packages/extension-koni/public/locales/{{lng}}/{{ns}}.json'
     },
     trans: {
       component: 'Trans'

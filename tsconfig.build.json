@@ -4,29 +4,21 @@
   },
   "files": [],
   "references": [
-    {
-      "path": "./packages/extension/tsconfig.build.json"
+    { "path": "./packages/extension/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-base/tsconfig.build.json"
+    { "path": "./packages/extension-base/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-chains/tsconfig.build.json"
+    { "path": "./packages/extension-chains/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-compat-metamask/tsconfig.build.json"
+    { "path": "./packages/extension-compat-metamask/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-dapp/tsconfig.build.json"
+    { "path": "./packages/extension-dapp/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-inject/tsconfig.build.json"
+    { "path": "./packages/extension-inject/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-mocks/tsconfig.build.json"
+    { "path": "./packages/extension-mocks/tsconfig.build.json"
     },
-    {
-      "path": "./packages/extension-ui/tsconfig.build.json"
+    { "path": "./packages/extension-ui/tsconfig.build.json"
     }
   ]
 }

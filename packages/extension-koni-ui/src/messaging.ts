@@ -9,6 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { PriceJson, RequestSubscribePrice } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -16,7 +17,6 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
-import { PriceJson, RandomTestRequest, RequestPrice, RequestSubscribePrice } from '@polkadot/extension-base/background/KoniTypes';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

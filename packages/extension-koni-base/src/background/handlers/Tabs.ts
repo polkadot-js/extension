@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Tabs from '@polkadot/extension-base/background/handlers/Tabs';
-import { MessageTypes, RequestTypes, ResponseTypes } from '@polkadot/extension-base/background/types';
 import { RandomTestRequest } from '@polkadot/extension-base/background/KoniTypes';
+import { MessageTypes, RequestTypes, ResponseTypes } from '@polkadot/extension-base/background/types';
+import { state } from '@polkadot/extension-koni-base/background/handlers/index';
 
 export default class KoniTabs extends Tabs {
   private static getRandom ({ end, start }: RandomTestRequest): number {
@@ -16,7 +17,7 @@ export default class KoniTabs extends Tabs {
     }
 
     if (type !== 'pub(authorize.tab)') {
-      this.getState().ensureUrlAuthorized(url);
+      state.ensureUrlAuthorized(url);
     }
 
     switch (type) {

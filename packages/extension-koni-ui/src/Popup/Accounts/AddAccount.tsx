@@ -3,16 +3,13 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 import { ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Header from '../../partials/Header';
 import AddAccountImage from './AddAccountImage';
-import { useSelector } from 'react-redux';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 
 interface Props extends ThemeProps {
   className?: string;

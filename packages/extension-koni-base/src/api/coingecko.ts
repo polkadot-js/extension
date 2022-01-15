@@ -4,8 +4,8 @@
 // eslint-disable-next-line header/header
 import axios from 'axios';
 
-import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
 import networks from '@polkadot/extension-koni-base/api/endpoints';
+import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
 
 const alternativeNameMap: Record<string, string> = {
   acala: 'acala-token',

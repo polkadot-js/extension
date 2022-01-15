@@ -71,7 +71,7 @@ module.exports = (entry, alias = {}) => ({
     }),
     new webpack.DefinePlugin({
       'process.env': {
-        NODE_ENV: JSON.stringify('development'),
+        NODE_ENV: JSON.stringify('production'),
         PKG_NAME: JSON.stringify(pkgJson.name),
         PKG_VERSION: JSON.stringify(pkgJson.version)
       }

@@ -7,14 +7,14 @@ import '@polkadot/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 
-import handlers from '@polkadot/extension-koni-base/background/handlers';
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
+import handlers from '@polkadot/extension-koni-base/background/handlers';
+import { KoniCron } from '@polkadot/extension-koni-base/cron';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { KoniCron } from '@polkadot/extension-koni-base/cron';
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));

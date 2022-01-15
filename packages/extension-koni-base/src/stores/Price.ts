@@ -3,8 +3,8 @@
 
 // eslint-disable-next-line header/header
 import { EXTENSION_PREFIX } from '@polkadot/extension-base/defaults';
-import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
 import SubscribableStore from '@polkadot/extension-koni-base/stores/SubcribableStore';
+import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
 
 export default class PriceStore extends SubscribableStore<PriceJson> {
   constructor () {

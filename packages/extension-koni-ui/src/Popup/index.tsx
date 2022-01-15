@@ -5,8 +5,10 @@ import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, S
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
+import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import uiSettings from '@polkadot/ui-settings';
@@ -14,7 +16,8 @@ import uiSettings from '@polkadot/ui-settings';
 import { ErrorBoundary, Loading } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests } from '../messaging';
+import { getPrice, subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests } from '../messaging';
+import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import Accounts from './Accounts';
 import AuthList from './AuthManagement';
@@ -32,10 +35,6 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import { Provider } from 'react-redux';
-import { store } from '../stores';
-import { update } from '@polkadot/extension-koni-ui/stores/Price';
-import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const startSettings = uiSettings.get();
 
@@ -67,6 +66,10 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
+function updatePrice (priceData: PriceJson): void {
+  store.dispatch({ type: 'price/update', payload: priceData });
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -90,14 +93,16 @@ export default function Popup (): React.ReactElement {
   );
 
   useEffect((): void => {
+    getPrice().then(updatePrice).catch(console.error);
+  }, []);
+
+  useEffect((): void => {
     Promise.all([
       subscribeAccounts(setAccounts),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests),
-      subscribePrice(null, (priceData) => {
-        update(priceData);
-      })
+      subscribePrice(null, updatePrice)
     ]).catch(console.error);
 
     uiSettings.on('change', (settings): void => {
@@ -106,7 +111,7 @@ export default function Popup (): React.ReactElement {
     });
 
     _onAction();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {

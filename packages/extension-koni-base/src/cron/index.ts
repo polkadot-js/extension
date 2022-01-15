@@ -1,9 +1,10 @@
 // Copyright 2019-2021 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Subject } from 'rxjs';
+
 import { CRON_REFRESH_PRICE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { refreshPrice } from '@polkadot/extension-koni-base/cron/price';
-import { Subject } from 'rxjs';
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};

@@ -4,9 +4,9 @@
 import { MessageTypes, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import KoniExtension from '@polkadot/extension-koni-base/background/handlers/Extension';
-import { assert } from '@polkadot/util';
 import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
 import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
+import { assert } from '@polkadot/util';
 
 export const state = new KoniState();
 export const extension = new KoniExtension(state);

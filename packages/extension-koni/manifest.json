@@ -1,7 +1,7 @@
 {
   "author": "polkadot.{js}",
   "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
-  "homepage_url": "https://github.com/polkadot-js/extension",
+  "homepage_url": "https://github.com/Koniverse/Subwallet-V2",
   "name": "polkadot{.js} extension",
   "short_name": "polkadot{.js}",
   "manifest_version": 2,

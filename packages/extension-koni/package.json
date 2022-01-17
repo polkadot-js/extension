@@ -1,16 +1,16 @@
 {
-  "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "author": "Koni Studio",
+  "bugs": "https://github.com/Koniverse/Subwallet-V2/issues",
   "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-koni#readme",
+  "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension-koni#readme",
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-koni",
   "repository": {
     "directory": "packages/extension-koni",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
   "type": "module",

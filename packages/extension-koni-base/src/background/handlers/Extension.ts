@@ -19,7 +19,7 @@ export default class KoniExtension extends Extension {
   private subscribePrice (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(price.getSubscription)'>(id, port);
 
-    state.getPriceSubject().subscribe({
+    state.subscribePrice().subscribe({
       next: (rs) => {
         cb(rs);
       }

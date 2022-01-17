@@ -14,6 +14,7 @@ export default class KoniState extends State {
     this.priceStore.set('PriceData', priceData, () => {
       if (callback) {
         callback(priceData);
+        this.priceStoreReady = true;
       }
     });
   }
@@ -36,7 +37,7 @@ export default class KoniState extends State {
     });
   }
 
-  public getPriceSubject () {
+  public subscribePrice () {
     return this.priceStore.getSubject();
   }
 }

@@ -1,0 +1,92 @@
+*, :after, :before {
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit
+}
+
+body ::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 6px;
+  height: 6px
+}
+
+body ::-webkit-scrollbar-track {
+  /*background: rgba(0, 0, 0, .1);*/
+  border-radius: 0
+}
+
+body ::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, .25);
+  -webkit-transition: color .2s ease;
+  transition: color .2s ease
+}
+
+body ::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(0, 0, 0, .15)
+}
+
+body ::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 135, 139, .8)
+}
+
+a {
+  text-decoration: none;
+}
+
+.kn-sui-dropdown-base .menu {
+  display: none;
+  user-select: none;
+  top: 100%;
+  position: absolute;
+  right: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-overflow-scrolling: touch;
+  outline: 0;
+  margin: 0 -2px;
+  min-width: calc(100% + 4px);
+  width: calc(100% + 2px);
+  box-shadow: 0 2px 3px 0 #ccc;
+  -webkit-transition: opacity .1s ease;
+  transition: opacity .1s ease;
+  background: #fff;
+  font-size: 15px;
+  border-radius: 8px;
+}
+
+.kn-sui-dropdown-base .menu.visible {
+  display: block;
+}
+
+.kn-sui-dropdown-base .menu .item {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+@media only screen and (min-width: 768px) {
+  .kn-sui-dropdown-base .menu {
+    max-height: 150px;
+  }
+}
+
+@media only screen and (min-width: 992px) {
+  .kn-sui-dropdown-base .menu {
+    max-height: 225px;
+  }
+}
+
+@media only screen and (min-width: 1920px) {
+  .kn-sui-dropdown-base .menu {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 767px) {
+  .kn-sui-dropdown-base .menu {
+    max-height: 112px;
+  }
+}

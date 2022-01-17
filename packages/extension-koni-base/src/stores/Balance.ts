@@ -1,7 +1,6 @@
-// Copyright 2019-2021 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import { EXTENSION_PREFIX } from '@polkadot/extension-base/defaults';
 import SubscribableStore from '@polkadot/extension-koni-base/stores/SubcribableStore';
 import { BalanceJson } from '@polkadot/extension-koni-base/stores/types';

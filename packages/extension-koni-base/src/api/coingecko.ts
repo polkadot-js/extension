@@ -1,7 +1,6 @@
-// Copyright 2019-2021 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import axios from 'axios';
 
 import networks from '@polkadot/extension-koni-base/api/endpoints';

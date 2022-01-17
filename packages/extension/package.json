@@ -1,25 +1,25 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "bugs": "https://github.com/Koniverse/Subwallet-V2/issues",
   "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension#readme",
+  "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension#readme",
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension",
   "repository": {
     "directory": "packages/extension",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.42.6-3",
+  "version": "0.0.1",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/extension-base": "^0.42.6-3",
-    "@polkadot/extension-inject": "^0.42.6-3",
-    "@polkadot/extension-ui": "^0.42.6-3"
+    "@polkadot/extension-base": "^0.0.1",
+    "@polkadot/extension-inject": "^0.0.1",
+    "@polkadot/extension-ui": "^0.0.1"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

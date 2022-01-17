@@ -1,7 +1,6 @@
-// Copyright 2019-2021 @polkadot/extension-base authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import { NetWorkInfo } from './types';
 
 const networks: Record<string, NetWorkInfo> = {
@@ -193,13 +192,13 @@ const networks: Record<string, NetWorkInfo> = {
     provider: 'wss://us-ws-quartz.unique.network/',
     group: 'KUSAMA_PARACHAIN'
   },
-  // "genshiro": {
-  //   "chain": "Genshiro",
-  //   "genesisHash": "0x9b8cefc0eb5c568b527998bdd76c184e2b76ae561be76e4667072230217ea243",
-  //   "ss58Format": 67,
-  //   "provider": "wss://node.genshiro.io/",
-  //   "group": "KUSAMA_PARACHAIN",
-  // },
+  genshiro: {
+    chain: 'Genshiro',
+    genesisHash: '0x9b8cefc0eb5c568b527998bdd76c184e2b76ae561be76e4667072230217ea243',
+    ss58Format: 67,
+    provider: 'wss://node.genshiro.io/',
+    group: 'KUSAMA_PARACHAIN'
+  },
   subsocial: {
     chain: 'Subsocial',
     genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',

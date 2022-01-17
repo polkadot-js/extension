@@ -1,7 +1,6 @@
-// Copyright 2019-2021 @polkadot/extension-base authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { NetWorkInfo } from './types';

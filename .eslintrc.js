@@ -8,7 +8,9 @@ module.exports = {
   ignorePatterns: [
     ...base.ignorePatterns,
     "i18next-scanner.config.js",
-    "koni-ci-ghact-build.mjs"
+    "koni-ci-ghact-build.mjs",
+    "packages/extension/*",
+    "packages/extension-ui/*"
   ],
   parserOptions: {
     ...base.parserOptions,
@@ -19,6 +21,7 @@ module.exports = {
   rules: {
     ...base.rules,
     // this seems very broken atm, false positives
-    '@typescript-eslint/unbound-method': 'off'
+    '@typescript-eslint/unbound-method': 'off',
+    'sort-keys': 'off'
   }
 };

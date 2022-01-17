@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-bg authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@polkadot/extension-base/background/handlers/State';

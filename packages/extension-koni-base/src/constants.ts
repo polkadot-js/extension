@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 export const CRON_REFRESH_PRICE_INTERVAL = 60000;

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.0.1 (Koni) Jan 17, 2022
+Changes:
+- Start folk and custom polkadot extension with packages extension-koni, extension-koni-base, extension-koni-ui
+- Add support redux in extension-koni-ui
+- Add subscribable store 
+- Add api get price from coingecko
+- ...
+
 ## 0.42.5 Jan 10, 2022
 
 **Important** Not published to the stores, aligns with latest released packages.

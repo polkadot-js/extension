@@ -1,27 +1,27 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
-  "bugs": "https://github.com/polkadot-js/extension/issues",
+  "bugs": "https://github.com/Koniverse/Subwallet-V2/issues",
   "contributors": [],
   "description": "Provides an interfaces around the injected globals for ease of access by dapp developers.",
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-dapp#readme",
+  "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension-dapp#readme",
   "license": "Apache-2",
   "maintainers": [],
   "name": "@polkadot/extension-dapp",
   "repository": {
     "directory": "packages/extension-dapp",
     "type": "git",
-    "url": "https://github.com/polkadot-js/extension.git"
+    "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": [
     "./detectPackage.js",
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.42.6-4",
+  "version": "0.0.1",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/extension-inject": "^0.42.6-4",
+    "@polkadot/extension-inject": "^0.0.1",
     "@polkadot/util": "^8.3.1",
     "@polkadot/util-crypto": "^8.3.1"
   },

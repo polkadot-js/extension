@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -17,7 +17,7 @@ interface Props {
   to?: string;
 }
 
-function Link ({ children, className = '', isDisabled, onClick, title, to }: Props): React.ReactElement<Props> {
+function KoniLink ({ children, className = '', isDisabled, onClick, title, to }: Props): React.ReactElement<Props> {
   if (isDisabled) {
     return (
       <div
@@ -41,32 +41,32 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
       </RouterLink>
     )
     : (
-      <a
+      <span
         className={className}
-        href='#'
         onClick={onClick}
         title={title}
       >
         {children}
-      </a>
+      </span>
     );
 }
 
-export default styled(Link)(({ isDanger, theme }: Props & ThemeProps) => `
+export default styled(KoniLink)(({ isDanger, theme }: Props & ThemeProps) => `
   align-items: center;
-  color: ${isDanger ? theme.textColorDanger : theme.textColor};
+  color: ${isDanger ? theme.buttonTextColor2 : theme.textColor2};
   display: flex;
   opacity: 0.85;
   text-decoration: none;
   vertical-align: middle;
+  cursor: pointer;
 
   &:hover {
-    color: ${isDanger ? theme.textColorDanger : theme.textColor};
+    color: ${isDanger ? theme.buttonTextColor2 : theme.textColor};
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${isDanger ? theme.textColorDanger : theme.textColor};
+    color: ${isDanger ? theme.buttonTextColor2 : theme.textColor};
   }
 
   &.isDisabled {

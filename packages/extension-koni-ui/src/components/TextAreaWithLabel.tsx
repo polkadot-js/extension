@@ -1,10 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback } from 'react';
-
-import Label from './Label';
-import { TextArea } from './TextInputs';
+import Label from "@polkadot/extension-koni-ui/components/Label";
+import {TextArea} from "@polkadot/extension-koni-ui/components/TextInputs";
 
 interface Props {
   className?: string;
@@ -17,7 +16,7 @@ interface Props {
   value?: string;
 }
 
-export default function TextAreaWithLabel ({ className, isError, isFocused, isReadOnly, label, onChange, rowsCount, value }: Props): React.ReactElement<Props> {
+export default function KoniTextAreaWithLabel ({ className, isError, isFocused, isReadOnly, label, onChange, rowsCount, value }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
       onChange && onChange(value);

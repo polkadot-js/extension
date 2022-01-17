@@ -17,6 +17,7 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
+import {ApiInitStatus} from "@polkadot/extension-koni-base/background/pDotApi";
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -66,6 +67,10 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
     port.postMessage({ id, message, request: request || {} });
   });
+}
+
+export async function initApi (networkName: string): Promise<ApiInitStatus> {
+  return sendMessage('pri(api.init)', { networkName });
 }
 
 export async function editAccount (address: string, name: string): Promise<boolean> {
@@ -225,12 +230,12 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.restore)', { file, password });
+export async function jsonRestore (file: KeyringPair$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.restore)', { file, password, address });
 }
 
-export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.batchRestore)', { file, password });
+export async function batchRestore (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password, address });
 }
 
 export async function setNotification (notification: string): Promise<boolean> {

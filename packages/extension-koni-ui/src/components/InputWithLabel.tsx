@@ -1,13 +1,13 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import useTranslation from '../hooks/useTranslation';
-import Label from './Label';
-import { Input } from './TextInputs';
-import Warning from './Warning';
+import Label from "@polkadot/extension-koni-ui/components/Label";
+import {Input} from "@polkadot/extension-koni-ui/components/TextInputs";
+import Warning from "@polkadot/extension-koni-ui/components/Warning";
 
 interface Props {
   className?: string;
@@ -81,7 +81,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
 }
 
 export default styled(InputWithLabel)`
-  margin-bottom: 16px;
+  margin-top: 12px;
 
   &.withoutMargin {
     margin-bottom: 0px;

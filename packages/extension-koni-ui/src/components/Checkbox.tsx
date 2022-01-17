@@ -1,14 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types';
-
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 
-import Checkmark from '../assets/checkmark.svg';
-
-interface Props {
+interface Props extends ThemeProps{
   checked: boolean;
   className?: string;
   label: string;
@@ -43,7 +39,7 @@ function Checkbox ({ checked, className, label, onChange, onClick }: Props): Rea
   );
 }
 
-export default styled(Checkbox)(({ theme }: ThemeProps) => `
+export default styled(Checkbox)(({ theme }: Props) => `
   margin: ${theme.boxMargin};
 
   label {
@@ -53,9 +49,10 @@ export default styled(Checkbox)(({ theme }: ThemeProps) => `
     user-select: none;
     padding-left: 24px;
     padding-top: 1px;
-    color: ${theme.subTextColor};
-    font-size: ${theme.fontSize};
-    line-height: ${theme.lineHeight};
+    color: ${theme.textColor2};
+    font-size: ${theme.fontSize2};
+    line-height: ${theme.lineHeight2};
+    font-weight: 400;
 
     & input {
       position: absolute;
@@ -69,23 +66,23 @@ export default styled(Checkbox)(({ theme }: ThemeProps) => `
       position: absolute;
       top: 4px;
       left: 0;
-      height: 16px;
-      width: 16px;
+      height: 14px;
+      width: 14px;
       border-radius: ${theme.borderRadius};
-      background-color: ${theme.readonlyInputBackground};
-      border: 1px solid ${theme.inputBorderColor};
-      border: 1px solid ${theme.inputBorderColor};
+      background-color: ${theme.checkboxColor};
+      border: 1px solid ${theme.checkboxBorderColor};
+      border: 1px solid ${theme.checkboxBorderColor};
       &:after {
         content: '';
         display: none;
-        width: 13px;
+        width: 5px;
         height: 10px;
         position: absolute;
-        left: 1px;
-        top: 2px;
-        mask: url(${Checkmark});
-        mask-size: cover;
-        background: ${theme.primaryColor};
+        top: 0;
+        right: 3px;
+        border-bottom: 2px solid ${theme.buttonTextColor2};
+        border-right: 2px solid ${theme.buttonTextColor2};
+        transform: rotate(45deg);
       }
     }
 

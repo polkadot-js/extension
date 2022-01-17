@@ -3,10 +3,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import Warning from "@polkadot/extension-koni-ui/components/Warning";
-import styled from "styled-components";
-import useIsMounted from "@polkadot/extension-koni-ui/hooks/useIsMounted";
-import {Result, Validator} from "@polkadot/extension-koni-ui/util/validators";
+import useIsMounted from '../hooks/useIsMounted';
+import { Result, Validator } from '../util/validators';
 
 interface BasicProps {
   isError?: boolean;
@@ -57,21 +55,8 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
         onChange={setValue}
         value={value}
       />
-      {Result.isError(validationResult) && (
-        <Warning
-          className='validated-input__warning'
-          isBelowInput
-          isDanger
-        >
-          {validationResult.error.errorDescription}
-        </Warning>
-      )}
     </div>
   );
 }
 
-export default styled(ValidatedInput)`
-  .validated-input__warning {
-    margin-top: 10px;
-  }
-`;
+export default ValidatedInput;

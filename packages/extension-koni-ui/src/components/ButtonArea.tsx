@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -22,11 +22,13 @@ const ButtonArea = function ({ children, className }: Props) {
 export default styled(ButtonArea)(({ theme }: ThemeProps) => `
   display: flex;
   flex-direction: row;
-  background: ${theme.highlightedAreaBackground};
-  border-top: 1px solid ${theme.inputBorderColor};
-  padding: 12px 24px;
-  margin-left: 0;
-  margin-right: 0;
+  position: sticky;
+  bottom: -15px;
+  margin-left: -15px;
+  margin-right: -15px;
+  margin-bottom: -15px;
+  padding: 15px;
+  background-color: ${theme.background};
 
   & > button:not(:last-of-type) {
     margin-right: 8px;

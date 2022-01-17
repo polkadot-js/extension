@@ -3,10 +3,10 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta, MetadataDefBase } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type {Registry, SignerPayloadJSON, SignerPayloadRaw} from '@polkadot/types/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
@@ -16,6 +16,10 @@ import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
+import {SubmittableExtrinsicFunction} from "@polkadot/api/promise/types";
+import {ApiPromise} from "@polkadot/api";
+import {ApiInitStatus} from "@polkadot/extension-koni-base/background/pDotApi";
+import {Keyring} from "@polkadot/ui-keyring";
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -44,6 +48,62 @@ export interface AccountJson extends KeyringPair$Meta {
   whenCreated?: number;
 }
 
+export interface DefaultFormatBalance {
+  decimals?: number[] | number;
+  unit?: string[] | string;
+}
+
+export interface ApiState {
+  apiDefaultTx: SubmittableExtrinsicFunction;
+  apiDefaultTxSudo: SubmittableExtrinsicFunction;
+  isApiReady: boolean;
+  isDevelopment?: boolean;
+  isEthereum?: boolean;
+  specName: string;
+  specVersion: string;
+  systemChain: string;
+  systemName: string;
+  systemVersion: string;
+  registry: Registry;
+  defaultFormatBalance: DefaultFormatBalance;
+}
+
+
+export interface NetWorkMetadataDef extends MetadataDefBase {
+  networkName: string;
+  group: string
+}
+
+export interface ApiProps extends ApiState {
+  api: ApiPromise;
+  apiError?: string;
+  apiUrl: string;
+  isNotSupport?: boolean;
+  isApiConnected: boolean;
+  isApiInitialized: boolean;
+  isReady: Promise<ApiProps>;
+}
+
+export type PdotApi = {
+  keyring: Keyring;
+  apisMap: Record<string, ApiProps>;
+}
+
+export interface BackgroundWindow extends Window {
+  pdotApi: PdotApi;
+}
+
+
+// all Accounts and the address of the current Account
+export interface AccountsWithCurrentAddress {
+  accounts: AccountJson[];
+  currentAddress?: string;
+}
+
+export interface CurrentAccountInfo {
+  address: string;
+}
+
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
@@ -52,6 +112,23 @@ export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
+}
+
+export type CurrentAccContext = {
+  currentAccount: AccountJson | null;
+  setCurrentAccount: (account: AccountJson | null) => void;
+}
+
+export type CurrentNetworkInfo = {
+  networkName: string;
+  networkPrefix: number;
+  icon: string;
+  genesisHash: string;
+}
+
+export type AccNetworkContext = {
+  network: CurrentNetworkInfo;
+  setNetwork: (network: CurrentNetworkInfo) => void;
 }
 
 export interface AuthorizeRequest {
@@ -76,6 +153,7 @@ export interface SigningRequest {
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures extends KoniRequestSignatures {
   // private/internal requests, i.e. from a popup
+  'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
@@ -142,12 +220,16 @@ export type MessageTypesWithNullRequest = NullKeys<RequestTypes>
 export interface TransportRequestMessage<TMessageType extends MessageTypes> {
   id: string;
   message: TMessageType;
-  origin: string;
+  origin: 'page' | 'extension';
   request: RequestTypes[TMessageType];
 }
 
 export interface RequestAuthorizeTab {
   origin: string;
+}
+
+export interface RequestApi {
+  networkName: string;
 }
 
 export interface RequestAuthorizeApprove {
@@ -162,6 +244,10 @@ export type RequestAuthorizeSubscribe = null;
 
 export interface RequestMetadataApprove {
   id: string;
+}
+
+export interface RequestCurrentAccountAddress {
+  address: string;
 }
 
 export interface RequestMetadataReject {
@@ -383,11 +469,13 @@ export interface RequestSign {
 export interface RequestJsonRestore {
   file: KeyringPair$Json;
   password: string;
+  address: string;
 }
 
 export interface RequestBatchRestore {
   file: KeyringPairs$Json;
   password: string;
+  address: string;
 }
 
 export interface ResponseJsonRestore {
@@ -405,4 +493,30 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
+}
+
+export interface TransactionHistoryItem {
+  time: number;
+  networkName: string;
+  change: string;
+  fee?: string;
+  isSuccess: boolean;
+  action: 'send' | 'received';
+  extrinsicHash: string
+}
+
+export interface RequestTransactionHistoryGet {
+  address: string;
+  networkName: string;
+}
+
+export interface RequestTransactionHistoryGetByMultiNetworks {
+  address: string;
+  networkNames: string[];
+}
+
+export interface RequestTransactionHistoryAdd {
+  address: string;
+  networkName: string;
+  item: TransactionHistoryItem;
 }

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -22,7 +22,7 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
 
   return (
     <div className={className}>
-      <span>{uncheckedLabel}</span>
+      <span className='lightLabel'>{uncheckedLabel}</span>
       <label>
         <input
           checked={checked}
@@ -32,7 +32,7 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
         />
         <span className='slider' />
       </label>
-      <span>{checkedLabel}</span>
+      <span className='darkLabel'>{checkedLabel}</span>
     </div>
   );
 }
@@ -41,8 +41,8 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
   label {
     position: relative;
     display: inline-block;
-    width: 48px;
-    height: 24px;
+    width: 54px;
+    height: 28px;
     margin: 8px;
   }
 
@@ -63,21 +63,36 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: ${theme.readonlyInputBackground};
+    background-color: ${theme.boxBorderColor};
     transition: 0.2s;
     border-radius: 100px;
-    border: 1px solid ${theme.inputBorderColor};
 
     &:before {
       position: absolute;
       content: '';
-      height: 16px;
-      width: 16px;
+      height: 22px;
+      width: 22px;
       left: 4px;
       bottom: 3px;
-      background-color: ${theme.primaryColor};
+      background-color: ${theme.buttonBackground2};
       transition: 0.4s;
       border-radius: 50%;
     }
+  }
+
+  .lightLabel {
+    font-weight: 400;
+    color: ${theme.labelLightThemeColor};
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 30px;
+  }
+
+  .darkLabel {
+    font-weight: 400;
+    color: ${theme.labelDarkThemeColor};
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 30px;
   }
 `);

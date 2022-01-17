@@ -1,11 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext, useMemo } from 'react';
-
-import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { isNotShorterThan } from '../util/validators';
+import ValidatedInput from "@polkadot/extension-koni-ui/components/ValidatedInput";
+import KoniInputWithLabel from "@polkadot/extension-koni-ui/components/InputWithLabel";
+import {AccountContext} from "@polkadot/extension-koni-ui/components";
+import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
+import {isNotShorterThan} from "@polkadot/extension-koni-ui/util/validators";
 
 interface Props {
   address?: string;
@@ -28,7 +29,7 @@ export default function Name ({ address, className, isFocused, label, onBlur, on
   return (
     <ValidatedInput
       className={className}
-      component={InputWithLabel}
+      component={KoniInputWithLabel}
       data-input-name
       defaultValue={startValue}
       isFocused={isFocused}

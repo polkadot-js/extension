@@ -1,12 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { InputWithLabel, ValidatedInput } from '../components';
-import useTranslation from '../hooks/useTranslation';
 import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
-
+import ValidatedInput from "../components/ValidatedInput";
+import InputWithLabel from "../components/InputWithLabel";
+import useTranslation from "../hooks/useTranslation";
 interface Props {
   isFocussed?: boolean;
   onChange: (password: string | null) => void;
@@ -31,6 +30,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   return (
     <>
       <ValidatedInput
+
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}

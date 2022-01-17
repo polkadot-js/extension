@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -27,7 +27,7 @@ export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
   display: block;
   font-size: ${theme.labelFontSize};
   line-height: ${theme.labelLineHeight};
-  margin-bottom: 1rem;
+  margin: 18px 15px;
 
   &.isFull {
     height: 100%;

@@ -1,4 +1,4 @@
-// Copyright 2017-2022 @polkadot/react-components authors & contributors
+// Copyright 2017-2021 @polkadot/react-components authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -6,11 +6,9 @@ import type { ThemeProps } from '../types';
 import React, { createRef, useCallback, useState } from 'react';
 import Dropzone, { DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
-
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
-
 import useTranslation from '../hooks/useTranslation';
-import Label from './Label';
+import Label from "@polkadot/extension-koni-ui/components/Label";
 
 function classes (...classNames: (boolean | null | string | undefined)[]): string {
   return classNames
@@ -102,10 +100,10 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
       {({ getInputProps, getRootProps }): JSX.Element => (
         <div {...getRootProps({ className: classes('ui--InputFile', isError ? 'error' : '', className) })}>
           <input {...getInputProps()} />
-          <em className='label'>
+          <div className='label'>
             {
               !file || clearContent
-                ? placeholder || t('click to select or drag and drop the file here')
+                ? placeholder || t('Click to select or drag and drop the file here')
                 : placeholder || t('{{name}} ({{size}} bytes)', {
                   replace: {
                     name: file.name,
@@ -113,7 +111,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
                   }
                 })
             }
-          </em>
+          </div>
         </div>
       )}
     </Dropzone>
@@ -131,14 +129,24 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
 }
 
 export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps & ThemeProps) => `
-  border: 1px solid ${isError ? theme.errorBorderColor : theme.inputBorderColor};
-  background: ${theme.inputBackground};
-  border-radius: ${theme.borderRadius};
+  border: 1px dashed ${isError ? theme.errorBorderColor : theme.uploadFileBorderColor};
+  background: ${theme.buttonBackground1};
+  border-radius: 8px;
   color: ${isError ? theme.errorBorderColor : theme.textColor};
   font-size: 1rem;
   margin: 0.25rem 0;
   overflow-wrap: anywhere;
-  padding: 0.5rem 0.75rem;
+  padding: 14px 12px;
+
+  .label {
+    font-size: 16px;
+    line-height: 26px;
+    color: ${theme.textColor};
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   &:hover {
     cursor: pointer;

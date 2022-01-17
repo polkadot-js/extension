@@ -1,4 +1,4 @@
-     472	Jaco                          	0.42.6 (#980)
+     473	Jaco                          	Reformat root tsconfig.build.json (#981)
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

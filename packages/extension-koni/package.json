@@ -14,13 +14,13 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.42.6-3",
+  "version": "0.42.6-4",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/extension-base": "^0.42.6-3",
-    "@polkadot/extension-inject": "^0.42.6-3",
-    "@polkadot/extension-koni-base": "^0.42.6-3",
-    "@polkadot/extension-koni-ui": "^0.42.6-3"
+    "@polkadot/extension-base": "^0.42.6-4",
+    "@polkadot/extension-inject": "^0.42.6-4",
+    "@polkadot/extension-koni-base": "^0.42.6-4",
+    "@polkadot/extension-koni-ui": "^0.42.6-4"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

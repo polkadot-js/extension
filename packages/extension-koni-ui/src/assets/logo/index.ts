@@ -1,3 +1,6 @@
+// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 const LogosMap: Record<string, string> = {
   'acala': require('./acala.svg'),
   'altair': require('./altair.svg'),

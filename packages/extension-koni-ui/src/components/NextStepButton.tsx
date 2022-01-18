@@ -1,9 +1,12 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
 import React from 'react';
 import styled from 'styled-components';
-import next from "@polkadot/extension-koni-ui/assets/caret-right.svg";
-import Button from "@polkadot/extension-koni-ui/components/Button";
+
+import Button from '@polkadot/extension-koni-ui/components/Button';
+
+import next from '../assets/caret-right.svg';
 
 type Props = React.ComponentProps<typeof Button>;
 
@@ -11,8 +14,10 @@ function NextStepButton ({ children, ...props }: Props): React.ReactElement<Prop
   return (
     <Button {...props}>
       {children}
-      <img src={next} alt='next'
+      <img
+        alt='next'
         className='next-step-btn__arrow-right'
+        src={next}
       />
     </Button>
   );

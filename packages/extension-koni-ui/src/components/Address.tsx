@@ -1,17 +1,25 @@
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
-import check from "@polkadot/extension-ui/assets/check.svg";
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faQrcode} from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import check from '@polkadot/extension-koni-ui/assets/check.svg';
+import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
+import { saveCurrentAccountAddress } from '@polkadot/extension-koni-ui/messaging';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { updateAccount } from '@polkadot/extension-koni-ui/stores/CurrentAccount';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import useMetadata from '../hooks/useMetadata';
@@ -20,9 +28,7 @@ import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
-import {AccountContext, ActionContext, CurrentAccountContext, SettingsContext} from './contexts';
-import {saveCurrentAccountAddress} from "@polkadot/extension-ui/messaging";
-import Identicon from "@polkadot/extension-koni-ui/components/IdentityIcon";
+import { AccountContext, ActionContext, SettingsContext } from './contexts';
 
 export interface Props {
   actions?: React.ReactNode;
@@ -87,11 +93,10 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function KoniAddress ({ address, children, className, genesisHash, isExternal, isHardware, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ address, children, className, genesisHash, isExternal, isHardware, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [isSelected, setSelected] = useState(false)
+  const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
-  const {currentAccount, setCurrentAccount} = useContext(CurrentAccountContext)
   const settings = useContext(SettingsContext);
   const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
@@ -99,7 +104,7 @@ function KoniAddress ({ address, children, className, genesisHash, isExternal, i
   const actionsRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
   const onAction = useContext(ActionContext);
-
+  const currentAccount: AccountJson = useSelector((state: RootState) => state.currentAccount);
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
@@ -142,30 +147,32 @@ function KoniAddress ({ address, children, className, genesisHash, isExternal, i
   const _changeAccount = useCallback(
     () => {
       setSelected(true);
+
       if (address) {
         const accountByAddress = findAccountByAddress(accounts, address);
+
         if (accountByAddress) {
           saveCurrentAccountAddress(address).then(() => {
-            setCurrentAccount(accountByAddress);
-          }).catch(e => {
-            console.error('There is a problem when set Current Account', e)
-          })
+            updateAccount(accountByAddress);
+          }).catch((e) => {
+            console.error('There is a problem when set Current Account', e);
+          });
         } else {
-          console.error('There is a problem when change account')
+          console.error('There is a problem when change account');
         }
       }
 
-      onAction('/')
+      onAction('/');
     }, []
-  )
+  );
 
-  const toShortAddress = (_address: string | null , halfLength?: number) => {
-    const address = (_address || '').toString()
+  const toShortAddress = (_address: string | null, halfLength?: number) => {
+    const address = (_address || '').toString();
 
-    const addressLength = halfLength ? halfLength : 7
+    const addressLength = halfLength || 7;
 
-    return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address
-  }
+    return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
+  };
 
   const Name = () => {
     const accountName = name || account?.name;
@@ -198,7 +205,10 @@ function KoniAddress ({ address, children, className, genesisHash, isExternal, i
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
   return (
-    <div className={className} onClick={_changeAccount}>
+    <div
+      className={className}
+      onClick={_changeAccount}
+    >
       {parentName
         ? (
           <>
@@ -216,18 +226,22 @@ function KoniAddress ({ address, children, className, genesisHash, isExternal, i
               </div>
             </div>
           </>
-        ) : (
+        )
+        : (
           <></>
         )
       }
       <div className={`${parentName ? 'infoRow parent-name' : 'infoRow'}`}>
         <div className='infoRow-icon-wrapper'>
           {isSelected
-            ?
-            (
-              <img src={check} alt="check"/>
-            ) : (
-              <div className='uncheckedItem'/>
+            ? (
+              <img
+                alt='check'
+                src={check}
+              />
+            )
+            : (
+              <div className='uncheckedItem' />
             )
           }
 
@@ -237,8 +251,8 @@ function KoniAddress ({ address, children, className, genesisHash, isExternal, i
             isExternal={isExternal}
             onCopy={_onCopy}
             prefix={prefix}
-            value={formatted || address}
             size={32}
+            value={formatted || address}
           />
         </div>
         <div className='info'>
@@ -270,7 +284,7 @@ function KoniAddress ({ address, children, className, genesisHash, isExternal, i
   );
 }
 
-export default styled(KoniAddress)(({ theme }: ThemeProps) => `
+export default styled(Address)(({ theme }: ThemeProps) => `
   box-sizing: border-box;
   position: relative;
 

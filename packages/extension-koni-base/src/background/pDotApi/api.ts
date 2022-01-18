@@ -1,8 +1,11 @@
+// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiProps, ApiState } from '@polkadot/extension-base/background/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
-import { ApiPromise, WsProvider } from '@polkadot/api';
 import { Registry } from '@polkadot/types/types';
-import { ApiProps, ApiState } from '@polkadot/extension-base/background/types';
 // import {settings as } from '@polkadot/ui-settings';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
@@ -23,7 +26,7 @@ interface ChainData {
   systemVersion: string;
 }
 
-async function retrieve(registry: Registry, api: ApiPromise): Promise<ChainData> {
+async function retrieve (registry: Registry, api: ApiPromise): Promise<ChainData> {
   const [systemChain, systemChainType, systemName, systemVersion] = await Promise.all([
     api.rpc.system.chain(),
     api.rpc.system.chainType
@@ -46,10 +49,10 @@ async function retrieve(registry: Registry, api: ApiPromise): Promise<ChainData>
   };
 }
 
-async function loadOnReady(registry: Registry, api: ApiPromise): Promise<ApiState> {
+async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiState> {
   const DEFAULT_DECIMALS = registry.createType('u32', 12);
   const DEFAULT_SS58 = registry.createType('u32', addressDefaults.prefix);
-  const {properties, systemChain, systemChainType, systemName, systemVersion} = await retrieve(registry, api);
+  const { properties, systemChain, systemChainType, systemName, systemVersion } = await retrieve(registry, api);
   const ss58Format = properties.ss58Format.unwrapOr(DEFAULT_SS58).toNumber();
   const tokenSymbol = properties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit, ...DEFAULT_AUX]);
   const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);
@@ -58,7 +61,7 @@ async function loadOnReady(registry: Registry, api: ApiPromise): Promise<ApiStat
   console.log(`chain: ${systemChain} (${systemChainType.toString()}), ${stringify(properties)}`);
 
   // explicitly override the ss58Format as specified
-  registry.setChainProperties(registry.createType('ChainProperties', {ss58Format, tokenDecimals, tokenSymbol}));
+  registry.setChainProperties(registry.createType('ChainProperties', { ss58Format, tokenDecimals, tokenSymbol }));
 
   // first setup the UI helpers
   const defaultFormatBalance = {
@@ -86,12 +89,12 @@ async function loadOnReady(registry: Registry, api: ApiPromise): Promise<ApiStat
   };
 }
 
-export function initApi(apiUrl: string): ApiProps {
+export function initApi (apiUrl: string): ApiProps {
   const registry = new TypeRegistry();
 
-  let provider = new WsProvider(apiUrl);
+  const provider = new WsProvider(apiUrl);
 
-  const api = new ApiPromise({provider, registry});
+  const api = new ApiPromise({ provider, registry });
 
   const result: ApiProps = ({
     api,
@@ -109,22 +112,23 @@ export function initApi(apiUrl: string): ApiProps {
     systemChain: '',
     systemName: '',
     systemVersion: '',
-    get isReady() {
-      const self = this as unknown as ApiProps;
+    get isReady () {
+      const self = this as ApiProps;
 
-      async function f(): Promise<ApiProps> {
+      async function f (): Promise<ApiProps> {
         await self.api.isReady;
 
         return new Promise<ApiProps>((resolve, reject) => {
-          //todo: may reject if timeout
+          // todo: may reject if timeout
           // const timer = setTimeout(() => {
           //   reject(new Error(`API timed out after 10000 ms`));
           // }, 10000);
 
-          (function wait() {
+          (function wait () {
             if (self.isApiReady) {
               return resolve(self);
             }
+
             setTimeout(wait, 100);
           })();
         });

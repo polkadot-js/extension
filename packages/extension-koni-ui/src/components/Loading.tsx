@@ -1,17 +1,16 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
+import styled from 'styled-components';
+
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
-  children?: React.ReactNode;
   className?: 'string';
 }
 
-function KoniLoading ({ children, className }: Props): React.ReactElement<Props> {
-
+function LoadingContainer ({ className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <div className='loader' />
@@ -19,7 +18,7 @@ function KoniLoading ({ children, className }: Props): React.ReactElement<Props>
   );
 }
 
-export default React.memo(styled(KoniLoading)(({theme}: Props) => `
+export default React.memo(styled(LoadingContainer)(({ theme }: Props) => `
   .loader {
     position: absolute;
     top: 0;

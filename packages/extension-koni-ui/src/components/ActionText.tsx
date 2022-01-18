@@ -1,3 +1,6 @@
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import type { ThemeProps } from '../types';
 
@@ -10,17 +13,20 @@ interface Props {
   icon?: IconDefinition;
   onClick: MouseEventHandler<HTMLDivElement>;
   text: string;
-  img?: any;
+  img?: string;
 }
 
-function ActionText ({ className, icon, onClick, text, img }: Props): React.ReactElement<Props> {
+function ActionText ({ className, icon, img, onClick, text }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}
       onClick={onClick}
     >
       {icon && <FontAwesomeIcon icon={icon} />}
-      {img && <img src={img} alt="copy"/>}
+      {img && <img
+        alt='copy'
+        src={img}
+      />}
       <span>{text}</span>
     </div>
   );

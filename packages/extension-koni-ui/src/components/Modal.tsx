@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -21,7 +21,7 @@ function Modal ({ children, className, reference }: Props): React.ReactElement<P
       <div className='koni-modal'>
         {children}
       </div>
-      <div className='koni-modal__backdrop'/>
+      <div className='koni-modal__backdrop' />
     </div>
   );
 }
@@ -54,4 +54,3 @@ export default styled(Modal)(({ theme }: ThemeProps) => `
   }
 
 `);
-

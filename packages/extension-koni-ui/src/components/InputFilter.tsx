@@ -1,4 +1,4 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -32,10 +32,10 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
   return (
     <div className={className}>
       <Input
-        className='kn-input-filter'
         autoCapitalize='off'
         autoCorrect='off'
         autoFocus
+        className='kn-input-filter'
         onChange={onChangeFilter}
         placeholder={placeholder}
         ref={inputRef}

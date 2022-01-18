@@ -1,6 +1,9 @@
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import type { ThemeProps } from '../types';
 
-import React  from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -13,7 +16,7 @@ function RadioStatus ({ checked, className }: Props): React.ReactElement<Props> 
     <div className={className}>
       <div className='radio-status'>
         {checked && (
-          <div className='radio-status__dot'/>
+          <div className='radio-status__dot' />
         )}
       </div>
     </div>

@@ -1,12 +1,17 @@
-import type {ThemeProps} from '../types';
-import React, {useCallback, useEffect, useState} from 'react';
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import type { ThemeProps } from '../types';
+
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import Menu from "@polkadot/extension-koni-ui/components/Menu";
-import useGenesisHashOptions from "@polkadot/extension-koni-ui/hooks/useGenesisHashOptions";
-import check from "@polkadot/extension-koni-ui/assets/check.svg";
-import {getLogoByGenesisHash} from "@polkadot/extension-koni-ui/util/logoByGenesisHashMap";
-import InputFilter from "@polkadot/extension-koni-ui/components/InputFilter";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
+
+import check from '@polkadot/extension-koni-ui/assets/check.svg';
+import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
+import Menu from '@polkadot/extension-koni-ui/components/Menu';
+import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -14,11 +19,11 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   currentNetwork?: string;
-  selectNetwork: (genesisHash: string, networkPrefix: number, icon: String, networkName: string) => void;
+  selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkName: string) => void;
   isNotHaveAccount?: boolean;
 }
 
-function KoniNetworkMenu ({ className, reference, currentNetwork, selectNetwork, isNotHaveAccount, onFilter }: Props): React.ReactElement<Props> {
+function KoniNetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   let genesisOptions = useGenesisHashOptions();
   const [filteredGenesisOptions, setFilteredGenesisOption] = useState(genesisOptions);
@@ -26,22 +31,23 @@ function KoniNetworkMenu ({ className, reference, currentNetwork, selectNetwork,
   const [selectedGroup, setSelectedGroup] = useState('');
   const filterCategories = [
     {
-      text: "All",
-      type: ""
+      text: 'All',
+      type: ''
     },
     {
-      text: "Relaychains",
-      type: "RELAY_CHAIN"
+      text: 'Relaychains',
+      type: 'RELAY_CHAIN'
     },
     {
-      text: "DOT Chains",
-      type: "POLKADOT_PARACHAIN"
+      text: 'DOT Chains',
+      type: 'POLKADOT_PARACHAIN'
     },
     {
-      text: "KSM Chains",
-      type: "KUSAMA_PARACHAIN"
+      text: 'KSM Chains',
+      type: 'KUSAMA_PARACHAIN'
     }
-  ]
+  ];
+
   if (isNotHaveAccount) {
     genesisOptions = useGenesisHashOptions().slice(0, 1);
   }
@@ -49,38 +55,36 @@ function KoniNetworkMenu ({ className, reference, currentNetwork, selectNetwork,
   useEffect(() => {
     if (filteredNetwork) {
       if (selectedGroup && selectedGroup.length) {
-        setFilteredGenesisOption(genesisOptions.filter(network => network.text.toLowerCase().includes(filteredNetwork) && network.group === selectedGroup))
+        setFilteredGenesisOption(genesisOptions.filter((network) => network.text.toLowerCase().includes(filteredNetwork) && network.group === selectedGroup));
       } else {
-        setFilteredGenesisOption(genesisOptions.filter(network => network.text.toLowerCase().includes(filteredNetwork)))
+        setFilteredGenesisOption(genesisOptions.filter((network) => network.text.toLowerCase().includes(filteredNetwork)));
       }
-
     } else {
       if (selectedGroup && selectedGroup.length) {
-        setFilteredGenesisOption(genesisOptions.filter(network => network.group === selectedGroup));
+        setFilteredGenesisOption(genesisOptions.filter((network) => network.group === selectedGroup));
       } else {
         setFilteredGenesisOption(genesisOptions);
       }
     }
-  }, [filteredNetwork, selectedGroup])
+  }, [filteredNetwork, selectedGroup]);
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilteredNetwork(filter);
     onFilter && onFilter(filter);
-  }, [])
-
-
+  }, []);
 
   const _selectGroup = useCallback(
     (type): void => {
       setSelectedGroup(type);
+
       if (type && type.length) {
-        setFilteredGenesisOption(genesisOptions.filter(f => f.group === type && f.text.toLowerCase().includes(filteredNetwork)));
+        setFilteredGenesisOption(genesisOptions.filter((f) => f.group === type && f.text.toLowerCase().includes(filteredNetwork)));
       } else {
-        setFilteredGenesisOption(genesisOptions.filter(f => f.text.toLowerCase().includes(filteredNetwork)));
+        setFilteredGenesisOption(genesisOptions.filter((f) => f.text.toLowerCase().includes(filteredNetwork)));
       }
     },
     [selectedGroup]
-  )
+  );
 
   return (
     <Menu
@@ -98,34 +102,49 @@ function KoniNetworkMenu ({ className, reference, currentNetwork, selectNetwork,
       </div>
       <div className='network-filter-list'>
 
-        {filterCategories.map(({text, type}) : React.ReactNode => (
-          <div key={text} onClick={() => {_selectGroup(type)}}
-               className={type === selectedGroup ? 'network-filter-item__selected-text' : 'network-filter-item__text'}>
-              {text}
+        {filterCategories.map(({ text, type }): React.ReactNode => (
+          <div
+            className={type === selectedGroup ? 'network-filter-item__selected-text' : 'network-filter-item__text'}
+            key={text}
+            onClick={() => { _selectGroup(type); }}
+          >
+            {text}
           </div>
         ))}
       </div>
       <div className='network-item-list'>
         {
-          filteredGenesisOptions && filteredGenesisOptions.length ?
-            filteredGenesisOptions.map(({ text, value , networkPrefix, icon, networkName}): React.ReactNode => (
-              <div key={value} className='network-item-container' onClick={() => {
-                selectNetwork(value, networkPrefix, icon, networkName)
-              }}>
-                <img src={getLogoByGenesisHash(value)} alt="logo" className={'network-logo'} />
+          filteredGenesisOptions && filteredGenesisOptions.length
+            ? filteredGenesisOptions.map(({ icon, networkName, networkPrefix, text, value }): React.ReactNode => (
+              <div
+                className='network-item-container'
+                key={value}
+                onClick={() => {
+                  selectNetwork(value, networkPrefix, icon, networkName);
+                }}
+              >
+                <img
+                  alt='logo'
+                  className={'network-logo'}
+                  src={getLogoByGenesisHash(value)}
+                />
 
-                <span className={value == currentNetwork ? 'koni-network-text__selected': 'koni-network-text'}>{text}</span>
+                <span className={value == currentNetwork ? 'koni-network-text__selected' : 'koni-network-text'}>{text}</span>
                 {value == currentNetwork
-                  ?
-                  (
-                    <img src={check} alt="check" className='checkIcon'/>
-                  ) : (
-                    <div className='uncheckedItem'/>
+                  ? (
+                    <img
+                      alt='check'
+                      className='checkIcon'
+                      src={check}
+                    />
+                  )
+                  : (
+                    <div className='uncheckedItem' />
                   )
                 }
               </div>
-            )) :
-            <div className='kn-no-result'>No results</div>
+            ))
+            : <div className='kn-no-result'>No results</div>
         }
       </div>
     </Menu>

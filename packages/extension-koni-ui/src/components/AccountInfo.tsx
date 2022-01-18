@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
@@ -7,6 +7,7 @@ import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
+
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,15 +15,16 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
+import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+
+import cloneLogo from '../assets/clone.svg';
 import useMetadata from '../hooks/useMetadata';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
 import { AccountContext, SettingsContext } from './contexts';
-import cloneLogo from "@polkadot/extension-koni-ui/assets/clone.svg";
-import Identicon from "@polkadot/extension-koni-ui/components/IdentityIcon";
 
 export interface Props {
   address?: string | null;
@@ -65,6 +67,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   const publicKey = decodeAddress(address);
   const account = findSubstrateAccount(accounts, publicKey);
   const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
+
   return {
     account,
     formatted: account?.type === 'ethereum'
@@ -75,9 +78,10 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
     type: account?.type || DEFAULT_TYPE
   };
 }
+
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function AccountInfo ({address, children, className, genesisHash, isExternal, isHardware, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, children, className, genesisHash, isExternal, isHardware, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
@@ -88,6 +92,7 @@ function AccountInfo ({address, children, className, genesisHash, isExternal, is
   useEffect((): void => {
     if (!address) {
       setRecoded(defaultRecoded);
+
       return;
     }
 
@@ -143,6 +148,7 @@ function AccountInfo ({address, children, className, genesisHash, isExternal, is
   };
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
+
   return (
     <div className={className}>
       <div className='infoRow'>
@@ -151,8 +157,8 @@ function AccountInfo ({address, children, className, genesisHash, isExternal, is
           iconTheme={theme}
           isExternal={isExternal}
           prefix={prefix}
-          value={formatted || address}
           size={48}
+          value={formatted || address}
         />
         <div className='info'>
           {parentName
@@ -206,7 +212,12 @@ function AccountInfo ({address, children, className, genesisHash, isExternal, is
               {formatted || address || t('<unknown>')}
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''}>
-              <img src={cloneLogo} alt="copy" className='account-info-copyIcon' onClick={_onCopy}/>
+              <img
+                alt='copy'
+                className='account-info-copyIcon'
+                onClick={_onCopy}
+                src={cloneLogo}
+              />
             </CopyToClipboard>
           </div>
         </div>

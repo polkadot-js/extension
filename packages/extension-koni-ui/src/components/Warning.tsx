@@ -1,11 +1,13 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
+
 import React from 'react';
 import styled from 'styled-components';
-import warning from "@polkadot/extension-ui/assets/warning.svg";
-import danger from "@polkadot/extension-ui/assets/danger.svg";
+
+import danger from '@polkadot/extension-koni-ui/assets/danger.svg';
+import warning from '@polkadot/extension-koni-ui/assets/warning.svg';
 
 interface Props extends ThemeProps {
   children: React.ReactNode;
@@ -18,8 +20,16 @@ function Warning ({ children, className = '', isBelowInput, isDanger }: Props): 
   return (
     <div className={`${className} ${isDanger ? 'danger' : ''} ${isBelowInput ? 'belowInput' : ''}`}>
       {isDanger
-        ? (<img src={danger} alt="danger" className='warning-image'/>)
-        : (<img src={warning} alt="warning" className='warning-image'/>)
+        ? (<img
+          alt='danger'
+          className='warning-image'
+          src={danger}
+        />)
+        : (<img
+          alt='warning'
+          className='warning-image'
+          src={warning}
+        />)
       }
       <div className='warning-message'>{children}</div>
     </div>

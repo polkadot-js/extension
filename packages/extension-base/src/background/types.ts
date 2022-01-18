@@ -3,23 +3,23 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta, MetadataDefBase } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, MetadataDefBase, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type {Registry, SignerPayloadJSON, SignerPayloadRaw} from '@polkadot/types/types';
+import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 import { TypeRegistry } from '@polkadot/types';
+import { Keyring } from '@polkadot/ui-keyring';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
-import {SubmittableExtrinsicFunction} from "@polkadot/api/promise/types";
-import {ApiPromise} from "@polkadot/api";
-import {ApiInitStatus} from "@polkadot/extension-koni-base/background/pDotApi";
-import {Keyring} from "@polkadot/ui-keyring";
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -68,7 +68,6 @@ export interface ApiState {
   defaultFormatBalance: DefaultFormatBalance;
 }
 
-
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkName: string;
   group: string
@@ -92,7 +91,6 @@ export type PdotApi = {
 export interface BackgroundWindow extends Window {
   pdotApi: PdotApi;
 }
-
 
 // all Accounts and the address of the current Account
 export interface AccountsWithCurrentAddress {
@@ -166,6 +164,8 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
+  'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.list)': [null, ResponseAuthorizeList];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {useEffect, useMemo, useRef, useState} from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getAllMetatdata } from '../messaging';
 import chains from '../util/chains';
@@ -48,7 +48,7 @@ export default function (): Option[] {
     },
     // put the relay chains at the top
     ...chains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash, ss58Format , icon, networkName, group}) => ({
+      .map(({ chain, genesisHash, group, icon, networkName, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
@@ -56,7 +56,7 @@ export default function (): Option[] {
         icon,
         group
       })),
-    ...chains.map(({ chain, genesisHash, ss58Format , icon, networkName, group}) => ({
+    ...chains.map(({ chain, genesisHash, group, icon, networkName, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,

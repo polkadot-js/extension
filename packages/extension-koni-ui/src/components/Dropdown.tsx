@@ -1,8 +1,13 @@
-import type {ThemeProps} from '../types';
-import React, {useState} from 'react';
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import type { ThemeProps } from '../types';
+
+import React, { useState } from 'react';
+import Select from 'react-select';
 import styled from 'styled-components';
+
 import Label from './Label';
-import Select from "react-select";
 // interface DropdownOption {
 //   text: string;
 //   value: string;
@@ -10,25 +15,20 @@ import Select from "react-select";
 
 interface Props extends ThemeProps {
   className?: string;
-  defaultValue?: string | null;
-  isDisabled?: boolean
-  isError?: boolean;
-  isFocussed?: boolean;
   label: string;
-  onBlur?: () => void;
   onChange?: (value: string) => void;
-  options?: any;
+  options?: any[];
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value}: Props): React.ReactElement<Props> {
-  const transformOptions = options.map((t: { text: any; value: any; }) => ({label: t.text, value: t.value}));
+function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
+  const transformOptions = options.map((t: { text: any; value: any; }) => ({ label: t.text, value: t.value }));
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
 
   const handleChange = (e: { value: any }) => {
     onChange && onChange(e.value.trim());
     setSelectedValue(e.value);
-  }
+  };
 
   const customStyles = {
     option: (base: any) => {
@@ -37,10 +37,11 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
         textAlign: 'left',
         fontFamily: 'Lexend',
         fontSize: '15px'
-      }
+      };
     },
-    noOptionsMessage: (base: any) => ({...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px'})
-  }
+    noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' })
+  };
+
   return (
     <>
       <Label
@@ -48,21 +49,21 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
         label={label}
       >
         <Select
-          options={transformOptions}
-          value={transformOptions.filter((obj: { value: number; }) => obj.value === selectedValue)}
-          menuPortalTarget={document.body}
-          isSearchable
-          styles={customStyles}
           className='kn-dropdown-wrapper'
           classNamePrefix='kn-dropdown'
+          isSearchable
+          menuPortalTarget={document.body}
           onChange={handleChange}
+          options={transformOptions}
+          styles={customStyles}
+          value={transformOptions.filter((obj: { value: number; }) => obj.value === selectedValue)}
         />
       </Label>
     </>
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
+export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
   font-weight: 500;
   color: ${theme.textColor2};
 

@@ -1,13 +1,14 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import Label from '@polkadot/extension-koni-ui/components/Label';
+import { Input } from '@polkadot/extension-koni-ui/components/TextInputs';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+
 import useTranslation from '../hooks/useTranslation';
-import Label from "@polkadot/extension-koni-ui/components/Label";
-import {Input} from "@polkadot/extension-koni-ui/components/TextInputs";
-import Warning from "@polkadot/extension-koni-ui/components/Warning";
 
 interface Props {
   className?: string;

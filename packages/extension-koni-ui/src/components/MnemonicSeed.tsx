@@ -1,14 +1,17 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
-import React, {MouseEventHandler} from 'react';
+
+import React, { MouseEventHandler } from 'react';
 import styled from 'styled-components';
-import useTranslation from '../hooks/useTranslation';
-import TextAreaWithLabel from "@polkadot/extension-koni-ui/components/TextAreaWithLabel";
-import ActionText from "@polkadot/extension-koni-ui/components/ActionText";
+
+import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
+import TextAreaWithLabel from '@polkadot/extension-koni-ui/components/TextAreaWithLabel';
+
 import clone from '../assets/clone.svg';
 import download from '../assets/icon/download.svg';
+import useTranslation from '../hooks/useTranslation';
 
 interface Props {
   seed: string;
@@ -18,19 +21,25 @@ interface Props {
   backupMnemonicSeed?: MouseEventHandler<HTMLDivElement>;
 }
 
-function MnemonicSeed ({ className, onCopy, seed, isShowDownloadButton, backupMnemonicSeed }: Props): React.ReactElement<Props> {
+function MnemonicSeed ({ backupMnemonicSeed, className, isShowDownloadButton, onCopy, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (
     <div className={className}>
       <TextAreaWithLabel
-        className={`mnemonicDisplay ${isShowDownloadButton ? 'mnemonic-display-download-btn': ''}`}
+        className={`mnemonicDisplay ${isShowDownloadButton ? 'mnemonic-display-download-btn' : ''}`}
         isReadOnly
         label={t<string>('Generated 12-word mnemonic seed:')}
         value={seed}
       />
-      {isShowDownloadButton && <div className='download-button' onClick={backupMnemonicSeed}>
-        <img src={download} alt="download"/>
+      {isShowDownloadButton && <div
+        className='download-button'
+        onClick={backupMnemonicSeed}
+      >
+        <img
+          alt='download'
+          src={download}
+        />
       </div>}
       <div className='buttonsRow'>
         <ActionText

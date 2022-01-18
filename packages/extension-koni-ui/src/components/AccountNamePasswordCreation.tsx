@@ -1,15 +1,15 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
-import styled from "styled-components";
-import ButtonArea from "@polkadot/extension-koni-ui/components/ButtonArea";
-import KoniNextStepButton from "@polkadot/extension-koni-ui/components/NextStepButton";
-import Name from "@polkadot/extension-koni-ui/partials/Name";
-import Password from "@polkadot/extension-koni-ui/partials/Password";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
+import Name from '@polkadot/extension-koni-ui/partials/Name';
+import Password from '@polkadot/extension-koni-ui/partials/Password';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   buttonLabel: string;
@@ -19,12 +19,11 @@ interface Props {
   onNameChange: (name: string) => void;
   className?: string;
   children?: any;
-  address?: any;
-  genesis?: any;
+  address?: string;
+  genesis?: string;
 }
 
-
-function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCreate, onNameChange, address, genesis, className, children }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
 
@@ -48,8 +47,13 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
       <div className={className}>
         <div className='account-info-wrapper'>
 
-          <AccountInfo address={address} genesisHash={genesis} name={name} className='account-info'>
-            <div className={ children? 'children-wrapper': ''}>
+          <AccountInfo
+            address={address}
+            className='account-info'
+            genesisHash={genesis}
+            name={name}
+          >
+            <div className={ children ? 'children-wrapper' : ''}>
               {children}
             </div>
             <Name
@@ -61,11 +65,11 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
         </div>
         <ButtonArea className='kn-button-area'>
           <KoniNextStepButton
+            className='next-step-btn'
             data-button-action='add new root'
             isBusy={isBusy}
             isDisabled={!password || !name}
             onClick={_onCreate}
-            className='next-step-btn'
           >
             {buttonLabel}
           </KoniNextStepButton>

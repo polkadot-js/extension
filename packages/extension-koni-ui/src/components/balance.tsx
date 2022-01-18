@@ -1,5 +1,8 @@
-import BigN from 'bignumber.js'
-import React from 'react'
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import BigN from 'bignumber.js';
+import React from 'react';
 
 type BalanceViewProps = {
   value: string | BigN
@@ -9,20 +12,22 @@ type BalanceViewProps = {
   withSymbol?: boolean
 }
 
-export const BalanceVal = ({ value, symbol, startWithSymbol = false, withComma = true, withSymbol = true }: BalanceViewProps) => {
-  let [prefix, postfix] = value.toString().split('.')
+export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma = true, withSymbol = true }: BalanceViewProps) => {
+  let [prefix, postfix] = value.toString().split('.');
+
   if (startWithSymbol) {
-    postfix = postfix?.substring(0, 3)
+    postfix = postfix?.substring(0, 3);
   } else {
-    postfix = postfix?.substring(0, 4)
+    postfix = postfix?.substring(0, 4);
   }
 
-  const lastSymbol = postfix?.slice(-1)
-  const isString = /^[KMB]/.test(lastSymbol)
+  const lastSymbol = postfix?.slice(-1);
+  const isString = /^[KMB]/.test(lastSymbol);
 
-  const postfixValue = postfix || '00'
+  const postfixValue = postfix || '00';
 
-  const symbolView = prefix && <span className='kn-balance-val__symbol'>{symbol}</span>
+  const symbolView = prefix && <span className='kn-balance-val__symbol'>{symbol}</span>;
+
   return (
     <span className='kn-balance-val'>
       {startWithSymbol && withSymbol && symbolView}<span className='kn-balance-val__prefix'>{withComma ? new Intl.NumberFormat().format(Number(prefix)) : prefix}</span>
@@ -33,5 +38,5 @@ export const BalanceVal = ({ value, symbol, startWithSymbol = false, withComma =
       {isString && lastSymbol}
       <> {!startWithSymbol && withSymbol && symbolView}</>
     </span>
-  )
-}
+  );
+};

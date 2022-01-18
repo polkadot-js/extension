@@ -1,12 +1,13 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext, useMemo } from 'react';
-import ValidatedInput from "@polkadot/extension-koni-ui/components/ValidatedInput";
-import KoniInputWithLabel from "@polkadot/extension-koni-ui/components/InputWithLabel";
-import {AccountContext} from "@polkadot/extension-koni-ui/components";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {isNotShorterThan} from "@polkadot/extension-koni-ui/util/validators";
+
+import { AccountContext } from '@polkadot/extension-koni-ui/components';
+import KoniInputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import ValidatedInput from '@polkadot/extension-koni-ui/components/ValidatedInput';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { isNotShorterThan } from '@polkadot/extension-koni-ui/util/validators';
 
 interface Props {
   address?: string;

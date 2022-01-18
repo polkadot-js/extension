@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsWithCurrentAddress, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -14,10 +14,10 @@ import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
-import {ApiInitStatus} from "@polkadot/extension-koni-base/background/pDotApi";
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,6 +79,10 @@ export async function editAccount (address: string, name: string): Promise<boole
 
 export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
   return sendMessage('pri(accounts.show)', { address, isShowing });
+}
+
+export async function saveCurrentAccountAddress (address: string): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAddress)', { address });
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
@@ -188,6 +192,10 @@ export async function rejectMetaRequest (id: string): Promise<boolean> {
 
 export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
   return sendMessage('pri(accounts.subscribe)', null, cb);
+}
+
+export async function getAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
+  return sendMessage('pri(accounts.getAllWithCurrentAddress)', null, cb);
 }
 
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {

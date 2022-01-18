@@ -7,7 +7,7 @@ Extension is compiled from folder `packages/extension-koni`
   - Background is use to handle message from Extensions pages and Chrome tabs via Chrome API Message Passing.
   - Save all state to store and persist to chrome storage.
   - Run cronjob.
-- **Extensions**: Is frontend and page of extension:
+- **Extension**: Is frontend and page of extension:
   - popup.html: Frontend page open when click to extension icon in browser.
   - portfolio.html: Frontend to display more complicated view.
 - **Inject Scripts**: Inject script into chrome tabs.

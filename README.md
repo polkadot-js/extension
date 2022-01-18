@@ -26,7 +26,7 @@ All data request must be call and handle by in background. Extension Pages and I
 - **extension-koni-ui** *(replace extension-ui)*: The UI components for the extension, to build up the popup 
 - **extension-koni** *(replace extension)*: All the injection and background processing logic (the main entry)
 
-# Development Guild
+# Development Guide
 
 ## Add an API
 - API is define in folder `packages/extension-koni-base/src/api`

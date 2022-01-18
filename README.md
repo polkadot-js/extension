@@ -1,4 +1,4 @@
-## SubWallet Extensions
+## SubWallet Extension
 SubWallet is forked from polkadot-js/extension. We aim add many features but can rebase polkadot origin anytime.
 ## Main Concept
 ![Main Concept](https://github.com/Koniverse/Subwallet-V2/wiki/images/ExtensionConcept.png)

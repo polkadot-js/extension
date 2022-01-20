@@ -4,9 +4,13 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { NetWorkInfo } from './types';
+import networks from "@polkadot/extension-koni-base/api/endpoints";
+import unique_types from "@polkadot/extension-koni-base/api/unique_nft/runtime_types";
 
 export const wsProvider = async ({ provider }: NetWorkInfo, type?: any): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  console.log("provider: ", provider)
+  console.log("type: ", type)
   const wsProvider = new WsProvider(provider);
 
   return ApiPromise.create({ provider: wsProvider, types: type });

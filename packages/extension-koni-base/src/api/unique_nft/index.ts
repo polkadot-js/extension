@@ -56,11 +56,10 @@ export default class UniqueNftApi {
    api: ApiPromise = new ApiPromise();
 
    constructor() {
-      this.connect()
    }
 
-   private async connect() {
-      this.api = await wsProvider(networks.uniqueNft, unique_types.types?.at(0)?.types);
+   public async connect() {
+      this.api = await wsProvider(networks.uniqueNft, unique_types.types[0]?.types)
    }
 
    public async disconnect() {
@@ -69,7 +68,7 @@ export default class UniqueNftApi {
 
    /**
     * Retrieve address of NFTs
-    * 
+    *
     * @param collectionId: Id of the collection
     * @param owner: address of account
     * @returns the array of NFTs
@@ -81,12 +80,11 @@ export default class UniqueNftApi {
 
    /**
     * Retrieve NFT image URL according to the collection offchain schema
-    * 
+    *
     * @param collectionId: Id of the collection
     * @param tokenId: Token ID
     * @returns the URL of the token image
     */
-
    public async getNftImageUrl(collectionId: number, tokenId: string) {
       const collection = (await this.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection
 
@@ -103,13 +101,14 @@ export default class UniqueNftApi {
       } else {
          // TBD: Query image URL from the RESTful service
       }
+     console.log(`NFT ${collectionId}-${tokenId} Image URL: `, url);
       return url;
    }
 
    /**
     * Retrieve and deserialize properties
-    * 
-    * 
+    *
+    *
     * @param collectionId: Id of the collection
     * @param tokenId: Token ID
     * @param locale: Output locale (default is "en")
@@ -145,6 +144,7 @@ export default class UniqueNftApi {
          image: url
       };
 
+      console.log(`NFT ${collectionId}-${tokenId} data: `, tokenData);
       return tokenData;
    }
 }

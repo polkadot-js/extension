@@ -33,6 +33,7 @@ export const getSingularByAccount = async (account: string) => {
     })
   }
 
+  console.log(nfts)
   return nfts
 }
 

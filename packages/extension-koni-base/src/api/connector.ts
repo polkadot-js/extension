@@ -5,11 +5,11 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { NetWorkInfo } from './types';
 
-export const wsProvider = async ({ provider }: NetWorkInfo): Promise<ApiPromise> => {
+export const wsProvider = async ({ provider }: NetWorkInfo, type?: any): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const wsProvider = new WsProvider(provider);
 
-  return ApiPromise.create({ provider: wsProvider });
+  return ApiPromise.create({ provider: wsProvider, types: type });
 };
 
 // Return an array of apis with the order like the input

@@ -1,12 +1,12 @@
 // Node >= 14 doesnt have require by default. Fix this maybe ?
-import {createRequire} from 'module'
 import {decodeAddress, encodeAddress} from "@polkadot/keyring";
 import {BN, hexToU8a, isHex} from "@polkadot/util";
-const require = createRequire(import.meta.url)
+import {readFileSync} from "fs";
+import { resolve } from 'path'
 
 export const loadJSON = (path: string) => {
     try {
-        return require(path)
+      return JSON.parse(readFileSync(resolve(__dirname, path), 'utf-8') )
     } catch (e) {
         console.log(e)
         console.log('Error parsing JSON file')

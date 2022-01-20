@@ -9,7 +9,7 @@ interface chainInfo {
 }
 
 export const getChainMetadata = ({ chainId, paraId }: chainInfo) => {
-   const manifestPath = `../endpoints/${chainId}/${paraId}/manifest.json`
+   const manifestPath = `./endpoints/${chainId}/${paraId}/manifest.json`
    return loadJSON(manifestPath)
 }
 
@@ -25,13 +25,13 @@ export const getBalances = async (targetChains: Array<any>, address: string) => 
    }
 
    let chainDict: Record<string, Object> = {}
-   targetChains.map((item: any, i: number) => {
-      if (!("paraId" in item) || !("chainId" in item)) {
-         console.log("Must include chainId")
-         return null
-      }
-      const chainMetadata = getChainMetadata({ chainId: item.chainId, paraId: item.paraId })
-      chainDict[i] = { chainId: item.chainId, paraId: item.paraId, ...chainMetadata }
+   targetChains.map(function (item: any, i: number)  {
+     if (!("paraId" in item) || !("chainId" in item)) {
+       console.log("Must include chainId")
+       return
+     }
+     const chainMetadata = getChainMetadata({chainId: item.chainId, paraId: item.paraId})
+     chainDict[i] = {chainId: item.chainId, paraId: item.paraId, ...chainMetadata}
    })
 
    const apis = await connectChains(targetChains)
@@ -71,12 +71,12 @@ export const getBalances = async (targetChains: Array<any>, address: string) => 
 export const subscribeBalances = async (targetChains: any[], address: string) => {
    if (!isValidAddress(address)) {
       console.log('Invalid address.')
-      return null
+      return
    }
 
    if (targetChains.length <= 0) {
       console.log('Must pass at least 1 chainId.')
-      return null
+      return
    }
 
    let balanceDict: Record<number, any> = {
@@ -91,7 +91,7 @@ export const subscribeBalances = async (targetChains: any[], address: string) =>
 
    const apis: any[] | undefined = await connectChains(targetChains)
 
-   if(!apis) return undefined
+   if(!apis) return
    apis.map(async (api, i) => {
       let { data: previousBalance, nonce: previousNonce } = await api.query.system.account(address)
       let previousFree = previousBalance.free

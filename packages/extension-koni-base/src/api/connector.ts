@@ -5,8 +5,10 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { getChainMetadata } from './rpc_api';
 
 import { NetWorkInfo } from './types';
+// import networks from "@polkadot/extension-koni-base/api/endpoints";
+// import unique_types from "@polkadot/extension-koni-base/api/unique_nft/runtime_types";
 
-export const wsProvider = async ({ provider }: NetWorkInfo, type?: any): Promise<ApiPromise> => {
+export const wsProvider = async ({ provider }: NetWorkInfo | any, type?: any): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const wsProvider = new WsProvider(provider);
 
@@ -48,7 +50,7 @@ export const connectChains = async (targetChains: Array<any>): Promise<any[] | u
 
   targetChains.map((item) => {
     const chainMetadata = getChainMetadata({ chainId: item.chainId, paraId: item.paraId })
-    const apiPromise = wsProvider(chainMetadata.rpcs)
+    const apiPromise = wsProvider({provider: chainMetadata.rpcs})
     apiPromises.push(apiPromise)
   })
 

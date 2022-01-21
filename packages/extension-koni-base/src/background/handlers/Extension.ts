@@ -4,10 +4,16 @@
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
 import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AccountsWithCurrentAddress, MessageTypes, RequestCurrentAccountAddress, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import { AccountJson, AccountsWithCurrentAddress, MessageTypes, RequestBatchRestore, RequestCurrentAccountAddress, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
+import { createPair } from '@polkadot/keyring';
+import { KeyringPair$Json } from '@polkadot/keyring/types';
+import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
+import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
+import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
   return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
@@ -18,6 +24,14 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
 }
 
 export default class KoniExtension extends Extension {
+  public decodeAddress = (key: string | Uint8Array, ignoreChecksum?: boolean, ss58Format?: Prefix): Uint8Array => {
+    return keyring.decodeAddress(key, ignoreChecksum, ss58Format);
+  };
+
+  public encodeAddress = (key: string | Uint8Array, ss58Format?: Prefix): string => {
+    return keyring.encodeAddress(key, ss58Format);
+  };
+
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.getAllWithCurrentAddress)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
@@ -86,6 +100,72 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private validatePassword (json: KeyringPair$Json, password: string): boolean {
+    const cryptoType = Array.isArray(json.encoding.content) ? json.encoding.content[1] : 'ed25519';
+    const encType = Array.isArray(json.encoding.type) ? json.encoding.type : [json.encoding.type];
+    const pair = createPair(
+      { toSS58: this.encodeAddress, type: cryptoType as KeypairType },
+      { publicKey: this.decodeAddress(json.address, true) },
+      json.meta,
+      isHex(json.encoded) ? hexToU8a(json.encoded) : base64Decode(json.encoded),
+      encType
+    );
+
+    // unlock then lock (locking cleans secretKey, so needs to be last)
+    try {
+      pair.decodePkcs8(password);
+      pair.lock();
+
+      return true;
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
+  }
+
+  private validatedAccountsPassword (json: EncryptedJson, password: string): boolean {
+    try {
+      u8aToString(jsonDecrypt(json, password));
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  private jsonRestoreV2 ({ address, file, password }: RequestJsonRestore): void {
+    const isPasswordValidated = this.validatePassword(file, password);
+
+    if (isPasswordValidated) {
+      try {
+        this._saveCurrentAccountAddress(address, () => {
+          keyring.restoreAccount(file, password);
+        });
+      } catch (error) {
+        throw new Error((error as Error).message);
+      }
+    } else {
+      throw new Error('Unable to decode using the supplied passphrase');
+    }
+  }
+
+  private batchRestoreV2 ({ address, file, password }: RequestBatchRestore): void {
+    const isPasswordValidated = this.validatedAccountsPassword(file, password);
+
+    if (isPasswordValidated) {
+      try {
+        this._saveCurrentAccountAddress(address, () => {
+          keyring.restoreAccounts(file, password);
+        });
+      } catch (error) {
+        throw new Error((error as Error).message);
+      }
+    } else {
+      throw new Error('Unable to decode using the supplied passphrase');
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -97,6 +177,10 @@ export default class KoniExtension extends Extension {
         return await this.getPrice();
       case 'pri(price.getSubscription)':
         return this.subscribePrice(id, port);
+      case 'pri(json.restoreV2)':
+        return this.jsonRestoreV2(request as RequestJsonRestore);
+      case 'pri(json.batchRestoreV2)':
+        return this.batchRestoreV2(request as RequestBatchRestore);
       default:
         return super.handle(id, type, request, port);
     }

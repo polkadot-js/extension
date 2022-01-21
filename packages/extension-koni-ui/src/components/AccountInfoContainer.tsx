@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
-import React, {  useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+
 import useOutsideClick from '../hooks/useOutsideClick';
 
 export interface Props {

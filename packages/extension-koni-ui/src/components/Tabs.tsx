@@ -22,25 +22,25 @@ function Tabs ({ activatedTab, className, onSelect }: Props): React.ReactElement
         <div className='koni-tabs'>
           <button
             className={`koni-tab ${activatedTab === 1 ? 'active' : ''}`}
-            onClick={() => {onSelect(1)}}
+            onClick={() => { onSelect(1); }}
           >
             {t<string>('Crypto')}
           </button>
           <button
             className={`koni-tab ${activatedTab === 2 ? 'active' : ''}`}
-            onClick={() => {onSelect(2)}}
+            onClick={() => { onSelect(2); }}
           >
             {t<string>('NFTs')}
           </button>
           <button
             className={`koni-tab ${activatedTab === 3 ? 'active' : ''}`}
-            onClick={() => {onSelect(3)}}
+            onClick={() => { onSelect(3); }}
           >
             {t<string>('Crowdloans')}
           </button>
           <button
             className={`koni-tab ${activatedTab === 4 ? 'active' : ''}`}
-            onClick={() => {onSelect(4)}}
+            onClick={() => { onSelect(4); }}
           >
             {t<string>('Transfers')}
           </button>

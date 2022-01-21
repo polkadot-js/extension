@@ -189,6 +189,9 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
   'pri(json.batchRestore)': [RequestBatchRestore, void];
+  'pri(json.validate.password)': []
+  'pri(json.restoreV2)': [RequestJsonRestore, void];
+  'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];

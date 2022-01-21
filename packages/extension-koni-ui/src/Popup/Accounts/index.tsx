@@ -48,6 +48,7 @@ function Accounts ({ className }: Props): React.ReactElement {
         : (
           <>
             <Header
+              isContainDetailHeader
               onFilter={_onFilter}
               showAdd
               showSearch

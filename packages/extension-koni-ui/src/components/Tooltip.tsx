@@ -1,11 +1,12 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2017-2022 @polkadot/ authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
-import styled, {ThemeContext} from 'styled-components';
-import {Theme} from "@polkadot/extension-koni-ui/components";
+import styled, { ThemeContext } from 'styled-components';
+
+import { Theme } from '@polkadot/extension-koni-ui/components';
 
 function rootElement () {
   return typeof document === 'undefined'
@@ -50,14 +51,14 @@ function Tooltip ({ className = '', clickable = false, effect = 'solid', offset,
 
   return ReactDOM.createPortal(
     <ReactTooltip
+      backgroundColor={theme === 'dark' ? '#fff' : ''}
       className={`ui--Tooltip ${className}`}
       clickable={clickable}
       effect={effect}
       id={trigger}
       offset={offset}
       place={place}
-      backgroundColor={theme == 'dark' ? '#fff' : ''}
-      textColor={theme == 'dark'? '#00072D': ''}
+      textColor={theme === 'dark' ? '#00072D' : ''}
     >
       {className?.includes('address') ? <div>{text}</div> : text}
     </ReactTooltip>,

@@ -1,26 +1,28 @@
-import React, {useCallback, useMemo, useState} from 'react';
-import styled from 'styled-components';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import Modal from "@polkadot/extension-koni-ui/components/Modal";
-import pencil from '../assets/pencil.svg';
-import QRCode from "react-qr-code";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faTimes} from "@fortawesome/free-solid-svg-icons";
-import Link from "@polkadot/extension-koni-ui/components/Link";
-import cloneLogo from '../assets/clone.svg';
-import useToast from "@polkadot/extension-koni-ui/hooks/useToast";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import CopyToClipboard from "react-copy-to-clipboard";
-import HeaderEditName from "@polkadot/extension-koni-ui/partials/HeaderEditName";
-import {editAccount} from "@polkadot/extension-koni-ui/messaging";
-import Identicon from "@polkadot/extension-koni-ui/components/Identicon";
-import reformatAddress from "@polkadot/extension-koni-ui/util/reformatAddress";
-import {
-  getLogoByNetworkName, getScanExplorerAddressInfoUrl,
-  isSupportScanExplorer} from "@polkadot/extension-koni-ui/util";
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import {IconTheme} from "@polkadot/react-identicon/types";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useCallback, useMemo, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import QRCode from 'react-qr-code';
+import styled from 'styled-components';
+
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
+import Link from '@polkadot/extension-koni-ui/components/Link';
+import Modal from '@polkadot/extension-koni-ui/components/Modal';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { editAccount } from '@polkadot/extension-koni-ui/messaging';
+import HeaderEditName from '@polkadot/extension-koni-ui/partials/HeaderEditName';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getLogoByNetworkName, getScanExplorerAddressInfoUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
+import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
+import { IconTheme } from '@polkadot/react-identicon/types';
+
+import cloneLogo from '../assets/clone.svg';
+import pencil from '../assets/pencil.svg';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -39,27 +41,25 @@ interface EditState {
   toggleActions: number;
 }
 
-const toShortAddress = (_address: string | null , halfLength?: number) => {
-  const address = (_address || '').toString()
+const toShortAddress = (_address: string | null, halfLength?: number) => {
+  const address = (_address || '').toString();
 
-  const addressLength = halfLength ? halfLength : 7
+  const addressLength = halfLength || 7;
 
-  return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address
-}
+  return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
+};
 
-function BuyToken({
-                    className, reference, closeModal,
-                    address,
-                    accountName,
-                    iconTheme,
-                    networkPrefix,
-                    networkName,
-                    showExportButton
-                  }: Props): React.ReactElement<Props> {
+function BuyToken ({ accountName, address, className,
+  closeModal,
+  iconTheme,
+  networkName,
+  networkPrefix,
+  reference,
+  showExportButton }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { show } = useToast();
   const [editedName, setName] = useState<string | undefined | null>(accountName);
-  const [{isEditing}, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
+  const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -85,11 +85,15 @@ function BuyToken({
 
   const formatted = useMemo(() => {
     const networkInfo = NETWORKS[networkName];
-   return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
+
+    return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
   }, [address, networkPrefix, networkName]);
 
   return (
-    <Modal className={className} reference={reference}>
+    <Modal
+      className={className}
+      reference={reference}
+    >
       <div className='buy-token-container'>
         <div className='buy-token-header'>
           <FontAwesomeIcon
@@ -103,49 +107,86 @@ function BuyToken({
             className='koni-buy-token-account-logo'
             iconTheme={iconTheme as IconTheme}
             prefix={networkPrefix}
-            value={formatted}
             size={54}
+            value={formatted}
           />
           <div className='koni-buy-token-name'>
             <div className='koni-buy-token-name__text'>
               {accountName}
             </div>
-            <div className='koni-buy-token-name__edit-btn' onClick={_toggleEdit}>
-              <img src={pencil} alt="edit"/>
+            <div
+              className='koni-buy-token-name__edit-btn'
+              onClick={_toggleEdit}
+            >
+              <img
+                alt='edit'
+                src={pencil}
+              />
             </div>
             {isEditing && (
-              <HeaderEditName address={address} isFocused label={' '} onBlur={_saveChanges} onChange={setName} className='edit-name'/>
+              <HeaderEditName
+                address={address}
+                className='edit-name'
+                isFocused
+                label={' '}
+                onBlur={_saveChanges}
+                onChange={setName}
+              />
             )}
           </div>
           <div className='koni-buy-token-qr-code'>
-            <QRCode value={formatted} size={140}/>
+            <QRCode
+              size={140}
+              value={formatted}
+            />
           </div>
           <CopyToClipboard text={formatted || ''}>
-            <div className='koni-buy-token-address' onClick={_onCopy}>
+            <div
+              className='koni-buy-token-address'
+              onClick={_onCopy}
+            >
               <div className='koni-buy-token-address__text'>
-                <img src={getLogoByNetworkName(networkName)} alt="logo" className={'koni-network-logo'} />
+                <img
+                  alt='logo'
+                  className={'koni-network-logo'}
+                  src={getLogoByNetworkName(networkName)}
+                />
                 {toShortAddress(formatted, 13)}
-                <img src={cloneLogo} alt="clone" className='clone-logo'/>
+                <img
+                  alt='clone'
+                  className='clone-logo'
+                  src={cloneLogo}
+                />
               </div>
             </div>
           </CopyToClipboard>
 
-          {isSupportScanExplorer(networkName) ? (
-            <a className='koni-buy-token-button' href={getScanExplorerAddressInfoUrl(networkName, formatted)} target="_blank">
-              <div className='koni-buy-token-button__text'>
-                {t<string>('View Account on Explorer')}
-              </div>
-            </a>
-          ) : (
-            <span className='koni-buy-token-button -disabled'>
-              <div className='koni-buy-token-button__text'>
-                {t<string>('View Account on Explorer')}
-              </div>
-            </span>
-          )}
+          {isSupportScanExplorer(networkName)
+            ? (
+              <a
+                className='koni-buy-token-button'
+                href={getScanExplorerAddressInfoUrl(networkName, formatted)}
+                rel='noreferrer'
+                target='_blank'
+              >
+                <div className='koni-buy-token-button__text'>
+                  {t<string>('View Account on Explorer')}
+                </div>
+              </a>
+            )
+            : (
+              <span className='koni-buy-token-button -disabled'>
+                <div className='koni-buy-token-button__text'>
+                  {t<string>('View Account on Explorer')}
+                </div>
+              </span>
+            )}
 
           {showExportButton && (
-            <Link className='koni-buy-token-button' to={`/account/export/${formatted}`}>
+            <Link
+              className='koni-buy-token-button'
+              to={`/account/export/${formatted}`}
+            >
               <div className='koni-buy-token-button__text'>
                 {t<string>('Export Private Key')}
               </div>
@@ -157,7 +198,7 @@ function BuyToken({
   );
 }
 
-export default styled(BuyToken)(({theme}: ThemeProps) => `
+export default styled(BuyToken)(({ theme }: ThemeProps) => `
   .koni-modal {
     max-width: 460px;
   }

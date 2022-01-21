@@ -1,5 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
 const colors = {
   primary1: '#004BFF',
   primary2: '#04C1B7'

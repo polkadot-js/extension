@@ -150,12 +150,12 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   }, [accounts, currentAccount?.address, chain, settings]);
 
   const getNetworkName = useCallback(
-    (genesisHash) => {
+    (genesisHash: string) => {
       let networkName = '';
 
       if (currentAccount) {
         genesisHash = genesisHash || '';
-        const currentNetwork = genesisOptions.find((opt) => opt.value == genesisHash);
+        const currentNetwork = genesisOptions.find((opt) => opt.value === genesisHash);
 
         networkName = currentNetwork ? currentNetwork.text : '';
       }
@@ -279,7 +279,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
             {isPopup && (<div
               className={'kn-l-expand-btn'}
               onClick={_onWindowOpen}
-                         >
+            >
               <img
                 alt='Expand Icon'
                 className='kn-l-expand-btn__icon'
@@ -296,7 +296,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                 src={getLogoByGenesisHash(currentAccount?.genesisHash as string)}
               />
               <div className='network-select-item__text'>
-                {getNetworkName(currentAccount?.genesisHash) || genesisOptions[0].text}
+                {getNetworkName(currentAccount?.genesisHash as string) || genesisOptions[0].text}
               </div>
               <FontAwesomeIcon
                 className='network-select-item__icon'
@@ -412,7 +412,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                 className={`kn-l-more-button ${isActionOpen && 'pointer-events-none'}`}
                 onClick={_toggleAccountAction}
               >
-                {popupTheme == 'dark'
+                {popupTheme === 'dark'
                   ? (
                     <img
                       alt='more'

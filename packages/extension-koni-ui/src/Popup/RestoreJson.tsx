@@ -12,7 +12,7 @@ import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../messaging';
+import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging';
 import { Header } from '../partials';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { isKeyringPairs$Json } from '../util/typeGuards';
@@ -99,7 +99,7 @@ function Upload ({ className }: Props): React.ReactElement {
 
       setIsBusy(true);
 
-      (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
+      (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo[0].address) : jsonRestoreV2(file, password, accountsInfo[0].address))
         .then(() => { onAction('/'); })
         .catch((e) => {
           console.error(e);

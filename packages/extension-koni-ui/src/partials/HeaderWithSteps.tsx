@@ -35,7 +35,7 @@ function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.
     >
       <div className='koni-header-with-steps'>
         <div className='koni-header-with-steps-left-content'>
-          {step == 2 && (
+          {step === 2 && (
             <FontAwesomeIcon
               className='back-button-icon'
               icon={faArrowLeft}

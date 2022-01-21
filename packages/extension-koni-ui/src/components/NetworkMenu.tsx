@@ -129,8 +129,8 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
                   src={getLogoByGenesisHash(value)}
                 />
 
-                <span className={value == currentNetwork ? 'koni-network-text__selected' : 'koni-network-text'}>{text}</span>
-                {value == currentNetwork
+                <span className={value === currentNetwork ? 'koni-network-text__selected' : 'koni-network-text'}>{text}</span>
+                {value === currentNetwork
                   ? (
                     <img
                       alt='check'

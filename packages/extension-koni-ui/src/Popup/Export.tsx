@@ -1,14 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type {Theme, ThemeProps} from '../types';
 
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled from 'styled-components';
-
-import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
+import styled, {ThemeContext} from 'styled-components';
 import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
 import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
 import Button from '@polkadot/extension-koni-ui/components/Button';
@@ -19,6 +17,7 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 const MIN_LENGTH = 6;
 
@@ -32,6 +31,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _goHome = useCallback(
     () => onAction('/'),
@@ -74,7 +74,8 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
         subHeaderName={t<string>('Export account')}
       />
       <div className={className}>
-        <AccountInfoContainer address={address}>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} export-account-wrapper`} >
+          <AccountInfo address={address}/>
           <Warning className='movedWarning'>
             {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>
@@ -119,7 +120,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
               </ActionBar>
             </div>
           </div>
-        </AccountInfoContainer>
+        </div>
       </div>
     </>
   );
@@ -131,9 +132,14 @@ export default withRouter(styled(KoniExportAccount)(({ theme }: Props) => `
   .passwordArea {
     padding-top: 13px;
   }
+
   .actionArea {
     display: flex;
     justify-content: center;
+  }
+
+  .export-account-wrapper {
+    padding-bottom: 8px;
   }
 
   .export-button {

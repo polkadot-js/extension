@@ -1,15 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
-
-import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
+import React, {useCallback, useContext, useState} from 'react';
+import styled, {ThemeContext} from 'styled-components';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
 import Name from '@polkadot/extension-koni-ui/partials/Name';
 import Password from '@polkadot/extension-koni-ui/partials/Password';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import {Theme, ThemeProps} from '@polkadot/extension-koni-ui/types';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 interface Props {
   buttonLabel: string;
@@ -26,7 +25,7 @@ interface Props {
 function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
-
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
     () => {
       name && password && onCreate(name, password);
@@ -46,13 +45,12 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
     <>
       <div className={className}>
         <div className='account-info-wrapper'>
-
-          <AccountInfoContainer
-            address={address}
-            className='account-info'
-            genesisHash={genesis}
-            name={name}
-          >
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} account-name-and-password-creation-wrapper`}>
+            <AccountInfo
+              address={address}
+              genesisHash={genesis}
+              name={name}
+            />
             <div className={ children ? 'children-wrapper' : ''}>
               {children}
             </div>
@@ -61,7 +59,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
               onChange={_onNameChange}
             />
             <Password onChange={setPassword} />
-          </AccountInfoContainer>
+          </div>
         </div>
         <ButtonArea className='kn-button-area'>
           <KoniNextStepButton
@@ -84,15 +82,8 @@ export default styled(AccountNamePasswordCreation)(({ theme }: ThemeProps) => `
   flex: 1;
   margin-top: -25px;
   overflow-y: auto;
-  .account-info-wrapper {
-  }
 
-  // .create-account-network-select label {
-  //   color: ${theme.textColor2};
-  //   font-weight: 500;
-  // }
-
-  .account-info {
+  .account-name-and-password-creation-wrapper {
     padding-bottom: 15px;
   }
 

@@ -2,19 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { saveAs } from 'file-saver';
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
-
-import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
+import React, {useCallback, useContext, useState} from 'react';
+import styled, {ThemeContext} from 'styled-components';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
 import MnemonicSeed from '@polkadot/extension-koni-ui/components/MnemonicSeed';
 import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
 import Warning from '@polkadot/extension-koni-ui/components/Warning';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-
+import {Theme, ThemeProps} from '@polkadot/extension-koni-ui/types';
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 interface Props extends ThemeProps {
   onNextStep: () => void;
@@ -40,6 +38,7 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _onCopy = useCallback((): void => {
     onCopy();
@@ -56,11 +55,12 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
     <>
       <div className={className}>
         <div className='account-info-wrapper'>
-          <AccountInfoContainer
-            address={address}
-            genesisHash={genesisHash}
-            name={name}
-          >
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'}`} >
+            <AccountInfo
+              address={address}
+              genesisHash={genesisHash}
+              name={name}
+            />
             <MnemonicSeed
               backupMnemonicSeed={_backupMnemonicSeed}
               isShowDownloadButton
@@ -75,7 +75,7 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
               label={t<string>('I have saved my mnemonic seed safely.')}
               onChange={setIsMnemonicSaved}
             />
-          </AccountInfoContainer>
+          </div>
         </div>
 
         <ButtonArea className='kn-next-area'>

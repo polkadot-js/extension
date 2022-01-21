@@ -7,11 +7,10 @@ import type { AccountInfo } from '.';
 
 import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
+import styled, {ThemeContext} from 'styled-components';
 
 import { Dropdown } from '@polkadot/extension-koni-ui/components';
-import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
 import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
@@ -19,9 +18,10 @@ import TextAreaWithLabel from '@polkadot/extension-koni-ui/components/TextAreaWi
 import Warning from '@polkadot/extension-koni-ui/components/Warning';
 import { validateSeed } from '@polkadot/extension-koni-ui/messaging';
 import { objectSpread } from '@polkadot/util';
-
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
+import AccountInfoEl from '@polkadot/extension-koni-ui/components/AccountInfo';
+import {Theme} from "../../types";
 
 interface Props {
   className?: string;
@@ -41,6 +41,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -79,12 +80,12 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
     <>
       <div className={className}>
         <div className='account-info-wrapper'>
-          <AccountInfoContainer
-            address={account?.address}
-            className='account-info'
-            genesisHash={account?.genesis}
-            name={name}
-          >
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} seed-and-path-wrapper`} >
+            <AccountInfoEl
+              address={account?.address}
+              className='account-info'
+              genesisHash={account?.genesis}
+              name={name}/>
             <TextAreaWithLabel
               className='seedInput'
               isError={!!error}
@@ -136,7 +137,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
                 {error}
               </Warning>
             )}
-          </AccountInfoContainer>
+          </div>
         </div>
         <ButtonArea>
           <NextStepButton
@@ -177,11 +178,8 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
     }
   }
 
-  .account-info-wrapper {
-  }
-
-  .account-info {
-    padding-bottom: 23px;
+  .seed-and-path-wrapper {
+    padding-bottom: 15px;
   }
 
   .next-step-btn {

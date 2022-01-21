@@ -2,14 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
-
-import React, { useCallback, useRef, useState } from 'react';
-import styled from 'styled-components';
-
-import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
-
+import React, {useCallback, useContext, useRef, useState} from 'react';
+import styled, {ThemeContext} from 'styled-components';
 import arrow from '../../assets/arrow-down.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
+import {Theme} from "../../types";
 
 interface Props {
   allAddresses: [string, string | null][];
@@ -22,7 +20,7 @@ interface Props {
 function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, selectedGenesis }: Props): React.ReactElement<Props> {
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _hideDropdown = useCallback(() => setDropdownVisible(false), []);
   const _toggleDropdown = useCallback(() => setDropdownVisible(!isDropdownVisible), [isDropdownVisible]);
   const _selectParent = useCallback((newParent: string) => () => onSelect(newParent), [onSelect]);
@@ -34,8 +32,9 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
       <div
         onClick={_toggleDropdown}
         ref={ref}
+        className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'}`}
       >
-        <AccountInfoContainer
+        <AccountInfo
           address={selectedAddress}
           className='address'
           genesisHash={selectedGenesis}
@@ -47,11 +46,13 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
             data-parent-option
             key={address}
             onClick={_selectParent(address)}
+            className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} address-dropdown-option`}
           >
-            <AccountInfoContainer
+            <AccountInfo
               address={address}
-              className='address'
+              className='address-dropdown-option__inner'
               genesisHash={genesisHash}
+              showCopyBtn={false}
             />
           </div>
         ))}
@@ -79,12 +80,17 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     border: 1px solid ${theme.boxBorderColor};
   }
 
+  .address-dropdown-option:not(:last-child) {
+    margin-bottom: 10px;
+  }
+
   .address .account-info-copy-icon {
     visibility: hidden;
   }
 
-  .address {
+  .address-dropdown-option__inner {
     margin: 0;
+    width: 300px;
   }
 
   .dropdown {

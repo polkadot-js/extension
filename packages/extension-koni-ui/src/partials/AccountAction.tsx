@@ -23,7 +23,7 @@ interface Props extends ThemeProps {
   toggleZeroBalances?: () => void;
 }
 
-function KoniAccountAction ({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
@@ -96,7 +96,7 @@ function KoniAccountAction ({ className, isShowZeroBalances, reference, toggleEd
   );
 }
 
-export default React.memo(styled(KoniAccountAction)(({ theme }: Props) => `
+export default React.memo(styled(AccountAction)(({ theme }: Props) => `
   top: 60px;
 
   .actions-wrapper {

@@ -67,6 +67,23 @@ a {
   cursor: pointer;
 }
 
+.account-info-container {
+  box-sizing: border-box;
+  position: relative;
+  border: 2px solid;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 0 15px;
+}
+
+.account-info-container.-dark {
+  border-color: #343849;
+}
+
+.account-info-container.-light {
+  border-color: #EEEEEE;
+}
+
 @media only screen and (min-width: 768px) {
   .kn-sui-dropdown-base .menu {
     max-height: 150px;

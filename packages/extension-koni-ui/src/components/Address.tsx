@@ -8,8 +8,7 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
-import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -37,7 +36,6 @@ export interface Props {
   className?: string;
   genesisHash?: string | null;
   isExternal?: boolean | null;
-  isHardware?: boolean | null;
   isHidden?: boolean;
   name?: string | null;
   parentName?: string | null;
@@ -93,7 +91,7 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ address, children, className, genesisHash, isExternal, isHardware, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ address, children, className, genesisHash, isExternal, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
@@ -105,6 +103,8 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
   const { show } = useToast();
   const onAction = useContext(ActionContext);
   const currentAccount: AccountJson = useSelector((state: RootState) => state.currentAccount);
+  const accountName = name || account?.name;
+  const displayName = accountName || t('<unknown>');
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
@@ -174,34 +174,6 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
     return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
   };
 
-  const Name = () => {
-    const accountName = name || account?.name;
-    const displayName = accountName || t('<unknown>');
-
-    return (
-      <>
-        {!!accountName && (account?.isExternal || isExternal) && (
-          (account?.isHardware || isHardware)
-            ? (
-              <FontAwesomeIcon
-                className='hardwareIcon'
-                icon={faUsb}
-                rotation={270}
-                title={t('hardware wallet account')}
-              />
-            )
-            : (
-              <FontAwesomeIcon
-                className='externalIcon'
-                icon={faQrcode}
-                title={t('external account')}
-              />
-            )
-        )}
-        <span title={displayName}>{displayName}</span>
-      </>);
-  };
-
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
   return (
@@ -209,27 +181,23 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
       className={className}
       onClick={_changeAccount}
     >
-      {parentName
-        ? (
-          <>
-            <div className='banner'>
-              <FontAwesomeIcon
-                className='deriveIcon'
-                icon={faCodeBranch}
-              />
-              <div
-                className='parentName'
-                data-field='parent'
-                title = {parentNameSuri}
-              >
-                {toShortAddress(parentNameSuri)}
-              </div>
+      {parentName && (
+        <>
+          <div className='banner'>
+            <FontAwesomeIcon
+              className='deriveIcon'
+              icon={faCodeBranch}
+            />
+            <div
+              className='parentName'
+              data-field='parent'
+              title = {parentNameSuri}
+            >
+              {toShortAddress(parentNameSuri)}
             </div>
-          </>
-        )
-        : (
-          <></>
-        )
+          </div>
+        </>
+      )
       }
       <div className={`${parentName ? 'infoRow parent-name' : 'infoRow'}`}>
         <div className='infoRow-icon-wrapper'>
@@ -248,7 +216,6 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
           <Identicon
             className='identityIcon'
             iconTheme={theme}
-            isExternal={isExternal}
             onCopy={_onCopy}
             prefix={prefix}
             size={32}
@@ -260,7 +227,7 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
             className='name'
             data-field='name'
           >
-            <Name />
+            <span title={displayName}>{displayName}</span>
           </div>
           <div className='koni-address-text'>{toShortAddress(formatted, 10)}</div>
           {chain?.genesisHash && (
@@ -276,7 +243,6 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
               {chain.name.replace(' Relay Chain', '')}
             </div>
           )}
-
         </div>
       </div>
       {children}
@@ -287,6 +253,13 @@ function Address ({ address, children, className, genesisHash, isExternal, isHar
 export default styled(Address)(({ theme }: ThemeProps) => `
   box-sizing: border-box;
   position: relative;
+  padding: 8px 14px 8px 14px;
+  border-radius: 8px;
+  margin-top: 8px;
+  &:hover {
+      background-color: ${theme.accountHoverBackground};
+      cursor: pointer;
+  }
 
   .banner {
     position: absolute;

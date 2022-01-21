@@ -3,15 +3,19 @@
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
+import styled from 'styled-components';
 
-import { AccountContext, AccountNamePasswordCreation, ActionContext, Address } from '../../components';
+import AccountNamePasswordCreation from '@polkadot/extension-koni-ui/components/AccountNamePasswordCreation';
+import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
+
+import { AccountContext, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccount } from '../../messaging';
-import { HeaderWithSteps } from '../../partials';
 import SelectParent from './SelectParent';
 
 interface Props {
   isLocked?: boolean;
+  className?: string;
 }
 
 interface AddressState {
@@ -27,7 +31,7 @@ interface ConfirmState {
   parentPassword: string;
 }
 
-function Derive ({ isLocked }: Props): React.ReactElement<Props> {
+function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
@@ -68,6 +72,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   return (
     <>
       <HeaderWithSteps
+        onBackClick={_onBackClick}
         step={account ? 2 : 1}
         text={t<string>('Add new account')}
       />
@@ -81,15 +86,11 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
       )}
       {account && (
         <>
-          <div>
-            <Address
-              address={account.address}
-              genesisHash={parentGenesis}
-              name={name}
-            />
-          </div>
           <AccountNamePasswordCreation
+            address={account?.address}
             buttonLabel={t<string>('Create derived account')}
+            className='koni-import-seed-content'
+            genesis={parentGenesis}
             isBusy={isBusy}
             onBackClick={_onBackClick}
             onCreate={_onCreate}
@@ -101,4 +102,5 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
   );
 }
 
-export default React.memo(Derive);
+export default styled(React.memo(Derive))`
+`;

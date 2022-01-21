@@ -1,24 +1,27 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Address, Dropdown, Loading } from '../../components';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
+
+import { ActionContext, Dropdown } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
-import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import Mnemonic from './Mnemonic';
 
 interface Props {
   className?: string;
+  defaultClassName?: string;
 }
 
-function CreateAccount ({ className }: Props): React.ReactElement {
+function CreateAccount ({ className, defaultClassName }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -30,6 +33,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
+  const networkRef = useRef(null);
 
   useEffect((): void => {
     createSeed(undefined)
@@ -38,7 +42,7 @@ function CreateAccount ({ className }: Props): React.ReactElement {
         setSeed(seed);
       })
       .catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {
@@ -89,51 +93,60 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   return (
     <>
       <HeaderWithSteps
+        onBackClick={_onPreviousStep}
         step={step}
         text={t<string>('Create an account')}
       />
-      <Loading>
-        <div>
-          <Address
-            address={address}
-            genesisHash={genesisHash}
-            name={name}
-          />
-        </div>
+      <LoadingContainer>
         {seed && (
           step === 1
             ? (
               <Mnemonic
+                address={address}
+                genesisHash={genesisHash}
+                name={name}
                 onNextStep={_onNextStep}
                 seed={seed}
               />
             )
             : (
               <>
-                <Dropdown
-                  className={className}
-                  label={t<string>('Network')}
-                  onChange={_onChangeNetwork}
-                  options={options}
-                  value={genesisHash}
-                />
                 <AccountNamePasswordCreation
+                  address={address}
                   buttonLabel={t<string>('Add the account with the generated seed')}
+                  genesis={genesisHash}
                   isBusy={isBusy}
                   onBackClick={_onPreviousStep}
                   onCreate={_onCreate}
                   onNameChange={setName}
-                />
+                >
+                  <Dropdown
+                    className='create-account-network-select'
+                    label={t<string>('Network')}
+                    onChange={_onChangeNetwork}
+                    options={options}
+                    reference={networkRef}
+                    value={genesisHash}
+                  />
+                </AccountNamePasswordCreation>
               </>
             )
         )}
-      </Loading>
+      </LoadingContainer>
     </>
   );
 }
 
 export default styled(CreateAccount)`
   margin-bottom: 16px;
+
+  .create-account-network-select {
+    font-weight: 500;
+  }
+
+  .create-account-network-dropdown {
+    margin-bottom: 10px;
+  }
 
   label::after {
     right: 36px;

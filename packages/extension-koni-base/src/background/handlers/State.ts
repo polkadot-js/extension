@@ -4,8 +4,7 @@
 import State from '@polkadot/extension-base/background/handlers/State';
 import { CurrentAccountInfo } from '@polkadot/extension-base/background/types';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { PriceStore } from '@polkadot/extension-koni-base/stores';
-import CurrentAccountStore from '@polkadot/extension-koni-base/stores/CurrentAccountStore';
+import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
 
 export default class KoniState extends State {

@@ -6,8 +6,9 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
+
 import arrow from '../../assets/arrow-down.svg';
-import { Address } from '../../components';
 import useOutsideClick from '../../hooks/useOutsideClick';
 
 interface Props {
@@ -34,7 +35,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
         onClick={_toggleDropdown}
         ref={ref}
       >
-        <Address
+        <AccountInfoContainer
           address={selectedAddress}
           className='address'
           genesisHash={selectedGenesis}
@@ -47,7 +48,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
             key={address}
             onClick={_selectParent(address)}
           >
-            <Address
+            <AccountInfoContainer
               address={address}
               className='address'
               genesisHash={genesisHash}
@@ -68,7 +69,7 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     position: absolute;
     top: 66%;
     transform: translateY(-50%);
-    right: 11px;
+    right: 15px;
     width: 30px;
     height: 30px;
     background: url(${arrow}) center no-repeat;
@@ -78,14 +79,17 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     border: 1px solid ${theme.boxBorderColor};
   }
 
-  .address .copyIcon {
+  .address .account-info-copy-icon {
     visibility: hidden;
+  }
+
+  .address {
+    margin: 0;
   }
 
   .dropdown {
     position: absolute;
     visibility: hidden;
-    width: 510px;
     z-index: 100;
     background: ${theme.bodyColor};
     max-height: 0;

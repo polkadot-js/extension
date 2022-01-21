@@ -68,6 +68,20 @@ export interface ApiState {
   defaultFormatBalance: DefaultFormatBalance;
 }
 
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'NOT_SURE';
+
+export interface NetWorkInfo {
+  chain: string;
+  genesisHash: string;
+  icon?: string;
+  ss58Format: number;
+  chainType?: 'substrate' | 'ethereum';
+  provider: string;
+  group: NetWorkGroup;
+  paraId?: number;
+  isEthereum?: boolean;
+}
+
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkName: string;
   group: string

@@ -23,7 +23,7 @@ interface Props extends ThemeProps {
   isNotHaveAccount?: boolean;
 }
 
-function KoniNetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
+function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   let genesisOptions = useGenesisHashOptions();
   const [filteredGenesisOptions, setFilteredGenesisOption] = useState(genesisOptions);
@@ -151,7 +151,7 @@ function KoniNetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilte
   );
 }
 
-export default React.memo(styled(KoniNetworkMenu)(({ theme }: Props) => `
+export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   margin-top: 60px;
   right: 15px;
   user-select: none;

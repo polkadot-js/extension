@@ -8,7 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, InputWithLabel } from '../../components';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps{
@@ -81,9 +83,10 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
   .lockButton {
     background: none;
     height: 14px;
-    margin: 36px 2px 0 10px;
+    margin: 50px 2px 0 10px;
     padding: 3px;
     width: 11px;
+    flex: 1;
 
     &:not(:disabled):hover {
       background: none;
@@ -103,7 +106,7 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
   }
 
   .pathInput {
-    width: 100%;
+    flex: 9;
 
     &.locked input {
       opacity: 50%;

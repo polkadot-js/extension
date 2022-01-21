@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { MouseEventHandler, useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
@@ -10,13 +10,11 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 interface Props extends ThemeProps {
   className?: string;
   activatedTab: number;
-  onSelect: MouseEventHandler<HTMLButtonElement>;
+  onSelect: (tab: number) => void;
 }
 
 function Tabs ({ activatedTab, className, onSelect }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
-  const onClickTab = useCallback((tab: number): void => onSelect(tab), [onSelect]);
 
   return (
     <>
@@ -24,25 +22,25 @@ function Tabs ({ activatedTab, className, onSelect }: Props): React.ReactElement
         <div className='koni-tabs'>
           <button
             className={`koni-tab ${activatedTab === 1 ? 'active' : ''}`}
-            onClick={onClickTab(1)}
+            onClick={() => {onSelect(1)}}
           >
             {t<string>('Crypto')}
           </button>
           <button
             className={`koni-tab ${activatedTab === 2 ? 'active' : ''}`}
-            onClick={onClickTab(2)}
+            onClick={() => {onSelect(2)}}
           >
             {t<string>('NFTs')}
           </button>
           <button
             className={`koni-tab ${activatedTab === 3 ? 'active' : ''}`}
-            onClick={onClickTab(3)}
+            onClick={() => {onSelect(3)}}
           >
             {t<string>('Crowdloans')}
           </button>
           <button
             className={`koni-tab ${activatedTab === 4 ? 'active' : ''}`}
-            onClick={onClickTab(4)}
+            onClick={() => {onSelect(4)}}
           >
             {t<string>('Transfers')}
           </button>

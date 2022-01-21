@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Address } from '../../components';
+import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+
+import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri } from '../../messaging';
-import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import SeedAndPath from './SeedAndPath';
 
@@ -18,7 +21,11 @@ export interface AccountInfo {
   suri: string;
 }
 
-function ImportSeed (): React.ReactElement {
+interface Props extends ThemeProps {
+  className?: string;
+}
+
+function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -68,19 +75,16 @@ function ImportSeed (): React.ReactElement {
   return (
     <>
       <HeaderWithSteps
+        onBackClick={_onBackClick}
         step={step1 ? 1 : 2}
         text={t<string>('Import account')}
       />
-      <div>
-        <Address
-          address={account?.address}
-          genesisHash={account?.genesis}
-          name={name}
-        />
-      </div>
       {step1
         ? (
           <SeedAndPath
+            account={account}
+            className='import-seed-content-wrapper'
+            name={name}
             onAccountChange={setAccount}
             onNextStep={_onNextStep}
             type={type}
@@ -88,7 +92,10 @@ function ImportSeed (): React.ReactElement {
         )
         : (
           <AccountNamePasswordCreation
+            address={account?.address}
             buttonLabel={t<string>('Add the account with the supplied seed')}
+            className='koni-import-seed-content'
+            genesis={account?.genesis}
             isBusy={isBusy}
             onBackClick={_onBackClick}
             onCreate={_onCreate}
@@ -97,7 +104,9 @@ function ImportSeed (): React.ReactElement {
         )
       }
     </>
+
   );
 }
 
-export default ImportSeed;
+export default styled(ImportSeed)`
+`;

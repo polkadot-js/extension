@@ -56,7 +56,8 @@ const networks: Record<string, NetWorkInfo> = {
     genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
     ss58Format: 1284,
     provider: 'wss://moonbeam.api.onfinality.io/public-ws',
-    group: 'POLKADOT_PARACHAIN'
+    group: 'POLKADOT_PARACHAIN',
+    isEthereum: true
   },
   astar: {
     chain: 'Astar',
@@ -106,7 +107,8 @@ const networks: Record<string, NetWorkInfo> = {
     genesisHash: '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b',
     ss58Format: 1285,
     provider: 'wss://moonriver.api.onfinality.io/public-ws',
-    group: 'KUSAMA_PARACHAIN'
+    group: 'KUSAMA_PARACHAIN',
+    isEthereum: true
   },
   shiden: {
     chain: 'Shiden',

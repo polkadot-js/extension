@@ -4,7 +4,7 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import AccountInfoContainer from '@polkadot/extension-koni-ui/components/AccountInfoContainer';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
 import Name from '@polkadot/extension-koni-ui/partials/Name';
@@ -19,8 +19,8 @@ interface Props {
   onNameChange: (name: string) => void;
   className?: string;
   children?: any;
-  address?: string;
-  genesis?: string;
+  address?: string | null;
+  genesis?: string | null;
 }
 
 function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
@@ -47,7 +47,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
       <div className={className}>
         <div className='account-info-wrapper'>
 
-          <AccountInfo
+          <AccountInfoContainer
             address={address}
             className='account-info'
             genesisHash={genesis}
@@ -61,7 +61,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
               onChange={_onNameChange}
             />
             <Password onChange={setPassword} />
-          </AccountInfo>
+          </AccountInfoContainer>
         </div>
         <ButtonArea className='kn-button-area'>
           <KoniNextStepButton

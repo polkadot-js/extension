@@ -10,4 +10,5 @@ export interface NetWorkInfo {
   provider: string;
   group: 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'NOT_SURE';
   paraId?: number;
+  isEthereum?: boolean;
 }

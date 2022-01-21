@@ -28,7 +28,6 @@ interface Props extends ThemeProps {
 }
 
 const jsonPath = '/account/restore-json';
-// const ledgerPath = '/account/import-ledger';
 
 function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -50,11 +49,6 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
         : hierarchy
     );
   }, [filter, hierarchy, networkMap]);
-
-  // const _onOpenLedgerConnect = useCallback(
-  //   () => windowOpen(ledgerPath),
-  //   []
-  // );
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilter(filter);
@@ -161,61 +155,6 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
               <span>{t<string>('Attach external QR-signer account')}</span>
             </Link>
           </MenuSettingItem>
-
-          {/* <MenuSettingItem className='menuItem ledger'> */}
-          {/*  {isLedgerEnabled */}
-          {/*    ? ( */}
-          {/*      <Link */}
-          {/*        className='menuItem__text' */}
-          {/*        isDisabled={!isLedgerCapable} */}
-          {/*        title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''} */}
-          {/*        to={ledgerPath} */}
-          {/*      > */}
-          {/*        <FontAwesomeIcon */}
-          {/*          icon={faUsb} */}
-          {/*          rotation={270} */}
-          {/*        /> */}
-          {/*        <span>{ t<string>('Attach ledger account')}</span> */}
-          {/*      </Link> */}
-          {/*    ) */}
-          {/*    : ( */}
-          {/*      <Link onClick={_onOpenLedgerConnect} className='menuItem__text'> */}
-          {/*        <FontAwesomeIcon */}
-          {/*          icon={faUsb} */}
-          {/*          rotation={270} */}
-          {/*        /> */}
-          {/*        <span>{ t<string>('Connect Ledger device')}</span> */}
-          {/*      </Link> */}
-          {/*    ) */}
-          {/*  } */}
-          {/* </MenuSettingItem>
-          {/*<MenuSettingItem className='menuItem ledger'> */}
-          {/*  {isLedgerEnabled */}
-          {/*    ? ( */}
-          {/*      <Link */}
-          {/*        className='menuItem__text' */}
-          {/*        isDisabled={!isLedgerCapable} */}
-          {/*        title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''} */}
-          {/*        to={ledgerPath} */}
-          {/*      > */}
-          {/*        <FontAwesomeIcon */}
-          {/*          icon={faUsb} */}
-          {/*          rotation={270} */}
-          {/*        /> */}
-          {/*        <span>{ t<string>('Attach ledger account')}</span> */}
-          {/*      </Link> */}
-          {/*    ) */}
-          {/*    : ( */}
-          {/*      <Link onClick={_onOpenLedgerConnect} className='menuItem__text'> */}
-          {/*        <FontAwesomeIcon */}
-          {/*          icon={faUsb} */}
-          {/*          rotation={270} */}
-          {/*        /> */}
-          {/*        <span>{ t<string>('Connect Ledger device')}</span> */}
-          {/*      </Link> */}
-          {/*    ) */}
-          {/*  } */}
-          {/* </MenuSettingItem> */}
         </div>
       </div>
       <div className='koni-menu-items-container'>

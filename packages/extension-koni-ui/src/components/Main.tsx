@@ -32,9 +32,4 @@ export default styled(Main)(({ theme }: ThemeProps) => `
   * {
     font-family: ${theme.fontFamily};
   }
-
-  > * {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
 `);

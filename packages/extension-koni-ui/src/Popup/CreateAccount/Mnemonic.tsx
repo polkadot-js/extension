@@ -97,11 +97,8 @@ export default React.memo(styled(Mnemonic)(({ theme }: Props) => `
   flex: 1;
   margin-top: -25px;
   overflow-y: auto;
-  .account-info-wrapper {
 
-  }
-
-    .next-step-btn {
+  .next-step-btn {
     > .children {
       display: flex;
       align-items: center;

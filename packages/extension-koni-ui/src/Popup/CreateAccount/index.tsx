@@ -12,7 +12,7 @@ import AccountNamePasswordCreation from '../../components/AccountNamePasswordCre
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
+import { createAccountSuriV2, createSeed, validateSeed } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import Mnemonic from './Mnemonic';
 
@@ -64,7 +64,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       if (name && password && seed) {
         setIsBusy(true);
 
-        createAccountSuri(name, password, seed, type, genesisHash)
+        createAccountSuriV2(name, password, seed, type, genesisHash)
           .then(() => onAction('/'))
           .catch((error: Error): void => {
             setIsBusy(false);

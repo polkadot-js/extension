@@ -11,7 +11,7 @@ import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuri } from '../../messaging';
+import { createAccountSuriV2 } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import SeedAndPath from './SeedAndPath';
 
@@ -53,7 +53,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuri(name, password, account.suri, type, account.genesis)
+      createAccountSuriV2(name, password, account.suri, type, account.genesis)
         .then(() => onAction('/'))
         .catch((error): void => {
           setIsBusy(false);

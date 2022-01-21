@@ -10,7 +10,7 @@ import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithStep
 
 import { AccountContext, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { deriveAccount } from '../../messaging';
+import {deriveAccountV2} from '../../messaging';
 import SelectParent from './SelectParent';
 
 interface Props {
@@ -52,7 +52,7 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
     }
 
     setIsBusy(true);
-    deriveAccount(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
+    deriveAccountV2(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
       .then(() => onAction('/'))
       .catch((error): void => {
         setIsBusy(false);

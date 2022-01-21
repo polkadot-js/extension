@@ -4,16 +4,34 @@
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
 import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AccountsWithCurrentAddress, MessageTypes, RequestBatchRestore, RequestCurrentAccountAddress, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import {
+  AccountJson,
+  AccountsWithCurrentAddress,
+  MessageTypes,
+  RequestAccountCreateSuri,
+  RequestBatchRestore,
+  RequestCurrentAccountAddress, RequestDeriveCreate,
+  RequestJsonRestore,
+  RequestTypes,
+  ResponseType
+} from '@polkadot/extension-base/background/types';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
-import { KeyringPair$Json } from '@polkadot/keyring/types';
+import {KeyringPair, KeyringPair$Json, KeyringPair$Meta} from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+
+const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
+
+function getSuri (seed: string, type?: KeypairType): string {
+  return type === 'ethereum'
+    ? `${seed}${ETH_DERIVE_DEFAULT}`
+    : seed;
+}
 
 function transformAccounts (accounts: SubjectInfo): AccountJson[] {
   return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
@@ -134,6 +152,50 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  private accountsCreateSuriV2({ genesisHash, name, password, suri: _suri, type }: RequestAccountCreateSuri): boolean {
+    const suri = getSuri(_suri, type);
+    const address = keyring.createFromUri(suri, {}, type).address;
+    this._saveCurrentAccountAddress(address, () => {
+      keyring.addUri(suri, password, { genesisHash, name }, type);
+    });
+
+    return true;
+  }
+
+  private deriveV2 (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
+    const parentPair = keyring.getPair(parentAddress);
+
+    try {
+      parentPair.decodePkcs8(password);
+    } catch (e) {
+      throw new Error('invalid password');
+    }
+
+    try {
+      return parentPair.derive(suri, metadata);
+    } catch (err) {
+      throw new Error(`"${suri}" is not a valid derivation path`);
+    }
+  }
+
+  private derivationCreateV2 ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
+    const childPair = this.deriveV2(parentAddress, suri, parentPassword, {
+      genesisHash,
+      name,
+      parentAddress,
+      suri
+    });
+
+    const address = childPair.address;
+
+    this._saveCurrentAccountAddress(address, () => {
+      keyring.addPair(childPair, password);
+    });
+
+    return true;
+  }
+
+
   private jsonRestoreV2 ({ address, file, password }: RequestJsonRestore): void {
     const isPasswordValidated = this.validatePassword(file, password);
 
@@ -169,6 +231,8 @@ export default class KoniExtension extends Extension {
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
+      case 'pri(accounts.create.suriV2)':
+        return this.accountsCreateSuriV2(request as RequestAccountCreateSuri)
       case 'pri(accounts.getAllWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
       case 'pri(currentAccount.saveAddress)':
@@ -177,6 +241,8 @@ export default class KoniExtension extends Extension {
         return await this.getPrice();
       case 'pri(price.getSubscription)':
         return this.subscribePrice(id, port);
+      case 'pri(derivation.createV2)':
+        return this.derivationCreateV2(request as RequestDeriveCreate);
       case 'pri(json.restoreV2)':
         return this.jsonRestoreV2(request as RequestJsonRestore);
       case 'pri(json.batchRestoreV2)':

@@ -141,6 +141,10 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
+export async function createAccountSuriV2 (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, type });
+}
+
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, seed, type });
 }
@@ -228,6 +232,10 @@ export async function validateDerivationPath (parentAddress: string, suri: strin
 
 export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
+}
+
+export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
 export async function windowOpen (path: AllowedPath): Promise<boolean> {

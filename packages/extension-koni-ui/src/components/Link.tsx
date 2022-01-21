@@ -17,7 +17,7 @@ interface Props {
   to?: string;
 }
 
-function KoniLink ({ children, className = '', isDisabled, onClick, title, to }: Props): React.ReactElement<Props> {
+function Link ({ children, className = '', isDisabled, onClick, title, to }: Props): React.ReactElement<Props> {
   if (isDisabled) {
     return (
       <div
@@ -51,7 +51,7 @@ function KoniLink ({ children, className = '', isDisabled, onClick, title, to }:
     );
 }
 
-export default styled(KoniLink)(({ isDanger, theme }: Props & ThemeProps) => `
+export default styled(Link)(({ isDanger, theme }: Props & ThemeProps) => `
   align-items: center;
   color: ${isDanger ? theme.buttonTextColor2 : theme.textColor2};
   display: flex;

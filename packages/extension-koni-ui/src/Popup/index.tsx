@@ -37,6 +37,7 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import Settings from "@polkadot/extension-koni-ui/Popup/Settings";
 
 const startSettings = uiSettings.get();
 
@@ -226,6 +227,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                          <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

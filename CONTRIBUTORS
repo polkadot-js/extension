@@ -1,4 +1,4 @@
-     476	Jaco                          	0.42.7 (#984)
+     477	Jaco                          	Update resolutions (#985)
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

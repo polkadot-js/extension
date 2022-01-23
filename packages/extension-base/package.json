@@ -17,27 +17,27 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.42.7-2",
+  "version": "0.42.7",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/api": "^7.4.2-9",
-    "@polkadot/extension-chains": "^0.42.7-2",
-    "@polkadot/extension-dapp": "^0.42.7-2",
-    "@polkadot/extension-inject": "^0.42.7-2",
-    "@polkadot/keyring": "^8.3.2",
-    "@polkadot/networks": "^8.3.2",
-    "@polkadot/phishing": "^0.8.68",
-    "@polkadot/rpc-provider": "^7.4.2-9",
-    "@polkadot/types": "^7.4.2-9",
-    "@polkadot/ui-keyring": "^0.89.2",
-    "@polkadot/ui-settings": "^0.89.2",
-    "@polkadot/util": "^8.3.2",
-    "@polkadot/util-crypto": "^8.3.2",
+    "@polkadot/api": "^7.5.1",
+    "@polkadot/extension-chains": "^0.42.7",
+    "@polkadot/extension-dapp": "^0.42.7",
+    "@polkadot/extension-inject": "^0.42.7",
+    "@polkadot/keyring": "^8.3.3",
+    "@polkadot/networks": "^8.3.3",
+    "@polkadot/phishing": "^0.8.71",
+    "@polkadot/rpc-provider": "^7.5.1",
+    "@polkadot/types": "^7.5.1",
+    "@polkadot/ui-keyring": "^0.89.3",
+    "@polkadot/ui-settings": "^0.89.3",
+    "@polkadot/util": "^8.3.3",
+    "@polkadot/util-crypto": "^8.3.3",
     "eventemitter3": "^4.0.7",
     "rxjs": "^7.5.2"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "^0.42.7-2"
+    "@polkadot/extension-mocks": "^0.42.7"
   }
 }

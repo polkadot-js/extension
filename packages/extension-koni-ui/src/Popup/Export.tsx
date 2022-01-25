@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {Theme, ThemeProps} from '../types';
+import type { Theme, ThemeProps } from '../types';
 
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled, {ThemeContext} from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
+
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
 import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
 import Button from '@polkadot/extension-koni-ui/components/Button';
@@ -17,7 +19,6 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 const MIN_LENGTH = 6;
 
@@ -74,8 +75,8 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
         subHeaderName={t<string>('Export account')}
       />
       <div className={className}>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} export-account-wrapper`} >
-          <AccountInfo address={address}/>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
+          <AccountInfo address={address} />
           <Warning className='movedWarning'>
             {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>

@@ -11,6 +11,10 @@ import { injectExtension } from '@polkadot/extension-inject';
 function inject () {
   injectExtension(enable, {
     name: 'polkadot-js',
+    version: '0.42.5'
+  });
+  injectExtension(enable, {
+    name: 'subwallet-js',
     version: process.env.PKG_VERSION as string
   });
 }

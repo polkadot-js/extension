@@ -42,22 +42,6 @@ export const priceParamByNetworkNameMap: Record<string, string> = {
 export const BN_TEN = new BigN(10);
 export const BN_ZERO = new BigN(0);
 
-export const getTokenPrice = async (chains: string) => {
-  try {
-    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${chains}`);
-
-    if (res.status !== 200) {
-      console.warn('Failed to get token price');
-    }
-
-    return res.data;
-  } catch (err) {
-    console.error('Failed to get token price', err);
-
-    return undefined;
-  }
-};
-
 export const getAcalaCrowdloanContribute = async (polkadotAddress: string) => {
   const acalaContributionApi = 'https://crowdloan.aca-api.network/contribution';
 

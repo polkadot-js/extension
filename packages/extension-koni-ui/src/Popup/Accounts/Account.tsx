@@ -18,6 +18,7 @@ import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
 interface Props extends AccountJson {
   className?: string;
   parentName?: string;
+  closeSetting?: () => void;
 }
 
 function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type }: Props): React.ReactElement<Props> {
@@ -55,8 +56,6 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
       closeSetting && closeSetting();
       onAction('/');
     }, []);
-
-  console.log('currentAccount', currentAccount);
 
   return (
     <div

@@ -10,7 +10,7 @@ export default function getNetworkInfoByGenesisHash (hash?: string | null): NetW
   }
 
   for (const n in NETWORKS) {
-    if (!NETWORKS.hasOwnProperty(n)) {
+    if (!Object.prototype.hasOwnProperty.call(NETWORKS, n)) {
       continue;
     }
 

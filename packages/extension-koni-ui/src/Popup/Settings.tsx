@@ -1,27 +1,27 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ThemeProps} from '../types';
-import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import styled, {ThemeContext} from 'styled-components';
-import {
-  ActionContext,
-  themes, ThemeSwitchContext
-} from '../components';
+import type { ThemeProps } from '../types';
+
+import { faExpand, faList } from '@fortawesome/free-solid-svg-icons';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
+import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
+import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
+import HorizontalLabelToggle from '@polkadot/extension-koni-ui/components/HorizontalLabelToggle';
+import MenuDivider from '@polkadot/extension-koni-ui/components/MenuDivider';
+import MenuItem from '@polkadot/extension-koni-ui/components/MenuItem';
+import SimpleDropdown from '@polkadot/extension-koni-ui/components/SimpleDropdown';
+import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
+import { setNotification, windowOpen } from '@polkadot/extension-koni-ui/messaging';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
+import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
+import settings from '@polkadot/ui-settings';
+
+import { ActionContext, themes, ThemeSwitchContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import Header from "@polkadot/extension-koni-ui/partials/Header";
-import settings from "@polkadot/ui-settings";
-import {faExpand, faList} from "@fortawesome/free-solid-svg-icons";
-import {Theme} from "../types";
-import useIsPopup from "@polkadot/extension-koni-ui/hooks/useIsPopup";
-import getLanguageOptions from "@polkadot/extension-koni-ui/util/getLanguageOptions";
-import {setNotification, windowOpen} from "@polkadot/extension-koni-ui/messaging";
-import MenuItem from "@polkadot/extension-koni-ui/components/MenuItem";
-import Checkbox from "@polkadot/extension-koni-ui/components/Checkbox";
-import ActionText from "@polkadot/extension-koni-ui/components/ActionText";
-import MenuDivider from "@polkadot/extension-koni-ui/components/MenuDivider";
-import HorizontalLabelToggle from "@polkadot/extension-koni-ui/components/HorizontalLabelToggle";
-import SimpleDropdown from "@polkadot/extension-koni-ui/components/SimpleDropdown";
+import { Theme } from '../types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -30,7 +30,7 @@ interface Props extends ThemeProps {
 const notificationOptions = ['Extension', 'PopUp', 'Window']
   .map((item) => ({ text: item, value: item.toLowerCase() }));
 
-function Settings({className}: Props): React.ReactElement {
+function Settings ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [notification, updateNotification] = useState(settings.notification);
@@ -77,7 +77,6 @@ function Settings({className}: Props): React.ReactElement {
     }, [onAction]
   );
 
-
   return (
     <>
       <div className={className}>
@@ -92,10 +91,10 @@ function Settings({className}: Props): React.ReactElement {
         >
           <HorizontalLabelToggle
             checkedLabel={t<string>('Dark')}
-            uncheckedLabel={t<string>('Light')}
-            value={themeContext.id === themes.dark.id}
             className='kn-theme-setting'
             toggleFunc={_onChangeTheme}
+            uncheckedLabel={t<string>('Light')}
+            value={themeContext.id === themes.dark.id}
           />
         </MenuItem>
         <MenuItem
@@ -122,7 +121,7 @@ function Settings({className}: Props): React.ReactElement {
             value={notification}
           />
         </MenuItem>
-        {/*</div>*/}
+        {/* </div> */}
 
         <MenuItem
           className='setting'
@@ -135,7 +134,7 @@ function Settings({className}: Props): React.ReactElement {
             onChange={setCamera}
           />
         </MenuItem>
-        <MenuDivider className='settings-menu-divider'/>
+        <MenuDivider className='settings-menu-divider' />
         <MenuItem className='setting'>
           <ActionText
             className='manage-website-access'

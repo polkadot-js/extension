@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useContext, useState} from 'react';
-import styled, {ThemeContext} from 'styled-components';
+import React, { useCallback, useContext, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
 import Name from '@polkadot/extension-koni-ui/partials/Name';
 import Password from '@polkadot/extension-koni-ui/partials/Password';
-import {Theme, ThemeProps} from '@polkadot/extension-koni-ui/types';
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
+import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   buttonLabel: string;
@@ -45,7 +46,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
     <>
       <div className={className}>
         <div className='account-info-wrapper'>
-          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} account-name-and-password-creation-wrapper`}>
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} account-name-and-password-creation-wrapper`}>
             <AccountInfo
               address={address}
               genesisHash={genesis}

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import styled, {ThemeContext} from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
@@ -12,7 +12,7 @@ import Label from '@polkadot/extension-koni-ui/components/Label';
 import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
 import Warning from '@polkadot/extension-koni-ui/components/Warning';
 
-import {AccountContext, ActionContext, Theme} from '../../components';
+import { AccountContext, ActionContext, Theme } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -133,8 +133,8 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
           {isLocked
             ? (
               <AccountInfo
-                className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'}`}
                 address={parentAddress}
+                className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}
                 genesisHash={parentGenesis}
               />
             )

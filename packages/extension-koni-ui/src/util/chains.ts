@@ -8,7 +8,7 @@ function getKnownHashes (): NetWorkMetadataDef[] {
   const result: NetWorkMetadataDef[] = [];
 
   Object.keys(NETWORKS).forEach((networkKey) => {
-    const { chain, genesisHash, group, icon, ss58Format } = NETWORKS[networkKey];
+    const { chain, genesisHash, group, icon, isEthereum, ss58Format } = NETWORKS[networkKey];
 
     if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
       return;
@@ -18,9 +18,10 @@ function getKnownHashes (): NetWorkMetadataDef[] {
       chain,
       networkName: networkKey,
       genesisHash,
-      icon: icon || 'substrate',
+      icon: isEthereum ? 'ethereum' : (icon || 'substrate'),
       ss58Format,
-      group
+      group,
+      isEthereum: !!isEthereum
     });
   });
 

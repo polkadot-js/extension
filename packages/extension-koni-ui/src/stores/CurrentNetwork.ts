@@ -9,7 +9,8 @@ const initialState = {
   networkPrefix: -1,
   icon: 'substrate',
   genesisHash: '',
-  networkName: 'all'
+  networkName: 'all',
+  isEthereum: false
 };
 
 const currentNetworkSlice = createSlice({
@@ -23,6 +24,7 @@ const currentNetworkSlice = createSlice({
       state.icon = payload.icon;
       state.genesisHash = payload.genesisHash;
       state.networkName = payload.networkName;
+      state.isEthereum = payload.isEthereum;
     }
   }
 });

@@ -22,14 +22,14 @@ function Label ({ children, className, label }: Props): React.ReactElement<Props
 }
 
 export default styled(Label)(({ theme }: ThemeProps) => `
-  color: ${theme.textColor};
+  color: ${theme.textColor2};
 
   label {
-    font-size: ${theme.inputLabelFontSize};
-    line-height: 14px;
+    font-size: 14px;
+    line-height: 26px;
     letter-spacing: 0.04em;
-    opacity: 0.65;
     margin-bottom: 12px;
     text-transform: uppercase;
+    font-weight: 500;
   }
 `);

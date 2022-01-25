@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 
-import useIsMounted from '../hooks/useIsMounted';
-import { Result, Validator } from '../util/validators';
-import Warning from './Warning';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import useIsMounted from '@polkadot/extension-koni-ui/hooks/useIsMounted';
+import { Result, Validator } from '@polkadot/extension-koni-ui/util/validators';
 
 interface BasicProps {
   isError?: boolean;
@@ -58,6 +59,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
       />
       {Result.isError(validationResult) && (
         <Warning
+          className='validated-input__warning'
           isBelowInput
           isDanger
         >
@@ -68,4 +70,8 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
   );
 }
 
-export default ValidatedInput;
+export default styled(ValidatedInput)`
+  .validated-input__warning {
+    margin-top: 10px;
+  }
+`;

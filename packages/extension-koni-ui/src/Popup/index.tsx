@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AccountsWithCurrentAddress, AuthorizeRequest, CurrentNetworkInfo, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -11,12 +11,14 @@ import { Route, Switch } from 'react-router';
 import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary, Loading } from '../components';
+import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getPrice, subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests } from '../messaging';
+import { getAccountsWithCurrentAddress, getPrice, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import Accounts from './Accounts';
@@ -35,6 +37,7 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import Settings from "@polkadot/extension-koni-ui/Popup/Settings";
 
 const startSettings = uiSettings.get();
 
@@ -70,6 +73,14 @@ function updatePrice (priceData: PriceJson): void {
   store.dispatch({ type: 'price/update', payload: priceData });
 }
 
+function updateCurrentAccount (currentAcc: AccountJson | undefined): void {
+  store.dispatch({ type: 'currentAccount/updateAccount', payload: currentAcc });
+}
+
+function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo | undefined): void {
+  store.dispatch({ type: 'currentNetwork/updateNetwork', payload: currentNetwork });
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -80,7 +91,8 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-
+  const genesisOptions = useGenesisHashOptions();
+  const currentAccount = store.getState().currentAccount;
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -92,13 +104,35 @@ export default function Popup (): React.ReactElement {
     []
   );
 
+  const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
+    const { accounts, currentAddress } = data;
+
+    setAccounts(accounts);
+
+    if (accounts && accounts.length) {
+      let selectedAcc = accounts.find((acc) => acc.address === currentAddress);
+
+      if (!selectedAcc) {
+        selectedAcc = accounts[0];
+        saveCurrentAccountAddress(selectedAcc.address).then(() => {
+          updateCurrentAccount(selectedAcc);
+        }).catch((e) => {
+          console.error('There is a problem when set Current Account', e);
+        });
+      } else {
+        updateCurrentAccount(selectedAcc);
+      }
+    }
+  };
+
   useEffect((): void => {
     getPrice().then(updatePrice).catch(console.error);
   }, []);
 
   useEffect((): void => {
     Promise.all([
-      subscribeAccounts(setAccounts),
+      // subscribeAccounts(setAccounts),
+      getAccountsWithCurrentAddress(handleGetAccountsWithCurrentAddress),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests),
@@ -117,6 +151,38 @@ export default function Popup (): React.ReactElement {
   useEffect((): void => {
     setAccountCtx(initAccountContext(accounts || []));
   }, [accounts]);
+
+  useEffect(() => {
+    let isSync = true;
+
+    (async () => {
+      let networkSelected;
+
+      if (!currentAccount || !currentAccount?.genesisHash) {
+        networkSelected = genesisOptions[0];
+      } else {
+        networkSelected = genesisOptions.find((opt) => opt.value === currentAccount.genesisHash);
+
+        if (!networkSelected) {
+          await tieAccount(currentAccount.address, null);
+          networkSelected = genesisOptions[0];
+        }
+      }
+
+      if (isSync && networkSelected) {
+        updateCurrentNetwork({
+          networkPrefix: networkSelected.networkPrefix,
+          icon: networkSelected.icon,
+          genesisHash: networkSelected.value,
+          networkName: networkSelected.networkName
+        });
+      }
+    })();
+
+    return () => {
+      isSync = false;
+    };
+  }, [currentAccount?.genesisHash]);
 
   useEffect((): void => {
     requestMediaAccess(cameraOn)
@@ -139,7 +205,7 @@ export default function Popup (): React.ReactElement {
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (
-    <Loading>{accounts && authRequests && metaRequests && signRequests && (
+    <LoadingContainer>{accounts && authRequests && metaRequests && signRequests && (
       <Provider store={store}>
         <ActionContext.Provider value={_onAction}>
           <SettingsContext.Provider value={settingsCtx}>
@@ -161,6 +227,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                          <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact
@@ -178,6 +245,6 @@ export default function Popup (): React.ReactElement {
           </SettingsContext.Provider>
         </ActionContext.Provider>
       </Provider>
-    )}</Loading>
+    )}</LoadingContainer>
   );
 }

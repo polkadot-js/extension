@@ -3,176 +3,107 @@
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { canDerive } from '@polkadot/extension-base/utils';
+import check from '@polkadot/extension-koni-ui/assets/check.svg';
+import { AccountContext, ActionContext } from '@polkadot/extension-koni-ui/components';
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import { saveCurrentAccountAddress } from '@polkadot/extension-koni-ui/messaging';
+import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-
-import { Address, Dropdown, Link, MenuDivider } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
-import useTranslation from '../../hooks/useTranslation';
-import { editAccount, tieAccount } from '../../messaging';
-import { Name } from '../../partials';
+import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
 
 interface Props extends AccountJson {
   className?: string;
   parentName?: string;
 }
 
-interface EditState {
-  isEditing: boolean;
-  toggleActions: number;
-}
+function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type }: Props): React.ReactElement<Props> {
+  const [isSelected, setSelected] = useState(false);
+  const { accounts } = useContext(AccountContext);
+  const onAction = useContext(ActionContext);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount);
 
-function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, type }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
-  const [editedName, setName] = useState<string | undefined | null>(name);
-  const genesisOptions = useGenesisHashOptions();
+  useEffect((): void => {
+    if (currentAccount?.address === address) {
+      setSelected(true);
+    } else {
+      setSelected(false);
+    }
+  }, [address]);
 
-  const _onChangeGenesis = useCallback(
-    (genesisHash?: string | null): void => {
-      tieAccount(address, genesisHash || null)
-        .catch(console.error);
-    },
-    [address]
-  );
+  const _changeAccount = useCallback(
+    () => {
+      setSelected(true);
 
-  const _toggleEdit = useCallback(
-    (): void => setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions })),
-    [isEditing]
-  );
+      if (address) {
+        const accountByAddress = findAccountByAddress(accounts, address);
 
-  const _saveChanges = useCallback(
-    (): void => {
-      editedName &&
-        editAccount(address, editedName)
-          .catch(console.error);
+        if (accountByAddress) {
+          saveCurrentAccountAddress(address).then(() => {
+            store.dispatch({ type: 'currentAccount/updateAccount', payload: accountByAddress });
+          }).catch((e) => {
+            console.error('There is a problem when set Current Account', e);
+          });
+        } else {
+          console.error('There is a problem when change account');
+        }
+      }
 
-      _toggleEdit();
-    },
-    [editedName, address, _toggleEdit]
-  );
+      closeSetting && closeSetting();
+      onAction('/');
+    }, []);
 
-  const _actions = useMemo(() => (
-    <>
-      <Link
-        className='menuItem'
-        onClick={_toggleEdit}
-      >
-        {t<string>('Rename')}
-      </Link>
-      {!isExternal && canDerive(type) && (
-        <Link
-          className='menuItem'
-          to={`/account/derive/${address}/locked`}
-        >
-          {t<string>('Derive New Account')}
-        </Link>
-      )}
-      <MenuDivider />
-      {!isExternal && (
-        <Link
-          className='menuItem'
-          isDanger
-          to={`/account/export/${address}`}
-        >
-          {t<string>('Export Account')}
-        </Link>
-      )}
-      <Link
-        className='menuItem'
-        isDanger
-        to={`/account/forget/${address}`}
-      >
-        {t<string>('Forget Account')}
-      </Link>
-      {!isHardware && (
-        <>
-          <MenuDivider />
-          <div className='menuItem'>
-            <Dropdown
-              className='genesisSelection'
-              label=''
-              onChange={_onChangeGenesis}
-              options={genesisOptions}
-              value={genesisHash || ''}
-            />
-          </div>
-        </>
-      )}
-    </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, genesisOptions, isExternal, isHardware, t, type]);
+  console.log('currentAccount', currentAccount);
 
   return (
-    <div className={className}>
-      <Address
-        actions={_actions}
-        address={address}
-        className='address'
-        genesisHash={genesisHash}
-        isExternal={isExternal}
-        isHidden={isHidden}
-        name={editedName}
-        parentName={parentName}
-        suri={suri}
-        toggleActions={toggleActions}
-      >
-        {isEditing && (
-          <Name
-            address={address}
-            className={`editName ${parentName ? 'withParent' : ''}`}
-            isFocused
-            label={' '}
-            onBlur={_saveChanges}
-            onChange={setName}
+    <div
+      className={className}
+      onClick={_changeAccount}
+    >
+      {isSelected
+        ? (
+          <img
+            alt='check'
+            src={check}
           />
-        )}
-      </Address>
+        )
+        : (
+          <div className='account-unchecked-item' />
+        )
+      }
+      <AccountInfo
+        address={address}
+        className='account__account-item'
+        genesisHash={genesisHash}
+        name={name}
+        parentName={parentName}
+        showCopyBtn={false}
+        suri={suri}
+        type={type}
+      />
     </div>
   );
 }
 
 export default styled(Account)(({ theme }: ThemeProps) => `
-  .address {
-    margin-bottom: 8px;
+  position: relative;
+  padding: 0 15px;
+  border-radius: 8px;
+  margin-top: 8px;
+  display: flex;
+  &:hover {
+    background-color: ${theme.accountHoverBackground};
+    cursor: pointer;
   }
 
-  .editName {
-    position: absolute;
-    flex: 1;
-    left: 70px;
-    top: 10px;
-    width: 350px;
-
-    .danger {
-      background-color: ${theme.bodyColor};
-      margin-top: -13px;
-      width: 330px;
-    }
-
-    input {
-      height : 30px;
-      width: 350px;
-    }
-
-    &.withParent {
-      top: 16px
-    }
+  .account__account-item {
+    margin-left: 5px;
   }
 
-  .menuItem {
-    border-radius: 8px;
-    display: block;
-    font-size: 15px;
-    line-height: 20px;
-    margin: 0;
-    min-width: 13rem;
-    padding: 4px 16px;
-
-    .genesisSelection {
-      margin: 0;
-    }
+  .account-unchecked-item {
+    width: 24px;
   }
 `);

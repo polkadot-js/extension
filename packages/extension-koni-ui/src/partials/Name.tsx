@@ -3,9 +3,11 @@
 
 import React, { useContext, useMemo } from 'react';
 
-import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { isNotShorterThan } from '../util/validators';
+import { AccountContext } from '@polkadot/extension-koni-ui/components';
+import KoniInputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import ValidatedInput from '@polkadot/extension-koni-ui/components/ValidatedInput';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { isNotShorterThan } from '@polkadot/extension-koni-ui/util/validators';
 
 interface Props {
   address?: string;
@@ -28,7 +30,7 @@ export default function Name ({ address, className, isFocused, label, onBlur, on
   return (
     <ValidatedInput
       className={className}
-      component={InputWithLabel}
+      component={KoniInputWithLabel}
       data-input-name
       defaultValue={startValue}
       isFocused={isFocused}

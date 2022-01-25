@@ -5,26 +5,34 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import { faCaretDown, faCaretRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
+import styled, {ThemeContext} from 'styled-components';
 
+import { Dropdown } from '@polkadot/extension-koni-ui/components';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
+import TextAreaWithLabel from '@polkadot/extension-koni-ui/components/TextAreaWithLabel';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
 import { validateSeed } from '@polkadot/extension-koni-ui/messaging';
 import { objectSpread } from '@polkadot/util';
-
-import { ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, VerticalSpace, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
+import AccountInfoEl from '@polkadot/extension-koni-ui/components/AccountInfo';
+import {Theme} from "../../types";
 
 interface Props {
   className?: string;
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
   type: KeypairType;
+  account: any;
+  name: string | null;
 }
 
-function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
+function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
@@ -33,6 +41,7 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -70,69 +79,86 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   return (
     <>
       <div className={className}>
-        <TextAreaWithLabel
-          className='seedInput'
-          isError={!!error}
-          isFocused
-          label={t<string>('existing 12 or 24-word mnemonic seed')}
-          onChange={setSeed}
-          rowsCount={2}
-          value={seed || ''}
-        />
-        {!!error && !seed && (
-          <Warning
-            className='seedError'
-            isBelowInput
-            isDanger
-          >
-            {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
-          </Warning>
-        )}
-        <Dropdown
-          className='genesisSelection'
-          label={t<string>('Network')}
-          onChange={setGenesis}
-          options={genesisOptions}
-          value={genesis}
-        />
-        <div
-          className='advancedToggle'
-          onClick={_onToggleAdvanced}
-        >
-          <FontAwesomeIcon icon={advanced ? faCaretDown : faCaretRight} />
-          <span>{t<string>('advanced')}</span>
+        <div className='account-info-wrapper'>
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} seed-and-path-wrapper`} >
+            <AccountInfoEl
+              address={account?.address}
+              className='account-info'
+              genesisHash={account?.genesis}
+              name={name}/>
+            <TextAreaWithLabel
+              className='seedInput'
+              isError={!!error}
+              isFocused
+              label={t<string>('existing 12 or 24-word mnemonic seed')}
+              onChange={setSeed}
+              rowsCount={2}
+              value={seed || ''}
+            />
+            {!!error && !seed && (
+              <Warning
+                className='seedError'
+                isBelowInput
+                isDanger
+              >
+                {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
+              </Warning>
+            )}
+            <Dropdown
+              className='genesisSelection'
+              label={t<string>('Network')}
+              onChange={setGenesis}
+              options={genesisOptions}
+              value={genesis}
+            />
+            <div
+              className='advancedToggle'
+              onClick={_onToggleAdvanced}
+            >
+              <FontAwesomeIcon
+                color='#888888'
+                icon={advanced ? faChevronDown : faChevronRight}
+              />
+              <span>{t<string>('advanced')}</span>
+            </div>
+            { advanced && (
+              <InputWithLabel
+                className='derivationPath'
+                isError={!!path && !!error}
+                label={t<string>('derivation path')}
+                onChange={setPath}
+                value={path || ''}
+              />
+            )}
+            {!!error && !!seed && (
+              <Warning
+                isDanger
+              >
+                {error}
+              </Warning>
+            )}
+          </div>
         </div>
-        { advanced && (
-          <InputWithLabel
-            className='derivationPath'
-            isError={!!path && !!error}
-            label={t<string>('derivation path')}
-            onChange={setPath}
-            value={path || ''}
-          />
-        )}
-        {!!error && !!seed && (
-          <Warning
-            isDanger
+        <ButtonArea>
+          <NextStepButton
+            className='next-step-btn'
+            isDisabled={!address || !!error}
+            onClick={onNextStep}
           >
-            {error}
-          </Warning>
-        )}
+            {t<string>('Next Step')}
+          </NextStepButton>
+        </ButtonArea>
       </div>
-      <VerticalSpace />
-      <ButtonArea>
-        <NextStepButton
-          isDisabled={!address || !!error}
-          onClick={onNextStep}
-        >
-          {t<string>('Next')}
-        </NextStepButton>
-      </ButtonArea>
     </>
   );
 }
 
 export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
+  padding: 25px 15px 15px;
+  flex: 1;
+  margin-top: -25px;
+  overflow-y: auto;
+
   .advancedToggle {
     color: ${theme.textColor};
     cursor: pointer;
@@ -140,22 +166,44 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
     letter-spacing: 0.04em;
     opacity: 0.65;
     text-transform: uppercase;
+    margin-top: 13px;
 
     > span {
       font-size: ${theme.inputLabelFontSize};
+      line-height: 26px;
       margin-left: .5rem;
       vertical-align: middle;
+      color: ${theme.textColor2};
+      font-weight: 500;
+    }
+  }
+
+  .seed-and-path-wrapper {
+    padding-bottom: 15px;
+  }
+
+  .next-step-btn {
+    > .children {
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
     }
   }
 
   .genesisSelection {
-    margin-bottom: ${theme.fontSize};
+    line-height: 26px;
+    label {
+      color: ${theme.textColor2};
+    }
   }
 
   .seedInput {
-    margin-bottom: ${theme.fontSize};
+    margin-bottom: 16px;
+    color: ${theme.textColor2};
     textarea {
-      height: unset;
+      height: 80px;
+      margin-top: 4px;
     }
   }
 

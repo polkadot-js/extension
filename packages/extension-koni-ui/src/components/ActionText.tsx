@@ -13,15 +13,20 @@ interface Props {
   icon?: IconDefinition;
   onClick: MouseEventHandler<HTMLDivElement>;
   text: string;
+  img?: string;
 }
 
-function ActionText ({ className, icon, onClick, text }: Props): React.ReactElement<Props> {
+function ActionText ({ className, icon, img, onClick, text }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}
       onClick={onClick}
     >
       {icon && <FontAwesomeIcon icon={icon} />}
+      {img && <img
+        alt='copy'
+        src={img}
+      />}
       <span>{text}</span>
     </div>
   );
@@ -31,10 +36,9 @@ export default styled(ActionText)(({ theme }: ThemeProps) => `
   cursor: pointer;
 
   span {
-    color: ${theme.labelColor}
+    color: ${theme.labelColor};
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
-    text-decoration-line: underline;
   }
 
   .svg-inline--fa {
@@ -42,6 +46,5 @@ export default styled(ActionText)(({ theme }: ThemeProps) => `
     display: inline-block;
     margin-right: 0.3rem;
     position: relative;
-    top: 2px;
   }
 `);

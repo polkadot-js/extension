@@ -1,17 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type {Theme, ThemeProps} from '../types';
 
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled from 'styled-components';
+import styled, {ThemeContext} from 'styled-components';
+import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
+import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
 
-import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components';
+import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
-import { Header } from '../partials';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 const MIN_LENGTH = 6;
 
@@ -19,12 +25,13 @@ interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
   className?: string;
 }
 
-function Export ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function KoniExportAccount ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _goHome = useCallback(
     () => onAction('/'),
@@ -63,15 +70,19 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
     <>
       <Header
         showBackArrow
-        text={t<string>('Export account')}
+        showSubHeader
+        subHeaderName={t<string>('Export account')}
       />
       <div className={className}>
-        <Address address={address}>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} export-account-wrapper`} >
+          <AccountInfo address={address}/>
           <Warning className='movedWarning'>
             {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>
-          <div className='actionArea'>
+
+          <div className='passwordArea'>
             <InputWithLabel
+              className='koni-export-input-label'
               data-export-password
               disabled={isBusy}
               isError={pass.length < MIN_LENGTH || !!error}
@@ -87,41 +98,52 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
                 {error}
               </Warning>
             )}
-            <Button
-              className='export-button'
-              data-export-button
-              isBusy={isBusy}
-              isDanger
-              isDisabled={pass.length === 0 || !!error}
-              onClick={_onExportButtonClick}
-            >
-              {t<string>('I want to export this account')}
-            </Button>
-            <ActionBar className='withMarginTop'>
-              <ActionText
-                className='center'
-                onClick={_goHome}
-                text={t<string>('Cancel')}
-              />
-            </ActionBar>
           </div>
-        </Address>
+
+          <div className='actionArea'>
+            <div>
+              <Button
+                className='export-button'
+                data-export-button
+                isBusy={isBusy}
+                isDisabled={pass.length === 0 || !!error}
+                onClick={_onExportButtonClick}
+              >
+                {t<string>('I want to export this account')}
+              </Button>
+              <ActionBar className='withMarginTop'>
+                <ActionText
+                  className='cancel-button'
+                  onClick={_goHome}
+                  text={t<string>('Cancel')}
+                />
+              </ActionBar>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
 }
 
-export default withRouter(styled(Export)`
-  .actionArea {
-    padding: 10px 24px;
+export default withRouter(styled(KoniExportAccount)(({ theme }: Props) => `
+  margin: 0 15px;
+
+  .passwordArea {
+    padding-top: 13px;
   }
 
-  .center {
-    margin: auto;
+  .actionArea {
+    display: flex;
+    justify-content: center;
+  }
+
+  .export-account-wrapper {
+    padding-bottom: 8px;
   }
 
   .export-button {
-    margin-top: 6px;
+    margin-bottom: 4px;
   }
 
   .movedWarning {
@@ -129,6 +151,20 @@ export default withRouter(styled(Export)`
   }
 
   .withMarginTop {
-    margin-top: 4px;
+    margin-top: 12px;
   }
-`);
+
+  .koni-export-input-label {
+    margin-bottom: 20px;
+  }
+
+  .cancel-button {
+    margin-top: 10px;
+    margin: auto;
+    > span {
+      color: ${theme.buttonTextColor2};
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 26px;
+  }
+`));

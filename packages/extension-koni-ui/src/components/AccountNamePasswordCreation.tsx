@@ -1,26 +1,35 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
-
-import { Name, Password } from '../partials';
-import { BackButton, ButtonArea, NextStepButton, VerticalSpace } from '.';
+import React, {useCallback, useContext, useState} from 'react';
+import styled, {ThemeContext} from 'styled-components';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
+import Name from '@polkadot/extension-koni-ui/partials/Name';
+import Password from '@polkadot/extension-koni-ui/partials/Password';
+import {Theme, ThemeProps} from '@polkadot/extension-koni-ui/types';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 interface Props {
-  buttonLabel?: string;
+  buttonLabel: string;
   isBusy: boolean;
-  onBackClick?: () => void;
+  onBackClick: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
-  onPasswordChange?: (password: string) => void;
+  className?: string;
+  children?: any;
+  address?: string | null;
+  genesis?: string | null;
 }
 
-function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCreate, onNameChange, onPasswordChange }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
-
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
-    () => name && password && onCreate(name, password),
+    () => {
+      name && password && onCreate(name, password);
+    },
     [name, password, onCreate]
   );
 
@@ -32,46 +41,62 @@ function AccountNamePasswordCreation ({ buttonLabel, isBusy, onBackClick, onCrea
     [onNameChange]
   );
 
-  const _onPasswordChange = useCallback(
-    (password: string | null) => {
-      onPasswordChange && onPasswordChange(password || '');
-      setPassword(password);
-    },
-    [onPasswordChange]
-  );
-
-  const _onBackClick = useCallback(
-    () => {
-      _onNameChange(null);
-      setPassword(null);
-      onBackClick && onBackClick();
-    },
-    [_onNameChange, onBackClick]
-  );
-
   return (
     <>
-      <Name
-        isFocused
-        onChange={_onNameChange}
-      />
-      <Password onChange={_onPasswordChange} />
-      <VerticalSpace />
-      {onBackClick && buttonLabel && (
-        <ButtonArea>
-          <BackButton onClick={_onBackClick} />
-          <NextStepButton
+      <div className={className}>
+        <div className='account-info-wrapper'>
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} account-name-and-password-creation-wrapper`}>
+            <AccountInfo
+              address={address}
+              genesisHash={genesis}
+              name={name}
+            />
+            <div className={ children ? 'children-wrapper' : ''}>
+              {children}
+            </div>
+            <Name
+              isFocused
+              onChange={_onNameChange}
+            />
+            <Password onChange={setPassword} />
+          </div>
+        </div>
+        <ButtonArea className='kn-button-area'>
+          <KoniNextStepButton
+            className='next-step-btn'
             data-button-action='add new root'
             isBusy={isBusy}
             isDisabled={!password || !name}
             onClick={_onCreate}
           >
             {buttonLabel}
-          </NextStepButton>
+          </KoniNextStepButton>
         </ButtonArea>
-      )}
+      </div>
     </>
   );
 }
 
-export default React.memo(AccountNamePasswordCreation);
+export default styled(AccountNamePasswordCreation)(({ theme }: ThemeProps) => `
+  padding: 25px 15px 15px;
+  flex: 1;
+  margin-top: -25px;
+  overflow-y: auto;
+
+  .account-name-and-password-creation-wrapper {
+    padding-bottom: 15px;
+  }
+
+  .children-wrapper {
+    margin-top: 6px;
+  }
+
+  .next-step-btn {
+    > .children {
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
+    }
+  }
+`);

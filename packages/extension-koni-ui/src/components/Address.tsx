@@ -8,28 +8,26 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../types';
 
-import { faUsb } from '@fortawesome/free-brands-svg-icons';
-import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
-import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import check from '@polkadot/extension-koni-ui/assets/check.svg';
+import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
+import { saveCurrentAccountAddress } from '@polkadot/extension-koni-ui/messaging';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { updateAccount } from '@polkadot/extension-koni-ui/stores/CurrentAccount';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import details from '../assets/details.svg';
 import useMetadata from '../hooks/useMetadata';
 import useOutsideClick from '../hooks/useOutsideClick';
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
-import { showAccount } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import getParentNameSuri from '../util/getParentNameSuri';
-import { AccountContext, SettingsContext } from './contexts';
-import Identicon from './Identicon';
-import Menu from './Menu';
-import Svg from './Svg';
+import { AccountContext, ActionContext, SettingsContext } from './contexts';
 
 export interface Props {
   actions?: React.ReactNode;
@@ -38,7 +36,6 @@ export interface Props {
   className?: string;
   genesisHash?: string | null;
   isExternal?: boolean | null;
-  isHardware?: boolean | null;
   isHidden?: boolean;
   name?: string | null;
   parentName?: string | null;
@@ -92,56 +89,49 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
   };
 }
 
-const ACCOUNTS_SCREEN_HEIGHT = 550;
 const defaultRecoded = { account: null, formatted: null, prefix: 42, type: DEFAULT_TYPE };
 
-function Address ({ actions, address, children, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, toggleActions, type: givenType }: Props): React.ReactElement<Props> {
+function Address ({ address, children, className, genesisHash, isExternal, name, parentName, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
   const settings = useContext(SettingsContext);
   const [{ account, formatted, genesisHash: recodedGenesis, prefix, type }, setRecoded] = useState<Recoded>(defaultRecoded);
   const chain = useMetadata(genesisHash || recodedGenesis, true);
-
   const [showActionsMenu, setShowActionsMenu] = useState(false);
-  const [moveMenuUp, setIsMovedMenu] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
+  const onAction = useContext(ActionContext);
+  const currentAccount: AccountJson = useSelector((state: RootState) => state.currentAccount);
+  const accountName = name || account?.name;
+  const displayName = accountName || t('<unknown>');
 
   useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
     if (!address) {
-      return setRecoded(defaultRecoded);
+      setRecoded(defaultRecoded);
+
+      return;
     }
 
-    const account = findAccountByAddress(accounts, address);
+    const accountByAddress = findAccountByAddress(accounts, address);
+
+    if (currentAccount?.address === address) {
+      setSelected(true);
+    } else {
+      setSelected(false);
+    }
 
     setRecoded(
       (
         chain?.definition.chainType === 'ethereum' ||
-        account?.type === 'ethereum' ||
-        (!account && givenType === 'ethereum')
+        accountByAddress?.type === 'ethereum' ||
+        (!accountByAddress && givenType === 'ethereum')
       )
-        ? { account, formatted: address, type: 'ethereum' }
-        : recodeAddress(address, accounts, chain, settings)
-    );
+        ? { account: accountByAddress, formatted: address, type: 'ethereum' }
+        : recodeAddress(address, accounts, chain, settings));
   }, [accounts, address, chain, givenType, settings]);
-
-  useEffect(() => {
-    if (!showActionsMenu) {
-      setIsMovedMenu(false);
-    } else if (actionsRef.current) {
-      const { bottom } = actionsRef.current.getBoundingClientRect();
-
-      if (bottom > ACCOUNTS_SCREEN_HEIGHT) {
-        setIsMovedMenu(true);
-      }
-    }
-  }, [showActionsMenu]);
-
-  useEffect((): void => {
-    setShowActionsMenu(false);
-  }, [toggleActions]);
 
   const theme = (
     type === 'ethereum'
@@ -149,96 +139,100 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
       : (chain?.icon || 'polkadot')
   ) as IconTheme;
 
-  const _onClick = useCallback(
-    () => setShowActionsMenu(!showActionsMenu),
-    [showActionsMenu]
-  );
-
   const _onCopy = useCallback(
     () => show(t('Copied')),
     [show, t]
   );
 
-  const _toggleVisibility = useCallback(
-    () => address && showAccount(address, isHidden || false).catch(console.error),
-    [address, isHidden]
+  const _changeAccount = useCallback(
+    () => {
+      setSelected(true);
+
+      if (address) {
+        const accountByAddress = findAccountByAddress(accounts, address);
+
+        if (accountByAddress) {
+          saveCurrentAccountAddress(address).then(() => {
+            updateAccount(accountByAddress);
+          }).catch((e) => {
+            console.error('There is a problem when set Current Account', e);
+          });
+        } else {
+          console.error('There is a problem when change account');
+        }
+      }
+
+      onAction('/');
+    }, []
   );
 
-  const Name = () => {
-    const accountName = name || account?.name;
-    const displayName = accountName || t('<unknown>');
+  const toShortAddress = (_address: string | null, halfLength?: number) => {
+    const address = (_address || '').toString();
 
-    return (
-      <>
-        {!!accountName && (account?.isExternal || isExternal) && (
-          (account?.isHardware || isHardware)
-            ? (
-              <FontAwesomeIcon
-                className='hardwareIcon'
-                icon={faUsb}
-                rotation={270}
-                title={t('hardware wallet account')}
-              />
-            )
-            : (
-              <FontAwesomeIcon
-                className='externalIcon'
-                icon={faQrcode}
-                title={t('external account')}
-              />
-            )
-        )}
-        <span title={displayName}>{displayName}</span>
-      </>);
+    const addressLength = halfLength || 7;
+
+    return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
   };
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
   return (
-    <div className={className}>
-      <div className='infoRow'>
-        <Identicon
-          className='identityIcon'
-          iconTheme={theme}
-          isExternal={isExternal}
-          onCopy={_onCopy}
-          prefix={prefix}
-          value={formatted || address}
-        />
-        <div className='info'>
-          {parentName
+    <div
+      className={className}
+      onClick={_changeAccount}
+    >
+      {parentName && (
+        <>
+          <div className='banner'>
+            <FontAwesomeIcon
+              className='deriveIcon'
+              icon={faCodeBranch}
+            />
+            <div
+              className='parentName'
+              data-field='parent'
+              title = {parentNameSuri}
+            >
+              {toShortAddress(parentNameSuri)}
+            </div>
+          </div>
+        </>
+      )
+      }
+      <div className={`${parentName ? 'infoRow parent-name' : 'infoRow'}`}>
+        <div className='infoRow-icon-wrapper'>
+          {isSelected
             ? (
-              <>
-                <div className='banner'>
-                  <FontAwesomeIcon
-                    className='deriveIcon'
-                    icon={faCodeBranch}
-                  />
-                  <div
-                    className='parentName'
-                    data-field='parent'
-                    title = {parentNameSuri}
-                  >
-                    {parentNameSuri}
-                  </div>
-                </div>
-                <div className='name displaced'>
-                  <Name />
-                </div>
-              </>
+              <img
+                alt='check'
+                src={check}
+              />
             )
             : (
-              <div
-                className='name'
-                data-field='name'
-              >
-                <Name />
-              </div>
+              <div className='uncheckedItem' />
             )
           }
+
+          <Identicon
+            className='identityIcon'
+            iconTheme={theme}
+            onCopy={_onCopy}
+            prefix={prefix}
+            size={32}
+            value={formatted || address}
+          />
+        </div>
+        <div className='info'>
+          <div
+            className='name'
+            data-field='name'
+          >
+            <span title={displayName}>{displayName}</span>
+          </div>
+          <div className='koni-address-text'>{toShortAddress(formatted, 10)}</div>
           {chain?.genesisHash && (
             <div
-              className='banner chain'
+              className='banner-chain'
               data-field='chain'
               style={
                 chain.definition.color
@@ -249,54 +243,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               {chain.name.replace(' Relay Chain', '')}
             </div>
           )}
-          <div className='addressDisplay'>
-            <div
-              className='fullAddress'
-              data-field='address'
-            >
-              {formatted || address || t('<unknown>')}
-            </div>
-            <CopyToClipboard text={(formatted && formatted) || ''}>
-              <FontAwesomeIcon
-                className='copyIcon'
-                icon={faCopy}
-                onClick={_onCopy}
-                size='sm'
-                title={t('copy address')}
-              />
-            </CopyToClipboard>
-            {actions && (
-              <FontAwesomeIcon
-                className={isHidden ? 'hiddenIcon' : 'visibleIcon'}
-                icon={isHidden ? faEyeSlash : faEye}
-                onClick={_toggleVisibility}
-                size='sm'
-                title={t('account visibility')}
-              />
-            )}
-          </div>
         </div>
-        {actions && (
-          <>
-            <div
-              className='settings'
-              onClick={_onClick}
-            >
-              <Svg
-                className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
-                src={details}
-              />
-            </div>
-            {showActionsMenu && (
-              <Menu
-                className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
-                reference={actionsRef}
-              >
-                {actions}
-              </Menu>
-            )}
-          </>
-        )}
       </div>
       {children}
     </div>
@@ -304,27 +251,39 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 }
 
 export default styled(Address)(({ theme }: ThemeProps) => `
-  background: ${theme.accountBackground};
-  border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
-  border-radius: 4px;
-  margin-bottom: 8px;
   position: relative;
+  padding: 8px 14px 8px 14px;
+  border-radius: 8px;
+  margin-top: 8px;
+  &:hover {
+      background-color: ${theme.accountHoverBackground};
+      cursor: pointer;
+  }
 
   .banner {
-    font-size: 12px;
-    line-height: 16px;
     position: absolute;
     top: 0;
+    left: 93px;
 
-    &.chain {
-      background: ${theme.primaryColor};
-      border-radius: 0 0 0 10px;
-      color: white;
-      padding: 0.1rem 0.5rem 0.1rem 0.75rem;
-      right: 0;
-      z-index: 1;
+    .parentName {
+      font-size: 12px;
+      line-height: 16px;
     }
+  }
+
+  .banner-chain {
+    position: absolute;
+    top: 10px;
+    background: ${theme.chainBackgroundColor};
+    border-radius: 4px;
+    color: ${theme.chainTextColor};
+    font-size: 15px;
+    line-height: 24px;
+    padding: 0 8px;
+    right: 15px;
+    z-index: 1;
+    font-weight: 400;
   }
 
   .addressDisplay {
@@ -357,20 +316,25 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     }
   }
 
+  .koni-address-text {
+    color: ${theme.textColor2};
+    font-weight: 400;
+    font-size: 14px;
+  }
+
   .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
     color: ${theme.labelColor};
     width: 0.875em;
   }
 
-  .identityIcon {
-    margin-left: 15px;
-    margin-right: 10px;
+  .uncheckedItem {
+    width: 24px;
+  }
 
-    & svg {
-      width: 50px;
-      height: 50px;
-    }
+  .identityIcon {
+    margin-left: 5px;
+    margin-right: 10px;
   }
 
   .info {
@@ -379,27 +343,33 @@ export default styled(Address)(({ theme }: ThemeProps) => `
 
   .infoRow {
     display: flex;
-    flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    height: 72px;
-    border-radius: 4px;
+
+    &.parent-name {
+      margin-top: 4px
+    }
   }
 
-  img {
-    max-width: 50px;
-    max-height: 50px;
-    border-radius: 50%;
+  .infoRow-icon-wrapper {
+    display: flex;
+    height: 100%;
+    align-items: center;
   }
 
   .name {
-    font-size: 16px;
-    line-height: 22px;
+    font-size: 15px;
+    line-height: 24px;
+
     margin: 2px 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 300px;
+    width: 150px;
     white-space: nowrap;
+
+    > span {
+      font-weight: 500;
+    }
 
     &.displaced {
       padding-top: 10px;

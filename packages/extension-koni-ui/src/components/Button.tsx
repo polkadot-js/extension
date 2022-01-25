@@ -52,23 +52,25 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   cursor: pointer;
   display: block;
   width: 100%;
-  height: ${isDanger ? '40px' : '48px'};
+  height: 48px;
   box-sizing: border-box;
   border: none;
-  border-radius: ${theme.borderRadius};
+  border-radius: 8px;
   color: ${theme.buttonTextColor};
-  font-size: 15px;
-  line-height: 20px;
+  font-size: 16px;
+  line-height: 26px;
   padding: 0 1rem;
   position: relative;
   text-align: center;
 
-  &:disabled {
-    cursor: default;
+
+  .children {
+    font-family: ${theme.fontFamily};
+    font-weight: 500;
   }
 
-  &:not(:disabled):hover {
-    background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
+  &:disabled {
+    cursor: default;
   }
 
   .busyOverlay,
@@ -77,8 +79,9 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   }
 
   .disabledOverlay {
-    background: rgba(96,96,96,0.75);
+    background: ${theme.overlayBackground};
     border-radius: ${theme.borderRadius};
+    opacity: 0.7;
     bottom: 0;
     left: 0;
     position: absolute;

@@ -3,10 +3,14 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 
+import CurrentAccountReducer from './CurrentAccount';
+import CurrentNetworkReducer from './CurrentNetwork';
 import PriceReducer from './Price';
 
 const reducers = {
-  price: PriceReducer
+  price: PriceReducer,
+  currentAccount: CurrentAccountReducer,
+  currentNetwork: CurrentNetworkReducer
 };
 
 export const store = configureStore({

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsWithCurrentAddress, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -14,6 +14,7 @@ import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -68,12 +69,20 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
   });
 }
 
+export async function initApi (networkName: string): Promise<ApiInitStatus> {
+  return sendMessage('pri(api.init)', { networkName });
+}
+
 export async function editAccount (address: string, name: string): Promise<boolean> {
   return sendMessage('pri(accounts.edit)', { address, name });
 }
 
 export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
   return sendMessage('pri(accounts.show)', { address, isShowing });
+}
+
+export async function saveCurrentAccountAddress (address: string): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAddress)', { address });
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
@@ -132,6 +141,10 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
+export async function createAccountSuriV2 (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, type });
+}
+
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, seed, type });
 }
@@ -185,6 +198,10 @@ export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void):
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 
+export async function getAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
+  return sendMessage('pri(accounts.getAllWithCurrentAddress)', null, cb);
+}
+
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(authorize.requests)', null, cb);
 }
@@ -217,6 +234,10 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
   return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
+export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri });
+}
+
 export async function windowOpen (path: AllowedPath): Promise<boolean> {
   return sendMessage('pri(window.open)', path);
 }
@@ -225,12 +246,20 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.restore)', { file, password });
+export async function jsonRestore (file: KeyringPair$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.restore)', { file, password, address });
 }
 
-export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.batchRestore)', { file, password });
+export async function batchRestore (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password, address });
+}
+
+export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.restoreV2)', { file, password, address });
+}
+
+export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.batchRestoreV2)', { file, password, address });
 }
 
 export async function setNotification (notification: string): Promise<boolean> {

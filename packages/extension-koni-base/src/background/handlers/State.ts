@@ -2,13 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@polkadot/extension-base/background/handlers/State';
+import { CurrentAccountInfo } from '@polkadot/extension-base/background/types';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { PriceStore } from '@polkadot/extension-koni-base/stores';
+import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
 
 export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
+  private readonly currentAccountStore = new CurrentAccountStore();
   private priceStoreReady = false;
+
+  public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
+    this.currentAccountStore.get('CurrentAccountInfo', update);
+  }
+
+  public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
+    this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+  }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
     this.priceStore.set('PriceData', priceData, () => {

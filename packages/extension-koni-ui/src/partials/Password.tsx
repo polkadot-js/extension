@@ -3,7 +3,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { InputWithLabel, ValidatedInput } from '../components';
+import InputWithLabel from '../components/InputWithLabel';
+import ValidatedInput from '../components/ValidatedInput';
 import useTranslation from '../hooks/useTranslation';
 import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
 
@@ -31,6 +32,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   return (
     <>
       <ValidatedInput
+
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}

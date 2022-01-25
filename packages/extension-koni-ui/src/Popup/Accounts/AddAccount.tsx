@@ -6,10 +6,11 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
+
 import { ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import Header from '../../partials/Header';
-import AddAccountImage from './AddAccountImage';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -18,24 +19,59 @@ interface Props extends ThemeProps {
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const _onClick = useCallback(
+  const _createNewAccount = useCallback(
     () => onAction('/account/create'),
+    [onAction]
+  );
+
+  const _importAccount = useCallback(
+    () => onAction('/account/import-seed'),
+    [onAction]
+  );
+
+  const _restoreAccount = useCallback(
+    () => onAction('/account/restore-json'),
     [onAction]
   );
 
   return (
     <>
       <Header
+        isNotHaveAccount
         showAdd
         showSettings
-        text={t<string>('Add Account')}
+        showSubHeader
+        subHeaderName={t<string>('Add Account')}
       />
       <div className={className}>
-        <div className='image'>
-          <AddAccountImage onClick={_onClick} />
-        </div>
-        <div className='no-accounts'>
-          <p>{t<string>("You currently don't have any accounts. Create your first account to get started.")}</p>
+        <div className='koni-add-account-wrapper'>
+          <div className='no-accounts'>
+            <p>{t<string>("You currently don't have any accounts. Create your first account or import another account to get started.")}</p>
+          </div>
+
+          <Button
+            className='kn-add-account-btn create-account'
+            data-export-button
+            onClick={_createNewAccount}
+          >
+            {t<string>('Create new account')}
+          </Button>
+
+          <Button
+            className='kn-add-account-btn'
+            data-export-button
+            onClick={_importAccount}
+          >
+            {t<string>('Import account from pre-existing seed')}
+          </Button>
+
+          <Button
+            className='kn-add-account-btn'
+            data-export-button
+            onClick={_restoreAccount}
+          >
+            {t<string>('Restore account from backup JSON file')}
+          </Button>
         </div>
       </div>
     </>
@@ -45,6 +81,19 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
 export default React.memo(styled(AddAccount)(({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
+
+  .koni-add-account-wrapper {
+    margin: 0 40px;
+  }
+
+  .kn-add-account-btn {
+    margin-bottom: 15px;
+  }
+
+  .create-account {
+    background-color: ${theme.buttonBackground2};
+    color: ${theme.buttonTextColor3};
+  }
 
   h3 {
     color: ${theme.textColor};
@@ -60,11 +109,14 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
     justify-content: center;
   }
 
-  > .no-accounts p {
+  .no-accounts {
+    margin: 20px 0 50px;
+  }
+
+  .no-accounts p {
     text-align: center;
-    font-size: 16px;
-    line-height: 26px;
-    margin: 0 30px;
-    color: ${theme.subTextColor};
+    font-size: 15px;
+    line-height: 24px;
+    color: ${theme.textColor};
   }
 `));

@@ -7,6 +7,8 @@ export interface NetWorkInfo {
   icon?: string;
   ss58Format: number;
   chainType?: 'substrate' | 'ethereum';
-  provider: string | string[];
+  provider: string;
   group: 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'NOT_SURE';
+  paraId?: number;
+  isEthereum?: boolean;
 }

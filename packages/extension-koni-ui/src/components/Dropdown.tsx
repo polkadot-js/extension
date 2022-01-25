@@ -3,36 +3,44 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback } from 'react';
+import React, { useState } from 'react';
+import Select from 'react-select';
 import styled from 'styled-components';
 
-import arrow from '../assets/arrow-down.svg';
 import Label from './Label';
-
-interface DropdownOption {
-  text: string;
-  value: string;
-}
+// interface DropdownOption {
+//   text: string;
+//   value: string;
+// }
 
 interface Props extends ThemeProps {
   className?: string;
-  defaultValue?: string | null;
-  isDisabled?: boolean
-  isError?: boolean;
-  isFocussed?: boolean;
   label: string;
-  onBlur?: () => void;
   onChange?: (value: string) => void;
-  options: DropdownOption[];
+  options?: any[];
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
-  const _onChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) =>
-      onChange && onChange(value.trim()),
-    [onChange]
-  );
+function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
+  const transformOptions = options.map((t: { text: any; value: any; }) => ({ label: t.text, value: t.value }));
+  const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
+
+  const handleChange = (e: { value: any }) => {
+    onChange && onChange(e.value.trim());
+    setSelectedValue(e.value);
+  };
+
+  const customStyles = {
+    option: (base: any) => {
+      return {
+        ...base,
+        textAlign: 'left',
+        fontFamily: 'Lexend',
+        fontSize: '15px'
+      };
+    },
+    noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' })
+  };
 
   return (
     <>
@@ -40,64 +48,64 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
         className={className}
         label={label}
       >
-        <select
-          autoFocus={isFocussed}
-          defaultValue={defaultValue || undefined}
-          disabled={isDisabled}
-          onBlur={onBlur}
-          onChange={_onChange}
-          value={value}
-        >
-          {options.map(({ text, value }): React.ReactNode => (
-            <option
-              key={value}
-              value={value}
-            >
-              {text}
-            </option>
-          ))}
-        </select>
+        <Select
+          className='kn-dropdown-wrapper'
+          classNamePrefix='kn-dropdown'
+          isSearchable
+          menuPortalTarget={document.body}
+          onChange={handleChange}
+          options={transformOptions}
+          styles={customStyles}
+          value={transformOptions.filter((obj: { value: number; }) => obj.value === selectedValue)}
+        />
       </Label>
     </>
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
-  position: relative;
+export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
+  font-weight: 500;
+  color: ${theme.textColor2};
 
-  select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background: ${theme.readonlyInputBackground};
-    border-color: ${isError ? theme.errorBorderColor : theme.inputBorderColor};
-    border-radius: ${theme.borderRadius};
-    border-style: solid;
-    border-width: 1px;
-    box-sizing: border-box;
-    color: ${isError ? theme.errorBorderColor : theme.textColor};
-    display: block;
-    font-family: ${theme.fontFamily};
-    font-size: ${theme.fontSize};
-    padding: 0.5rem 0.75rem;
+  .kn-dropdown__control {
+    height: 48px;
+    border-radius: 8px;
     width: 100%;
     cursor: pointer;
-
-    &:read-only {
-      box-shadow: none;
-      outline: none;
-    }
+    margin-top: 4px;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    display: flex;
+    font-family: ${theme.fontFamily};
+    background: ${theme.backgroundAccountAddress};
+    box-shadow: none;
   }
 
-  label::after {
-    content: '';
-    position: absolute;
-    top: ${label ? 'calc(50% + 14px)' : '50%'};
-    transform: translateY(-50%);
-    right: 12px;
-    width: 8px;
-    height: 6px;
-    background: url(${arrow}) center no-repeat;
-    pointer-events: none;
+  .kn-dropdown__control:hover {
+    border: 1px solid transparent;
+    box-shadow: none;
   }
+
+  .kn-dropdown__single-value {
+    color: ${theme.textColor2};
+  }
+
+  .kn-dropdown__indicator-separator {
+    display: none;
+  }
+
+  .kn-dropdown__input-container {
+    color: ${theme.textColor2};
+  }
+
+  .kn-dropdown__menu-portal {
+    text-align: left;
+    font-size: 15px;
+  }
+
+  .kn-dropdown__menu-notice--no-options {
+    text-align: left;
+    font-family: ${theme.fontFamily};
+  }
+
 `));

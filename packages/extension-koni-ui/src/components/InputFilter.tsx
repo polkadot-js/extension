@@ -1,4 +1,4 @@
-// Copyright 2017-2022 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -35,6 +35,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
         autoCapitalize='off'
         autoCorrect='off'
         autoFocus
+        className='kn-input-filter'
         onChange={onChangeFilter}
         placeholder={placeholder}
         ref={inputRef}
@@ -54,14 +55,19 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
 }
 
 export default styled(InputFilter)(({ theme }: Props) => `
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
   position: relative;
+
+  .kn-input-filter {
+    margin-top: 0;
+    padding-right: 2rem;
+  }
 
   .resetIcon {
     position: absolute;
-    right: 28px;
-    top: 12px;
+    right: 10px;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
     color: ${theme.iconNeutralColor};
     cursor: pointer;
   }

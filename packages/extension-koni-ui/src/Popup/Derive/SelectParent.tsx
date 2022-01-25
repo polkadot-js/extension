@@ -2,10 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import styled, {ThemeContext} from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import Label from '@polkadot/extension-koni-ui/components/Label';
+import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
 
-import { AccountContext, ActionContext, Address, ButtonArea, InputWithLabel, Label, NextStepButton, VerticalSpace, Warning } from '../../components';
+import {AccountContext, ActionContext, Theme} from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -23,7 +30,7 @@ interface Props {
 // match any single slash
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
-export default function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -39,6 +46,7 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
 
     return parent?.type === 'sr25519';
   }, [accounts, parentAddress]);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   // reset the password field if the parent address changes
   useEffect(() => {
@@ -121,75 +129,92 @@ export default function SelectParent ({ className, isLocked, onDerivationConfirm
   return (
     <>
       <div className={className}>
-        {isLocked
-          ? (
-            <Address
-              address={parentAddress}
-              genesisHash={parentGenesis}
-            />
-          )
-          : (
-            <Label label={t<string>('Choose Parent Account:')}>
-              <AddressDropdown
-                allAddresses={allAddresses}
-                onSelect={_onParentChange}
-                selectedAddress={parentAddress}
-                selectedGenesis={parentGenesis}
+        <div className='koni-derive-account'>
+          {isLocked
+            ? (
+              <AccountInfo
+                className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'}`}
+                address={parentAddress}
+                genesisHash={parentGenesis}
               />
-            </Label>
-          )
-        }
-        <div ref={passwordInputRef}>
-          <InputWithLabel
-            data-input-password
-            isError={!!parentPassword && !isProperParentPassword}
-            isFocused
-            label={t<string>('enter the password for the account you want to derive from')}
-            onChange={_onParentPasswordEnter}
-            type='password'
-            value={parentPassword}
-          />
-          {!!parentPassword && !isProperParentPassword && (
-            <Warning
-              isBelowInput
-              isDanger
-            >
-              {t('Wrong password')}
-            </Warning>
-          )}
-        </div>
-        {isProperParentPassword && (
-          <>
-            <DerivationPath
-              defaultPath={defaultPath}
-              isError={!!pathError}
-              onChange={_onSuriPathChange}
-              parentAddress={parentAddress}
-              parentPassword={parentPassword}
-              withSoftPath={allowSoftDerivation}
+            )
+            : (
+              <Label label={t<string>('Choose Parent Account:')}>
+                <AddressDropdown
+                  allAddresses={allAddresses}
+                  onSelect={_onParentChange}
+                  selectedAddress={parentAddress}
+                  selectedGenesis={parentGenesis}
+                />
+              </Label>
+            )
+          }
+          <div ref={passwordInputRef}>
+            <InputWithLabel
+              data-input-password
+              isError={!!parentPassword && !isProperParentPassword}
+              isFocused
+              label={t<string>('enter the password for the account you want to derive from')}
+              onChange={_onParentPasswordEnter}
+              type='password'
+              value={parentPassword}
             />
-            {(!!pathError) && (
+            {!!parentPassword && !isProperParentPassword && (
               <Warning
                 isBelowInput
                 isDanger
               >
-                {pathError}
+                {t('Wrong password')}
               </Warning>
             )}
-          </>
-        )}
+          </div>
+          {isProperParentPassword && (
+            <>
+              <DerivationPath
+                defaultPath={defaultPath}
+                isError={!!pathError}
+                onChange={_onSuriPathChange}
+                parentAddress={parentAddress}
+                parentPassword={parentPassword}
+                withSoftPath={allowSoftDerivation}
+              />
+              {(!!pathError) && (
+                <Warning
+                  isBelowInput
+                  isDanger
+                >
+                  {pathError}
+                </Warning>
+              )}
+            </>
+          )}
+        </div>
+
+        <ButtonArea>
+          <NextStepButton
+            className='next-step-btn'
+            data-button-action='create derived account'
+            isBusy={isBusy}
+            isDisabled={!isProperParentPassword || !!pathError}
+            onClick={_onSubmit}
+          >
+            {t<string>('Create a derived account')}
+          </NextStepButton>
+        </ButtonArea>
       </div>
-      <VerticalSpace />
-      <ButtonArea>
-        <NextStepButton
-          data-button-action='create derived account'
-          isBusy={isBusy}
-          isDisabled={!isProperParentPassword || !!pathError}
-          onClick={_onSubmit}
-        >
-          {t<string>('Create a derived account')}
-        </NextStepButton>
-      </ButtonArea>
     </>
   );
 }
+
+export default styled(React.memo(SelectParent))`
+  margin: 0 15px;
+
+  .next-step-btn {
+    > .children {
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
+    }
+  }
+`;

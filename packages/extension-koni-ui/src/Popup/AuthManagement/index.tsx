@@ -2,17 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
-
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { InputFilter } from '@polkadot/extension-koni-ui/components';
-
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, toggleAuthorization } from '../../messaging';
-import { Header } from '../../partials';
 import WebsiteEntry from './WebsiteEntry';
+import Header from "@polkadot/extension-koni-ui/partials/Header";
+import InputFilter from "@polkadot/extension-koni-ui/components/InputFilter";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -43,36 +40,41 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
     <>
       <Header
         showBackArrow
+        showSubHeader
+        subHeaderName={t<string>('Manage Website Access')}
         smallMargin
-        text={t<string>('Manage Website Access')}
       />
       <>
-        <InputFilter
-          onChange={_onChangeFilter}
-          placeholder={t<string>('example.com')}
-          value={filter}
-          withReset
-        />
         <div className={className}>
-          {
-            !authList || !Object.entries(authList)?.length
-              ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
-              : <>
-                <div className='website-list'>
-                  {Object.entries(authList)
-                    .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
-                    .map(
-                      ([url, info]: [string, AuthUrlInfo]) =>
-                        <WebsiteEntry
-                          info={info}
-                          key={url}
-                          toggleAuth={toggleAuth}
-                          url={url}
-                        />
-                    )}
-                </div>
-              </>
-          }
+          <div className='auth-list-wrapper'>
+            <InputFilter
+              onChange={_onChangeFilter}
+              placeholder={t<string>('example.com')}
+              value={filter}
+              withReset
+            />
+            <div>
+              {
+                !authList || !Object.entries(authList)?.length
+                  ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
+                  : <>
+                    <div className='website-list'>
+                      {Object.entries(authList)
+                        .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
+                        .map(
+                          ([url, info]: [string, AuthUrlInfo]) =>
+                            <WebsiteEntry
+                              info={info}
+                              key={url}
+                              toggleAuth={toggleAuth}
+                              url={url}
+                            />
+                        )}
+                    </div>
+                  </>
+              }
+            </div>
+          </div>
         </div>
       </>
     </>
@@ -82,6 +84,16 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
 export default styled(AuthManagement)`
   height: calc(100vh - 2px);
   overflow-y: auto;
+
+  .auth-list-wrapper {
+    margin: 0 15px;
+  }
+
+  .website-list {
+    margin-top: 7px;
+    height: 380px;
+    overflow: auto;
+  }
 
   .empty-list {
     text-align: center;

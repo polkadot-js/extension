@@ -14,6 +14,7 @@ import { saveCurrentAccountAddress } from '@polkadot/extension-koni-ui/messaging
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
+import NftContainer from "@polkadot/extension-koni-ui/components/NftContainer";
 
 interface Props extends AccountJson {
   className?: string;
@@ -52,38 +53,40 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
         }
       }
 
+      // @ts-ignore
       closeSetting && closeSetting();
       onAction('/');
     }, []);
 
-  console.log('currentAccount', currentAccount);
+  // console.log('currentAccount', currentAccount);
 
   return (
     <div
       className={className}
       onClick={_changeAccount}
     >
-      {isSelected
-        ? (
-          <img
-            alt='check'
-            src={check}
-          />
-        )
-        : (
-          <div className='account-unchecked-item' />
-        )
-      }
-      <AccountInfo
-        address={address}
-        className='account__account-item'
-        genesisHash={genesisHash}
-        name={name}
-        parentName={parentName}
-        showCopyBtn={false}
-        suri={suri}
-        type={type}
-      />
+      <NftContainer/>
+      {/*{isSelected*/}
+      {/*  ? (*/}
+      {/*    <img*/}
+      {/*      alt='check'*/}
+      {/*      src={check}*/}
+      {/*    />*/}
+      {/*  )*/}
+      {/*  : (*/}
+      {/*    <div className='account-unchecked-item' />*/}
+      {/*  )*/}
+      {/*}*/}
+      {/*<AccountInfo*/}
+      {/*  address={address}*/}
+      {/*  className='account__account-item'*/}
+      {/*  genesisHash={genesisHash}*/}
+      {/*  name={name}*/}
+      {/*  parentName={parentName}*/}
+      {/*  showCopyBtn={false}*/}
+      {/*  suri={suri}*/}
+      {/*  type={type}*/}
+      {/*/>*/}
     </div>
   );
 }
@@ -94,10 +97,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   border-radius: 8px;
   margin-top: 8px;
   display: flex;
-  &:hover {
-    background-color: ${theme.accountHoverBackground};
-    cursor: pointer;
-  }
+
 
   .account__account-item {
     margin-left: 5px;
@@ -107,3 +107,8 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     width: 24px;
   }
 `);
+
+// &:hover {
+//   background-color: ${theme.accountHoverBackground};
+//   cursor: pointer;
+// }

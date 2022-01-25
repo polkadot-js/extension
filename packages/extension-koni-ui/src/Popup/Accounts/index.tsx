@@ -7,6 +7,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import styled from 'styled-components';
 
 import { AccountWithChildren } from '@polkadot/extension-base/background/types';
+import Link from '@polkadot/extension-koni-ui/components/Link';
 import getNetworkMap from '@polkadot/extension-koni-ui/util/getNetworkMap';
 
 import { AccountContext } from '../../components';
@@ -62,6 +63,10 @@ function Accounts ({ className }: Props): React.ReactElement {
                   key={`${index}:${json.address}`}
                 />
               ))}
+              <Link
+                className='test-btn'
+                to={'/account/test'}
+              />
             </div>
           </>
         )
@@ -79,5 +84,10 @@ export default styled(Accounts)`
 
   &::-webkit-scrollbar {
     display: none;
+  }
+
+  .test-btn {
+    height: 40px;
+    background-color: red;
   }
 `;

@@ -12,3 +12,8 @@ export interface NetWorkInfo {
   paraId?: number;
   isEthereum?: boolean;
 }
+
+export interface ChainRegistry {
+  chainDecimals: number[];
+  chainTokens: string[];
+}

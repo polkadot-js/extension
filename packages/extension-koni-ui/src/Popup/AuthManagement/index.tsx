@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
+
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
 import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handlers/State';
+import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
+
 import useTranslation from '../../hooks/useTranslation';
 import { getAuthList, toggleAuthorization } from '../../messaging';
 import WebsiteEntry from './WebsiteEntry';
-import Header from "@polkadot/extension-koni-ui/partials/Header";
-import InputFilter from "@polkadot/extension-koni-ui/components/InputFilter";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -41,8 +44,8 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
       <Header
         showBackArrow
         showSubHeader
-        subHeaderName={t<string>('Manage Website Access')}
         smallMargin
+        subHeaderName={t<string>('Manage Website Access')}
       />
       <>
         <div className={className}>

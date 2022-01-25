@@ -8,6 +8,8 @@ import Select from 'react-select';
 import styled from 'styled-components';
 
 import Label from './Label';
+import {Option} from "@polkadot/extension-koni-ui/components/InputAddress/types";
+import networkSelectOption from "@polkadot/extension-koni-ui/hooks/useGenesisHashOptions";
 // interface DropdownOption {
 //   text: string;
 //   value: string;
@@ -17,12 +19,13 @@ interface Props extends ThemeProps {
   className?: string;
   label: string;
   onChange?: (value: string) => void;
-  options?: any[];
+  options: networkSelectOption[];
   value?: string;
 }
 
 function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions = options.map((t: { text: any; value: any; }) => ({ label: t.text, value: t.value }));
+  console.log('options', options);
+  const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
 
   const handleChange = (e: { value: any }) => {
@@ -55,6 +58,7 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
           menuPortalTarget={document.body}
           onChange={handleChange}
           options={transformOptions}
+          placeholder=''
           styles={customStyles}
           value={transformOptions.filter((obj: { value: number; }) => obj.value === selectedValue)}
         />

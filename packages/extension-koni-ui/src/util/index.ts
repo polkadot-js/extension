@@ -133,3 +133,5 @@ export function getScanExplorerAddressInfoUrl (networkName: string, address: str
 
   return `${subscanByNetworkName[networkName]}/account/${address}`;
 }
+
+export { toAddress } from './toAddress';

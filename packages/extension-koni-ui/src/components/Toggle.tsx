@@ -3,7 +3,8 @@
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
+
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
@@ -36,12 +37,15 @@ function Toggle ({ className = '', isDisabled, isOverlay, isRadio, label, onChan
       className={`ui--Toggle${value ? ' isChecked' : ''}${isDisabled ? ' isDisabled' : ''}${isOverlay ? ' isOverlay' : ''}${isRadio ? ' isRadio' : ''} ${className}`}
     >
       {label && <label>{label}</label>}
-      <div onClick={_onClick} className={`ui--Toggle-Slider${isRadio ? ' highlight--before-border' : ''}`} />
+      <div
+        className={`ui--Toggle-Slider${isRadio ? ' highlight--before-border' : ''}`}
+        onClick={_onClick}
+      />
     </div>
   );
 }
 
-export default React.memo(styled(Toggle)(({ theme }: ThemeProps) =>`
+export default React.memo(styled(Toggle)(({ theme }: ThemeProps) => `
   > label {
     display: inline-block;
     margin-right: 12px;

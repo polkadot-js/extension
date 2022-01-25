@@ -3,24 +3,24 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { getAllMetatdata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
 
-interface Option {
+export default interface networkSelectOption {
   text: string;
   value: string;
   networkName: string;
   networkPrefix: number;
   icon: string;
-  group: string
+  group: string;
+  isEthereum: boolean;
 }
 
 const RELAY_CHAIN = 'Relay Chain';
 
-export default function (): Option[] {
+export default function (): networkSelectOption[] {
   const { t } = useTranslation();
-  const [metadataChains, setMetadatachains] = useState<Option[]>([]);
+  const [metadataChains, setMetadatachains] = useState<networkSelectOption[]>([]);
   const mounted = useRef(false);
 
   useEffect(() => {
@@ -44,25 +44,28 @@ export default function (): Option[] {
       networkName: 'all',
       networkPrefix: -1,
       icon: 'substrate',
-      group: ''
+      group: '',
+      isEthereum: false
     },
     // put the relay chains at the top
     ...chains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash, group, icon, networkName, ss58Format }) => ({
+      .map(({ chain, genesisHash, group, icon, isEthereum, networkName, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
         networkName,
         icon,
-        group
+        group,
+        isEthereum
       })),
-    ...chains.map(({ chain, genesisHash, group, icon, networkName, ss58Format }) => ({
+    ...chains.map(({ chain, genesisHash, group, icon, isEthereum, networkName, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
       networkName,
       icon,
-      group
+      group,
+      isEthereum
     }))
       // remove the relay chains, they are at the top already
       .filter(({ text }) => !text.includes(RELAY_CHAIN))

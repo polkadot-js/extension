@@ -85,6 +85,7 @@ export interface NetWorkInfo {
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkName: string;
   group: string
+  isEthereum: boolean;
 }
 
 export interface ApiProps extends ApiState {
@@ -136,6 +137,7 @@ export type CurrentNetworkInfo = {
   networkPrefix: number;
   icon: string;
   genesisHash: string;
+  isEthereum: boolean;
 }
 
 export type AccNetworkContext = {

@@ -13,6 +13,8 @@ import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/SendFund';
+import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';
@@ -37,7 +39,6 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import Settings from "@polkadot/extension-koni-ui/Popup/Settings";
 
 const startSettings = uiSettings.get();
 
@@ -174,7 +175,8 @@ export default function Popup (): React.ReactElement {
           networkPrefix: networkSelected.networkPrefix,
           icon: networkSelected.icon,
           genesisHash: networkSelected.value,
-          networkName: networkSelected.networkName
+          networkName: networkSelected.networkName,
+          isEthereum: networkSelected.isEthereum
         });
       }
     })();
@@ -207,7 +209,7 @@ export default function Popup (): React.ReactElement {
   return (
     <LoadingContainer>{accounts && authRequests && metaRequests && signRequests && (
       <Provider store={store}>
-        <ActionContext.Provider value={_onAction}>
+        <ActionContext.Provider value={_onAction}><div id='tooltips' />
           <SettingsContext.Provider value={settingsCtx}>
             <AccountContext.Provider value={accountCtx}>
               <AuthorizeReqContext.Provider value={authRequests}>
@@ -228,6 +230,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
+                          <Route path='/account/test'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

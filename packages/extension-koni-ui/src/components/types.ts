@@ -4,3 +4,5 @@
 export type OmitProps<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export type SubtractProps<T, K> = OmitProps<T, keyof K>;
+
+export type BitLength = 8 | 16 | 32 | 64 | 128 | 256;

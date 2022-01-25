@@ -1,0 +1,25 @@
+{
+  "name": "Clover Finance",
+  "description": "Clover is a substrate based smart contract platform built for Polkadot, with added support for Ethereum developers to participate in the Polkadot ecosystem. This will especially help existing DeFi projects on any EVM based blockchain to seamlessly port over their smart contracts onto a Polkadot infrastructure. A few of the main pillars of the clover smart contract platform are interoperability, cross chain integrations, and a seamless multi-chain defi user experience. The set of products that Clover is starting to release reflects this interoperable and cross chain vision as the future of Web3, from the Clover extension wallet, to Cloverscan, to the underlying 2-way peg technology between Ethereum and Polkadot, and eventually support for non-Turing complete blockchains like Bitcoin.",
+  "nativeToken": "CLV",
+  "tokenDecimals": 18,
+  "links": {
+    "Website": "https://clover.finance/",
+    "Twitter": "https://twitter.com/clover_finance",
+    "Telegram": "https://t.me/clover_en",
+    "Medium": "https://projectclover.medium.com/",
+    "Github": "https://github.com/clover-network/clover",
+    "Discord": ""
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2002/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2002/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2002/assets/card.png"
+  },
+  "rpcs": [
+    "wss://rpc-para.clover.finance",
+    "wss://clover.api.onfinality.io/public-ws"
+  ]
+}
+ 

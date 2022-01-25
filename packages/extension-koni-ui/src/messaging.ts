@@ -9,7 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { PriceJson, RequestSubscribePrice } from '@polkadot/extension-base/background/KoniTypes';
+import {NftJson, PriceJson, RequestSubscribePrice} from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -272,4 +272,8 @@ export async function getPrice (): Promise<PriceJson> {
 
 export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<boolean> {
   return sendMessage('pri(price.getSubscription)', request, callback);
+}
+
+export async function getNft (account: string): Promise<NftJson> {
+  return sendMessage('pri(nft.getNft)', account);
 }

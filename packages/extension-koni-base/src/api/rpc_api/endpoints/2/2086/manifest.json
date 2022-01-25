@@ -1,0 +1,27 @@
+{
+  "name": "KILT Spiritnet",
+  "description": "KILT is a blockchain protocol for issuing self-sovereign verifiable, revocable, anonymous credentials and enabling trust market business models in the Web 3.0.",
+  "nativeToken": "KILT",
+  "tokenDecimals": 18,
+  "links": {
+    "Website": "https://www.kilt.io/",
+    "Twitter": "https://twitter.com/Kiltprotocol",
+    "Telegram": "https://t.me/KILTProtocolChat",
+    "Medium": "https://kilt-protocol.medium.com/",
+    "Github": "https://github.com/KILTprotocol",
+    "Element": "https://riot.im/app/#/group/+kilt-community:matrix.org",
+    "Youtube": "https://www.youtube.com/channel/UC5ihHD8UyGGx0oLZt78429w",
+    "Reddit": "https://www.reddit.com/r/KiltProtocol/",
+    "Linkedin": "https://www.linkedin.com/company/kilt-protocol/"
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2086/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2086/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2086/assets/card.png"
+  },
+  "rpcs": [
+    "wss://spiritnet.kilt.io/",
+    "wss://spiritnet.api.onfinality.io/public-ws"
+  ]
+}

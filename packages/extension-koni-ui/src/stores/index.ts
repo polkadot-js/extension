@@ -6,8 +6,10 @@ import { configureStore } from '@reduxjs/toolkit';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import PriceReducer from './Price';
+import NftReducer from './Nft';
 
 const reducers = {
+  nft: NftReducer,
   price: PriceReducer,
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer

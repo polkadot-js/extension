@@ -4,12 +4,13 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { NetWorkInfo } from './types';
+import {getChainMetadata} from "@polkadot/extension-koni-base/api/rpc_api";
 
-export const wsProvider = async ({ provider }: NetWorkInfo): Promise<ApiPromise> => {
+export const wsProvider = async ({ provider }: NetWorkInfo | any, type?: any): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const wsProvider = new WsProvider(provider);
 
-  return ApiPromise.create({ provider: wsProvider });
+  return ApiPromise.create({ provider: wsProvider, types: type });
 };
 
 // Return an array of apis with the order like the input
@@ -35,4 +36,21 @@ export const initWsNetworkMap = (networkMap: Record<string, NetWorkInfo>) => {
   });
 
   return wsMap;
+};
+
+// Return an array of apis with the order like the input
+export const connectChains = async (targetChains: Array<any>): Promise<any[] | undefined> => {
+  if (targetChains.length <= 0) {
+    console.log('Must pass at least 1 chainId.')
+    return undefined
+  }
+  let apiPromises: any[] = []
+
+  targetChains.map((item) => {
+    const chainMetadata = getChainMetadata({ chainId: item.chainId, paraId: item.paraId })
+    const apiPromise = wsProvider({provider: chainMetadata.rpcs})
+    apiPromises.push(apiPromise)
+  })
+
+  return await Promise.all(apiPromises)
 };

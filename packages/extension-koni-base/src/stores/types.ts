@@ -3,6 +3,28 @@
 
 import { u128 } from '@polkadot/types';
 
+export interface NftItem {
+  id: string;
+  name: string;
+  image: string;
+  external_url: string;
+  rarity: string;
+  collectionId: string;
+  properties: Record<any, any>;
+}
+
+export interface NftCollection {
+  collectionId: string;
+  collectionName: string;
+  nftItems: Array<NftItem>;
+}
+
+export interface NftJson {
+  ready?: boolean;
+  total: number;
+  nftList: Array<NftCollection>;
+}
+
 export interface PriceJson {
   ready?: boolean,
   currency: string,

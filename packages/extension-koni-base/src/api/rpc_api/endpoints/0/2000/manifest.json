@@ -1,0 +1,28 @@
+{
+  "name": "Acala",
+  "description": "Acala is the all-in-one DeFi hub of Polkadot. Acala is an Ethereum-compatible platform for financial applications to use smart contracts or built-in protocols with out-of-the-box cross-chain capabilities and robust security. The platform also offers a suite of financial applications including: a trustless staking derivative (liquid DOT), a multi-collateralized stablecoin backed by cross-chain assets (aUSD), and an AMM DEX – all with micro gas fees that can be paid in any token.",
+  "nativeToken": "ACA",
+  "tokenDecimals": 12,
+  "links": {
+    "Website": "https://acala.network/",
+    "Twitter": "https://twitter.com/AcalaNetwork",
+    "Telegram": "https://t.me/acalaofficial",
+    "Medium": "https://medium.com/acalanetwork",
+    "Github": "https://github.com/AcalaNetwork/Acala",
+    "Discord": "https://discord.com/invite/6QHVY4X"
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2000/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2000/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2000/assets/card.png"
+  },
+  "rpcs": [
+    "wss://acala-rpc-0.aca-api.network",
+    "wss://acala-rpc-1.aca-api.network",
+    "wss://acala-rpc-2.aca-api.network",
+    "wss://acala-rpc-3.aca-api.network",
+    "wss://acala.polkawallet.io/",
+    "wss://acala-polkadot.api.onfinality.io/public-ws"
+  ]
+}

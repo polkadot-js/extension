@@ -1,0 +1,23 @@
+{
+  "name": "Altair",
+  "description": "Altair combines the industry-leading infrastructure built by Centrifuge to finance real-world assets (RWA) on Centrifuge Chain, with the newest experimental features — before they go live on Centrifuge Chain.",
+  "nativeToken": "AIR",
+  "tokenDecimals": 18,
+  "links": {
+    "Website": "https://centrifuge.io/altair",
+    "Twitter": "https://twitter.com/centrifuge",
+    "Telegram": "https://t.me/centrifuge_chat",
+    "Medium": "https://medium.com/centrifuge",
+    "Github": "https://github.com/centrifuge/",
+    "Discord": "https://centrifuge.io/discord"
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2088/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2088/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2088/assets/card.png"
+  },
+  "rpcs": [
+    "wss://fullnode.altair.centrifuge.io"
+  ]
+}

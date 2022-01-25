@@ -1,0 +1,23 @@
+{
+  "name": "HydraDX",
+  "description": "HydraDX is built as a parachain – specialized blockchain in the Polkadot network. It is benefiting from shared security, speed and flexibility of the Substrate framework while remaining optimized for a single purpose: enabling fluid programmable value exchange.",
+  "nativeToken": "HDX",
+  "tokenDecimals": 12,
+  "links": {
+    "Website": "https://hydradx.io/",
+    "Twitter": "https://twitter.com/hydra_dx",
+    "Telegram": "https://t.me/hydradx",
+    "Medium": "https://hydradx.substack.com/",
+    "Github": "https://github.com/galacticcouncil/HydraDX-node",
+    "Discord": "https://discord.com/invite/xtVnQgq"
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2034/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2034/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/2034/assets/card.png"
+  },
+  "rpcs": [
+    "wss://rpc-01.snakenet.hydradx.io"
+  ]
+}

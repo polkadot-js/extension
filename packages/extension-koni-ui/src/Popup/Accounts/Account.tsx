@@ -15,6 +15,7 @@ import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
 import NftContainer from "@polkadot/extension-koni-ui/components/NftContainer";
+import StakingContainer from "@polkadot/extension-koni-ui/components/StakingContainer";
 
 interface Props extends AccountJson {
   className?: string;
@@ -65,7 +66,8 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
       className={className}
       onClick={_changeAccount}
     >
-      <NftContainer/>
+      <StakingContainer/>
+      {/*<NftContainer/>*/}
       {/*{isSelected*/}
       {/*  ? (*/}
       {/*    <img*/}

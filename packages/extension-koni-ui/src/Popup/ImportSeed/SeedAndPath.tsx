@@ -158,7 +158,6 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
 export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   padding: 25px 15px 15px;
   flex: 1;
-  margin-top: -25px;
   overflow-y: auto;
 
   .advancedToggle {

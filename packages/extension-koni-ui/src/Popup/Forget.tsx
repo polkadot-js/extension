@@ -45,8 +45,8 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   return (
     <>
       <Header
-        showBackArrow
-        text={t<string>('Forget account')}
+        showSubHeader
+        subHeaderName={t<string>('Forget Account')}
       />
       <div className={className}>
         <Address address={address}>

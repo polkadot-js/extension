@@ -97,7 +97,6 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
 export default React.memo(styled(Mnemonic)(({ theme }: Props) => `
   padding: 25px 15px 15px;
   flex: 1;
-  margin-top: -25px;
   overflow-y: auto;
 
   .next-step-btn {

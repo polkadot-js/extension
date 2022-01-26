@@ -55,7 +55,7 @@ function BaseDropdown<Option> ({ children, className = '', defaultValue, help, i
         borderRadius: '8px',
         cursor: 'pointer',
         '&:hover': {
-          '.ui--KeyPair .name, .advantage-dropdown-basic-item': {
+          '.ui--KeyPair .name, .advance-dropdown-basic-item': {
             color: themeContext.id === 'dark' ? '#fff' : '#00072D'
           }
         }
@@ -144,7 +144,7 @@ function BaseDropdown<Option> ({ children, className = '', defaultValue, help, i
           address={data.value}
           name={data.label}
         />
-        : (<div className='advantage-dropdown-basic-item'>{data.label}</div>));
+        : (<div className='advance-dropdown-basic-item'>{data.label}</div>));
     } else {
       return (<div>{data.label}</div>);
     }
@@ -152,8 +152,8 @@ function BaseDropdown<Option> ({ children, className = '', defaultValue, help, i
 
   const dropdown = (
     <Select
-      className='advantage-dropdown-wrapper'
-      classNamePrefix='advantage-dropdown'
+      className='advance-dropdown-wrapper'
+      classNamePrefix='advance-dropdown'
       formatOptionLabel={formatOptionLabel}
       isDisabled={isDisabled}
       isMulti={isMultiple}
@@ -187,11 +187,11 @@ function BaseDropdown<Option> ({ children, className = '', defaultValue, help, i
 }
 
 export default React.memo(styled(BaseDropdown)(({ theme }: ThemeProps) => `
-  .advantage-dropdown-wrapper {
+  .advance-dropdown-wrapper {
     height: 100%;
   }
 
-  .advantage-dropdown__control {
+  .advance-dropdown__control {
     height: 100%;
     border-radius: 8px;
     width: 100%;
@@ -205,7 +205,7 @@ export default React.memo(styled(BaseDropdown)(({ theme }: ThemeProps) => `
     align-items: flex-end;
   }
 
-  .advantage-dropdown__control:before {
+  .advance-dropdown__control:before {
     content: '';
     height: 42px;
     width: 42px;
@@ -217,29 +217,29 @@ export default React.memo(styled(BaseDropdown)(({ theme }: ThemeProps) => `
     background: ${theme.backgroundAccountAddress};
   }
 
-  .advantage-dropdown__control:hover {
+  .advance-dropdown__control:hover {
     border: 1px solid transparent;
     box-shadow: none;
   }
 
-  .advantage-dropdown__single-value {
+  .advance-dropdown__single-value {
     color: ${theme.textColor2};
   }
 
-  .advantage-dropdown__indicator-separator {
+  .advance-dropdown__indicator-separator {
     display: none;
   }
 
-  .advantage-dropdown__input-container {
+  .advance-dropdown__input-container {
     color: ${theme.textColor2};
   }
 
-  .advantage-dropdown__menu-portal {
+  .advance-dropdown__menu-portal {
     text-align: left;
     font-size: 15px;
   }
 
-  .advantage-dropdown__menu-notice--no-options {
+  .advance-dropdown__menu-notice--no-options {
     text-align: left;
     font-family: ${theme.fontFamily};
   }

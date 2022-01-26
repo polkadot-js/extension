@@ -153,7 +153,6 @@ export default React.memo(styled(SendFund)(({ theme }: Props) => `
     padding-bottom: 15px;
     flex: 1;
     padding-top: 25px;
-    margin-top: -25px;
     overflow-y: auto;
   }
 

@@ -3,17 +3,12 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import Select from 'react-select';
 import styled from 'styled-components';
 
 import Label from './Label';
-import {Option} from "@polkadot/extension-koni-ui/components/InputAddress/types";
 import networkSelectOption from "@polkadot/extension-koni-ui/hooks/useGenesisHashOptions";
-// interface DropdownOption {
-//   text: string;
-//   value: string;
-// }
 
 interface Props extends ThemeProps {
   className?: string;
@@ -24,14 +19,15 @@ interface Props extends ThemeProps {
 }
 
 function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  console.log('options', options);
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
 
-  const handleChange = (e: { value: any }) => {
-    onChange && onChange(e.value.trim());
-    setSelectedValue(e.value);
-  };
+  const handleChange = useCallback(
+    ({ value }): void => {
+      onChange && onChange(value.trim());
+      setSelectedValue(value);
+    }, []
+  );
 
   const customStyles = {
     option: (base: any) => {
@@ -60,7 +56,7 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
           options={transformOptions}
           placeholder=''
           styles={customStyles}
-          value={transformOptions.filter((obj: { value: number; }) => obj.value === selectedValue)}
+          value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
         />
       </Label>
     </>

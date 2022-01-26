@@ -372,17 +372,17 @@ export default React.memo(styled(InputBalance)(({ theme }: ThemeProps) => `
     border-radius: 8px;
   }
 
-  .unit-buttons .advantage-dropdown__control:before {
+  .unit-buttons .advance-dropdown__control:before {
     display: none;
   }
 
-  .advantage-dropdown-wrapper .menu .item:hover {
-    .advantage-dropdown-basic-item {
+  .advance-dropdown-wrapper .menu .item:hover {
+    .advance-dropdown-basic-item {
       color: ${theme.textColor};
     }
   }
 
-  .unit-button .advantage-dropdown__control {
+  .unit-button .advance-dropdown__control {
     align-items: center;
   }
 

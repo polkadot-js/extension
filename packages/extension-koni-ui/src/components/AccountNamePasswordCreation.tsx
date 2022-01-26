@@ -12,15 +12,16 @@ import Password from '@polkadot/extension-koni-ui/partials/Password';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
-  buttonLabel: string;
+  buttonLabel?: string;
   isBusy: boolean;
-  onBackClick: () => void;
+  onBackClick?: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
   className?: string;
   children?: any;
   address?: string | null;
   genesis?: string | null;
+  onPasswordChange?: (password: string) => void;
 }
 
 function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
@@ -81,7 +82,6 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
 export default styled(AccountNamePasswordCreation)(({ theme }: ThemeProps) => `
   padding: 25px 15px 15px;
   flex: 1;
-  margin-top: -25px;
   overflow-y: auto;
 
   .account-name-and-password-creation-wrapper {

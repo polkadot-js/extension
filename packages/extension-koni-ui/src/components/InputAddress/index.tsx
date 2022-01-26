@@ -221,7 +221,7 @@ export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
     color: ${theme.textColor2};
   }
 
-  .advantage-dropdown-wrapper {
+  .advance-dropdown-wrapper {
     position: absolute;
     top: 0;
     left: 0;
@@ -229,11 +229,11 @@ export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
     right: 0;
   }
 
-  .advantage-dropdown-wrapper .advantage-dropdown__value-container {
+  .advance-dropdown-wrapper .advance-dropdown__value-container {
     padding: 28px 10px 10px 60px;
   }
 
-  .advantage-dropdown__input-container {
+  .advance-dropdown__input-container {
     cursor: text
   }
 

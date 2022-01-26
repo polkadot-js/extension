@@ -118,7 +118,7 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
 
 export default withRouter(styled(KoniExportAll)(({ theme }: Props) => `
   .action-area {
-    padding: 0 15px 10px 15px;
+    padding: 25px 15px 10px 15px;
   }
 
   .action-area > div {

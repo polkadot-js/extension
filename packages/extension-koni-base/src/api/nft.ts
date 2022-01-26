@@ -4,8 +4,12 @@ import {
   getSingularByAccount
 } from "@polkadot/extension-koni-base/api/rmrk_nft";
 import fetch from "node-fetch";
-import {SINGULAR_COLLECTION_ENDPOINT} from "@polkadot/extension-koni-base/api/rmrk_nft/config";
+import {SERVER, SINGULAR_COLLECTION_ENDPOINT} from "@polkadot/extension-koni-base/api/rmrk_nft/config";
 import {NftCollection, NftItem, NftJson} from "@polkadot/extension-koni-base/stores/types";
+
+const parseIpfsLink = (ipfsLink: string) => {
+  return SERVER + ipfsLink.split('ipfs://ipfs/')[1]
+}
 
 export const handleRmrkNfts = async (account: string) => {
   if (!account) return;
@@ -26,12 +30,22 @@ export const handleRmrkNfts = async (account: string) => {
         collectionInfoUrl.push(url)
       }
     })
-
+    let allCollectionMetaUrl: any[] = []
     const collectionInfo = await Promise.all(collectionInfoUrl.map(async url => {
       const resp = await fetch(url);
       const data: any[] = await resp.json();
-      if (data.length > 0) return data[0]
+      const result = data[0]
+      if (result && 'metadata' in result) allCollectionMetaUrl.push({url: parseIpfsLink(result?.metadata), id: result?.id})
+      if (data.length > 0) return result
       else return {}
+    }))
+
+    let allCollectionMeta = {}
+    await Promise.all(allCollectionMetaUrl.map(async item => {
+      const resp = await fetch(item.url);
+      const data = await resp.json()
+      // @ts-ignore
+      allCollectionMeta[item?.id] = {...data}
     }))
 
     let collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({[item.id]: item.name})));
@@ -41,6 +55,7 @@ export const handleRmrkNfts = async (account: string) => {
         id: item?.id,
         name: item?.metadata?.name,
         image: item?.metadata?.image,
+        description: item?.metadata?.description,
         external_url: '',
         rarity: item?.metadata_rarity,
         collectionId: item?.collectionId,
@@ -50,8 +65,7 @@ export const handleRmrkNfts = async (account: string) => {
       if (item.collectionId in nftDict) {
         // @ts-ignore
         nftDict[item.collectionId] = [...nftDict[item.collectionId], parsedItem]
-      }
-      else {
+      } else {
         // @ts-ignore
         nftDict[item.collectionId] = [parsedItem]
       }
@@ -62,9 +76,13 @@ export const handleRmrkNfts = async (account: string) => {
         collectionId: item.collectionId,
         collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] : null,
         // @ts-ignore
+        image: allCollectionMeta[item.collectionId] ? parseIpfsLink(allCollectionMeta[item.collectionId].image) : null,
+        // @ts-ignore
         nftItems: nftDict[item.collectionId]
       } as NftCollection
     })
+
+    console.log(allCollections)
 
     // should return list of NftCollection
     return {total: allNfts.length, allCollections}

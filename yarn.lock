@@ -2721,6 +2721,7 @@ __metadata:
     react-dropzone: ^11.5.1
     react-i18next: ^11.15.3
     react-is: ^17.0.2
+    react-lazyload: ^3.2.0
     react-qr-code: ^2.0.3
     react-redux: ^7.2.6
     react-router: ^5.2.1
@@ -14007,6 +14008,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-lazyload@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "react-lazyload@npm:3.2.0"
+  peerDependencies:
+    react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    react-dom: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 871a88c698a80c53ead85c293b493ac67c94e5980590094128c371e3f1e3d5bc17841ead1e7830771c87ece7fe677a6c9c323f3e6ce392a5f6f0328a36c38fe7
+  languageName: node
+  linkType: hard
+
 "react-qr-code@npm:^2.0.3":
   version: 2.0.3
   resolution: "react-qr-code@npm:2.0.3"
@@ -14766,6 +14777,7 @@ resolve@^2.0.0-next.3:
     "@polkadot/dev": ^0.65.23
     "@types/jest": ^27.4.0
     i18next-scanner: ^3.1.0
+    react-lazyload: ^3.2.0
     sinon-chrome: ^3.0.1
   bin:
     koni-ci-ghact-build: ./scripts/koni-ci-ghact-build.mjs

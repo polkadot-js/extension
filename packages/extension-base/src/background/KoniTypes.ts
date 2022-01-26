@@ -22,6 +22,7 @@ export interface NftItem {
 export interface NftCollection {
   collectionId: string;
   collectionName: string;
+  image: string;
   nftItems: Array<NftItem>;
 }
 

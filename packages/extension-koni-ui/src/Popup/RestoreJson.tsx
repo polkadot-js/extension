@@ -6,9 +6,9 @@ import type {KeyringPair$Json} from '@polkadot/keyring/types';
 import type {KeyringPairs$Json} from '@polkadot/ui-keyring/types';
 
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import styled from 'styled-components';
+import styled, {ThemeContext} from 'styled-components';
 import {u8aToString} from '@polkadot/util';
-import {AccountContext, ActionContext} from '../components';
+import {AccountContext, ActionContext, Theme} from '../components';
 import useTranslation from '../hooks/useTranslation';
 import {batchRestore, jsonGetAccountInfo, jsonRestore} from '../messaging';
 import {DEFAULT_TYPE} from '../util/defaultType';
@@ -37,6 +37,7 @@ function Upload({className}: Props): React.ReactElement {
   const [isFileError, setFileError] = useState(false);
   const [requirePassword, setRequirePassword] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
   // don't use the info from the file directly
   // rather use what comes from the background from jsonGetAccountInfo
   const [file, setFile] = useState<KeyringPair$Json | KeyringPairs$Json | undefined>(undefined);
@@ -127,14 +128,15 @@ function Upload({className}: Props): React.ReactElement {
       <div className={className}>
         <div className='restore-from-json-wrapper'>
           {accountsInfo.map(({address, genesisHash, name, type = DEFAULT_TYPE}, index) => (
-            <AccountInfo
-              address={address}
-              genesisHash={genesisHash}
-              key={`${index}:${address}`}
-              name={name}
-              type={type}
-              className='account-info'
-            />
+            <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}>
+              <AccountInfo
+                address={address}
+                genesisHash={genesisHash}
+                key={`${index}:${address}`}
+                name={name}
+                type={type}
+              />
+            </div>
           ))}
         </div>
         <InputFileWithLabel
@@ -186,7 +188,7 @@ function Upload({className}: Props): React.ReactElement {
 }
 
 export default styled(Upload)`
-  padding: 0 15px;
+  padding: 25px 15px 0;
   height: 100%;
   overflow-y: auto;
   .restore-from-json-wrapper {
@@ -194,7 +196,7 @@ export default styled(Upload)`
     overflow-y: auto;
   }
 
-  .account-info {
+  .restore-json__account-info {
     margin-bottom: 10px;
   }
 

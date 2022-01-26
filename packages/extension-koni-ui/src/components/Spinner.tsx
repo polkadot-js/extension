@@ -29,5 +29,4 @@ export default React.memo(styled(Spinner)`
   margin-left: -1.5rem;
   position: absolute;
   width: 3rem;
-  z-index:
 `);

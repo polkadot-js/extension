@@ -11,7 +11,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, ActionContext, Address, VerticalSpace, Warning } from '../../../components';
+import {AccountContext, ActionContext, Theme, VerticalSpace, Warning} from '../../../components';
 import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
@@ -19,6 +19,8 @@ import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
+import {ThemeContext} from "styled-components";
 
 interface Props {
   account: AccountJson;
@@ -50,6 +52,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
   const [error, setError] = useState<string | null>(null);
   const { accounts } = useContext(AccountContext);
   const { t } = useTranslation();
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect((): void => {
     const payload = request.payload;
@@ -85,12 +88,10 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
 
     return (
       <>
-        <div>
-          <Address
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+          <AccountInfo
             address={json.address}
             genesisHash={json.genesisHash}
-            isExternal={isExternal}
-            isHardware={isHardware}
           />
         </div>
         {isExternal && !isHardware
@@ -138,10 +139,9 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
 
     return (
       <>
-        <div>
-          <Address
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+          <AccountInfo
             address={address}
-            isExternal={isExternal}
           />
         </div>
         {isExternal && !isHardware && account?.genesisHash
@@ -161,7 +161,6 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
             />
           )
         }
-        <VerticalSpace />
         {isHardware && <>
           <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
           <VerticalSpace />

@@ -31,7 +31,7 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
         <p>
           {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
         </p>
-        <p className='websiteAddress'>
+        <p className='website-address'>
           {decodedWebsite}
         </p>
         <p>
@@ -54,7 +54,7 @@ export default styled(PhishingDetected)(({ theme }: Props) => `
       color: ${theme.subTextColor};
     }
 
-    &.websiteAddress {
+    &.website-address {
       font-size: 1.3rem;
       text-align: center;
     }

@@ -48,8 +48,8 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
         label={label}
       >
         <Select
-          className='kn-dropdown-wrapper'
-          classNamePrefix='kn-dropdown'
+          className='dropdown-wrapper'
+          classNamePrefix='dropdown'
           isSearchable
           menuPortalTarget={document.body}
           onChange={handleChange}
@@ -67,7 +67,7 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
   font-weight: 500;
   color: ${theme.textColor2};
 
-  .kn-dropdown__control {
+  .dropdown__control {
     height: 48px;
     border-radius: 8px;
     width: 100%;
@@ -81,29 +81,29 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
     box-shadow: none;
   }
 
-  .kn-dropdown__control:hover {
+  .dropdown__control:hover {
     border: 1px solid transparent;
     box-shadow: none;
   }
 
-  .kn-dropdown__single-value {
+  .dropdown__single-value {
     color: ${theme.textColor2};
   }
 
-  .kn-dropdown__indicator-separator {
+  .dropdown__indicator-separator {
     display: none;
   }
 
-  .kn-dropdown__input-container {
+  .dropdown__input-container {
     color: ${theme.textColor2};
   }
 
-  .kn-dropdown__menu-portal {
+  .dropdown__menu-portal {
     text-align: left;
     font-size: 15px;
   }
 
-  .kn-dropdown__menu-notice--no-options {
+  .dropdown__menu-notice--no-options {
     text-align: left;
     font-family: ${theme.fontFamily};
   }

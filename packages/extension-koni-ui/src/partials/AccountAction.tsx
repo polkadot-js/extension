@@ -36,14 +36,14 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
     >
       <div className='actions-wrapper'>
         <Link
-          className='menuItem'
+          className='account-action__menu-item'
           onClick={toggleEdit}
         >
           {t<string>('Rename')}
         </Link>
         {!currentAccount?.isExternal && canDerive(currentAccount?.type) && (
           <Link
-            className='menuItem'
+            className='account-action__menu-item'
             to={`/account/derive/${currentAccount?.address}/locked`}
           >
             {t<string>('Derive New Account')}
@@ -55,7 +55,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
       <div className='actions-wrapper'>
         {!currentAccount?.isExternal && (
           <Link
-            className='menuItem'
+            className='account-action__menu-item'
             isDanger
             to={`/account/export/${currentAccount?.address}`}
           >
@@ -63,7 +63,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
           </Link>
         )}
         <Link
-          className='menuItem'
+          className='account-action__menu-item'
           isDanger
           to={`/account/forget/${currentAccount?.address}`}
         >
@@ -77,7 +77,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
 
           <div className='actions-wrapper'>
             <Link
-              className={`menuItem kn-l-show-zero-balance ${isShowZeroBalances ? '-check' : ''}`}
+              className={`account-action__menu-item account-action__show-zero-balance ${isShowZeroBalances ? '-check' : ''}`}
               onClick={toggleZeroBalances}
             >
               <span>
@@ -85,7 +85,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
               </span>
               <img
                 alt='check'
-                className='kn-l-check-icon'
+                className='account-action__check-icon'
                 src={check}
               />
             </Link>
@@ -103,7 +103,7 @@ export default React.memo(styled(AccountAction)(({ theme }: Props) => `
     margin: 10px;
   }
 
-  .menuItem {
+  .account-action__menu-item {
     border-radius: 8px;
     display: block;
     font-size: 15px;
@@ -116,17 +116,17 @@ export default React.memo(styled(AccountAction)(({ theme }: Props) => `
     }
   }
 
-  .kn-l-show-zero-balance {
+  .account-action__show-zero-balance {
     display: flex;
     align-items: center;
   }
 
-  .kn-l-check-icon {
+  .account-action__check-icon {
     margin-left: 4px;
     opacity: 0;
   }
 
-  .kn-l-show-zero-balance.-check .kn-l-check-icon {
+  .account-action__show-zero-balance.-check .account-action__check-icon {
     opacity: 1;
   }
 `));

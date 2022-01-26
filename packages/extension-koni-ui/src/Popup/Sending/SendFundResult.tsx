@@ -45,7 +45,7 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
     if (isSupportScanExplorer(networkName)) {
       return (
         <a
-          className='kn-send-fund-stt-btn kn-view-history-btn'
+          className='send-fund-result__stt-btn send-fund-result__view-history-btn'
           href={getScanExplorerTransactionHistoryUrl(networkName, extrinsicHash)}
           rel='noreferrer'
           target={'_blank'}
@@ -56,7 +56,7 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
     }
 
     return (
-      <span className='kn-send-fund-stt-btn kn-view-history-btn -disabled'>
+      <span className='send-fund-result__stt-btn send-fund-result__view-history-btn -disabled'>
         {t<string>('View Transaction')}
       </span>
     );
@@ -65,20 +65,20 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
   const errorMessage = getErrorMessage(txError);
 
   return (
-    <div className={`kn-send-fund-result-wrapper ${className}`}>
+    <div className={`send-fund-result-wrapper ${className}`}>
       {isTxSuccess
-        ? <div className='kn-send-fund-result'>
+        ? <div className='send-fund-result'>
           <img
             alt='success'
-            className='kn-status-img'
+            className='send-fund-result__status-img'
             src={successStatus}
           />
-          <div className='kn-stt-text'>{t<string>('Send Fund Successful')}</div>
+          <div className='send-fund-result__stt-text'>{t<string>('Send Fund Successful')}</div>
           <div
-            className='kn-stt-subtext'
+            className='send-fund-result__stt-subtext'
           >{t<string>('Your request has been confirmed. You can track its progress on the Transaction History page.')}</div>
           <Button
-            className='kn-send-fund-stt-btn'
+            className='send-fund-result__stt-btn'
             onClick={_backToHome}
           >
             {t<string>('Back To Home')}
@@ -86,26 +86,26 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
 
           {extrinsicHash && viewTransactionBtn(networkName, extrinsicHash)}
         </div>
-        : <div className='kn-send-fund-result'>
+        : <div className='send-fund-result'>
           <img
             alt='fail'
-            className='kn-status-img'
+            className='send-fund-result__status-img'
             src={failStatus}
           />
-          <div className='kn-stt-text'>{t<string>('Send Fund Fail')}</div>
-          <div className='kn-stt-subtext'>
+          <div className='send-fund-result__stt-text'>{t<string>('Send Fund Fail')}</div>
+          <div className='send-fund-result__stt-subtext'>
             {extrinsicHash
               ? (t<string>('There was a problem with your request. You can track its progress on the Transaction History page.'))
               : (t<string>('There was a problem with your request.'))
             }
 
             {errorMessage && (
-              <div className={'kn-l-text-danger'}>{errorMessage}</div>
+              <div className={'send-fund-result__text-danger'}>{errorMessage}</div>
             )}
           </div>
 
           <Button
-            className='kn-send-fund-stt-btn'
+            className='send-fund-result__stt-btn'
             onClick={onResend}
           >
             {t<string>('Resend')}
@@ -121,45 +121,45 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
 export default React.memo(styled(SendFundResult)(({ theme }: ThemeProps) => `
   margin: 20px 45px 0;
 
-  .kn-send-fund-result {
+  .send-fund-result {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .kn-status-img {
+  .send-fund-result__status-img {
     width: 120px;
     margin-top: 10px;
     margin-bottom: 32px;
   }
 
-  .kn-stt-text {
+  .send-fund-result__stt-text {
     font-size: 20px;
     line-height: 36px;
     color: ${theme.textColor};
     font-weight: 500;
   }
 
-  .kn-stt-subtext {
+  .send-fund-result__stt-subtext {
     color: ${theme.textColor};
     margin-bottom: 30px;
     text-align: center;
     font-size: 14px;
   }
 
-  .kn-send-fund-stt-btn {
+  .send-fund-result__stt-btn {
     margin-bottom: 10px;
   }
 
-  .kn-l-text-danger {
+  .send-fund-result__text-danger {
     color: ${theme.iconDangerColor};
   }
 
-  .kn-send-fund-stt-btn > .children {
+  .send-fund-result__stt-btn > .children {
     font-weight: 500;
   }
 
-  .kn-view-history-btn {
+  .send-fund-result__view-history-btn {
     background-color: ${theme.buttonBackground2};
     color: ${theme.buttonTextColor3};
     cursor: pointer;

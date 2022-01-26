@@ -28,7 +28,7 @@ function Tip ({ className, onChange }: Props): React.ReactElement<Props> | null 
 
   return (
     <div className={className}>
-      <div className={'kn-l-toggle'}>
+      <div className={'sending-tip__toggle'}>
         <Toggle
           className='tipToggle'
           label={
@@ -41,7 +41,7 @@ function Tip ({ className, onChange }: Props): React.ReactElement<Props> | null 
         />
       </div>
       {showTip && (
-        <div className={'kn-l-InputBalance'}>
+        <div className={'sending-tip__input-balance'}>
           <InputBalance
             help={t<string>('Add a tip to this extrinsic, paying the block author for greater priority')}
             isZeroable
@@ -55,12 +55,12 @@ function Tip ({ className, onChange }: Props): React.ReactElement<Props> | null 
 }
 
 export default React.memo(styled(Tip)(({ theme }: ThemeProps) => `
-  .kn-l-toggle {
+  .sending-tip__toggle {
     display: flex;
     justify-content: flex-end;
   }
 
-  .kn-l-InputBalance {
+  .sending-tip__input-balance {
     margin-top: 10px;
   }
 `));

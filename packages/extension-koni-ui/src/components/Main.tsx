@@ -32,4 +32,17 @@ export default styled(Main)(({ theme }: ThemeProps) => `
   * {
     font-family: ${theme.fontFamily};
   }
+
+
+::-webkit-scrollbar-thumb {
+  background:
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(0, 0, 0, .15)
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 135, 139, .8)
+}
 `);

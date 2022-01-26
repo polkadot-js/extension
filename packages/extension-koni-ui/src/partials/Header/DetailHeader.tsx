@@ -15,6 +15,7 @@ import useOutsideClick from "@polkadot/extension-koni-ui/hooks/useOutsideClick";
 import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
 import {editAccount} from "@polkadot/extension-koni-ui/messaging";
 import useToast from "@polkadot/extension-koni-ui/hooks/useToast";
+import Tooltip from "@polkadot/extension-koni-ui/components/Tooltip";
 
 interface Props extends ThemeProps {
   className?: string,
@@ -31,6 +32,8 @@ interface EditState {
   toggleActions: number;
 }
 
+let tooltipId = 0;
+
 function DetailHeader({
                         className,
                         popupTheme,
@@ -46,6 +49,7 @@ function DetailHeader({
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [editedName, setName] = useState<string | undefined | null>(currentAccount?.name);
   const {show} = useToast();
+  const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -104,6 +108,8 @@ function DetailHeader({
         <div
           className='detail-header-connect-status-btn'
           onClick={toggleVisibility}
+          data-for={trigger}
+          data-tip={true}
         >
           {currentAccount?.isHidden
             ? (
@@ -120,6 +126,10 @@ function DetailHeader({
                 src={popupTheme === 'dark' ? EyeDarkIcon : EyeLightIcon}
               />
             )}
+          <Tooltip
+            text={'Account visibility'}
+            trigger={trigger}
+          />
         </div>
       </div>
 

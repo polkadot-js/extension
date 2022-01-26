@@ -26,8 +26,10 @@ function NextStepButton ({ children, ...props }: Props): React.ReactElement<Prop
 export default styled(NextStepButton)(({ theme }: Props) => `
   .next-step-btn__arrow-right {
     position: absolute;
-    top: 4px;
-    right: 0;
+    margin: auto 0;
+    top: 0;
+    bottom: 0;
+    right: 16px;
     color: ${theme.buttonTextColor};
   }
 `);

@@ -58,7 +58,7 @@ function Address ({ className, onChange, onEnter, passwordError, requestAddress 
         withLabel
       />
       {/* {signAddress && ( */}
-      <div className={'kn-l-password-wrapper'}>
+      <div className={'sending-address-password-wrapper'}>
         <Password
           address={signAddress}
           error={passwordError}
@@ -69,7 +69,7 @@ function Address ({ className, onChange, onEnter, passwordError, requestAddress 
       {/* )} */}
       {passwordError && (
         <Warning
-          className={'kn-l-warning'}
+          className={'sending-address-warning'}
           isDanger
         >
           {passwordError}
@@ -80,11 +80,11 @@ function Address ({ className, onChange, onEnter, passwordError, requestAddress 
 }
 
 export default React.memo(styled(Address)(({ theme }: ThemeProps) => `
-  .kn-l-password-wrapper {
+  .sending-address-password-wrapper {
     margin-top: 10px;
   }
 
-  .kn-l-warning {
+  .sending-address-warning {
     margin-top: 10px;
   }
 `));

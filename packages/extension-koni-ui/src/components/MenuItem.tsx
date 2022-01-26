@@ -17,7 +17,7 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
   return (
     <div className={`${className}${title ? ' isTitled' : ''}`}>
       {title && (
-        <div className='itemTitle'>{title}</div>
+        <div className='menu-item__title'>{title}</div>
       )}
       {children}
     </div>
@@ -30,7 +30,7 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   margin-top: 14px;
   flex: 1;
 
-  > .itemTitle {
+  > .menu-item__title {
     margin: 0;
     width: 100%;
     font-size: ${theme.inputLabelFontSize};
@@ -40,8 +40,4 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
     color: ${theme.textColor2};
     font-weight: 500;
   }
-
-  // &+&.isTitled {
-  //   margin-top: 16px;
-  // }
 `);

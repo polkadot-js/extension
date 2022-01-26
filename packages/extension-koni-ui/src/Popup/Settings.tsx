@@ -91,7 +91,7 @@ function Settings ({ className }: Props): React.ReactElement {
         >
           <HorizontalLabelToggle
             checkedLabel={t<string>('Dark')}
-            className='kn-theme-setting'
+            className='settings__theme-setting'
             toggleFunc={_onChangeTheme}
             uncheckedLabel={t<string>('Light')}
             value={themeContext.id === themes.dark.id}
@@ -146,7 +146,7 @@ function Settings ({ className }: Props): React.ReactElement {
         {isPopup && (
           <MenuItem className='setting'>
             <ActionText
-              className='openWindow'
+              className='setting__action-text'
               icon={faExpand}
               onClick={_onWindowOpen}
               text={t<string>('Open extension in new window')}
@@ -162,7 +162,7 @@ export default styled(Settings)(({ theme }: Props) => `
   margin-top: -25px;
   padding-top: 25px;
 
-  .kn-theme-setting {
+  .settings__theme-setting {
     .kn-label {
       font-size: 18px;
       line-height: 30px;
@@ -178,7 +178,7 @@ export default styled(Settings)(({ theme }: Props) => `
     padding-top: 0;
   }
 
-  .manage-website-access, .openWindow {
+  .manage-website-access, .setting__action-text {
     > span {
       font-size: 16px;
       line-height: 26px;
@@ -190,13 +190,6 @@ export default styled(Settings)(({ theme }: Props) => `
   .checkbox {
     margin: 6px 0 14px 0;
   }
-
-  // .setting {
-  //   > span {
-  //     font-size: 16px;
-  //     line-height: 26px;
-  //   }
-  // }
 
   &::-webkit-scrollbar {
     display: none;

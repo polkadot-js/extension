@@ -40,7 +40,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   return (
     <div className={className}>
-      <div className='requestInfo'>
+      <div className='request-info'>
         <div className='info'>
           <Icon
             icon='X'
@@ -60,18 +60,18 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
         </div>
         {isFirst && (
           <>
-            <Warning className='warningMargin'>
+            <Warning className='request__warning'>
               {t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}
             </Warning>
             <Button
-              className='acceptButton'
+              className='request__accept-btn acceptButton'
               onClick={_onApprove}
             >
               {t<string>('Yes, allow this application access')}
             </Button>
           </>
         )}
-        <ActionBar className='rejectionButton'>
+        <ActionBar className='request__rejection-btn'>
           <Link
             isDanger
             onClick={_onReject}
@@ -116,7 +116,7 @@ export default styled(Request)(({ theme }: Props) => `
     text-decoration: underline;
   }
 
-  .requestInfo {
+  .request-info {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -129,16 +129,16 @@ export default styled(Request)(({ theme }: Props) => `
     flex-direction: row;
   }
 
-  .acceptButton {
+  .request-_accept-btn request__accept-btn {
     width: 90%;
     margin: 25px auto 0;
   }
 
-  .warningMargin {
+  .request__warning {
     margin: 24px 24px 0 1.45rem;
   }
 
-  .rejectionButton {
+  .request__rejection-btn {
     margin: 8px 0 15px 0;
     text-decoration: underline;
   }

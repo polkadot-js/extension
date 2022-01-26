@@ -37,18 +37,18 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
   return (
     <div className={className}>
       <div>
-        <span className='currentStep'>{index + 1}</span>
-        <span className='totalSteps'>/{totalItems}</span>
+        <span className='transaction-index__current-step'>{index + 1}</span>
+        <span className='transaction-index__total-steps'>/{totalItems}</span>
       </div>
       <div>
         <FontAwesomeIcon
-          className={`arrowLeft ${previousClickActive ? 'active' : ''}`}
+          className={`transaction-index__arrow-left ${previousClickActive ? 'active' : ''}`}
           icon={faArrowLeft}
           onClick={prevClick}
           size='sm'
         />
         <FontAwesomeIcon
-          className={`arrowRight ${nextClickActive ? 'active' : ''}`}
+          className={`transaction-index__arrow-right ${nextClickActive ? 'active' : ''}`}
           icon={faArrowRight}
           onClick={nextClick}
           size='sm'
@@ -65,7 +65,7 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
   flex-grow: 1;
   padding-right: 24px;
 
-  .arrowLeft, .arrowRight {
+  .transaction-index__arrow-left, .transaction-index__arrow-right {
     display: inline-block;
     color: ${theme.iconNeutralColor};
 
@@ -75,18 +75,18 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
     }
   }
 
-  .arrowRight {
+  .transaction-index__arrow-right {
     margin-left: 0.5rem;
   }
 
-  .currentStep {
+  .transaction-index__current-step {
     color: ${theme.primaryColor};
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
     margin-left: 10px;
   }
 
-  .totalSteps {
+  .transaction-index__total-steps {
     font-size: ${theme.labelFontSize};
     line-height: ${theme.labelLineHeight};
     color: ${theme.textColor};

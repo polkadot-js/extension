@@ -129,7 +129,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
                   src={getLogoByGenesisHash(value)}
                 />
 
-                <span className={value === currentNetwork ? 'koni-network-text__selected' : 'koni-network-text'}>{text}</span>
+                <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
                 {value === currentNetwork
                   ? (
                     <img
@@ -204,7 +204,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     align-items: center;
 
     &:hover {
-      .koni-network-text {
+      .network-text {
         color: ${theme.textColor};
       }
     }
@@ -223,7 +223,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     margin-right: 10px;
   }
 
-  .koni-network-text {
+  .network-text {
     font-size: 16px;
     line-height: 26px;
     color: ${theme.textColor2};

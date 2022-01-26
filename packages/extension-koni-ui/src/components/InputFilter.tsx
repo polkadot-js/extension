@@ -35,7 +35,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
         autoCapitalize='off'
         autoCorrect='off'
         autoFocus
-        className='kn-input-filter'
+        className='input-filter'
         onChange={onChangeFilter}
         placeholder={placeholder}
         ref={inputRef}
@@ -45,7 +45,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
       />
       {withReset && !!value && (
         <FontAwesomeIcon
-          className='resetIcon'
+          className='input-filter__reset-icon'
           icon={faTimes}
           onClick={onResetFilter}
         />
@@ -57,12 +57,12 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
 export default styled(InputFilter)(({ theme }: Props) => `
   position: relative;
 
-  .kn-input-filter {
+  .input-filter {
     margin-top: 0;
     padding-right: 2rem;
   }
 
-  .resetIcon {
+  .input-filter__reset-icon {
     position: absolute;
     right: 10px;
     top: 0;

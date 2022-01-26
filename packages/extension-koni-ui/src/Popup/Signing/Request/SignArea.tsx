@@ -115,7 +115,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
           </Button>
         </>
       )}
-      <ActionBar className='cancelButton'>
+      <ActionBar className='sign-area__cancel-button'>
         <Link
           isDanger
           onClick={_onCancel}
@@ -131,7 +131,7 @@ export default styled(SignArea)`
   flex-direction: column;
   padding: 6px 24px;
 
-  .cancelButton {
+  .sign-area__cancel-button {
     margin-top: 4px;
     margin-bottom: 4px;
     text-decoration: underline;

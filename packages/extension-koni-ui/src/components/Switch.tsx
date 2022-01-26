@@ -22,7 +22,7 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
 
   return (
     <div className={className}>
-      <span className='lightLabel'>{uncheckedLabel}</span>
+      <span className='switch__light-label'>{uncheckedLabel}</span>
       <label>
         <input
           checked={checked}
@@ -32,7 +32,7 @@ function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }:
         />
         <span className='slider' />
       </label>
-      <span className='darkLabel'>{checkedLabel}</span>
+      <span className='switch__dark-label'>{checkedLabel}</span>
     </div>
   );
 }
@@ -80,7 +80,7 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
     }
   }
 
-  .lightLabel {
+  .switch__light-label {
     font-weight: 400;
     color: ${theme.labelLightThemeColor};
     font-weight: 500;
@@ -88,7 +88,7 @@ export default styled(Switch)(({ theme }: ThemeProps) => `
     line-height: 30px;
   }
 
-  .darkLabel {
+  .switch__dark-label {
     font-weight: 400;
     color: ${theme.labelDarkThemeColor};
     font-weight: 500;

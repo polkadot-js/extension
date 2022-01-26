@@ -86,7 +86,8 @@ const darkTheme = {
   loadingBackground2: colors.primary2,
   toggleInactiveBgc: '#262C4A',
   toggleInactiveThumbColor: '#9196AB',
-  toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)'
+  toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
+  scrollBarThumb: 'rgba(0, 0, 0, .15)'
 };
 
 export declare type Theme = typeof darkTheme;
@@ -143,7 +144,8 @@ const lightTheme: Theme = {
   loadingBackground2: colors.primary1,
   toggleInactiveBgc: '#ddd',
   toggleInactiveThumbColor: '#fff',
-  toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)'
+  toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
+  scrollBarThumb: 'rgba(0, 0, 0, .15)'
 };
 
 export const themes = {

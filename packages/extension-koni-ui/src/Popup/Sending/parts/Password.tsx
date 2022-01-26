@@ -43,7 +43,7 @@ function Unlock ({ address, className, error, onChange, onEnter, tabIndex }: Pro
       >
       </Password>
 
-      <div className={'kn-toggle-wrapper'}>
+      <div className={'sending-password-toggle-wrapper'}>
         <Toggle
           isOverlay
           label={t<string>('Unlock for {{expiry}} min', { replace: { expiry: UNLOCK_MINS } })}
@@ -56,7 +56,7 @@ function Unlock ({ address, className, error, onChange, onEnter, tabIndex }: Pro
 }
 
 export default React.memo(styled(Unlock)(({ theme }: Props) => `
-  .kn-toggle-wrapper {
+  .sending-password-toggle-wrapper {
       display: flex;
       margin-top: 10px;
       display: none;

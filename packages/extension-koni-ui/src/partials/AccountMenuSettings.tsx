@@ -60,23 +60,23 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
       className={className}
       reference={reference}
     >
-      <div className='searchBarWrapper'>
-        <div className='koniBranding'>
+      <div className='account-menu-settings-header'>
+        <div className='account-menu-settings__branding'>
           <img
             className='logo'
             src={logo}
           />
-          <span className='logoText'>Accounts</span>
+          <span className='account-menu-settings__logo-text'>Accounts</span>
         </div>
         <InputFilter
-          className='inputFilter'
+          className='account-menu-settings__input-filter'
           onChange={_onChangeFilter}
           placeholder={t<string>('Search by name or network...')}
           value={filter}
           withReset
         />
       </div>
-      <div className='accountsContainer'>
+      <div className='account-menu-settings'>
         {filteredAccount.map((json, index): React.ReactNode => (
           <AccountsTree
             closeSetting={closeSetting}
@@ -87,10 +87,10 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
       </div>
 
       <div className='koni-menu-items-container'>
-        <div className='koni-menu-items-wrapper'>
-          <MenuSettingItem className='menuItem'>
+        <div className='account-menu-settings-items-wrapper'>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
-              className='menuItem__text'
+              className='account-menu-settings__menu-item-text'
               to={'/account/create'}
             >
               <FontAwesomeIcon icon={faPlusCircle} />
@@ -98,9 +98,9 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
             </Link>
           </MenuSettingItem>
           {!!master && (
-            <MenuSettingItem className='menuItem'>
+            <MenuSettingItem className='account-menu-settings__menu-item'>
               <Link
-                className='menuItem__text'
+                className='account-menu-settings__menu-item-text'
                 to={`/account/derive/${master.address}`}
               >
                 <FontAwesomeIcon icon={faCodeBranch} />
@@ -110,28 +110,28 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           )}
         </div>
 
-        <div className='koni-menu-items-wrapper'>
-          <MenuSettingItem className='menuItem'>
+        <div className='account-menu-settings-items-wrapper'>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
-              className='menuItem__text'
+              className='account-menu-settings__menu-item-text'
               to={'/account/export-all'}
             >
               <FontAwesomeIcon icon={faFileExport} />
               <span>{t<string>('Export all accounts')}</span>
             </Link>
           </MenuSettingItem>
-          <MenuSettingItem className='menuItem'>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
-              className='menuItem__text'
+              className='account-menu-settings__menu-item-text'
               to='/account/import-seed'
             >
               <FontAwesomeIcon icon={faKey} />
               <span>{t<string>('Import account from pre-existing seed')}</span>
             </Link>
           </MenuSettingItem>
-          <MenuSettingItem className='menuItem'>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
-              className='menuItem__text'
+              className='account-menu-settings__menu-item-text'
               to={jsonPath}
             >
               <FontAwesomeIcon icon={faFileUpload} />
@@ -140,10 +140,10 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           </MenuSettingItem>
         </div>
 
-        <div className='koni-menu-items-wrapper'>
-          <MenuSettingItem className='menuItem'>
+        <div className='account-menu-settings-items-wrapper'>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
-              className='menuItem__text'
+              className='account-menu-settings__menu-item-text'
               isDisabled={!mediaAllowed}
               title={!mediaAllowed
                 ? t<string>('Camera access must be first enabled in the settings')
@@ -158,9 +158,9 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
         </div>
       </div>
       <div className='koni-menu-items-container'>
-        <MenuSettingItem className='menuItem'>
+        <MenuSettingItem className='account-menu-settings__menu-item'>
           <Link
-            className='menuItem__text'
+            className='account-menu-settings__menu-item-text'
             to={'/account/settings'}
           >
             <FontAwesomeIcon icon={faCog} />
@@ -177,7 +177,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   right: 5px;
   user-select: none;
 
-  .accountsContainer {
+  .account-menu-settings {
     max-height: 148px;
     overflow-y: auto;
     scrollbar-width: none;
@@ -189,14 +189,14 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
     }
   }
 
-  .logoText {
+  .account-menu-settings__logo-text {
     font-size: 20px;
     line-height: 32px;
     font-weight: 500;
     color: ${theme.textColor};
   }
 
-  .koniBranding {
+  .account-menu-settings__branding {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -212,7 +212,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
       }
   }
 
-  .searchBarWrapper {
+  .account-menu-settings-header {
     padding: 12px 16px;
     display: flex;
     justify-content: space-between;
@@ -261,7 +261,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
     }
   }
 
-  .menuItem {
+  .account-menu-settings__menu-item {
     padding: 0;
 
     .svg-inline--fa {
@@ -269,18 +269,18 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
       margin-right: 0.3rem;
       width: 0.875em;
     }
+  }
 
-    &__text {
-      font-size: 15px;
-      line-height: 30px;
-      color: ${theme.textColor2};
-      > span {
-        font-weight: 400;
-      }
+  .account-menu-settings__menu-item-text {
+    font-size: 15px;
+    line-height: 30px;
+    color: ${theme.textColor2};
+    > span {
+      font-weight: 400;
     }
   }
 
-  .menuItem:hover {
+  .account-menu-settings__menu-item:hover {
     .menuItem__text {
       color: ${theme.textColor};
     }
@@ -299,18 +299,18 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
     }
   }
 
-  .koni-menu-items-wrapper {
+  .account-menu-settings-items-wrapper {
     border-radius: 8px;
     border: 2px solid ${theme.menuItemsBorder};
     padding: 8px 12px;
     margin-bottom: 8px;
   }
 
-  .koni-menu-items-wrapper:last-child {
+  .account-menu-settings-items-wrapper:last-child {
     margin-bottom: 0;
   }
 
-  .inputFilter {
+  .account-menu-settings__input-filter {
     width: 100%;
   }
 `));

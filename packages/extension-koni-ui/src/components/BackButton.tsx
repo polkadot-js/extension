@@ -21,7 +21,7 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
       onClick={onClick}
     >
       <FontAwesomeIcon
-        className='arrowLeft'
+        className='back-button__arrow-left-icon'
         icon={faArrowLeft}
         size='sm'
       />
@@ -34,7 +34,7 @@ export default styled(BackButton)(({ theme }: ThemeProps) => `
   margin-right: 11px;
   width: 42px;
 
-  .arrowLeft {
+  .back-button__arrow-left-icon {
     color: ${theme.backButtonTextColor};
     display: block;
     margin: auto;

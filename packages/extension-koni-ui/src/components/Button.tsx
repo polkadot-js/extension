@@ -36,13 +36,13 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
 
   return (
     <button
-      className={`${className}${(isDisabled || isBusy) ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
+      className={`${className}${(isDisabled || isBusy) ? 'button__is-disabled' : ''}${isBusy ? 'button__is-busy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
     >
-      <div className='children'>{children}</div>
-      <div className='disabledOverlay' />
-      <Spinner className='busyOverlay' />
+      <div className='button__children'>{children}</div>
+      <div className='button__disabled-overlay' />
+      <Spinner className='button__busy-overlay' />
     </button>
   );
 }
@@ -64,7 +64,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   text-align: center;
 
 
-  .children {
+  .button__children {
     font-family: ${theme.fontFamily};
     font-weight: 500;
   }
@@ -73,12 +73,12 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     cursor: default;
   }
 
-  .busyOverlay,
-  .disabledOverlay {
+  .button__busy-overlay,
+  .button__disabled-overlay {
     visibility: hidden;
   }
 
-  .disabledOverlay {
+  .button__disabled-overlay {
     background: ${theme.overlayBackground};
     border-radius: ${theme.borderRadius};
     opacity: 0.7;
@@ -93,19 +93,19 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     margin-right: 0.3rem;
   }
 
-  &.isBusy {
+  &.button__is-busy {
     background: rgba(96,96,96,0.15);
 
-    .children {
+    .button__children {
       opacity: 0.25;
     }
 
-    .busyOverlay {
+    .button__busy-overlay {
       visibility: visible;
     }
   }
 
-  &.isDisabled .disabledOverlay {
+  &.button__is-disabled .button__disabled-overlay {
     visibility: visible;
   }
 `);

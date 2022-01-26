@@ -61,11 +61,11 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
           />
         </div>
         <Button
-          className='lockButton'
+          className='derivation-path__lock-button'
           onClick={_onExpand}
         >
           <FontAwesomeIcon
-            className='lockIcon'
+            className='derivation-path__lock-icon'
             icon={isDisabled ? faLock : faLockOpen}
           />
         </Button>
@@ -80,7 +80,7 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
     flex-direction: row;
   }
 
-  .lockButton {
+  .derivation-path__lock-button {
     background: none;
     height: 14px;
     margin: 50px 2px 0 10px;
@@ -101,7 +101,7 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
     }
   }
 
-  .lockIcon {
+  .derivation-path__lock-icon {
     color: ${theme.iconNeutralColor}
   }
 

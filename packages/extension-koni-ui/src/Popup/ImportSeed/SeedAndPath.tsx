@@ -89,7 +89,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
               name={name}
             />
             <TextAreaWithLabel
-              className='seedInput'
+              className='seed-and-path__seed-input'
               isError={!!error}
               isFocused
               label={t<string>('existing 12 or 24-word mnemonic seed')}
@@ -99,7 +99,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
             />
             {!!error && !seed && (
               <Warning
-                className='seedError'
+                className='seed-and-path__error'
                 isBelowInput
                 isDanger
               >
@@ -107,14 +107,14 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
               </Warning>
             )}
             <Dropdown
-              className='genesisSelection'
+              className='seed-and-path__genesis-selection'
               label={t<string>('Network')}
               onChange={setGenesis}
               options={genesisOptions}
               value={genesis}
             />
             <div
-              className='advancedToggle'
+              className='seed-and-path__advanced-toggle'
               onClick={_onToggleAdvanced}
             >
               <FontAwesomeIcon
@@ -160,7 +160,7 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   flex: 1;
   overflow-y: auto;
 
-  .advancedToggle {
+  .seed-and-path__advanced-toggle {
     color: ${theme.textColor};
     cursor: pointer;
     line-height: ${theme.lineHeight};
@@ -192,14 +192,14 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
     }
   }
 
-  .genesisSelection {
+  .seed-and-path__genesis-selection {
     line-height: 26px;
     label {
       color: ${theme.textColor2};
     }
   }
 
-  .seedInput {
+  .seed-and-path__seed-input {
     margin-bottom: 16px;
     color: ${theme.textColor2};
     textarea {
@@ -208,7 +208,7 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
     }
   }
 
-  .seedError {
+  .seed-and-path__error {
     margin-bottom: 1rem;
   }
 `);

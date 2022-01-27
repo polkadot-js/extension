@@ -23,7 +23,6 @@ import ToastProvider from '../components/Toast/ToastProvider';
 import { getAccountsWithCurrentAddress, getPrice, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
@@ -38,6 +37,7 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import Home from './Home';
 
 const startSettings = uiSettings.get();
 
@@ -202,7 +202,7 @@ export default function Popup (): React.ReactElement {
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
           ? wrapWithErrorBoundary(<Signing />, 'signing')
-          : wrapWithErrorBoundary(<Accounts />, 'accounts')
+          : wrapWithErrorBoundary(<Home />, 'Home')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (

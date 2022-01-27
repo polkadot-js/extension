@@ -516,7 +516,7 @@ export interface ResponseAuthorizeList {
   list: AuthUrls;
 }
 
-export interface TransactionHistoryItem {
+export interface TransactionHistoryItemType {
   time: number;
   networkName: string;
   change: string;
@@ -539,5 +539,5 @@ export interface RequestTransactionHistoryGetByMultiNetworks {
 export interface RequestTransactionHistoryAdd {
   address: string;
   networkName: string;
-  item: TransactionHistoryItem;
+  item: TransactionHistoryItemType;
 }

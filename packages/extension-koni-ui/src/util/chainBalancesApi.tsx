@@ -4,38 +4,60 @@
 import axios from 'axios';
 import BigN from 'bignumber.js';
 
-import { isEmptyArray } from './support';
+import { isEmptyArray } from './common';
 import { AccountInfoItem, BalanceInfo, BalanceSubInfo } from './types';
 
 export const priceParamByNetworkNameMap: Record<string, string> = {
-  acala: 'acala-token',
-  // 'altair': 'altair',
-  // 'astar': 'astar',
+  'acala':'acala',
+  // 'altair':'altair',
+  'astar': 'astar',
   // 'basilisk': 'basilisk',
-  bifrost: 'bifrost-native-coin',
-  calamari: 'calamari-network',
-  clover: 'clover',
-  genshiro: 'genshiro',
-  // 'heiko': 'heiko',
-  hydradx: 'hydradx',
-  karura: 'karura',
-  // 'khala': 'khala',
-  kilt: 'kilt-protocol',
-  kintsugi: 'kintsugi',
-  kusama: 'kusama',
-  // 'moonbeam': 'moonbeam',
-  moonriver: 'moonriver',
-  parallel: 'par-stablecoin',
-  // 'picasso': 'picasso',
+  'bifrost':'bifrost-native-coin',
+  'calamari': 'calamari-network',
+  'centrifuge': 'centrifuge',
+  'clover':'clover',
+  'coinversation': 'coinversation',
+  // 'composableFinance': 'composableFinance',
+  'crab':'darwinia-crab-network',
+  'crust':'crust-network',
+  'darwinia': 'darwinia-network-native-token',
+  'edgeware': 'edgeware',
+  'efinity':'efinity',
+  'equilibrium':'equilibrium',
+  'genshiro':'genshiro',
+  'heiko': 'heiko',
+  'hydradx':'hydradx',
+  'integritee':'integritee',
+  'interlay':'interlay',
+  'karura':'karura',
+  'khala':'khala',
+  'kilt': 'kilt-protocol',
+  'kintsugi': 'kintsugi',
+  // 'koni':'koni',
+  'kusama':'kusama',
+  'litentry': 'litentry',
+  // 'manta': 'manta',
+  'moonbeam': 'moonbeam',
+  'moonriver':'moonriver',
+  'nodle':'nodle',
+  'parallel':'paralink-network',
+  'phala':'pha',
+  'picasso':'pica',
+  // 'pichiu': 'pichiu',
   // 'pioneer': 'pioneer',
-  polkadot: 'polkadot',
+  'polkadot':'polkadot',
   // 'quartz': 'quartz',
-  sakura: 'sakura',
-  // 'shadow': 'shadow',
-  shiden: 'shiden'
-  // 'statemine': 'statemine',
-  // 'statemint': 'statemint',
-  // 'subsocial': 'subsocial',
+  'robonomics':'robonomics-network',
+  // 'rococo':'rococo',
+  'sakura':'sakura',
+  'shadow':'crust-storage-market',
+  'shiden': 'shiden',
+  'sora-substrate': 'sora',
+  'statemine':'statemine',
+  'statemint':'statemint',
+  'subgame':'subgame',
+  // 'subsocial':'subsocial',
+  // 'westend':'westend',
   // 'zeitgeist': 'zeitgeist',
 };
 
@@ -43,7 +65,7 @@ export const BN_TEN = new BigN(10);
 export const BN_ZERO = new BigN(0);
 
 export const getAcalaCrowdloanContribute = async (polkadotAddress: string) => {
-  const acalaContributionApi = 'https://crowdloan.aca-api.network/contribution';
+  const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   try {
     const res = await axios.get(`${acalaContributionApi}/${polkadotAddress}`);

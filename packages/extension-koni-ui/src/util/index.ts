@@ -8,8 +8,10 @@ import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-export * from './support';
+export * from './common';
 export * from './chainBalancesApi';
+
+//todo: Refactor this file
 
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();

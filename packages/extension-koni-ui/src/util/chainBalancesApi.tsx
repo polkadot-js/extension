@@ -7,7 +7,7 @@ import BigN from 'bignumber.js';
 import { isEmptyArray } from './common';
 import { AccountInfoItem, BalanceInfo, BalanceSubInfo } from './types';
 
-export const priceParamByNetworkNameMap: Record<string, string> = {
+export const priceParamByNetworkKeyMap: Record<string, string> = {
   'acala':'acala',
   // 'altair':'altair',
   'astar': 'astar',

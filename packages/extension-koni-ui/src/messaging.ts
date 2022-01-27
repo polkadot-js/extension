@@ -69,8 +69,8 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
   });
 }
 
-export async function initApi (networkName: string): Promise<ApiInitStatus> {
-  return sendMessage('pri(api.init)', { networkName });
+export async function initApi (networkKey: string): Promise<ApiInitStatus> {
+  return sendMessage('pri(api.init)', { networkKey });
 }
 
 export async function editAccount (address: string, name: string): Promise<boolean> {

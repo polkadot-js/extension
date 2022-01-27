@@ -22,8 +22,8 @@ const GroupDisplayNameMap: Record<string, string> = {
   'KUSAMA_PARACHAIN': 'Kusama\'s parachain'
 }
 
-function getItem(networkName: string, contributeValueInfo: BalanceValueType): CrowdloanItemType {
-  const networkInfo = NETWORKS[networkName];
+function getItem(networkKey: string, contributeValueInfo: BalanceValueType): CrowdloanItemType {
+  const networkInfo = NETWORKS[networkKey];
   const groupDisplayName = GroupDisplayNameMap[networkInfo.group] || '';
   const {
     balanceValue,
@@ -34,18 +34,18 @@ function getItem(networkName: string, contributeValueInfo: BalanceValueType): Cr
   return {
     contribute: balanceValue,
     contributeToUsd: convertedBalanceValue,
-    logo: LogosMap[networkName],
+    logo: LogosMap[networkKey],
     networkDisplayName: networkInfo.chain,
-    networkName,
+    networkKey,
     symbol,
     groupDisplayName
   }
 }
 
-function getItems(networkNames: string[], crowdloanContributeMap: Record<string, BalanceValueType>, includeZeroBalance: boolean = false): CrowdloanItemType[] {
+function getItems(networkKeys: string[], crowdloanContributeMap: Record<string, BalanceValueType>, includeZeroBalance: boolean = false): CrowdloanItemType[] {
   const result: CrowdloanItemType[] = [];
 
-  networkNames.forEach(n => {
+  networkKeys.forEach(n => {
     const contributeValueInfo: BalanceValueType = crowdloanContributeMap[n]
       || {balanceValue: new BigN(0), convertedBalanceValue: new BigN(0)};
 
@@ -63,10 +63,10 @@ const mockCrowdloanContributeMap: Record<string, BalanceValueType> = {
 
 }
 
-function getmockCrowdloanContributeMap(networkNames: string[]): Record<string, BalanceValueType> {
+function getmockCrowdloanContributeMap(networkKeys: string[]): Record<string, BalanceValueType> {
   const result: Record<string, BalanceValueType> = {};
 
-  networkNames.forEach(n => {
+  networkKeys.forEach(n => {
     result[n] = {
       balanceValue: new BigN(50),
       convertedBalanceValue: new BigN(50),
@@ -105,7 +105,7 @@ function Crowdloans({items}: ContentProp): React.ReactElement<ContentProp> {
   return (
     <div className={`crowdloan-items-container`}>
       {items.map(item => (
-        <CrowdloanItem key={item.networkName} item={item}/>
+        <CrowdloanItem key={item.networkKey} item={item}/>
       ))}
     </div>
   )

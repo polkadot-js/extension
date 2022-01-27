@@ -4,7 +4,7 @@ import {AccountInfoByNetwork, BalanceInfo} from "@polkadot/extension-koni-ui/uti
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import React from "react";
 import styled from "styled-components";
-import {getLogoByNetworkName} from "@polkadot/extension-koni-ui/util";
+import {getLogoByNetworkKey} from "@polkadot/extension-koni-ui/util";
 import reformatAddress from "@polkadot/extension-koni-ui/util/reformatAddress";
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import BigN from "bignumber.js";
@@ -15,41 +15,41 @@ interface Props extends ThemeProps {
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
-    networkName: string,
+    networkKey: string,
     iconTheme: string,
     showExportButton: boolean
   }) => void;
 }
 
-function getAccountInfoByNetwork(address: string, networkName: string): AccountInfoByNetwork {
-  const networkInfo = NETWORKS[networkName];
+function getAccountInfoByNetwork(address: string, networkKey: string): AccountInfoByNetwork {
+  const networkInfo = NETWORKS[networkKey];
 
   return {
-    key: networkName,
-    networkName,
+    key: networkKey,
+    networkKey,
     networkDisplayName: networkInfo.chain,
     networkPrefix: networkInfo.ss58Format,
-    networkLogo: getLogoByNetworkName(networkName),
+    networkLogo: getLogoByNetworkKey(networkKey),
     networkIconTheme: networkInfo.isEthereum ? 'ethereum' : (networkInfo.icon || 'polkadot'),
     address: reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)
     // address: ''
   }
 }
 
-function getAccountInfoByNetworkMap(address: string, networkNames: string[]): Record<string, AccountInfoByNetwork> {
+function getAccountInfoByNetworkMap(address: string, networkKeys: string[]): Record<string, AccountInfoByNetwork> {
   const result: Record<string, AccountInfoByNetwork> = {};
 
-  networkNames.forEach(n => {
+  networkKeys.forEach(n => {
     result[n] = getAccountInfoByNetwork(address, n);
   });
 
   return result;
 }
 
-function getMockChainBalanceMaps(networkNames: string[]): Record<string, BalanceInfo> {
+function getMockChainBalanceMaps(networkKeys: string[]): Record<string, BalanceInfo> {
   const result: Record<string, BalanceInfo> = {};
 
-  networkNames.forEach(n => {
+  networkKeys.forEach(n => {
     result[n] = {
       balanceValue: new BigN(100),
       convertedBalanceValue: new BigN(100),

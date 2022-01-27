@@ -21,7 +21,7 @@ function getMockTransactionHistory() :TransactionHistoryItemType[] {
   return [
     {
       time: 1643194677273,
-      networkName: 'koni',
+      networkKey: 'koni',
       change: '1000000000000000',
       fee: '0000000100000000',
       isSuccess: true,
@@ -30,7 +30,7 @@ function getMockTransactionHistory() :TransactionHistoryItemType[] {
     },
     {
       time: 1643194677273,
-      networkName: 'koni',
+      networkKey: 'koni',
       change: '1000000000000000',
       isSuccess: true,
       action: 'send',
@@ -38,7 +38,7 @@ function getMockTransactionHistory() :TransactionHistoryItemType[] {
     },
     {
       time: 1643194677273,
-      networkName: 'koni',
+      networkKey: 'koni',
       change: '1000000000000000',
       fee: '0000000100000000',
       isSuccess: true,
@@ -47,7 +47,7 @@ function getMockTransactionHistory() :TransactionHistoryItemType[] {
     },
     {
       time: 1643194677273,
-      networkName: 'koni',
+      networkKey: 'koni',
       change: '0000000000000000',
       fee: '0000000100000000',
       isSuccess: false,
@@ -56,7 +56,7 @@ function getMockTransactionHistory() :TransactionHistoryItemType[] {
     },
     {
       time: 1643194677273,
-      networkName: 'koni',
+      networkKey: 'koni',
       change: '0000000000000000',
       fee: '0000000100000000',
       isSuccess: false,
@@ -92,19 +92,19 @@ function Wrapper({className, theme}: Props): React.ReactElement<Props> {
 
 function TransactionHistory({items, registryMap}: ContentProp): React.ReactElement<ContentProp> {
   const renderChainBalanceItem = (item: TransactionHistoryItemType, registryMap: Record<string, ChainRegistry>) => {
-    const {networkName} = item;
+    const {networkKey} = item;
 
     const {extrinsicHash} = item;
 
-    if (isSupportScanExplorer(networkName)) {
+    if (isSupportScanExplorer(networkKey)) {
       return (
-        <a href={getScanExplorerTransactionHistoryUrl(networkName, extrinsicHash)}
+        <a href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
            target={'_blank'}
            key={extrinsicHash}
            className={'transaction-item-wrapper'}>
           <TransactionHistoryItem
             item={item}
-            registry={registryMap[networkName]}
+            registry={registryMap[networkKey]}
           />
         </a>
       )
@@ -115,7 +115,7 @@ function TransactionHistory({items, registryMap}: ContentProp): React.ReactEleme
         <TransactionHistoryItem
           item={item}
           isSupportSubscan={false}
-          registry={registryMap[networkName]}
+          registry={registryMap[networkKey]}
         />
       </div>
     )

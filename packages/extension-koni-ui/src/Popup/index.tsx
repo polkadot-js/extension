@@ -174,7 +174,7 @@ export default function Popup (): React.ReactElement {
           networkPrefix: networkSelected.networkPrefix,
           icon: networkSelected.icon,
           genesisHash: networkSelected.value,
-          networkName: networkSelected.networkName,
+          networkKey: networkSelected.networkKey,
           isEthereum: networkSelected.isEthereum
         });
       }

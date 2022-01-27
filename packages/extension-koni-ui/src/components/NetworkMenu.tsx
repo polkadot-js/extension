@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   currentNetwork?: string;
-  selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkName: string) => void;
+  selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkKey: string) => void;
   isNotHaveAccount?: boolean;
 }
 
@@ -115,12 +115,12 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       <div className='network-item-list'>
         {
           filteredGenesisOptions && filteredGenesisOptions.length
-            ? filteredGenesisOptions.map(({ icon, networkName, networkPrefix, text, value }): React.ReactNode => (
+            ? filteredGenesisOptions.map(({ icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
               <div
                 className='network-item-container'
                 key={value}
                 onClick={() => {
-                  selectNetwork(value, networkPrefix, icon, networkName);
+                  selectNetwork(value, networkPrefix, icon, networkKey);
                 }}
               >
                 <img

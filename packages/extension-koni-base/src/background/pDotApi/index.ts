@@ -42,8 +42,8 @@ export const rpcsMap: Record<string, string> = getRpcsMap();
 function initapisMap (): Record<string, ApiProps> {
   const apisMap: Record<string, ApiProps> = {};
 
-  Object.keys(rpcsMap).forEach((networkName) => {
-    apisMap[networkName] = initApi(rpcsMap[networkName]);
+  Object.keys(rpcsMap).forEach((networkKey) => {
+    apisMap[networkKey] = initApi(rpcsMap[networkKey]);
   });
 
   return apisMap;

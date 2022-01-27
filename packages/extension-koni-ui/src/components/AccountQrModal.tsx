@@ -18,7 +18,7 @@ import {editAccount} from '@polkadot/extension-koni-ui/messaging';
 import HeaderEditName from '@polkadot/extension-koni-ui/partials/HeaderEditName';
 import {ThemeProps} from '@polkadot/extension-koni-ui/types';
 import {
-  getLogoByNetworkName,
+  getLogoByNetworkKey,
   getScanExplorerAddressInfoUrl,
   isSupportScanExplorer, toShort
 } from '@polkadot/extension-koni-ui/util';
@@ -34,7 +34,7 @@ interface Props extends ThemeProps {
   accountName: string | undefined | null;
   address: string;
   networkPrefix: number;
-  networkName: string;
+  networkKey: string;
   iconTheme: string;
   showExportButton: boolean
 }
@@ -48,7 +48,7 @@ function AccountQrModal({
                           accountName, address, className,
                           closeModal,
                           iconTheme,
-                          networkName,
+                          networkKey,
                           networkPrefix,
                           showExportButton
                         }: Props): React.ReactElement<Props> {
@@ -80,10 +80,10 @@ function AccountQrModal({
   );
 
   const formatted = useMemo(() => {
-    const networkInfo = NETWORKS[networkName];
+    const networkInfo = NETWORKS[networkKey];
 
     return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
-  }, [address, networkPrefix, networkName]);
+  }, [address, networkPrefix, networkKey]);
 
   return (
     <Modal
@@ -144,7 +144,7 @@ function AccountQrModal({
                 <img
                   alt='logo'
                   className={'koni-network-logo'}
-                  src={getLogoByNetworkName(networkName)}
+                  src={getLogoByNetworkKey(networkKey)}
                 />
                 {toShort(formatted, 13, 13)}
                 <img
@@ -156,11 +156,11 @@ function AccountQrModal({
             </div>
           </CopyToClipboard>
 
-          {isSupportScanExplorer(networkName)
+          {isSupportScanExplorer(networkKey)
             ? (
               <a
                 className='koni-buy-token-button'
-                href={getScanExplorerAddressInfoUrl(networkName, formatted)}
+                href={getScanExplorerAddressInfoUrl(networkKey, formatted)}
                 rel='noreferrer'
                 target='_blank'
               >

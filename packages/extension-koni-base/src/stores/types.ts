@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { u128 } from '@polkadot/types';
 
 export interface PriceJson {
   ready?: boolean,
@@ -10,15 +9,13 @@ export interface PriceJson {
 }
 
 export interface BalanceItem {
-  total: u128,
-  free: u128,
-  reserved: u128,
-  miscFrozen: u128,
-  feeFrozen: u128,
+  free: string,
+  reserved: string,
+  miscFrozen: string,
+  feeFrozen: string,
 }
 
 export interface BalanceJson {
   ready?: boolean,
-  total: BalanceItem,
   details: Record<string, BalanceItem>
 }

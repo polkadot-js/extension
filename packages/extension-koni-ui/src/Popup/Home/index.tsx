@@ -92,14 +92,14 @@ function Wrapper({className, theme}: WrapperProps): React.ReactElement {
 
 const MockCurrentNetwork = {
   networkPrefix: -1,
-  networkName: 'all',
+  networkKey: 'all',
   iconTheme: 'polkadot',
 }
 
 function Home({className, currentAccount}: Props): React.ReactElement {
   const {
     networkPrefix,
-    networkName,
+    networkKey,
     iconTheme
   } = MockCurrentNetwork;
   const {t} = useTranslation();
@@ -112,13 +112,13 @@ function Home({className, currentAccount}: Props): React.ReactElement {
   const [
     {
       networkPrefix: qrModalNetworkPrefix,
-      networkName: qrModalNetworkName,
+      networkKey: qrModalNetworkKey,
       iconTheme: qrModalIconTheme,
       showExportButton: qrModalShowExportButton
     }, setQrModalProps]
     = useState({
     networkPrefix,
-    networkName,
+    networkKey,
     iconTheme,
     showExportButton: true,
   });
@@ -133,7 +133,7 @@ function Home({className, currentAccount}: Props): React.ReactElement {
   const _showQrModal = (): void => {
     setQrModalProps({
         networkPrefix: networkPrefix,
-        networkName: networkName,
+        networkKey: networkKey,
         iconTheme: iconTheme,
         showExportButton: true
       });
@@ -227,7 +227,7 @@ function Home({className, currentAccount}: Props): React.ReactElement {
           address={address}
           accountName={currentAccount.name}
           networkPrefix={qrModalNetworkPrefix}
-          networkName={qrModalNetworkName}
+          networkKey={qrModalNetworkKey}
           iconTheme={qrModalIconTheme}
           showExportButton={qrModalShowExportButton}
         />

@@ -18,14 +18,14 @@ interface Props extends ThemeProps {
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
-    networkName: string,
+    networkKey: string,
     iconTheme: string,
     showExportButton: boolean
   }) => void;
 }
 
 function ChainBalanceItem({accountInfo, balanceInfo, className, setQrModalOpen, setQrModalProps}: Props): React.ReactElement<Props> {
-  const {networkName, address, networkPrefix, networkIconTheme} = accountInfo;
+  const {networkKey, address, networkPrefix, networkIconTheme} = accountInfo;
   const [toggleDetail, setToggleDetail] = useState(false);
   const {show} = useToast();
   const {t} = useTranslation();
@@ -43,7 +43,7 @@ function ChainBalanceItem({accountInfo, balanceInfo, className, setQrModalOpen, 
       e.stopPropagation();
       setQrModalProps({
         networkPrefix: networkPrefix,
-        networkName: networkName,
+        networkKey: networkKey,
         iconTheme: networkIconTheme,
         showExportButton: false
       });

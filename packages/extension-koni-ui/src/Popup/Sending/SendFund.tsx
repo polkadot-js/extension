@@ -25,7 +25,7 @@ function SendFund ({ className }: Props): React.ReactElement {
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
   const propSenderId = currentAccount?.address;
   const [recipientId, setRecipientId] = useState<string | null>('5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k');
-  const networkName = useSelector((state: RootState) => state.currentNetwork.networkName);
+  const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
   const [senderId, setSenderId] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<any | null>(null);
@@ -124,7 +124,7 @@ function SendFund ({ className }: Props): React.ReactElement {
         </div>
       ) : (
         <SendFundResult
-          networkName={networkName}
+          networkKey={networkKey}
           onResend={_onResend}
           txResult={txResult}
         />

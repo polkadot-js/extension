@@ -92,10 +92,10 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private subscribePrice (id: string, port: chrome.runtime.Port): boolean {
+  private subscribePrice (id: string, port: chrome.runtime.Port): Promise<PriceJson> {
     const cb = createSubscription<'pri(price.getSubscription)'>(id, port);
 
-    state.subscribePrice().subscribe({
+    const priceSubscription = state.subscribePrice().subscribe({
       next: (rs) => {
         cb(rs);
       }
@@ -103,9 +103,10 @@ export default class KoniExtension extends Extension {
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
+      priceSubscription.unsubscribe();
     });
 
-    return true;
+    return this.getPrice();
   }
 
   private validatePassword (json: KeyringPair$Json, password: string): boolean {
@@ -230,7 +231,7 @@ export default class KoniExtension extends Extension {
       case 'pri(price.getPrice)':
         return await this.getPrice();
       case 'pri(price.getSubscription)':
-        return this.subscribePrice(id, port);
+        return await this.subscribePrice(id, port);
       case 'pri(derivation.createV2)':
         return this.derivationCreateV2(request as RequestDeriveCreate);
       case 'pri(json.restoreV2)':

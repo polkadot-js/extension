@@ -1,26 +1,22 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { u128 } from '@polkadot/types';
-
 export interface PriceJson {
-  ready?: boolean;
-  currency: string;
-  priceMap: Record<string, number>;
+  ready?: boolean,
+  currency: string,
+  priceMap: Record<string, number>
 }
 
 export interface BalanceItem {
-  total: u128;
-  free: u128;
-  reserved: u128;
-  miscFrozen: u128;
-  feeFrozen: u128;
+  free: string,
+  reserved: string,
+  miscFrozen: string,
+  feeFrozen: string,
 }
 
 export interface BalanceJson {
-  ready?: boolean;
-  total: BalanceItem;
-  details: Record<string, BalanceItem>;
+  ready?: boolean,
+  details: Record<string, BalanceItem>
 }
 
 export interface RandomTestRequest {
@@ -33,6 +29,6 @@ export type RequestSubscribePrice = null
 
 export interface KoniRequestSignatures {
   'pri(price.getPrice)': [RequestPrice, PriceJson]
-  'pri(price.getSubscription)': [RequestSubscribePrice, boolean, PriceJson]
+  'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson]
   'pub(utils.getRandom)': [RandomTestRequest, number]
 }

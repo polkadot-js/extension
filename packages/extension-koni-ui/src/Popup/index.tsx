@@ -126,7 +126,9 @@ export default function Popup (): React.ReactElement {
   };
 
   useEffect((): void => {
-    getPrice().then(updatePrice).catch(console.error);
+    subscribePrice(null, updatePrice)
+      .then(updatePrice)
+      .catch(console.error);
   }, []);
 
   useEffect((): void => {
@@ -135,8 +137,7 @@ export default function Popup (): React.ReactElement {
       getAccountsWithCurrentAddress(handleGetAccountsWithCurrentAddress),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
-      subscribeSigningRequests(setSignRequests),
-      subscribePrice(null, updatePrice)
+      subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);
 
     uiSettings.on('change', (settings): void => {

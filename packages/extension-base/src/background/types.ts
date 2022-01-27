@@ -14,7 +14,6 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 import { TypeRegistry } from '@polkadot/types';
 import { Keyring } from '@polkadot/ui-keyring';
 
@@ -167,7 +166,6 @@ export interface SigningRequest {
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures extends KoniRequestSignatures {
   // private/internal requests, i.e. from a popup
-  'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];

@@ -14,7 +14,6 @@ import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -67,10 +66,6 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
     port.postMessage({ id, message, request: request || {} });
   });
-}
-
-export async function initApi (networkName: string): Promise<ApiInitStatus> {
-  return sendMessage('pri(api.init)', { networkName });
 }
 
 export async function editAccount (address: string, name: string): Promise<boolean> {
@@ -270,6 +265,6 @@ export async function getPrice (): Promise<PriceJson> {
   return sendMessage('pri(price.getPrice)', null);
 }
 
-export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<boolean> {
+export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<PriceJson> {
   return sendMessage('pri(price.getSubscription)', request, callback);
 }

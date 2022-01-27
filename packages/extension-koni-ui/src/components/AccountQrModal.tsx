@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faTimes } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useMemo, useState } from 'react';
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import React, {useCallback, useMemo, useState} from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import QRCode from 'react-qr-code';
 import styled from 'styled-components';
@@ -14,19 +14,22 @@ import Link from '@polkadot/extension-koni-ui/components/Link';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { editAccount } from '@polkadot/extension-koni-ui/messaging';
+import {editAccount} from '@polkadot/extension-koni-ui/messaging';
 import HeaderEditName from '@polkadot/extension-koni-ui/partials/HeaderEditName';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { getLogoByNetworkName, getScanExplorerAddressInfoUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
+import {ThemeProps} from '@polkadot/extension-koni-ui/types';
+import {
+  getLogoByNetworkName,
+  getScanExplorerAddressInfoUrl,
+  isSupportScanExplorer, toShort
+} from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
-import { IconTheme } from '@polkadot/react-identicon/types';
+import {IconTheme} from '@polkadot/react-identicon/types';
 
 import cloneLogo from '../assets/clone.svg';
 import pencil from '../assets/pencil.svg';
 
 interface Props extends ThemeProps {
   className?: string;
-  reference: React.MutableRefObject<null>;
   closeModal?: () => void;
   accountName: string | undefined | null;
   address: string;
@@ -41,29 +44,22 @@ interface EditState {
   toggleActions: number;
 }
 
-const toShortAddress = (_address: string | null, halfLength?: number) => {
-  const address = (_address || '').toString();
-
-  const addressLength = halfLength || 7;
-
-  return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
-};
-
-function BuyToken ({ accountName, address, className,
-  closeModal,
-  iconTheme,
-  networkName,
-  networkPrefix,
-  reference,
-  showExportButton }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
-  const { show } = useToast();
+function AccountQrModal({
+                          accountName, address, className,
+                          closeModal,
+                          iconTheme,
+                          networkName,
+                          networkPrefix,
+                          showExportButton
+                        }: Props): React.ReactElement<Props> {
+  const {t} = useTranslation();
+  const {show} = useToast();
   const [editedName, setName] = useState<string | undefined | null>(accountName);
-  const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
+  const [{isEditing}, setEditing] = useState<EditState>({isEditing: false, toggleActions: 0});
 
   const _toggleEdit = useCallback(
     (): void => {
-      setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions }));
+      setEditing(({toggleActions}) => ({isEditing: !isEditing, toggleActions: ++toggleActions}));
     },
     [isEditing]
   );
@@ -92,7 +88,6 @@ function BuyToken ({ accountName, address, className,
   return (
     <Modal
       className={className}
-      reference={reference}
     >
       <div className='buy-token-container'>
         <div className='buy-token-header'>
@@ -151,7 +146,7 @@ function BuyToken ({ accountName, address, className,
                   className={'koni-network-logo'}
                   src={getLogoByNetworkName(networkName)}
                 />
-                {toShortAddress(formatted, 13)}
+                {toShort(formatted, 13, 13)}
                 <img
                   alt='clone'
                   className='clone-logo'
@@ -198,7 +193,7 @@ function BuyToken ({ accountName, address, className,
   );
 }
 
-export default styled(BuyToken)(({ theme }: ThemeProps) => `
+export default styled(AccountQrModal)(({theme}: ThemeProps) => `
   .koni-modal {
     max-width: 460px;
   }

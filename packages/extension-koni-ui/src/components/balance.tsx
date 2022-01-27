@@ -26,13 +26,13 @@ export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma =
 
   const postfixValue = postfix || '00';
 
-  const symbolView = prefix && <span className='kn-balance-val__symbol'>{symbol}</span>;
+  const symbolView = prefix && <span className='balance-val__symbol'>{symbol}</span>;
 
   return (
-    <span className='kn-balance-val'>
-      {startWithSymbol && withSymbol && symbolView}<span className='kn-balance-val__prefix'>{withComma ? new Intl.NumberFormat().format(Number(prefix)) : prefix}</span>
+    <span className='balance-val'>
+      {startWithSymbol && withSymbol && symbolView}<span className='balance-val__prefix'>{withComma ? new Intl.NumberFormat().format(Number(prefix)) : prefix}</span>
 
-      .<span className='kn-balance-val__postfix'>
+      .<span className='balance-val__postfix'>
         {isString ? postfixValue.slice(0, -1) : postfixValue}
       </span>
       {isString && lastSymbol}

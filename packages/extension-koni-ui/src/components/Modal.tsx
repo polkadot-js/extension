@@ -14,10 +14,7 @@ interface Props {
 
 function Modal ({ children, className, reference }: Props): React.ReactElement<Props> {
   return (
-    <div
-      className={className}
-      ref={reference}
-    >
+    <div className={className} ref={reference}>
       <div className='subwallet-modal'>
         {children}
       </div>
@@ -49,7 +46,7 @@ export default styled(Modal)(({ theme }: ThemeProps) => `
       animation-duration: 0.3s;
       animation-name: anim_31638350639197;
       animation-timing-function: ease-out;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: ${theme.backDropColor};
     }
   }
 

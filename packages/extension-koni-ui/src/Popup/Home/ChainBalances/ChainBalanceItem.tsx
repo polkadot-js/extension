@@ -125,8 +125,8 @@ export default React.memo(styled(ChainBalanceItem)(({theme}: Props) => `
   .chain-balance-item__main-area {
     display: flex;
     font-size: 15px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 
   .chain-balance-item__detail-area,
@@ -140,12 +140,12 @@ export default React.memo(styled(ChainBalanceItem)(({theme}: Props) => `
     flex: 1;
     display: flex;
     overflow: hidden;
-    padding-left: 15px;
+    padding-left: 25px;
   }
 
   .chain-balance-item__main-area-part-2 {
     position: relative;
-    padding-right: 38px;
+    padding-right: 48px;
     text-align: right;
     cursor: pointer;
   }
@@ -204,7 +204,7 @@ export default React.memo(styled(ChainBalanceItem)(({theme}: Props) => `
     padding: 3.5px;
     transform: rotate(45deg);
     top: 7px;
-    right: 15px;
+    right: 25px;
   }
 
   .chain-balance-item__chain-name,
@@ -218,8 +218,8 @@ export default React.memo(styled(ChainBalanceItem)(({theme}: Props) => `
   }
 
   .chain-balance-item__separator {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 69px;
+    padding-right: 25px;
 
     &:before {
       content: '';

@@ -8,12 +8,24 @@ import styled from 'styled-components';
 import TabHeaders from "@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders";
 import {TFunction} from "react-i18next";
 import {TabHeaderItemType} from "@polkadot/extension-koni-ui/Popup/Home/types";
-import cryptoDark from '@polkadot/extension-koni-ui//assets/crypto.svg';
+import crypto from '@polkadot/extension-koni-ui/assets/home-tab-icon/crypto.svg';
+import cryptoActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crypto-active.svg';
+import nfts from '@polkadot/extension-koni-ui/assets/home-tab-icon/nfts.svg';
+import nftsActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/nfts-active.svg';
+import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
+import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
+import staking from '@polkadot/extension-koni-ui/assets/home-tab-icon/staking.svg';
+import stakingActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/staking-active.svg';
+import transfers from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers.svg';
+import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
+
 import AccountQrModal from "@polkadot/extension-koni-ui/components/AccountQrModal";
 import {AccountJson} from "@polkadot/extension-base/background/types";
 import ChainBalances from './ChainBalances/ChainBalances';
-import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
+import Crowdloans from './Crowdloans/Crowdloans';
+import StackingEmptyList from './Stacking/EmptyList';
+import NftsEmptyList from './Nfts/EmptyList';
 import BigN from 'bignumber.js';
 import {BalanceVal} from "@polkadot/extension-koni-ui/components/balance";
 import ActionButton from './ActionButton';
@@ -35,42 +47,42 @@ function getTabHeaderItems(t: TFunction): TabHeaderItemType[] {
     {
       tabId: 1,
       label: t('Crypto'),
-      lightIcon: cryptoDark,
-      darkIcon: cryptoDark,
-      activatedLightIcon: cryptoDark,
-      activatedDarkIcon: cryptoDark
+      lightIcon: crypto,
+      darkIcon: crypto,
+      activatedLightIcon: cryptoActive,
+      activatedDarkIcon: cryptoActive
     },
     {
       tabId: 2,
       label: t('NFTs'),
-      lightIcon: cryptoDark,
-      darkIcon: cryptoDark,
-      activatedLightIcon: cryptoDark,
-      activatedDarkIcon: cryptoDark
+      lightIcon: nfts,
+      darkIcon: nfts,
+      activatedLightIcon: nftsActive,
+      activatedDarkIcon: nftsActive
     },
     {
       tabId: 3,
       label: t('Crowdloans'),
-      lightIcon: cryptoDark,
-      darkIcon: cryptoDark,
-      activatedLightIcon: cryptoDark,
-      activatedDarkIcon: cryptoDark
+      lightIcon: crowdloans,
+      darkIcon: crowdloans,
+      activatedLightIcon: crowdloansActive,
+      activatedDarkIcon: crowdloansActive
     },
     {
       tabId: 4,
       label: t('Staking'),
-      lightIcon: cryptoDark,
-      darkIcon: cryptoDark,
-      activatedLightIcon: cryptoDark,
-      activatedDarkIcon: cryptoDark
+      lightIcon: staking,
+      darkIcon: staking,
+      activatedLightIcon: stakingActive,
+      activatedDarkIcon: stakingActive
     },
     {
       tabId: 5,
       label: t('Transfers'),
-      lightIcon: cryptoDark,
-      darkIcon: cryptoDark,
-      activatedLightIcon: cryptoDark,
-      activatedDarkIcon: cryptoDark
+      lightIcon: transfers,
+      darkIcon: transfers,
+      activatedLightIcon: transfersActive,
+      activatedDarkIcon: transfersActive
     }
   ]
 }
@@ -198,7 +210,7 @@ function Home({className, currentAccount}: Props): React.ReactElement {
         )}
 
         {activatedTab === 2 && (
-          <div>NFTs here</div>
+          <NftsEmptyList />
         )}
 
         {activatedTab === 3 && (
@@ -206,7 +218,7 @@ function Home({className, currentAccount}: Props): React.ReactElement {
         )}
 
         {activatedTab === 4 && (
-          <div>Stacking here</div>
+          <StackingEmptyList />
         )}
 
         {activatedTab === 5 && (
@@ -223,6 +235,7 @@ function Home({className, currentAccount}: Props): React.ReactElement {
 
       {isQrModalOpen && (
         <AccountQrModal
+          className='home__account-qr-modal'
           closeModal={_closeQrModal}
           address={address}
           accountName={currentAccount.name}
@@ -243,14 +256,19 @@ export default React.memo(styled(Wrapper)(({theme}: WrapperProps) => `
 
   .home-tab-contents {
     flex: 1;
+    overflow: auto;
   }
 
   .home-action-block {
     display: flex;
+    padding: 20px 25px;
   }
 
   .account-total-balance {
     flex: 1;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 44px;
   }
 
   .home-account-button-container {
@@ -259,5 +277,15 @@ export default React.memo(styled(Wrapper)(({theme}: WrapperProps) => `
 
   .action-button-wrapper {
     opacity: 1;
+    margin-right: 10px;
   }
+
+  .action-button-wrapper:last-child {
+    margin-right: 0;
+  }
+
+  .home__account-qr-modal .subwallet-modal {
+    max-width: 460px;
+  }
+
 `));

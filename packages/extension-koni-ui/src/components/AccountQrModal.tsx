@@ -86,31 +86,29 @@ function AccountQrModal({
   }, [address, networkPrefix, networkKey]);
 
   return (
-    <Modal
-      className={className}
-    >
-      <div className='buy-token-container'>
-        <div className='buy-token-header'>
+    <Modal className={className}>
+      <div className={'account-qr-modal'}>
+        <div className='account-qr-modal__header'>
           <FontAwesomeIcon
-            className='close-modal-btn__icon'
+            className='account-qr-modal__icon'
             icon={faTimes}
             onClick={closeModal}
           />
         </div>
-        <div className='koni-buy-token-content'>
+        <div className='account-qr-modal__content'>
           <Identicon
-            className='koni-buy-token-account-logo'
+            className='account-qr-modal__logo'
             iconTheme={iconTheme as IconTheme}
             prefix={networkPrefix}
             size={54}
             value={formatted}
           />
-          <div className='koni-buy-token-name'>
-            <div className='koni-buy-token-name__text'>
+          <div className='account-qr-modal-token-name'>
+            <div className='account-qr-modal-token-name__text'>
               {accountName}
             </div>
             <div
-              className='koni-buy-token-name__edit-btn'
+              className='account-qr-modal-token-name__edit-btn'
               onClick={_toggleEdit}
             >
               <img
@@ -121,7 +119,7 @@ function AccountQrModal({
             {isEditing && (
               <HeaderEditName
                 address={address}
-                className='edit-name'
+                className='account-qr-modal__edit-name'
                 isFocused
                 label={' '}
                 onBlur={_saveChanges}
@@ -129,7 +127,7 @@ function AccountQrModal({
               />
             )}
           </div>
-          <div className='koni-buy-token-qr-code'>
+          <div className='account-qr-modal__qr-code'>
             <QRCode
               size={140}
               value={formatted}
@@ -137,19 +135,19 @@ function AccountQrModal({
           </div>
           <CopyToClipboard text={formatted || ''}>
             <div
-              className='koni-buy-token-address'
+              className='account-qr-modal__address'
               onClick={_onCopy}
             >
-              <div className='koni-buy-token-address__text'>
+              <div className='account-qr-modal__address-text'>
                 <img
                   alt='logo'
-                  className={'koni-network-logo'}
+                  className={'account-qr-modal__network-logo'}
                   src={getLogoByNetworkKey(networkKey)}
                 />
                 {toShort(formatted, 13, 13)}
                 <img
                   alt='clone'
-                  className='clone-logo'
+                  className='account-qr-modal__clone-logo'
                   src={cloneLogo}
                 />
               </div>
@@ -159,19 +157,19 @@ function AccountQrModal({
           {isSupportScanExplorer(networkKey)
             ? (
               <a
-                className='koni-buy-token-button'
+                className='account-qr-modal-button'
                 href={getScanExplorerAddressInfoUrl(networkKey, formatted)}
                 rel='noreferrer'
                 target='_blank'
               >
-                <div className='koni-buy-token-button__text'>
+                <div className='account-qr-modal-button__text'>
                   {t<string>('View Account on Explorer')}
                 </div>
               </a>
             )
             : (
-              <span className='koni-buy-token-button -disabled'>
-                <div className='koni-buy-token-button__text'>
+              <span className='account-qr-modal-button -disabled'>
+                <div className='account-qr-modal-button__text'>
                   {t<string>('View Account on Explorer')}
                 </div>
               </span>
@@ -179,10 +177,10 @@ function AccountQrModal({
 
           {showExportButton && (
             <Link
-              className='koni-buy-token-button'
+              className='account-qr-modal-button'
               to={`/account/export/${formatted}`}
             >
-              <div className='koni-buy-token-button__text'>
+              <div className='account-qr-modal-button__text'>
                 {t<string>('Export Private Key')}
               </div>
             </Link>
@@ -194,41 +192,35 @@ function AccountQrModal({
 }
 
 export default styled(AccountQrModal)(({theme}: ThemeProps) => `
-  .koni-modal {
-    max-width: 460px;
-  }
-
-  .buy-token-container {
+  .account-qr-modal {
     position: relative;
   }
-  .buy-token-header {
+
+  .account-qr-modal__header {
     position: absolute;
     top: -5px;
     right: -5px;
     cursor: pointer;
   }
 
-  .close-modal-btn {
+  .account-qr-modal__icon {
     cursor: pointer;
-
-    &__icon {
-      color: ${theme.textColor};
-    }
+    color: ${theme.textColor};
   }
 
-  .koni-buy-token-content {
+  .account-qr-modal__content {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .koni-buy-token-account-logo {
+  .account-qr-modal__logo {
     margin-top: 11px;
     width: 58px;
     height: 58px;
   }
 
-  .koni-network-logo {
+  .account-qr-modal__network-logo {
     width: 20px;
     height: 20px;
     border: 1px solid #fff;
@@ -237,64 +229,64 @@ export default styled(AccountQrModal)(({theme}: ThemeProps) => `
     background-color: #fff;
   }
 
-  .koni-buy-token-name {
+  .account-qr-modal-token-name {
     margin-top: 3px;
     display: flex;
     align-items: center;
     position: relative;
-
-    &__text {
-      font-size: 18px;
-      line-height: 30px;
-      font-weight: 500;
-      margin-right: 5px;
-      max-width: 200px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    &__edit-btn {
-      height: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-    }
   }
 
-  .koni-buy-token-qr-code {
+  .account-qr-modal-token-name__text {
+    font-size: 18px;
+    line-height: 30px;
+    font-weight: 500;
+    margin-right: 5px;
+    max-width: 200px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .account-qr-modal-token-name__edit-btn {
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .account-qr-modal__qr-code {
     margin: 20px 0;
     border: 2px solid #fff;
   }
 
-  .koni-buy-token-address {
+  .account-qr-modal__address {
     border-radius: 8px;
     background-color: ${theme.backgroundAccountAddress};
     width: 100%;
     margin-bottom: 15px;
     cursor: pointer;
-
-    &__text {
-      font-size: 15px;
-      line-height: 26px;
-      color: ${theme.textColor2};
-      max-width: 100%;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      padding: 11px 43px 11px 43px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
   }
 
-  .clone-logo {
+  .account-qr-modal__address-text {
+    font-size: 15px;
+    line-height: 26px;
+    color: ${theme.textColor2};
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 11px 43px 11px 43px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .account-qr-modal__clone-logo {
     padding-left: 10px;
   }
 
-  .koni-buy-token-button {
+  .account-qr-modal-button {
     width: 320px;
     padding: 11px;
     display: flex;
@@ -305,24 +297,24 @@ export default styled(AccountQrModal)(({theme}: ThemeProps) => `
     margin-bottom: 10px;
     cursor: pointer;
     text-decoration: none;
-
-    &__text {
-      font-size: 16px;
-      line-height: 26px;
-      font-weight: 500;
-      color: ${theme.textColor3};
-    }
   }
 
-  .koni-buy-token-button.-disabled {
+  .account-qr-modal-button__text {
+    font-size: 16px;
+    line-height: 26px;
+    font-weight: 500;
+    color: ${theme.textColor3};
+  }
+
+  .account-qr-modal-button.-disabled {
     cursor: not-allowed;
 
-    .koni-buy-token-button__text {
+    .account-qr-modal-button__text {
       opacity: 0.5;
     }
   }
 
-  .edit-name {
+  .account-qr-modal__edit-name {
     position: absolute;
     flex: 1;
     left: calc(50% - 120px);

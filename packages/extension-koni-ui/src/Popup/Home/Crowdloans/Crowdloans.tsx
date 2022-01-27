@@ -14,6 +14,7 @@ interface Props extends ThemeProps {
 }
 
 interface ContentProp {
+  className?: string;
   items: CrowdloanItemType[];
 }
 
@@ -77,7 +78,7 @@ function getmockCrowdloanContributeMap(networkKeys: string[]): Record<string, Ba
   return result;
 }
 
-function Wrapper(): React.ReactElement<Props> {
+function Wrapper({className}: Props): React.ReactElement<Props> {
   const mockNetworks = [
     'statemint',
     'acala',
@@ -92,18 +93,18 @@ function Wrapper(): React.ReactElement<Props> {
     'bifrost',
   ];
 
-  const items: CrowdloanItemType[] = getItems(mockNetworks, getmockCrowdloanContributeMap(mockNetworks));
+  const items: CrowdloanItemType[] = [];
 
   if (!items.length) {
     return <CrowdloanEmptyList/>
   }
 
-  return <Crowdloans items={items}/>
+  return <Crowdloans className={className} items={items}/>
 }
 
-function Crowdloans({items}: ContentProp): React.ReactElement<ContentProp> {
+function Crowdloans({items, className}: ContentProp): React.ReactElement<ContentProp> {
   return (
-    <div className={`crowdloan-items-container`}>
+    <div className={`crowdloan-items-container ${className}`}>
       {items.map(item => (
         <CrowdloanItem key={item.networkKey} item={item}/>
       ))}

@@ -79,18 +79,15 @@ function Wrapper({className, theme}: Props): React.ReactElement<Props> {
   const items: TransactionHistoryItemType[] = getMockTransactionHistory();
   const registryMap: Record<string, ChainRegistry> = getMockRegistryMap();
 
-  return (
-    <div className={`-wrapper ${className}`}>
-      {items && items.length ? (<TransactionHistory
-          items={items}
-          registryMap={registryMap}/>)
-        : (<TransactionHistoryEmptyList />)
-      }
-    </div>
-  );
+  // if (!items.length) {
+    return (<TransactionHistoryEmptyList />)
+  // }
+  //
+  //
+  // return (<TransactionHistory items={items} registryMap={registryMap} className={className}/>)
 }
 
-function TransactionHistory({items, registryMap}: ContentProp): React.ReactElement<ContentProp> {
+function TransactionHistory({items, registryMap, className}: ContentProp): React.ReactElement<ContentProp> {
   const renderChainBalanceItem = (item: TransactionHistoryItemType, registryMap: Record<string, ChainRegistry>) => {
     const {networkKey} = item;
 
@@ -122,9 +119,9 @@ function TransactionHistory({items, registryMap}: ContentProp): React.ReactEleme
   };
 
   return (
-    <>
+    <div className={`transaction-history ${className}`}>
       {items.map(item => renderChainBalanceItem(item, registryMap))}
-    </>
+    </div>
   );
 }
 

@@ -1,17 +1,28 @@
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import React from "react";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import transactionHistoryComingSoon from "../../../assets/transaction-history-coming-soon.png";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+
+import transactionHistoryComingSoon from '../../../assets/transaction-history-coming-soon.png';
+
 interface Props extends ThemeProps {
   className?: string;
 }
 
-function TransactionHistoryEmptyList({className}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function TransactionHistoryEmptyList ({ className }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
-    <div className={`${className} empty-list transaction-history-empty-list`}>
-      <img src={transactionHistoryComingSoon} alt="Empty" className='empty-list__img'/>
+    <div className={`${className? className : ''} empty-list transaction-history-empty-list`}>
+      <img
+        alt='Empty'
+        className='empty-list__img'
+        src={transactionHistoryComingSoon}
+      />
       <div className='empty-list__text'>{t<string>('Transactions will appear here')}</div>
     </div>
   );

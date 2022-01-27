@@ -33,7 +33,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
     } else {
       setSelected(false);
     }
-  }, [address]);
+  }, [address, currentAccount?.address]);
 
   const _changeAccount = useCallback(
     () => {

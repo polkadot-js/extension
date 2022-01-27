@@ -14,7 +14,10 @@ interface Props {
 
 function Modal ({ children, className, reference }: Props): React.ReactElement<Props> {
   return (
-    <div className={className} ref={reference}>
+    <div
+      className={className}
+      ref={reference}
+    >
       <div className='subwallet-modal'>
         {children}
       </div>

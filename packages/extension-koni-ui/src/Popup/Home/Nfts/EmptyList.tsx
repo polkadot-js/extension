@@ -1,17 +1,26 @@
-import React from "react";
-import styled from "styled-components";
-import nftsEmptyData from "@polkadot/extension-koni-ui/assets/nft-coming-soon.png";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import nftsEmptyData from '@polkadot/extension-koni-ui/assets/nft-coming-soon.png';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 
 interface Props {
   className?: string;
 }
 
-function NftsEmptyList({className}: Props): React.ReactElement {
-  const {t} = useTranslation();
+function NftsEmptyList ({ className }: Props): React.ReactElement {
+  const { t } = useTranslation();
+
   return (
-    <div className={`${className} empty-list nfts-empty-list`}>
-      <img src={nftsEmptyData} alt="Empty" className='empty-list__img'/>
+    <div className={`${className ? className : ''} empty-list nfts-empty-list`}>
+      <img
+        alt='Empty'
+        className='empty-list__img'
+        src={nftsEmptyData}
+      />
       <div className='empty-list__text'>
         <div>{t<string>('Your NFTs will appear here')}</div>
         <div>{t<string>('Coming Soon...')}</div>
@@ -43,4 +52,4 @@ export default styled(NftsEmptyList)`
     text-align: center;
     font-weight: 500;
   }
-`
+`;

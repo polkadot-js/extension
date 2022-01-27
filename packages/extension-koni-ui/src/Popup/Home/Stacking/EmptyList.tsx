@@ -1,18 +1,27 @@
-import React from "react";
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import stackingEmptyData from "@polkadot/extension-koni-ui/assets/stacking-empty-list.png";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import stackingEmptyData from '@polkadot/extension-koni-ui/assets/stacking-empty-list.png';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-function StackingEmptyList({className}: Props): React.ReactElement {
-  const {t} = useTranslation();
+function StackingEmptyList ({ className }: Props): React.ReactElement {
+  const { t } = useTranslation();
+
   return (
-    <div className={`${className} empty-list stacking-empty-list`}>
-      <img src={stackingEmptyData} alt="Empty" className='empty-list__img'/>
+    <div className={`${className ? className : ''} empty-list stacking-empty-list`}>
+      <img
+        alt='Empty'
+        className='empty-list__img'
+        src={stackingEmptyData}
+      />
       <div className='empty-list__text'>{t<string>('No staking data was recorded')}</div>
     </div>
   );
@@ -41,4 +50,4 @@ export default styled(StackingEmptyList)`
     text-align: center;
     font-weight: 500;
   }
-`
+`;

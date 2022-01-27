@@ -1,13 +1,17 @@
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import ChainBalanceItem from "@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem";
-import {AccountInfoByNetwork, BalanceInfo} from "@polkadot/extension-koni-ui/util/types";
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import React from "react";
-import styled from "styled-components";
-import {getLogoByNetworkKey} from "@polkadot/extension-koni-ui/util";
-import reformatAddress from "@polkadot/extension-koni-ui/util/reformatAddress";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import BigN from 'bignumber.js';
+import React from 'react';
+import styled from 'styled-components';
+
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import BigN from "bignumber.js";
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
+import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
+import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 interface Props extends ThemeProps {
   address: string;
@@ -21,7 +25,7 @@ interface Props extends ThemeProps {
   }) => void;
 }
 
-function getAccountInfoByNetwork(address: string, networkKey: string): AccountInfoByNetwork {
+function getAccountInfoByNetwork (address: string, networkKey: string): AccountInfoByNetwork {
   const networkInfo = NETWORKS[networkKey];
 
   return {
@@ -33,23 +37,23 @@ function getAccountInfoByNetwork(address: string, networkKey: string): AccountIn
     networkIconTheme: networkInfo.isEthereum ? 'ethereum' : (networkInfo.icon || 'polkadot'),
     address: reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)
     // address: ''
-  }
+  };
 }
 
-function getAccountInfoByNetworkMap(address: string, networkKeys: string[]): Record<string, AccountInfoByNetwork> {
+function getAccountInfoByNetworkMap (address: string, networkKeys: string[]): Record<string, AccountInfoByNetwork> {
   const result: Record<string, AccountInfoByNetwork> = {};
 
-  networkKeys.forEach(n => {
+  networkKeys.forEach((n) => {
     result[n] = getAccountInfoByNetwork(address, n);
   });
 
   return result;
 }
 
-function getMockChainBalanceMaps(networkKeys: string[]): Record<string, BalanceInfo> {
+function getMockChainBalanceMaps (networkKeys: string[]): Record<string, BalanceInfo> {
   const result: Record<string, BalanceInfo> = {};
 
-  networkKeys.forEach(n => {
+  networkKeys.forEach((n) => {
     result[n] = {
       balanceValue: new BigN(100),
       convertedBalanceValue: new BigN(100),
@@ -81,18 +85,18 @@ function getMockChainBalanceMaps(networkKeys: string[]): Record<string, BalanceI
           symbol: 'Unit',
           convertedBalanceValue: new BigN(0),
           balanceValue: new BigN(0)
-        },
+        }
       ],
       detailBalances: [],
-      symbol: "Unit"
+      symbol: 'Unit'
     };
   });
 
   return result;
 }
 
-function ChainBalances({className, setQrModalOpen, setQrModalProps, address}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function ChainBalances ({ address, className, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const networks: string[] = [
     'polkadot',
     'kusama',
@@ -103,7 +107,7 @@ function ChainBalances({className, setQrModalOpen, setQrModalProps, address}: Pr
     'astar',
     'parallel',
     'clover',
-    'hydradx',
+    'hydradx'
   ];
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> = getAccountInfoByNetworkMap(address, networks);
   const chainBalanceMaps: Record<string, BalanceInfo> = getMockChainBalanceMaps(networks);
@@ -114,36 +118,37 @@ function ChainBalances({className, setQrModalOpen, setQrModalProps, address}: Pr
 
     return (
       <ChainBalanceItem
-        accountInfo={info} key={info.key}
+        accountInfo={info}
         balanceInfo={balanceInfo}
-        setQrModalProps={setQrModalProps}
+        key={info.key}
         setQrModalOpen={setQrModalOpen}
+        setQrModalProps={setQrModalProps}
       />
     );
   };
 
   return (
-    <div className={`chain-balances-container ${className}`}>
-      <div className="chain-balances-container__body">
+    <div className={`chain-balances-container ${className? className : ''}`}>
+      <div className='chain-balances-container__body'>
         {networks.map((network) => renderChainBalanceItem(network))}
       </div>
-      <div className="chain-balances-container__footer">
+      <div className='chain-balances-container__footer'>
         <div>
-          <div className="chain-balances-container__footer-row-1">
+          <div className='chain-balances-container__footer-row-1'>
             {t<string>("Don't see your token?")}
           </div>
-          <div className="chain-balances-container__footer-row-2">
-            <div className="chain-balances-container__footer-action">{t<string>("Refresh list")}</div>
-            <span>&nbsp;{t<string>("or")}&nbsp;</span>
-            <div className="chain-balances-container__footer-action">{t<string>("import tokens")}</div>
+          <div className='chain-balances-container__footer-row-2'>
+            <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div>
+            <span>&nbsp;{t<string>('or')}&nbsp;</span>
+            <div className='chain-balances-container__footer-action'>{t<string>('import tokens')}</div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default React.memo(styled(ChainBalances)(({theme}: Props) => `
+export default React.memo(styled(ChainBalances)(({ theme }: Props) => `
   .chain-balances-container {
     display: flex;
     flex-direction: column;

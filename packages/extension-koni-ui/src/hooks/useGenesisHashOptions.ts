@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {getAllNetworkMetadata} from '../messaging';
 
+import { getAllNetworkMetadata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
 
@@ -39,6 +39,7 @@ export default function (): networkSelectOption[] {
             group: metadata.group,
             isEthereum: metadata.isEthereum
           }));
+
         setMetadatachains(res);
       }
     }).catch(console.error);

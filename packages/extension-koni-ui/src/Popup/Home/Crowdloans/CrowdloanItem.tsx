@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
@@ -15,7 +15,7 @@ interface Props extends ThemeProps {
 
 function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
   return (
-    <div className={`crowdloan-item ${className}`}>
+    <div className={`crowdloan-item ${className ? className : ''}`}>
       <div className='crowdloan-item__part-1'>
         <img
           alt='Logo'

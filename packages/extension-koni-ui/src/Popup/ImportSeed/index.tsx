@@ -73,7 +73,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   );
 
   return (
-    <>
+    <div className={className}>
       <HeaderWithSteps
         onBackClick={_onBackClick}
         step={step1 ? 1 : 2}
@@ -103,7 +103,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           />
         )
       }
-    </>
+    </div>
 
   );
 }

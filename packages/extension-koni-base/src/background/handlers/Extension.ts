@@ -3,8 +3,9 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import {AccountsWithCurrentAddress, NetWorkMetadataDef, PriceJson} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, NetWorkMetadataDef, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -14,7 +15,6 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
-import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 
 const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 

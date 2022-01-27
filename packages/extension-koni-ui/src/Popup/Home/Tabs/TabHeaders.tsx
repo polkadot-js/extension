@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext } from 'react';
@@ -19,7 +19,7 @@ function TabHeaders ({ activatedItem, className, items, onSelectItem }: Props): 
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   return (
-    <div className={`tab-headers ${className}`}>
+    <div className={`tab-headers ${className? className : ''}`}>
       {items.map((item) => (
         <TabHeaderItem
           isActivated={activatedItem === item.tabId}

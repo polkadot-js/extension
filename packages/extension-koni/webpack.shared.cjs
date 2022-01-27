@@ -55,7 +55,8 @@ module.exports = (entry, alias = {}) => ({
     chunkFilename: '[name].js',
     filename: '[name].js',
     globalObject: '(typeof self !== \'undefined\' ? self : this)',
-    path: path.join(__dirname, 'build')
+    path: path.join(__dirname, 'build'),
+    publicPath: ''
   },
   performance: {
     hints: false

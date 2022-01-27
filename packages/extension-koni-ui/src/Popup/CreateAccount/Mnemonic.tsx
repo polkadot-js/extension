@@ -19,9 +19,9 @@ import useTranslation from '../../hooks/useTranslation';
 interface Props extends ThemeProps {
   onNextStep: () => void;
   seed: string;
-  address?: any;
-  genesisHash?: any;
-  name?: any;
+  address?: string;
+  genesisHash?: string;
+  name?: string;
   className?: string;
 }
 

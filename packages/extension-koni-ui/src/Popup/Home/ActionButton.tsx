@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useState } from 'react';
@@ -11,7 +11,7 @@ let tooltipId = 0;
 
 interface Props extends ThemeProps {
   className?: string;
-  onClick?: any;
+  onClick?: () => void;
   tooltipContent?: string;
   iconSrc: string;
 }
@@ -22,7 +22,7 @@ function HomeActionButton ({ className, iconSrc, onClick, tooltipContent }: Prop
   return (
     <>
       <div
-        className={`home-action-button action-button ${className}`}
+        className={`home-action-button action-button ${className || ''}`}
         data-for={trigger}
         data-tip={true}
         onClick={onClick}

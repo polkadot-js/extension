@@ -1,18 +1,27 @@
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import React from "react";
-import crowdloansEmptyData from "@polkadot/extension-koni-ui/assets/crowdloans-empty-list.png";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import crowdloansEmptyData from '@polkadot/extension-koni-ui/assets/crowdloans-empty-list.png';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-function CrowdloanEmptyList({className}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function CrowdloanEmptyList ({ className }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
     <div className={`${className} empty-list crowdloan-empty-list`}>
-      <img src={crowdloansEmptyData} alt="Empty" className='empty-list__img'/>
+      <img
+        alt='Empty'
+        className='empty-list__img'
+        src={crowdloansEmptyData}
+      />
       <div className='empty-list__text'>{t<string>('Your crowdloans will appear here')}</div>
     </div>
   );
@@ -42,4 +51,3 @@ export default styled(CrowdloanEmptyList)`
     font-weight: 500;
   }
 `;
-

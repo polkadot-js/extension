@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import chains from '../util/chains';
-import {NetWorkMetadataDef} from '@polkadot/extension-base/background/KoniTypes';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-function getNetworkMetadataMap(networkMetaDataItems: NetWorkMetadataDef[]): Record<string, NetWorkMetadataDef> {
+import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+
+import chains from '../util/chains';
+
+function getNetworkMetadataMap (networkMetaDataItems: NetWorkMetadataDef[]): Record<string, NetWorkMetadataDef> {
   const result: Record<string, NetWorkMetadataDef> = {};
 
-  networkMetaDataItems.forEach(item => {
+  networkMetaDataItems.forEach((item) => {
     result[item.networkKey] = item;
-  })
+  });
 
   return result;
 }
@@ -22,11 +24,11 @@ const networkMetadataSlice = createSlice({
   name: 'networkMetadata',
   reducers: {
     updateNetworkMetadata (state, action: PayloadAction<NetWorkMetadataDef[]>) {
-      const {payload} = action;
+      const { payload } = action;
 
-      payload.forEach(item => {
+      payload.forEach((item) => {
         state[item.networkKey] = item;
-      })
+      });
     }
   }
 });

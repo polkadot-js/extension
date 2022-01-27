@@ -1,6 +1,6 @@
-// // Copyright 2017-2022 @polkadot/apps-config authors & contributors
-// // SPDX-License-Identifier: Apache-2.0
-//
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // // structs need to be in order
 // /* eslint-disable sort-keys */
 //

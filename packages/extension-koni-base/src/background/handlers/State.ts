@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { BalanceJson, PriceJson, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { BalanceJson, CurrentAccountInfo, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import BalanceStore from '@polkadot/extension-koni-base/stores/Balance';

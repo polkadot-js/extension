@@ -47,6 +47,7 @@
     "react-i18next": "^11.15.3",
     "react-is": "^17.0.2",
     "react-lazyload": "^3.2.0",
+    "react-loading-skeleton": "^3.0.2",
     "react-qr-code": "^2.0.3",
     "react-redux": "^7.2.6",
     "react-router": "^5.2.1",

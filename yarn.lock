@@ -2722,6 +2722,7 @@ __metadata:
     react-i18next: ^11.15.3
     react-is: ^17.0.2
     react-lazyload: ^3.2.0
+    react-loading-skeleton: ^3.0.2
     react-qr-code: ^2.0.3
     react-redux: ^7.2.6
     react-router: ^5.2.1
@@ -14015,6 +14016,15 @@ __metadata:
     react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     react-dom: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 871a88c698a80c53ead85c293b493ac67c94e5980590094128c371e3f1e3d5bc17841ead1e7830771c87ece7fe677a6c9c323f3e6ce392a5f6f0328a36c38fe7
+  languageName: node
+  linkType: hard
+
+"react-loading-skeleton@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "react-loading-skeleton@npm:3.0.2"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 0c8ebdd533ca9d943d336c8f09c440034008133b3a889e5932ffc2ebc9a75c22c771f2b6e8e9151bab6bd3a441e5c9798d36100bc8077e49bc2a3c507b05c88e
   languageName: node
   linkType: hard
 

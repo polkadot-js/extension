@@ -66,8 +66,8 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
       className={className}
       onClick={_changeAccount}
     >
-      <StakingContainer/>
-      {/*<NftContainer/>*/}
+      {/*<StakingContainer/>*/}
+      <NftContainer/>
       {/*{isSelected*/}
       {/*  ? (*/}
       {/*    <img*/}

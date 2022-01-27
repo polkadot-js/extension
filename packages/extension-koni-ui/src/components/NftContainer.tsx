@@ -6,21 +6,29 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import styled from 'styled-components';
 import Spinner from "@polkadot/extension-koni-ui/components/Spinner";
 import NftCollection from "@polkadot/extension-koni-ui/components/NftCollection";
-import logo from '../assets/sub-wallet-logo.svg';
+import NftCollectionPreview from "./NftCollectionPreview";
 // @ts-ignore
 import LazyLoad from 'react-lazyload';
+import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faArrowRight} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   className?: string;
 }
 
 function NftContainer ({className}: Props): React.ReactElement<Props> {
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount)
+  // const nftStore = useSelector((state: RootState) => state.nft)
   const [nftJson, setNftJson] = useState()
   const [nftList, setNftList] = useState()
   const [loading, setLoading] = useState(false)
   const [chosenCollection, setChosenCollection] = useState()
   const [showCollectionDetail, setShowCollectionDetail] = useState(false)
+  const [totalCollection, setTotalCollection] = useState(0)
+  const [page, setPage] = useState(1)
+  const [size, setSize] = useState(9)
+  const [currentNftList, setCurrentNftList] = useState()
 
   const _onCreate = useCallback(
     (): void => {
@@ -29,8 +37,13 @@ function NftContainer ({className}: Props): React.ReactElement<Props> {
         getNft(currentAccount.address).then(r => {
           // @ts-ignore
           setNftJson(r)
+          const nftList = r?.nftList
+          const total = nftList.length
           // @ts-ignore
-          setNftList(r?.nftList)
+          setNftList(nftList)
+          setTotalCollection(total)
+          // @ts-ignore
+          setCurrentNftList(nftList.slice(0, total > 9 ? 9 : total))
           store.dispatch({type: 'nft', payload: r})
           setLoading(false)
         }).catch(e => {
@@ -52,36 +65,35 @@ function NftContainer ({className}: Props): React.ReactElement<Props> {
     setChosenCollection(data)
   }
 
-  const NftCollectionPreview = (data: any, index: React.Key | null | undefined) => {
-    return (
-      <LazyLoad key={index}>
-        <div
-          className={'nft-preview'}
-          style={{height:'164px'}}
-          onClick={() => handleShowCollectionDetail(data)}
-        >
-          <img
-            src={data.image ? data?.image : logo}
-            className={'collection-thumbnail'}
-            alt={'collection-thumbnail'}
-            style={{borderRadius: '5px 5px 0 0'}}
-          />
+  const onPreviousClick = () => {
+    if (page === 1) return
+    const prevPage = page - 1
+    const from = (prevPage - 1) * size
+    const to = from + size
 
-          <div className={'collection-title'}>
-            <div className={'collection-name'} title={data.collectionName ? data.collectionName : data?.collectionId}>
-              {/*show only first 10 characters*/}
-              {data.collectionName ? data.collectionName : data?.collectionId}
-            </div>
-            <div className={'collection-item-count'}>{data?.nftItems.length}</div>
-          </div>
-        </div>
-      </LazyLoad>
-    )
+    setPage(prevPage)
+    setCurrentNftList(nftList.slice(from, to))
+  }
+
+  const onNextClick = () => {
+    const nextPage = page + 1
+    const from = (nextPage - 1) * size
+    const to = from + size
+    if (from > totalCollection) return
+
+    setPage(nextPage)
+    setCurrentNftList(nftList.slice(from, to))
   }
 
   return (
     <div className={className}>
       {loading && <Spinner className={'spinner'}/>}
+
+      {!loading &&
+      <div className={'total-title'}>
+        You own {nftJson?.total} NFTs from {totalCollection} collections
+      </div>
+      }
 
       {
         !showCollectionDetail &&
@@ -89,9 +101,11 @@ function NftContainer ({className}: Props): React.ReactElement<Props> {
           {
             !loading && nftList &&
             // @ts-ignore
-            nftList.map((item: any, index: React.Key | null | undefined) => {
+            currentNftList.map((item: any, index: React.Key | null | undefined) => {
               // @ts-ignore
-              return NftCollectionPreview(item, index)
+              return <div key={index}>
+                <NftCollectionPreview data={item} onClick={handleShowCollectionDetail}/>
+              </div>
             })
           }
         </div>
@@ -99,9 +113,34 @@ function NftContainer ({className}: Props): React.ReactElement<Props> {
 
       {
         showCollectionDetail &&
-          <NftCollection data={chosenCollection} onClickBack={() => setShowCollectionDetail(false)}/>
+          <LazyLoad>
+            <NftCollection data={chosenCollection} onClickBack={() => setShowCollectionDetail(false)}/>
+          </LazyLoad>
       }
 
+      {
+        !loading && !showCollectionDetail &&
+        <div className={'pagination'}>
+          <div
+            className={'nav-item'}
+            onClick={() => onPreviousClick()}
+          >
+            <FontAwesomeIcon
+              className='arrowLeftIcon'
+              icon={faArrowLeft}
+            />
+          </div>
+          <div
+            className={'nav-item'}
+            onClick={() => onNextClick()}
+          >
+            <FontAwesomeIcon
+              className='arrowLeftIcon'
+              icon={faArrowRight}
+            />
+          </div>
+        </div>
+      }
 
       {!loading &&
         <div className={'footer'}>
@@ -117,6 +156,32 @@ function NftContainer ({className}: Props): React.ReactElement<Props> {
 
 export default styled(NftContainer)(({theme}: ThemeProps) => `
   width: 100%;
+
+  .nav-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 5px;
+    background-color: #181E42;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+  }
+
+  .nav-item:hover {
+    cursor: pointer;
+  }
+
+  .pagination {
+    margin-top: 25px;
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .total-title {
+    margin-bottom: 20px;
+  }
 
   .spinner {
     margin-top: 50px;
@@ -148,47 +213,5 @@ export default styled(NftContainer)(({theme}: ThemeProps) => `
   .link:hover {
     text-decoration: underline;
     cursor: pointer;
-  }
-
-  .nft-preview {
-    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
-    width: 124px;
-    &:hover {
-      cursor: pointer;
-    }
-
-    .collection-thumbnail {
-      display: block;
-      height: 124px;
-      width: 124px;
-      object-fit: cover;
-    }
-
-    .collection-name {
-      width: 70%
-      text-transform: capitalize;
-      font-size: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .collection-title {
-      height: 40px;
-      padding-left: 10px;
-      padding-right: 10px;
-      display: flex;
-      align-items: center;
-      background-color: #181E42;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
-      border-radius: 0 0 5px 5px;
-    }
-
-    .collection-item-count {
-      font-size: 14px;
-      margin-left: 5px;
-      font-weight: normal;
-      color: #7B8098;
-    }
   }
 `);

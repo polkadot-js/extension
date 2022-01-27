@@ -4,7 +4,8 @@ import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import NftItem from "@polkadot/extension-koni-ui/components/NftItem";
-import logo from '../assets/sub-wallet-logo.svg';
+import LazyLoad from 'react-lazyload';
+import NftItemPreview from "@polkadot/extension-koni-ui/components/NftItemPreview";
 
 interface Props {
   className?: string;
@@ -19,23 +20,6 @@ function NftCollection ({className, data, onClickBack}: Props): React.ReactEleme
   const handleShowItem = (data: any) => {
     setChosenItem(data)
     setShowItemDetail(true)
-  }
-
-  const NftItemPreview = (itemData: any) => {
-    return (
-      <div
-        className={'nft-preview'}
-        style={{height:'124px'}}
-        onClick={() => handleShowItem(itemData)}
-      >
-        <img
-          src={itemData.image ? itemData?.image : logo}
-          className={'collection-thumbnail'}
-          alt={'collection-thumbnail'}
-          style={{borderRadius: '5px'}}
-        />
-      </div>
-    )
   }
 
   return (
@@ -63,7 +47,9 @@ function NftCollection ({className, data, onClickBack}: Props): React.ReactEleme
             {
               data?.nftItems.length > 0 &&
               data?.nftItems.map((item: any, index: React.Key | null | undefined) => {
-                return NftItemPreview(item)
+                return <div key={index}>
+                  <NftItemPreview data={item} onClick={handleShowItem}/>
+                </div>
               })
             }
           </div>
@@ -71,7 +57,10 @@ function NftCollection ({className, data, onClickBack}: Props): React.ReactEleme
       }
 
       {
-        showItemDetail && <NftItem data={chosenItem} onClickBack={() => setShowItemDetail(false)}/>
+        showItemDetail &&
+        <LazyLoad>
+          <NftItem data={chosenItem} onClickBack={() => setShowItemDetail(false)}/>
+        </LazyLoad>
       }
 
     </div>
@@ -120,45 +109,5 @@ export default styled(NftCollection)(({theme}: ThemeProps) => `
     color: #7B8098;
   }
 
-  .nft-preview {
-    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
-    width: 124px;
-    &:hover {
-      cursor: pointer;
-    }
 
-    .collection-thumbnail {
-      display: block;
-      height: 124px;
-      width: 124px;
-      object-fit: cover;
-    }
-
-    .collection-name {
-      width: 70%
-      text-transform: capitalize;
-      font-size: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .collection-title {
-      height: 40px;
-      padding-left: 10px;
-      padding-right: 10px;
-      display: flex;
-      align-items: center;
-      background-color: #181E42;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
-      border-radius: 0 0 5px 5px;
-    }
-
-    .collection-item-count {
-      font-size: 14px;
-      margin-left: 5px;
-      font-weight: normal;
-      color: #7B8098;
-    }
-  }
 `);

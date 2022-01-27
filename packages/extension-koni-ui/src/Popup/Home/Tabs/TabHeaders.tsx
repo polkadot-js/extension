@@ -35,7 +35,7 @@ function TabHeaders ({ activatedItem, className, items, onSelectItem }: Props): 
 
 export default styled(TabHeaders)(({ theme }: Props) => `
   display: flex;
-  border-top: 2px solid #212845;
+  border-top: 2px solid ${theme.borderColor2};
 
   .tab-header-item {
     flex: 1;

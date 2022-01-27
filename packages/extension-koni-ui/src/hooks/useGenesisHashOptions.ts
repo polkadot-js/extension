@@ -9,7 +9,7 @@ import useTranslation from './useTranslation';
 export default interface networkSelectOption {
   text: string;
   value: string;
-  networkName: string;
+  networkKey: string;
   networkPrefix: number;
   icon: string;
   group: string;
@@ -41,7 +41,7 @@ export default function (): networkSelectOption[] {
     {
       text: t('Allow use on any chain'),
       value: '',
-      networkName: 'all',
+      networkKey: 'all',
       networkPrefix: -1,
       icon: 'substrate',
       group: '',
@@ -49,20 +49,20 @@ export default function (): networkSelectOption[] {
     },
     // put the relay chains at the top
     ...chains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash, group, icon, isEthereum, networkName, ss58Format }) => ({
+      .map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
-        networkName,
+        networkKey,
         icon,
         group,
         isEthereum
       })),
-    ...chains.map(({ chain, genesisHash, group, icon, isEthereum, networkName, ss58Format }) => ({
+    ...chains.map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
-      networkName,
+      networkKey,
       icon,
       group,
       isEthereum

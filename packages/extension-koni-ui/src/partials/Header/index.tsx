@@ -128,18 +128,18 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
         : recodeAddress(currentAccount?.address, accounts, chain, settings));
   }, [accounts, currentAccount?.address, chain, settings]);
 
-  const getNetworkName = useCallback(
+  const getNetworkKey = useCallback(
     (genesisHash: string) => {
-      let networkName = '';
+      let networkKey = '';
 
       if (currentAccount) {
         genesisHash = genesisHash || '';
         const currentNetwork = genesisOptions.find((opt) => opt.value === genesisHash);
 
-        networkName = currentNetwork ? currentNetwork.text : '';
+        networkKey = currentNetwork ? currentNetwork.text : '';
       }
 
-      return networkName;
+      return networkKey;
     }, [currentAccount?.genesisHash]
   );
 
@@ -158,7 +158,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   ) as IconTheme;
 
   const _onChangeGenesis = useCallback(
-    async (genesisHash: string, networkPrefix: number, icon: string, networkName: string, isEthereum: boolean): Promise<void> => {
+    async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
         await tieAccount(currentAccount.address, genesisHash || null);
 
@@ -166,7 +166,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
           networkPrefix,
           icon,
           genesisHash,
-          networkName,
+          networkKey,
           isEthereum
         });
       }
@@ -238,7 +238,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                 src={getLogoByGenesisHash(currentAccount?.genesisHash as string)}
               />
               <div className='network-select-item__text'>
-                {getNetworkName(currentAccount?.genesisHash as string) || genesisOptions[0].text}
+                {getNetworkKey(currentAccount?.genesisHash as string) || genesisOptions[0].text}
               </div>
               <FontAwesomeIcon
                 className='network-select-item__icon'

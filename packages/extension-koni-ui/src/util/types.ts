@@ -43,7 +43,7 @@ export type BalanceSubInfo = {
 
 export type AccountInfoByNetwork = {
   key: string;
-  networkName: string;
+  networkKey: string;
   networkDisplayName: string;
   networkPrefix: number;
   networkLogo: string;

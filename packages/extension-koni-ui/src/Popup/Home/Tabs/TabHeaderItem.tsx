@@ -68,8 +68,7 @@ export default styled(TabHeaderItem)(({ theme }: Props) => `
     flex-direction: column;
     align-items: center;
     position: relative;
-    padding-left: 4px;
-    padding-right: 4px;
+    padding: 18px 4px;
   }
 
   .tab-header-item__content-wrapper:before {
@@ -92,6 +91,9 @@ export default styled(TabHeaderItem)(({ theme }: Props) => `
   }
 
   .tab-header-item__label {
-
+    font-size: 13px;
+    line-height: 20px;
+    color: ${theme.textColor2};
+    font-weight: 400;
   }
 `);

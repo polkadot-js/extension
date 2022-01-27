@@ -27,7 +27,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
   const { t } = useTranslation();
 
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
-  const networkName = useSelector((state: RootState) => state.currentNetwork.networkName);
+  const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
 
   return (
     <Menu
@@ -71,7 +71,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
         </Link>
       </div>
 
-      {(networkName === 'all') && !!toggleZeroBalances && (
+      {(networkKey === 'all') && !!toggleZeroBalances && (
         <>
           <MenuDivider />
 

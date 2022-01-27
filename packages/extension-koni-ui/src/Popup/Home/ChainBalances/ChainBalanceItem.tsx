@@ -1,19 +1,15 @@
-// [object Object]
-// SPDX-License-Identifier: Apache-2.0
-
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import styled from 'styled-components';
-
 import cloneIcon from '@polkadot/extension-koni-ui/assets/clone.svg';
 import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
-import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
+import {ThemeProps} from "@polkadot/extension-koni-ui/types";
+import {AccountInfoByNetwork, BalanceInfo} from "@polkadot/extension-koni-ui/util/types";
+import useToast from "@polkadot/extension-koni-ui/hooks/useToast";
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { toShort } from '@polkadot/extension-koni-ui/util';
-import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
+import {BalanceVal} from "@polkadot/extension-koni-ui/components/balance";
+import {toShort} from "@polkadot/extension-koni-ui/util";
+import styled from "styled-components";
+import ChainBalanceItemRow from "@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -22,94 +18,68 @@ interface Props extends ThemeProps {
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
-    networkName: string,
+    networkKey: string,
     iconTheme: string,
     showExportButton: boolean
   }) => void;
 }
 
-function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
-  const { address, networkIconTheme, networkName, networkPrefix } = accountInfo;
+function ChainBalanceItem({accountInfo, balanceInfo, className, setQrModalOpen, setQrModalProps}: Props): React.ReactElement<Props> {
+  const {networkKey, address, networkPrefix, networkIconTheme} = accountInfo;
   const [toggleDetail, setToggleDetail] = useState(false);
-  const { show } = useToast();
-  const { t } = useTranslation();
+  const {show} = useToast();
+  const {t} = useTranslation();
 
   const _onCopy = (e: React.MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    show(t('Copied'));
-  };
+      e.stopPropagation();
+      show(t('Copied'));
+    };
 
   const _onToggleDetail = (e: React.MouseEvent<HTMLElement>) => {
-    setToggleDetail((toggleDetail) => !toggleDetail);
+    setToggleDetail(toggleDetail => !toggleDetail);
   };
 
   const _openQr = (e: React.MouseEvent<HTMLElement>) => {
-    e.stopPropagation();
-    setQrModalProps({
-      networkPrefix: networkPrefix,
-      networkName: networkName,
-      iconTheme: networkIconTheme,
-      showExportButton: false
-    });
-    setQrModalOpen(true);
-  };
+      e.stopPropagation();
+      setQrModalProps({
+        networkPrefix: networkPrefix,
+        networkKey: networkKey,
+        iconTheme: networkIconTheme,
+        showExportButton: false
+      });
+      setQrModalOpen(true);
+    };
 
   return (
-    <div
-      className={`${className} ${toggleDetail ? '-show-detail' : ''}`}
-      onClick={_onToggleDetail}
-    >
+    <div className={`${className} ${toggleDetail ? '-show-detail' : ''}`} onClick={_onToggleDetail}>
       <div className='chain-balance-item__main-area'>
         <div className='chain-balance-item__main-area-part-1'>
-          <img
-            alt={'Logo'}
-            className='chain-balance-item__logo'
-            src={accountInfo.networkLogo}
-          />
+          <img src={accountInfo.networkLogo} alt={'Logo'} className='chain-balance-item__logo' />
 
           <div className='chain-balance-item__meta-wrapper'>
             <div className='chain-balance-item__chain-name'>{accountInfo.networkDisplayName}</div>
             <div className='chain-balance-item__bottom-area'>
               <CopyToClipboard text={address}>
-                <div
-                  className='chain-balance-item__address'
-                  onClick={_onCopy}
-                >
+                <div className='chain-balance-item__address' onClick={_onCopy}>
                   <span className='chain-balance-item__address-text'>{toShort(address)}</span>
-                  <img
-                    alt='copy'
-                    className='chain-balance-item__copy'
-                    src={cloneIcon}
-                  />
+                  <img src={cloneIcon} alt="copy" className='chain-balance-item__copy' />
                 </div>
               </CopyToClipboard>
-              <img
-                alt='receive'
-                className='chain-balance-item__receive'
-                onClick={_openQr}
-                src={receivedIcon}
-              />
+              <img src={receivedIcon} alt="receive" className='chain-balance-item__receive' onClick={_openQr} />
             </div>
           </div>
         </div>
 
         <div className='chain-balance-item__main-area-part-2'>
-          <div className='chain-balance-item__balance'>
-            <BalanceVal
-              symbol={balanceInfo.symbol}
-              value={balanceInfo.balanceValue}
-            />
+          <div className="chain-balance-item__balance">
+            <BalanceVal value={balanceInfo.balanceValue} symbol={balanceInfo.symbol} />
           </div>
-          <div className='chain-balance-item__value'>
-            <BalanceVal
-              startWithSymbol
-              symbol={'$'}
-              value={balanceInfo.convertedBalanceValue}
-            />
+          <div className="chain-balance-item__value">
+            <BalanceVal value={balanceInfo.convertedBalanceValue} symbol={'$'} startWithSymbol />
           </div>
 
           {(!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
-            <div className='chain-balance-item__toggle' />
+            <div className="chain-balance-item__toggle" />
           )}
         </div>
       </div>
@@ -119,10 +89,7 @@ function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen
           <div className='chain-balance-item__separator' />
           <div className='chain-balance-item__detail-area'>
             {balanceInfo.detailBalances.map((d) => (
-              <ChainBalanceItemRow
-                item={d}
-                key={d.key}
-              />
+              <ChainBalanceItemRow item={d} key={d.key} />
             ))}
           </div>
         </>
@@ -133,10 +100,7 @@ function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen
           <div className='chain-balance-item__separator' />
           <div className='chain-balance-item__detail-area'>
             {balanceInfo.childrenBalances.map((c) => (
-              <ChainBalanceItemRow
-                item={c}
-                key={c.key}
-              />
+              <ChainBalanceItemRow item={c} key={c.key} />
             ))}
           </div>
         </>
@@ -146,7 +110,7 @@ function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen
   );
 }
 
-export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
+export default React.memo(styled(ChainBalanceItem)(({theme}: Props) => `
   //border: 2px solid ${theme.boxBorderColor};
   border-radius: 8px;
   color: ${theme.textColor2};
@@ -161,8 +125,8 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
   .chain-balance-item__main-area {
     display: flex;
     font-size: 15px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 
   .chain-balance-item__detail-area,
@@ -176,12 +140,12 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
     flex: 1;
     display: flex;
     overflow: hidden;
-    padding-left: 15px;
+    padding-left: 25px;
   }
 
   .chain-balance-item__main-area-part-2 {
     position: relative;
-    padding-right: 38px;
+    padding-right: 48px;
     text-align: right;
     cursor: pointer;
   }
@@ -240,7 +204,7 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
     padding: 3.5px;
     transform: rotate(45deg);
     top: 7px;
-    right: 15px;
+    right: 25px;
   }
 
   .chain-balance-item__chain-name,
@@ -254,8 +218,8 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
   }
 
   .chain-balance-item__separator {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 69px;
+    padding-right: 25px;
 
     &:before {
       content: '';

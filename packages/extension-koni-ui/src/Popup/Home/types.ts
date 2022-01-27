@@ -4,7 +4,7 @@
 import BigN from 'bignumber.js';
 
 export type CrowdloanItemType = {
-  networkName: string;
+  networkKey: string;
   contribute: string | BigN;
   contributeToUsd: string | BigN;
   networkDisplayName: string;

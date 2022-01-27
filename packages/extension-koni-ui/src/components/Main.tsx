@@ -22,7 +22,7 @@ function Main ({ children, className }: Props): React.ReactElement<Props> {
 export default styled(Main)(({ theme }: ThemeProps) => `
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 2px);
+  height: 100vh;
   background: ${theme.background};
   color: ${theme.textColor};
   font-size: ${theme.fontSize};

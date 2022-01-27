@@ -176,7 +176,7 @@ export default function Popup (): React.ReactElement {
           networkPrefix: networkSelected.networkPrefix,
           icon: networkSelected.icon,
           genesisHash: networkSelected.value,
-          networkName: networkSelected.networkName,
+          networkKey: networkSelected.networkKey,
           isEthereum: networkSelected.isEthereum
         });
       }
@@ -230,7 +230,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
-                          <Route path='/account/test'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
+                          <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

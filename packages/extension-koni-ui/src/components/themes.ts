@@ -13,7 +13,7 @@ const darkTheme = {
   backButtonBackground: '#3A3B41',
   backButtonBackgroundHover: '#3a3b41ad',
   backButtonTextColor: '#FFFFFF',
-  backDropColor: 'rgba(0, 0, 0, 0.5)',
+  backDropColor: 'rgba(255, 255, 255, 0.5)',
   background: '#010414',
   backgroundAccountAddress: '#262C4A',
   backgroundDropdownSeclection: 'rgba(0, 7, 45, .7)',
@@ -21,6 +21,7 @@ const darkTheme = {
   borderRadius: '3px',
   boxBorderColor: '#343849',
   borderColor: '#EEEEEE',
+  borderColor2: '#212845',
   boxMargin: '0.75rem 0',
   boxPadding: '0 0.25rem',
   boxShadow: 'rgba(0, 0, 0, 0.86)',
@@ -89,7 +90,7 @@ const darkTheme = {
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
   scrollBarThumb: 'rgba(128, 135, 139, .8)',
   scrollBarThumbInactive: 'rgba(145, 150, 171, .5)',
-  scrollBarThumbHover: '#9196AB'
+  scrollBarThumbHover: '#9196AB',
 };
 
 export declare type Theme = typeof darkTheme;
@@ -101,11 +102,12 @@ const lightTheme: Theme = {
   backButtonBackground: '#D7D7D7',
   backButtonBackgroundHover: '#d7d7d7ad',
   backButtonTextColor: '#454545',
-  backDropColor: 'rgba(255, 255, 255, 0.5)',
+  backDropColor: 'rgba(0, 0, 0, 0.5)',
   background: '#FFFFFF',
   backgroundAccountAddress: '#F5F5F5',
   backgroundDropdownSeclection: 'rgba(0,0,0,.03)',
   bodyColor: '#FFFFFF',
+  borderColor2: '#EEEEEE',
   boxBorderColor: '#EEEEEE',
   boxShadow: 'rgba(0, 0, 0, 0.3)',
   boxShadow2: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 20px 60px rgba(0, 0, 0, 0.15)',
@@ -147,7 +149,8 @@ const lightTheme: Theme = {
   toggleInactiveBgc: '#ddd',
   toggleInactiveThumbColor: '#fff',
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
-  scrollBarThumb: 'rgba(0, 0, 0, .25)'
+  scrollBarThumb: 'rgba(0, 0, 0, .25)',
+
 };
 
 export const themes = {

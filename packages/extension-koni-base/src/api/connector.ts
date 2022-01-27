@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
+import { getChainMetadata } from './rpc_api';
 
 import { NetWorkInfo } from './types';
+// import networks from "@polkadot/extension-koni-base/api/endpoints";
+// import unique_types from "@polkadot/extension-koni-base/api/unique_nft/runtime_types";
 import {getChainMetadata} from "@polkadot/extension-koni-base/api/rpc_api";
 
-export const wsProvider = async ({ provider }: NetWorkInfo | any, type?: any): Promise<ApiPromise> => {
+export const wsProvider = async ({ provider }: NetWorkInfo): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const wsProvider = new WsProvider(provider);
 
-  return ApiPromise.create({ provider: wsProvider, types: type });
+  return ApiPromise.create({ provider: wsProvider });
 };
 
 // Return an array of apis with the order like the input
@@ -53,4 +56,4 @@ export const connectChains = async (targetChains: Array<any>): Promise<any[] | u
   })
 
   return await Promise.all(apiPromises)
-};
+}

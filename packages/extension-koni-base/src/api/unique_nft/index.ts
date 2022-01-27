@@ -53,7 +53,7 @@ function hexToUTF16(hex: string): Uint8Array {
 }
 
 export default class UniqueNftApi {
-   api: ApiPromise = new ApiPromise();
+   api : ApiPromise| null = null
 
    constructor() {
    }
@@ -64,7 +64,8 @@ export default class UniqueNftApi {
    }
 
    public async disconnect() {
-      this.api.disconnect();
+     if(this.api)
+        await this.api.disconnect();
    }
 
    /**
@@ -75,6 +76,7 @@ export default class UniqueNftApi {
     * @returns the array of NFTs
     */
    public async getAddressTokens(collectionId: number, owner: string): Promise<any> {
+      if(!this.api) return
       const data = (await this.api.query.nft.addressTokens(collectionId, owner)).toJSON();
       return data;
    }
@@ -87,6 +89,7 @@ export default class UniqueNftApi {
     * @returns the URL of the token image
     */
    public async getNftImageUrl(collectionId: number, tokenId: string) {
+      if(!this.api) return
       const collection = (await this.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection
 
       let url = '';
@@ -116,6 +119,7 @@ export default class UniqueNftApi {
     * @returns tokenData: Token data object
     */
    public async getNftData(collectionId: number, tokenId: string, locale = "en") {
+      if(!this.api) return
       const collection = (await this.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
       const schemaRead = hexToStr(collection.ConstOnChainSchema);
       const token = (await this.api.query.nft.nftItemList(collectionId, tokenId)).toJSON() as unknown as Token;

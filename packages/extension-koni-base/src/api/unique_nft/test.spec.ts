@@ -27,6 +27,6 @@ describe('test get unique nft api', () => {
       expect(tokenData?.owner).toEqual('5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb')
     }
 
-    api.disconnect();
+    await api.disconnect();
   })
 })

@@ -228,6 +228,13 @@ const networks: Record<string, NetWorkInfo> = {
     ss58Format: -1,
     provider: 'PROVIDER',
     group: 'NOT_SURE'
+  },
+  uniqueNft: {
+    chain: 'Unique TestNet 2.0',
+    genesisHash: 'UNKNOWN',
+    ss58Format: -1,
+    provider: 'wss://testnet2.uniquenetwork.io',
+    group: 'NOT_SURE'
   }
 };
 

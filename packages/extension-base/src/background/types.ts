@@ -82,7 +82,7 @@ export interface NetWorkInfo {
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
-  networkName: string;
+  networkKey: string;
   group: string
   isEthereum: boolean;
 }
@@ -132,7 +132,7 @@ export type CurrentAccContext = {
 }
 
 export type CurrentNetworkInfo = {
-  networkName: string;
+  networkKey: string;
   networkPrefix: number;
   icon: string;
   genesisHash: string;
@@ -248,7 +248,7 @@ export interface RequestAuthorizeTab {
 }
 
 export interface RequestApi {
-  networkName: string;
+  networkKey: string;
 }
 
 export interface RequestAuthorizeApprove {
@@ -516,7 +516,7 @@ export interface ResponseAuthorizeList {
 
 export interface TransactionHistoryItemType {
   time: number;
-  networkName: string;
+  networkKey: string;
   change: string;
   fee?: string;
   isSuccess: boolean;
@@ -526,16 +526,16 @@ export interface TransactionHistoryItemType {
 
 export interface RequestTransactionHistoryGet {
   address: string;
-  networkName: string;
+  networkKey: string;
 }
 
 export interface RequestTransactionHistoryGetByMultiNetworks {
   address: string;
-  networkNames: string[];
+  networkKeys: string[];
 }
 
 export interface RequestTransactionHistoryAdd {
   address: string;
-  networkName: string;
+  networkKey: string;
   item: TransactionHistoryItemType;
 }

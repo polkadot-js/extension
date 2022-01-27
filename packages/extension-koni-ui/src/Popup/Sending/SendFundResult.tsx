@@ -15,7 +15,7 @@ import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@po
 export interface Props extends ThemeProps {
   className?: string;
   txResult: TxResult;
-  networkName: string;
+  networkKey: string;
   onResend: () => void
 }
 
@@ -31,7 +31,7 @@ function getErrorMessage (txError?: Error | null): string | null {
   return null;
 }
 
-function SendFundResult ({ className, networkName, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
+function SendFundResult ({ className, networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useContext(ActionContext);
   const _backToHome = useCallback(
@@ -41,12 +41,12 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
     [navigate]
   );
 
-  const viewTransactionBtn = (networkName: string, extrinsicHash: string) => {
-    if (isSupportScanExplorer(networkName)) {
+  const viewTransactionBtn = (networkKey: string, extrinsicHash: string) => {
+    if (isSupportScanExplorer(networkKey)) {
       return (
         <a
           className='send-fund-result__stt-btn send-fund-result__view-history-btn'
-          href={getScanExplorerTransactionHistoryUrl(networkName, extrinsicHash)}
+          href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
           rel='noreferrer'
           target={'_blank'}
         >
@@ -84,7 +84,7 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
             {t<string>('Back To Home')}
           </Button>
 
-          {extrinsicHash && viewTransactionBtn(networkName, extrinsicHash)}
+          {extrinsicHash && viewTransactionBtn(networkKey, extrinsicHash)}
         </div>
         : <div className='send-fund-result'>
           <img
@@ -111,7 +111,7 @@ function SendFundResult ({ className, networkName, onResend, txResult: { extrins
             {t<string>('Resend')}
           </Button>
 
-          {extrinsicHash && viewTransactionBtn(networkName, extrinsicHash)}
+          {extrinsicHash && viewTransactionBtn(networkKey, extrinsicHash)}
         </div>
       }
     </div>

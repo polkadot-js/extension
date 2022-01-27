@@ -44,11 +44,11 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
 
 export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
 
-export function getLogoByNetworkName (networkName: string): string {
-  return LogosMap[networkName] || LogosMap.default;
+export function getLogoByNetworkKey (networkKey: string): string {
+  return LogosMap[networkKey] || LogosMap.default;
 }
 
-export const subscanByNetworkName: Record<string, string> = {
+export const subscanByNetworkKey: Record<string, string> = {
   acala: 'https://acala.subscan.io',
   // 'altair': 'https://altair.subscan.io',
   astar: 'https://astar.subscan.io',
@@ -104,36 +104,36 @@ export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';
 
 export const moonriverScanUrl = 'https://moonriver.moonscan.io';
 
-export function isSupportSubscan (networkName: string): boolean {
-  return !!subscanByNetworkName[networkName];
+export function isSupportSubscan (networkKey: string): boolean {
+  return !!subscanByNetworkKey[networkKey];
 }
 
-export function isSupportScanExplorer (networkName: string): boolean {
-  return ['moonbeam', 'moonriver'].includes(networkName) || isSupportSubscan(networkName);
+export function isSupportScanExplorer (networkKey: string): boolean {
+  return ['moonbeam', 'moonriver'].includes(networkKey) || isSupportSubscan(networkKey);
 }
 
-export function getScanExplorerTransactionHistoryUrl (networkName: string, hash: string): string {
-  if (networkName === 'moonbeam') {
+export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string): string {
+  if (networkKey === 'moonbeam') {
     return `${moonbeamScanUrl}/tx/${hash}`;
   }
 
-  if (networkName === 'moonriver') {
+  if (networkKey === 'moonriver') {
     return `${moonriverScanUrl}/tx/${hash}`;
   }
 
-  return `${subscanByNetworkName[networkName]}/extrinsic/${hash}`;
+  return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
 }
 
-export function getScanExplorerAddressInfoUrl (networkName: string, address: string): string {
-  if (networkName === 'moonbeam') {
+export function getScanExplorerAddressInfoUrl (networkKey: string, address: string): string {
+  if (networkKey === 'moonbeam') {
     return `${moonbeamScanUrl}/address/${address}`;
   }
 
-  if (networkName === 'moonriver') {
+  if (networkKey === 'moonriver') {
     return `${moonriverScanUrl}/address/${address}`;
   }
 
-  return `${subscanByNetworkName[networkName]}/account/${address}`;
+  return `${subscanByNetworkKey[networkKey]}/account/${address}`;
 }
 
 export { toAddress } from './toAddress';

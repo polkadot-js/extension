@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps } from '@polkadot/extension-base/background/types';
+import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama/api';
 
 import NETWORKS from '../../api/endpoints';
@@ -26,7 +26,7 @@ export function connectDotSamaApis (networks = NETWORKS): Record<string, ApiProp
   Object.keys(networks).forEach((networkKey) => {
     const network = networks[networkKey];
 
-    if (!network.genesisHash || network.genesisHash.toLowerCase() === 'unknown') {
+    if (!network.genesisHash || network.genesisHash.toLowerCase() === 'unknown' || !network.provider) {
       return;
     }
 

@@ -1,12 +1,16 @@
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import React from "react";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-function CrowdloanEmptyList({className}: Props): React.ReactElement<Props> {
+function CrowdloanEmptyList ({ className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       Empty list
@@ -14,5 +18,4 @@ function CrowdloanEmptyList({className}: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(CrowdloanEmptyList)(({theme}: Props) => ``);
-
+export default styled(CrowdloanEmptyList)(({ theme }: Props) => '');

@@ -7,7 +7,7 @@ import type { Compact } from '@polkadot/types';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { ChainRegistry } from '@polkadot/extension-koni-base/api/types';
+import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
 import { BN_ZERO, formatBalance } from '@polkadot/util';
 
 import { useTranslation } from './translate';

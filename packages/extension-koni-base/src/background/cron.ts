@@ -3,8 +3,9 @@
 
 import { Subject } from 'rxjs';
 
+import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { CRON_REFRESH_PRICE_INTERVAL } from '@polkadot/extension-koni-base/constants';
-import { refreshPrice } from '@polkadot/extension-koni-base/cron/price';
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -42,6 +43,16 @@ export class KoniCron {
   }
 
   init () {
-    this.addCron('refreshPrice', refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+    this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+  }
+
+  refreshPrice () {
+    getTokenPrice()
+      .then((rs) => {
+        state.setPrice(rs, () => {
+          console.log('Get Token Price From CoinGecko');
+        });
+      })
+      .catch((err) => console.log(err));
   }
 }

@@ -3,8 +3,8 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AccountsWithCurrentAddress, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import { AccountsWithCurrentAddress, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -230,7 +230,7 @@ export default class KoniExtension extends Extension {
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
       case 'pri(price.getPrice)':
         return await this.getPrice();
-      case 'pri(price.getSubscription)':
+      case '♦':
         return await this.subscribePrice(id, port);
       case 'pri(derivation.createV2)':
         return this.derivationCreateV2(request as RequestDeriveCreate);

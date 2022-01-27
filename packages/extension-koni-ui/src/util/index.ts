@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AccountJson, AccountWithChildren, NetWorkInfo } from '@polkadot/extension-base/background/types';
+import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import { Recoded } from '@polkadot/extension-koni-ui/types';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
@@ -11,7 +12,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 export * from './common';
 export * from './chainBalancesApi';
 
-//todo: Refactor this file
+// todo: Refactor this file
 
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();

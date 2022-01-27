@@ -1,25 +1,30 @@
-import React, {useContext, useState} from 'react';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import AddAccount from "@polkadot/extension-koni-ui/Popup/Accounts/AddAccount";
-import {AccountContext, Link} from "@polkadot/extension-koni-ui/components";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {Header} from "@polkadot/extension-koni-ui/partials";
-import styled from 'styled-components';
-import TabHeaders from "@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders";
-import {TFunction} from "react-i18next";
-import {TabHeaderItemType} from "@polkadot/extension-koni-ui/Popup/Home/types";
-import cryptoDark from '@polkadot/extension-koni-ui//assets/crypto.svg';
-import AccountQrModal from "@polkadot/extension-koni-ui/components/AccountQrModal";
-import {AccountJson} from "@polkadot/extension-base/background/types";
-import ChainBalances from './ChainBalances/ChainBalances';
-import Crowdloans from './Crowdloans/Crowdloans';
-import TransactionHistory from './TransactionHistory/TransactionHistory';
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
 import BigN from 'bignumber.js';
-import {BalanceVal} from "@polkadot/extension-koni-ui/components/balance";
-import ActionButton from './ActionButton';
+import React, { useContext, useState } from 'react';
+import { TFunction } from 'react-i18next';
+import styled from 'styled-components';
+
+import { AccountJson } from '@polkadot/extension-base/background/types';
+import cryptoDark from '@polkadot/extension-koni-ui//assets/crypto.svg';
+import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
+import AccountQrModal from '@polkadot/extension-koni-ui/components/AccountQrModal';
+import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { Header } from '@polkadot/extension-koni-ui/partials';
+import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
+import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
+import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+
 import buyIcon from '../../assets/buy-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
+import ChainBalances from './ChainBalances/ChainBalances';
+import Crowdloans from './Crowdloans/Crowdloans';
+import TransactionHistory from './TransactionHistory/TransactionHistory';
+import ActionButton from './ActionButton';
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -30,7 +35,7 @@ interface Props {
   currentAccount: AccountJson;
 }
 
-function getTabHeaderItems(t: TFunction): TabHeaderItemType[] {
+function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
   return [
     {
       tabId: 1,
@@ -72,74 +77,74 @@ function getTabHeaderItems(t: TFunction): TabHeaderItemType[] {
       activatedLightIcon: cryptoDark,
       activatedDarkIcon: cryptoDark
     }
-  ]
+  ];
 }
 
-function Wrapper({className, theme}: WrapperProps): React.ReactElement {
-  const {hierarchy} = useContext(AccountContext);
+function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
+  const { hierarchy } = useContext(AccountContext);
 
   if (!hierarchy.length) {
-    return (<AddAccount/>);
+    return (<AddAccount />);
   }
 
   const fakeAccount: AccountJson = {
     address: '5HWA78W7x8qi2zbb9BbFhuvvV5jbS8v1c8Mt6E6Y7pvPopEv',
     name: 'Subwallet User'
-  }
+  };
 
-  return (<Home className={className} currentAccount={fakeAccount}/>);
+  return (<Home
+    className={className}
+    currentAccount={fakeAccount}
+  />);
 }
 
 const MockCurrentNetwork = {
   networkPrefix: -1,
   networkName: 'all',
-  iconTheme: 'polkadot',
-}
+  iconTheme: 'polkadot'
+};
 
-function Home({className, currentAccount}: Props): React.ReactElement {
-  const {
-    networkPrefix,
+function Home ({ className, currentAccount }: Props): React.ReactElement {
+  const { iconTheme,
     networkName,
-    iconTheme
-  } = MockCurrentNetwork;
-  const {t} = useTranslation();
-  const {address} = currentAccount;
+    networkPrefix } = MockCurrentNetwork;
+  const { t } = useTranslation();
+  const { address } = currentAccount;
   const [activatedTab, setActivatedTab] = useState<number>(1);
   const [isShowZeroBalances, setShowZeroBalances] = useState<boolean>(
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [
-    {
-      networkPrefix: qrModalNetworkPrefix,
+    { iconTheme: qrModalIconTheme,
       networkName: qrModalNetworkName,
-      iconTheme: qrModalIconTheme,
-      showExportButton: qrModalShowExportButton
-    }, setQrModalProps]
-    = useState({
-    networkPrefix,
-    networkName,
-    iconTheme,
-    showExportButton: true,
-  });
+      networkPrefix: qrModalNetworkPrefix,
+      showExportButton: qrModalShowExportButton }, setQrModalProps] =
+    useState({
+      networkPrefix,
+      networkName,
+      iconTheme,
+      showExportButton: true
+    });
 
   const _toggleZeroBalances = (): void => {
-    setShowZeroBalances(v => {
+    setShowZeroBalances((v) => {
       window.localStorage.setItem('show_zero_balances', v ? '0' : '1');
+
       return !v;
     });
   };
 
   const _showQrModal = (): void => {
     setQrModalProps({
-        networkPrefix: networkPrefix,
-        networkName: networkName,
-        iconTheme: iconTheme,
-        showExportButton: true
-      });
+      networkPrefix: networkPrefix,
+      networkName: networkName,
+      iconTheme: iconTheme,
+      showExportButton: true
+    });
 
     setQrModalOpen(true);
-    };
+  };
 
   const _closeQrModal = (): void => setQrModalOpen(false);
 
@@ -149,40 +154,47 @@ function Home({className, currentAccount}: Props): React.ReactElement {
     <div className={`home-screen home ${className}`}>
       <Header
         className={'home-header'}
+        isContainDetailHeader={true}
+        isShowZeroBalances={isShowZeroBalances}
         showAdd
         showSearch
         showSettings
-        isShowZeroBalances={isShowZeroBalances}
-        toggleZeroBalances={_toggleZeroBalances}
         text={t<string>('Accounts')}
-        isContainDetailHeader={true}
+        toggleZeroBalances={_toggleZeroBalances}
       />
 
       <div className={'home-action-block'}>
         <div className='account-total-balance'>
-            <BalanceVal value={totalBalance} symbol={'$'} startWithSymbol/>
+          <BalanceVal
+            startWithSymbol
+            symbol={'$'}
+            value={totalBalance}
+          />
         </div>
 
         <div className='home-account-button-container'>
           <div className='action-button-wrapper'>
             <ActionButton
+              iconSrc={buyIcon}
               onClick={_showQrModal}
               tooltipContent={t<string>('Receive')}
-              iconSrc={buyIcon}
             />
           </div>
 
-          <Link to={'/account/send-fund'} className={'action-button-wrapper'}>
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/send-fund'}
+          >
             <ActionButton
-              tooltipContent={t<string>('Send')}
               iconSrc={sendIcon}
+              tooltipContent={t<string>('Send')}
             />
           </Link>
 
           <div className='action-button-wrapper'>
             <ActionButton
-              tooltipContent={t<string>('Swap')}
               iconSrc={swapIcon}
+              tooltipContent={t<string>('Swap')}
             />
           </div>
         </div>
@@ -202,7 +214,7 @@ function Home({className, currentAccount}: Props): React.ReactElement {
         )}
 
         {activatedTab === 3 && (
-          <Crowdloans/>
+          <Crowdloans />
         )}
 
         {activatedTab === 4 && (
@@ -210,33 +222,33 @@ function Home({className, currentAccount}: Props): React.ReactElement {
         )}
 
         {activatedTab === 5 && (
-          <TransactionHistory/>
+          <TransactionHistory />
         )}
       </div>
 
       <TabHeaders
-        className={'home-tab-headers'}
-        onSelectItem={setActivatedTab}
         activatedItem={activatedTab}
+        className={'home-tab-headers'}
         items={getTabHeaderItems(t)}
+        onSelectItem={setActivatedTab}
       />
 
       {isQrModalOpen && (
         <AccountQrModal
-          closeModal={_closeQrModal}
-          address={address}
           accountName={currentAccount.name}
-          networkPrefix={qrModalNetworkPrefix}
-          networkName={qrModalNetworkName}
+          address={address}
+          closeModal={_closeQrModal}
           iconTheme={qrModalIconTheme}
+          networkName={qrModalNetworkName}
+          networkPrefix={qrModalNetworkPrefix}
           showExportButton={qrModalShowExportButton}
         />
       )}
     </div>
-  )
+  );
 }
 
-export default React.memo(styled(Wrapper)(({theme}: WrapperProps) => `
+export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   display: flex;
   flex-direction: column;
   height: 100%;

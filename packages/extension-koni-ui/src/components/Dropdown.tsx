@@ -3,12 +3,13 @@
 
 import type { ThemeProps } from '../types';
 
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import Select from 'react-select';
 import styled from 'styled-components';
 
+import networkSelectOption from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+
 import Label from './Label';
-import networkSelectOption from "@polkadot/extension-koni-ui/hooks/useGenesisHashOptions";
 
 interface Props extends ThemeProps {
   className?: string;

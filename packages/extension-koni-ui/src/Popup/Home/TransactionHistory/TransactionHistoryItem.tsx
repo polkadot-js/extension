@@ -1,16 +1,20 @@
-import React, {useState} from "react";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import arrowSend from "@polkadot/extension-koni-ui/assets/arrow-send.svg"
-import arrowSendError from "@polkadot/extension-koni-ui/assets/arrow-send-error.svg"
-import arrowReceived from "@polkadot/extension-koni-ui/assets/arrow-received.svg"
-import {TransactionHistoryItemType} from "@polkadot/extension-base/background/types";
-import {customFormatDate} from "@polkadot/extension-koni-ui/util/customFormatDate";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import Tooltip from "@polkadot/extension-koni-ui/components/Tooltip";
-import {BalanceVal} from "@polkadot/extension-koni-ui/components/balance";
-import {getBalances, toShort} from "@polkadot/extension-koni-ui/util";
-import {ChainRegistry} from "@polkadot/extension-koni-base/api/types";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React, { useState } from 'react';
+import styled from 'styled-components';
+
+import { TransactionHistoryItemType } from '@polkadot/extension-base/background/types';
+import { ChainRegistry } from '@polkadot/extension-koni-base/api/types';
+import arrowReceived from '@polkadot/extension-koni-ui/assets/arrow-received.svg';
+import arrowSend from '@polkadot/extension-koni-ui/assets/arrow-send.svg';
+import arrowSendError from '@polkadot/extension-koni-ui/assets/arrow-send-error.svg';
+import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getBalances, toShort } from '@polkadot/extension-koni-ui/util';
+import { customFormatDate } from '@polkadot/extension-koni-ui/util/customFormatDate';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -21,7 +25,7 @@ interface Props extends ThemeProps {
 
 let tooltipId = 0;
 
-function getContainerClassName(item: TransactionHistoryItemType, extraClass: string = '') {
+function getContainerClassName (item: TransactionHistoryItemType, extraClass = '') {
   let className = `history-item ${extraClass}`;
 
   if (item.action === 'received') {
@@ -37,45 +41,59 @@ function getContainerClassName(item: TransactionHistoryItemType, extraClass: str
   return className;
 }
 
-function TransactionHistoryItem({
-                                  className,
-                                  item,
-                                  registry,
-                                  isSupportScanExplorer = true
-                                }: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function TransactionHistoryItem ({ className,
+  isSupportScanExplorer = true,
+  item,
+  registry }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [trigger] = useState(() => `transaction-history-item-${++tooltipId}`);
   const transactionValue = getBalances({
     balance: item.change,
     decimals: registry.chainDecimals[0],
     symbol: registry.chainTokens[0],
     tokenPrices: [],
-    priceField: "",
-    comparableValue: "",
-  })
+    priceField: '',
+    comparableValue: ''
+  });
 
   const transactionFee = getBalances({
     balance: item.fee || '',
     decimals: registry.chainDecimals[0],
     symbol: registry.chainTokens[0],
     tokenPrices: [],
-    priceField: "",
-    comparableValue: "",
-  })
+    priceField: '',
+    comparableValue: ''
+  });
 
   const containerClassName = getContainerClassName(item, className);
 
   return (
     <>
-      <div className={containerClassName} data-for={trigger} data-tip={true}>
+      <div
+        className={containerClassName}
+        data-for={trigger}
+        data-tip={true}
+      >
         <div className='history-item__part-1'>
           <div className='history-item__img-wrapper'>
-            {item.action === 'received' ?
-              <img className='history-item__img' src={arrowReceived} alt="Received"/> :
-              <>
-                {item.isSuccess ?
-                  <img className='history-item__img' src={arrowSend} alt="Send"/> :
-                  <img className='history-item__img' src={arrowSendError} alt="Send error"/>
+            {item.action === 'received'
+              ? <img
+                alt='Received'
+                className='history-item__img'
+                src={arrowReceived}
+              />
+              : <>
+                {item.isSuccess
+                  ? <img
+                    alt='Send'
+                    className='history-item__img'
+                    src={arrowSend}
+                  />
+                  : <img
+                    alt='Send error'
+                    className='history-item__img'
+                    src={arrowSendError}
+                  />
                 }
               </>
             }
@@ -98,8 +116,8 @@ function TransactionHistoryItem({
             <span>{item.action === 'received' ? '+' : '-'}</span>
 
             <BalanceVal
-              value={transactionValue.balanceValue}
               symbol={registry.chainTokens[0]}
+              value={transactionValue.balanceValue}
             />
           </div>
 
@@ -107,8 +125,8 @@ function TransactionHistoryItem({
             !!item.fee && (<div className='history-item__fee'>
               <span className={'history-item__fee-label'}>{t<string>('Fee:')}</span>
               <BalanceVal
-                value={transactionFee.balanceValue}
                 symbol={registry.chainTokens[0]}
+                value={transactionFee.balanceValue}
               />
             </div>)
           }
@@ -123,7 +141,7 @@ function TransactionHistoryItem({
   );
 }
 
-export default React.memo(styled(TransactionHistoryItem)(({theme}: Props) => `
+export default React.memo(styled(TransactionHistoryItem)(({ theme }: Props) => `
   cursor: pointer;
   position: relative;
   display: flex;
@@ -235,4 +253,4 @@ export default React.memo(styled(TransactionHistoryItem)(({theme}: Props) => `
   .history-item__fee-label {
     margin-right: 4px;
   }
-`))
+`));

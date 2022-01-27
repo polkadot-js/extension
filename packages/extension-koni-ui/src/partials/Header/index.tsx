@@ -1,36 +1,39 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ThemeProps} from '../../types';
-import {Theme} from '../../types';
-import {faChevronDown} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {useSelector} from 'react-redux';
-import styled, {ThemeContext} from 'styled-components';
-import {AccountJson, AccountWithChildren} from '@polkadot/extension-base/background/types';
-import {Chain} from '@polkadot/extension-chains/types';
+import type { ThemeProps } from '../../types';
+
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled, { ThemeContext } from 'styled-components';
+
+import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
+import { Chain } from '@polkadot/extension-chains/types';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import {AccountContext, SettingsContext} from '@polkadot/extension-koni-ui/components';
+import { AccountContext, SettingsContext } from '@polkadot/extension-koni-ui/components';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import useMetadata from '@polkadot/extension-koni-ui/hooks/useMetadata';
-import {showAccount, tieAccount, windowOpen} from '@polkadot/extension-koni-ui/messaging';
+import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
-import {RootState} from '@polkadot/extension-koni-ui/stores';
-import {updateNetwork} from '@polkadot/extension-koni-ui/stores/CurrentNetwork';
-import {getLogoByGenesisHash} from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
-import {IconTheme} from '@polkadot/react-identicon/types';
-import {SettingsStruct} from '@polkadot/ui-settings/types';
-import {decodeAddress, encodeAddress} from '@polkadot/util-crypto';
+import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
+import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { updateNetwork } from '@polkadot/extension-koni-ui/stores/CurrentNetwork';
+import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
+import { IconTheme } from '@polkadot/react-identicon/types';
+import { SettingsStruct } from '@polkadot/ui-settings/types';
+import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
+
 import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
-import DetailHeader from "@polkadot/extension-koni-ui/partials/Header/DetailHeader";
-import SubHeader from "@polkadot/extension-koni-ui/partials/Header/SubHeader";
+import { Theme } from '../../types';
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -56,15 +59,15 @@ interface Recoded {
   prefix?: number;
 }
 
-function findSubstrateAccount(accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
+function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
-  return accounts.find(({address}): boolean =>
+  return accounts.find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
   ) || null;
 }
 
-function recodeAddress(address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
+function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
   // find our account using the actual publicKey, and then find the associated chain
@@ -80,19 +83,19 @@ function recodeAddress(address: string, accounts: AccountWithChildren[], chain: 
   };
 }
 
-const defaultRecoded = {formatted: null, prefix: 42};
+const defaultRecoded = { formatted: null, prefix: 42 };
 
-function Header({children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances}: Props): React.ReactElement<Props> {
+function Header ({ children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
   const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
-  const {accounts} = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
   const settings = useContext(SettingsContext);
-  const [{formatted, prefix}, setRecoded] = useState<Recoded>(defaultRecoded);
+  const [{ formatted, prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const popupTheme = themeContext.id;
   const setRef = useRef(null);
@@ -121,7 +124,7 @@ function Header({children, className = '', isContainDetailHeader, isNotHaveAccou
         chain?.definition.chainType === 'ethereum' ||
         currentAccount?.type === 'ethereum'
       )
-        ? {formatted: currentAccount?.address}
+        ? { formatted: currentAccount?.address }
         : recodeAddress(currentAccount?.address, accounts, chain, settings));
   }, [accounts, currentAccount?.address, chain, settings]);
 
@@ -289,19 +292,24 @@ function Header({children, className = '', isContainDetailHeader, isNotHaveAccou
             />
           )}
         </div>
-        {isWelcomeScreen && (<div className='only-top-container'/>)}
+        {isWelcomeScreen && (<div className='only-top-container' />)}
         {isContainDetailHeader &&
           <DetailHeader
             currentAccount={currentAccount}
             formatted={formatted}
+            isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}
             toggleVisibility={_toggleVisibility}
             toggleZeroBalances={_toggleZeroBalances}
-            isShowZeroBalances={isShowZeroBalances}/>
+          />
         }
 
         {showSubHeader &&
-          <SubHeader showBackArrow={showBackArrow} subHeaderName={subHeaderName} showCancelButton={showCancelButton} />
+          <SubHeader
+            showBackArrow={showBackArrow}
+            showCancelButton={showCancelButton}
+            subHeaderName={subHeaderName}
+          />
         }
 
         {children}
@@ -310,7 +318,7 @@ function Header({children, className = '', isContainDetailHeader, isNotHaveAccou
   );
 }
 
-export default React.memo(styled(Header)(({theme}: Props) => `
+export default React.memo(styled(Header)(({ theme }: Props) => `
   max-width: 100%;
   box-sizing: border-box;
   margin: 0;

@@ -1,21 +1,25 @@
-import React, {useCallback, useRef, useState} from "react";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import EyeSlashDarkIcon from "@polkadot/extension-koni-ui/assets/icon/eye-slash-dark.svg";
-import EyeSlashLightIcon from "@polkadot/extension-koni-ui/assets/icon/eye-slash-light.svg";
-import EyeDarkIcon from "@polkadot/extension-koni-ui/assets/icon/eye-dark.svg";
-import EyeLightIcon from "@polkadot/extension-koni-ui/assets/icon/eye-light.svg";
-import CopyToClipboard from "react-copy-to-clipboard";
-import cloneLogo from "@polkadot/extension-koni-ui/assets/clone.svg";
-import HeaderEditName from "@polkadot/extension-koni-ui/partials/HeaderEditName";
-import moreButtonDark from "@polkadot/extension-koni-ui/assets/dots-three-vertical-dark.svg";
-import moreButtonLight from "@polkadot/extension-koni-ui/assets/dots-three-vertical-light.svg";
-import AccountAction from "@polkadot/extension-koni-ui/partials/AccountAction";
-import useOutsideClick from "@polkadot/extension-koni-ui/hooks/useOutsideClick";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {editAccount} from "@polkadot/extension-koni-ui/messaging";
-import useToast from "@polkadot/extension-koni-ui/hooks/useToast";
-import Tooltip from "@polkadot/extension-koni-ui/components/Tooltip";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React, { useCallback, useRef, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import styled from 'styled-components';
+
+import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
+import moreButtonDark from '@polkadot/extension-koni-ui/assets/dots-three-vertical-dark.svg';
+import moreButtonLight from '@polkadot/extension-koni-ui/assets/dots-three-vertical-light.svg';
+import EyeDarkIcon from '@polkadot/extension-koni-ui/assets/icon/eye-dark.svg';
+import EyeLightIcon from '@polkadot/extension-koni-ui/assets/icon/eye-light.svg';
+import EyeSlashDarkIcon from '@polkadot/extension-koni-ui/assets/icon/eye-slash-dark.svg';
+import EyeSlashLightIcon from '@polkadot/extension-koni-ui/assets/icon/eye-slash-light.svg';
+import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
+import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { editAccount } from '@polkadot/extension-koni-ui/messaging';
+import AccountAction from '@polkadot/extension-koni-ui/partials/AccountAction';
+import HeaderEditName from '@polkadot/extension-koni-ui/partials/HeaderEditName';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string,
@@ -34,26 +38,24 @@ interface EditState {
 
 let tooltipId = 0;
 
-function DetailHeader({
-                        className,
-                        popupTheme,
-                        toggleVisibility,
-                        currentAccount,
-                        toggleZeroBalances,
-                        formatted,
-                        isShowZeroBalances
-                      }: Props): React.ReactElement {
+function DetailHeader ({ className,
+  currentAccount,
+  formatted,
+  isShowZeroBalances,
+  popupTheme,
+  toggleVisibility,
+  toggleZeroBalances }: Props): React.ReactElement {
   const actionsRef = useRef(null);
-  const {t} = useTranslation();
-  const [{isEditing}, setEditing] = useState<EditState>({isEditing: false, toggleActions: 0});
+  const { t } = useTranslation();
+  const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [editedName, setName] = useState<string | undefined | null>(currentAccount?.name);
-  const {show} = useToast();
+  const { show } = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
 
   const _toggleEdit = useCallback(
     (): void => {
-      setEditing(({toggleActions}) => ({isEditing: !isEditing, toggleActions: ++toggleActions}));
+      setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions }));
       setShowAccountAction(false);
     },
     [isEditing]
@@ -102,14 +104,15 @@ function DetailHeader({
     },
     [editedName, currentAccount?.address, _toggleEdit]
   );
+
   return (
     <div className={`detail-header ${className}`}>
       <div className='detail-header__part-1'>
         <div
           className='detail-header-connect-status-btn'
-          onClick={toggleVisibility}
           data-for={trigger}
           data-tip={true}
+          onClick={toggleVisibility}
         >
           {currentAccount?.isHidden
             ? (
@@ -143,7 +146,8 @@ function DetailHeader({
                 onClick={_onCopy}
               >
                 <span
-                  className='detail-header-account-info__formatted'>{ellipsisCenterStr(formatted || currentAccount?.address)}</span>
+                  className='detail-header-account-info__formatted'
+                >{ellipsisCenterStr(formatted || currentAccount?.address)}</span>
                 <img
                   alt='copy'
                   className='detail-header-account-info__copy-icon'
@@ -187,10 +191,10 @@ function DetailHeader({
         />
       )}
     </div>
-  )
+  );
 }
 
-export default styled(DetailHeader)(({theme}: Props) => `
+export default styled(DetailHeader)(({ theme }: Props) => `
   display: flex;
   align-items: center;
   padding-bottom: 8px;
@@ -262,4 +266,4 @@ export default styled(DetailHeader)(({theme}: Props) => `
   .detail-header-more-button__icon {
     width: 32px;
   }
-`)
+`);

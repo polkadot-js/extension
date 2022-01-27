@@ -6,7 +6,7 @@ import type { AccountId, AccountIndex, Address } from '@polkadot/types/interface
 import BN from 'bn.js';
 import React from 'react';
 
-import { ChainRegistry } from '@polkadot/extension-koni-base/api/types';
+import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
 
 import FormatBalance from './FormatBalance';
 

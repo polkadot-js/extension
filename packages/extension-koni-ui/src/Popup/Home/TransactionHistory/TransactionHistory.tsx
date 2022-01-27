@@ -1,11 +1,16 @@
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
 import React from 'react';
-import {ThemeProps} from '@polkadot/extension-koni-ui/types';
 import styled from 'styled-components';
-import {TransactionHistoryItemType} from '@polkadot/extension-base/background/types';
-import TransactionHistoryItem from './TransactionHistoryItem';
-import {getScanExplorerTransactionHistoryUrl, isSupportScanExplorer} from '@polkadot/extension-koni-ui/util';
-import {ChainRegistry} from "@polkadot/extension-koni-base/api/types";
+
+import { TransactionHistoryItemType } from '@polkadot/extension-base/background/types';
+import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
+
 import TransactionHistoryEmptyList from './EmptyList';
+import TransactionHistoryItem from './TransactionHistoryItem';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -17,7 +22,7 @@ interface ContentProp {
   items: TransactionHistoryItemType[];
 }
 
-function getMockTransactionHistory() :TransactionHistoryItemType[] {
+function getMockTransactionHistory (): TransactionHistoryItemType[] {
   return [
     {
       time: 1643194677273,
@@ -63,72 +68,77 @@ function getMockTransactionHistory() :TransactionHistoryItemType[] {
       action: 'send',
       extrinsicHash: '0x4b7180400e06932b4378d8fa3484eea2d754001b3d7b12488eb6bf49224371c7'
     }
-  ]
+  ];
 }
 
-function getMockRegistryMap(): Record<string, ChainRegistry> {
+function getMockRegistryMap (): Record<string, ChainRegistry> {
   return {
-    'koni': {
+    koni: {
       chainDecimals: [10],
       chainTokens: ['Unit']
     }
   };
 }
 
-function Wrapper({className, theme}: Props): React.ReactElement<Props> {
+function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
   const items: TransactionHistoryItemType[] = getMockTransactionHistory();
   const registryMap: Record<string, ChainRegistry> = getMockRegistryMap();
 
   return (
     <div className={`-wrapper ${className}`}>
-      {items && items.length ? (<TransactionHistory
+      {items && items.length
+        ? (<TransactionHistory
           items={items}
-          registryMap={registryMap}/>)
+          registryMap={registryMap}
+        />)
         : (<TransactionHistoryEmptyList />)
       }
     </div>
   );
 }
 
-function TransactionHistory({items, registryMap}: ContentProp): React.ReactElement<ContentProp> {
+function TransactionHistory ({ items, registryMap }: ContentProp): React.ReactElement<ContentProp> {
   const renderChainBalanceItem = (item: TransactionHistoryItemType, registryMap: Record<string, ChainRegistry>) => {
-    const {networkName} = item;
+    const { networkName } = item;
 
-    const {extrinsicHash} = item;
+    const { extrinsicHash } = item;
 
     if (isSupportScanExplorer(networkName)) {
       return (
-        <a href={getScanExplorerTransactionHistoryUrl(networkName, extrinsicHash)}
-           target={'_blank'}
-           key={extrinsicHash}
-           className={'transaction-item-wrapper'}>
+        <a
+          className={'transaction-item-wrapper'}
+          href={getScanExplorerTransactionHistoryUrl(networkName, extrinsicHash)}
+          key={extrinsicHash}
+          rel='noreferrer'
+          target={'_blank'}
+        >
           <TransactionHistoryItem
             item={item}
             registry={registryMap[networkName]}
           />
         </a>
-      )
+      );
     }
 
     return (
       <div key={extrinsicHash}>
         <TransactionHistoryItem
-          item={item}
           isSupportSubscan={false}
+          item={item}
           registry={registryMap[networkName]}
         />
       </div>
-    )
+    );
   };
 
   return (
     <>
-      {items.map(item => renderChainBalanceItem(item, registryMap))}
+      {items.map((item) => renderChainBalanceItem(item, registryMap))}
     </>
   );
 }
 
-export default styled(Wrapper)(({theme}: Props) => `
+export default styled(Wrapper)(({ theme }: Props) => `
   height: 100%;
   overflow-y: auto;
-`)
+`);

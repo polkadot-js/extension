@@ -89,7 +89,7 @@ const darkTheme = {
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
   scrollBarThumb: 'rgba(128, 135, 139, .8)',
   scrollBarThumbInactive: 'rgba(145, 150, 171, .5)',
-  scrollBarThumbHover: '#9196AB',
+  scrollBarThumbHover: '#9196AB'
 };
 
 export declare type Theme = typeof darkTheme;
@@ -147,7 +147,7 @@ const lightTheme: Theme = {
   toggleInactiveBgc: '#ddd',
   toggleInactiveThumbColor: '#fff',
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
-  scrollBarThumb: 'rgba(0, 0, 0, .25)',
+  scrollBarThumb: 'rgba(0, 0, 0, .25)'
 };
 
 export const themes = {

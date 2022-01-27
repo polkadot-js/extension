@@ -1,34 +1,48 @@
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {CrowdloanItemType} from "@polkadot/extension-koni-ui/Popup/Home/types";
-import {BalanceVal} from "@polkadot/extension-koni-ui/components/balance";
-import styled from "styled-components";
-import React from "react";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
 
+import React from 'react';
+import styled from 'styled-components';
+
+import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
   item: CrowdloanItemType;
 }
 
-function CrowdloanItem({className, item}: Props): React.ReactElement<Props> {
-  return(
+function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
+  return (
     <div className={`crowdloan-item ${className}`}>
       <div className='crowdloan-item__part-1'>
-        <img src={item.logo} alt="Logo" className='crowdloan-item__logo'/>
+        <img
+          alt='Logo'
+          className='crowdloan-item__logo'
+          src={item.logo}
+        />
         <div className='crowdloan-item__meta-wrapper'>
           <div className='crowdloan-item__chain-name'>{item.networkDisplayName}</div>
           <div className='crowdloan-item__chain-group'>{item.groupDisplayName}</div>
         </div>
       </div>
       <div className='crowdloan-item__part-2'>
-        <BalanceVal value={item.contribute} symbol={item.symbol} />
-        <BalanceVal value={item.contributeToUsd} symbol={'$'} startWithSymbol />
+        <BalanceVal
+          symbol={item.symbol}
+          value={item.contribute}
+        />
+        <BalanceVal
+          startWithSymbol
+          symbol={'$'}
+          value={item.contributeToUsd}
+        />
       </div>
     </div>
-  )
+  );
 }
 
-export default styled(CrowdloanItem)(({theme}: Props) =>`
+export default styled(CrowdloanItem)(({ theme }: Props) => `
   display: flex;
   align-item: center;
   padding: 10px 0;
@@ -87,4 +101,4 @@ export default styled(CrowdloanItem)(({theme}: Props) =>`
     flex-direction: column;
     justify-content: center;
   }
-`)
+`);

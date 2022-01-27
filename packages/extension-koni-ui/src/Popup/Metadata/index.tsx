@@ -14,7 +14,10 @@ export default function Metadata (): React.ReactElement {
 
   return (
     <>
-      <Header showSubHeader subHeaderName={t<string>('Metadata')} />
+      <Header
+        showSubHeader
+        subHeaderName={t<string>('Metadata')}
+      />
       {requests[0]
         ? (
           <Request

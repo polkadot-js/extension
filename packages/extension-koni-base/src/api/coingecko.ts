@@ -3,8 +3,8 @@
 
 import axios from 'axios';
 
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 const alternativeNameMap: Record<string, string> = {
   acala: 'acala-token',

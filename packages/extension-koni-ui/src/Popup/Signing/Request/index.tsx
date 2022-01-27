@@ -7,11 +7,13 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { ThemeContext } from 'styled-components';
 
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-import {AccountContext, ActionContext, Theme, VerticalSpace, Warning} from '../../../components';
+import { AccountContext, ActionContext, Theme, VerticalSpace, Warning } from '../../../components';
 import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
@@ -19,8 +21,6 @@ import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
-import {ThemeContext} from "styled-components";
 
 interface Props {
   account: AccountJson;

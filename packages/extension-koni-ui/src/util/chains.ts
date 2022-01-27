@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkMetadataDef } from '@polkadot/extension-base/background/types';
+import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 function getKnownHashes (): NetWorkMetadataDef[] {

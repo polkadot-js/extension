@@ -1,25 +1,27 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ResponseJsonGetAccountInfo} from '@polkadot/extension-base/background/types';
-import type {KeyringPair$Json} from '@polkadot/keyring/types';
-import type {KeyringPairs$Json} from '@polkadot/ui-keyring/types';
+import type { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
+import type { KeyringPair$Json } from '@polkadot/keyring/types';
+import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 
-import React, {useCallback, useContext, useEffect, useState} from 'react';
-import styled, {ThemeContext} from 'styled-components';
-import {u8aToString} from '@polkadot/util';
-import {AccountContext, ActionContext, Theme} from '../components';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import InputFileWithLabel from '@polkadot/extension-koni-ui/components/InputFileWithLabel';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
+import { u8aToString } from '@polkadot/util';
+
+import { AccountContext, ActionContext, Theme } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import {batchRestore, jsonGetAccountInfo, jsonRestore} from '../messaging';
-import {DEFAULT_TYPE} from '../util/defaultType';
-import {isKeyringPairs$Json} from '../util/typeGuards';
-import Header from "@polkadot/extension-koni-ui/partials/Header";
-import Warning from "@polkadot/extension-koni-ui/components/Warning";
-import InputWithLabel from "@polkadot/extension-koni-ui/components/InputWithLabel";
-import Button from "@polkadot/extension-koni-ui/components/Button";
-import InputFileWithLabel from "@polkadot/extension-koni-ui/components/InputFileWithLabel";
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
-import ButtonArea from "@polkadot/extension-koni-ui/components/ButtonArea";
+import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../messaging';
+import { DEFAULT_TYPE } from '../util/defaultType';
+import { isKeyringPairs$Json } from '../util/typeGuards';
 
 const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
@@ -27,9 +29,9 @@ interface Props {
   className?: string;
 }
 
-function Upload({className}: Props): React.ReactElement {
-  const {t} = useTranslation();
-  const {accounts} = useContext(AccountContext);
+function Upload ({ className }: Props): React.ReactElement {
+  const { t } = useTranslation();
+  const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [accountsInfo, setAccountsInfo] = useState<ResponseJsonGetAccountInfo[]>([]);
@@ -108,11 +110,11 @@ function Upload({className}: Props): React.ReactElement {
         .then(() => {
           onAction('/');
         }).catch(
-        (e) => {
-          console.error(e);
-          setIsBusy(false);
-          setIsPasswordError(true);
-        });
+          (e) => {
+            console.error(e);
+            setIsBusy(false);
+            setIsPasswordError(true);
+          });
     },
     [file, onAction, password, requirePassword]
   );
@@ -121,13 +123,13 @@ function Upload({className}: Props): React.ReactElement {
     <>
       <Header
         showBackArrow
-        smallMargin
         showSubHeader
+        smallMargin
         subHeaderName={t<string>('Restore from JSON')}
       />
       <div className={className}>
         <div className='restore-from-json-wrapper'>
-          {accountsInfo.map(({address, genesisHash, name, type = DEFAULT_TYPE}, index) => (
+          {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
             <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}>
               <AccountInfo
                 address={address}
@@ -163,9 +165,9 @@ function Upload({className}: Props): React.ReactElement {
             />
             {isPasswordError && (
               <Warning
+                className='restore-json-warning'
                 isBelowInput
                 isDanger
-                className='restore-json-warning'
               >
                 {t<string>('Unable to decode using the supplied passphrase')}
               </Warning>

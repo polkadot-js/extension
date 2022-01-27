@@ -1,16 +1,20 @@
-import React from "react";
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {BalanceSubInfo} from "@polkadot/extension-koni-ui/util/types";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {BalanceVal} from "@polkadot/extension-koni-ui/components/balance";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { BalanceSubInfo } from '@polkadot/extension-koni-ui/util/types';
 
 interface Props extends ThemeProps {
   className?: string;
   item: BalanceSubInfo;
 }
 
-function ChainBalanceItemRow({item, className}: Props): React.ReactElement<Props> {
+function ChainBalanceItemRow ({ className, item }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (
@@ -19,13 +23,20 @@ function ChainBalanceItemRow({item, className}: Props): React.ReactElement<Props
         {t<string>(item.label)}
       </div>
       <div className='chain-balance-item-row__col-2'>
-        <BalanceVal value={item.balanceValue} symbol={item.symbol}/>
+        <BalanceVal
+          symbol={item.symbol}
+          value={item.balanceValue}
+        />
       </div>
       <div className='chain-balance-item-row__col-3'>
-        <BalanceVal value={item.convertedBalanceValue} symbol={'$'} startWithSymbol/>
+        <BalanceVal
+          startWithSymbol
+          symbol={'$'}
+          value={item.convertedBalanceValue}
+        />
       </div>
     </div>
-  )
+  );
 }
 
 export default React.memo(styled(ChainBalanceItemRow)(({ theme }: Props) => `

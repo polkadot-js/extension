@@ -1,4 +1,7 @@
-import BigN from "bignumber.js";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import BigN from 'bignumber.js';
 
 export type CrowdloanItemType = {
   networkName: string;

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AccountsWithCurrentAddress, AuthorizeRequest, CurrentNetworkInfo, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, CurrentNetworkInfo, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -20,7 +20,7 @@ import uiSettings from '@polkadot/ui-settings';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getAccountsWithCurrentAddress, getPrice, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
+import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AuthList from './AuthManagement';
@@ -30,6 +30,7 @@ import Derive from './Derive';
 import Export from './Export';
 import ExportAll from './ExportAll';
 import Forget from './Forget';
+import Home from './Home';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
@@ -37,7 +38,6 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import Home from './Home';
 
 const startSettings = uiSettings.get();
 
@@ -104,6 +104,7 @@ export default function Popup (): React.ReactElement {
     []
   );
 
+  // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
     const { accounts, currentAddress } = data;
 

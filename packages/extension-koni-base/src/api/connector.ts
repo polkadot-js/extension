@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-
-import { NetWorkInfo } from './types';
+import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
 
 export const wsProvider = async ({ provider }: NetWorkInfo): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

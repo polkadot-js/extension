@@ -1,7 +1,11 @@
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {TabHeaderItemType} from "@polkadot/extension-koni-ui/Popup/Home/types";
-import React from "react";
-import styled from "styled-components";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -11,7 +15,7 @@ interface Props extends ThemeProps {
   onSelect: (tabId: number) => void;
 }
 
-function getImgSrc(item: TabHeaderItemType, isActivated: boolean, isDarkTheme: boolean): string {
+function getImgSrc (item: TabHeaderItemType, isActivated: boolean, isDarkTheme: boolean): string {
   if (isDarkTheme) {
     return isActivated ? item.activatedDarkIcon : item.darkIcon;
   } else {
@@ -19,7 +23,7 @@ function getImgSrc(item: TabHeaderItemType, isActivated: boolean, isDarkTheme: b
   }
 }
 
-function getContainerClassName(isActivated: boolean, extraClassName: string = ''): string {
+function getContainerClassName (isActivated: boolean, extraClassName = ''): string {
   let className = `tab-header-item ${extraClassName}`;
 
   if (isActivated) {
@@ -29,32 +33,32 @@ function getContainerClassName(isActivated: boolean, extraClassName: string = ''
   return className;
 }
 
-function TabHeaderItem({className, isActivated, item, isDarkTheme, onSelect}: Props): React.ReactElement<Props> {
+function TabHeaderItem ({ className, isActivated, isDarkTheme, item, onSelect }: Props): React.ReactElement<Props> {
   const _onSelect = (tabId: number) => {
     return (e: React.MouseEvent<HTMLElement>) => {
       onSelect(tabId);
-    }
-  }
+    };
+  };
 
   return (
     <div
       className={getContainerClassName(isActivated, className)}
       onClick={_onSelect(item.tabId)}
     >
-      <div className="tab-header-item__content-wrapper">
+      <div className='tab-header-item__content-wrapper'>
         <img
+          alt='Icon'
           className={'tab-header-item__icon'}
           src={getImgSrc(item, isActivated, isDarkTheme)}
-          alt="Icon"
         />
 
         <div className='tab-header-item__label'>{item.label}</div>
       </div>
     </div>
-  )
+  );
 }
 
-export default styled(TabHeaderItem)(({theme}: Props) => `
+export default styled(TabHeaderItem)(({ theme }: Props) => `
   display: flex;
   justify-content: center;
   cursor: pointer;

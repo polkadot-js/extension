@@ -3,8 +3,8 @@
 
 import axios from 'axios';
 
-import networks from '@polkadot/extension-koni-base/api/endpoints';
-import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const alternativeNameMap: Record<string, string> = {
   acala: 'acala-token',
@@ -20,7 +20,7 @@ interface GeckoItem {
   current_price: number
 }
 
-export const getTokenPrice = async (chains: Array<string> = Object.keys(networks), currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS), currency = 'usd'): Promise<PriceJson> => {
   try {
     const inverseMap: Record<string, string> = {};
     const finalChains = chains.map((chain) => {

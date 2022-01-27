@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { ApiProps, ApiState } from '@polkadot/extension-base/background/types';
+import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
+import { ApiProps, ApiState } from '@polkadot/extension-koni-base/api/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
-// import {settings as } from '@polkadot/ui-settings';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
@@ -37,12 +37,11 @@ async function retrieve (registry: Registry, api: ApiPromise): Promise<ChainData
   ]);
 
   return {
-    properties: registry.createType('ChainProperties', {
-      ss58Format: api.registry.chainSS58,
-      tokenDecimals: api.registry.chainDecimals,
-      tokenSymbol: api.registry.chainTokens
-    }),
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    properties: registry.createType('ChainProperties', { ss58Format: api.registry.chainSS58, tokenDecimals: api.registry.chainDecimals, tokenSymbol: api.registry.chainTokens }),
     systemChain: (systemChain || '<unknown>').toString(),
+    // @ts-ignore
     systemChainType,
     systemName: systemName.toString(),
     systemVersion: systemVersion.toString()
@@ -61,6 +60,8 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   console.log(`chain: ${systemChain} (${systemChainType.toString()}), ${stringify(properties)}`);
 
   // explicitly override the ss58Format as specified
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   registry.setChainProperties(registry.createType('ChainProperties', { ss58Format, tokenDecimals, tokenSymbol }));
 
   // first setup the UI helpers
@@ -69,6 +70,7 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     unit: tokenSymbol[0].toString()
   };
 
+  const isEthereum = ethereumChains.includes(api.runtimeVersion.specName.toString());
   const defaultSection = Object.keys(api.tx)[0];
   const defaultMethod = Object.keys(api.tx[defaultSection])[0];
   const apiDefaultTx = api.tx[defaultSection][defaultMethod];
@@ -80,6 +82,8 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     apiDefaultTx,
     apiDefaultTxSudo,
     isApiReady: true,
+    isApiReadyOnce: true,
+    isEthereum,
     isDevelopment: isDevelopment,
     specName: api.runtimeVersion.specName.toString(),
     specVersion: api.runtimeVersion.specVersion.toString(),
@@ -89,12 +93,14 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
-export function initApi (apiUrl: string): ApiProps {
+export function initApi (apiUrl: string | string[]): ApiProps {
   const registry = new TypeRegistry();
 
   const provider = new WsProvider(apiUrl);
 
-  const api = new ApiPromise({ provider, registry });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const api = new ApiPromise({ provider, registry, typesBundle, typesChain: typesChain });
+  // const api = new ApiPromise({provider, registry});
 
   const result: ApiProps = ({
     api,
@@ -104,8 +110,10 @@ export function initApi (apiUrl: string): ApiProps {
     apiUrl,
     defaultFormatBalance: undefined,
     isApiConnected: false,
+    isApiReadyOnce: false,
     isApiInitialized: true,
     isApiReady: false,
+    isEthereum: false,
     registry,
     specName: '',
     specVersion: '',
@@ -116,7 +124,9 @@ export function initApi (apiUrl: string): ApiProps {
       const self = this as ApiProps;
 
       async function f (): Promise<ApiProps> {
-        await self.api.isReady;
+        if (!result.isApiReadyOnce) {
+          await self.api.isReady;
+        }
 
         return new Promise<ApiProps>((resolve, reject) => {
           // todo: may reject if timeout
@@ -129,7 +139,7 @@ export function initApi (apiUrl: string): ApiProps {
               return resolve(self);
             }
 
-            setTimeout(wait, 100);
+            setTimeout(wait, 10);
           })();
         });
       }
@@ -138,15 +148,24 @@ export function initApi (apiUrl: string): ApiProps {
     }
   }) as unknown as ApiProps;
 
-  api.once('connected', () => {
+  api.on('connected', () => {
+    console.log('=============connected', apiUrl);
+
+    if (result.isApiReadyOnce) {
+      result.isApiReady = true;
+    }
+
     result.isApiConnected = true;
   });
 
-  api.once('disconnected', () => {
+  api.on('disconnected', () => {
+    console.log('=============disconnected', apiUrl);
     result.isApiConnected = false;
+    result.isApiReady = false;
   });
 
-  api.once('ready', () => {
+  api.on('ready', () => {
+    console.log('=============ready', apiUrl);
     loadOnReady(registry, api)
       .then((rs) => {
         objectSpread(result, rs);

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import {getAllNetworkMetadata} from '../messaging';
 
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
@@ -26,11 +27,21 @@ export default function (): networkSelectOption[] {
   useEffect(() => {
     mounted.current = true;
 
-    // getAllMetatdata().then((metadataDefs) => {
-    //   const res = metadataDefs.map((metadata) => ({ text: metadata.chain, value: metadata.genesisHash }));
-    //   setMetadatachains(res);
-    // }).catch(console.error);
-    setMetadatachains([]);
+    getAllNetworkMetadata().then((metadataDefs) => {
+      if (mounted.current) {
+        const res = metadataDefs.map((metadata) => (
+          {
+            text: metadata.chain,
+            value: metadata.genesisHash,
+            networkKey: metadata.networkKey,
+            networkPrefix: metadata.ss58Format,
+            icon: metadata.icon,
+            group: metadata.group,
+            isEthereum: metadata.isEthereum
+          }));
+        setMetadatachains(res);
+      }
+    }).catch(console.error);
 
     return () => {
       mounted.current = false;

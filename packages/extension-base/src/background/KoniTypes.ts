@@ -90,7 +90,7 @@ export interface NetWorkInfo {
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
-  networkName: string;
+  networkKey: string;
   group: string
   isEthereum: boolean;
 }
@@ -117,5 +117,6 @@ export interface KoniRequestSignatures {
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],
   'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]]
   'pub(utils.getRandom)': [RandomTestRequest, number]
 }

@@ -16,9 +16,9 @@ function getKnownHashes (): NetWorkMetadataDef[] {
 
     result.push({
       chain,
-      networkKey: networkKey,
+      networkKey,
       genesisHash,
-      icon: isEthereum ? 'ethereum' : (icon || 'substrate'),
+      icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
       ss58Format,
       group,
       isEthereum: !!isEthereum

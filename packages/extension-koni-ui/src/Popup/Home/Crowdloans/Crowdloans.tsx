@@ -4,10 +4,9 @@ import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 import CrowdloanEmptyList from './EmptyList';
 import React from "react";
 import styled from "styled-components";
-import {BalanceValueType, BN_ZERO} from "@polkadot/extension-koni-ui/util";
+import {BalanceValueType, BN_ZERO, getLogoByNetworkKey} from "@polkadot/extension-koni-ui/util";
 import BigN from "bignumber.js";
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import LogosMap from "@polkadot/extension-koni-ui/assets/logo";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -35,7 +34,7 @@ function getItem(networkKey: string, contributeValueInfo: BalanceValueType): Cro
   return {
     contribute: balanceValue,
     contributeToUsd: convertedBalanceValue,
-    logo: LogosMap[networkKey],
+    logo: getLogoByNetworkKey(networkKey),
     networkDisplayName: networkInfo.chain,
     networkKey,
     symbol,
@@ -58,10 +57,6 @@ function getItems(networkKeys: string[], crowdloanContributeMap: Record<string, 
   })
 
   return result;
-}
-
-const mockCrowdloanContributeMap: Record<string, BalanceValueType> = {
-
 }
 
 function getmockCrowdloanContributeMap(networkKeys: string[]): Record<string, BalanceValueType> {

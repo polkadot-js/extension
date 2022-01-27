@@ -3,7 +3,7 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import {AccountsWithCurrentAddress, NetWorkMetadataDef, PriceJson} from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
@@ -14,6 +14,7 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 
 const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 
@@ -219,6 +220,31 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  // todo: add custom network metadata to here
+  private networkMetadataList (): NetWorkMetadataDef[] {
+    const result: NetWorkMetadataDef[] = [];
+
+    Object.keys(NETWORKS).forEach((networkKey) => {
+      const { chain, genesisHash, group, icon, isEthereum, ss58Format } = NETWORKS[networkKey];
+
+      if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
+        return;
+      }
+
+      result.push({
+        chain,
+        networkKey,
+        genesisHash,
+        icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
+        ss58Format,
+        group,
+        isEthereum: !!isEthereum
+      });
+    });
+
+    return result;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -230,7 +256,7 @@ export default class KoniExtension extends Extension {
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
       case 'pri(price.getPrice)':
         return await this.getPrice();
-      case '♦':
+      case 'pri(price.getSubscription)':
         return await this.subscribePrice(id, port);
       case 'pri(derivation.createV2)':
         return this.derivationCreateV2(request as RequestDeriveCreate);
@@ -238,6 +264,8 @@ export default class KoniExtension extends Extension {
         return this.jsonRestoreV2(request as RequestJsonRestore);
       case 'pri(json.batchRestoreV2)':
         return this.batchRestoreV2(request as RequestBatchRestore);
+      case 'pri(networkMetadata.list)':
+        return this.networkMetadataList();
       default:
         return super.handle(id, type, request, port);
     }

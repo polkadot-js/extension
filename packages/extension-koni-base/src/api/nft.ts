@@ -56,7 +56,7 @@ export const handleRmrkNfts = async (account: string) => {
         name: item?.metadata?.name,
         image: item?.metadata?.image,
         description: item?.metadata?.description,
-        external_url: '',
+        external_url: item?.external_url,
         rarity: item?.metadata_rarity,
         collectionId: item?.collectionId,
         properties: item?.metadata?.properties

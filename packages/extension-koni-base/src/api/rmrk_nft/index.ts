@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { KANARIA_ENDPOINT, SERVER, SINGULAR_ENDPOINT } from "./config";
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SERVER, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from "./config";
 
 // data for test
 // const singular_account = 'DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW';
@@ -29,7 +29,8 @@ export const getSingularByAccount = async (account: string) => {
         attributes,
         animation_url: getIPFSLink(animation_url),
         image: getIPFSLink(image)
-      }
+      },
+      external_url: SINGULAR_EXTERNAL_SERVER + data[i].id
     })
   }
 
@@ -53,7 +54,8 @@ export const getItemsKanariaByAccount = async (account: string) => {
       ...data[i],
       metadata: {
         ...result,
-        image: getIPFSLink(result.image)
+        image: getIPFSLink(result.image),
+        external_url: KANARIA_EXTERNAL_SERVER + data[i].id
       }
     })
   }
@@ -75,7 +77,8 @@ export const getBirdsKanariaByAccount = async (account: string) => {
 
     nfts.push({
       ...data[i],
-      metadata: result
+      metadata: result,
+      external_url: KANARIA_EXTERNAL_SERVER + data[i].id
     })
   }
 

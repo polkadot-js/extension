@@ -9,7 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountsWithCurrentAddress, BalanceJson, NetWorkMetadataDef, PriceJson, RequestSubscribeBalance, RequestSubscribePrice } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, NetWorkMetadataDef, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -275,6 +275,14 @@ export async function getBalance (): Promise<BalanceJson> {
 
 export async function subscribeBalance (request: RequestSubscribeBalance, callback: (balanceData: BalanceJson) => void): Promise<BalanceJson> {
   return sendMessage('pri(balance.getSubscription)', request, callback);
+}
+
+export async function getCrowdloan (): Promise<CrowdloanJson> {
+  return sendMessage('pri(crowdloan.getCrowdloan)', null);
+}
+
+export async function subscribeCrowdloan (request: RequestSubscribeCrowdloan, callback: (crowdloanData: CrowdloanJson) => void): Promise<CrowdloanJson> {
+  return sendMessage('pri(crowdloan.getSubscription)', request, callback);
 }
 
 export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {

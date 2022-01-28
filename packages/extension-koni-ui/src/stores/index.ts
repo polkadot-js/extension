@@ -3,14 +3,16 @@
 
 import { configureStore } from '@reduxjs/toolkit/dist';
 
+import BalanceReducer from './Balance';
+import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import PriceReducer from './Price';
-import BalanceReducer from './Balance';
 
 const reducers = {
   price: PriceReducer,
   balance: BalanceReducer,
+  crowdloan: CrowdloanReducer,
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer
 };

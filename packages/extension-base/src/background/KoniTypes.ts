@@ -14,8 +14,21 @@ export interface PriceJson {
   priceMap: Record<string, number>
 }
 
+export enum APIItemState {
+  PENDING = 'pending',
+  READY = 'ready',
+  CACHED = 'cached',
+  ERROR = 'pending',
+}
+
+export enum CrowdloanParaSate {
+  ONGOING = 'ongoing',
+  COMPLETED = 'completed',
+  FAILED = 'failed'
+}
+
 export interface BalanceItem {
-  ready?: boolean,
+  state: APIItemState,
   free: string,
   reserved: string,
   miscFrozen: string,
@@ -24,6 +37,16 @@ export interface BalanceItem {
 
 export interface BalanceJson {
   details: Record<string, BalanceItem>
+}
+
+export interface CrowdloanItem {
+  state: APIItemState,
+  paraState?: CrowdloanParaSate,
+  contribute: string
+}
+
+export interface CrowdloanJson {
+  details: Record<string, CrowdloanItem>
 }
 
 export interface ChainRegistry {
@@ -114,12 +137,16 @@ export type RequestPrice = null
 export type RequestSubscribePrice = null
 export type RequestBalance = null
 export type RequestSubscribeBalance = null
+export type RequestCrowdloan = null
+export type RequestSubscribeCrowdloan = null
 
 export interface KoniRequestSignatures {
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],
   'pri(balance.getBalance)': [RequestBalance, BalanceJson],
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson],
+  'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson],
+  'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson],
   'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pub(utils.getRandom)': [RandomTestRequest, number]
 }

@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
-import { BalanceJson, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import { BalanceJson, CrowdloanJson, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
@@ -20,7 +20,7 @@ import uiSettings from '@polkadot/ui-settings';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeBalance, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
+import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeBalance, subscribeCrowdloan, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AuthList from './AuthManagement';
@@ -74,8 +74,11 @@ function updatePrice (priceData: PriceJson): void {
 }
 
 function updateBalance (balanceData: BalanceJson): void {
-  console.log(balanceData.details);
   store.dispatch({ type: 'balance/update', payload: balanceData });
+}
+
+function updateCrowdloan (crowdloan: CrowdloanJson): void {
+  store.dispatch({ type: 'crowdloan/update', payload: crowdloan });
 }
 
 function updateCurrentAccount (currentAcc: AccountJson | undefined): void {
@@ -137,6 +140,9 @@ export default function Popup (): React.ReactElement {
       .catch(console.error);
     subscribeBalance(null, updateBalance)
       .then(updateBalance)
+      .catch(console.error);
+    subscribeCrowdloan(null, updateCrowdloan)
+      .then(updateCrowdloan)
       .catch(console.error);
   }, []);
 

@@ -3,7 +3,7 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, BalanceJson, NetWorkMetadataDef, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, NetWorkMetadataDef, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
@@ -129,6 +129,27 @@ export default class KoniExtension extends Extension {
     });
 
     return this.getBalance();
+  }
+
+  private getCrowdloan (): CrowdloanJson {
+    return state.getCrowdloan();
+  }
+
+  private subscribeCrowdloan (id: string, port: chrome.runtime.Port): CrowdloanJson {
+    const cb = createSubscription<'pri(crowdloan.getSubscription)'>(id, port);
+
+    const balanceSubscription = state.subscribeCrowdloan().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      balanceSubscription.unsubscribe();
+    });
+
+    return this.getCrowdloan();
   }
 
   private validatePassword (json: KeyringPair$Json, password: string): boolean {
@@ -283,6 +304,10 @@ export default class KoniExtension extends Extension {
         return this.getBalance();
       case 'pri(balance.getSubscription)':
         return this.subscribeBalance(id, port);
+      case 'pri(crowdloan.getCrowdloan)':
+        return this.getCrowdloan();
+      case 'pri(crowdloan.getSubscription)':
+        return this.subscribeCrowdloan(id, port);
       case 'pri(derivation.createV2)':
         return this.derivationCreateV2(request as RequestDeriveCreate);
       case 'pri(json.restoreV2)':

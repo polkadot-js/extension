@@ -3,7 +3,7 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, NetWorkMetadataDef, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, NetWorkMetadataDef, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
@@ -108,6 +108,27 @@ export default class KoniExtension extends Extension {
     });
 
     return this.getPrice();
+  }
+
+  private getBalance (): BalanceJson {
+    return state.getBalance();
+  }
+
+  private subscribeBalance (id: string, port: chrome.runtime.Port): BalanceJson {
+    const cb = createSubscription<'pri(balance.getSubscription)'>(id, port);
+
+    const balanceSubscription = state.subscribeBalance().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      balanceSubscription.unsubscribe();
+    });
+
+    return this.getBalance();
   }
 
   private validatePassword (json: KeyringPair$Json, password: string): boolean {
@@ -258,6 +279,10 @@ export default class KoniExtension extends Extension {
         return await this.getPrice();
       case 'pri(price.getSubscription)':
         return await this.subscribePrice(id, port);
+      case 'pri(balance.getBalance)':
+        return this.getBalance();
+      case 'pri(balance.getSubscription)':
+        return this.subscribeBalance(id, port);
       case 'pri(derivation.createV2)':
         return this.derivationCreateV2(request as RequestDeriveCreate);
       case 'pri(json.restoreV2)':

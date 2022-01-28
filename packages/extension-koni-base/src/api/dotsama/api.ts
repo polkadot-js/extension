@@ -149,7 +149,7 @@ export function initApi (apiUrl: string | string[]): ApiProps {
   }) as unknown as ApiProps;
 
   api.on('connected', () => {
-    console.log('=============connected', apiUrl);
+    console.log('DotSamaAPI connected', apiUrl);
 
     if (result.isApiReadyOnce) {
       result.isApiReady = true;
@@ -159,13 +159,13 @@ export function initApi (apiUrl: string | string[]): ApiProps {
   });
 
   api.on('disconnected', () => {
-    console.log('=============disconnected', apiUrl);
+    console.log('DotSamaAPI disconnected', apiUrl);
     result.isApiConnected = false;
     result.isApiReady = false;
   });
 
   api.on('ready', () => {
-    console.log('=============ready', apiUrl);
+    console.log('DotSamaAPI ready', apiUrl);
     loadOnReady(registry, api)
       .then((rs) => {
         objectSpread(result, rs);

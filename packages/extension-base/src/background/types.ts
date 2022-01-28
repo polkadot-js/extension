@@ -3,16 +3,19 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, MetadataDefBase, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
 import { TypeRegistry } from '@polkadot/types';
+import { Keyring } from '@polkadot/ui-keyring';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
@@ -42,6 +45,75 @@ export interface AccountJson extends KeyringPair$Meta {
   suri?: string;
   type?: KeypairType;
   whenCreated?: number;
+}
+
+export interface DefaultFormatBalance {
+  decimals?: number[] | number;
+  unit?: string[] | string;
+}
+
+export interface ApiState {
+  apiDefaultTx: SubmittableExtrinsicFunction;
+  apiDefaultTxSudo: SubmittableExtrinsicFunction;
+  isApiReady: boolean;
+  isDevelopment?: boolean;
+  isEthereum?: boolean;
+  specName: string;
+  specVersion: string;
+  systemChain: string;
+  systemName: string;
+  systemVersion: string;
+  registry: Registry;
+  defaultFormatBalance: DefaultFormatBalance;
+}
+
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'NOT_SURE';
+
+export interface NetWorkInfo {
+  chain: string;
+  genesisHash: string;
+  icon?: string;
+  ss58Format: number;
+  chainType?: 'substrate' | 'ethereum';
+  provider: string;
+  group: NetWorkGroup;
+  paraId?: number;
+  isEthereum?: boolean;
+}
+
+export interface NetWorkMetadataDef extends MetadataDefBase {
+  networkKey: string;
+  group: string
+  isEthereum: boolean;
+}
+
+export interface ApiProps extends ApiState {
+  api: ApiPromise;
+  apiError?: string;
+  apiUrl: string;
+  isNotSupport?: boolean;
+  isApiConnected: boolean;
+  isApiInitialized: boolean;
+  isReady: Promise<ApiProps>;
+}
+
+export type PdotApi = {
+  keyring: Keyring;
+  apisMap: Record<string, ApiProps>;
+}
+
+export interface BackgroundWindow extends Window {
+  pdotApi: PdotApi;
+}
+
+// all Accounts and the address of the current Account
+export interface AccountsWithCurrentAddress {
+  accounts: AccountJson[];
+  currentAddress?: string;
+}
+
+export interface CurrentAccountInfo {
+  address: string;
 }
 
 export type AccountWithChildren = AccountJson & {
@@ -107,6 +179,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
+  'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.list)': [null, ResponseAuthorizeList];

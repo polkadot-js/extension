@@ -2,16 +2,37 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { BalanceJson, CurrentAccountInfo, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import { BalanceItem, BalanceJson, CurrentAccountInfo, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import BalanceStore from '@polkadot/extension-koni-base/stores/Balance';
+import { Subject } from 'rxjs';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+
+function generateDefaultBalanceMap () {
+  const balanceMap: Record<string, BalanceItem> = {};
+
+  Object.keys(NETWORKS).forEach((networkKey) => {
+    balanceMap[networkKey] = {
+      ready: false,
+      free: '0',
+      reserved: '0',
+      miscFrozen: '0',
+      feeFrozen: '0'
+    };
+  });
+
+  return balanceMap;
+}
 
 export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
   private priceStoreReady = false;
   private readonly currentAccountStore = new CurrentAccountStore();
-  private readonly balanceStore = new BalanceStore();
+
+  // Todo: Persist data to balanceStore later
+  // private readonly balanceStore = new BalanceStore();
+  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
+  private balanceSubject = new Subject<BalanceJson>();
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
@@ -19,6 +40,31 @@ export default class KoniState extends State {
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+  }
+
+  public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {
+    return this.currentAccountStore.getSubject();
+  }
+
+  public getAccountAddress () {
+    return new Promise((resolve, reject) => {
+      this.getCurrentAccount(({ address }) => {
+        resolve(address);
+      });
+    });
+  }
+
+  public getBalance (): BalanceJson {
+    return { details: this.balanceMap } as BalanceJson;
+  }
+
+  public setBalanceItem (networkKey: string, item: BalanceItem) {
+    this.balanceMap[networkKey] = item;
+    this.balanceSubject.next(this.getBalance());
+  }
+
+  public subscribeBalance () {
+    return this.balanceSubject;
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
@@ -50,29 +96,5 @@ export default class KoniState extends State {
 
   public subscribePrice () {
     return this.priceStore.getSubject();
-  }
-
-  public getBalance () {
-    return new Promise((resolve, reject) => {
-      this.getCurrentAccount(({ address }) => {
-        this.balanceStore.get(address, (rs) => {
-          resolve(rs);
-        });
-      });
-    });
-  }
-
-  public setBalance (balanceValue: BalanceJson) {
-    return new Promise((resolve, reject) => {
-      this.getCurrentAccount(({ address }) => {
-        this.balanceStore.set(address, balanceValue, () => {
-          resolve(true);
-        });
-      });
-    });
-  }
-
-  public subscribeBalance () {
-    return this.balanceStore.getSubject();
   }
 }

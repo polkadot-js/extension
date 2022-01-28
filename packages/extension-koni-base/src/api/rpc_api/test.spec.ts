@@ -1,6 +1,6 @@
 import {getBalances} from "@polkadot/extension-koni-base/api/rpc_api/index";
-import { wsProvider } from "../connector";
-import { getCurrentBonded } from "./staking-info";
+import {connectChains, wsProvider} from "../connector";
+import {getCurrentBonded, getMultiCurrentBonded} from "./staking_info";
 import networks from '../endpoints';
 
 jest.setTimeout(50000)
@@ -18,9 +18,8 @@ describe('test rpc api', () => {
 
 describe('test api get staking', () => {
   test('test api get bonded token from endpoints', async () => {
-    console.log(networks.polkadot.provider)
-    const api = await wsProvider(networks.polkadot)
-    return getCurrentBonded( { api, accountId: '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S' } ).then(rs => {
+    const apis = await connectChains([{chainId: 0, paraId: 0}, {chainId: 2, paraId: 2000}])
+    return getMultiCurrentBonded( { apis, accountId: '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S' } ).then(rs => {
       console.log(rs)
       expect(rs).not.toBeNaN()
     }).catch(err => {

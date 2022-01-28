@@ -7,7 +7,6 @@ import { getChainMetadata } from './rpc_api';
 import { NetWorkInfo } from './types';
 // import networks from "@polkadot/extension-koni-base/api/endpoints";
 // import unique_types from "@polkadot/extension-koni-base/api/unique_nft/runtime_types";
-import {getChainMetadata} from "@polkadot/extension-koni-base/api/rpc_api";
 
 export const wsProvider = async ({ provider }: NetWorkInfo, type?: any): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

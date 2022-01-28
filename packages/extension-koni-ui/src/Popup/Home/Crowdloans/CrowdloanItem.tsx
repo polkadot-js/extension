@@ -117,6 +117,8 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
     border-radius: 3px;
     background-color: ${theme.backgroundAccountAddress};
     margin-left: 8px;
+    font-size: 13px;
+    line-height: 20px;
   }
 
 

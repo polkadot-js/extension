@@ -1,8 +1,11 @@
 import {AccountJson} from "@polkadot/extension-base/background/types";
 import styled from "styled-components";
 import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import React from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import LogosMap from "@polkadot/extension-koni-ui/assets/logo";
+import {useSelector} from "react-redux";
+import {RootState, store} from "@polkadot/extension-koni-ui/stores";
+import {getNft, getStaking} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends AccountJson {
   className?: string;
@@ -10,6 +13,29 @@ interface Props extends AccountJson {
 
 
 function StakingContainer ({className}: Props): React.ReactElement<Props> {
+  const currentAccount = useSelector((state: RootState) => state.currentAccount)
+  const [loading, setLoading] = useState(false)
+  const _onCreate = useCallback(
+    (): void => {
+      if (currentAccount && currentAccount.address) {
+        setLoading(true)
+        getStaking(currentAccount.address).then(r => {
+          console.log(r)
+          setLoading(false)
+        }).catch(e => {
+          console.error('There is a problem getting staking', e)
+        })
+      } else {
+        console.error('There is a problem getting staking')
+      }
+    },
+    [currentAccount]
+  );
+
+  useEffect(() => {
+    _onCreate()
+  }, [currentAccount])
+
   const editBalance = (balance: Number) => {
     if (balance === 0) return <span className={`major-balance`}>{balance}</span>
 

@@ -3,6 +3,20 @@
 
 import { u128 } from '@polkadot/types';
 
+export interface StakingItem {
+  name: string,
+  chainId: string,
+  paraId: string,
+  balance: string,
+  nativeToken: string,
+  unit: string,
+}
+
+export interface StakingJson {
+  ready?: boolean,
+  details: Array<StakingItem>
+}
+
 export interface PriceJson {
   ready?: boolean;
   currency: string;
@@ -55,6 +69,7 @@ export type RequestPrice = null
 export type RequestSubscribePrice = null
 
 export interface KoniRequestSignatures {
+  'pri(staking.getStaking)': [string, StakingJson]
   'pri(nft.getNft)': [string, NftJson]
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, boolean, PriceJson]

@@ -3,7 +3,7 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import {NftJson, PriceJson} from '@polkadot/extension-base/background/KoniTypes';
+import {NftJson, PriceJson, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
 import {
   AccountJson,
   AccountsWithCurrentAddress,
@@ -236,6 +236,14 @@ export default class KoniExtension extends Extension {
     });
   }
 
+  private getStaking(account: string): Promise<StakingJson> {
+    return new Promise<StakingJson>((resolve, reject) => {
+      state.getStaking(account, (rs: StakingJson) => {
+        resolve(rs);
+      })
+    })
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -257,6 +265,8 @@ export default class KoniExtension extends Extension {
         return this.batchRestoreV2(request as RequestBatchRestore);
       case 'pri(nft.getNft)':
         return await this.getNft(request as string)
+      case 'pri(staking.getStaking)':
+        return await this.getStaking(request as string)
       default:
         return super.handle(id, type, request, port);
     }

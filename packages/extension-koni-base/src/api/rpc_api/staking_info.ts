@@ -1,5 +1,6 @@
 import {ApiPromise} from "@polkadot/api";
 import {connectChains} from "@polkadot/extension-koni-base/api/connector";
+import {StakingItem, StakingJson} from "@polkadot/extension-koni-base/stores/types";
 
 interface LedgerData {
    active: string,
@@ -41,12 +42,21 @@ export const getMultiCurrentBonded = async ({apis, accountId}: PropsMulti): Prom
   }
 }
 
-export const getStakingInfo = async (): Promise<any> => {
-  const apis = await connectChains([{chainId: 0, paraId: 0}, {chainId: 2, paraId: 2000}])
-  return getMultiCurrentBonded( { apis, accountId: '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S' } ).then(rs => {
-    console.log(rs)
-    expect(rs).not.toBeNaN()
-  }).catch(err => {
-    console.log(err)
-  })
+export const getStakingInfo = async (accountId: string): Promise<StakingJson> => {
+  let result: any[] = []
+  const targetChains = [{chainId: 0, paraId: 0}, {chainId: 2, paraId: 2000}]
+  const apis = await connectChains(targetChains)
+  const balances = await getMultiCurrentBonded( { apis, accountId: '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S' } )
+  for (let i in targetChains) {
+    const currentChain = targetChains[i]
+    const currentBalance = balances[i]
+    result.push({
+      name: 'null',
+      chainId:
+    } as StakingItem)
+  }
+
+  return {
+    details: result
+  } as StakingJson
 }

@@ -3,6 +3,20 @@
 
 import { u128 } from '@polkadot/types';
 
+export interface StakingItem {
+  name: string,
+  chainId: string,
+  paraId: string,
+  balance: string,
+  nativeToken: string,
+  unit: string,
+}
+
+export interface StakingJson {
+  ready?: boolean,
+  details: Array<StakingItem>
+}
+
 export interface NftItem {
   id: string;
   name: string;

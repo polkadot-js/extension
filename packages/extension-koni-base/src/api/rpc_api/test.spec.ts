@@ -1,9 +1,10 @@
-import {getBalances} from "@polkadot/extension-koni-base/api/rpc_api/index";
+import {getAllChainsMapping, getBalances} from "@polkadot/extension-koni-base/api/rpc_api/index";
 import {connectChains, wsProvider} from "../connector";
 import {getCurrentBonded, getMultiCurrentBonded} from "./staking_info";
 import networks from '../endpoints';
+import {loadJSON} from "@polkadot/extension-koni-base/api/rpc_api/utils";
 
-jest.setTimeout(50000)
+jest.setTimeout(500000000)
 
 describe('test rpc api', () => {
   test('test rpc api from endpoints', async () => {
@@ -18,9 +19,10 @@ describe('test rpc api', () => {
 
 describe('test api get staking', () => {
   test('test api get bonded token from endpoints', async () => {
-    const apis = await connectChains([{chainId: 0, paraId: 0}, {chainId: 2, paraId: 2000}])
+    const allChainsMapping = getAllChainsMapping()
+    const apis = await connectChains(allChainsMapping)
     return getMultiCurrentBonded( { apis, accountId: '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S' } ).then(rs => {
-      console.log(rs)
+      console.log(rs.length)
       expect(rs).not.toBeNaN()
     }).catch(err => {
       console.log(err)

@@ -8,6 +8,20 @@ interface chainInfo {
    paraId: number;
 }
 
+// returns [{chainId, paraId},...]
+export const getAllChainsMapping = () => {
+  const rawMeta = loadJSON('./endpoints/manifest.json')
+  let allMeta: any[] = []
+  for (const [chainId, paraChain] of Object.entries(rawMeta)) {
+    // @ts-ignore
+    for (const [paraId] of Object.entries(paraChain)) {
+      allMeta.push({chainId: parseInt(chainId), paraId: parseInt(paraId)})
+    }
+  }
+
+  return allMeta
+}
+
 export const getChainMetadata = ({ chainId, paraId }: chainInfo) => {
    const manifestPath = `./endpoints/${chainId}/${paraId}/manifest.json`
    return loadJSON(manifestPath)

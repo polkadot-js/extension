@@ -50,8 +50,11 @@ export const connectChains = async (targetChains: Array<any>): Promise<any[] | u
 
   targetChains.map((item) => {
     const chainMetadata = getChainMetadata({ chainId: item.chainId, paraId: item.paraId })
-    const apiPromise = wsProvider({provider: chainMetadata.rpcs})
-    apiPromises.push(apiPromise)
+    if (chainMetadata && chainMetadata.rpcs) {
+      const apiPromise = wsProvider({provider: chainMetadata.rpcs})
+      apiPromises.push(apiPromise)
+    }
+    else apiPromises.push(null)
   })
 
   return await Promise.all(apiPromises)

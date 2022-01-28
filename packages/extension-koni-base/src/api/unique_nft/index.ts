@@ -53,7 +53,7 @@ function hexToUTF16(hex: string): Uint8Array {
 }
 
 export default class UniqueNftApi {
-   api : ApiPromise| null = null
+   api: ApiPromise | null = null
 
    constructor() {
    }
@@ -64,8 +64,14 @@ export default class UniqueNftApi {
    }
 
    public async disconnect() {
-     if(this.api)
-        await this.api.disconnect();
+      if (this.api)
+         await this.api.disconnect();
+   }
+
+   public async getCollectionCount(): Promise<number> {
+      if (!this.api) return 0
+      const collectionCount = (await this.api.query.nft.createdCollectionCount()) as unknown as number
+      return collectionCount
    }
 
    /**

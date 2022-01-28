@@ -17,6 +17,8 @@ export class KoniSubcription {
   }
 
   init () {
+    this.initChainRegistrySubscription();
+
     state.getCurrentAccount(({ address }) => {
       let unsubCrowdloans = this.initCrowdloanSubscription(address);
 
@@ -34,6 +36,19 @@ export class KoniSubcription {
           await unsubBalances();
           unsubBalances = this.initBalanceSubscription(address);
         }
+      });
+    });
+  }
+
+  initChainRegistrySubscription() {
+    Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
+      const networkAPI = await apiProps.isReady;
+
+      const {chainDecimals, chainTokens} = networkAPI.api.registry;
+
+      state.setChainRegistryItem(networkKey, {
+        chainDecimals,
+        chainTokens
       });
     });
   }

@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { APIItemState, BalanceItem, BalanceJson, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  APIItemState,
+  BalanceItem,
+  BalanceJson, ChainRegistry, CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  PriceJson
+} from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import { Subject } from 'rxjs';
@@ -49,6 +56,10 @@ export default class KoniState extends State {
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
 
+  //todo: persist data to store later
+  private chainRegistryMap: Record<string, ChainRegistry> = {};
+  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
   }
@@ -93,6 +104,19 @@ export default class KoniState extends State {
 
   public subscribeCrowdloan () {
     return this.crowdloanSubject;
+  }
+
+  public getChainRegistryMap (): Record<string, ChainRegistry> {
+    return this.chainRegistryMap;
+  }
+
+  public setChainRegistryItem (networkKey: string, registry: ChainRegistry) {
+    this.chainRegistryMap[networkKey] = registry;
+    this.chainRegistrySubject.next(this.getChainRegistryMap());
+  }
+
+  public subscribeChainRegistryMap () {
+    return this.chainRegistrySubject;
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {

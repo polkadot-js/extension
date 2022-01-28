@@ -90,7 +90,10 @@ const darkTheme = {
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
   scrollBarThumb: 'rgba(128, 135, 139, .8)',
   scrollBarThumbInactive: 'rgba(145, 150, 171, .5)',
-  scrollBarThumbHover: '#9196AB'
+  scrollBarThumbHover: '#9196AB',
+  crowdloanWinnerStatus: '#42C59A',
+  crowdloanActiveStatus: '#F7A21B',
+  crowdloanFailStatus: '#F5000E',
 };
 
 export declare type Theme = typeof darkTheme;

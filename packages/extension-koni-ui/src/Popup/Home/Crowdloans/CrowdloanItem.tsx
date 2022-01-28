@@ -14,8 +14,17 @@ interface Props extends ThemeProps {
 }
 
 function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
+  let crowdloanStatusClass;
+
+  if (item.crowdloanStatus === 'Winner') {
+    crowdloanStatusClass = '-winner-status';
+  } else if (item.crowdloanStatus === 'Fail') {
+    crowdloanStatusClass = '-fail-status';
+  } else {
+    crowdloanStatusClass = '-active-status';
+  }
   return (
-    <div className={`crowdloan-item ${className ? className : ''}`}>
+    <div className={`crowdloan-item ${className ? className : ''} ${crowdloanStatusClass}`}>
       <div className='crowdloan-item__part-1'>
         <img
           alt='Logo'
@@ -23,7 +32,10 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
           src={item.logo}
         />
         <div className='crowdloan-item__meta-wrapper'>
-          <div className='crowdloan-item__chain-name'>{item.networkDisplayName}</div>
+          <div className='crowdloan-item__chain-top-area'>
+            <div className='crowdloan-item__chain-name'>{item.networkDisplayName}</div>
+            <div className={`crowdloan-item__status`}>{item.crowdloanStatus}</div>
+          </div>
           <div className='crowdloan-item__chain-group'>{item.groupDisplayName}</div>
         </div>
       </div>
@@ -59,6 +71,24 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
     background: ${theme.boxBorderColor};
   }
 
+  &.-winner-status {
+    .crowdloan-item__status {
+      color: ${theme.crowdloanWinnerStatus};
+    }
+  }
+
+  &.-active-status {
+    .crowdloan-item__status {
+      color: ${theme.crowdloanActiveStatus};
+    }
+  }
+
+  &.-fail-status {
+    .crowdloan-item__status {
+      color: ${theme.crowdloanFailStatus};
+    }
+  }
+
   .crowdloan-item__part-1 {
     display: flex;
     align-items: center;
@@ -76,6 +106,19 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
     background-color: #fff;
     border: 1px solid #fff;
   }
+
+  .crowdloan-item__chain-top-area {
+    display: flex;
+    align-items: center;
+  }
+
+  .crowdloan-item__status {
+    padding: 2px 6px;
+    border-radius: 3px;
+    background-color: ${theme.backgroundAccountAddress};
+    margin-left: 8px;
+  }
+
 
   .crowdloan-item__chain-name, .crowdloan-item__part-2 .kn-balance-val:first-child {
     font-size: 15px;

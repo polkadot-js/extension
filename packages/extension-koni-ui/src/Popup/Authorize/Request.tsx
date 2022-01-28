@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
-import type { ThemeProps } from '../../types';
+import type {RequestAuthorizeTab} from '@polkadot/extension-base/background/types';
+import type {ThemeProps} from '../../types';
 
-import React, { useCallback, useContext } from 'react';
-import { Trans } from 'react-i18next';
+import React, {useCallback, useContext} from 'react';
+import {Trans} from 'react-i18next';
 import styled from 'styled-components';
 
-import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
+import {ActionBar, ActionContext, Button, Icon, Link, Warning} from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
+import {approveAuthRequest, rejectAuthRequest} from '../../messaging';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -20,8 +20,8 @@ interface Props extends ThemeProps {
   url: string;
 }
 
-function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+function Request({authId, className, isFirst, request: {origin}, url}: Props): React.ReactElement<Props> {
+  const {t} = useTranslation();
   const onAction = useContext(ActionContext);
 
   const _onApprove = useCallback(
@@ -40,14 +40,15 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   return (
     <div className={className}>
-      <div className='request-info'>
-        <div className='info'>
+      <div className='request-info-wrapper'>
+        <div className='request-info'>
           <Icon
             icon='X'
             onClick={_onReject}
           />
           <div className='tab-info'>
-            <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
+            <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is
+              requesting access from{' '}
               <a
                 href={url}
                 rel='noopener noreferrer'
@@ -64,16 +65,15 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
               {t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}
             </Warning>
             <Button
-              className='request__accept-btn acceptButton'
+              className='request__accept-button'
               onClick={_onApprove}
             >
               {t<string>('Yes, allow this application access')}
             </Button>
           </>
         )}
-        <ActionBar className='request__rejection-btn'>
+        <ActionBar className='request__rejection-button'>
           <Link
-            isDanger
             onClick={_onReject}
           >
             Reject
@@ -84,7 +84,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   );
 }
 
-export default styled(Request)(({ theme }: Props) => `
+export default styled(Request)(({theme}: Props) => `
 
   .icon {
     background: ${theme.buttonBackgroundDanger};
@@ -94,14 +94,16 @@ export default styled(Request)(({ theme }: Props) => `
     height: 18px;
     font-size: 10px;
     line-height: 20px;
-    margin: 16px 15px 0 1.35rem;
+    margin: 16px 15px 0 0;
     font-weight: 800;
-    padding-left: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .tab-info {
     overflow: hidden;
-    margin: 0.75rem 20px 0 0;
+    margin-top: 0.75rem;
   }
 
   .tab-name,
@@ -116,30 +118,38 @@ export default styled(Request)(({ theme }: Props) => `
     text-decoration: underline;
   }
 
-  .request-info {
+  .request-info-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-bottom: 8px;
-    background: ${theme.highlightedAreaBackground};
   }
 
-  .info {
+  .request-info {
     display: flex;
     flex-direction: row;
+    padding-top: 20px;
   }
 
-  .request-_accept-btn request__accept-btn {
-    width: 90%;
-    margin: 25px auto 0;
+  .request__accept-button {
+    margin-top: 25px;
   }
 
   .request__warning {
-    margin: 24px 24px 0 1.45rem;
+    margin-top: 24px;
   }
 
-  .request__rejection-btn {
+  .request__rejection-button {
     margin: 8px 0 15px 0;
-    text-decoration: underline;
+
+    span {
+      color: ${theme.buttonTextColor2};
+      font-weight: 500;
+    }
+
+    a {
+      text-decoration: underline;
+    }
+
   }
 `);

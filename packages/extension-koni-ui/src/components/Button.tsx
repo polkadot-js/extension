@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -36,11 +36,11 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
 
   return (
     <button
-      className={`${className}${(isDisabled || isBusy) ? 'button__is-disabled' : ''}${isBusy ? 'button__is-busy' : ''}`}
+      className={`${className}${(isDisabled || isBusy) ? ' is-disabled' : ''}${isBusy ? ' is-busy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
     >
-      <div className='button__children'>{children}</div>
+      <div className='children'>{children}</div>
       <div className='button__disabled-overlay' />
       <Spinner className='button__busy-overlay' />
     </button>
@@ -64,7 +64,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   text-align: center;
 
 
-  .button__children {
+  .children {
     font-family: ${theme.fontFamily};
     font-weight: 500;
   }
@@ -93,10 +93,10 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     margin-right: 0.3rem;
   }
 
-  &.button__is-busy {
+  &.is-busy {
     background: rgba(96,96,96,0.15);
 
-    .button__children {
+    .children {
       opacity: 0.25;
     }
 
@@ -105,7 +105,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     }
   }
 
-  &.button__is-disabled .button__disabled-overlay {
+  &.is-disabled .button__disabled-overlay {
     visibility: visible;
   }
 `);

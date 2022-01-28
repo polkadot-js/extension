@@ -42,7 +42,8 @@ function getItem (networkKey: string, contributeValueInfo: BalanceValueType): Cr
     networkDisplayName: networkInfo.chain,
     networkKey,
     symbol,
-    groupDisplayName
+    groupDisplayName,
+    crowdloanStatus: 'Active'
   };
 }
 
@@ -74,7 +75,8 @@ function getmockCrowdloanContributeMap (networkKeys: string[]): Record<string, B
     result[n] = {
       balanceValue: new BigN(50),
       convertedBalanceValue: new BigN(50),
-      symbol: 'DOT'
+      symbol: 'DOT',
+
     };
   });
 

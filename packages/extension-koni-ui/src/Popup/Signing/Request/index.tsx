@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
@@ -7,20 +7,20 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { ThemeContext } from 'styled-components';
 
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, ActionContext, Theme, VerticalSpace, Warning } from '../../../components';
-import { useTranslation } from '../../../components/translate';
+import {AccountContext, ActionContext, Theme} from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
+import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
+import MenuDivider from "@polkadot/extension-koni-ui/components/MenuDivider";
+import styled, {ThemeContext} from "styled-components";
 
 interface Props {
   account: AccountJson;
@@ -29,6 +29,7 @@ interface Props {
   request: RequestSign;
   signId: string;
   url: string;
+  className?: string;
 }
 
 interface Data {
@@ -46,12 +47,11 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware }, buttonText, isFirst, request, signId, url, className }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const { accounts } = useContext(AccountContext);
-  const { t } = useTranslation();
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect((): void => {
@@ -83,16 +83,20 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
     [onAction, signId]
   );
 
+
   if (payload !== null) {
     const json = request.payload as SignerPayloadJSON;
 
     return (
       <>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-          <AccountInfo
-            address={json.address}
-            genesisHash={json.genesisHash}
-          />
+        <div className={className}>
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+            <AccountInfo
+              address={json.address}
+              genesisHash={json.genesisHash}
+              className='transaction-account-info'
+            />
+          </div>
         </div>
         {isExternal && !isHardware
           ? (
@@ -123,6 +127,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
             setError={setError}
           />
         )}
+        <MenuDivider className='transaction-divider'/>
         <SignArea
           buttonText={buttonText}
           error={error}
@@ -139,7 +144,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
 
     return (
       <>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+        <div>
           <AccountInfo
             address={address}
           />
@@ -161,10 +166,6 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
             />
           )
         }
-        {isHardware && <>
-          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
-          <VerticalSpace />
-        </>}
         <SignArea
           buttonText={buttonText}
           error={error}
@@ -179,3 +180,10 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
 
   return null;
 }
+
+export default styled(Request)`
+  padding: 0 15px;
+  .transaction-account-info {
+    padding-bottom: 0;
+  }
+`;

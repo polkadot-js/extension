@@ -7,7 +7,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { Loading, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { Header } from '../../partials';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
 
@@ -47,16 +46,13 @@ export default function Signing (): React.ReactElement {
   return request
     ? (
       <>
-        <Header text={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}>
-          {requests.length > 1 && (
-            <TransactionIndex
-              index={requestIndex}
-              onNextClick={_onNextClick}
-              onPreviousClick={_onPreviousClick}
-              totalItems={requests.length}
-            />
-          )}
-        </Header>
+        <TransactionIndex
+          index={requestIndex}
+          onNextClick={_onNextClick}
+          onPreviousClick={_onPreviousClick}
+          totalItems={requests.length}
+          name={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}
+        />
         <Request
           account={request.account}
           buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}

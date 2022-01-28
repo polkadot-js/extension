@@ -11,6 +11,7 @@ export type CrowdloanItemType = {
   groupDisplayName: string;
   logo: string;
   symbol: string;
+  crowdloanStatus?: 'Active' | 'Winner' | 'Fail';
 }
 
 export type TabHeaderItemType = {

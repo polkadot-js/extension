@@ -113,7 +113,7 @@ export interface NetWorkInfo {
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
-  networkName: string;
+  networkKey: string;
   group: string
   isEthereum: boolean;
 }

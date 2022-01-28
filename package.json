@@ -56,5 +56,10 @@
   },
   "dependencies": {
     "@types/node": "^17.0.10"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false
   }
 }

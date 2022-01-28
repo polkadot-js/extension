@@ -4,8 +4,8 @@ import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 import React, {useCallback, useEffect, useState} from "react";
 import LogosMap from "@polkadot/extension-koni-ui/assets/logo";
 import {useSelector} from "react-redux";
-import {RootState, store} from "@polkadot/extension-koni-ui/stores";
-import {getNft, getStaking} from "@polkadot/extension-koni-ui/messaging";
+import {RootState} from "@polkadot/extension-koni-ui/stores";
+import {getStaking} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends AccountJson {
   className?: string;
@@ -20,7 +20,7 @@ function StakingContainer ({className}: Props): React.ReactElement<Props> {
       if (currentAccount && currentAccount.address) {
         setLoading(true)
         getStaking(currentAccount.address).then(r => {
-          console.log(r)
+          console.log('finally', r)
           setLoading(false)
         }).catch(e => {
           console.error('There is a problem getting staking', e)

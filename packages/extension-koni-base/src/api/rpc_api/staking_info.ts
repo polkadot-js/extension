@@ -1,6 +1,7 @@
 import {ApiPromise} from "@polkadot/api";
 import {connectChains} from "@polkadot/extension-koni-base/api/connector";
 import {StakingItem, StakingJson} from "@polkadot/extension-koni-base/stores/types";
+import {getChainMetadata} from "@polkadot/extension-koni-base/api/rpc_api/index";
 
 interface LedgerData {
    active: string,
@@ -50,12 +51,18 @@ export const getStakingInfo = async (accountId: string): Promise<StakingJson> =>
   for (let i in targetChains) {
     const currentChain = targetChains[i]
     const currentBalance = balances[i]
+    const amount = currentBalance.split(' ')[0]
+    const unit = currentBalance.split(' ')[1]
+    const chainMeta = getChainMetadata({chainId: currentChain.chainId, paraId: currentChain.paraId})
     result.push({
-      name: 'null',
-      chainId:
+      name: chainMeta.name ,
+      chainId: (currentChain.chainId).toString(),
+      paraId: (currentChain.paraId).toString(),
+      balance: amount,
+      nativeToken: chainMeta.nativeToken,
+      unit: unit ? unit : chainMeta.nativeToken
     } as StakingItem)
   }
-
   return {
     details: result
   } as StakingJson

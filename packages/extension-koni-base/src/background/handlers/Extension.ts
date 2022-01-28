@@ -237,6 +237,7 @@ export default class KoniExtension extends Extension {
   }
 
   private getStaking(account: string): Promise<StakingJson> {
+    console.log('ok')
     return new Promise<StakingJson>((resolve, reject) => {
       state.getStaking(account, (rs: StakingJson) => {
         resolve(rs);

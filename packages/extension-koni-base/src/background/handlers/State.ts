@@ -21,7 +21,7 @@ export default class KoniState extends State {
   private stakingStoreReady = false;
 
   public getStaking (account: string, update: (value: StakingJson) => void): void {
-    this.stakingStore.get('NftData', (rs) => {
+    this.stakingStore.get('StakingData', (rs) => {
       if (this.stakingStoreReady) update(rs);
       else {
         getStakingInfo(account)
@@ -38,7 +38,7 @@ export default class KoniState extends State {
   }
 
   public setStaking (stakingData: StakingJson, callback?: (stakingData: StakingJson) => void): void {
-    this.nftStore.set('NftData', nftData, () => {
+    this.stakingStore.set('StakingData', stakingData, () => {
       if (callback) {
         callback(stakingData);
         this.stakingStoreReady = true;

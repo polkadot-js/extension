@@ -18,3 +18,50 @@ export interface Recoded {
   prefix?: number;
   isEthereum: boolean;
 }
+
+export interface AddressFlags {
+  accountOffset: number;
+  addressOffset: number;
+  hardwareType?: string;
+  isHardware: boolean;
+  isMultisig: boolean;
+  isProxied: boolean;
+  isQr: boolean;
+  isUnlockable: boolean;
+  threshold: number;
+  who: string[];
+}
+
+export interface AddressProxy {
+  isUnlockCached: boolean;
+  signAddress: string | null;
+  signPassword: string;
+}
+
+export interface TxHandler {
+  onTxStart?: () => void;
+  onTxUpdate?: (result: any) => void; // TODO: change any type when add logic
+  onTxSuccess?: (result: any, extrinsicHash?: string) => void; // TODO: change any type when add logic
+  onTxFail?: (result: any | null, error: Error | null, extrinsicHash?: string) => void; // TODO: change any type when add logic
+}
+
+export interface TxResult {
+  isShowTxResult: boolean;
+  isTxSuccess: boolean;
+  txError?: Error | null;
+  extrinsicHash?: string;
+}
+
+export interface QrState {
+  isQrHashed: boolean;
+  qrAddress: string;
+  qrPayload: Uint8Array;
+  qrResolve?: (result: any) => void; // TODO: change any type when add logic
+  qrReject?: (error: Error) => void;
+}
+
+export interface Signed {
+  data: Uint8Array;
+  message: Uint8Array;
+  signature: Uint8Array;
+}

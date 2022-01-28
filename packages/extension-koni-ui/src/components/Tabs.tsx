@@ -72,7 +72,7 @@ export default styled(Tabs)(({ theme }: Props) => `
     border: 0;
     outline: 0;
     border-bottom: 2px solid ${theme.tabContentBorderBottomColor};
-    color: ${theme.textColor2}
+    color: ${theme.textColor2};
   }
 
   .active {

@@ -3,33 +3,33 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import Toggle from "@polkadot/extension-koni-ui/components/Toggle";
+
+import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className: string;
-  toggleFunc: Function;
+  toggleFunc: (isChecked: boolean) => void;
   value: any;
   uncheckedLabel: string;
   checkedLabel: string;
 }
 
-function HorizontalLabelToggle ({className, toggleFunc, value, uncheckedLabel, checkedLabel}: Props): React.ReactElement<Props> {
-
+function HorizontalLabelToggle ({ checkedLabel, className, toggleFunc, uncheckedLabel, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <span className={!value ? 'kn-label' : 'kn-label unselected-label'}>{uncheckedLabel}</span>
       <Toggle
-        onChange={toggleFunc}
         className='horizontal-label-toggle'
+        onChange={toggleFunc}
         value={value}
       />
-      <span className={!!value ? 'kn-label' : 'kn-label unselected-label'}>{checkedLabel}</span>
+      <span className={value ? 'kn-label' : 'kn-label unselected-label'}>{checkedLabel}</span>
     </div>
-  )
+  );
 }
 
-export default styled(HorizontalLabelToggle)(({ theme }: ThemeProps) =>`
+export default styled(HorizontalLabelToggle)(({ theme }: ThemeProps) => `
   display: flex;
   align-items: center;
   .horizontal-label-toggle {

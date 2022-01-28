@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {Theme, ThemeProps} from '../types';
+import type { Theme, ThemeProps } from '../types';
 
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled, {ThemeContext} from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
+
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
 import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
 import Button from '@polkadot/extension-koni-ui/components/Button';
@@ -17,7 +19,6 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
 
 const MIN_LENGTH = 6;
 
@@ -74,15 +75,15 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
         subHeaderName={t<string>('Export account')}
       />
       <div className={className}>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} export-account-wrapper`} >
-          <AccountInfo address={address}/>
-          <Warning className='movedWarning'>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
+          <AccountInfo address={address} />
+          <Warning className='export-warning'>
             {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>
 
-          <div className='passwordArea'>
+          <div className='export__password-area'>
             <InputWithLabel
-              className='koni-export-input-label'
+              className='export__input-label'
               data-export-password
               disabled={isBusy}
               isError={pass.length < MIN_LENGTH || !!error}
@@ -100,7 +101,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
             )}
           </div>
 
-          <div className='actionArea'>
+          <div className='export__action-area'>
             <div>
               <Button
                 className='export-button'
@@ -111,7 +112,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
               >
                 {t<string>('I want to export this account')}
               </Button>
-              <ActionBar className='withMarginTop'>
+              <ActionBar className='export__action-bar'>
                 <ActionText
                   className='cancel-button'
                   onClick={_goHome}
@@ -129,11 +130,11 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
 export default withRouter(styled(KoniExportAccount)(({ theme }: Props) => `
   margin: 0 15px;
 
-  .passwordArea {
+  .export__password-area {
     padding-top: 13px;
   }
 
-  .actionArea {
+  .export__action-area {
     display: flex;
     justify-content: center;
   }
@@ -146,15 +147,15 @@ export default withRouter(styled(KoniExportAccount)(({ theme }: Props) => `
     margin-bottom: 4px;
   }
 
-  .movedWarning {
+  .export-warning {
     margin-top: 8px;
   }
 
-  .withMarginTop {
+  .export__action-bar {
     margin-top: 12px;
   }
 
-  .koni-export-input-label {
+  .export__input-label {
     margin-bottom: 20px;
   }
 

@@ -10,7 +10,7 @@ import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithStep
 
 import { AccountContext, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import {deriveAccountV2} from '../../messaging';
+import { deriveAccountV2 } from '../../messaging';
 import SelectParent from './SelectParent';
 
 interface Props {

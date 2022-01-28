@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 
-import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components';
+import { ActionBar, ActionContext, Button, Checkbox, Link } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
 import Unlock from '../Unlock';
@@ -92,7 +92,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   );
 
   return (
-    <ButtonArea className={className}>
+    <div className={className}>
       {isFirst && !isExternal && (
         <>
           { isLocked && (
@@ -106,16 +106,18 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
             />
           )}
           <RememberPasswordCheckbox />
-          <Button
-            isBusy={isBusy}
-            isDisabled={(!!isLocked && !password) || !!error}
-            onClick={_onSign}
-          >
-            {buttonText}
-          </Button>
+          <div className='sign-button'>
+            <Button
+              isBusy={isBusy}
+              isDisabled={(!!isLocked && !password) || !!error}
+              onClick={_onSign}
+            >
+              {buttonText}
+            </Button>
+          </div>
         </>
       )}
-      <ActionBar className='cancelButton'>
+      <ActionBar className='cancel-button'>
         <Link
           isDanger
           onClick={_onCancel}
@@ -123,21 +125,31 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
           {t<string>('Cancel')}
         </Link>
       </ActionBar>
-    </ButtonArea>
+    </div>
   );
 }
 
 export default styled(SignArea)`
   flex-direction: column;
-  padding: 6px 24px;
+  padding: 15px;
 
-  .cancelButton {
+  .cancel-button {
     margin-top: 4px;
     margin-bottom: 4px;
-    text-decoration: underline;
+    display: flex;
+    justify-content: center;
 
     a {
       margin: auto;
+      text-decoration: underline;
     }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  .sign-button {
+    padding: 0 85px;
   }
 `;

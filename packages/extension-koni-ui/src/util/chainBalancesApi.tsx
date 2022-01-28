@@ -4,62 +4,68 @@
 import axios from 'axios';
 import BigN from 'bignumber.js';
 
-import { isEmptyArray } from './support';
+import { isEmptyArray } from './common';
 import { AccountInfoItem, BalanceInfo, BalanceSubInfo } from './types';
 
-export const priceParamByNetworkNameMap: Record<string, string> = {
-  acala: 'acala-token',
-  // 'altair': 'altair',
-  // 'astar': 'astar',
+export const priceParamByNetworkKeyMap: Record<string, string> = {
+  acala: 'acala',
+  // 'altair':'altair',
+  astar: 'astar',
   // 'basilisk': 'basilisk',
   bifrost: 'bifrost-native-coin',
   calamari: 'calamari-network',
+  centrifuge: 'centrifuge',
   clover: 'clover',
+  coinversation: 'coinversation',
+  // 'composableFinance': 'composableFinance',
+  crab: 'darwinia-crab-network',
+  crust: 'crust-network',
+  darwinia: 'darwinia-network-native-token',
+  edgeware: 'edgeware',
+  efinity: 'efinity',
+  equilibrium: 'equilibrium',
   genshiro: 'genshiro',
-  // 'heiko': 'heiko',
+  heiko: 'heiko',
   hydradx: 'hydradx',
+  integritee: 'integritee',
+  interlay: 'interlay',
   karura: 'karura',
-  // 'khala': 'khala',
+  khala: 'khala',
   kilt: 'kilt-protocol',
   kintsugi: 'kintsugi',
+  // 'koni':'koni',
   kusama: 'kusama',
-  // 'moonbeam': 'moonbeam',
+  litentry: 'litentry',
+  // 'manta': 'manta',
+  moonbeam: 'moonbeam',
   moonriver: 'moonriver',
-  parallel: 'par-stablecoin',
-  // 'picasso': 'picasso',
+  nodle: 'nodle',
+  parallel: 'paralink-network',
+  phala: 'pha',
+  picasso: 'pica',
+  // 'pichiu': 'pichiu',
   // 'pioneer': 'pioneer',
   polkadot: 'polkadot',
   // 'quartz': 'quartz',
+  robonomics: 'robonomics-network',
+  // 'rococo':'rococo',
   sakura: 'sakura',
-  // 'shadow': 'shadow',
-  shiden: 'shiden'
-  // 'statemine': 'statemine',
-  // 'statemint': 'statemint',
-  // 'subsocial': 'subsocial',
+  shadow: 'crust-storage-market',
+  shiden: 'shiden',
+  'sora-substrate': 'sora',
+  statemine: 'statemine',
+  statemint: 'statemint',
+  subgame: 'subgame'
+  // 'subsocial':'subsocial',
+  // 'westend':'westend',
   // 'zeitgeist': 'zeitgeist',
 };
 
 export const BN_TEN = new BigN(10);
 export const BN_ZERO = new BigN(0);
 
-export const getTokenPrice = async (chains: string) => {
-  try {
-    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${chains}`);
-
-    if (res.status !== 200) {
-      console.warn('Failed to get token price');
-    }
-
-    return res.data;
-  } catch (err) {
-    console.error('Failed to get token price', err);
-
-    return undefined;
-  }
-};
-
 export const getAcalaCrowdloanContribute = async (polkadotAddress: string) => {
-  const acalaContributionApi = 'https://crowdloan.aca-api.network/contribution';
+  const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   try {
     const res = await axios.get(`${acalaContributionApi}/${polkadotAddress}`);

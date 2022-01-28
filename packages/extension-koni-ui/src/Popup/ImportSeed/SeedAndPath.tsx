@@ -7,10 +7,11 @@ import type { AccountInfo } from '.';
 
 import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
-import styled, {ThemeContext} from 'styled-components';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 import { Dropdown } from '@polkadot/extension-koni-ui/components';
+import AccountInfoEl from '@polkadot/extension-koni-ui/components/AccountInfo';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
 import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
@@ -18,10 +19,10 @@ import TextAreaWithLabel from '@polkadot/extension-koni-ui/components/TextAreaWi
 import Warning from '@polkadot/extension-koni-ui/components/Warning';
 import { validateSeed } from '@polkadot/extension-koni-ui/messaging';
 import { objectSpread } from '@polkadot/util';
+
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
-import AccountInfoEl from '@polkadot/extension-koni-ui/components/AccountInfo';
-import {Theme} from "../../types";
+import { Theme } from '../../types';
 
 interface Props {
   className?: string;
@@ -80,14 +81,15 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
     <>
       <div className={className}>
         <div className='account-info-wrapper'>
-          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} seed-and-path-wrapper`} >
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
             <AccountInfoEl
               address={account?.address}
               className='account-info'
               genesisHash={account?.genesis}
-              name={name}/>
+              name={name}
+            />
             <TextAreaWithLabel
-              className='seedInput'
+              className='seed-and-path__seed-input'
               isError={!!error}
               isFocused
               label={t<string>('existing 12 or 24-word mnemonic seed')}
@@ -97,7 +99,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
             />
             {!!error && !seed && (
               <Warning
-                className='seedError'
+                className='seed-and-path__error'
                 isBelowInput
                 isDanger
               >
@@ -105,14 +107,14 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
               </Warning>
             )}
             <Dropdown
-              className='genesisSelection'
+              className='seed-and-path__genesis-selection'
               label={t<string>('Network')}
               onChange={setGenesis}
               options={genesisOptions}
               value={genesis}
             />
             <div
-              className='advancedToggle'
+              className='seed-and-path__advanced-toggle'
               onClick={_onToggleAdvanced}
             >
               <FontAwesomeIcon
@@ -156,10 +158,9 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
 export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   padding: 25px 15px 15px;
   flex: 1;
-  margin-top: -25px;
   overflow-y: auto;
 
-  .advancedToggle {
+  .seed-and-path__advanced-toggle {
     color: ${theme.textColor};
     cursor: pointer;
     line-height: ${theme.lineHeight};
@@ -191,14 +192,14 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
     }
   }
 
-  .genesisSelection {
+  .seed-and-path__genesis-selection {
     line-height: 26px;
     label {
       color: ${theme.textColor2};
     }
   }
 
-  .seedInput {
+  .seed-and-path__seed-input {
     margin-bottom: 16px;
     color: ${theme.textColor2};
     textarea {
@@ -207,7 +208,7 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
     }
   }
 
-  .seedError {
+  .seed-and-path__error {
     margin-bottom: 1rem;
   }
 `);

@@ -18,16 +18,16 @@ function Modal ({ children, className, reference }: Props): React.ReactElement<P
       className={className}
       ref={reference}
     >
-      <div className='koni-modal'>
+      <div className='subwallet-modal'>
         {children}
       </div>
-      <div className='koni-modal__backdrop' />
+      <div className='subwallet-modal__backdrop' />
     </div>
   );
 }
 
 export default styled(Modal)(({ theme }: ThemeProps) => `
-  .koni-modal {
+  .subwallet-modal {
     border-radius: 15px;
     top: 10%;
     z-index: 1050;
@@ -49,7 +49,7 @@ export default styled(Modal)(({ theme }: ThemeProps) => `
       animation-duration: 0.3s;
       animation-name: anim_31638350639197;
       animation-timing-function: ease-out;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: ${theme.backDropColor};
     }
   }
 

@@ -33,8 +33,8 @@ function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.
       className={className}
       text={text}
     >
-      <div className='koni-header-with-steps'>
-        <div className='koni-header-with-steps-left-content'>
+      <div className='header-with-steps'>
+        <div className='header-with-steps-left-content'>
           {step === 2 && (
             <FontAwesomeIcon
               className='back-button-icon'
@@ -43,14 +43,14 @@ function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.
             />
           )}
         </div>
-        <div className='koni-header-with-steps-title'>{text}</div>
+        <div className='header-with-steps-title'>{text}</div>
         <div className='steps'>
           <div>
             <span className='current'>{step}</span>
             <span className='total'>/2</span>
           </div>
           <ActionText
-            className='koni-header-with-steps-cancel-btn'
+            className='header-with-steps-cancel-btn'
             onClick={_onCancel}
             text={t<string>('Cancel')}
           />
@@ -63,20 +63,20 @@ function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.
 
 export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
 
-  .koni-header-with-steps {
+  .header-with-steps {
     display: flex;
     align-items: center;
     padding: 7px 0;
   }
 
-  .koni-header-with-steps-title {
+  .header-with-steps-title {
     font-size: 20px;
     line-height: 30px;
     color: ${theme.textColor};
     font-weight: 500;
   }
 
-  .koni-header-with-steps-left-content {
+  .header-with-steps-left-content {
     align-items: center;
     display: flex;
     flex: 1;
@@ -109,7 +109,7 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
     color: ${theme.textColor2};
   }
 
-  .koni-header-with-steps-cancel-btn {
+  .header-with-steps-cancel-btn {
     span {
       color: ${theme.buttonTextColor2};
       font-size: 15px;

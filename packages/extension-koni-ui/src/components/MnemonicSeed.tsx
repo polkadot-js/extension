@@ -27,7 +27,7 @@ function MnemonicSeed ({ backupMnemonicSeed, className, isShowDownloadButton, on
   return (
     <div className={className}>
       <TextAreaWithLabel
-        className={`mnemonicDisplay ${isShowDownloadButton ? 'mnemonic-display-download-btn' : ''}`}
+        className={`mnemonic-seed__display ${isShowDownloadButton ? 'mnemonic-display-download-btn' : ''}`}
         isReadOnly
         label={t<string>('Generated 12-word mnemonic seed:')}
         value={seed}
@@ -41,9 +41,9 @@ function MnemonicSeed ({ backupMnemonicSeed, className, isShowDownloadButton, on
           src={download}
         />
       </div>}
-      <div className='buttonsRow'>
+      <div className='mnemonic-seed__buttons-row'>
         <ActionText
-          className='copyBtn'
+          className='mnemonic-seed__copy-btn'
           data-seed-action='copy'
           img={clone}
           onClick={onCopy}
@@ -59,12 +59,12 @@ export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
   margin-top: 7px;
   margin-bottom: 12px;
 
-  .buttonsRow {
+  .mnemonic-seed__buttons-row {
     display: flex;
     flex-direction: row;
     margin-top: 15px;
 
-    .copyBtn {
+    .mnemonic-seed__copy-btn {
       margin-right: 32px;
       display: flex;
       align-items: center;
@@ -84,7 +84,7 @@ export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
     cursor: pointer;
   }
 
-  .mnemonicDisplay {
+  .mnemonic-seed__display {
     textarea {
       color: ${theme.textColor3};
       font-size: ${theme.fontSize};

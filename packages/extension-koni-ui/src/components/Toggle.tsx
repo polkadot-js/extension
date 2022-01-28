@@ -3,7 +3,8 @@
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
+
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
@@ -33,15 +34,18 @@ function Toggle ({ className = '', isDisabled, isOverlay, isRadio, label, onChan
 
   return (
     <div
-      className={`ui--Toggle${value ? ' isChecked' : ''}${isDisabled ? ' isDisabled' : ''}${isOverlay ? ' isOverlay' : ''}${isRadio ? ' isRadio' : ''} ${className}`}
+      className={`ui--Toggle${value ? ' is-checked' : ''}${isDisabled ? 'is-disabled' : ''}${isOverlay ? ' isOverlay' : ''}${isRadio ? ' is-radio' : ''} ${className}`}
     >
       {label && <label>{label}</label>}
-      <div onClick={_onClick} className={`ui--Toggle-Slider${isRadio ? ' highlight--before-border' : ''}`} />
+      <div
+        className={`toggle-slider${isRadio ? ' highlight--before-border' : ''}`}
+        onClick={_onClick}
+      />
     </div>
   );
 }
 
-export default React.memo(styled(Toggle)(({ theme }: ThemeProps) =>`
+export default React.memo(styled(Toggle)(({ theme }: ThemeProps) => `
   > label {
     display: inline-block;
     margin-right: 12px;
@@ -53,7 +57,7 @@ export default React.memo(styled(Toggle)(({ theme }: ThemeProps) =>`
     vertical-align: middle;
   }
 
-  .ui--Toggle-Slider {
+  .toggle-slider {
     background: ${theme.toggleInactiveBgc};
     border-radius: 28px;
     display: inline-block;
@@ -77,7 +81,7 @@ export default React.memo(styled(Toggle)(({ theme }: ThemeProps) =>`
     }
   }
 
-  &:not(.isDisabled) {
+  &:not(.is-disabled) {
     cursor: pointer;
 
     > label {
@@ -85,35 +89,29 @@ export default React.memo(styled(Toggle)(({ theme }: ThemeProps) =>`
     }
   }
 
-  &.isChecked {
-    &:not(.isRadio) {
-      .ui--Toggle-Slider {
+  &.is-checked {
+    &:not(.is-radio) {
+      .toggle-slider {
         background: ${theme.buttonBackground2};
       }
 
-      .ui--Toggle-Slider:before {
+      .toggle-slider:before {
         background-color: #fff;
         transform: translateX(26px);
         box-shadow: none;
       }
     }
 
-    &.isRadio {
-      .ui--Toggle-Slider:before {
+    &.is-radio {
+      .toggle-slider:before {
         border-width: 0.5rem;
       }
     }
   }
 
-  &.isRadio {
-    .ui--Toggle-Slider {
+  &.is-radio {
+    .toggle-slider {
       width: 1.5rem;
     }
   }
-
-  // &.isOverlay {
-  //   bottom: 1.375rem;
-  //   position: absolute;
-  //   right: 3.5rem;
-  // }
 `));

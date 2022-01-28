@@ -51,7 +51,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
   if (!payloadU8a) {
     return (
       <div className={className}>
-        <div className='qrContainer'>
+        <div className='qr-container'>
           Transaction command:{cmd} not supported.
         </div>
       </div>
@@ -60,7 +60,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
 
   return (
     <div className={className}>
-      <div className='qrContainer'>
+      <div className='qr-container'>
         {isScanning
           ? <QrScanSignature onScan={onSignature} />
           : (
@@ -88,7 +88,7 @@ function Qr ({ address, className, cmd, genesisHash, onSignature, payload }: Pro
 export default styled(Qr)`
   height: 100%;
 
-  .qrContainer {
+  .qr-container {
     margin: 5px auto 10px auto;
     width: 65%;
 

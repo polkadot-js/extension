@@ -15,9 +15,9 @@ interface Props extends ThemeProps {
 
 function MenuSettingItem ({ children, className = '', title }: Props): React.ReactElement<Props> {
   return (
-    <div className={`${className}${title ? ' isTitled' : ''}`}>
+    <div className={`${className}${title ? ' is-titled' : ''}`}>
       {title && (
-        <div className='itemTitle'>{title}</div>
+        <div className='menu-setting-item__title'>{title}</div>
       )}
       {children}
     </div>
@@ -29,7 +29,7 @@ export default styled(MenuSettingItem)(({ theme }: ThemeProps) => `
   padding: 16px;
   max-width: 100%;
 
-  > .itemTitle {
+  > .menu-setting-item__title {
     margin: 0;
     width: 100%;
     font-size: ${theme.inputLabelFontSize};
@@ -40,7 +40,7 @@ export default styled(MenuSettingItem)(({ theme }: ThemeProps) => `
     opacity: 0.65;
   }
 
-  &+&.isTitled {
+  &+&.is-titled {
     margin-top: 16px;
   }
 `);

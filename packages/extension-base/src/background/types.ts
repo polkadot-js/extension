@@ -3,20 +3,16 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, MetadataDefBase, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
-import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 import { TypeRegistry } from '@polkadot/types';
-import { Keyring } from '@polkadot/ui-keyring';
 
 import { ALLOWED_PATH } from '../defaults';
 import { AuthUrls } from './handlers/State';
@@ -48,64 +44,6 @@ export interface AccountJson extends KeyringPair$Meta {
   whenCreated?: number;
 }
 
-export interface DefaultFormatBalance {
-  decimals?: number[] | number;
-  unit?: string[] | string;
-}
-
-export interface ApiState {
-  apiDefaultTx: SubmittableExtrinsicFunction;
-  apiDefaultTxSudo: SubmittableExtrinsicFunction;
-  isApiReady: boolean;
-  isDevelopment?: boolean;
-  isEthereum?: boolean;
-  specName: string;
-  specVersion: string;
-  systemChain: string;
-  systemName: string;
-  systemVersion: string;
-  registry: Registry;
-  defaultFormatBalance: DefaultFormatBalance;
-}
-
-export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'NOT_SURE';
-
-export interface NetWorkInfo {
-  chain: string;
-  genesisHash: string;
-  icon?: string;
-  ss58Format: number;
-  chainType?: 'substrate' | 'ethereum';
-  provider: string;
-  group: NetWorkGroup;
-  paraId?: number;
-  isEthereum?: boolean;
-}
-
-export interface NetWorkMetadataDef extends MetadataDefBase {
-  networkName: string;
-  group: string
-}
-
-export interface ApiProps extends ApiState {
-  api: ApiPromise;
-  apiError?: string;
-  apiUrl: string;
-  isNotSupport?: boolean;
-  isApiConnected: boolean;
-  isApiInitialized: boolean;
-  isReady: Promise<ApiProps>;
-}
-
-export type PdotApi = {
-  keyring: Keyring;
-  apisMap: Record<string, ApiProps>;
-}
-
-export interface BackgroundWindow extends Window {
-  pdotApi: PdotApi;
-}
-
 // all Accounts and the address of the current Account
 export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
@@ -132,10 +70,11 @@ export type CurrentAccContext = {
 }
 
 export type CurrentNetworkInfo = {
-  networkName: string;
+  networkKey: string;
   networkPrefix: number;
   icon: string;
   genesisHash: string;
+  isEthereum: boolean;
 }
 
 export type AccNetworkContext = {
@@ -165,7 +104,6 @@ export interface SigningRequest {
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures extends KoniRequestSignatures {
   // private/internal requests, i.e. from a popup
-  'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
@@ -248,7 +186,7 @@ export interface RequestAuthorizeTab {
 }
 
 export interface RequestApi {
-  networkName: string;
+  networkKey: string;
 }
 
 export interface RequestAuthorizeApprove {
@@ -514,9 +452,9 @@ export interface ResponseAuthorizeList {
   list: AuthUrls;
 }
 
-export interface TransactionHistoryItem {
+export interface TransactionHistoryItemType {
   time: number;
-  networkName: string;
+  networkKey: string;
   change: string;
   fee?: string;
   isSuccess: boolean;
@@ -526,16 +464,16 @@ export interface TransactionHistoryItem {
 
 export interface RequestTransactionHistoryGet {
   address: string;
-  networkName: string;
+  networkKey: string;
 }
 
 export interface RequestTransactionHistoryGetByMultiNetworks {
   address: string;
-  networkNames: string[];
+  networkKeys: string[];
 }
 
 export interface RequestTransactionHistoryAdd {
   address: string;
-  networkName: string;
-  item: TransactionHistoryItem;
+  networkKey: string;
+  item: TransactionHistoryItemType;
 }

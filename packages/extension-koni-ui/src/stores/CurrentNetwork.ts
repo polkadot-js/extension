@@ -7,9 +7,10 @@ import { CurrentNetworkInfo } from '@polkadot/extension-base/background/types';
 
 const initialState = {
   networkPrefix: -1,
-  icon: 'substrate',
+  icon: 'polkadot',
   genesisHash: '',
-  networkName: 'all'
+  networkKey: 'all',
+  isEthereum: false
 };
 
 const currentNetworkSlice = createSlice({
@@ -22,7 +23,8 @@ const currentNetworkSlice = createSlice({
       state.networkPrefix = payload.networkPrefix;
       state.icon = payload.icon;
       state.genesisHash = payload.genesisHash;
-      state.networkName = payload.networkName;
+      state.networkKey = payload.networkKey;
+      state.isEthereum = payload.isEthereum;
     }
   }
 });

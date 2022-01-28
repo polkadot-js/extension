@@ -1,25 +1,27 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useContext, useState} from 'react';
-import styled, {ThemeContext} from 'styled-components';
+import React, { useCallback, useContext, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
 import Name from '@polkadot/extension-koni-ui/partials/Name';
 import Password from '@polkadot/extension-koni-ui/partials/Password';
-import {Theme, ThemeProps} from '@polkadot/extension-koni-ui/types';
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
+import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
-  buttonLabel: string;
+  buttonLabel?: string;
   isBusy: boolean;
-  onBackClick: () => void;
+  onBackClick?: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onNameChange: (name: string) => void;
   className?: string;
   children?: any;
   address?: string | null;
   genesis?: string | null;
+  onPasswordChange?: (password: string) => void;
 }
 
 function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
@@ -45,7 +47,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
     <>
       <div className={className}>
         <div className='account-info-wrapper'>
-          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} account-name-and-password-creation-wrapper`}>
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} account-name-and-password-creation-wrapper`}>
             <AccountInfo
               address={address}
               genesisHash={genesis}
@@ -65,7 +67,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
           <KoniNextStepButton
             className='next-step-btn'
             data-button-action='add new root'
-            isBusy={isBusy}
+            isBusy={true}
             isDisabled={!password || !name}
             onClick={_onCreate}
           >
@@ -80,7 +82,6 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
 export default styled(AccountNamePasswordCreation)(({ theme }: ThemeProps) => `
   padding: 25px 15px 15px;
   flex: 1;
-  margin-top: -25px;
   overflow-y: auto;
 
   .account-name-and-password-creation-wrapper {
@@ -91,12 +92,10 @@ export default styled(AccountNamePasswordCreation)(({ theme }: ThemeProps) => `
     margin-top: 6px;
   }
 
-  .next-step-btn {
-    > .children {
-      display: flex;
-      align-items: center;
-      position: relative;
-      justify-content: center;
-    }
+  .next-step-btn > .children {
+    display: flex;
+    align-items: center;
+    position: relative;
+    justify-content: center;
   }
 `);

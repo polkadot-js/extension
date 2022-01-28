@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   currentNetwork?: string;
-  selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkName: string) => void;
+  selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkKey: string) => void;
   isNotHaveAccount?: boolean;
 }
 
@@ -115,12 +115,12 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       <div className='network-item-list'>
         {
           filteredGenesisOptions && filteredGenesisOptions.length
-            ? filteredGenesisOptions.map(({ icon, networkName, networkPrefix, text, value }): React.ReactNode => (
+            ? filteredGenesisOptions.map(({ icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
               <div
                 className='network-item-container'
                 key={value}
                 onClick={() => {
-                  selectNetwork(value, networkPrefix, icon, networkName);
+                  selectNetwork(value, networkPrefix, icon, networkKey);
                 }}
               >
                 <img
@@ -129,7 +129,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
                   src={getLogoByGenesisHash(value)}
                 />
 
-                <span className={value === currentNetwork ? 'koni-network-text__selected' : 'koni-network-text'}>{text}</span>
+                <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
                 {value === currentNetwork
                   ? (
                     <img
@@ -204,7 +204,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     align-items: center;
 
     &:hover {
-      .koni-network-text {
+      .network-text {
         color: ${theme.textColor};
       }
     }
@@ -223,7 +223,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     margin-right: 10px;
   }
 
-  .koni-network-text {
+  .network-text {
     font-size: 16px;
     line-height: 26px;
     color: ${theme.textColor2};

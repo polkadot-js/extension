@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Address, ButtonArea, NextStepButton, VerticalSpace } from '../components';
+import { ActionContext, Theme } from '../components';
 import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
@@ -18,13 +20,14 @@ interface QrAccount {
   name?: string;
 }
 
-export default function ImportQr (): React.ReactElement {
+function ImportQr (): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<QrAccount | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _setAccount = useCallback(
     (qrAccount: QrAccount) => {
@@ -63,7 +66,8 @@ export default function ImportQr (): React.ReactElement {
     <>
       <Header
         showBackArrow
-        text={t<string>('Scan Address Qr')}
+        showSubHeader
+        subHeaderName={t<string>('Scan Address Qr')}
       />
       {!account && (
         <div>
@@ -72,14 +76,13 @@ export default function ImportQr (): React.ReactElement {
       )}
       {account && (
         <>
-          <div>
-            <Address
+          {account.isAddress && (<div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+            <AccountInfo
               {...account}
               address={address}
-              isExternal={true}
               name={name}
             />
-          </div>
+          </div>)}
           {account.isAddress
             ? (
               <Name
@@ -90,6 +93,7 @@ export default function ImportQr (): React.ReactElement {
             )
             : (
               <AccountNamePasswordCreation
+                buttonLabel={t<string>('Add the account with identified address')}
                 isBusy={false}
                 onCreate={_onCreate}
                 onNameChange={setName}
@@ -97,17 +101,11 @@ export default function ImportQr (): React.ReactElement {
               />
             )
           }
-          <VerticalSpace />
-          <ButtonArea>
-            <NextStepButton
-              isDisabled={!name || (!account.isAddress && !password)}
-              onClick={_onCreate}
-            >
-              {t<string>('Add the account with identified address')}
-            </NextStepButton>
-          </ButtonArea>
         </>
       )}
     </>
   );
 }
+
+export default styled(ImportQr)`
+`;

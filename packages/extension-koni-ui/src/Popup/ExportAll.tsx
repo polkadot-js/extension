@@ -103,9 +103,9 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
             </Button>
           </div>
 
-          <ActionBar className='withMarginTop'>
+          <ActionBar className='export-all__action-bar'>
             <ActionText
-              className='center'
+              className='export-all__action-text'
               onClick={_goHome}
               text={t<string>('Cancel')}
             />
@@ -118,14 +118,14 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
 
 export default withRouter(styled(KoniExportAll)(({ theme }: Props) => `
   .action-area {
-    padding: 0 15px 10px 15px;
+    padding: 25px 15px 10px 15px;
   }
 
   .action-area > div {
     margin-top: 0;
   }
 
-  .center {
+  .export-all__action-text {
     margin: auto;
     margin-top: 10px;
     > span {
@@ -144,11 +144,7 @@ export default withRouter(styled(KoniExportAll)(({ theme }: Props) => `
     margin-top: 6px;
   }
 
-  .movedWarning {
-    margin-top: 8px;
-  }
-
-  .withMarginTop {
+  .export-all__action-bar {
     margin-top: 4px;
   }
 `));

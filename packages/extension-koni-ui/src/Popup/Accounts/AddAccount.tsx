@@ -44,13 +44,13 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
         subHeaderName={t<string>('Add Account')}
       />
       <div className={className}>
-        <div className='koni-add-account-wrapper'>
+        <div className='add-account-wrapper'>
           <div className='no-accounts'>
             <p>{t<string>("You currently don't have any accounts. Create your first account or import another account to get started.")}</p>
           </div>
 
           <Button
-            className='kn-add-account-btn create-account'
+            className='add-account-btn create-account'
             data-export-button
             onClick={_createNewAccount}
           >
@@ -58,7 +58,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           </Button>
 
           <Button
-            className='kn-add-account-btn'
+            className='add-account-btn'
             data-export-button
             onClick={_importAccount}
           >
@@ -66,7 +66,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           </Button>
 
           <Button
-            className='kn-add-account-btn'
+            className='add-account-btn'
             data-export-button
             onClick={_restoreAccount}
           >
@@ -82,11 +82,11 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
   color: ${theme.textColor};
   height: 100%;
 
-  .koni-add-account-wrapper {
+  .add-account-wrapper {
     margin: 0 40px;
   }
 
-  .kn-add-account-btn {
+  .add-account-btn {
     margin-bottom: 15px;
   }
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsWithCurrentAddress, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
@@ -10,11 +10,19 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import {NftJson, PriceJson, RequestSubscribePrice, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  BalanceJson, ChainRegistry, CrowdloanJson,
+  NetWorkMetadataDef,
+  PriceJson,
+  RequestSubscribeBalance,
+  RequestSubscribeCrowdloan,
+  RequestSubscribePrice
+} from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/background/pDotApi';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -67,10 +75,6 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
     port.postMessage({ id, message, request: request || {} });
   });
-}
-
-export async function initApi (networkName: string): Promise<ApiInitStatus> {
-  return sendMessage('pri(api.init)', { networkName });
 }
 
 export async function editAccount (address: string, name: string): Promise<boolean> {
@@ -270,8 +274,32 @@ export async function getPrice (): Promise<PriceJson> {
   return sendMessage('pri(price.getPrice)', null);
 }
 
-export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<boolean> {
+export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<PriceJson> {
   return sendMessage('pri(price.getSubscription)', request, callback);
+}
+
+export async function getBalance (): Promise<BalanceJson> {
+  return sendMessage('pri(balance.getBalance)', null);
+}
+
+export async function subscribeBalance (request: RequestSubscribeBalance, callback: (balanceData: BalanceJson) => void): Promise<BalanceJson> {
+  return sendMessage('pri(balance.getSubscription)', request, callback);
+}
+
+export async function getCrowdloan (): Promise<CrowdloanJson> {
+  return sendMessage('pri(crowdloan.getCrowdloan)', null);
+}
+
+export async function subscribeCrowdloan (request: RequestSubscribeCrowdloan, callback: (crowdloanData: CrowdloanJson) => void): Promise<CrowdloanJson> {
+  return sendMessage('pri(crowdloan.getSubscription)', request, callback);
+}
+
+export async function subscribeChainRegistry (callback: (map: Record<string, ChainRegistry>) => void): Promise<Record<string, ChainRegistry>> {
+  return sendMessage('pri(chainRegistry.getSubscription)', null, callback);
+}
+
+export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
+  return sendMessage('pri(networkMetadata.list)');
 }
 
 export async function getNft (account: string): Promise<NftJson> {

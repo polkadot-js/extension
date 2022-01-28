@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
-import React, {useCallback, useContext, useRef, useState} from 'react';
-import styled, {ThemeContext} from 'styled-components';
+
+import React, { useCallback, useContext, useRef, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+
 import arrow from '../../assets/arrow-down.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
-import AccountInfo from "@polkadot/extension-koni-ui/components/AccountInfo";
-import {Theme} from "../../types";
+import { Theme } from '../../types';
 
 interface Props {
   allAddresses: [string, string | null][];
@@ -30,9 +33,9 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   return (
     <div className={className}>
       <div
+        className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}
         onClick={_toggleDropdown}
         ref={ref}
-        className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'}`}
       >
         <AccountInfo
           address={selectedAddress}
@@ -43,10 +46,10 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
       <div className={`dropdown ${isDropdownVisible ? 'visible' : ''}`}>
         {allAddresses.map(([address, genesisHash]) => (
           <div
+            className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} address-dropdown-option`}
             data-parent-option
             key={address}
             onClick={_selectParent(address)}
-            className={`account-info-container ${themeContext.id === 'dark' ? '-dark': '-light'} address-dropdown-option`}
           >
             <AccountInfo
               address={address}

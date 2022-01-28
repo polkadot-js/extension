@@ -22,7 +22,7 @@ function Main ({ children, className }: Props): React.ReactElement<Props> {
 export default styled(Main)(({ theme }: ThemeProps) => `
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 2px);
+  height: 100%;
   background: ${theme.background};
   color: ${theme.textColor};
   font-size: ${theme.fontSize};
@@ -31,5 +31,16 @@ export default styled(Main)(({ theme }: ThemeProps) => `
 
   * {
     font-family: ${theme.fontFamily};
+    ::-webkit-scrollbar-thumb {
+      background: ${theme.scrollBarThumb};
+    }
+
+    ::-webkit-scrollbar-thumb:window-inactive {
+      background: ${theme.scrollBarThumbInactive};
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: ${theme.scrollBarThumbHover};
+    }
   }
 `);

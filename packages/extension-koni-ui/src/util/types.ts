@@ -3,6 +3,10 @@
 
 import BigN from 'bignumber.js';
 
+import { AccountId, AccountIndex, Address } from '@polkadot/types/interfaces';
+
+export type AccountIdIsh = AccountId | AccountIndex | Address | string | Uint8Array | null;
+
 export type AccountInfoByChain = {
   freeBalance: string
   frozenFee: string
@@ -39,7 +43,7 @@ export type BalanceSubInfo = {
 
 export type AccountInfoByNetwork = {
   key: string;
-  networkName: string;
+  networkKey: string;
   networkDisplayName: string;
   networkPrefix: number;
   networkLogo: string;

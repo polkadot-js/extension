@@ -1,0 +1,50 @@
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import BN from 'bn.js';
+import React, { useState } from 'react';
+import { Trans } from 'react-i18next';
+import styled from 'styled-components';
+
+import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
+import { formatBalance } from '@polkadot/util';
+
+interface Props extends ThemeProps {
+  className?: string;
+}
+
+function PaymentInfo ({ accountId, className = '', extrinsic }: Props): React.ReactElement<Props> | null {
+  const [dispatchInfo, setDispatchInfo] = useState<RuntimeDispatchInfo | null>(null);
+  const { t } = useTranslation();
+  const isFeeError = false;
+
+  return (
+    <div className={className}>
+      <div className='payment-info__fee-info'>
+        <Trans i18nKey='feesForSubmission'>
+          Fees of <span className='highlight'>{formatBalance(new BN(0), { withSiFull: true })}</span> will be applied to the submission
+        </Trans>
+      </div>
+      {isFeeError && (
+        <Warning className='payment-info__warning'>
+          {t<string>('The account does not have enough free funds (excluding locked/bonded/reserved) available to cover the transaction fees without dropping the balance below the account existential amount.')}
+        </Warning>
+      )}
+    </div>
+  );
+}
+
+export default React.memo(styled(PaymentInfo)(({ theme }: ThemeProps) => `
+  .payment-info__fee-info {
+    font-size: 16px;
+    font-weight: 500;
+    color: ${theme.textColor};
+  }
+
+  .payment-info__warning {
+    margin-top: 10px;
+  }
+`));

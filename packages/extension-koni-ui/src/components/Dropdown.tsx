@@ -3,32 +3,32 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import Select from 'react-select';
 import styled from 'styled-components';
 
+import networkSelectOption from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+
 import Label from './Label';
-// interface DropdownOption {
-//   text: string;
-//   value: string;
-// }
 
 interface Props extends ThemeProps {
   className?: string;
   label: string;
   onChange?: (value: string) => void;
-  options?: any[];
+  options: networkSelectOption[];
   value?: string;
 }
 
 function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions = options.map((t: { text: any; value: any; }) => ({ label: t.text, value: t.value }));
+  const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
 
-  const handleChange = (e: { value: any }) => {
-    onChange && onChange(e.value.trim());
-    setSelectedValue(e.value);
-  };
+  const handleChange = useCallback(
+    ({ value }): void => {
+      onChange && onChange(value.trim());
+      setSelectedValue(value);
+    }, []
+  );
 
   const customStyles = {
     option: (base: any) => {
@@ -49,14 +49,15 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
         label={label}
       >
         <Select
-          className='kn-dropdown-wrapper'
-          classNamePrefix='kn-dropdown'
+          className='dropdown-wrapper'
+          classNamePrefix='dropdown'
           isSearchable
           menuPortalTarget={document.body}
           onChange={handleChange}
           options={transformOptions}
+          placeholder=''
           styles={customStyles}
-          value={transformOptions.filter((obj: { value: number; }) => obj.value === selectedValue)}
+          value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
         />
       </Label>
     </>
@@ -67,7 +68,7 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
   font-weight: 500;
   color: ${theme.textColor2};
 
-  .kn-dropdown__control {
+  .dropdown__control {
     height: 48px;
     border-radius: 8px;
     width: 100%;
@@ -81,29 +82,29 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
     box-shadow: none;
   }
 
-  .kn-dropdown__control:hover {
+  .dropdown__control:hover {
     border: 1px solid transparent;
     box-shadow: none;
   }
 
-  .kn-dropdown__single-value {
+  .dropdown__single-value {
     color: ${theme.textColor2};
   }
 
-  .kn-dropdown__indicator-separator {
+  .dropdown__indicator-separator {
     display: none;
   }
 
-  .kn-dropdown__input-container {
+  .dropdown__input-container {
     color: ${theme.textColor2};
   }
 
-  .kn-dropdown__menu-portal {
+  .dropdown__menu-portal {
     text-align: left;
     font-size: 15px;
   }
 
-  .kn-dropdown__menu-notice--no-options {
+  .dropdown__menu-notice--no-options {
     text-align: left;
     font-family: ${theme.fontFamily};
   }

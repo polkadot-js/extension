@@ -5,19 +5,17 @@ import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
 import {NftJson, PriceJson, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
 import {
-  AccountJson,
   AccountsWithCurrentAddress,
-  MessageTypes,
-  RequestAccountCreateSuri,
-  RequestBatchRestore,
-  RequestCurrentAccountAddress, RequestDeriveCreate,
-  RequestJsonRestore,
-  RequestTypes,
-  ResponseType
-} from '@polkadot/extension-base/background/types';
+  BalanceJson,
+  ChainRegistry, CrowdloanJson,
+  NetWorkMetadataDef,
+  PriceJson
+} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
-import {KeyringPair, KeyringPair$Json, KeyringPair$Meta} from '@polkadot/keyring/types';
+import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -102,10 +100,10 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private subscribePrice (id: string, port: chrome.runtime.Port): boolean {
+  private subscribePrice (id: string, port: chrome.runtime.Port): Promise<PriceJson> {
     const cb = createSubscription<'pri(price.getSubscription)'>(id, port);
 
-    state.subscribePrice().subscribe({
+    const priceSubscription = state.subscribePrice().subscribe({
       next: (rs) => {
         cb(rs);
       }
@@ -113,9 +111,73 @@ export default class KoniExtension extends Extension {
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
+      priceSubscription.unsubscribe();
     });
 
-    return true;
+    return this.getPrice();
+  }
+
+  private getBalance (): BalanceJson {
+    return state.getBalance();
+  }
+
+  private subscribeBalance (id: string, port: chrome.runtime.Port): BalanceJson {
+    const cb = createSubscription<'pri(balance.getSubscription)'>(id, port);
+
+    const balanceSubscription = state.subscribeBalance().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      balanceSubscription.unsubscribe();
+    });
+
+    return this.getBalance();
+  }
+
+  private getCrowdloan (): CrowdloanJson {
+    return state.getCrowdloan();
+  }
+
+  private subscribeCrowdloan (id: string, port: chrome.runtime.Port): CrowdloanJson {
+    const cb = createSubscription<'pri(crowdloan.getSubscription)'>(id, port);
+
+    const balanceSubscription = state.subscribeCrowdloan().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      balanceSubscription.unsubscribe();
+    });
+
+    return this.getCrowdloan();
+  }
+
+  private getChainRegistryMap (): Record<string, ChainRegistry> {
+    return state.getChainRegistryMap();
+  }
+
+  private subscribeChainRegistry (id: string, port: chrome.runtime.Port): Record<string, ChainRegistry> {
+    const cb = createSubscription<'pri(chainRegistry.getSubscription)'>(id, port);
+
+    const subscription = state.subscribeChainRegistryMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return this.getChainRegistryMap();
   }
 
   private validatePassword (json: KeyringPair$Json, password: string): boolean {
@@ -152,9 +214,10 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private accountsCreateSuriV2({ genesisHash, name, password, suri: _suri, type }: RequestAccountCreateSuri): boolean {
+  private accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, type }: RequestAccountCreateSuri): boolean {
     const suri = getSuri(_suri, type);
     const address = keyring.createFromUri(suri, {}, type).address;
+
     this._saveCurrentAccountAddress(address, () => {
       keyring.addUri(suri, password, { genesisHash, name }, type);
     });
@@ -194,7 +257,6 @@ export default class KoniExtension extends Extension {
 
     return true;
   }
-
 
   private jsonRestoreV2 ({ address, file, password }: RequestJsonRestore): void {
     const isPasswordValidated = this.validatePassword(file, password);
@@ -244,11 +306,36 @@ export default class KoniExtension extends Extension {
     })
   }
 
+  // todo: add custom network metadata to here
+  private networkMetadataList (): NetWorkMetadataDef[] {
+    const result: NetWorkMetadataDef[] = [];
+
+    Object.keys(NETWORKS).forEach((networkKey) => {
+      const { chain, genesisHash, group, icon, isEthereum, ss58Format } = NETWORKS[networkKey];
+
+      if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
+        return;
+      }
+
+      result.push({
+        chain,
+        networkKey,
+        genesisHash,
+        icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
+        ss58Format,
+        group,
+        isEthereum: !!isEthereum
+      });
+    });
+
+    return result;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
       case 'pri(accounts.create.suriV2)':
-        return this.accountsCreateSuriV2(request as RequestAccountCreateSuri)
+        return this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
       case 'pri(accounts.getAllWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
       case 'pri(currentAccount.saveAddress)':
@@ -256,13 +343,25 @@ export default class KoniExtension extends Extension {
       case 'pri(price.getPrice)':
         return await this.getPrice();
       case 'pri(price.getSubscription)':
-        return this.subscribePrice(id, port);
+        return await this.subscribePrice(id, port);
+      case 'pri(balance.getBalance)':
+        return this.getBalance();
+      case 'pri(balance.getSubscription)':
+        return this.subscribeBalance(id, port);
+      case 'pri(crowdloan.getCrowdloan)':
+        return this.getCrowdloan();
+      case 'pri(crowdloan.getSubscription)':
+        return this.subscribeCrowdloan(id, port);
       case 'pri(derivation.createV2)':
         return this.derivationCreateV2(request as RequestDeriveCreate);
       case 'pri(json.restoreV2)':
         return this.jsonRestoreV2(request as RequestJsonRestore);
       case 'pri(json.batchRestoreV2)':
         return this.batchRestoreV2(request as RequestBatchRestore);
+      case 'pri(networkMetadata.list)':
+        return this.networkMetadataList();
+      case 'pri(chainRegistry.getSubscription)':
+        return this.subscribeChainRegistry(id, port);
       case 'pri(nft.getNft)':
         return await this.getNft(request as string);
       case 'pri(staking.getStaking)':

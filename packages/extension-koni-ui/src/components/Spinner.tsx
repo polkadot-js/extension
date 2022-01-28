@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
-
 import React from 'react';
 import styled from 'styled-components';
 
-import spinnerSrc from '../assets/spinner.png';
+import {AssetImageMap} from "@polkadot/extension-koni-ui/assets";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -17,16 +16,19 @@ function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElemen
   return (
     <img
       className={`${className} ${size}Size`}
-      src={spinnerSrc}
+      src={AssetImageMap.loading}
     />
   );
 }
 
 export default React.memo(styled(Spinner)`
-  bottom: 0rem;
-  height: 3rem;
-  left: 50%;
-  margin-left: -1.5rem;
+  height: 32px;
+  width: 32px;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
   position: absolute;
-  width: 3rem;
+  z-index: 100;
 `);

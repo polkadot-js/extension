@@ -48,9 +48,9 @@ function StakingContainer ({className}: Props): React.ReactElement<Props> {
     )
   }
 
-  const StakingRow = (logo: string, chainName: string, symbol: string, amount: string, unit: string) => {
+  const StakingRow = (logo: string, chainName: string, symbol: string, amount: string, unit: string, index: any) => {
     return (
-      <div className={`staking-row`}>
+      <div className={`staking-row`} key={index}>
         <img
           alt='logo'
           className={'network-logo'}
@@ -80,7 +80,7 @@ function StakingContainer ({className}: Props): React.ReactElement<Props> {
           data?.details.map((item: any, index: any) => {
             const name = item?.paraId
             const icon = LogosMap[name]
-            return StakingRow(icon, name, item.nativeToken, item.balance, item.unit)
+            return StakingRow(icon, name, item.nativeToken, item.balance, item.unit, index)
           })
         }
       </div>

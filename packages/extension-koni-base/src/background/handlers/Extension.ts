@@ -3,7 +3,13 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, BalanceJson, CrowdloanJson, NetWorkMetadataDef, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  BalanceJson,
+  ChainRegistry, CrowdloanJson,
+  NetWorkMetadataDef,
+  PriceJson
+} from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
@@ -150,6 +156,27 @@ export default class KoniExtension extends Extension {
     });
 
     return this.getCrowdloan();
+  }
+
+  private getChainRegistryMap (): Record<string, ChainRegistry> {
+    return state.getChainRegistryMap();
+  }
+
+  private subscribeChainRegistry (id: string, port: chrome.runtime.Port): Record<string, ChainRegistry> {
+    const cb = createSubscription<'pri(chainRegistry.getSubscription)'>(id, port);
+
+    const subscription = state.subscribeChainRegistryMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return this.getChainRegistryMap();
   }
 
   private validatePassword (json: KeyringPair$Json, password: string): boolean {
@@ -316,6 +343,8 @@ export default class KoniExtension extends Extension {
         return this.batchRestoreV2(request as RequestBatchRestore);
       case 'pri(networkMetadata.list)':
         return this.networkMetadataList();
+      case 'pri(chainRegistry.getSubscription)':
+        return this.subscribeChainRegistry(id, port);
       default:
         return super.handle(id, type, request, port);
     }

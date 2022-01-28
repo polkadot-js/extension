@@ -1,7 +1,7 @@
 import {ApiPromise} from "@polkadot/api";
-import {connectChains} from "@polkadot/extension-koni-base/api/connector";
 import {StakingItem, StakingJson} from "@polkadot/extension-koni-base/stores/types";
-import {getChainMetadata} from "@polkadot/extension-koni-base/api/rpc_api/index";
+import {wsProvider} from "@polkadot/extension-koni-base/api/connector";
+import networks from "@polkadot/extension-koni-base/api/endpoints";
 
 interface LedgerData {
    active: string,
@@ -45,22 +45,28 @@ export const getMultiCurrentBonded = async ({apis, accountId}: PropsMulti): Prom
 
 export const getStakingInfo = async (accountId: string): Promise<StakingJson> => {
   let result: any[] = []
-  const targetChains = [{chainId: 0, paraId: 0}, {chainId: 2, paraId: 2000}]
-  const apis = await connectChains(targetChains)
+  const targetChains = ['polkadot', 'kusama']
+
+  let apiPromises: any[] = []
+  targetChains.map((item) => {
+    const apiPromise = wsProvider({provider: networks[item].provider})
+    apiPromises.push(apiPromise)
+  })
+  const apis = await Promise.all(apiPromises)
+
   const balances = await getMultiCurrentBonded( { apis, accountId: '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S' } )
   for (let i in targetChains) {
     const currentChain = targetChains[i]
     const currentBalance = balances[i]
-    const amount = currentBalance.split(' ')[0]
-    const unit = currentBalance.split(' ')[1]
-    const chainMeta = getChainMetadata({chainId: currentChain.chainId, paraId: currentChain.paraId})
+    const amount = currentBalance ? currentBalance.split(' ')[0] : ''
+    const unit = currentBalance ? currentBalance.split(' ')[1] : ''
     result.push({
-      name: chainMeta.name ,
-      chainId: (currentChain.chainId).toString(),
-      paraId: (currentChain.paraId).toString(),
+      name: networks[currentChain].chain,
+      chainId: '',
+      paraId: currentChain,
       balance: amount,
-      nativeToken: chainMeta.nativeToken,
-      unit: unit ? unit : chainMeta.nativeToken
+      nativeToken: 'DOT',
+      unit: unit ? unit : 'DOT'
     } as StakingItem)
   }
   return {

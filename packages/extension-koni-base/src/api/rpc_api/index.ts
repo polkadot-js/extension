@@ -1,6 +1,5 @@
 import { connectChains } from "../connector"
 import { isValidAddress, loadJSON, toUnit } from "./utils"
-// import {connectChains} from "../connectors/wsProvider.js"
 
 
 interface chainInfo {

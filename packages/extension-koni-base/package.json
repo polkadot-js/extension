@@ -39,5 +39,10 @@
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "^0.0.2-1"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
   }
 }

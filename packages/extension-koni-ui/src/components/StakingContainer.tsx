@@ -6,6 +6,7 @@ import LogosMap from "@polkadot/extension-koni-ui/assets/logo";
 import {useSelector} from "react-redux";
 import {RootState} from "@polkadot/extension-koni-ui/stores";
 import {getStaking} from "@polkadot/extension-koni-ui/messaging";
+import Spinner from "@polkadot/extension-koni-ui/components/Spinner";
 
 interface Props extends AccountJson {
   className?: string;
@@ -15,16 +16,14 @@ interface Props extends AccountJson {
 function StakingContainer ({className}: Props): React.ReactElement<Props> {
   const currentAccount = useSelector((state: RootState) => state.currentAccount)
   const [loading, setLoading] = useState(false)
+  const [data, setData] = useState()
   const _onCreate = useCallback(
-    (): void => {
+    async (): void => {
       if (currentAccount && currentAccount.address) {
         setLoading(true)
-        getStaking(currentAccount.address).then(r => {
-          console.log('finally', r)
-          setLoading(false)
-        }).catch(e => {
-          console.error('There is a problem getting staking', e)
-        })
+        const resp = await getStaking(currentAccount.address)
+        setData(resp)
+        setLoading(false)
       } else {
         console.error('There is a problem getting staking')
       }
@@ -36,20 +35,20 @@ function StakingContainer ({className}: Props): React.ReactElement<Props> {
     _onCreate()
   }, [currentAccount])
 
-  const editBalance = (balance: Number) => {
-    if (balance === 0) return <span className={`major-balance`}>{balance}</span>
+  const editBalance = (balance: string) => {
+    if (parseInt(balance) === 0) return <span className={`major-balance`}>{balance}</span>
 
-    const balanceSplit = balance.toString().split('.')
+    const balanceSplit = balance.split('.')
     return (
       <span>
         <span className={'major-balance'}>{balanceSplit[0]}</span>
-        .
+        {balance.includes('.') && '.'}
         <span className={'decimal-balance'}>{balanceSplit[1]}</span>
       </span>
     )
   }
 
-  const StakingRow = (logo: string, chainName: string, symbol: string, amount: Number, unit: string) => {
+  const StakingRow = (logo: string, chainName: string, symbol: string, amount: string, unit: string) => {
     return (
       <div className={`staking-row`}>
         <img
@@ -75,9 +74,15 @@ function StakingContainer ({className}: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <div className={`staking-container`}>
-        {StakingRow(LogosMap.clover, 'Moonbeam', 'Dot', 0, 'DOT')}
-        {StakingRow(LogosMap.polkadot, 'Polkadot', 'Dot', 100.05128398, 'DOT')}
-        {StakingRow(LogosMap.kusama, 'Kusama', 'Dot', 0.00128398, 'DOT')}
+        {loading && <Spinner/>}
+
+        {!loading && data &&
+          data?.details.map((item: any, index: any) => {
+            const name = item?.paraId
+            const icon = LogosMap[name]
+            return StakingRow(icon, name, item.nativeToken, item.balance, item.unit)
+          })
+        }
       </div>
     </div>
   )

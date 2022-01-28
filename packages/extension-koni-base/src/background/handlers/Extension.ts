@@ -237,7 +237,6 @@ export default class KoniExtension extends Extension {
   }
 
   private getStaking(account: string): Promise<StakingJson> {
-    console.log('ok')
     return new Promise<StakingJson>((resolve, reject) => {
       state.getStaking(account, (rs: StakingJson) => {
         resolve(rs);
@@ -265,9 +264,9 @@ export default class KoniExtension extends Extension {
       case 'pri(json.batchRestoreV2)':
         return this.batchRestoreV2(request as RequestBatchRestore);
       case 'pri(nft.getNft)':
-        return await this.getNft(request as string)
+        return await this.getNft(request as string);
       case 'pri(staking.getStaking)':
-        return await this.getStaking(request as string)
+        return await this.getStaking(request as string);
       default:
         return super.handle(id, type, request, port);
     }

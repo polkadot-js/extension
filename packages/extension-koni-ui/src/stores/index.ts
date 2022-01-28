@@ -7,8 +7,10 @@ import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import PriceReducer from './Price';
 import NftReducer from './Nft';
+import StakingReducer from './Staking'
 
 const reducers = {
+  staking: StakingReducer,
   nft: NftReducer,
   price: PriceReducer,
   currentAccount: CurrentAccountReducer,

@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { TFunction } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -19,11 +21,15 @@ import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/tr
 import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
 import AccountQrModal from '@polkadot/extension-koni-ui/components/AccountQrModal';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
+import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
+import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import buyIcon from '../../assets/buy-icon.svg';
@@ -35,12 +41,6 @@ import NftsEmptyList from './Nfts/EmptyList';
 import StackingEmptyList from './Stacking/EmptyList';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
-import {CurrentNetworkInfo} from "@polkadot/extension-base/background/KoniTypes";
-import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
-import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
-import useCrowdloanNetworks from "@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -99,19 +99,15 @@ function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
 
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
-  const {
-    currentAccount: {
-      account: currentAccount
-    },
-    currentNetwork
-  } = useSelector((state: RootState) => state);
+  const { currentAccount: { account: currentAccount },
+    currentNetwork } = useSelector((state: RootState) => state);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
   }
 
   if (!currentAccount) {
-    return (<></>)
+    return (<></>);
   }
 
   console.log('currentAccount', currentAccount);
@@ -124,44 +120,42 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
 }
 
 function Home ({ className, currentAccount, network }: Props): React.ReactElement {
-  const {
-    icon: iconTheme,
+  const { icon: iconTheme,
     networkKey,
-    networkPrefix
-  } = network;
+    networkPrefix } = network;
   const { t } = useTranslation();
   const { address } = currentAccount;
-  const [activatedTab, setActivatedTab] = useState<number>(1);
+
+  const backupTabId = window.localStorage.getItem('homeActiveTab') || '1';
+  const [activatedTab, setActivatedTab] = useState<number>(Number(backupTabId));
+  const _setActiveTab = useCallback((tabId: number) => {
+    window.localStorage.setItem('homeActiveTab', `${tabId}`);
+    setActivatedTab(tabId);
+  }, []);
   const [isShowZeroBalances, setShowZeroBalances] = useState<boolean>(
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [
-    {
-      iconTheme: qrModalIconTheme,
+    { iconTheme: qrModalIconTheme,
       networkKey: qrModalNetworkKey,
       networkPrefix: qrModalNetworkPrefix,
-      showExportButton: qrModalShowExportButton
-    }, setQrModalProps] = useState({
-      networkPrefix,
-      networkKey,
-      iconTheme,
-      showExportButton: true
-    });
+      showExportButton: qrModalShowExportButton }, setQrModalProps] = useState({
+    networkPrefix,
+    networkKey,
+    iconTheme,
+    showExportButton: true
+  });
 
   console.log('networkKey==========', networkKey);
 
   const showedNetworks = useShowedNetworks(networkKey);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
-  const {
+  const { crowdloanContributeMap,
     networkBalanceMaps,
-    totalBalanceValue,
-    crowdloanContributeMap
-  } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
-  const {
-    networkMetadata: networkMetadataMap
-  } = useSelector((state: RootState) => state);
+    totalBalanceValue } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
+  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 
   const _toggleZeroBalances = (): void => {
     setShowZeroBalances((v) => {
@@ -240,8 +234,8 @@ function Home ({ className, currentAccount, network }: Props): React.ReactElemen
             address={address}
             currentNetworkKey={networkKey}
             isShowZeroBalances={isShowZeroBalances}
-            networkKeys={showedNetworks}
             networkBalanceMaps={networkBalanceMaps}
+            networkKeys={showedNetworks}
             networkMetadataMap={networkMetadataMap}
             setQrModalOpen={setQrModalOpen}
             setQrModalProps={setQrModalProps}
@@ -254,9 +248,9 @@ function Home ({ className, currentAccount, network }: Props): React.ReactElemen
 
         {activatedTab === 3 && (
           <Crowdloans
+            crowdloanContributeMap={crowdloanContributeMap}
             networkKeys={crowdloanNetworks}
             networkMetadataMap={networkMetadataMap}
-            crowdloanContributeMap={crowdloanContributeMap}
           />
         )}
 
@@ -273,7 +267,7 @@ function Home ({ className, currentAccount, network }: Props): React.ReactElemen
         activatedItem={activatedTab}
         className={'home-tab-headers'}
         items={getTabHeaderItems(t)}
-        onSelectItem={setActivatedTab}
+        onSelectItem={_setActiveTab}
       />
 
       {isQrModalOpen && (

@@ -94,8 +94,12 @@ export default function Popup (): React.ReactElement {
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
+      const beforeNav = window.localStorage.getItem('popupNavigation');
+
       if (to) {
         window.location.hash = to;
+      } else if (beforeNav) {
+        window.location.hash = beforeNav;
       }
     },
     []

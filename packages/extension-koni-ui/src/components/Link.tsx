@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -18,6 +18,14 @@ interface Props {
 }
 
 function Link ({ children, className = '', isDisabled, onClick, title, to }: Props): React.ReactElement<Props> {
+  const _onClick = useCallback(() => {
+    if (to) {
+      window.localStorage.setItem('popupNavigation', to);
+    }
+
+    onClick && onClick();
+  }, [onClick, to]);
+
   if (isDisabled) {
     return (
       <div
@@ -33,7 +41,7 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
     ? (
       <RouterLink
         className={className}
-        onClick={onClick}
+        onClick={_onClick}
         title={title}
         to={to}
       >
@@ -43,7 +51,7 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
     : (
       <span
         className={className}
-        onClick={onClick}
+        onClick={_onClick}
         title={title}
       >
         {children}

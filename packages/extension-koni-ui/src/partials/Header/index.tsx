@@ -13,7 +13,7 @@ import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/backg
 import { Chain } from '@polkadot/extension-chains/types';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import { AccountContext, SettingsContext } from '@polkadot/extension-koni-ui/components';
+import { AccountContext, Link, SettingsContext } from '@polkadot/extension-koni-ui/components';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -212,10 +212,12 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       <div className='container'>
         <div className='top-container'>
           <div className='branding'>
-            <img
-              className='logo'
-              src={logo}
-            />
+            <Link to={'/'} title={'SubWallet'}>
+              <img
+                className='logo'
+                src={logo}
+              />
+            </Link>
           </div>
           <div className='koni-header-right-content'>
             {isPopup && (<div

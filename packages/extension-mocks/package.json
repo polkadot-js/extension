@@ -4,7 +4,7 @@
   "contributors": [],
   "description": "Definitions for all known chains as exposed by the extension.",
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-mocks#readme",
-  "license": "Apache-2",
+  "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension-mocks",
   "repository": {
@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.42.8-0",
+  "version": "0.42.8-1",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.7",

@@ -8,6 +8,7 @@ import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import ChainRegistryReducer from './ChainRegistry';
+import TransactionHistoryReducer from './TransactionHistory';
 import NetworkMetadataReducer from './NetworkMetadata';
 import NftReducer from './Nft';
 import PriceReducer from './Price';
@@ -19,6 +20,7 @@ const reducers = {
   price: PriceReducer,
   balance: BalanceReducer,
   crowdloan: CrowdloanReducer,
+  transactionHistory: TransactionHistoryReducer,
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,

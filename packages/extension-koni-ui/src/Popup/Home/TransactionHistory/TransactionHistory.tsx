@@ -1,21 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
+import {ChainRegistry, TransactionHistoryItemType} from '@polkadot/extension-base/background/KoniTypes';
+import {ThemeProps} from '@polkadot/extension-koni-ui/types';
+import {getScanExplorerTransactionHistoryUrl, isSupportScanExplorer} from '@polkadot/extension-koni-ui/util';
 import TransactionHistoryEmptyList from './EmptyList';
 import TransactionHistoryItem from './TransactionHistoryItem';
-import {ChainRegistry} from "@polkadot/extension-base/background/KoniTypes";
-import {getTransactionHistoryByMultiNetworks} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
-  networkKeys: string[];
-  address: string;
   registryMap: Record<string, ChainRegistry>;
+  items: TransactionHistoryItemType[];
 }
 
 interface ContentProp {
@@ -40,26 +37,7 @@ function getReadyNetwork(registryMap: Record<string, ChainRegistry>): string[] {
   return result;
 }
 
-function Wrapper ({ className, networkKeys, address, registryMap}: Props): React.ReactElement<Props> {
-  const [items, setItems] = useState<TransactionHistoryItemType[]>([]);
-
-  useEffect(() => {
-    let isSync = true;
-
-    (async () => {
-      getTransactionHistoryByMultiNetworks(address, networkKeys, (items) => {
-        if (isSync) {
-          setItems(items)
-        }
-      }).catch(e => console.log('Error when get Transaction History', e));
-    })();
-
-    return () => {
-      isSync = false;
-      setItems([]);
-    };
-  }, [networkKeys, address]);
-
+function Wrapper ({ className, items, registryMap}: Props): React.ReactElement<Props> {
   const readyNetworks = getReadyNetwork(registryMap);
   const readyItems = items.filter(i => readyNetworks.includes(i.networkKey));
 

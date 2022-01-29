@@ -16,8 +16,9 @@ import {
   PriceJson,
   RequestSubscribeBalance,
   RequestSubscribeCrowdloan,
-  RequestSubscribePrice, TransactionHistoryItemType
+  RequestSubscribePrice
 } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -316,4 +317,12 @@ export async function updateTransactionHistory (address: string, networkKey: str
 
 export async function initApi (networkKey: string): Promise<ApiInitStatus> {
   return sendMessage('pri(api.init)', { networkKey });
+}
+
+export async function getNft (account: string): Promise<NftJson> {
+  return sendMessage('pri(nft.getNft)', account);
+}
+
+export async function getStaking (account: string): Promise<StakingJson> {
+  return sendMessage('pri(staking.getStaking)', account);
 }

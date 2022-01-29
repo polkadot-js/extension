@@ -93,7 +93,7 @@ const darkTheme = {
   scrollBarThumbHover: '#9196AB',
   crowdloanWinnerStatus: '#42C59A',
   crowdloanActiveStatus: '#F7A21B',
-  crowdloanFailStatus: '#F5000E',
+  crowdloanFailStatus: '#F5000E'
 };
 
 export declare type Theme = typeof darkTheme;

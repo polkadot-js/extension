@@ -19,7 +19,7 @@ function TabHeaders ({ activatedItem, className, items, onSelectItem }: Props): 
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   return (
-    <div className={`tab-headers ${className? className : ''}`}>
+    <div className={`tab-headers ${className || ''}`}>
       {items.map((item) => (
         <TabHeaderItem
           isActivated={activatedItem === item.tabId}

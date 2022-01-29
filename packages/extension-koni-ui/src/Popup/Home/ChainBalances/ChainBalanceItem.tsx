@@ -64,7 +64,7 @@ function ChainBalanceItem ({
 
   return (
     <div
-      className={`${className ? className : ''} ${toggleDetail ? '-show-detail' : ''}`}
+      className={`${className || ''} ${toggleDetail ? '-show-detail' : ''}`}
       onClick={_onToggleDetail}
     >
       <div className='chain-balance-item__main-area'>

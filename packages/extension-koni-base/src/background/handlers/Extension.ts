@@ -16,6 +16,7 @@ import {
   RequestTransactionHistoryGet,
   RequestTransactionHistoryGetByMultiNetworks
 } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import {rpcsMap, state} from '@polkadot/extension-koni-base/background/handlers/index';
@@ -298,6 +299,22 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  private getNft (account: string): Promise<NftJson> {
+    return new Promise<NftJson>((resolve, reject) => {
+      state.getNft(account, (rs: NftJson) => {
+        resolve(rs);
+      });
+    });
+  }
+
+  private getStaking (account: string): Promise<StakingJson> {
+    return new Promise<StakingJson>((resolve, reject) => {
+      state.getStaking(account, (rs: StakingJson) => {
+        resolve(rs);
+      });
+    });
+  }
+
   // todo: add custom network metadata to here
   private networkMetadataList (): NetWorkMetadataDef[] {
     const result: NetWorkMetadataDef[] = [];
@@ -419,6 +436,10 @@ export default class KoniExtension extends Extension {
         return this.networkMetadataList();
       case 'pri(chainRegistry.getSubscription)':
         return this.subscribeChainRegistry(id, port);
+      case 'pri(nft.getNft)':
+        return await this.getNft(request as string);
+      case 'pri(staking.getStaking)':
+        return await this.getStaking(request as string);
       case 'pri(transaction.history.add)':
         return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
       case 'pri(transaction.history.get)':

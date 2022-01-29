@@ -15,7 +15,7 @@ function NftsEmptyList ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
-    <div className={`${className ? className : ''} empty-list nfts-empty-list`}>
+    <div className={`${className || ''} empty-list nfts-empty-list`}>
       <img
         alt='Empty'
         className='empty-list__img'
@@ -23,7 +23,7 @@ function NftsEmptyList ({ className }: Props): React.ReactElement {
       />
       <div className='empty-list__text'>
         <div>{t<string>('Your NFTs will appear here')}</div>
-        <div>{t<string>('Coming Soon...')}</div>
+        {/*<div>{t<string>('Coming Soon...')}</div>*/}
       </div>
     </div>
   );

@@ -114,7 +114,7 @@ function ChainBalances ({
   };
 
   return (
-    <div className={`chain-balances-container ${className? className : ''}`}>
+    <div className={`chain-balances-container ${className || ''}`}>
       <div className='chain-balances-container__body'>
         {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
       </div>

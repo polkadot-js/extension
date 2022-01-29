@@ -9,9 +9,13 @@ import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import ChainRegistryReducer from './ChainRegistry';
 import NetworkMetadataReducer from './NetworkMetadata';
+import NftReducer from './Nft';
 import PriceReducer from './Price';
+import StakingReducer from './Staking';
 
 const reducers = {
+  staking: StakingReducer,
+  nft: NftReducer,
   price: PriceReducer,
   balance: BalanceReducer,
   crowdloan: CrowdloanReducer,

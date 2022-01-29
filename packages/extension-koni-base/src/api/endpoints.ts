@@ -379,6 +379,13 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: 'UNKNOWN',
     ss58Format: -1,
     provider: 'PROVIDER',
+    group: 'NOT_SURE'
+  },
+  uniqueNft: {
+    chain: 'Unique TestNet 2.0',
+    genesisHash: 'UNKNOWN',
+    ss58Format: -1,
+    provider: 'wss://testnet2.uniquenetwork.io',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2012
   },

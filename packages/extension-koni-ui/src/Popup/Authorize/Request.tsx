@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {RequestAuthorizeTab} from '@polkadot/extension-base/background/types';
-import type {ThemeProps} from '../../types';
+import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
+import type { ThemeProps } from '../../types';
 
-import React, {useCallback, useContext} from 'react';
-import {Trans} from 'react-i18next';
+import React, { useCallback, useContext } from 'react';
+import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import {ActionBar, ActionContext, Button, Icon, Link, Warning} from '../../components';
+import { ActionBar, ActionContext, Button, Icon, Link, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import {approveAuthRequest, rejectAuthRequest} from '../../messaging';
+import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -20,8 +20,8 @@ interface Props extends ThemeProps {
   url: string;
 }
 
-function Request({authId, className, isFirst, request: {origin}, url}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function Request ({ authId, className, isFirst, request: { origin }, url }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
   const _onApprove = useCallback(
@@ -49,13 +49,13 @@ function Request({authId, className, isFirst, request: {origin}, url}: Props): R
           <div className='tab-info'>
             <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is
               requesting access from{' '}
-              <a
-                href={url}
-                rel='noopener noreferrer'
-                target='_blank'
-              >
-                <span className='tab-url'>{url}</span>
-              </a>.
+            <a
+              href={url}
+              rel='noopener noreferrer'
+              target='_blank'
+            >
+              <span className='tab-url'>{url}</span>
+            </a>.
             </Trans>
           </div>
         </div>
@@ -84,7 +84,7 @@ function Request({authId, className, isFirst, request: {origin}, url}: Props): R
   );
 }
 
-export default styled(Request)(({theme}: Props) => `
+export default styled(Request)(({ theme }: Props) => `
 
   .icon {
     background: ${theme.buttonBackgroundDanger};

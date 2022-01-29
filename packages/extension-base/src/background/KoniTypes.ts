@@ -7,8 +7,21 @@ import { AccountJson, RequestAccountSubscribe } from '@polkadot/extension-base/b
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
-import {Keyring} from "@polkadot/ui-keyring";
-import {ApiInitStatus} from "@polkadot/extension-koni-base/api/dotsama";
+import { Keyring } from '@polkadot/ui-keyring';
+
+export interface StakingItem {
+  name: string,
+  chainId: string,
+  paraId: string,
+  balance: string,
+  nativeToken: string,
+  unit: string,
+}
+
+export interface StakingJson {
+  ready?: boolean,
+  details: Array<StakingItem>
+}
 
 export interface PriceJson {
   ready?: boolean,
@@ -28,6 +41,29 @@ export enum CrowdloanParaState {
   ONGOING = 'ongoing',
   COMPLETED = 'completed',
   FAILED = 'failed'
+}
+
+export interface NftItem {
+  id: string;
+  name: string;
+  image: string;
+  external_url: string;
+  rarity: string;
+  collectionId: string;
+  properties: Record<any, any>;
+}
+
+export interface NftCollection {
+  collectionId: string;
+  collectionName: string;
+  image: string;
+  nftItems: Array<NftItem>;
+}
+
+export interface NftJson {
+  ready?: boolean;
+  total: number;
+  nftList: Array<NftCollection>;
 }
 
 export interface BalanceItem {
@@ -194,6 +230,8 @@ export type RequestSubscribeCrowdloan = null
 
 export interface KoniRequestSignatures {
   'pri(api.init)': [RequestApi, ApiInitStatus];
+  'pri(staking.getStaking)': [string, StakingJson]
+  'pri(nft.getNft)': [string, NftJson]
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],
   'pri(balance.getBalance)': [RequestBalance, BalanceJson],

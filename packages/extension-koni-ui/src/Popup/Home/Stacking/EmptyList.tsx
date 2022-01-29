@@ -16,7 +16,7 @@ function StackingEmptyList ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
-    <div className={`${className ? className : ''} empty-list stacking-empty-list`}>
+    <div className={`${className || ''} empty-list stacking-empty-list`}>
       <img
         alt='Empty'
         className='empty-list__img'

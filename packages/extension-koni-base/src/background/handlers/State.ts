@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Subject } from 'rxjs';
+
 import State from '@polkadot/extension-base/background/handlers/State';
 import {
   APIItemState,
@@ -10,11 +12,13 @@ import {
   CurrentAccountInfo,
   PriceJson, TransactionHistoryItemType
 } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import { Subject } from 'rxjs';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import TransactionHistoryStore from "@polkadot/extension-koni-base/stores/TransactionHistory";
+import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
+import { PriceJson} from '@polkadot/extension-koni-base/stores/types';
+import NftStore from '@polkadot/extension-koni-base/stores/Nft';
+import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -47,10 +51,14 @@ function generateDefaultCrowdloanMap () {
 
 export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
-  private priceStoreReady = false;
   private readonly currentAccountStore = new CurrentAccountStore();
+  private readonly nftStore = new NftStore();
+  private readonly stakingStore = new StakingStore();
+  private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
+  private nftStoreReady = false;
+  private stakingStoreReady = false;
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
@@ -77,6 +85,58 @@ export default class KoniState extends State {
 
     this.lazyMap[key] = lazy;
   };
+
+  public getStaking (account: string, update: (value: StakingJson) => void): void {
+    this.stakingStore.get('StakingData', (rs) => {
+      if (this.stakingStoreReady) update(rs);
+      else {
+        getStakingInfo(account)
+          .then((rs) => {
+            this.setStaking(rs);
+            update(rs);
+          })
+          .catch((e) => {
+            console.error(e);
+            throw e;
+          });
+      }
+    });
+  }
+
+  public setStaking (stakingData: StakingJson, callback?: (stakingData: StakingJson) => void): void {
+    this.stakingStore.set('StakingData', stakingData, () => {
+      if (callback) {
+        callback(stakingData);
+        this.stakingStoreReady = true;
+      }
+    });
+  }
+
+  public setNft (nftData: NftJson, callback?: (nftData: NftJson) => void): void {
+    this.nftStore.set('NftData', nftData, () => {
+      if (callback) {
+        callback(nftData);
+        this.nftStoreReady = true;
+      }
+    });
+  }
+
+  public getNft (account: string, update: (value: NftJson) => void): void {
+    this.nftStore.get('NftData', (rs) => {
+      if (this.nftStoreReady) update(rs);
+      else {
+        getAllNftsByAccount(account)
+          .then((rs) => {
+            this.setNft(rs);
+            update(rs);
+          })
+          .catch((e) => {
+            console.error(e);
+            throw e;
+          });
+      }
+    });
+  }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);

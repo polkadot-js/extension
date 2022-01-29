@@ -1,0 +1,22 @@
+{
+  "name": "Basilisk",
+  "description": "Basilisk is a liquidity bootstrapping protocol designed to operate as a parachain in Kusama, the Substrate canary network from the Polkadot family.",
+  "nativeToken": "BSX",
+  "tokenDecimals": 12,
+  "links": {
+    "Website": "https://bsx.fi/",
+    "Twitter": "https://twitter.com/bsx_finance",
+    "Telegram": "https://t.me/bsx_fi",
+    "Github": "https://github.com/galacticcouncil",
+    "Discord": "https://discord.gg/S8YZj5aXR6"
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2090/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2090/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2090/assets/card.png"
+  },
+  "rpcs": [
+    "wss://rpc-01.basilisk.hydradx.io"
+  ]
+}

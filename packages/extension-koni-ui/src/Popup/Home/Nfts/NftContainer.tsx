@@ -37,9 +37,11 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
 
   const _onCreate = useCallback(
     (): void => {
-      if (currentAccount && currentAccount.address) {
+      console.log('here')
+      if (currentAccount.account && currentAccount.account.address) {
+        console.log('handling')
         setLoading(true);
-        getNft(currentAccount.address).then((r) => {
+        getNft(currentAccount.account.address).then((r) => {
           // @ts-ignore
           setNftJson(r);
           const nftList = r?.nftList;

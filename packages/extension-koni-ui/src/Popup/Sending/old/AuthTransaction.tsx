@@ -276,7 +276,7 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
 }
 
 export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
-  .koni-modal {
+  .subwallet-modal {
     max-width: 460px;
     left: 0;
     right: 0;

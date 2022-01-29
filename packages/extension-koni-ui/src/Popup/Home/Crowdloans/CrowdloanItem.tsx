@@ -40,15 +40,19 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
         </div>
       </div>
       <div className='crowdloan-item__part-2'>
-        <BalanceVal
-          symbol={item.symbol}
-          value={item.contribute}
-        />
-        <BalanceVal
-          startWithSymbol
-          symbol={'$'}
-          value={item.contributeToUsd}
-        />
+        <div className='crowdloan-item__contributed'>
+          <BalanceVal
+            symbol={item.symbol}
+            value={item.contribute}
+          />
+        </div>
+        <div className='crowdloan-item__contributed-to-usd'>
+          <BalanceVal
+            startWithSymbol
+            symbol={'$'}
+            value={item.contributeToUsd}
+          />
+        </div>
       </div>
     </div>
   );
@@ -62,8 +66,8 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
 
   &:before {
     content: '';
-    left: 15px;
-    right: 15px;
+    left: 69px;
+    right: 25px;
     height: 1px;
     display: block;
     bottom: 0;
@@ -93,7 +97,7 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
     display: flex;
     align-items: center;
     flex: 1;
-    padding-left: 15px;
+    padding-left: 25px;
   }
 
   .crowdloan-item__logo {
@@ -141,9 +145,19 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
 
   .crowdloan-item__part-2 {
     text-align: right;
-    padding-right: 15px;
+    padding-right: 25px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+
+  .crowdloan-item__contributed .balance-val {
+    color: ${theme.textColor};
+    font-weight: 500;
+  }
+
+  .crowdloan-item__contributed-to-usd .balance-val {
+    color: ${theme.textColor2};
+    font-weight: 500;
   }
 `);

@@ -3,14 +3,12 @@
 
 import React from 'react';
 import styled from 'styled-components';
-
 import { TransactionHistoryItemType } from '@polkadot/extension-base/background/types';
-import { ChainRegistry } from '@polkadot/extension-koni-base/api/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
-
 import TransactionHistoryEmptyList from './EmptyList';
 import TransactionHistoryItem from './TransactionHistoryItem';
+import {ChainRegistry} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -84,12 +82,12 @@ function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
   const items: TransactionHistoryItemType[] = getMockTransactionHistory();
   const registryMap: Record<string, ChainRegistry> = getMockRegistryMap();
 
-  // if (!items.length) {
+  if (!items.length) {
   return (<TransactionHistoryEmptyList />);
-  // }
-  //
-  //
-  // return (<TransactionHistory items={items} registryMap={registryMap} className={className}/>)
+  }
+
+
+  return (<TransactionHistory items={items} registryMap={registryMap} className={className}/>)
 }
 
 function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {

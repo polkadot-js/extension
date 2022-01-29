@@ -49,19 +49,13 @@ function TransactionHistoryItem ({ className,
   const transactionValue = getBalances({
     balance: item.change,
     decimals: registry.chainDecimals[0],
-    symbol: registry.chainTokens[0],
-    tokenPrices: [],
-    priceField: '',
-    comparableValue: ''
+    symbol: registry.chainTokens[0]
   });
 
   const transactionFee = getBalances({
     balance: item.fee || '',
     decimals: registry.chainDecimals[0],
-    symbol: registry.chainTokens[0],
-    tokenPrices: [],
-    priceField: '',
-    comparableValue: ''
+    symbol: registry.chainTokens[0]
   });
 
   const containerClassName = getContainerClassName(item, className);

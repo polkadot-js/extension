@@ -8,12 +8,13 @@ import {
   BalanceJson, ChainRegistry, CrowdloanItem,
   CrowdloanJson,
   CurrentAccountInfo,
-  PriceJson
+  PriceJson, TransactionHistoryItemType
 } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import { Subject } from 'rxjs';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import TransactionHistoryStore from "@polkadot/extension-koni-base/stores/TransactionHistory";
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -48,6 +49,7 @@ export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
   private priceStoreReady = false;
   private readonly currentAccountStore = new CurrentAccountStore();
+  private readonly transactionHistoryStore = new TransactionHistoryStore();
 
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
@@ -139,6 +141,48 @@ export default class KoniState extends State {
 
   public subscribeChainRegistryMap () {
     return this.chainRegistrySubject;
+  }
+
+  private getTransactionKey (address: string, networkKey: string): string {
+    return `${address}_${networkKey}`
+  }
+
+  public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
+    this.transactionHistoryStore.get(this.getTransactionKey(address, networkKey), (items) => {
+      if (!items) {
+        update([]);
+      } else {
+        update(items);
+      }
+    });
+  }
+
+  public getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], update: (items: TransactionHistoryItemType[]) => void): void {
+    const keys: string[] = networkKeys.map(n => this.getTransactionKey(address, n));
+
+    this.transactionHistoryStore.getByMultiKeys(keys, (items) => {
+      if (!items) {
+        update([]);
+      } else {
+        items.sort((a, b) => b.time - a.time);
+
+        update(items);
+      }
+    });
+  }
+
+  public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
+    this.getTransactionHistory(address, networkKey,(items) => {
+      if (!items || !items.length) {
+        items = [item];
+      } else {
+        items.unshift(item);
+      }
+
+      this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items, () => {
+        callback && callback(items);
+      });
+    })
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {

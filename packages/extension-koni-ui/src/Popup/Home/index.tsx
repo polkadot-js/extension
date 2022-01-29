@@ -6,7 +6,7 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
+import {ChainRegistry, CurrentNetworkInfo} from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -50,6 +50,7 @@ interface Props {
   className?: string;
   currentAccount: AccountJson;
   network: CurrentNetworkInfo;
+  chainRegistryMap: Record<string, ChainRegistry>;
 }
 
 function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
@@ -100,7 +101,8 @@ function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
   const { currentAccount: { account: currentAccount },
-    currentNetwork } = useSelector((state: RootState) => state);
+    currentNetwork,
+    chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
@@ -116,10 +118,11 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     className={className}
     currentAccount={currentAccount}
     network={currentNetwork}
+    chainRegistryMap={chainRegistryMap}
   />);
 }
 
-function Home ({ className, currentAccount, network }: Props): React.ReactElement {
+function Home ({ className, currentAccount, network, chainRegistryMap }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
     networkPrefix } = network;
@@ -259,7 +262,11 @@ function Home ({ className, currentAccount, network }: Props): React.ReactElemen
         )}
 
         {activatedTab === 5 && (
-          <TransactionHistory />
+          <TransactionHistory
+            networkKeys={showedNetworks}
+            address={address}
+            registryMap={chainRegistryMap}
+          />
         )}
       </div>
 

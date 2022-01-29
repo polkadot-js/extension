@@ -203,6 +203,8 @@ export interface KoniRequestSignatures {
   'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]],
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>],
+  'pri(transaction.history.get)': [RequestTransactionHistoryGet, boolean, TransactionHistoryItemType[]];
+  'pri(transaction.history.getByMultiNetwork)': [RequestTransactionHistoryGetByMultiNetworks, boolean, TransactionHistoryItemType[]];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
   'pub(utils.getRandom)': [RandomTestRequest, number]
 }

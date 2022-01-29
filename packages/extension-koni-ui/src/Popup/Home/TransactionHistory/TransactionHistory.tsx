@@ -1,17 +1,21 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
-import { TransactionHistoryItemType } from '@polkadot/extension-base/background/types';
+import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
 import TransactionHistoryEmptyList from './EmptyList';
 import TransactionHistoryItem from './TransactionHistoryItem';
 import {ChainRegistry} from "@polkadot/extension-base/background/KoniTypes";
+import {getTransactionHistoryByMultiNetworks} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
+  networkKeys: string[];
+  address: string;
+  registryMap: Record<string, ChainRegistry>;
 }
 
 interface ContentProp {
@@ -20,74 +24,50 @@ interface ContentProp {
   items: TransactionHistoryItemType[];
 }
 
-function getMockTransactionHistory (): TransactionHistoryItemType[] {
-  return [
-    {
-      time: 1643194677273,
-      networkKey: 'koni',
-      change: '1000000000000000',
-      fee: '0000000100000000',
-      isSuccess: true,
-      action: 'send',
-      extrinsicHash: '0x4b7180400e06932b4378d8fa3484eea2d714001b3d7b12488eb6bf49224371c7'
-    },
-    {
-      time: 1643194677273,
-      networkKey: 'koni',
-      change: '1000000000000000',
-      isSuccess: true,
-      action: 'send',
-      extrinsicHash: '0x4b7180400e06932b4378d8fa3484eea2d724001b3d7b12488eb6bf49224371c7'
-    },
-    {
-      time: 1643194677273,
-      networkKey: 'koni',
-      change: '1000000000000000',
-      fee: '0000000100000000',
-      isSuccess: true,
-      action: 'received',
-      extrinsicHash: '0x4b7180400e06932b4378d8fa3484eea2d734001b3d7b12488eb6bf49224371c7'
-    },
-    {
-      time: 1643194677273,
-      networkKey: 'koni',
-      change: '0000000000000000',
-      fee: '0000000100000000',
-      isSuccess: false,
-      action: 'send',
-      extrinsicHash: '0x4b7180400e06932b4378d8fa3484eea2d744001b3d7b12488eb6bf49224371c7'
-    },
-    {
-      time: 1643194677273,
-      networkKey: 'koni',
-      change: '0000000000000000',
-      fee: '0000000100000000',
-      isSuccess: false,
-      action: 'send',
-      extrinsicHash: '0x4b7180400e06932b4378d8fa3484eea2d754001b3d7b12488eb6bf49224371c7'
+function getReadyNetwork(registryMap: Record<string, ChainRegistry>): string[] {
+  const result: string[]  = [];
+
+  for (let networkKey in registryMap) {
+    if (!registryMap.hasOwnProperty(networkKey)) {
+      continue;
     }
-  ];
-}
 
-function getMockRegistryMap (): Record<string, ChainRegistry> {
-  return {
-    koni: {
-      chainDecimals: [10],
-      chainTokens: ['Unit']
+    if (registryMap[networkKey]) {
+      result.push(networkKey);
     }
-  };
-}
-
-function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
-  const items: TransactionHistoryItemType[] = getMockTransactionHistory();
-  const registryMap: Record<string, ChainRegistry> = getMockRegistryMap();
-
-  if (!items.length) {
-  return (<TransactionHistoryEmptyList />);
   }
 
+  return result;
+}
 
-  return (<TransactionHistory items={items} registryMap={registryMap} className={className}/>)
+function Wrapper ({ className, networkKeys, address, registryMap}: Props): React.ReactElement<Props> {
+  const [items, setItems] = useState<TransactionHistoryItemType[]>([]);
+
+  useEffect(() => {
+    let isSync = true;
+
+    (async () => {
+      getTransactionHistoryByMultiNetworks(address, networkKeys, (items) => {
+        if (isSync) {
+          setItems(items)
+        }
+      }).catch(e => console.log('Error when get Transaction History', e));
+    })();
+
+    return () => {
+      isSync = false;
+      setItems([]);
+    };
+  }, [networkKeys, address]);
+
+  const readyNetworks = getReadyNetwork(registryMap);
+  const readyItems = items.filter(i => readyNetworks.includes(i.networkKey));
+
+  if (!readyItems.length) {
+    return (<TransactionHistoryEmptyList/>);
+  }
+
+  return (<TransactionHistory items={readyItems} registryMap={registryMap} className={className}/>)
 }
 
 function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {

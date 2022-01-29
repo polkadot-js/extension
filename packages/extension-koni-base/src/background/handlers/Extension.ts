@@ -4,11 +4,17 @@
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
 import {
-  AccountsWithCurrentAddress, BackgroundWindow,
+  AccountsWithCurrentAddress,
+  BackgroundWindow,
   BalanceJson,
-  ChainRegistry, CrowdloanJson,
+  ChainRegistry,
+  CrowdloanJson,
   NetWorkMetadataDef,
-  PriceJson, RequestApi
+  PriceJson,
+  RequestApi,
+  RequestTransactionHistoryAdd,
+  RequestTransactionHistoryGet,
+  RequestTransactionHistoryGetByMultiNetworks
 } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -338,6 +344,48 @@ export default class KoniExtension extends Extension {
     return ApiInitStatus.SUCCESS;
   }
 
+  private getTransactionHistoryByMultiNetworks({address, networkKeys}: RequestTransactionHistoryGetByMultiNetworks, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(transaction.history.getByMultiNetwork)'>(id, port);
+
+    state.getTransactionHistoryByMultiNetworks(address, networkKeys, (items) => {
+      cb(items);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private getTransactionHistory({address, networkKey}: RequestTransactionHistoryGet, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(transaction.history.get)'>(id, port);
+
+    state.getTransactionHistory(address, networkKey, (items) => {
+      cb(items);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private updateTransactionHistory({address, item, networkKey}: RequestTransactionHistoryAdd, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(transaction.history.add)'>(id, port);
+
+    state.setTransactionHistory(address, networkKey, item, (items) => {
+      cb(items);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -371,6 +419,12 @@ export default class KoniExtension extends Extension {
         return this.networkMetadataList();
       case 'pri(chainRegistry.getSubscription)':
         return this.subscribeChainRegistry(id, port);
+      case 'pri(transaction.history.add)':
+        return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
+      case 'pri(transaction.history.get)':
+        return this.getTransactionHistory(request as RequestTransactionHistoryGet, id, port);
+      case 'pri(transaction.history.getByMultiNetwork)':
+        return this.getTransactionHistoryByMultiNetworks(request as RequestTransactionHistoryGetByMultiNetworks, id, port);
       default:
         return super.handle(id, type, request, port);
     }

@@ -10,7 +10,7 @@ import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import {BalanceValueType, BN_ZERO, getLogoByNetworkKey} from '@polkadot/extension-koni-ui/util';
+import { BalanceValueType, BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 
 import CrowdloanEmptyList from './EmptyList';
 
@@ -75,7 +75,7 @@ function getmockCrowdloanContributeMap (networkKeys: string[]): Record<string, B
     result[n] = {
       balanceValue: new BigN(50),
       convertedBalanceValue: new BigN(50),
-      symbol: 'DOT',
+      symbol: 'DOT'
 
     };
   });
@@ -112,7 +112,7 @@ function Wrapper ({ className }: Props): React.ReactElement<Props> {
 
 function Crowdloans ({ className, items }: ContentProp): React.ReactElement<ContentProp> {
   return (
-    <div className={`crowdloan-items-container ${className? className : ''}`}>
+    <div className={`crowdloan-items-container ${className || ''}`}>
       {items.map((item) => (
         <CrowdloanItem
           item={item}

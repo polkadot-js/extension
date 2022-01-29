@@ -1,24 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import State from '@polkadot/extension-base/background/handlers/State';
-import {
-  APIItemState,
-  BalanceItem,
-  BalanceJson, ChainRegistry, CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  PriceJson
-} from '@polkadot/extension-base/background/KoniTypes';
-import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import {NftJson, PriceJson, StakingJson} from '@polkadot/extension-koni-base/stores/types';
-import NftStore from "@polkadot/extension-koni-base/stores/Nft";
-import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
-import StakingStore from "@polkadot/extension-koni-base/stores/Staking";
-import {getStakingInfo} from "@polkadot/extension-koni-base/api/rpc_api/staking_info";
 import { Subject } from 'rxjs';
+
+import State from '@polkadot/extension-base/background/handlers/State';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
+import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
+import NftStore from '@polkadot/extension-koni-base/stores/Nft';
+import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
+import { NftJson, PriceJson, StakingJson } from '@polkadot/extension-koni-base/stores/types';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -57,6 +51,16 @@ export default class KoniState extends State {
   private priceStoreReady = false;
   private nftStoreReady = false;
   private stakingStoreReady = false;
+  // Todo: Persist data to balanceStore later
+  // private readonly balanceStore = new BalanceStore();
+  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
+  private balanceSubject = new Subject<BalanceJson>();
+  private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
+  private crowdloanSubject = new Subject<CrowdloanJson>();
+
+  // todo: persist data to store later
+  private chainRegistryMap: Record<string, ChainRegistry> = {};
+  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
 
   public getStaking (account: string, update: (value: StakingJson) => void): void {
     this.stakingStore.get('StakingData', (rs) => {
@@ -72,7 +76,7 @@ export default class KoniState extends State {
             throw e;
           });
       }
-    })
+    });
   }
 
   public setStaking (stakingData: StakingJson, callback?: (stakingData: StakingJson) => void): void {
@@ -81,7 +85,7 @@ export default class KoniState extends State {
         callback(stakingData);
         this.stakingStoreReady = true;
       }
-    })
+    });
   }
 
   public setNft (nftData: NftJson, callback?: (nftData: NftJson) => void): void {
@@ -90,7 +94,7 @@ export default class KoniState extends State {
         callback(nftData);
         this.nftStoreReady = true;
       }
-    })
+    });
   }
 
   public getNft (account: string, update: (value: NftJson) => void): void {
@@ -107,20 +111,8 @@ export default class KoniState extends State {
             throw e;
           });
       }
-    })
+    });
   }
-  private readonly currentAccountStore = new CurrentAccountStore();
-
-  // Todo: Persist data to balanceStore later
-  // private readonly balanceStore = new BalanceStore();
-  private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
-  private balanceSubject = new Subject<BalanceJson>();
-  private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
-  private crowdloanSubject = new Subject<CrowdloanJson>();
-
-  //todo: persist data to store later
-  private chainRegistryMap: Record<string, ChainRegistry> = {};
-  private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);

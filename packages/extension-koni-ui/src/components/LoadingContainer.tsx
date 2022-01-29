@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
+import styled from 'styled-components';
 
 import Loading from '@polkadot/extension-koni-ui/components/Loading';
-import styled from "styled-components";
 
 interface Props {
   children?: React.ReactNode
@@ -39,4 +39,4 @@ export default styled(LoadingContainer)`
     right: 0;
     bottom: 0;
   }
-`
+`;

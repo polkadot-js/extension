@@ -1,6 +1,10 @@
-import React from "react";
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
+import styled from 'styled-components';
+
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
@@ -9,36 +13,38 @@ interface Props {
   onClick: (data) => void;
 }
 
-function NftPreview ({className, minimal, data, onClick}: Props): React.ReactElement<Props> {
-
+function NftPreview ({ className, data, minimal, onClick }: Props): React.ReactElement<Props> {
   return (
     <div
       className={className}
-      style={{height: minimal ? '124px': '164px'}}
       onClick={() => onClick(data?.nftItems)}
+      style={{ height: minimal ? '124px' : '164px' }}
     >
       <img
-        src={'https://kodadot.mypinata.cloud/ipfs/bafkreihgocle6ixnibfgtmdg63t6vrx77rpahutnyhsjsmccub7pq26zjm'}
-        className={'collection-thumbnail'}
         alt={'collection-thumbnail'}
-        style={{borderRadius: minimal ? '5px' : '5px 5px 0 0'}}
+        className={'collection-thumbnail'}
+        src={'https://kodadot.mypinata.cloud/ipfs/bafkreihgocle6ixnibfgtmdg63t6vrx77rpahutnyhsjsmccub7pq26zjm'}
+        style={{ borderRadius: minimal ? '5px' : '5px 5px 0 0' }}
       />
 
       {
         !minimal &&
         <div className={'collection-title'}>
-          <div className={'collection-name'} title={data.collectionName ? data.collectionName : data?.collectionId}>
-            {/*show only first 10 characters*/}
+          <div
+            className={'collection-name'}
+            title={data.collectionName ? data.collectionName : data?.collectionId}
+          >
+            {/* show only first 10 characters */}
             {data.collectionName ? data.collectionName : data?.collectionId}
           </div>
           <div className={'collection-item-count'}>{data?.nftItems.length}</div>
         </div>
       }
     </div>
-  )
+  );
 }
 
-export default styled(NftPreview)(({theme}: ThemeProps) => `
+export default styled(NftPreview)(({ theme }: ThemeProps) => `
   .nft-preview {
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
     width: 124px;

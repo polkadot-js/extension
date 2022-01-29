@@ -3,7 +3,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import {NftJson} from '@polkadot/extension-base/background/KoniTypes';
+import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const initialState = {
   total: 0,

@@ -1,56 +1,64 @@
-import {AccountJson} from "@polkadot/extension-base/background/types";
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import React, {useCallback, useEffect, useState} from "react";
-import LogosMap from "@polkadot/extension-koni-ui/assets/logo";
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
-import {getStaking} from "@polkadot/extension-koni-ui/messaging";
-import Spinner from "@polkadot/extension-koni-ui/components/Spinner";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { AccountJson } from '@polkadot/extension-base/background/types';
+import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
+import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import { getStaking } from '@polkadot/extension-koni-ui/messaging';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends AccountJson {
   className?: string;
 }
 
-
-function StakingContainer ({className}: Props): React.ReactElement<Props> {
-  const currentAccount = useSelector((state: RootState) => state.currentAccount)
-  const [loading, setLoading] = useState(false)
-  const [data, setData] = useState()
+function StakingContainer ({ className }: Props): React.ReactElement<Props> {
+  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState();
   const _onCreate = useCallback(
     async (): void => {
       if (currentAccount && currentAccount.address) {
-        setLoading(true)
-        const resp = await getStaking(currentAccount.address)
-        setData(resp)
-        setLoading(false)
+        setLoading(true);
+        const resp = await getStaking(currentAccount.address);
+        console.log(resp);
+        setData(resp);
+        setLoading(false);
       } else {
-        console.error('There is a problem getting staking')
+        console.error('There is a problem getting staking');
       }
     },
     [currentAccount]
   );
 
   useEffect(() => {
-    _onCreate()
-  }, [currentAccount])
+    _onCreate();
+  }, [currentAccount]);
 
   const editBalance = (balance: string) => {
-    if (parseInt(balance) === 0) return <span className={`major-balance`}>{balance}</span>
+    if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
 
-    const balanceSplit = balance.split('.')
+    const balanceSplit = balance.split('.');
+
     return (
       <span>
         <span className={'major-balance'}>{balanceSplit[0]}</span>
         {balance.includes('.') && '.'}
         <span className={'decimal-balance'}>{balanceSplit[1]}</span>
       </span>
-    )
-  }
+    );
+  };
 
   const StakingRow = (logo: string, chainName: string, symbol: string, amount: string, unit: string, index: any) => {
     return (
-      <div className={`staking-row`} key={index}>
+      <div
+        className={'staking-row'}
+        key={index}
+      >
         <img
           alt='logo'
           className={'network-logo'}
@@ -68,28 +76,30 @@ function StakingContainer ({className}: Props): React.ReactElement<Props> {
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className={className}>
-      <div className={`staking-container`}>
-        {loading && <Spinner/>}
+      <div className={'staking-container'}>
+        {loading && <Spinner />}
 
         {!loading && data &&
           data?.details.map((item: any, index: any) => {
-            const name = item?.paraId
-            const icon = LogosMap[name]
-            return StakingRow(icon, name, item.nativeToken, item.balance, item.unit, index)
+            const name = item?.paraId;
+            const icon = LogosMap[name];
+
+            return StakingRow(icon, name, item.nativeToken, item.balance, item.unit, index);
           })
         }
       </div>
     </div>
-  )
+  );
 }
 
-export default styled(StakingContainer)(({ theme }: ThemeProps) => `
+export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   width: 100%;
+  padding: 0 25px;
 
   .staking-container {
     display: flex;
@@ -156,4 +166,4 @@ export default styled(StakingContainer)(({ theme }: ThemeProps) => `
   .decimal-balance {
     color: #7B8098;
   }
-`);
+`));

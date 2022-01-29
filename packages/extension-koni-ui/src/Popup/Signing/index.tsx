@@ -5,11 +5,12 @@ import type { SignerPayloadJSON } from '@polkadot/types/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+
 import { SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';
-import LoadingContainer from "@polkadot/extension-koni-ui/components/LoadingContainer";
 
 export default function Signing (): React.ReactElement {
   const { t } = useTranslation();
@@ -49,10 +50,10 @@ export default function Signing (): React.ReactElement {
       <>
         <TransactionIndex
           index={requestIndex}
+          name={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}
           onNextClick={_onNextClick}
           onPreviousClick={_onPreviousClick}
           totalItems={requests.length}
-          name={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}
         />
         <Request
           account={request.account}

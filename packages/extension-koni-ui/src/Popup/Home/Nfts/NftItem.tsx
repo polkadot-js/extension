@@ -1,9 +1,14 @@
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
-import React from "react";
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import logo from '../assets/sub-wallet-logo.svg';
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
+import styled from 'styled-components';
+
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+
+import logo from '../../../assets/sub-wallet-logo.svg';
 
 interface Props {
   className?: string;
@@ -11,15 +16,15 @@ interface Props {
   onClickBack: () => void;
 }
 
-function NftItem ({className, data, onClickBack}: Props): React.ReactElement<Props> {
+function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
   const propDetail = (title: string, value: string) => {
     return (
       <div className={'prop-detail'}>
         <div className={'prop-title'}>{title}</div>
         <div className={'prop-value'}>{value}</div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className={className}>
@@ -41,9 +46,9 @@ function NftItem ({className, data, onClickBack}: Props): React.ReactElement<Pro
 
       <div className={'detail-container'}>
         <img
-          src={data.image ? data?.image : logo}
-          className={'item-img'}
           alt={'item-img'}
+          className={'item-img'}
+          src={data.image ? data?.image : logo}
         />
         <div className={'send-button'}>Send</div>
         {
@@ -67,22 +72,22 @@ function NftItem ({className, data, onClickBack}: Props): React.ReactElement<Pro
               <div className={'prop-container'}>
                 {
                   Object.keys(data?.properties).map((key, index) => {
-                    return propDetail(key, data?.properties[key].value)
+                    return propDetail(key, data?.properties[key].value);
                   })
                 }
 
-                {/*{data?.properties.map((item: any) => {*/}
-                {/*  return propDetail(item)*/}
-                {/*})}*/}
+                {/* {data?.properties.map((item: any) => { */}
+                {/*  return propDetail(item) */}
+                {/* })} */}
               </div>
             </div>
         }
       </div>
     </div>
-  )
+  );
 }
 
-export default styled(NftItem)(({theme}: ThemeProps) => `
+export default styled(NftItem)(({ theme }: ThemeProps) => `
   .back-icon:hover {
     cursor: pointer;
   }

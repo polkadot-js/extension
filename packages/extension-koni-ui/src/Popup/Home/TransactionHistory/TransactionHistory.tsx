@@ -127,7 +127,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
   };
 
   return (
-    <div className={`transaction-history ${className ? className : ''}`}>
+    <div className={`transaction-history ${className || ''}`}>
       {items.map((item) => renderChainBalanceItem(item, registryMap))}
     </div>
   );

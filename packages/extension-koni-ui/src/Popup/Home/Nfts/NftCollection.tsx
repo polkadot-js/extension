@@ -1,11 +1,15 @@
-import React, {useState} from "react";
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {faArrowLeft} from "@fortawesome/free-solid-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import NftItem from "@polkadot/extension-koni-ui/components/NftItem";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useState } from 'react';
 import LazyLoad from 'react-lazyload';
-import NftItemPreview from "@polkadot/extension-koni-ui/components/NftItemPreview";
+import styled from 'styled-components';
+
+import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
+import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItemPreview';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
@@ -13,14 +17,14 @@ interface Props {
   onClickBack: () => void;
 }
 
-function NftCollection ({className, data, onClickBack}: Props): React.ReactElement<Props> {
-  const [chosenItem, setChosenItem] = useState()
-  const [showItemDetail, setShowItemDetail] = useState(false)
+function NftCollection ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
+  const [chosenItem, setChosenItem] = useState();
+  const [showItemDetail, setShowItemDetail] = useState(false);
 
   const handleShowItem = (data: any) => {
-    setChosenItem(data)
-    setShowItemDetail(true)
-  }
+    setChosenItem(data);
+    setShowItemDetail(true);
+  };
 
   return (
     <div className={className}>
@@ -37,7 +41,10 @@ function NftCollection ({className, data, onClickBack}: Props): React.ReactEleme
                 icon={faArrowLeft}
               />
             </div>
-            <div className={'header-title'} title={data.collectionName ? data?.collectionName : data?.collectionId}>
+            <div
+              className={'header-title'}
+              title={data.collectionName ? data?.collectionName : data?.collectionId}
+            >
               <div className={'collection-name'}>{data.collectionName ? data?.collectionName : data?.collectionId}</div>
               <div className={'collection-item-count'}>{data?.nftItems.length}</div>
             </div>
@@ -48,8 +55,11 @@ function NftCollection ({className, data, onClickBack}: Props): React.ReactEleme
               data?.nftItems.length > 0 &&
               data?.nftItems.map((item: any, index: React.Key | null | undefined) => {
                 return <div key={index}>
-                  <NftItemPreview data={item} onClick={handleShowItem}/>
-                </div>
+                  <NftItemPreview
+                    data={item}
+                    onClick={handleShowItem}
+                  />
+                </div>;
               })
             }
           </div>
@@ -59,15 +69,18 @@ function NftCollection ({className, data, onClickBack}: Props): React.ReactEleme
       {
         showItemDetail &&
         <LazyLoad>
-          <NftItem data={chosenItem} onClickBack={() => setShowItemDetail(false)}/>
+          <NftItem
+            data={chosenItem}
+            onClickBack={() => setShowItemDetail(false)}
+          />
         </LazyLoad>
       }
 
     </div>
-  )
+  );
 }
 
-export default styled(NftCollection)(({theme}: ThemeProps) => `
+export default styled(NftCollection)(({ theme }: ThemeProps) => `
   .grid-container {
     width: 100%;
     display: grid;

@@ -1,10 +1,13 @@
-import { Root } from "protobufjs";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
 
-function defineMessage(schema: string) {
+import { Root } from 'protobufjs';
+
+function defineMessage (schema: string) {
   return Root.fromJSON(JSON.parse(schema));
 }
 
-function convertEnumToString(value: any, key: string, NFTMeta: any, locale: any) {
+function convertEnumToString (value: any, key: string, NFTMeta: any, locale: any) {
   let result = value;
 
   try {
@@ -58,4 +61,4 @@ export const deserializeNft = (schema: string, buffer: Uint8Array, locale: strin
   }
 
   return objectItem;
-}
+};

@@ -1,5 +1,9 @@
-import fetch from "node-fetch";
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SERVER, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from "./config";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import fetch from 'node-fetch';
+
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SERVER, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from './config';
 
 // data for test
 // const singular_account = 'DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW';
@@ -10,16 +14,17 @@ const headers = {
 };
 
 export const getSingularByAccount = async (account: string) => {
-  const url = SINGULAR_ENDPOINT + account
+  const url = SINGULAR_ENDPOINT + account;
   const data = await fetch(url, {
     method: 'GET',
     headers
   })
-    .then(res => res.json())
+    .then((res) => res.json());
 
-  let nfts = []
+  const nfts = [];
+
   for (let i = 0; i < data.length; i++) {
-    const { description, name, attributes, animation_url, image } = await getMetadata(data[i].metadata)
+    const { animation_url, attributes, description, image, name } = await getMetadata(data[i].metadata);
 
     nfts.push({
       ...data[i],
@@ -31,24 +36,25 @@ export const getSingularByAccount = async (account: string) => {
         image: getIPFSLink(image)
       },
       external_url: SINGULAR_EXTERNAL_SERVER + data[i].id
-    })
+    });
   }
 
   // console.log(nfts)
-  return nfts
-}
+  return nfts;
+};
 
 export const getItemsKanariaByAccount = async (account: string) => {
-  const url = KANARIA_ENDPOINT + 'account-items/' + account
+  const url = KANARIA_ENDPOINT + 'account-items/' + account;
   const data = await fetch(url, {
     method: 'GET',
     headers
   })
-    .then(res => res.json())
+    .then((res) => res.json());
 
-  let nfts = []
+  const nfts = [];
+
   for (let i = 0; i < data.length; i++) {
-    const result = await getMetadata(data[i].metadata)
+    const result = await getMetadata(data[i].metadata);
 
     nfts.push({
       ...data[i],
@@ -57,42 +63,45 @@ export const getItemsKanariaByAccount = async (account: string) => {
         image: getIPFSLink(result.image),
         external_url: KANARIA_EXTERNAL_SERVER + data[i].id
       }
-    })
+    });
   }
 
-  return nfts
-}
+  return nfts;
+};
 
 export const getBirdsKanariaByAccount = async (account: string) => {
-  const url = KANARIA_ENDPOINT + 'account-birds/' + account
+  const url = KANARIA_ENDPOINT + 'account-birds/' + account;
   const data = await fetch(url, {
     method: 'GET',
     headers
   })
-    .then(res => res.json())
+    .then((res) => res.json());
 
-  let nfts = []
+  const nfts = [];
+
   for (let i = 0; i < data.length; i++) {
-    const result = await getMetadata(data[i].metadata)
+    const result = await getMetadata(data[i].metadata);
 
     nfts.push({
       ...data[i],
       metadata: result,
       external_url: KANARIA_EXTERNAL_SERVER + data[i].id
-    })
+    });
   }
 
-  return nfts
-}
+  return nfts;
+};
 
 export const getMetadata = (metadata_url: string) => {
-  const url = getIPFSLink(metadata_url)
-  if(!url) return undefined
+  const url = getIPFSLink(metadata_url);
+
+  if (!url) return undefined;
+
   return fetch(url, {
     method: 'GET',
     headers
   })
-    .then(res => res.json())
-}
+    .then((res) => res.json());
+};
 
 const getIPFSLink = (string: string): string | undefined => string ? SERVER + string.slice(12) : undefined;

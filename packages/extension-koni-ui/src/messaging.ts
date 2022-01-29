@@ -9,16 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import {NftJson, PriceJson, RequestSubscribePrice, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
-import {
-  AccountsWithCurrentAddress,
-  BalanceJson, ChainRegistry, CrowdloanJson,
-  NetWorkMetadataDef,
-  PriceJson,
-  RequestSubscribeBalance,
-  RequestSubscribeCrowdloan,
-  RequestSubscribePrice
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';

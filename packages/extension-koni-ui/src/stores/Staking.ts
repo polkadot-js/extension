@@ -1,5 +1,9 @@
-import {StakingJson} from "@polkadot/extension-base/background/KoniTypes";
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+import { StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const initialState = {
   ready: false,

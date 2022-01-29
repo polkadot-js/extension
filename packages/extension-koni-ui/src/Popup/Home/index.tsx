@@ -32,10 +32,10 @@ import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
 import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
-import NftsEmptyList from './Nfts/EmptyList';
 import StackingEmptyList from './Stacking/EmptyList';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
+import NftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -221,7 +221,7 @@ function Home ({ className, currentAccount }: Props): React.ReactElement {
         )}
 
         {activatedTab === 2 && (
-          <NftsEmptyList />
+          <NftContainer />
         )}
 
         {activatedTab === 3 && (

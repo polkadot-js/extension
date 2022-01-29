@@ -1,7 +1,7 @@
 // Copyright 2017-2022 @polkadot/apps-config authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { OverrideBundleDefinition } from "@polkadot/types/types";
+import { OverrideBundleDefinition } from '@polkadot/types/types';
 
 // structs need to be in order
 /* eslint-disable sort-keys */

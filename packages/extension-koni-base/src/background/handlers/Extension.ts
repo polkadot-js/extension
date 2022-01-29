@@ -3,14 +3,7 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import {NftJson, PriceJson, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
-import {
-  AccountsWithCurrentAddress,
-  BalanceJson,
-  ChainRegistry, CrowdloanJson,
-  NetWorkMetadataDef,
-  PriceJson
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { state } from '@polkadot/extension-koni-base/background/handlers/index';
@@ -298,12 +291,12 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private getStaking(account: string): Promise<StakingJson> {
+  private getStaking (account: string): Promise<StakingJson> {
     return new Promise<StakingJson>((resolve, reject) => {
       state.getStaking(account, (rs: StakingJson) => {
         resolve(rs);
-      })
-    })
+      });
+    });
   }
 
   // todo: add custom network metadata to here

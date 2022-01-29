@@ -128,7 +128,7 @@ function ChainBalances ({ address, className, setQrModalOpen, setQrModalProps }:
   };
 
   return (
-    <div className={`chain-balances-container ${className? className : ''}`}>
+    <div className={`chain-balances-container ${className || ''}`}>
       <div className='chain-balances-container__body'>
         {networks.map((network) => renderChainBalanceItem(network))}
       </div>

@@ -1,9 +1,13 @@
-import React, {useState} from "react";
-import logo from "@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import React, { useState } from 'react';
 import LazyLoad from 'react-lazyload';
-import styled from "styled-components";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import Spinner from "@polkadot/extension-koni-ui/components/Spinner";
+import styled from 'styled-components';
+
+import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
+import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
@@ -11,41 +15,52 @@ interface Props {
   onClick: (data: any) => void;
 }
 
-function NftItemPreview ({className, data, onClick}: Props): React.ReactElement<Props> {
-  const [loading, setLoading] = useState(true)
+function NftCollectionPreview ({ className, data, onClick }: Props): React.ReactElement<Props> {
+  const [loading, setLoading] = useState(true);
 
   const handleOnLoad = () => {
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   return (
     <div className={className}>
       <LazyLoad>
         <div
           className={'nft-preview'}
-          style={{height:'124px'}}
           onClick={() => onClick(data)}
+          style={{ height: '164px' }}
         >
-          <div className={`img-container`}>
+          <div className={'img-container'}>
             {
               loading &&
-              <Spinner className={'img-spinner'}/>
+              <Spinner className={'img-spinner'} />
             }
             <img
-              src={data.image ? data?.image : logo}
-              className={'collection-thumbnail'}
               alt={'collection-thumbnail'}
-              style={{borderRadius: '5px'}}
+              className={'collection-thumbnail'}
               onLoad={() => handleOnLoad()}
+              src={data.image ? data?.image : logo}
+              style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
             />
+          </div>
+
+          <div className={'collection-title'}>
+            <div
+              className={'collection-name'}
+              title={data.collectionName ? data.collectionName : data?.collectionId}
+            >
+              {/* show only first 10 characters */}
+              {data.collectionName ? data.collectionName : data?.collectionId}
+            </div>
+            <div className={'collection-item-count'}>{data?.nftItems.length}</div>
           </div>
         </div>
       </LazyLoad>
     </div>
-  )
+  );
 }
 
-export default styled(NftItemPreview)(({theme}: ThemeProps) => `
+export default styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
   .img-container {
     position: relative;
     height: 124px;

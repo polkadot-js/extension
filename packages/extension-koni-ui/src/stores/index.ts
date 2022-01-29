@@ -7,9 +7,9 @@ import BalanceReducer from './Balance';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
-import PriceReducer from './Price';
 import NftReducer from './Nft';
-import StakingReducer from './Staking'
+import PriceReducer from './Price';
+import StakingReducer from './Staking';
 
 const reducers = {
   staking: StakingReducer,

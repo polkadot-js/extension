@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getItemsKanariaByAccount, getSingularByAccount } from "./api/rmrk_nft";
+import { getItemsKanariaByAccount, getSingularByAccount } from './api/rmrk_nft';
 // import UniqueNftApi from "./api/unique_nft";
 //
 // // no direct exports
@@ -57,11 +57,11 @@ import { getItemsKanariaByAccount, getSingularByAccount } from "./api/rmrk_nft";
 // index()
 
 describe('test getSingularByAccount api', () => {
-   test('test getSingularByAccount from endpoints', async () => {
-      return getSingularByAccount('DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW').then(rs => {
-         expect(rs.length).toEqual(71)
-         expect(rs[0].block).toEqual(10719419)
-         expect(rs[0].metadata.image).toEqual('https://kodadot.mypinata.cloud/ipfs/bafybeigdfb4tpldxbukdabdggpoh54wwb2tzrefok33pgojefoic7ssdiu')
-      })
-   })
-})
+  test('test getSingularByAccount from endpoints', async () => {
+    return getSingularByAccount('DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW').then((rs) => {
+      expect(rs.length).toEqual(71);
+      expect(rs[0].block).toEqual(10719419);
+      expect(rs[0].metadata.image).toEqual('https://kodadot.mypinata.cloud/ipfs/bafybeigdfb4tpldxbukdabdggpoh54wwb2tzrefok33pgojefoic7ssdiu');
+    });
+  });
+});

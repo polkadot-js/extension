@@ -1,6 +1,9 @@
-import SubscribableStore from "@polkadot/extension-koni-base/stores/SubcribableStore";
-import {NftJson} from "@polkadot/extension-koni-base/stores/types";
-import {EXTENSION_PREFIX} from "@polkadot/extension-base/defaults";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { EXTENSION_PREFIX } from '@polkadot/extension-base/defaults';
+import SubscribableStore from '@polkadot/extension-koni-base/stores/SubcribableStore';
+import { NftJson } from '@polkadot/extension-koni-base/stores/types';
 
 export default class NftStore extends SubscribableStore<NftJson> {
   constructor () {

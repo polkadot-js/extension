@@ -386,7 +386,6 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: 'UNKNOWN',
     ss58Format: -1,
     provider: 'wss://testnet2.uniquenetwork.io',
-    group: 'NOT_SURE'
     group: 'KUSAMA_PARACHAIN',
     paraId: 2012
   },

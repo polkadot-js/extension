@@ -23,8 +23,9 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
   } else {
     crowdloanStatusClass = '-active-status';
   }
+
   return (
-    <div className={`crowdloan-item ${className ? className : ''} ${crowdloanStatusClass}`}>
+    <div className={`crowdloan-item ${className || ''} ${crowdloanStatusClass}`}>
       <div className='crowdloan-item__part-1'>
         <img
           alt='Logo'
@@ -34,7 +35,7 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
         <div className='crowdloan-item__meta-wrapper'>
           <div className='crowdloan-item__chain-top-area'>
             <div className='crowdloan-item__chain-name'>{item.networkDisplayName}</div>
-            <div className={`crowdloan-item__status`}>{item.crowdloanStatus}</div>
+            <div className={'crowdloan-item__status'}>{item.crowdloanStatus}</div>
           </div>
           <div className='crowdloan-item__chain-group'>{item.groupDisplayName}</div>
         </div>

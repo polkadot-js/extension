@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { getChainMetadata } from './rpc_api';
-
 // import networks from "@polkadot/extension-koni-base/api/endpoints";
 // import unique_types from "@polkadot/extension-koni-base/api/unique_nft/runtime_types";
 import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
+
+import { getChainMetadata } from './rpc_api';
 
 export const wsProvider = async ({ provider }: NetWorkInfo, type?: any): Promise<ApiPromise> => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -43,19 +43,22 @@ export const initWsNetworkMap = (networkMap: Record<string, NetWorkInfo>) => {
 // Return an array of apis with the order like the input
 export const connectChains = async (targetChains: Array<any>): Promise<any[] | undefined> => {
   if (targetChains.length <= 0) {
-    console.log('Must pass at least 1 chainId.')
-    return undefined
+    console.log('Must pass at least 1 chainId.');
+
+    return undefined;
   }
-  let apiPromises: any[] = []
+
+  const apiPromises: any[] = [];
 
   targetChains.map((item) => {
-    const chainMetadata = getChainMetadata({ chainId: item.chainId, paraId: item.paraId })
-    if (chainMetadata && chainMetadata.rpcs) {
-      const apiPromise = wsProvider({provider: chainMetadata.rpcs})
-      apiPromises.push(apiPromise)
-    }
-    else apiPromises.push(null)
-  })
+    const chainMetadata = getChainMetadata({ chainId: item.chainId, paraId: item.paraId });
 
-  return await Promise.all(apiPromises)
-}
+    if (chainMetadata && chainMetadata.rpcs) {
+      const apiPromise = wsProvider({ provider: chainMetadata.rpcs });
+
+      apiPromises.push(apiPromise);
+    } else apiPromises.push(null);
+  });
+
+  return await Promise.all(apiPromises);
+};

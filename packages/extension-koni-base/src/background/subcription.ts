@@ -40,11 +40,11 @@ export class KoniSubcription {
     });
   }
 
-  initChainRegistrySubscription() {
+  initChainRegistrySubscription () {
     Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
       const networkAPI = await apiProps.isReady;
 
-      const {chainDecimals, chainTokens} = networkAPI.api.registry;
+      const { chainDecimals, chainTokens } = networkAPI.api.registry;
 
       state.setChainRegistryItem(networkKey, {
         chainDecimals,

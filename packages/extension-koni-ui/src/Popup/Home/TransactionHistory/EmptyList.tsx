@@ -17,7 +17,7 @@ function TransactionHistoryEmptyList ({ className }: Props): React.ReactElement<
   const { t } = useTranslation();
 
   return (
-    <div className={`${className? className : ''} empty-list transaction-history-empty-list`}>
+    <div className={`${className || ''} empty-list transaction-history-empty-list`}>
       <img
         alt='Empty'
         className='empty-list__img'

@@ -4,21 +4,15 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import {
-  APIItemState,
-  BalanceItem,
-  BalanceJson, ChainRegistry, CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  PriceJson, TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
-import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import { PriceJson} from '@polkadot/extension-koni-base/stores/types';
 import NftStore from '@polkadot/extension-koni-base/stores/Nft';
 import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
+import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -204,7 +198,7 @@ export default class KoniState extends State {
   }
 
   private getTransactionKey (address: string, networkKey: string): string {
-    return `${address}_${networkKey}`
+    return `${address}_${networkKey}`;
   }
 
   public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
@@ -218,7 +212,7 @@ export default class KoniState extends State {
   }
 
   public getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], update: (items: TransactionHistoryItemType[]) => void): void {
-    const keys: string[] = networkKeys.map(n => this.getTransactionKey(address, n));
+    const keys: string[] = networkKeys.map((n) => this.getTransactionKey(address, n));
 
     this.transactionHistoryStore.getByMultiKeys(keys, (items) => {
       if (!items) {
@@ -232,7 +226,7 @@ export default class KoniState extends State {
   }
 
   public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
-    this.getTransactionHistory(address, networkKey,(items) => {
+    this.getTransactionHistory(address, networkKey, (items) => {
       if (!items || !items.length) {
         items = [item];
       } else {
@@ -242,7 +236,7 @@ export default class KoniState extends State {
       this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items, () => {
         callback && callback(items);
       });
-    })
+    });
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {

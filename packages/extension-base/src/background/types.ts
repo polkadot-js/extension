@@ -11,7 +11,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import {CurrentNetworkInfo, KoniRequestSignatures} from '@polkadot/extension-base/background/KoniTypes';
+import { CurrentNetworkInfo, KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';

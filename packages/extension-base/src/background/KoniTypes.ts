@@ -8,6 +8,7 @@ import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 
 export interface StakingItem {
   name: string,
@@ -22,6 +23,30 @@ export interface StakingJson {
   ready?: boolean,
   details: Array<StakingItem>
 }
+
+export interface NftItem {
+  id: string;
+  name: string;
+  image: string;
+  external_url: string;
+  rarity: string;
+  collectionId: string;
+  properties: Record<any, any>;
+}
+
+export interface NftCollection {
+  collectionId: string;
+  collectionName: string;
+  image: string;
+  nftItems: Array<NftItem>;
+}
+
+export interface NftJson {
+  ready?: boolean;
+  total: number;
+  nftList: Array<NftCollection>;
+}
+
 
 export interface PriceJson {
   ready?: boolean,
@@ -137,7 +162,7 @@ export interface ApiProps extends ApiState {
   isReady: Promise<ApiProps>;
 }
 
-export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'UNKNOWN';
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'UNKNOWN' | 'NOT_SURE';
 
 export interface NetWorkInfo {
   chain: string;

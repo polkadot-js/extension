@@ -23,7 +23,6 @@ function NftsEmptyList ({ className }: Props): React.ReactElement {
       />
       <div className='empty-list__text'>
         <div>{t<string>('Your NFTs will appear here')}</div>
-        {/*<div>{t<string>('Coming Soon...')}</div>*/}
       </div>
     </div>
   );

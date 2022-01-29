@@ -84,12 +84,9 @@ export const getAcalaCrowdloanContribute = async (polkadotAddress: string) => {
 
 type BalanceType = {
   balance: string
-  priceField: string
-  comparableValue: string
-  tokenPrices: any[]
+  price?: number
   decimals: number
   symbol: string
-  balanceClassName?: string
 }
 
 type BalanceWithDecimalsProps = {
@@ -113,19 +110,19 @@ export type BalanceValueType = {
   symbol: string
 }
 
-export const getBalances = ({ balance,
-  comparableValue,
-  decimals,
-  priceField,
-  symbol,
-  tokenPrices }: BalanceType): BalanceValueType => {
+export const getBalances = ({
+                              balance,
+                              decimals,
+                              symbol,
+                              price,
+                            }: BalanceType): BalanceValueType => {
   const stable = symbol.toLowerCase().includes('usd') ? 1 : 0;
 
   const balanceValue = getBalanceWithDecimals({ balance, decimals });
 
-  const priceValue = (tokenPrices.find((x) => x[priceField] === comparableValue.toLowerCase())?.current_price)?.toString() || stable;
+  const priceValue = price || stable;
 
-  const convertedBalanceValue = getConvertedBalance(balanceValue, priceValue);
+  const convertedBalanceValue = getConvertedBalance(balanceValue, `${priceValue}`);
 
   return {
     balanceValue,
@@ -134,8 +131,8 @@ export const getBalances = ({ balance,
   };
 };
 
-export const parseBalancesInfo = (tokenPrices: any[], balanceInfo: AccountInfoItem): BalanceInfo => {
-  const { info, tokenDecimals, tokenSymbol } = balanceInfo;
+export const parseBalancesInfo = (priceMap: Record<string, number>, balanceInfo: AccountInfoItem): BalanceInfo => {
+  const { info, tokenDecimals, tokenSymbol, networkKey } = balanceInfo;
 
   const decimals = tokenDecimals && !isEmptyArray(tokenDecimals) ? tokenDecimals[0] : 0;
   const symbol = tokenSymbol && !isEmptyArray(tokenSymbol) ? tokenSymbol[0] : '';
@@ -165,9 +162,7 @@ export const parseBalancesInfo = (tokenPrices: any[], balanceInfo: AccountInfoIt
       balance: value,
       decimals,
       symbol,
-      tokenPrices,
-      priceField: 'symbol',
-      comparableValue: symbol
+      price: priceMap[networkKey]
     });
 
     if (['free', 'reserved', 'locked'].includes(key)) {

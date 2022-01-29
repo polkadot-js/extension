@@ -16,7 +16,7 @@ import {
   PriceJson,
   RequestSubscribeBalance,
   RequestSubscribeCrowdloan,
-  RequestSubscribePrice
+  RequestSubscribePrice, TransactionHistoryItemType
 } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -25,6 +25,7 @@ import { MetadataDef } from '@polkadot/extension-inject/types';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
+import {ApiInitStatus} from "@polkadot/extension-koni-base/api/dotsama";
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -299,4 +300,12 @@ export async function subscribeChainRegistry (callback: (map: Record<string, Cha
 
 export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
   return sendMessage('pri(networkMetadata.list)');
+}
+
+export async function updateTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.add)', {address, networkKey, item}, callback);
+}
+
+export async function initApi (networkKey: string): Promise<ApiInitStatus> {
+  return sendMessage('pri(api.init)', { networkKey });
 }

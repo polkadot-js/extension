@@ -12,7 +12,7 @@ import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
-import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/SendFund';
+import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import uiSettings from '@polkadot/ui-settings';
 
@@ -89,7 +89,7 @@ export default function Popup (): React.ReactElement {
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const genesisOptions = useGenesisHashOptions();
-  const currentAccount = store.getState().currentAccount;
+  const currentAccount = store.getState().currentAccount.account;
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');

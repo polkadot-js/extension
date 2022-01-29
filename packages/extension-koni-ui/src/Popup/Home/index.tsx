@@ -100,13 +100,21 @@ function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
   const {
-    currentAccount,
+    currentAccount: {
+      account: currentAccount
+    },
     currentNetwork
   } = useSelector((state: RootState) => state);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
   }
+
+  if (!currentAccount) {
+    return (<></>)
+  }
+
+  console.log('currentAccount', currentAccount);
 
   return (<Home
     className={className}
@@ -140,6 +148,8 @@ function Home ({ className, currentAccount, network }: Props): React.ReactElemen
       iconTheme,
       showExportButton: true
     });
+
+  console.log('networkKey==========', networkKey);
 
   const showedNetworks = useShowedNetworks(networkKey);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);

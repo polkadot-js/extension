@@ -177,10 +177,6 @@ export interface RequestAuthorizeTab {
   origin: string;
 }
 
-export interface RequestApi {
-  networkKey: string;
-}
-
 export interface RequestAuthorizeApprove {
   id: string;
 }
@@ -442,30 +438,4 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
-}
-
-export interface TransactionHistoryItemType {
-  time: number;
-  networkKey: string;
-  change: string;
-  fee?: string;
-  isSuccess: boolean;
-  action: 'send' | 'received';
-  extrinsicHash: string
-}
-
-export interface RequestTransactionHistoryGet {
-  address: string;
-  networkKey: string;
-}
-
-export interface RequestTransactionHistoryGetByMultiNetworks {
-  address: string;
-  networkKeys: string[];
-}
-
-export interface RequestTransactionHistoryAdd {
-  address: string;
-  networkKey: string;
-  item: TransactionHistoryItemType;
 }

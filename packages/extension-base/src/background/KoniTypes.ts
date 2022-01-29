@@ -7,6 +7,8 @@ import { AccountJson, RequestAccountSubscribe } from '@polkadot/extension-base/b
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
+import {Keyring} from "@polkadot/ui-keyring";
+import {ApiInitStatus} from "@polkadot/extension-koni-base/api/dotsama";
 
 export interface PriceJson {
   ready?: boolean,
@@ -144,6 +146,45 @@ export interface RandomTestRequest {
   end: number;
 }
 
+export type PdotApi = {
+  keyring: Keyring;
+  apisMap: Record<string, ApiProps>;
+}
+
+export interface BackgroundWindow extends Window {
+  pdotApi: PdotApi;
+}
+
+export interface TransactionHistoryItemType {
+  time: number;
+  networkKey: string;
+  change: string;
+  fee?: string;
+  isSuccess: boolean;
+  action: 'send' | 'received';
+  extrinsicHash: string
+}
+
+export interface RequestTransactionHistoryGet {
+  address: string;
+  networkKey: string;
+}
+
+export interface RequestTransactionHistoryGetByMultiNetworks {
+  address: string;
+  networkKeys: string[];
+}
+
+export interface RequestTransactionHistoryAdd {
+  address: string;
+  networkKey: string;
+  item: TransactionHistoryItemType;
+}
+
+export interface RequestApi {
+  networkKey: string;
+}
+
 export type RequestPrice = null
 export type RequestSubscribePrice = null
 export type RequestBalance = null
@@ -152,6 +193,7 @@ export type RequestCrowdloan = null
 export type RequestSubscribeCrowdloan = null
 
 export interface KoniRequestSignatures {
+  'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],
   'pri(balance.getBalance)': [RequestBalance, BalanceJson],
@@ -161,5 +203,6 @@ export interface KoniRequestSignatures {
   'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]],
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>],
+  'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
   'pub(utils.getRandom)': [RandomTestRequest, number]
 }

@@ -23,7 +23,7 @@ import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui
 import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
+import {RootState, store} from '@polkadot/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@polkadot/extension-koni-ui/stores/CurrentNetwork';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 import { IconTheme } from '@polkadot/react-identicon/types';
@@ -89,7 +89,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
   const { accounts } = useContext(AccountContext);
   const genesisOptions = useGenesisHashOptions();
@@ -161,14 +161,14 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
         await tieAccount(currentAccount.address, genesisHash || null);
-
-        updateCurrentNetwork({
-          networkPrefix,
-          icon,
-          genesisHash,
-          networkKey,
-          isEthereum
-        });
+        store.dispatch({ type: 'currentNetwork/update', payload: {
+            networkPrefix,
+            icon,
+            genesisHash,
+            networkKey,
+            isEthereum
+          } });
+        // updateCurrentNetwork();
       }
 
       setShowNetworkSelect(false);

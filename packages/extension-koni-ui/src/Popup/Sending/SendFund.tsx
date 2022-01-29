@@ -22,7 +22,7 @@ interface Props extends ThemeProps {
 
 function SendFund ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const propSenderId = currentAccount?.address;
   const [recipientId, setRecipientId] = useState<string | null>('5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k');
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
@@ -69,7 +69,7 @@ function SendFund ({ className }: Props): React.ReactElement {
           <div className='send-fund-container'>
             <InputAddress
               className={'send-fund-item'}
-              defaultValue={'5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k'}
+              defaultValue={propSenderId}
               help={t<string>('Select a contact or paste the address you want to send funds to.')}
               label={t<string>('Send to address')}
               // isDisabled={!!propRecipientId}

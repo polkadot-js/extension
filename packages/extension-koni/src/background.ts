@@ -11,7 +11,7 @@ import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpe
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import { KoniCron } from '@polkadot/extension-koni-base/background/cron';
-import handlers from '@polkadot/extension-koni-base/background/handlers';
+import handlers, {initBackgroundWindow} from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
@@ -38,11 +38,14 @@ cryptoWaitReady()
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
 
+
     // Init subcription
     (new KoniSubcription()).init();
 
     // Init cron
     (new KoniCron()).init();
+
+    initBackgroundWindow(keyring);
 
     console.log('initialization completed');
   })

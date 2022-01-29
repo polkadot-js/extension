@@ -26,7 +26,7 @@ interface Props extends ThemeProps {
 function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
 
   return (

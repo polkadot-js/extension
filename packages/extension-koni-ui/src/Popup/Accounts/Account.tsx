@@ -25,7 +25,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
   const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
 
   useEffect((): void => {
     if (currentAccount?.address === address) {

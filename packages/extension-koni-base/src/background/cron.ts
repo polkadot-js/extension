@@ -4,8 +4,8 @@
 import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { state } from '@polkadot/extension-koni-base/background/handlers';
-import { CRON_REFRESH_PRICE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_PRICE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -44,6 +44,15 @@ export class KoniCron {
 
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+    this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL);
+  }
+
+  recoverAPI () {
+    Object.values(dotSamaAPIMap).forEach(async (apiProp) => {
+      if (!apiProp.isApiReady) {
+        await apiProp.isReady;
+      }
+    });
   }
 
   refreshPrice () {

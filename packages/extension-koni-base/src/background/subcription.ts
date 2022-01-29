@@ -57,13 +57,27 @@ export class KoniSubcription {
     const promiseList = Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
       const networkAPI = await apiProps.isReady;
 
-      return networkAPI.api.query.system.account(address, ({ data }: BalanceRPCResponse) => {
+      const {api} = networkAPI;
+
+      if (!api.tx || !api.tx.balances) {
+        state.setBalanceItem(networkKey, {
+          state: APIItemState.NOT_SUPPORT,
+          free: '0',
+          reserved: '0',
+          miscFrozen: '0',
+          feeFrozen: '0'
+        });
+
+        return null;
+      }
+
+      return api.query.system.account(address, ({ data }: BalanceRPCResponse) => {
         const balanceItem = {
           state: APIItemState.READY,
           free: data.free?.toString() || '0',
           reserved: data.reserved?.toString() || '0',
-          miscFrozen: data.feeFrozen?.toString() || '0',
-          feeFrozen: data.miscFrozen?.toString() || '0'
+          miscFrozen: data.miscFrozen?.toString() || '0',
+          feeFrozen: data.feeFrozen?.toString() || '0'
         } as BalanceItem;
 
         state.setBalanceItem(networkKey, balanceItem);
@@ -75,7 +89,7 @@ export class KoniSubcription {
 
       unsubList.forEach((unsub) => {
         // @ts-ignore
-        unsub();
+        unsub && unsub();
       });
     };
   }

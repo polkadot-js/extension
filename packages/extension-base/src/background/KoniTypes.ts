@@ -22,7 +22,7 @@ export enum APIItemState {
   NOT_SUPPORT = 'not_support'
 }
 
-export enum CrowdloanParaSate {
+export enum CrowdloanParaState {
   ONGOING = 'ongoing',
   COMPLETED = 'completed',
   FAILED = 'failed'
@@ -42,7 +42,7 @@ export interface BalanceJson {
 
 export interface CrowdloanItem {
   state: APIItemState,
-  paraState?: CrowdloanParaSate,
+  paraState?: CrowdloanParaState,
   contribute: string
 }
 

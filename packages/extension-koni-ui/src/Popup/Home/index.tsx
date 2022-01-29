@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BigN from 'bignumber.js';
 import React, { useContext, useState } from 'react';
 import { TFunction } from 'react-i18next';
 import styled from 'styled-components';
@@ -36,6 +35,12 @@ import NftsEmptyList from './Nfts/EmptyList';
 import StackingEmptyList from './Stacking/EmptyList';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
+import {useSelector} from "react-redux";
+import {RootState} from "@polkadot/extension-koni-ui/stores";
+import {CurrentNetworkInfo} from "@polkadot/extension-base/background/KoniTypes";
+import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
+import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
+import useCrowdloanNetworks from "@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -44,6 +49,7 @@ interface WrapperProps extends ThemeProps {
 interface Props {
   className?: string;
   currentAccount: AccountJson;
+  network: CurrentNetworkInfo;
 }
 
 function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
@@ -93,32 +99,28 @@ function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
 
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
+  const {
+    currentAccount,
+    currentNetwork
+  } = useSelector((state: RootState) => state);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
   }
 
-  const fakeAccount: AccountJson = {
-    address: '5HWA78W7x8qi2zbb9BbFhuvvV5jbS8v1c8Mt6E6Y7pvPopEv',
-    name: 'Subwallet User'
-  };
-
   return (<Home
     className={className}
-    currentAccount={fakeAccount}
+    currentAccount={currentAccount}
+    network={currentNetwork}
   />);
 }
 
-const MockCurrentNetwork = {
-  networkPrefix: -1,
-  networkKey: 'all',
-  iconTheme: 'polkadot'
-};
-
-function Home ({ className, currentAccount }: Props): React.ReactElement {
-  const { iconTheme,
+function Home ({ className, currentAccount, network }: Props): React.ReactElement {
+  const {
+    icon: iconTheme,
     networkKey,
-    networkPrefix } = MockCurrentNetwork;
+    networkPrefix
+  } = network;
   const { t } = useTranslation();
   const { address } = currentAccount;
   const [activatedTab, setActivatedTab] = useState<number>(1);
@@ -127,16 +129,29 @@ function Home ({ className, currentAccount }: Props): React.ReactElement {
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [
-    { iconTheme: qrModalIconTheme,
+    {
+      iconTheme: qrModalIconTheme,
       networkKey: qrModalNetworkKey,
       networkPrefix: qrModalNetworkPrefix,
-      showExportButton: qrModalShowExportButton }, setQrModalProps] =
-    useState({
+      showExportButton: qrModalShowExportButton
+    }, setQrModalProps] = useState({
       networkPrefix,
       networkKey,
       iconTheme,
       showExportButton: true
     });
+
+  const showedNetworks = useShowedNetworks(networkKey);
+  const crowdloanNetworks = useCrowdloanNetworks(networkKey);
+
+  const {
+    networkBalanceMaps,
+    totalBalanceValue,
+    crowdloanContributeMap
+  } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
+  const {
+    networkMetadata: networkMetadataMap
+  } = useSelector((state: RootState) => state);
 
   const _toggleZeroBalances = (): void => {
     setShowZeroBalances((v) => {
@@ -159,8 +174,6 @@ function Home ({ className, currentAccount }: Props): React.ReactElement {
 
   const _closeQrModal = (): void => setQrModalOpen(false);
 
-  const totalBalance: BigN = new BigN(2000);
-
   return (
     <div className={`home-screen home ${className}`}>
       <Header
@@ -179,7 +192,7 @@ function Home ({ className, currentAccount }: Props): React.ReactElement {
           <BalanceVal
             startWithSymbol
             symbol={'$'}
-            value={totalBalance}
+            value={totalBalanceValue}
           />
         </div>
 
@@ -215,6 +228,11 @@ function Home ({ className, currentAccount }: Props): React.ReactElement {
         {activatedTab === 1 && (
           <ChainBalances
             address={address}
+            currentNetworkKey={networkKey}
+            isShowZeroBalances={isShowZeroBalances}
+            networkKeys={showedNetworks}
+            networkBalanceMaps={networkBalanceMaps}
+            networkMetadataMap={networkMetadataMap}
             setQrModalOpen={setQrModalOpen}
             setQrModalProps={setQrModalProps}
           />
@@ -225,7 +243,11 @@ function Home ({ className, currentAccount }: Props): React.ReactElement {
         )}
 
         {activatedTab === 3 && (
-          <Crowdloans />
+          <Crowdloans
+            networkKeys={crowdloanNetworks}
+            networkMetadataMap={networkMetadataMap}
+            crowdloanContributeMap={crowdloanContributeMap}
+          />
         )}
 
         {activatedTab === 4 && (

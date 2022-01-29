@@ -7,38 +7,78 @@ import styled from 'styled-components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import {CrowdloanParaState} from "@polkadot/extension-base/background/KoniTypes";
+import {TFunction} from "react-i18next";
+import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
 
 interface Props extends ThemeProps {
   className?: string;
   item: CrowdloanItemType;
 }
 
-function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
-  let crowdloanStatusClass;
+function getContainerClassName (item: CrowdloanItemType, extraClassName = ''): string {
+  let className = `crowdloan-item ${extraClassName}`;
 
-  if (item.crowdloanStatus === 'Winner') {
-    crowdloanStatusClass = '-winner-status';
-  } else if (item.crowdloanStatus === 'Fail') {
-    crowdloanStatusClass = '-fail-status';
-  } else {
-    crowdloanStatusClass = '-active-status';
+  if (!item.paraState) {
+    return className;
   }
+
+  if (item.paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
+    className += ' -state-complete ';
+  }
+
+  if (item.paraState === CrowdloanParaState.FAILED.valueOf()) {
+    className += ' -state-fail ';
+  }
+
+  if (item.paraState === CrowdloanParaState.ONGOING.valueOf()) {
+    className += ' -state-ongoing ';
+  }
+
+  return className;
+}
+
+function getParaStateLabel (paraState: CrowdloanParaState, t: TFunction): string {
+
+  if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
+    return t('Winner')
+  }
+
+  if (paraState === CrowdloanParaState.FAILED.valueOf()) {
+    return t('Fail')
+  }
+
+  if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
+    return t('Active')
+  }
+
+  return '';
+}
+
+function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
   return (
-    <div className={`crowdloan-item ${className ? className : ''} ${crowdloanStatusClass}`}>
+    <div className={getContainerClassName(item, className)}>
       <div className='crowdloan-item__part-1'>
         <img
           alt='Logo'
           className='crowdloan-item__logo'
           src={item.logo}
         />
+
         <div className='crowdloan-item__meta-wrapper'>
           <div className='crowdloan-item__chain-top-area'>
             <div className='crowdloan-item__chain-name'>{item.networkDisplayName}</div>
-            <div className={`crowdloan-item__status`}>{item.crowdloanStatus}</div>
+
+            {!!item.paraState && (
+              <div className={`crowdloan-item__status`}>{getParaStateLabel(item.paraState, t)}</div>
+            )}
           </div>
           <div className='crowdloan-item__chain-group'>{item.groupDisplayName}</div>
         </div>
       </div>
+
       <div className='crowdloan-item__part-2'>
         <BalanceVal
           symbol={item.symbol}
@@ -71,19 +111,19 @@ export default styled(CrowdloanItem)(({ theme }: Props) => `
     background: ${theme.boxBorderColor};
   }
 
-  &.-winner-status {
+  &.-state-complete {
     .crowdloan-item__status {
       color: ${theme.crowdloanWinnerStatus};
     }
   }
 
-  &.-active-status {
+  &.-state-ongoing {
     .crowdloan-item__status {
       color: ${theme.crowdloanActiveStatus};
     }
   }
 
-  &.-fail-status {
+  &.-state-fail {
     .crowdloan-item__status {
       color: ${theme.crowdloanFailStatus};
     }

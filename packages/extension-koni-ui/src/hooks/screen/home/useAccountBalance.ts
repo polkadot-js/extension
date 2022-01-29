@@ -1,10 +1,10 @@
-import {AccountBalanceType} from "@polkadot/extension-koni-ui/hooks/screen/home/types";
+import {AccountBalanceType, CrowdloanContributeValueType} from "@polkadot/extension-koni-ui/hooks/screen/home/types";
 import {useSelector} from "react-redux";
 import {RootState} from "@polkadot/extension-koni-ui/stores";
 import BigN from "bignumber.js";
 import {BalanceInfo} from "@polkadot/extension-koni-ui/util/types";
 import {APIItemState, ChainRegistry, NetWorkGroup} from "@polkadot/extension-base/background/KoniTypes";
-import {BalanceValueType, BN_ZERO, getBalances, parseBalancesInfo} from '@polkadot/extension-koni-ui/util';
+import {BN_ZERO, getBalances, parseBalancesInfo} from '@polkadot/extension-koni-ui/util';
 
 function getCrowdloadChainRegistry(group: NetWorkGroup, chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
   if (group === 'POLKADOT_PARACHAIN' && chainRegistryMap['polkadot']) {
@@ -36,7 +36,7 @@ export default function useAccountBalance(
 
   let totalBalanceValue = new BigN(0);
   const networkBalanceMaps: Record<string, BalanceInfo> = {};
-  const crowdloanContributeMap: Record<string, BalanceValueType> = {};
+  const crowdloanContributeMap: Record<string, CrowdloanContributeValueType> = {};
 
   showedNetworks.forEach(networkKey => {
     const registry = chainRegistryMap[networkKey];
@@ -96,17 +96,20 @@ export default function useAccountBalance(
       return;
     }
 
-    const balanceInfo = getBalances({
+    const contributeInfo = getBalances({
       balance: crowdLoanItem.contribute,
       decimals: registry.chainDecimals[0],
       symbol: registry.chainTokens[0],
       price: priceMap[networkKey]
     })
 
-    crowdloanContributeMap[networkKey] = balanceInfo;
+    crowdloanContributeMap[networkKey] = {
+      paraState: crowdLoanItem.paraState,
+      contribute: contributeInfo
+    };
 
     if (['all', 'polkadot', 'kusama'].includes(currentNetworkKey)) {
-        totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);
+        totalBalanceValue = totalBalanceValue.plus(contributeInfo.convertedBalanceValue);
     }
   });
 

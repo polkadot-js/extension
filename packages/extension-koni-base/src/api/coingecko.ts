@@ -7,11 +7,19 @@ import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 const alternativeNameMap: Record<string, string> = {
-  acala: 'acala-token',
   bifrost: 'bifrost-native-coin',
   calamari: 'calamari-network',
+  crab: 'darwinia-crab-network',
+  crust: 'crust-network',
+  darwinia: 'darwinia-network-native-token',
   kilt: 'kilt-protocol',
-  parallel: 'par-stablecoin'
+  kintsugi: 'kintsugi',
+  parallel: 'paralink-network',
+  phala: 'pha',
+  picasso: 'pica',
+  robonomics: 'robonomics-network',
+  shadow: 'crust-storage-market',
+  'sora-substrate': 'sora'
 };
 
 interface GeckoItem {

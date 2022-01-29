@@ -294,10 +294,13 @@ export default class KoniExtension extends Extension {
     const result: NetWorkMetadataDef[] = [];
 
     Object.keys(NETWORKS).forEach((networkKey) => {
-      const { chain, genesisHash, group, icon, isEthereum, ss58Format } = NETWORKS[networkKey];
+      const { chain, genesisHash, group, icon, isEthereum, ss58Format, paraId } = NETWORKS[networkKey];
 
+      let isAvailable = true;
+
+      //todo: add more logic in further update
       if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
-        return;
+        isAvailable = false;
       }
 
       result.push({
@@ -307,7 +310,9 @@ export default class KoniExtension extends Extension {
         icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
         ss58Format,
         group,
-        isEthereum: !!isEthereum
+        isEthereum: !!isEthereum,
+        paraId,
+        isAvailable
       });
     });
 

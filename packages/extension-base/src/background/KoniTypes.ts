@@ -18,7 +18,8 @@ export enum APIItemState {
   PENDING = 'pending',
   READY = 'ready',
   CACHED = 'cached',
-  ERROR = 'pending',
+  ERROR = 'error',
+  NOT_SUPPORT = 'not_support'
 }
 
 export enum CrowdloanParaSate {
@@ -98,7 +99,7 @@ export interface ApiProps extends ApiState {
   isReady: Promise<ApiProps>;
 }
 
-export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'NOT_SURE';
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'UNKNOWN';
 
 export interface NetWorkInfo {
   chain: string;
@@ -114,7 +115,17 @@ export interface NetWorkInfo {
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkKey: string;
-  group: string
+  group: NetWorkGroup
+  isEthereum: boolean;
+  paraId?: number;
+  isAvailable: boolean;
+}
+
+export type CurrentNetworkInfo = {
+  networkKey: string;
+  networkPrefix: number;
+  icon: string;
+  genesisHash: string;
   isEthereum: boolean;
 }
 

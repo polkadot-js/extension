@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { getAllNetworkMetadata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
+import {NetWorkGroup} from "@polkadot/extension-base/background/KoniTypes";
 
 export default interface networkSelectOption {
   text: string;
@@ -13,15 +14,17 @@ export default interface networkSelectOption {
   networkKey: string;
   networkPrefix: number;
   icon: string;
-  group: string;
+  group: NetWorkGroup;
   isEthereum: boolean;
 }
 
 const RELAY_CHAIN = 'Relay Chain';
 
+const availableChain = chains.filter(c => c.isAvailable);
+
 export default function (): networkSelectOption[] {
   const { t } = useTranslation();
-  const [metadataChains, setMetadatachains] = useState<networkSelectOption[]>([]);
+  const [metadataChains, setMetadataChains] = useState<networkSelectOption[]>([]);
   const mounted = useRef(false);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export default function (): networkSelectOption[] {
 
     getAllNetworkMetadata().then((metadataDefs) => {
       if (mounted.current) {
-        const res = metadataDefs.map((metadata) => (
+        const res = metadataDefs.filter(c => c.isAvailable).map((metadata) => (
           {
             text: metadata.chain,
             value: metadata.genesisHash,
@@ -40,7 +43,7 @@ export default function (): networkSelectOption[] {
             isEthereum: metadata.isEthereum
           }));
 
-        setMetadatachains(res);
+        setMetadataChains(res);
       }
     }).catch(console.error);
 
@@ -56,11 +59,11 @@ export default function (): networkSelectOption[] {
       networkKey: 'all',
       networkPrefix: -1,
       icon: 'substrate',
-      group: '',
+      group: 'UNKNOWN' as NetWorkGroup,
       isEthereum: false
     },
     // put the relay chains at the top
-    ...chains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
+    ...availableChain.filter(({ chain }) => chain.includes(RELAY_CHAIN))
       .map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
         text: chain,
         value: genesisHash,
@@ -70,7 +73,7 @@ export default function (): networkSelectOption[] {
         group,
         isEthereum
       })),
-    ...chains.map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChain.map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
@@ -85,7 +88,7 @@ export default function (): networkSelectOption[] {
         // get any chain present in the metadata and not already part of chains
         ...metadataChains.filter(
           ({ value }) => {
-            return !chains.find(
+            return !availableChain.find(
               ({ genesisHash }) => genesisHash === value);
           }
         ))

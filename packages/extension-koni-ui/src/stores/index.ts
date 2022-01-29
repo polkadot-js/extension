@@ -7,6 +7,8 @@ import BalanceReducer from './Balance';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
+import ChainRegistryReducer from './ChainRegistry';
+import NetworkMetadataReducer from './NetworkMetadata';
 import PriceReducer from './Price';
 
 const reducers = {
@@ -14,7 +16,9 @@ const reducers = {
   balance: BalanceReducer,
   crowdloan: CrowdloanReducer,
   currentAccount: CurrentAccountReducer,
-  currentNetwork: CurrentNetworkReducer
+  currentNetwork: CurrentNetworkReducer,
+  chainRegistry: ChainRegistryReducer,
+  networkMetadata: NetworkMetadataReducer
 };
 
 export const store = configureStore({

@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, CurrentNetworkInfo, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
-import { BalanceJson, CrowdloanJson, PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
@@ -20,7 +19,7 @@ import uiSettings from '@polkadot/ui-settings';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeBalance, subscribeCrowdloan, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests, tieAccount } from '../messaging';
+import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests, tieAccount } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AuthList from './AuthManagement';
@@ -38,6 +37,8 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import {AccountsWithCurrentAddress, CurrentNetworkInfo} from '@polkadot/extension-base/background/KoniTypes';
+import useSetupStore from "@polkadot/extension-koni-ui/hooks/store/useSetupStore";
 
 const startSettings = uiSettings.get();
 
@@ -69,24 +70,12 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
-function updatePrice (priceData: PriceJson): void {
-  store.dispatch({ type: 'price/update', payload: priceData });
+function updateCurrentAccount (currentAcc: AccountJson): void {
+  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
-function updateBalance (balanceData: BalanceJson): void {
-  store.dispatch({ type: 'balance/update', payload: balanceData });
-}
-
-function updateCrowdloan (crowdloan: CrowdloanJson): void {
-  store.dispatch({ type: 'crowdloan/update', payload: crowdloan });
-}
-
-function updateCurrentAccount (currentAcc: AccountJson | undefined): void {
-  store.dispatch({ type: 'currentAccount/updateAccount', payload: currentAcc });
-}
-
-function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo | undefined): void {
-  store.dispatch({ type: 'currentNetwork/updateNetwork', payload: currentNetwork });
+function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
+  store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
 export default function Popup (): React.ReactElement {
@@ -124,7 +113,7 @@ export default function Popup (): React.ReactElement {
       if (!selectedAcc) {
         selectedAcc = accounts[0];
         saveCurrentAccountAddress(selectedAcc.address).then(() => {
-          updateCurrentAccount(selectedAcc);
+          updateCurrentAccount(selectedAcc as AccountJson);
         }).catch((e) => {
           console.error('There is a problem when set Current Account', e);
         });
@@ -133,18 +122,6 @@ export default function Popup (): React.ReactElement {
       }
     }
   };
-
-  useEffect((): void => {
-    subscribePrice(null, updatePrice)
-      .then(updatePrice)
-      .catch(console.error);
-    subscribeBalance(null, updateBalance)
-      .then(updateBalance)
-      .catch(console.error);
-    subscribeCrowdloan(null, updateCrowdloan)
-      .then(updateCrowdloan)
-      .catch(console.error);
-  }, []);
 
   useEffect((): void => {
     Promise.all([
@@ -163,6 +140,8 @@ export default function Popup (): React.ReactElement {
     _onAction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useSetupStore();
 
   useEffect((): void => {
     setAccountCtx(initAccountContext(accounts || []));

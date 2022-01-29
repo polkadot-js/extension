@@ -11,13 +11,19 @@ const currentAccountSlice = createSlice({
   initialState,
   name: 'currentAccount',
   reducers: {
-    updateAccount (state, action: PayloadAction<AccountJson>) {
+    update(state, action: PayloadAction<AccountJson>) {
       const payload = action.payload;
+
+      for (let key in state) {
+        if (state.hasOwnProperty(key)) {
+          delete state[key];
+        }
+      }
 
       Object.assign(state, payload);
     }
   }
 });
 
-export const { updateAccount } = currentAccountSlice.actions;
+export const { update: updateCurrentAccount } = currentAccountSlice.actions;
 export default currentAccountSlice.reducer;

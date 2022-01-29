@@ -44,7 +44,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
 
         if (accountByAddress) {
           saveCurrentAccountAddress(address).then(() => {
-            store.dispatch({ type: 'currentAccount/updateAccount', payload: accountByAddress });
+            store.dispatch({ type: 'currentAccount/update', payload: accountByAddress });
           }).catch((e) => {
             console.error('There is a problem when set Current Account', e);
           });
@@ -55,7 +55,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
 
       closeSetting && closeSetting();
       onAction('/');
-    }, []);
+    }, [address]);
 
   return (
     <div

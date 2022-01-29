@@ -67,7 +67,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
           <KoniNextStepButton
             className='next-step-btn'
             data-button-action='add new root'
-            isBusy={true}
+            isBusy={isBusy}
             isDisabled={!password || !name}
             onClick={_onCreate}
           >

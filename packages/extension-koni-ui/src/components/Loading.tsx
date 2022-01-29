@@ -13,9 +13,10 @@ interface Props extends ThemeProps {
 
 function Loading({ className }: Props): React.ReactElement<Props> {
   return (
-    <div className={`${className} loading-layer`}><img src={AssetImageMap.loading} alt="Loading"/></div>
+    <div className={`${className} loading-layer`}>
+      <img src={AssetImageMap.loading} alt="Loading" className={'loading-img'} />
+    </div>
   );
 }
 
-export default React.memo(styled(Loading)(({ theme }: Props) => `
-`));
+export default React.memo(styled(Loading)(({ theme }: Props) => ``));

@@ -3,9 +3,7 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-
 import { TransactionHistoryItemType } from '@polkadot/extension-base/background/types';
-import { ChainRegistry } from '@polkadot/extension-koni-base/api/types';
 import arrowReceived from '@polkadot/extension-koni-ui/assets/arrow-received.svg';
 import arrowSend from '@polkadot/extension-koni-ui/assets/arrow-send.svg';
 import arrowSendError from '@polkadot/extension-koni-ui/assets/arrow-send-error.svg';
@@ -15,6 +13,7 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getBalances, toShort } from '@polkadot/extension-koni-ui/util';
 import { customFormatDate } from '@polkadot/extension-koni-ui/util/customFormatDate';
+import {ChainRegistry} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -150,23 +149,24 @@ export default React.memo(styled(TransactionHistoryItem)(({ theme }: Props) => `
 
   &:before {
     content: '';
-    left: 15px;
-    right: 15px;
-    bottom: 0;
+    left: 25px;
+    right: 25px;
     height: 1px;
     display: block;
+    bottom: 0;
+    position: absolute;
     background: ${theme.boxBorderColor};
   }
 
   .history-item__part-1 {
     display: flex;
-    padding-left: 15px;
+    padding-left: 25px;
     align-items: center;
     flex: 1;
   }
 
   .history-item__part-2 {
-    padding-right: 15px;
+    padding-right: 25px;
     display: flex;
     flex-direction: column;
     justify-content: center;

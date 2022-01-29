@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, BalanceItem, BalanceRPCResponse } from '@polkadot/extension-base/background/KoniTypes';
+import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 
@@ -20,31 +20,31 @@ export class KoniSubcription {
     this.initChainRegistrySubscription();
 
     state.getCurrentAccount(({ address }) => {
-      let unsubCrowdloans = this.initCrowdloanSubscription(address);
-
-      state.subscribeCurrentAccount().subscribe({
-        next: async ({ address }) => {
-          await unsubCrowdloans();
-          unsubCrowdloans = this.initCrowdloanSubscription(address);
-        }
-      });
-
       let unsubBalances = this.initBalanceSubscription(address);
 
       state.subscribeCurrentAccount().subscribe({
-        next: async ({ address }) => {
-          await unsubBalances();
+        next: ({ address }) => {
+          unsubBalances();
           unsubBalances = this.initBalanceSubscription(address);
+        }
+      });
+
+      let unsubCrowdloans = this.initCrowdloanSubscription(address);
+
+      state.subscribeCurrentAccount().subscribe({
+        next: ({ address }) => {
+          unsubCrowdloans();
+          unsubCrowdloans = this.initCrowdloanSubscription(address);
         }
       });
     });
   }
 
-  initChainRegistrySubscription() {
+  initChainRegistrySubscription () {
     Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
       const networkAPI = await apiProps.isReady;
 
-      const {chainDecimals, chainTokens} = networkAPI.api.registry;
+      const { chainDecimals, chainTokens } = networkAPI.api.registry;
 
       state.setChainRegistryItem(networkKey, {
         chainDecimals,
@@ -54,43 +54,18 @@ export class KoniSubcription {
   }
 
   initBalanceSubscription (address: string) {
-    const promiseList = Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
-      const networkAPI = await apiProps.isReady;
-
-      const {api} = networkAPI;
-
-      if (!api.tx || !api.tx.balances) {
-        state.setBalanceItem(networkKey, {
-          state: APIItemState.NOT_SUPPORT,
-          free: '0',
-          reserved: '0',
-          miscFrozen: '0',
-          feeFrozen: '0'
-        });
-
-        return null;
-      }
-
-      return api.query.system.account(address, ({ data }: BalanceRPCResponse) => {
-        const balanceItem = {
-          state: APIItemState.READY,
-          free: data.free?.toString() || '0',
-          reserved: data.reserved?.toString() || '0',
-          miscFrozen: data.miscFrozen?.toString() || '0',
-          feeFrozen: data.feeFrozen?.toString() || '0'
-        } as BalanceItem;
-
-        state.setBalanceItem(networkKey, balanceItem);
-      });
+    const subscriptionPromises = subscribeBalance(address, dotSamaAPIMap, (networkKey, rs) => {
+      state.setBalanceItem(networkKey, rs);
     });
 
-    return async () => {
-      const unsubList = await Promise.all(promiseList);
-
-      unsubList.forEach((unsub) => {
-        // @ts-ignore
-        unsub && unsub();
-      });
+    return () => {
+      Promise.all(subscriptionPromises)
+        .then((subscriptions) => {
+          subscriptions.forEach((unsub) => {
+            // @ts-ignore
+            unsub && unsub();
+          });
+        }).catch(console.error);
     };
   }
 
@@ -99,13 +74,13 @@ export class KoniSubcription {
       state.setCrowdloanItem(networkKey, rs);
     });
 
-    return async () => {
-      const unsubMap = await subscriptionPromise;
-
-      Object.values(unsubMap).forEach((unsub) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        unsub();
-      });
+    return () => {
+      subscriptionPromise.then((unsubMap) => {
+        Object.values(unsubMap).forEach((unsub) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          unsub && unsub();
+        });
+      }).catch(console.error);
     };
   }
 }

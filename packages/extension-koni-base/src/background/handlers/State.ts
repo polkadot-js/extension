@@ -56,9 +56,25 @@ export default class KoniState extends State {
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
 
-  //todo: persist data to store later
+  // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+
+  private lazyMap: Record<string, unknown> = {};
+
+  private lazyNext = (key: string, callback: () => void) => {
+    if (this.lazyMap[key]) {
+      // @ts-ignore
+      clearTimeout(this.lazyMap[key]);
+    }
+
+    const lazy = setTimeout(() => {
+      callback();
+      clearTimeout(lazy);
+    }, 300);
+
+    this.lazyMap[key] = lazy;
+  };
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
     this.currentAccountStore.get('CurrentAccountInfo', update);
@@ -86,7 +102,9 @@ export default class KoniState extends State {
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
-    this.balanceSubject.next(this.getBalance());
+    this.lazyNext('setBalanceItem', () => {
+      this.balanceSubject.next(this.getBalance());
+    });
   }
 
   public subscribeBalance () {
@@ -99,7 +117,9 @@ export default class KoniState extends State {
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
     this.crowdloanMap[networkKey] = item;
-    this.crowdloanSubject.next(this.getCrowdloan());
+    this.lazyNext('setCrowdloanItem', () => {
+      this.crowdloanSubject.next(this.getCrowdloan());
+    });
   }
 
   public subscribeCrowdloan () {
@@ -112,7 +132,9 @@ export default class KoniState extends State {
 
   public setChainRegistryItem (networkKey: string, registry: ChainRegistry) {
     this.chainRegistryMap[networkKey] = registry;
-    this.chainRegistrySubject.next(this.getChainRegistryMap());
+    this.lazyNext('setChainRegistry', () => {
+      this.chainRegistrySubject.next(this.getChainRegistryMap());
+    });
   }
 
   public subscribeChainRegistryMap () {

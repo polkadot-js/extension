@@ -22,11 +22,11 @@
     "@polkadot/extension-ui": "^0.42.8-1"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.65.46",
+    "@polkadot/dev": "^0.65.47",
     "babel-loader": "^8.2.3",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
-    "copy-webpack-plugin": "^10.2.2",
+    "copy-webpack-plugin": "^10.2.4",
     "crypto-browserify": "^3.12.0",
     "extract-loader": "^5.1.0",
     "file-loader": "^6.2.0",
@@ -36,7 +36,7 @@
     "stream-browserify": "^3.0.0",
     "thread-loader": "^3.0.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.67.0",
+    "webpack": "^5.68.0",
     "webpack-cli": "^4.9.2",
     "webpack-extension-manifest-plugin": "^0.8.0"
   }

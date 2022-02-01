@@ -10,7 +10,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.42.8-1",
+  "version": "0.42.8-2",
   "workspaces": [
     "packages/*"
   ],

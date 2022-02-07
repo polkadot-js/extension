@@ -8,7 +8,6 @@ import { getBirdsKanariaByAccount, getItemsKanariaByAccount, getSingularByAccoun
 import { SERVER, SINGULAR_COLLECTION_ENDPOINT } from '@polkadot/extension-koni-base/api/rmrk_nft/config';
 
 import UniqueNftApi from './unique_nft';
-import {store} from "@polkadot/extension-koni-ui/stores";
 
 const parseIpfsLink = (ipfsLink: string) => {
   if (!ipfsLink.includes('ipfs://ipfs/')) return ipfsLink;
@@ -31,9 +30,6 @@ interface TokenData {
 }
 
 export const handleUniqueNfts = async (account: string): Promise<any> => {
-  const currentAccount = store.getState().currentAccount.account;
-  console.log(currentAccount)
-
   if (!account) return [];
 
   const api = new UniqueNftApi();
@@ -215,3 +211,4 @@ export const getAllNftsByAccount = async (account: string): Promise<NftJson> => 
     throw e;
   }
 };
+

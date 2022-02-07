@@ -45,9 +45,6 @@ export default function useAccountBalance(currentNetworkKey: string,
     staking: stakingReducer
   } = useSelector((state: RootState) => state);
 
-  console.log('hopefully', nftReducer)
-  console.log(stakingReducer)
-
   const balanceMap = balanceReducer.details;
   const crowdLoanMap = crowdloanReducer.details;
   const {priceMap} = priceReducer;

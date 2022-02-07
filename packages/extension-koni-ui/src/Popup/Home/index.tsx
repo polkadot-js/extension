@@ -258,7 +258,7 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
         )}
 
         {activatedTab === 2 && (
-          <NftContainer />
+          <NftContainer nftData={nftData}/>
         )}
 
         {activatedTab === 3 && (

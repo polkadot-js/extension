@@ -9,7 +9,6 @@ import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
-import NftStore from "@polkadot/extension-koni-base/stores/Nft";
 
 export interface StakingItem {
   name: string,
@@ -253,13 +252,14 @@ export type RequestBalance = null
 export type RequestSubscribeBalance = null
 export type RequestCrowdloan = null
 export type RequestSubscribeCrowdloan = null
+export type RequestSubscribeNft = null
 
 export interface KoniRequestSignatures {
   'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(staking.getStaking)': [string, StakingJson]
   'pri(staking.getSubscription)': [string, StakingJson, StakingJson]
   'pri(nft.getNft)': [string, NftJson],
-  'pri(nft.getSubscription)': [string, NftJson, NftJson]
+  'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson]
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],
   'pri(balance.getBalance)': [RequestBalance, BalanceJson],

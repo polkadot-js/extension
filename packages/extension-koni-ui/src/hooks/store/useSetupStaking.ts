@@ -9,12 +9,9 @@ function updateStaking (stakingData: StakingJson): void {
 
 export default function useSetupStaking (): void {
   useEffect((): void => {
-    const currentAccount = store.getState().currentAccount.account;
-    if (currentAccount) {
-      console.log('--- Setup redux: staking');
-      subscribeStaking(currentAccount.address, updateStaking)
-        .then(updateStaking)
-        .catch(console.error);
-    }
+    console.log('--- Setup redux: staking');
+    // subscribeStaking(null, updateStaking)
+    //   .then(updateStaking)
+    //   .catch(console.error);
   }, []);
 }

@@ -18,7 +18,7 @@ import {
   NftJson,
   PriceJson,
   RequestSubscribeBalance,
-  RequestSubscribeCrowdloan,
+  RequestSubscribeCrowdloan, RequestSubscribeNft,
   RequestSubscribePrice,
   StakingJson,
   TransactionHistoryItemType
@@ -327,8 +327,8 @@ export async function getNft (account: string): Promise<NftJson> {
   return sendMessage('pri(nft.getNft)', account);
 }
 
-export async function subscribeNft (account: string, callback: (nftData: NftJson) => void): Promise<NftJson> {
-  return sendMessage('pri(nft.getSubscription)', account, callback);
+export async function subscribeNft (request: RequestSubscribeNft, callback: (nftData: NftJson) => void): Promise<NftJson> {
+  return sendMessage('pri(nft.getSubscription)', request, callback);
 }
 
 export async function getStaking (account: string): Promise<StakingJson> {

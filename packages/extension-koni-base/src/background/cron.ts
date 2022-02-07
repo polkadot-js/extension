@@ -5,7 +5,13 @@ import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_PRICE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import {
+  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
+  CRON_REFRESH_NFT_INTERVAL,
+  CRON_REFRESH_PRICE_INTERVAL
+} from '@polkadot/extension-koni-base/constants';
+import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
+import {store} from "@polkadot/extension-koni-ui/stores";
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -45,6 +51,7 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL);
+    this.addCron('refreshNft', this.refreshNft, CRON_REFRESH_NFT_INTERVAL);
   }
 
   recoverAPI () {
@@ -60,6 +67,17 @@ export class KoniCron {
       .then((rs) => {
         state.setPrice(rs, () => {
           console.log('Get Token Price From CoinGecko');
+        });
+      })
+      .catch((err) => console.log(err));
+  }
+
+  async refreshNft() {
+    const currentAccount = await state.getAccountAddress()
+    getAllNftsByAccount('CmNYnM3pStTCKgXq67Cp8rURA6GTfdfseJx7posbg2vJVHQ')
+      .then((rs) => {
+        state.setNft(rs, () => {
+          console.log(`Fetched nft for address ${currentAccount}`);
         });
       })
       .catch((err) => console.log(err));

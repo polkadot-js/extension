@@ -10,12 +10,9 @@ function updateNft (nftData: NftJson): void {
 
 export default function useSetupNft (): void {
   useEffect((): void => {
-    const currentAccount = store.getState().currentAccount.account;
-    if (currentAccount) {
-      console.log('--- Setup redux: nft');
-      subscribeNft(currentAccount.address, updateNft)
-        .then(updateNft)
-        .catch(console.error);
-    }
+    console.log('--- Setup redux: nft');
+    subscribeNft(null, updateNft)
+      .then(updateNft)
+      .catch(console.error);
   }, []);
 }

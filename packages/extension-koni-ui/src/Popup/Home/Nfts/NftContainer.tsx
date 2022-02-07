@@ -11,8 +11,7 @@ import styled from 'styled-components';
 
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import { getNft } from '@polkadot/extension-koni-ui/messaging';
-import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { RootState} from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import NftCollectionPreview from './NftCollectionPreview';
@@ -20,11 +19,10 @@ import EmptyList from "@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList";
 
 interface Props {
   className?: string;
+  nftData: any;
 }
 
-function NftContainer ({ className }: Props): React.ReactElement<Props> {
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
-  // const nftStore = useSelector((state: RootState) => state.nft)
+function NftContainer ({ className, nftData }: Props): React.ReactElement<Props> {
   const [nftJson, setNftJson] = useState();
   const [nftList, setNftList] = useState();
   const [loading, setLoading] = useState(false);
@@ -34,38 +32,26 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(9);
   const [currentNftList, setCurrentNftList] = useState();
+  const {
+    nft: nftReducer,
+  } = useSelector((state: RootState) => state);
 
-  const _onCreate = useCallback(
-    (): void => {
-      console.log('here')
-      if (currentAccount.account && currentAccount.account.address) {
-        console.log('handling')
-        setLoading(true);
-        getNft(currentAccount.account.address).then((r) => {
-          // @ts-ignore
-          setNftJson(r);
-          const nftList = r?.nftList;
-          const total = nftList.length;
-          // @ts-ignore
-          setNftList(nftList);
-          setTotalCollection(total);
-          // @ts-ignore
-          setCurrentNftList(nftList.slice(0, total > 9 ? 9 : total));
-          store.dispatch({ type: 'nft', payload: r });
-          setLoading(false);
-        }).catch((e) => {
-          console.error('There is a problem getting NFTs', e);
-        });
-      } else {
-        console.error('There is a problem getting NFTs');
-      }
-    },
-    [currentAccount]
-  );
+  console.log('here', nftReducer)
+
+  const _onCreate = (): void => {
+    setLoading(true);
+    const nftList = nftData?.nftList;
+    const total = nftList.length;
+    setNftJson(nftData);
+    setNftList(nftList);
+    setTotalCollection(total);
+    setCurrentNftList(nftList.slice(0, total > 9 ? 9 : total));
+    setLoading(false);
+  }
 
   useEffect(() => {
     _onCreate();
-  }, [currentAccount]);
+  }, []);
 
   const handleShowCollectionDetail = (data: any) => {
     setShowCollectionDetail(true);

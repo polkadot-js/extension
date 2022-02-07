@@ -14,11 +14,13 @@ import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBal
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { toShort } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
+import { Loading } from '@polkadot/extension-koni-ui/components';
 
 interface Props extends ThemeProps {
   className?: string;
   accountInfo: AccountInfoByNetwork;
   balanceInfo: BalanceInfo;
+  isLoading: boolean;
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
@@ -28,7 +30,13 @@ interface Props extends ThemeProps {
   }) => void;
 }
 
-function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
+function ChainBalanceItem ({
+                             accountInfo,
+                             balanceInfo,
+                             className,
+                             setQrModalOpen,
+                             isLoading,
+                             setQrModalProps }: Props): React.ReactElement<Props> {
   const { address, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const [toggleDetail, setToggleDetail] = useState(false);
   const { show } = useToast();
@@ -93,28 +101,36 @@ function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen
           </div>
         </div>
 
-        <div className='chain-balance-item__main-area-part-2'>
-          <div className='chain-balance-item__balance'>
-            <BalanceVal
-              symbol={balanceInfo.symbol}
-              value={balanceInfo.balanceValue}
-            />
+        {isLoading && (
+          <div className='chain-balance-item__main-area-part-2'>
+            <Loading />
           </div>
-          <div className='chain-balance-item__value'>
-            <BalanceVal
-              startWithSymbol
-              symbol={'$'}
-              value={balanceInfo.convertedBalanceValue}
-            />
-          </div>
+        )}
 
-          {(!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
-            <div className='chain-balance-item__toggle' />
-          )}
-        </div>
+        {!isLoading && (
+          <div className='chain-balance-item__main-area-part-2'>
+            <div className='chain-balance-item__balance'>
+              <BalanceVal
+                symbol={balanceInfo.symbol}
+                value={balanceInfo.balanceValue}
+              />
+            </div>
+            <div className='chain-balance-item__value'>
+              <BalanceVal
+                startWithSymbol
+                symbol={'$'}
+                value={balanceInfo.convertedBalanceValue}
+              />
+            </div>
+
+            {(!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
+              <div className='chain-balance-item__toggle' />
+            )}
+          </div>
+        )}
       </div>
 
-      {toggleDetail && !!balanceInfo.detailBalances.length && (
+      {!isLoading && toggleDetail && !!balanceInfo.detailBalances.length && (
         <>
           <div className='chain-balance-item__separator' />
           <div className='chain-balance-item__detail-area'>
@@ -128,7 +144,7 @@ function ChainBalanceItem ({ accountInfo, balanceInfo, className, setQrModalOpen
         </>
       )}
 
-      {toggleDetail && !!balanceInfo.childrenBalances.length && (
+      {!isLoading && toggleDetail && !!balanceInfo.childrenBalances.length && (
         <>
           <div className='chain-balance-item__separator' />
           <div className='chain-balance-item__detail-area'>
@@ -184,6 +200,16 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
     padding-right: 48px;
     text-align: right;
     cursor: pointer;
+    min-width: 80px;
+
+    .loading-img.loading-img {
+      width: 32px;
+      height: 32px;
+      border-width: 4px;
+      border-color: transparent;
+      border-left-color: ${theme.textColor2};
+      display: block;
+    }
   }
 
   .chain-balance-item__logo {

@@ -4,17 +4,20 @@
 import BigN from 'bignumber.js';
 import React from 'react';
 import styled from 'styled-components';
-
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
-import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { BalanceValueType, BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
+import {CrowdloanItemType} from '@polkadot/extension-koni-ui/Popup/Home/types';
+import {ThemeProps} from '@polkadot/extension-koni-ui/types';
+import {BN_ZERO, getLogoByNetworkKey} from '@polkadot/extension-koni-ui/util';
 
 import CrowdloanEmptyList from './EmptyList';
+import {CrowdloanContributeValueType} from "@polkadot/extension-koni-ui/hooks/screen/home/types";
+import {NetWorkMetadataDef} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   className?: string;
+  networkKeys: string[];
+  crowdloanContributeMap: Record<string, CrowdloanContributeValueType>;
+  networkMetadataMap: Record<string, NetWorkMetadataDef>;
 }
 
 interface ContentProp {
@@ -27,77 +30,63 @@ const GroupDisplayNameMap: Record<string, string> = {
   KUSAMA_PARACHAIN: 'Kusama\'s parachain'
 };
 
-function getItem (networkKey: string, contributeValueInfo: BalanceValueType): CrowdloanItemType {
-  const networkInfo = NETWORKS[networkKey];
-  const groupDisplayName = GroupDisplayNameMap[networkInfo.group] || '';
+function getItem (
+  networkKey: string,
+  contributeValueInfo: CrowdloanContributeValueType,
+  networkMetadata: NetWorkMetadataDef
+): CrowdloanItemType {
+  const groupDisplayName = GroupDisplayNameMap[networkMetadata.group] || '';
   const { balanceValue,
     convertedBalanceValue,
-    symbol } = contributeValueInfo;
+    symbol } = contributeValueInfo.contribute;
 
   return {
     contribute: balanceValue,
     contributeToUsd: convertedBalanceValue,
     logo: getLogoByNetworkKey(networkKey),
-    networkDisplayName: networkInfo.chain,
+    networkDisplayName: networkMetadata.chain,
     networkKey,
     symbol,
     groupDisplayName,
-    crowdloanStatus: 'Active'
+    paraState: contributeValueInfo.paraState
   };
 }
 
-function getItems (networkKeys: string[], crowdloanContributeMap: Record<string, BalanceValueType>, includeZeroBalance = false): CrowdloanItemType[] {
+function getItems (
+  networkKeys: string[],
+  crowdloanContributeMap: Record<string, CrowdloanContributeValueType>,
+  networkMetadataMap: Record<string, NetWorkMetadataDef>,
+  includeZeroBalance = false): CrowdloanItemType[] {
   const result: CrowdloanItemType[] = [];
 
   networkKeys.forEach((n) => {
-    const contributeValueInfo: BalanceValueType = crowdloanContributeMap[n] ||
-      { balanceValue: new BigN(0), convertedBalanceValue: new BigN(0) };
+    const networkMetadata = networkMetadataMap[n];
 
-    if (!includeZeroBalance && !BN_ZERO.lt(new BigN(contributeValueInfo.convertedBalanceValue))) {
+    if (!networkMetadata) {
       return;
     }
 
-    result.push(getItem(n, contributeValueInfo));
+    const contributeValueInfo: CrowdloanContributeValueType = crowdloanContributeMap[n] ||
+      {
+        contribute: {
+          balanceValue: new BigN(0),
+          convertedBalanceValue: new BigN(0),
+          symbol: 'Unit'
+        }
+      };
+
+    if (!includeZeroBalance && !BN_ZERO.lt(new BigN(contributeValueInfo.contribute.balanceValue))) {
+      return;
+    }
+
+    result.push(getItem(n, contributeValueInfo, networkMetadata));
   });
 
   return result;
 }
 
-const mockCrowdloanContributeMap: Record<string, BalanceValueType> = {
-
-};
-
-function getmockCrowdloanContributeMap (networkKeys: string[]): Record<string, BalanceValueType> {
-  const result: Record<string, BalanceValueType> = {};
-
-  networkKeys.forEach((n) => {
-    result[n] = {
-      balanceValue: new BigN(50),
-      convertedBalanceValue: new BigN(50),
-      symbol: 'DOT'
-
-    };
-  });
-
-  return result;
-}
-
-function Wrapper ({ className }: Props): React.ReactElement<Props> {
-  const mockNetworks = [
-    'statemint',
-    'acala',
-    'moonbeam',
-    'clover',
-    'hydradx',
-    'statemine',
-    'karura',
-    'moonriver',
-    'shiden',
-    'khala',
-    'bifrost'
-  ];
-
-  const items: CrowdloanItemType[] = getItems(mockNetworks, getmockCrowdloanContributeMap(mockNetworks));
+function Wrapper ({ className, networkKeys, crowdloanContributeMap, networkMetadataMap }: Props): React.ReactElement<Props> {
+  const items: CrowdloanItemType[] = getItems(networkKeys, crowdloanContributeMap, networkMetadataMap);
 
   if (!items.length) {
     return <CrowdloanEmptyList />;
@@ -111,7 +100,7 @@ function Wrapper ({ className }: Props): React.ReactElement<Props> {
 
 function Crowdloans ({ className, items }: ContentProp): React.ReactElement<ContentProp> {
   return (
-    <div className={`crowdloan-items-container ${className || ''}`}>
+    <div className={`crowdloan-items-container ${className? className : ''}`}>
       {items.map((item) => (
         <CrowdloanItem
           item={item}

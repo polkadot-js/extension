@@ -66,7 +66,7 @@ function Output ({ children, className = '', help, isDisabled, isError, isFull, 
 
       <CopyToClipboard text={(value && value) || ''}>
         <div
-          className={'output__copy-btn'}
+          className={'kn-copy-btn'}
           onClick={_onCopy}
         >
           {theme === 'dark'
@@ -100,7 +100,7 @@ export default React.memo(styled(Output)(({ theme }: ThemeProps) => `
     color: ${theme.textColor2};
   }
 
-  .outpput__copy-btn {
+  .kn-copy-btn {
     width: 48px;
     height: 48px;
     position: absolute;

@@ -129,6 +129,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
 
 export default withRouter(styled(KoniExportAccount)(({ theme }: Props) => `
   margin: 0 15px;
+  padding-top: 25px;
 
   .export__password-area {
     padding-top: 13px;

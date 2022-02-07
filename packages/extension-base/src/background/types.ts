@@ -11,7 +11,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
+import { CurrentNetworkInfo, KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
@@ -67,14 +67,6 @@ export type AccountsContext = {
 export type CurrentAccContext = {
   currentAccount: AccountJson | null;
   setCurrentAccount: (account: AccountJson | null) => void;
-}
-
-export type CurrentNetworkInfo = {
-  networkKey: string;
-  networkPrefix: number;
-  icon: string;
-  genesisHash: string;
-  isEthereum: boolean;
 }
 
 export type AccNetworkContext = {
@@ -183,10 +175,6 @@ export interface TransportRequestMessage<TMessageType extends MessageTypes> {
 
 export interface RequestAuthorizeTab {
   origin: string;
-}
-
-export interface RequestApi {
-  networkKey: string;
 }
 
 export interface RequestAuthorizeApprove {
@@ -450,30 +438,4 @@ export interface ResponseJsonGetAccountInfo {
 
 export interface ResponseAuthorizeList {
   list: AuthUrls;
-}
-
-export interface TransactionHistoryItemType {
-  time: number;
-  networkKey: string;
-  change: string;
-  fee?: string;
-  isSuccess: boolean;
-  action: 'send' | 'received';
-  extrinsicHash: string
-}
-
-export interface RequestTransactionHistoryGet {
-  address: string;
-  networkKey: string;
-}
-
-export interface RequestTransactionHistoryGetByMultiNetworks {
-  address: string;
-  networkKeys: string[];
-}
-
-export interface RequestTransactionHistoryAdd {
-  address: string;
-  networkKey: string;
-  item: TransactionHistoryItemType;
 }

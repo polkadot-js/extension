@@ -21,5 +21,5 @@ const balanceSlice = createSlice({
   }
 });
 
-export const { update } = balanceSlice.actions;
+export const { update: updateBalance } = balanceSlice.actions;
 export default balanceSlice.reducer;

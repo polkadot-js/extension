@@ -14,9 +14,7 @@ interface Props {
 function LoadingContainer ({ children, className }: Props): React.ReactElement<Props> {
   if (!children) {
     return (
-      <div className={className}>
-        <Loading />
-      </div>
+        <Loading className={className} />
     );
   }
 

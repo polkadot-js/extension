@@ -9,11 +9,25 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribePrice, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  NetWorkMetadataDef,
+  NftJson,
+  PriceJson,
+  RequestSubscribeBalance,
+  RequestSubscribeCrowdloan,
+  RequestSubscribePrice,
+  StakingJson,
+  TransactionHistoryItemType
+} from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -291,6 +305,22 @@ export async function subscribeChainRegistry (callback: (map: Record<string, Cha
 
 export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
   return sendMessage('pri(networkMetadata.list)');
+}
+
+export async function getTransactionHistory (address: string, networkKey: string, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.get)', { address, networkKey }, callback);
+}
+
+export async function getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.getByMultiNetwork)', { address, networkKeys }, callback);
+}
+
+export async function updateTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.add)', { address, networkKey, item }, callback);
+}
+
+export async function initApi (networkKey: string): Promise<ApiInitStatus> {
+  return sendMessage('pri(api.init)', { networkKey });
 }
 
 export async function getNft (account: string): Promise<NftJson> {

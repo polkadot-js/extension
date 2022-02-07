@@ -3,9 +3,9 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { CurrentNetworkInfo } from '@polkadot/extension-base/background/types';
+import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
 
-const initialState = {
+const initialState: CurrentNetworkInfo = {
   networkPrefix: -1,
   icon: 'polkadot',
   genesisHash: '',
@@ -17,7 +17,7 @@ const currentNetworkSlice = createSlice({
   initialState,
   name: 'currentNetwork',
   reducers: {
-    updateNetwork (state, action: PayloadAction<CurrentNetworkInfo>) {
+    update (state, action: PayloadAction<CurrentNetworkInfo>) {
       const payload = action.payload;
 
       state.networkPrefix = payload.networkPrefix;
@@ -29,5 +29,5 @@ const currentNetworkSlice = createSlice({
   }
 });
 
-export const { updateNetwork } = currentNetworkSlice.actions;
+export const { update: updateCurrentNetwork } = currentNetworkSlice.actions;
 export default currentNetworkSlice.reducer;

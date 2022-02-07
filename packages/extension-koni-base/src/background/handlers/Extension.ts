@@ -3,10 +3,11 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestApi, RequestTransactionHistoryAdd, RequestTransactionHistoryGet, RequestTransactionHistoryGetByMultiNetworks, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import { ApiInitStatus, initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { state } from '@polkadot/extension-koni-base/background/handlers/index';
+import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
@@ -15,6 +16,8 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+
+const bWindow = window as unknown as BackgroundWindow;
 
 const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 
@@ -304,10 +307,13 @@ export default class KoniExtension extends Extension {
     const result: NetWorkMetadataDef[] = [];
 
     Object.keys(NETWORKS).forEach((networkKey) => {
-      const { chain, genesisHash, group, icon, isEthereum, ss58Format } = NETWORKS[networkKey];
+      const { chain, genesisHash, group, icon, isEthereum, paraId, ss58Format } = NETWORKS[networkKey];
 
+      let isAvailable = true;
+
+      // todo: add more logic in further update
       if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
-        return;
+        isAvailable = false;
       }
 
       result.push({
@@ -317,16 +323,78 @@ export default class KoniExtension extends Extension {
         icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
         ss58Format,
         group,
-        isEthereum: !!isEthereum
+        isEthereum: !!isEthereum,
+        paraId,
+        isAvailable
       });
     });
 
     return result;
   }
 
+  private apiInit ({ networkKey }: RequestApi): ApiInitStatus {
+    const { apisMap } = bWindow.pdotApi;
+
+    if (!rpcsMap.hasOwnProperty(networkKey) || !rpcsMap[networkKey]) {
+      return ApiInitStatus.NOT_SUPPORT;
+    }
+
+    if (apisMap[networkKey]) {
+      return ApiInitStatus.ALREADY_EXIST;
+    }
+
+    apisMap[networkKey] = initApi(rpcsMap[networkKey]);
+
+    return ApiInitStatus.SUCCESS;
+  }
+
+  private getTransactionHistoryByMultiNetworks ({ address, networkKeys }: RequestTransactionHistoryGetByMultiNetworks, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(transaction.history.getByMultiNetwork)'>(id, port);
+
+    state.getTransactionHistoryByMultiNetworks(address, networkKeys, (items) => {
+      cb(items);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private getTransactionHistory ({ address, networkKey }: RequestTransactionHistoryGet, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(transaction.history.get)'>(id, port);
+
+    state.getTransactionHistory(address, networkKey, (items) => {
+      cb(items);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private updateTransactionHistory ({ address, item, networkKey }: RequestTransactionHistoryAdd, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(transaction.history.add)'>(id, port);
+
+    state.setTransactionHistory(address, networkKey, item, (items) => {
+      cb(items);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
+      case 'pri(api.init)':
+        return this.apiInit(request as RequestApi);
       case 'pri(accounts.create.suriV2)':
         return this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
       case 'pri(accounts.getAllWithCurrentAddress)':
@@ -359,6 +427,12 @@ export default class KoniExtension extends Extension {
         return await this.getNft(request as string);
       case 'pri(staking.getStaking)':
         return await this.getStaking(request as string);
+      case 'pri(transaction.history.add)':
+        return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
+      case 'pri(transaction.history.get)':
+        return this.getTransactionHistory(request as RequestTransactionHistoryGet, id, port);
+      case 'pri(transaction.history.getByMultiNetwork)':
+        return this.getTransactionHistoryByMultiNetworks(request as RequestTransactionHistoryGetByMultiNetworks, id, port);
       default:
         return super.handle(id, type, request, port);
     }

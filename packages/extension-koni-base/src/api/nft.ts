@@ -1,11 +1,11 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import fetch from 'node-fetch';
 
+import { NftCollection, NftItem, NftJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getBirdsKanariaByAccount, getItemsKanariaByAccount, getSingularByAccount } from '@polkadot/extension-koni-base/api/rmrk_nft';
 import { SERVER, SINGULAR_COLLECTION_ENDPOINT } from '@polkadot/extension-koni-base/api/rmrk_nft/config';
-import { NftCollection, NftItem, NftJson } from '@polkadot/extension-koni-base/stores/types';
 
 import UniqueNftApi from './unique_nft';
 
@@ -38,21 +38,22 @@ export const handleUniqueNfts = async (account: string): Promise<any> => {
 
   const collectionCount = await api.getCollectionCount();
 
-  let data: NftIdList[] = [];
-  let allCollections: NftCollection[] = [];
+  const data: NftIdList[] = [];
+  const allCollections: NftCollection[] = [];
 
-  let addressTokenDict: any[] = []
+  const addressTokenDict: any[] = [];
 
   for (let i = 0; i < collectionCount; i++) {
-    addressTokenDict.push({i, account})
+    addressTokenDict.push({ i, account });
   }
 
   await Promise.all(addressTokenDict.map(async (item) => {
     const rs = await api.getAddressTokens(item.i, item.account);
+
     if (rs && rs.length > 0) { data.push({ collectionId: item.i, nfts: rs }); }
   }));
 
-  let total = 0
+  let total = 0;
 
   for (let j = 0; j < data.length; j++) {
     const nftItems: NftItem[] = [];
@@ -60,7 +61,8 @@ export const handleUniqueNfts = async (account: string): Promise<any> => {
     const nfts = data[j].nfts;
     let collectionName = '';
     let collectionImage = '';
-    total += nfts.length
+
+    total += nfts.length;
 
     for (let i = 0; i < nfts.length; i++) {
       const tokenId = nfts[i];
@@ -91,11 +93,11 @@ export const handleUniqueNfts = async (account: string): Promise<any> => {
       collectionName: collectionName,
       image: collectionImage,
       nftItems: nftItems
-    } as NftCollection)
+    } as NftCollection);
   }
 
-  return {total, allCollections};
-}
+  return { total, allCollections };
+};
 
 export const handleRmrkNfts = async (account: string): Promise<any> => {
   if (!account) return;
@@ -177,8 +179,6 @@ export const handleRmrkNfts = async (account: string): Promise<any> => {
       } as NftCollection;
     });
 
-    console.log(allCollections);
-
     // should return list of NftCollection
     return { total: allNfts.length, allCollections };
   } catch (e) {
@@ -190,18 +190,18 @@ export const handleRmrkNfts = async (account: string): Promise<any> => {
 // should get all nfts from all sources
 export const getAllNftsByAccount = async (account: string): Promise<NftJson> => {
   try {
-    console.log('Getting nfts for ', account)
+    console.log('Getting nfts for ', account);
     // @ts-ignore
     const _rmrkNfts = handleRmrkNfts(account);
     const _uniqueNfts = handleUniqueNfts(account);
     const [rmrkNfts, uniqueNfts] = await Promise.all([_rmrkNfts, _uniqueNfts]);
-    let total = rmrkNfts.total + uniqueNfts.total;
-    let allCollections = [...rmrkNfts.allCollections, ...uniqueNfts.allCollections]
+    const total = rmrkNfts.total + uniqueNfts.total;
+    const allCollections = [...rmrkNfts.allCollections, ...uniqueNfts.allCollections];
 
     // const [rmrkNfts] = await Promise.all([_rmrkNfts]);
     // let total = rmrkNfts.total;
     // let allCollections = [...rmrkNfts.allCollections]
-
+    console.log(`Fetched ${total} nfts`)
     return {
       total,
       nftList: allCollections

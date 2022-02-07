@@ -49,24 +49,24 @@ export default React.memo(styled(ChainBalanceItemRow)(({ theme }: Props) => `
   }
 
   .chain-balance-item-row__col-1 {
-    flex-grow: 4.18;
-    max-width: 41.8%;
+    flex-grow: 4.3;
+    max-width: 43%;
     padding-left: 69px;
-    padding-right: 7.5px;
+    padding-right: 4px;
   }
 
   .chain-balance-item-row__col-2 {
-    flex-grow: 2.91;
-    max-width: 29.1%;
-    padding-left: 7.5px;
-    padding-right: 7.5px;
+    flex-grow: 2.85;
+    max-width: 28.5%;
+    padding-left: 4px;
+    padding-right: 4px;
     text-align: right;
   }
 
   .chain-balance-item-row__col-3 {
-    flex-grow: 2.91;
-    max-width: 29.1%;
-    padding-left: 7.5px;
+    flex-grow: 2.85;
+    max-width: 28.5%;
+    padding-left: 4px;
     padding-right: 25px;
     text-align: right;
   }

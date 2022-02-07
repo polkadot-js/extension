@@ -100,5 +100,6 @@ export default styled(AuthManagement)`
 
   .empty-list {
     text-align: center;
+    padding-top: 10px;
   }
 `;

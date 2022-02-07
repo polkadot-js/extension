@@ -27,9 +27,12 @@ function AuthTransaction ({ className, extrinsic, onCancel, requestAddress }: Pr
   const [isRenderError, toggleRenderError] = useToggle();
   const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: requestAddress, signPassword: '' }));
   const [isBusy, setBusy] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [callHash, setCallHash] = useState<string | null>(null);
-  const [tip, setTip] = useState(BN_ZERO);
+  // const [passwordError, setPasswordError] = useState<string | null>(null);
+  // const [callHash, setCallHash] = useState<string | null>(null);
+  // const [tip, setTip] = useState(BN_ZERO);
+
+  const passwordError = null;
+  const [, setTip] = useState(BN_ZERO);
 
   const _onCancel = useCallback(() => {
     onCancel();

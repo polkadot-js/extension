@@ -1,4 +1,4 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { getBalances } from '@polkadot/extension-koni-base/api/rpc_api/index';

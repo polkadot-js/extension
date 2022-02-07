@@ -11,7 +11,7 @@ import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@polkadot/extension-koni-base/
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
 function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddress: string, callback: (rs: CrowdloanItem) => void) {
-  return parentAPI.api.derive.crowdloan.ownContributions(paraId, [hexAddress], (result: DeriveOwnContributions) => {
+  const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, [hexAddress], (result: DeriveOwnContributions) => {
     const rs: CrowdloanItem = {
       state: APIItemState.READY,
       contribute: result[hexAddress]?.toString() || '0'
@@ -19,6 +19,14 @@ function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddress: stri
 
     callback(rs);
   });
+
+  return () => {
+    unsubPromise
+      .then((unsub) => {
+        unsub();
+      })
+      .catch(console.error);
+  };
 }
 
 export const subcribleAcalaContributeInterval = (polkadotAddress: string, callback: (rs: CrowdloanItem) => void) => {

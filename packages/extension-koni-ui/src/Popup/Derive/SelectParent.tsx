@@ -207,6 +207,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
 }
 
 export default styled(React.memo(SelectParent))`
+  padding-top: 25px;
   margin: 0 15px;
 
   .next-step-btn {

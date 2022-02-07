@@ -15,7 +15,7 @@ export type AccountInfoByChain = {
 }
 
 export type AccountInfoItem = {
-  network: string;
+  networkKey: string;
   tokenDecimals: number[];
   tokenSymbol: string[];
   info: Record<string, AccountInfoByChain>;

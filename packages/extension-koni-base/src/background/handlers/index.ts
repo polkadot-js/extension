@@ -8,11 +8,38 @@ import KoniExtension from '@polkadot/extension-koni-base/background/handlers/Ext
 import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
 import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
 import { assert } from '@polkadot/util';
+import {BackgroundWindow} from "@polkadot/extension-base/background/KoniTypes";
+import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 
 export const state = new KoniState();
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
+
+function getRpcsMap(): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  Object.keys(NETWORKS).forEach(networkKey => {
+    const networkInfo = NETWORKS[networkKey];
+
+    if (!networkInfo.genesisHash || networkInfo.genesisHash.toLowerCase() === 'unknown') {
+      return;
+    }
+
+    result[networkKey] = networkInfo.provider;
+  });
+
+  return result;
+}
+
+export const rpcsMap: Record<string, string> = getRpcsMap();
+
+export function initBackgroundWindow(keyring: any) {
+  (window as any as BackgroundWindow).pdotApi = {
+    keyring,
+    apisMap: dotSamaAPIMap
+  };
+}
 
 export default function handlers<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
   const isExtension = port.name === extensionPortName;

@@ -4,7 +4,7 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
@@ -12,7 +12,7 @@ import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/stakin
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import NftStore from '@polkadot/extension-koni-base/stores/Nft';
 import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
-import { NftJson, PriceJson, StakingJson } from '@polkadot/extension-koni-base/stores/types';
+import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -49,6 +49,8 @@ export default class KoniState extends State {
   private readonly nftStore = new NftStore();
   private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
+  private readonly transactionHistoryStore = new TransactionHistoryStore();
+
   private nftStoreReady = false;
   private stakingStoreReady = false;
   // Todo: Persist data to balanceStore later
@@ -58,9 +60,25 @@ export default class KoniState extends State {
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
 
-  // todo: persist data to store later
+  // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+
+  private lazyMap: Record<string, unknown> = {};
+
+  private lazyNext = (key: string, callback: () => void) => {
+    if (this.lazyMap[key]) {
+      // @ts-ignore
+      clearTimeout(this.lazyMap[key]);
+    }
+
+    const lazy = setTimeout(() => {
+      callback();
+      clearTimeout(lazy);
+    }, 300);
+
+    this.lazyMap[key] = lazy;
+  };
 
   public getStaking (account: string, update: (value: StakingJson) => void): void {
     this.stakingStore.get('StakingData', (rs) => {
@@ -140,7 +158,9 @@ export default class KoniState extends State {
 
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
-    this.balanceSubject.next(this.getBalance());
+    this.lazyNext('setBalanceItem', () => {
+      this.balanceSubject.next(this.getBalance());
+    });
   }
 
   public subscribeBalance () {
@@ -153,7 +173,9 @@ export default class KoniState extends State {
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
     this.crowdloanMap[networkKey] = item;
-    this.crowdloanSubject.next(this.getCrowdloan());
+    this.lazyNext('setCrowdloanItem', () => {
+      this.crowdloanSubject.next(this.getCrowdloan());
+    });
   }
 
   public subscribeCrowdloan () {
@@ -166,11 +188,55 @@ export default class KoniState extends State {
 
   public setChainRegistryItem (networkKey: string, registry: ChainRegistry) {
     this.chainRegistryMap[networkKey] = registry;
-    this.chainRegistrySubject.next(this.getChainRegistryMap());
+    this.lazyNext('setChainRegistry', () => {
+      this.chainRegistrySubject.next(this.getChainRegistryMap());
+    });
   }
 
   public subscribeChainRegistryMap () {
     return this.chainRegistrySubject;
+  }
+
+  private getTransactionKey (address: string, networkKey: string): string {
+    return `${address}_${networkKey}`;
+  }
+
+  public getTransactionHistory (address: string, networkKey: string, update: (items: TransactionHistoryItemType[]) => void): void {
+    this.transactionHistoryStore.get(this.getTransactionKey(address, networkKey), (items) => {
+      if (!items) {
+        update([]);
+      } else {
+        update(items);
+      }
+    });
+  }
+
+  public getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], update: (items: TransactionHistoryItemType[]) => void): void {
+    const keys: string[] = networkKeys.map((n) => this.getTransactionKey(address, n));
+
+    this.transactionHistoryStore.getByMultiKeys(keys, (items) => {
+      if (!items) {
+        update([]);
+      } else {
+        items.sort((a, b) => b.time - a.time);
+
+        update(items);
+      }
+    });
+  }
+
+  public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {
+    this.getTransactionHistory(address, networkKey, (items) => {
+      if (!items || !items.length) {
+        items = [item];
+      } else {
+        items.unshift(item);
+      }
+
+      this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items, () => {
+        callback && callback(items);
+      });
+    });
   }
 
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {

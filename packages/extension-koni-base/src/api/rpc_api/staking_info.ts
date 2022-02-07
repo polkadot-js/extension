@@ -1,10 +1,10 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise } from '@polkadot/api';
+import { StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { wsProvider } from '@polkadot/extension-koni-base/api/connector';
 import networks from '@polkadot/extension-koni-base/api/endpoints';
-import { StakingItem, StakingJson } from '@polkadot/extension-koni-base/stores/types';
 
 interface LedgerData {
   active: string,
@@ -51,7 +51,7 @@ export const getMultiCurrentBonded = async ({ accountId, apis }: PropsMulti): Pr
 };
 
 export const getStakingInfo = async (accountId: string): Promise<StakingJson> => {
-  console.log('Getting staking for ', accountId)
+  console.log('Getting staking for ', accountId);
   const result: any[] = [];
   const targetChains = ['polkadot', 'kusama'];
 
@@ -83,7 +83,7 @@ export const getStakingInfo = async (accountId: string): Promise<StakingJson> =>
     } as StakingItem);
   }
 
-  console.log('staking info', result)
+  console.log('staking info', result);
 
   return {
     details: result

@@ -29,6 +29,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   const _selectParent = useCallback((newParent: string) => () => onSelect(newParent), [onSelect]);
 
   useOutsideClick(ref, _hideDropdown);
+  console.log('selectedAddress', selectedAddress);
 
   return (
     <div className={className}>
@@ -106,8 +107,10 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     padding: 5px;
     border: 1px solid ${theme.boxBorderColor};
     box-sizing: border-box;
-    border-radius: 4px;
-    margin-top: -8px;
+    border-radius: 8px;
+    margin-top: 5px;
+    left: 16px;
+    right: 16px;
 
     &.visible{
       visibility: visible;

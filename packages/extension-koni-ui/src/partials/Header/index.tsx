@@ -24,7 +24,6 @@ import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMen
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
 import {RootState, store} from '@polkadot/extension-koni-ui/stores';
-import { updateCurrentNetwork } from '@polkadot/extension-koni-ui/stores/CurrentNetwork';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';

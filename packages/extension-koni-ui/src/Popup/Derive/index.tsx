@@ -38,7 +38,6 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
   const { address: parentAddress } = useParams<AddressState>();
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
-  const [name, setName] = useState<string | null>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
 
   const parentGenesis = useMemo(
@@ -94,7 +93,6 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
             isBusy={isBusy}
             onBackClick={_onBackClick}
             onCreate={_onCreate}
-            onNameChange={setName}
           />
         </>
       )}

@@ -294,12 +294,46 @@ export default class KoniExtension extends Extension {
     });
   }
 
+  private subscribeNft(account: string, id: string, port: chrome.runtime.Port): Promise<NftJson>  {
+    const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
+
+    const nftSubscription = state.subscribeNft().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(account);
+      nftSubscription.unsubscribe();
+    });
+
+    return this.getNft(account);
+  }
+
   private getStaking (account: string): Promise<StakingJson> {
     return new Promise<StakingJson>((resolve, reject) => {
       state.getStaking(account, (rs: StakingJson) => {
         resolve(rs);
       });
     });
+  }
+
+  private subscribeStaking (account: string, id: string, port: chrome.runtime.Port): Promise<StakingJson> {
+    const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
+
+    const stakingSubscription = state.subscribeStaking().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(account);
+      stakingSubscription.unsubscribe();
+    });
+
+    return this.getStaking(account);
   }
 
   // todo: add custom network metadata to here
@@ -425,8 +459,12 @@ export default class KoniExtension extends Extension {
         return this.subscribeChainRegistry(id, port);
       case 'pri(nft.getNft)':
         return await this.getNft(request as string);
+      case 'pri(nft.getSubscription)':
+        return await this.subscribeNft(request as string, id, port);
       case 'pri(staking.getStaking)':
         return await this.getStaking(request as string);
+      case 'pri(staking.getSubscription)':
+        return await this.subscribeStaking(request as string, id, port);
       case 'pri(transaction.history.add)':
         return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
       case 'pri(transaction.history.get)':

@@ -30,17 +30,23 @@ function getGroupNetworkKey (group: NetWorkGroup): string {
   return '';
 }
 
-export default function useAccountBalance(
-  currentNetworkKey: string,
-  showedNetworks: string[],
-  crowdloanNetworks: string[]): AccountBalanceType {
+export default function useAccountBalance(currentNetworkKey: string,
+                                          showedNetworks: string[],
+                                          crowdloanNetworks: string[]
+): AccountBalanceType {
+
   const {
     chainRegistry: chainRegistryMap,
     balance: balanceReducer,
     price: priceReducer,
     crowdloan: crowdloanReducer,
     networkMetadata: networkMetadataMap,
+    nft: nftReducer,
+    staking: stakingReducer
   } = useSelector((state: RootState) => state);
+
+  console.log('hopefully', nftReducer)
+  console.log(stakingReducer)
 
   const balanceMap = balanceReducer.details;
   const crowdLoanMap = crowdloanReducer.details;
@@ -131,6 +137,8 @@ export default function useAccountBalance(
   return {
     totalBalanceValue,
     networkBalanceMaps,
-    crowdloanContributeMap
+    crowdloanContributeMap,
+    nftData: nftReducer,
+    stakingData: stakingReducer
   };
 }

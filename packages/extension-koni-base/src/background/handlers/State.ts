@@ -59,6 +59,8 @@ export default class KoniState extends State {
   private balanceSubject = new Subject<BalanceJson>();
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
+  private nftSubject = new Subject<NftJson>();
+  private stakingSubject = new Subject<StakingJson>();
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -97,6 +99,10 @@ export default class KoniState extends State {
     });
   }
 
+  public subscribeStaking () {
+    return this.stakingSubject;
+  }
+
   public setStaking (stakingData: StakingJson, callback?: (stakingData: StakingJson) => void): void {
     this.stakingStore.set('StakingData', stakingData, () => {
       if (callback) {
@@ -130,6 +136,10 @@ export default class KoniState extends State {
           });
       }
     });
+  }
+
+  public subscribeNft () {
+    return this.nftSubject;
   }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {

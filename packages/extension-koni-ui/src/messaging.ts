@@ -327,6 +327,14 @@ export async function getNft (account: string): Promise<NftJson> {
   return sendMessage('pri(nft.getNft)', account);
 }
 
+export async function subscribeNft (account: string, callback: (nftData: NftJson) => void): Promise<NftJson> {
+  return sendMessage('pri(nft.getSubscription)', account, callback);
+}
+
 export async function getStaking (account: string): Promise<StakingJson> {
   return sendMessage('pri(staking.getStaking)', account);
+}
+
+export async function subscribeStaking (account: string, callback: (stakingData: StakingJson) => void): Promise<StakingJson> {
+  return sendMessage('pri(staking.getSubscription)', account, callback)
 }

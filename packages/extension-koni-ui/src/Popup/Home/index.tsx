@@ -122,8 +122,6 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<></>);
   }
 
-  console.log('currentAccount', currentAccount);
-
   return (<Home
     className={className}
     currentAccount={currentAccount}
@@ -165,9 +163,12 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
   useSetupTransactionHistory(address, showedNetworks);
 
-  const { crowdloanContributeMap,
+  const {
+    crowdloanContributeMap,
     networkBalanceMaps,
     totalBalanceValue,
+    nftData,
+    stakingData
   } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
   const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 

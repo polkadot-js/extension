@@ -19,7 +19,7 @@ import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Theme } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../messaging';
+import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2} from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { isKeyringPairs$Json } from '../util/typeGuards';
 
@@ -106,7 +106,7 @@ function Upload ({ className }: Props): React.ReactElement {
 
       setIsBusy(true);
 
-      (isKeyringPairs$Json(file) ? batchRestore(file, password, accountsInfo[0].address) : jsonRestore(file, password, accountsInfo[0].address))
+      (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo[0].address) : jsonRestoreV2(file, password, accountsInfo[0].address))
         .then(() => {
           onAction('/');
         }).catch(
@@ -130,11 +130,10 @@ function Upload ({ className }: Props): React.ReactElement {
       <div className={className}>
         <div className='restore-from-json-wrapper'>
           {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
-            <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}>
+            <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`} key={`${index}:${address}`}>
               <AccountInfo
                 address={address}
                 genesisHash={genesisHash}
-                key={`${index}:${address}`}
                 name={name}
                 type={type}
               />

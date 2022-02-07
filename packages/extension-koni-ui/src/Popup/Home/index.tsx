@@ -122,8 +122,6 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<></>);
   }
 
-  console.log('currentAccount', currentAccount);
-
   return (<Home
     className={className}
     currentAccount={currentAccount}

@@ -19,21 +19,21 @@ export class KoniSubcription {
   init () {
     this.initChainRegistrySubscription();
 
-    state.getCurrentAccount(({ address }) => {
-      let unsubBalances = this.initBalanceSubscription(address);
+    let unsubBalances: Function | undefined;
+    let unsubCrowdloans: Function | undefined;
+
+    state.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo) {
+        const {address} = currentAccountInfo;
+        unsubBalances = this.initBalanceSubscription(address);
+        unsubCrowdloans = this.initCrowdloanSubscription(address);
+      }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          unsubBalances();
+          unsubBalances && unsubBalances();
+          unsubCrowdloans && unsubCrowdloans();
           unsubBalances = this.initBalanceSubscription(address);
-        }
-      });
-
-      let unsubCrowdloans = this.initCrowdloanSubscription(address);
-
-      state.subscribeCurrentAccount().subscribe({
-        next: ({ address }) => {
-          unsubCrowdloans();
           unsubCrowdloans = this.initCrowdloanSubscription(address);
         }
       });

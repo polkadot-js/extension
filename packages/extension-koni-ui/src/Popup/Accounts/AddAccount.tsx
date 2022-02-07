@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
-
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-
-import { ActionContext } from '../../components';
+import {ActionContext, Link} from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
@@ -21,16 +18,6 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const onAction = useContext(ActionContext);
   const _createNewAccount = useCallback(
     () => onAction('/account/create'),
-    [onAction]
-  );
-
-  const _importAccount = useCallback(
-    () => onAction('/account/import-seed'),
-    [onAction]
-  );
-
-  const _restoreAccount = useCallback(
-    () => onAction('/account/restore-json'),
     [onAction]
   );
 
@@ -60,17 +47,19 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           <Button
             className='add-account-btn'
             data-export-button
-            onClick={_importAccount}
           >
-            {t<string>('Import account from pre-existing seed')}
+            <Link to={`/account/import-seed`} className='add-account-link'>
+              {t<string>('Import account from pre-existing seed')}
+            </Link>
           </Button>
 
           <Button
             className='add-account-btn'
             data-export-button
-            onClick={_restoreAccount}
           >
-            {t<string>('Restore account from backup JSON file')}
+            <Link to={`/account/restore-json`} className='add-account-link'>
+              {t<string>('Restore account from backup JSON file')}
+            </Link>
           </Button>
         </div>
       </div>
@@ -93,6 +82,12 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
   .create-account {
     background-color: ${theme.buttonBackground2};
     color: ${theme.buttonTextColor3};
+  }
+
+  .add-account-link {
+    justify-content: center;
+    color: ${theme.textColor};
+    opacity: 1;
   }
 
   h3 {

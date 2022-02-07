@@ -22,13 +22,21 @@ export class KoniSubcription {
     let unsubBalances: Function | undefined;
     let unsubCrowdloans: Function | undefined;
 
-    state.subscribeCurrentAccount().subscribe({
-      next: ({ address }) => {
-        unsubBalances && unsubBalances();
-        unsubCrowdloans && unsubCrowdloans();
+    state.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo) {
+        const {address} = currentAccountInfo;
         unsubBalances = this.initBalanceSubscription(address);
         unsubCrowdloans = this.initCrowdloanSubscription(address);
       }
+
+      state.subscribeCurrentAccount().subscribe({
+        next: ({ address }) => {
+          unsubBalances && unsubBalances();
+          unsubCrowdloans && unsubCrowdloans();
+          unsubBalances = this.initBalanceSubscription(address);
+          unsubCrowdloans = this.initCrowdloanSubscription(address);
+        }
+      });
     });
   }
 

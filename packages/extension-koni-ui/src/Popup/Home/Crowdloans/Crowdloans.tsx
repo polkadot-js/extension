@@ -6,7 +6,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';

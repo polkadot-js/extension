@@ -78,80 +78,78 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
   }, [advanced]);
 
   return (
-    <>
-      <div className={className}>
-        <div className='account-info-wrapper'>
-          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
-            <AccountInfoEl
-              address={account?.address}
-              className='account-info'
-              genesisHash={account?.genesis}
-              name={name}
-            />
-            <TextAreaWithLabel
-              className='seed-and-path__seed-input'
-              isError={!!error}
-              isFocused
-              label={t<string>('existing 12 or 24-word mnemonic seed')}
-              onChange={setSeed}
-              rowsCount={2}
-              value={seed || ''}
-            />
-            {!!error && !seed && (
-              <Warning
-                className='seed-and-path__error'
-                isBelowInput
-                isDanger
-              >
-                {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
-              </Warning>
-            )}
-            <Dropdown
-              className='seed-and-path__genesis-selection'
-              label={t<string>('Network')}
-              onChange={setGenesis}
-              options={genesisOptions}
-              value={genesis}
-            />
-            <div
-              className='seed-and-path__advanced-toggle'
-              onClick={_onToggleAdvanced}
+    <div className={className}>
+      <div className='account-info-wrapper'>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
+          <AccountInfoEl
+            address={account?.address}
+            className='account-info'
+            genesisHash={account?.genesis}
+            name={name}
+          />
+          <TextAreaWithLabel
+            className='seed-and-path__seed-input'
+            isError={!!error}
+            isFocused
+            label={t<string>('existing 12 or 24-word mnemonic seed')}
+            onChange={setSeed}
+            rowsCount={2}
+            value={seed || ''}
+          />
+          {!!error && !seed && (
+            <Warning
+              className='seed-and-path__error'
+              isBelowInput
+              isDanger
             >
-              <FontAwesomeIcon
-                color='#888888'
-                icon={advanced ? faChevronDown : faChevronRight}
-              />
-              <span>{t<string>('advanced')}</span>
-            </div>
-            { advanced && (
-              <InputWithLabel
-                className='derivationPath'
-                isError={!!path && !!error}
-                label={t<string>('derivation path')}
-                onChange={setPath}
-                value={path || ''}
-              />
-            )}
-            {!!error && !!seed && (
-              <Warning
-                isDanger
-              >
-                {error}
-              </Warning>
-            )}
-          </div>
-        </div>
-        <ButtonArea>
-          <NextStepButton
-            className='next-step-btn'
-            isDisabled={!address || !!error}
-            onClick={onNextStep}
+              {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
+            </Warning>
+          )}
+          <Dropdown
+            className='seed-and-path__genesis-selection'
+            label={t<string>('Network')}
+            onChange={setGenesis}
+            options={genesisOptions}
+            value={genesis}
+          />
+          <div
+            className='seed-and-path__advanced-toggle'
+            onClick={_onToggleAdvanced}
           >
-            {t<string>('Next Step')}
-          </NextStepButton>
-        </ButtonArea>
+            <FontAwesomeIcon
+              color='#888888'
+              icon={advanced ? faChevronDown : faChevronRight}
+            />
+            <span>{t<string>('advanced')}</span>
+          </div>
+          { advanced && (
+            <InputWithLabel
+              className='derivationPath'
+              isError={!!path && !!error}
+              label={t<string>('derivation path')}
+              onChange={setPath}
+              value={path || ''}
+            />
+          )}
+          {!!error && !!seed && (
+            <Warning
+              isDanger
+            >
+              {error}
+            </Warning>
+          )}
+        </div>
       </div>
-    </>
+      <ButtonArea>
+        <NextStepButton
+          className='next-step-btn'
+          isDisabled={!address || !!error}
+          onClick={onNextStep}
+        >
+          {t<string>('Next Step')}
+        </NextStepButton>
+      </ButtonArea>
+    </div>
   );
 }
 

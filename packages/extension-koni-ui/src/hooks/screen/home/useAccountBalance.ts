@@ -18,6 +18,18 @@ function getCrowdloadChainRegistry(group: NetWorkGroup, chainRegistryMap: Record
   return null;
 }
 
+function getGroupNetworkKey (group: NetWorkGroup): string {
+  if (group === 'POLKADOT_PARACHAIN') {
+    return 'polkadot';
+  }
+
+  if (group === 'KUSAMA_PARACHAIN') {
+    return 'kusama';
+  }
+
+  return '';
+}
+
 export default function useAccountBalance(
   currentNetworkKey: string,
   showedNetworks: string[],
@@ -83,7 +95,7 @@ export default function useAccountBalance(
   crowdloanNetworks.forEach(networkKey => {
     const networkMetadata = networkMetadataMap[networkKey];
 
-    if (!networkMetadata) {
+    if (!networkMetadata || !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].includes(networkMetadata.group)) {
       return;
     }
 
@@ -96,12 +108,15 @@ export default function useAccountBalance(
       return;
     }
 
+    const groupNetworkKey = getGroupNetworkKey(networkMetadata.group);
+    const price = !!groupNetworkKey ? priceMap[groupNetworkKey] : undefined;
+
     const contributeInfo = getBalances({
       balance: crowdLoanItem.contribute,
       decimals: registry.chainDecimals[0],
       symbol: registry.chainTokens[0],
-      price: priceMap[networkKey]
-    })
+      price
+    });
 
     crowdloanContributeMap[networkKey] = {
       paraState: crowdLoanItem.paraState,

@@ -26,17 +26,18 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _hideDropdown = useCallback(() => setDropdownVisible(false), []);
   const _toggleDropdown = useCallback(() => setDropdownVisible(!isDropdownVisible), [isDropdownVisible]);
-  const _selectParent = useCallback((newParent: string) => () => onSelect(newParent), [onSelect]);
+  const _selectParent = useCallback((newParent: string) => () => {
+    onSelect(newParent);
+    _hideDropdown();
+  }, [onSelect]);
 
   useOutsideClick(ref, _hideDropdown);
-  console.log('selectedAddress', selectedAddress);
 
   return (
-    <div className={className}>
+    <div className={className} ref={ref}>
       <div
         className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}
         onClick={_toggleDropdown}
-        ref={ref}
       >
         <AccountInfo
           address={selectedAddress}
@@ -72,11 +73,11 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
   & > div:first-child > .address::after {
     content: '';
     position: absolute;
-    top: 66%;
+    top: 70%;
     transform: translateY(-50%);
     right: 15px;
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     background: url(${arrow}) center no-repeat;
     background-color: ${theme.inputBackground};
     pointer-events: none;

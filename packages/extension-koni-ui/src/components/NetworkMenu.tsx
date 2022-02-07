@@ -54,10 +54,17 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
 
   useEffect(() => {
     if (filteredNetwork) {
+      const lowerCaseFilteredNetwork = filteredNetwork.toLowerCase();
+
       if (selectedGroup && selectedGroup.length) {
-        setFilteredGenesisOption(genesisOptions.filter((network) => network.text.toLowerCase().includes(filteredNetwork) && network.group === selectedGroup));
+        setFilteredGenesisOption(genesisOptions.filter(
+          (network) => network.text.toLowerCase()
+            .includes(lowerCaseFilteredNetwork)
+              && network.group === selectedGroup));
       } else {
-        setFilteredGenesisOption(genesisOptions.filter((network) => network.text.toLowerCase().includes(filteredNetwork)));
+        setFilteredGenesisOption(genesisOptions.filter(
+          (network) => network.text.toLowerCase()
+            .includes(lowerCaseFilteredNetwork)));
       }
     } else {
       if (selectedGroup && selectedGroup.length) {

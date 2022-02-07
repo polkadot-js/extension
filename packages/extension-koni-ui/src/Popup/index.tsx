@@ -11,7 +11,6 @@ import { Route, Switch } from 'react-router';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
-import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import uiSettings from '@polkadot/ui-settings';
@@ -19,7 +18,7 @@ import uiSettings from '@polkadot/ui-settings';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests, tieAccount } from '../messaging';
+import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AuthList from './AuthManagement';
@@ -37,7 +36,7 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import {AccountsWithCurrentAddress, CurrentNetworkInfo} from '@polkadot/extension-base/background/KoniTypes';
+import {AccountsWithCurrentAddress} from '@polkadot/extension-base/background/KoniTypes';
 import useSetupStore from "@polkadot/extension-koni-ui/hooks/store/useSetupStore";
 
 const startSettings = uiSettings.get();
@@ -74,10 +73,6 @@ function updateCurrentAccount (currentAcc: AccountJson): void {
   store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
-function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
-  store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
-}
-
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -88,8 +83,7 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
-  const genesisOptions = useGenesisHashOptions();
-  const currentAccount = store.getState().currentAccount.account;
+
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -150,39 +144,6 @@ export default function Popup (): React.ReactElement {
   useEffect((): void => {
     setAccountCtx(initAccountContext(accounts || []));
   }, [accounts]);
-
-  useEffect(() => {
-    let isSync = true;
-
-    (async () => {
-      let networkSelected;
-
-      if (!currentAccount || !currentAccount?.genesisHash) {
-        networkSelected = genesisOptions[0];
-      } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === currentAccount.genesisHash);
-
-        if (!networkSelected) {
-          await tieAccount(currentAccount.address, null);
-          networkSelected = genesisOptions[0];
-        }
-      }
-
-      if (isSync && networkSelected) {
-        updateCurrentNetwork({
-          networkPrefix: networkSelected.networkPrefix,
-          icon: networkSelected.icon,
-          genesisHash: networkSelected.value,
-          networkKey: networkSelected.networkKey,
-          isEthereum: networkSelected.isEthereum
-        });
-      }
-    })();
-
-    return () => {
-      isSync = false;
-    };
-  }, [currentAccount?.genesisHash]);
 
   useEffect((): void => {
     requestMediaAccess(cameraOn)

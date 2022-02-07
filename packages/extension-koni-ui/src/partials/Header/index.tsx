@@ -33,6 +33,7 @@ import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
+import {CurrentNetworkInfo} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -84,6 +85,10 @@ function recodeAddress (address: string, accounts: AccountWithChildren[], chain:
 
 const defaultRecoded = { formatted: null, prefix: 42 };
 
+function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
+  store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
+}
+
 function Header ({ children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
@@ -127,6 +132,39 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
         : recodeAddress(currentAccount?.address, accounts, chain, settings));
   }, [accounts, currentAccount?.address, chain, settings]);
 
+  useEffect(() => {
+    let isSync = true;
+
+    (async () => {
+      let networkSelected;
+
+      if (!currentAccount || !currentAccount?.genesisHash) {
+        networkSelected = genesisOptions[0];
+      } else {
+        networkSelected = genesisOptions.find((opt) => opt.value === currentAccount.genesisHash);
+
+        if (!networkSelected) {
+          await tieAccount(currentAccount.address, null);
+          networkSelected = genesisOptions[0];
+        }
+      }
+
+      if (isSync && networkSelected) {
+        updateCurrentNetwork({
+          networkPrefix: networkSelected.networkPrefix,
+          icon: networkSelected.icon,
+          genesisHash: networkSelected.value,
+          networkKey: networkSelected.networkKey,
+          isEthereum: networkSelected.isEthereum
+        });
+      }
+    })();
+
+    return () => {
+      isSync = false;
+    };
+  }, [currentAccount?.genesisHash]);
+
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
       let networkKey = '';
@@ -160,14 +198,13 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
         await tieAccount(currentAccount.address, genesisHash || null);
-        store.dispatch({ type: 'currentNetwork/update', payload: {
+        updateCurrentNetwork( {
             networkPrefix,
             icon,
             genesisHash,
             networkKey,
             isEthereum
-          } });
-        // updateCurrentNetwork();
+          });
       }
 
       setShowNetworkSelect(false);

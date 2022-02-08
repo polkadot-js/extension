@@ -1,9 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { take } from 'rxjs';
+
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
+import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
+import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 
 export class KoniSubcription {
   private subscriptionMap: Record<string, any> = {};
@@ -24,19 +29,41 @@ export class KoniSubcription {
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
-        const {address} = currentAccountInfo;
-        unsubBalances = this.initBalanceSubscription(address);
-        unsubCrowdloans = this.initCrowdloanSubscription(address);
+        const { address } = currentAccountInfo;
+
+        this.detectAddresses(address)
+          .then((addresses) => {
+            unsubBalances = this.initBalanceSubscription(addresses);
+            unsubCrowdloans = this.initCrowdloanSubscription(addresses);
+          })
+          .catch(console.error);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           unsubBalances && unsubBalances();
           unsubCrowdloans && unsubCrowdloans();
-          unsubBalances = this.initBalanceSubscription(address);
-          unsubCrowdloans = this.initCrowdloanSubscription(address);
+          this.detectAddresses(address)
+            .then((addresses) => {
+              unsubBalances = this.initBalanceSubscription(addresses);
+              unsubCrowdloans = this.initCrowdloanSubscription(addresses);
+            })
+            .catch(console.error);
         }
       });
+    });
+  }
+
+  detectAddresses (currentAccountAddress: string) {
+    return new Promise<Array<string>>((resolve, reject) => {
+      if (currentAccountAddress === ALL_ACCOUNT_KEY) {
+        accountsObservable.subject.pipe(take(1))
+          .subscribe((accounts: SubjectInfo): void => {
+            resolve([...Object.keys(accounts)]);
+          });
+      } else {
+        return resolve([currentAccountAddress]);
+      }
     });
   }
 
@@ -53,8 +80,8 @@ export class KoniSubcription {
     });
   }
 
-  initBalanceSubscription (address: string) {
-    const subscriptionPromises = subscribeBalance(address, dotSamaAPIMap, (networkKey, rs) => {
+  initBalanceSubscription (addresses: string[]) {
+    const subscriptionPromises = subscribeBalance(addresses, dotSamaAPIMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);
     });
 
@@ -69,8 +96,8 @@ export class KoniSubcription {
     };
   }
 
-  initCrowdloanSubscription (address: string) {
-    const subscriptionPromise = subcribeCrowdloan(address, dotSamaAPIMap, (networkKey, rs) => {
+  initCrowdloanSubscription (addresses: string[]) {
+    const subscriptionPromise = subcribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 

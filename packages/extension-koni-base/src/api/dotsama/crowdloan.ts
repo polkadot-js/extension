@@ -9,12 +9,19 @@ import registry from '@polkadot/extension-koni-base/api/dotsama/typeRegistry';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
+import { BN } from '@polkadot/util';
 
-function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddress: string, callback: (rs: CrowdloanItem) => void) {
-  const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, [hexAddress], (result: DeriveOwnContributions) => {
+function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
+  const unsubPromise = parentAPI.api.derive.crowdloan.ownContributions(paraId, hexAddresses, (result: DeriveOwnContributions) => {
+    let contribute = new BN(0);
+
+    Object.values(result).forEach((item) => {
+      contribute = contribute.add(item.toBn());
+    });
+
     const rs: CrowdloanItem = {
       state: APIItemState.READY,
-      contribute: result[hexAddress]?.toString() || '0'
+      contribute: contribute.toString()
     };
 
     callback(rs);
@@ -29,24 +36,32 @@ function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddress: stri
   };
 }
 
-export const subcribleAcalaContributeInterval = (polkadotAddress: string, callback: (rs: CrowdloanItem) => void) => {
+export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
-    axios.get(`${acalaContributionApi}${polkadotAddress}`)
-      .then((res) => {
+    Promise.all(polkadotAddresses.map((polkadotAddress) => {
+      return axios.get(`${acalaContributionApi}${polkadotAddress}`);
+    })).then((resList) => {
+      let contribute = 0;
+
+      resList.forEach((res) => {
         if (res.status !== 200) {
           console.warn('Failed to get Acala crowdloan contribute');
         }
 
-        const rs: CrowdloanItem = {
-          state: APIItemState.READY,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          contribute: res.data.data?.acala?.[0]?.detail?.lcAmount || '0'
-        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+        contribute += parseInt(res.data.data?.acala?.[0]?.detail?.lcAmount || '0');
+      });
 
-        callback(rs);
-      }).catch(console.error);
+      const rs: CrowdloanItem = {
+        state: APIItemState.READY,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+        contribute: contribute.toString()
+      };
+
+      callback(rs);
+    }).catch(console.error);
   };
 
   getContributeInfo();
@@ -58,11 +73,13 @@ export const subcribleAcalaContributeInterval = (polkadotAddress: string, callba
 };
 
 // Get All crowdloan
-export async function subcribeCrowdloan (address: string, dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = NETWORKS) {
+export async function subcribeCrowdloan (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = NETWORKS) {
   const polkadotAPI = await dotSamaAPIMap.polkadot.isReady;
   const kusamaAPI = await dotSamaAPIMap.kusama.isReady;
   const unsubMap: Record<string, any> = {};
-  const hexAddress = registry.createType('AccountId', address).toHex();
+  const hexAddresses = addresses.map((address) => {
+    return registry.createType('AccountId', address).toHex();
+  });
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
     const crowdloanCb = (rs: CrowdloanItem) => {
@@ -74,11 +91,11 @@ export async function subcribeCrowdloan (address: string, dotSamaAPIMap: Record<
     }
 
     if (networkKey === 'acala') {
-      unsubMap.acala = subcribleAcalaContributeInterval(reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum), crowdloanCb);
+      unsubMap.acala = subcribleAcalaContributeInterval(addresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
     } else if (networkInfo.group === 'POLKADOT_PARACHAIN') {
-      unsubMap[networkKey] = getRPCCrowndloan(polkadotAPI, networkInfo.paraId, hexAddress, crowdloanCb);
+      unsubMap[networkKey] = getRPCCrowndloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
     } else if (networkInfo.group === 'KUSAMA_PARACHAIN') {
-      unsubMap[networkKey] = getRPCCrowndloan(kusamaAPI, networkInfo.paraId, hexAddress, crowdloanCb);
+      unsubMap[networkKey] = getRPCCrowndloan(kusamaAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
     }
   });
 

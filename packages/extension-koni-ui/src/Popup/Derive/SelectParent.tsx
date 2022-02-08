@@ -89,7 +89,9 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   );
 
   const _onParentChange = useCallback(
-    (address: string) => onAction(`/account/derive/${address}`),
+    (address: string) => {
+      onAction(`/account/derive/${address}`);
+    },
     [onAction]
   );
 

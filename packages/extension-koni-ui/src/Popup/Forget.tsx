@@ -26,7 +26,10 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _goHome = useCallback(
-    () => onAction('/'),
+    () => {
+      onAction('/');
+      window.localStorage.setItem('popupNavigation', '/');
+    },
     [onAction]
   );
 
@@ -36,7 +39,8 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
       forgetAccount(address)
         .then(() => {
           setIsBusy(false);
-          onAction('/');
+          _goHome();
+
         })
         .catch((error: Error) => {
           setIsBusy(false);

@@ -27,7 +27,7 @@ function AvailableDisplay ({ children, className = '', label, params, api, apiUr
       className={className}
       label={label}
       registry={api.registry}
-      value={allBalances?.availableBalance}
+      value={params ? allBalances?.availableBalance : undefined}
     >
       {children}
     </FormatBalance>

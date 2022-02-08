@@ -4,7 +4,6 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
-import LazyLoad from 'react-lazyload';
 import styled from 'styled-components';
 
 import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
@@ -68,12 +67,10 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
 
       {
         showItemDetail &&
-        <LazyLoad>
-          <NftItem
-            data={chosenItem}
-            onClickBack={() => setShowItemDetail(false)}
-          />
-        </LazyLoad>
+        <NftItem
+          data={chosenItem}
+          onClickBack={() => setShowItemDetail(false)}
+        />
       }
 
     </div>

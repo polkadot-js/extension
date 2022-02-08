@@ -11,7 +11,6 @@ import {
   CRON_REFRESH_PRICE_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
 import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
-import {store} from "@polkadot/extension-koni-ui/stores";
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -74,9 +73,9 @@ export class KoniCron {
 
   async refreshNft() {
     const currentAccount = await state.getAccountAddress()
-    getAllNftsByAccount('CmNYnM3pStTCKgXq67Cp8rURA6GTfdfseJx7posbg2vJVHQ')
+    getAllNftsByAccount(currentAccount as string)
       .then((rs) => {
-        state.setNft(rs, () => {
+        state.setNft(rs, (nftData) => {
           console.log(`Fetched nft for address ${currentAccount}`);
         });
       })

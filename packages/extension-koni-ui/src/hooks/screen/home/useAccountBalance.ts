@@ -40,9 +40,7 @@ export default function useAccountBalance(currentNetworkKey: string,
     balance: balanceReducer,
     price: priceReducer,
     crowdloan: crowdloanReducer,
-    networkMetadata: networkMetadataMap,
-    nft: nftReducer,
-    staking: stakingReducer
+    networkMetadata: networkMetadataMap
   } = useSelector((state: RootState) => state);
 
   const balanceMap = balanceReducer.details;
@@ -134,8 +132,6 @@ export default function useAccountBalance(currentNetworkKey: string,
   return {
     totalBalanceValue,
     networkBalanceMaps,
-    crowdloanContributeMap,
-    nftData: nftReducer,
-    stakingData: stakingReducer
+    crowdloanContributeMap
   };
 }

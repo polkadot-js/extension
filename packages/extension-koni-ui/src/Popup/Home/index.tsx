@@ -166,9 +166,7 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
   const {
     crowdloanContributeMap,
     networkBalanceMaps,
-    totalBalanceValue,
-    nftData,
-    stakingData
+    totalBalanceValue
   } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
   const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 
@@ -258,7 +256,7 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
         )}
 
         {activatedTab === 2 && (
-          <NftContainer nftData={nftData}/>
+          <NftContainer/>
         )}
 
         {activatedTab === 3 && (

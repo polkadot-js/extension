@@ -4,8 +4,7 @@ import {subscribeNft} from "@polkadot/extension-koni-ui/messaging";
 import {store} from "@polkadot/extension-koni-ui/stores";
 
 function updateNft (nftData: NftJson): void {
-  console.log('got it', nftData)
-  store.dispatch({type: 'nft', payload: nftData});
+  store.dispatch({type: 'nft/update', payload: nftData});
 }
 
 export default function useSetupNft (): void {

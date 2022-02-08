@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useState } from 'react';
-import LazyLoad from 'react-lazyload';
 import styled from 'styled-components';
 
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
@@ -24,38 +23,36 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
 
   return (
     <div className={className}>
-      <LazyLoad>
-        <div
-          className={'nft-preview'}
-          onClick={() => onClick(data)}
-          style={{ height: '164px' }}
-        >
-          <div className={'img-container'}>
-            {
-              loading &&
-              <Spinner className={'img-spinner'} />
-            }
-            <img
-              alt={'collection-thumbnail'}
-              className={'collection-thumbnail'}
-              onLoad={() => handleOnLoad()}
-              src={data.image ? data?.image : logo}
-              style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
-            />
-          </div>
-
-          <div className={'collection-title'}>
-            <div
-              className={'collection-name'}
-              title={data.collectionName ? data.collectionName : data?.collectionId}
-            >
-              {/* show only first 10 characters */}
-              {data.collectionName ? data.collectionName : data?.collectionId}
-            </div>
-            <div className={'collection-item-count'}>{data?.nftItems.length}</div>
-          </div>
+      <div
+        className={'nft-preview'}
+        onClick={() => onClick(data)}
+        style={{ height: '164px' }}
+      >
+        <div className={'img-container'}>
+          {
+            loading &&
+            <Spinner className={'img-spinner'} />
+          }
+          <img
+            alt={'collection-thumbnail'}
+            className={'collection-thumbnail'}
+            onLoad={() => handleOnLoad()}
+            src={data.image ? data?.image : logo}
+            style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
+          />
         </div>
-      </LazyLoad>
+
+        <div className={'collection-title'}>
+          <div
+            className={'collection-name'}
+            title={data.collectionName ? data.collectionName : data?.collectionId}
+          >
+            {/* show only first 10 characters */}
+            {data.collectionName ? data.collectionName : data?.collectionId}
+          </div>
+          <div className={'collection-item-count'}>{data?.nftItems.length}</div>
+        </div>
+      </div>
     </div>
   );
 }

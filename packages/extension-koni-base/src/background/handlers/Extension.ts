@@ -299,8 +299,9 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private subscribeNft(id: string, port: chrome.runtime.Port): Promise<NftJson>  {
+  private async subscribeNft(id: string, port: chrome.runtime.Port): Promise<NftJson> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
+    const currentAccount = await state.getAccountAddress()
     const nftSubscription = state.subscribeNft().subscribe({
       next: (rs) => {
         cb(rs);
@@ -312,7 +313,7 @@ export default class KoniExtension extends Extension {
       nftSubscription.unsubscribe();
     });
 
-    return this.getNft(null);
+    return this.getNft(currentAccount as string);
   }
 
   private getStaking (account: string): Promise<StakingJson> {

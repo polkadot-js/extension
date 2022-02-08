@@ -3,26 +3,26 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // @ts-ignore
-import LazyLoad from 'react-lazyload';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import { RootState} from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import NftCollectionPreview from './NftCollectionPreview';
 import EmptyList from "@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList";
+import {useSelector} from "react-redux";
+import {RootState} from "@polkadot/extension-koni-ui/stores";
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
-  nftData: any;
 }
 
-function NftContainer ({ className, nftData }: Props): React.ReactElement<Props> {
+const size = 9
+
+function NftContainer ({ className }: Props): React.ReactElement<Props> {
   const [nftJson, setNftJson] = useState();
   const [nftList, setNftList] = useState();
   const [loading, setLoading] = useState(false);
@@ -30,28 +30,30 @@ function NftContainer ({ className, nftData }: Props): React.ReactElement<Props>
   const [showCollectionDetail, setShowCollectionDetail] = useState(false);
   const [totalCollection, setTotalCollection] = useState(0);
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(9);
   const [currentNftList, setCurrentNftList] = useState();
-  const {
-    nft: nftReducer,
-  } = useSelector((state: RootState) => state);
+  const {nft: nftReducer} = useSelector((state: RootState) => state);
 
-  console.log('here', nftReducer)
+  const _onChangeState = (): void => {
+    if (!nftReducer?.ready) {
+      setLoading(true);
+      return;
+    }
 
-  const _onCreate = (): void => {
-    setLoading(true);
-    const nftList = nftData?.nftList;
+    const nftList = nftReducer?.nftList;
     const total = nftList.length;
-    setNftJson(nftData);
+    // @ts-ignore
+    setNftJson(nftReducer);
+    // @ts-ignore
     setNftList(nftList);
     setTotalCollection(total);
-    setCurrentNftList(nftList.slice(0, total > 9 ? 9 : total));
+    // @ts-ignore
+    setCurrentNftList(nftList.slice(0, total > size ? size : total));
     setLoading(false);
   }
 
   useEffect(() => {
-    _onCreate();
-  }, []);
+    _onChangeState();
+  }, [nftReducer]);
 
   const handleShowCollectionDetail = (data: any) => {
     setShowCollectionDetail(true);
@@ -65,6 +67,7 @@ function NftContainer ({ className, nftData }: Props): React.ReactElement<Props>
     const to = from + size;
 
     setPage(prevPage);
+    // @ts-ignore
     setCurrentNftList(nftList.slice(from, to));
   };
 
@@ -76,6 +79,7 @@ function NftContainer ({ className, nftData }: Props): React.ReactElement<Props>
     if (from > totalCollection) return;
 
     setPage(nextPage);
+    // @ts-ignore
     setCurrentNftList(nftList.slice(from, to));
   };
 
@@ -85,13 +89,16 @@ function NftContainer ({ className, nftData }: Props): React.ReactElement<Props>
         <Spinner size={'large'}/>
       </div>}
 
+      {/*@ts-ignore*/}
       {nftJson?.total === 0 && !loading &&
         <EmptyList/>
       }
 
+      {/*@ts-ignore*/}
       {!loading && !showCollectionDetail && nftJson?.total > 0 &&
       <div className={'total-title'}>
-        You own {nftJson?.total} NFTs from {totalCollection} collections
+        {/*@ts-ignore*/}
+        Own {nftJson?.total} NFT{nftJson?.total > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
       </div>
       }
 
@@ -116,16 +123,15 @@ function NftContainer ({ className, nftData }: Props): React.ReactElement<Props>
 
       {
         showCollectionDetail &&
-          <LazyLoad>
-            <NftCollection
-              data={chosenCollection}
-              onClickBack={() => setShowCollectionDetail(false)}
-            />
-          </LazyLoad>
+          <NftCollection
+            data={chosenCollection}
+            onClickBack={() => setShowCollectionDetail(false)}
+          />
       }
 
       {
-        !loading && !showCollectionDetail && nftJson?.total > 0 &&
+        // @ts-ignore
+        !loading && !showCollectionDetail && nftJson?.total > size &&
         <div className={'pagination'}>
           <div
             className={'nav-item'}
@@ -148,17 +154,17 @@ function NftContainer ({ className, nftData }: Props): React.ReactElement<Props>
         </div>
       }
 
-      {!loading &&
-        <div className={'footer'}>
-          <div>Don't see your tokens?</div>
-          <div>
-            <span
-              className={'link'}
-              onClick={() => _onCreate()}
-            >Refresh list</span> or <span className={'link'}>import tokens</span>
-          </div>
-        </div>
-      }
+      {/*{!loading &&*/}
+      {/*  <div className={'footer'}>*/}
+      {/*    <div>Don't see your tokens?</div>*/}
+      {/*    <div>*/}
+      {/*      <span*/}
+      {/*        className={'link'}*/}
+      {/*        onClick={() => _onChangeState()}*/}
+      {/*      >Refresh list</span> or <span className={'link'}>import tokens</span>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*}*/}
     </div>
   );
 }

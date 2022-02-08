@@ -39,6 +39,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
   const [parentPassword, setParentPassword] = useState<string>('');
   const [isProperParentPassword, setIsProperParentPassword] = useState(false);
+  const [isHaveDerivationPath, setIsHaveDerivationPath] = useState(!!defaultPath);
   const [pathError, setPathError] = useState('');
   const passwordInputRef = useRef<HTMLDivElement>(null);
   const allowSoftDerivation = useMemo(() => {
@@ -82,6 +83,11 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
 
   const _onSuriPathChange = useCallback(
     (path: string): void => {
+      if (!path) {
+        setIsHaveDerivationPath(false);
+      } else {
+        setIsHaveDerivationPath(true);
+      }
       setSuriPath(path);
       setPathError('');
     },
@@ -131,7 +137,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   return (
     <>
       <div className={className}>
-        <div className='koni-derive-account'>
+        <div className='derive-account'>
           {isLocked
             ? (
               <AccountInfo
@@ -163,6 +169,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
             />
             {!!parentPassword && !isProperParentPassword && (
               <Warning
+                className='select-parent-warning'
                 isBelowInput
                 isDanger
               >
@@ -182,6 +189,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
               />
               {(!!pathError) && (
                 <Warning
+                  className='select-parent-warning'
                   isBelowInput
                   isDanger
                 >
@@ -197,7 +205,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
             className='next-step-btn'
             data-button-action='create derived account'
             isBusy={isBusy}
-            isDisabled={!isProperParentPassword || !!pathError}
+            isDisabled={!isProperParentPassword || !!pathError || !isHaveDerivationPath}
             onClick={_onSubmit}
           >
             {t<string>('Create a derived account')}
@@ -209,8 +217,9 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
 }
 
 export default styled(React.memo(SelectParent))`
-  padding-top: 25px;
-  margin: 0 15px;
+  padding: 25px 15px 15px;
+  flex: 1;
+  overflow-y: auto;
 
   .next-step-btn {
     > .children {
@@ -219,5 +228,9 @@ export default styled(React.memo(SelectParent))`
       position: relative;
       justify-content: center;
     }
+  }
+
+  .select-parent-warning {
+    margin-top: 10px;
   }
 `;

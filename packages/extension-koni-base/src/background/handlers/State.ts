@@ -4,7 +4,19 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  APIItemState,
+  BalanceItem,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  NftJson,
+  PriceJson,
+  StakingJson,
+  TransactionHistoryItemType
+} from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
@@ -57,6 +69,12 @@ export default class KoniState extends State {
   // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
+
+  private nftState: NftJson = {
+    ready: true,
+    total: 0,
+    nftList: [],
+  } as NftJson;
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
   private nftSubject = new Subject<NftJson>();
@@ -113,12 +131,12 @@ export default class KoniState extends State {
   }
 
   public setNft (nftData: NftJson, callback?: (nftData: NftJson) => void): void {
-    this.nftStore.set('NftData', nftData, () => {
-      if (callback) {
-        callback(nftData);
-        this.nftStoreReady = true;
-      }
-    });
+    this.nftState = nftData
+    if (callback) {
+      callback(nftData);
+      this.nftStoreReady = true;
+    }
+    this.nftSubject.next(nftData);
   }
 
   public getNft (account: string, update: (value: NftJson) => void): void {
@@ -127,7 +145,8 @@ export default class KoniState extends State {
       else {
         getAllNftsByAccount(account)
           .then((rs) => {
-            this.setNft(rs);
+            this.nftState = rs;
+            console.log('got nft', this.nftState)
             update(rs);
           })
           .catch((e) => {

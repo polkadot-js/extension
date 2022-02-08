@@ -173,7 +173,6 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
   const _toggleZeroBalances = (): void => {
     setShowZeroBalances((v) => {
       window.localStorage.setItem('show_zero_balances', v ? '0' : '1');
-
       return !v;
     });
   };

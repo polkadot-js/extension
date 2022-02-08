@@ -24,7 +24,7 @@ export class KoniCron {
     return this.subjectMap[name];
   }
 
-  addCron (name: string, callback: () => void, interval: number) {
+  addCron (name: string, callback: (param?: any) => void, interval: number) {
     callback();
 
     this.cronMap[name] = setInterval(callback, interval);
@@ -50,7 +50,23 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL);
-    this.addCron('refreshNft', this.refreshNft, CRON_REFRESH_NFT_INTERVAL);
+
+    state.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo) {
+        console.log('refreshing')
+        // @ts-ignore
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
+      }
+
+      state.subscribeCurrentAccount().subscribe({
+        next: ({ address }) => {
+          console.log('refreshing')
+          this.removeCron('refreshNft');
+          // @ts-ignore
+          this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
+        }
+      });
+    });
   }
 
   recoverAPI () {
@@ -71,14 +87,15 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  async refreshNft() {
-    const currentAccount = await state.getAccountAddress()
-    getAllNftsByAccount(currentAccount as string)
-      .then((rs) => {
-        state.setNft(rs, (nftData) => {
-          console.log(`Fetched nft for address ${currentAccount}`);
-        });
-      })
-      .catch((err) => console.log(err));
+  refreshNft(address: string) {
+    return () => {
+      getAllNftsByAccount(address)
+        .then((rs) => {
+          state.setNft(rs, (nftData) => {
+            console.log(`Update nft state to ${nftData}`);
+          });
+        })
+        .catch((err) => console.log(err));
+    }
   }
 }

@@ -38,7 +38,7 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
       setLoading(true);
       return;
     }
-
+    console.log('change state', nftReducer)
     const nftList = nftReducer?.nftList;
     const total = nftList.length;
     // @ts-ignore

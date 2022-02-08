@@ -16,7 +16,7 @@ interface Props {
   isBusy: boolean;
   onBackClick?: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
-  onNameChange: (name: string) => void;
+  onNameChange?: (name: string) => void;
   className?: string;
   children?: any;
   address?: string | null;
@@ -37,7 +37,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
 
   const _onNameChange = useCallback(
     (name: string | null) => {
-      onNameChange(name || '');
+      onNameChange && onNameChange(name || '');
       setName(name);
     },
     [onNameChange]

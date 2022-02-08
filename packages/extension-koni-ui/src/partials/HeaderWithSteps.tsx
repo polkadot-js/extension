@@ -2,17 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
-
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-
-import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-
-import { ActionContext } from '../components';
+import Link from "@polkadot/extension-koni-ui/components/Link";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -23,10 +19,6 @@ interface Props extends ThemeProps {
 
 function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
-  const _onCancel = useCallback(() => {
-    onAction('/');
-  }, [onAction]);
 
   return (
     <Header
@@ -49,11 +41,12 @@ function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.
             <span className='current'>{step}</span>
             <span className='total'>/2</span>
           </div>
-          <ActionText
+          <Link
             className='header-with-steps-cancel-btn'
-            onClick={_onCancel}
-            text={t<string>('Cancel')}
-          />
+            to='/'
+          >
+            <span>{t<string>('Cancel')}</span>
+          </Link>
         </div>
       </div>
 

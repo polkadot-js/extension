@@ -164,6 +164,10 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
       padding: 0 8px;
       right: 15px;
       z-index: 1;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 100px;
+      white-space: nowrap;
     }
   }
 
@@ -218,7 +222,7 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     margin: 2px 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    // width: 300px;
+    max-width: 150px;
     white-space: nowrap;
 
     &.displaced {

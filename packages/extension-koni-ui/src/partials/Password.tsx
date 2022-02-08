@@ -21,6 +21,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   const [pass2, setPass2] = useState<string | null>(null);
   const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
   const isSecondPasswordValid = useCallback((firstPassword: string): Validator<string> => allOf(
+    isNotShorterThan(1, t<string>('Please fill repeat password')),
     isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')),
     isSameAs(firstPassword, t<string>('Passwords do not match'))
   ), [t]);

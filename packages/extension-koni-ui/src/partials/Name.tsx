@@ -4,7 +4,7 @@
 import React, { useContext, useMemo } from 'react';
 
 import { AccountContext } from '@polkadot/extension-koni-ui/components';
-import KoniInputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
 import ValidatedInput from '@polkadot/extension-koni-ui/components/ValidatedInput';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { isNotShorterThan } from '@polkadot/extension-koni-ui/util/validators';
@@ -30,7 +30,7 @@ export default function Name ({ address, className, isFocused, label, onBlur, on
   return (
     <ValidatedInput
       className={className}
-      component={KoniInputWithLabel}
+      component={InputWithLabel}
       data-input-name
       defaultValue={startValue}
       isFocused={isFocused}

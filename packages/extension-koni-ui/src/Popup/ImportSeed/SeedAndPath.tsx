@@ -143,7 +143,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
       <ButtonArea>
         <NextStepButton
           className='next-step-btn'
-          isDisabled={!address || !!error}
+          isDisabled={!address || !!error || !seed}
           onClick={onNextStep}
         >
           {t<string>('Next Step')}

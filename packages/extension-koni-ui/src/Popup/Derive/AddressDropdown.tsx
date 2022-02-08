@@ -95,7 +95,7 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
 
   .address-dropdown-option__inner {
     margin: 0;
-    width: 300px;
+    width: 375px;
   }
 
   .dropdown {
@@ -110,8 +110,6 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     box-sizing: border-box;
     border-radius: 8px;
     margin-top: 5px;
-    left: 16px;
-    right: 16px;
 
     &.visible{
       visibility: visible;

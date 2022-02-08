@@ -83,7 +83,7 @@ export const getBirdsKanariaByAccount = async (account: string) => {
 }
 
 export const getMetadata = (metadata_url: string) => {
-  const url = getIPFSLink(metadata_url)
+  const url = parseIpfsLink(metadata_url)
   if(!url) return undefined
   return fetch(url, {
     method: 'GET',
@@ -92,4 +92,8 @@ export const getMetadata = (metadata_url: string) => {
     .then(res => res.json())
 }
 
-const getIPFSLink = (string: string): string | undefined => string ? SERVER + string.slice(12) : undefined;
+const parseIpfsLink = (ipfsLink: string) => {
+  if (!ipfsLink.includes('ipfs://ipfs/'))
+    return SERVER + ipfsLink;
+  return SERVER + ipfsLink.split('ipfs://ipfs/')[1];
+};

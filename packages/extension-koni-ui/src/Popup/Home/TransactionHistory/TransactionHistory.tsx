@@ -64,6 +64,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
           target={'_blank'}
         >
           <TransactionHistoryItem
+            isSupportScanExplorer={true}
             item={item}
             registry={registryMap[networkKey]}
           />
@@ -74,7 +75,7 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
     return (
       <div key={extrinsicHash}>
         <TransactionHistoryItem
-          isSupportSubscan={false}
+          isSupportScanExplorer={false}
           item={item}
           registry={registryMap[networkKey]}
         />

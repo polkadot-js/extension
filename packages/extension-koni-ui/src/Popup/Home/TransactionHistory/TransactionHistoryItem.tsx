@@ -41,7 +41,7 @@ function getContainerClassName (item: TransactionHistoryItemType, extraClass = '
 }
 
 function TransactionHistoryItem ({ className,
-  isSupportScanExplorer = true,
+  isSupportScanExplorer = false,
   item,
   registry }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -126,7 +126,7 @@ function TransactionHistoryItem ({ className,
         </div>
       </div>
 
-      {isSupportScanExplorer && (<Tooltip
+      {!isSupportScanExplorer && (<Tooltip
         text={t<string>('You can\'t view this transaction because it isn\'t supported on Subscan')}
         trigger={trigger}
       />)}

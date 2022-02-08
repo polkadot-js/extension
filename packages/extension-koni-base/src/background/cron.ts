@@ -11,6 +11,7 @@ import {
   CRON_REFRESH_PRICE_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
 import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
+import {reformatAddress} from "@polkadot/extension-koni-base/utils/utils";
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -89,7 +90,10 @@ export class KoniCron {
 
   refreshNft(address: string) {
     return () => {
-      getAllNftsByAccount(address)
+      // 2 is prefix of Kusama
+      const reformattedAddress = reformatAddress(address, 2);
+
+      getAllNftsByAccount(reformattedAddress)
         .then((rs) => {
           state.setNft(rs, (nftData) => {
             console.log(`Update nft state to ${nftData}`);

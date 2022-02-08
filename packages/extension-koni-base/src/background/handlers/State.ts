@@ -19,10 +19,10 @@ import {
 } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+// import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
 import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import NftStore from '@polkadot/extension-koni-base/stores/Nft';
+// import NftStore from '@polkadot/extension-koni-base/stores/Nft';
 import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
@@ -58,12 +58,12 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
-  private readonly nftStore = new NftStore();
+  // private readonly nftStore = new NftStore();
   private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
-  private nftStoreReady = false;
+  // private nftStoreReady = false;
   private stakingStoreReady = false;
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
@@ -134,27 +134,30 @@ export default class KoniState extends State {
     this.nftState = nftData
     if (callback) {
       callback(nftData);
-      this.nftStoreReady = true;
     }
     this.nftSubject.next(nftData);
   }
 
   public getNft (account: string, update: (value: NftJson) => void): void {
-    this.nftStore.get('NftData', (rs) => {
-      if (this.nftStoreReady) update(rs);
-      else {
-        getAllNftsByAccount(account)
-          .then((rs) => {
-            this.nftState = rs;
-            console.log('got nft', this.nftState)
-            update(rs);
-          })
-          .catch((e) => {
-            console.error(e);
-            throw e;
-          });
-      }
-    });
+    update(this.nftState);
+
+    // return this.nftState;
+
+    // this.nftStore.get('NftData', (rs) => {
+    //   if (this.nftStoreReady) update(rs);
+    //   else {
+    //     getAllNftsByAccount(account)
+    //       .then((rs) => {
+    //         this.nftState = rs;
+    //         console.log('got nft', this.nftState)
+    //         update(rs);
+    //       })
+    //       .catch((e) => {
+    //         console.error(e);
+    //         throw e;
+    //       });
+    //   }
+    // });
   }
 
   public subscribeNft () {

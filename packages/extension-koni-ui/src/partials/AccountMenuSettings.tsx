@@ -14,6 +14,8 @@ import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Link from '@polkadot/extension-koni-ui/components/Link';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import MenuSettingItem from '@polkadot/extension-koni-ui/components/MenuSettingItem';
+import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
+import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import AccountsTree from '@polkadot/extension-koni-ui/Popup/Accounts/AccountsTree';
 import getNetworkMap from '@polkadot/extension-koni-ui/util/getNetworkMap';
 
@@ -31,13 +33,20 @@ const jsonPath = '/account/restore-json';
 
 function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  // const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const [filteredAccount, setFilteredAccount] = useState<AccountWithChildren[]>([]);
   const { hierarchy } = useContext(AccountContext);
   const { master } = useContext(AccountContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
   const [filter, setFilter] = useState('');
   const mediaAllowed = useContext(MediaContext);
+  const isPopup = useIsPopup();
+
+  const _openJson = useCallback(
+    () => {
+      window.localStorage.setItem('popupNavigation', jsonPath);
+      windowOpen(jsonPath);
+    }, []
+  );
 
   useEffect(() => {
     setFilteredAccount(
@@ -132,7 +141,8 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
-              to={jsonPath}
+              onClick={isPopup ? _openJson : undefined}
+              to={isPopup ? undefined : jsonPath}
             >
               <FontAwesomeIcon icon={faFileUpload} />
               <span>{t<string>('Restore account from backup JSON file')}</span>

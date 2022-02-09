@@ -163,7 +163,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     return () => {
       isSync = false;
     };
-  }, [currentAccount?.genesisHash]);
+  }, [currentAccount?.genesisHash, accounts]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
@@ -290,7 +290,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                 className={`setting-icon-wrapper ${isSettingsOpen && 'pointer-events-none'}`}
                 onClick={_toggleSettings}
               >
-                {currentAccount
+                {!!currentAccount && !!currentAccount.address
                   ? (
                     <Identicon
                       className='identityIcon'

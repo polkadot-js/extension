@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
-import React, { useCallback, useContext } from 'react';
+import React, {useCallback, useContext } from 'react';
 import styled from 'styled-components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-import {ActionContext, Link} from '../../components';
+import { ActionContext, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {

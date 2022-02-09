@@ -201,7 +201,8 @@ export const getAllNftsByAccount = async (account: string): Promise<NftJson> => 
     // const [rmrkNfts] = await Promise.all([_rmrkNfts]);
     // let total = rmrkNfts.total;
     // let allCollections = [...rmrkNfts.allCollections]
-    console.log(`Fetched ${total} nfts from api`)
+    console.log(`Fetched ${total} nfts from api`);
+
     return {
       total,
       nftList: allCollections
@@ -211,4 +212,3 @@ export const getAllNftsByAccount = async (account: string): Promise<NftJson> => 
     throw e;
   }
 };
-

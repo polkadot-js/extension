@@ -1,10 +1,14 @@
-import {NftJson} from "@polkadot/extension-base/background/KoniTypes";
-import {useEffect} from "react";
-import {subscribeNft} from "@polkadot/extension-koni-ui/messaging";
-import {store} from "@polkadot/extension-koni-ui/stores";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { useEffect } from 'react';
+
+import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
+import { subscribeNft } from '@polkadot/extension-koni-ui/messaging';
+import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateNft (nftData: NftJson): void {
-  store.dispatch({type: 'nft/update', payload: nftData});
+  store.dispatch({ type: 'nft/update', payload: nftData });
 }
 
 export default function useSetupNft (): void {

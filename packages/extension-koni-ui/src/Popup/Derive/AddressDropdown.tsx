@@ -34,7 +34,10 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   useOutsideClick(ref, _hideDropdown);
 
   return (
-    <div className={className} ref={ref}>
+    <div
+      className={className}
+      ref={ref}
+    >
       <div
         className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}
         onClick={_toggleDropdown}

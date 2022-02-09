@@ -4,14 +4,10 @@
 import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
-import {
-  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
-  CRON_REFRESH_NFT_INTERVAL,
-  CRON_REFRESH_PRICE_INTERVAL
-} from '@polkadot/extension-koni-base/constants';
-import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
-import {reformatAddress} from "@polkadot/extension-koni-base/utils/utils";
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -54,14 +50,14 @@ export class KoniCron {
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
-        console.log('refreshing')
+        console.log('refreshing');
         // @ts-ignore
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          console.log('refreshing')
+          console.log('refreshing');
           this.removeCron('refreshNft');
           // @ts-ignore
           this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
@@ -88,7 +84,7 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft(address: string) {
+  refreshNft (address: string) {
     return () => {
       // 2 is prefix of Kusama
       const reformattedAddress = reformatAddress(address, 2);
@@ -100,6 +96,6 @@ export class KoniCron {
           });
         })
         .catch((err) => console.log(err));
-    }
+    };
   }
 }

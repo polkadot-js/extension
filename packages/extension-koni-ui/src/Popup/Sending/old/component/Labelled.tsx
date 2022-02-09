@@ -1,11 +1,12 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
 import styled from 'styled-components';
 
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+
 import LabelHelp from './LabelHelp';
-import {ThemeProps} from "@polkadot/extension-ui/types";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -46,7 +47,7 @@ function Labelled ({ className = '', children, help, isFull, isHidden, isOuter, 
   );
 }
 
-export default React.memo(styled(Labelled)(({theme}: Props) => `
+export default React.memo(styled(Labelled)(({ theme }: Props) => `
   .withEllipsis {
     display: inline;
     overflow: hidden;

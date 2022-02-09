@@ -1,18 +1,22 @@
-import {AccountBalanceType, CrowdloanContributeValueType} from "@polkadot/extension-koni-ui/hooks/screen/home/types";
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
-import BigN from "bignumber.js";
-import {BalanceInfo} from "@polkadot/extension-koni-ui/util/types";
-import {APIItemState, ChainRegistry, NetWorkGroup} from "@polkadot/extension-base/background/KoniTypes";
-import {BN_ZERO, getBalances, parseBalancesInfo} from '@polkadot/extension-koni-ui/util';
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
-function getCrowdloadChainRegistry(group: NetWorkGroup, chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
-  if (group === 'POLKADOT_PARACHAIN' && chainRegistryMap['polkadot']) {
-    return chainRegistryMap['polkadot'];
+import BigN from 'bignumber.js';
+import { useSelector } from 'react-redux';
+
+import { APIItemState, ChainRegistry, NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountBalanceType, CrowdloanContributeValueType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { BN_ZERO, getBalances, parseBalancesInfo } from '@polkadot/extension-koni-ui/util';
+import { BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
+
+function getCrowdloadChainRegistry (group: NetWorkGroup, chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
+  if (group === 'POLKADOT_PARACHAIN' && chainRegistryMap.polkadot) {
+    return chainRegistryMap.polkadot;
   }
 
-  if (group === 'KUSAMA_PARACHAIN' && chainRegistryMap['kusama']) {
-    return chainRegistryMap['kusama'];
+  if (group === 'KUSAMA_PARACHAIN' && chainRegistryMap.kusama) {
+    return chainRegistryMap.kusama;
   }
 
   return null;
@@ -30,28 +34,25 @@ function getGroupNetworkKey (group: NetWorkGroup): string {
   return '';
 }
 
-export default function useAccountBalance(currentNetworkKey: string,
-                                          showedNetworks: string[],
-                                          crowdloanNetworks: string[]
+export default function useAccountBalance (currentNetworkKey: string,
+  showedNetworks: string[],
+  crowdloanNetworks: string[]
 ): AccountBalanceType {
-
-  const {
+  const { balance: balanceReducer,
     chainRegistry: chainRegistryMap,
-    balance: balanceReducer,
-    price: priceReducer,
     crowdloan: crowdloanReducer,
-    networkMetadata: networkMetadataMap
-  } = useSelector((state: RootState) => state);
+    networkMetadata: networkMetadataMap,
+    price: priceReducer } = useSelector((state: RootState) => state);
 
   const balanceMap = balanceReducer.details;
   const crowdLoanMap = crowdloanReducer.details;
-  const {priceMap} = priceReducer;
+  const { priceMap } = priceReducer;
 
   let totalBalanceValue = new BigN(0);
   const networkBalanceMaps: Record<string, BalanceInfo> = {};
   const crowdloanContributeMap: Record<string, CrowdloanContributeValueType> = {};
 
-  showedNetworks.forEach(networkKey => {
+  showedNetworks.forEach((networkKey) => {
     const registry = chainRegistryMap[networkKey];
     const balanceItem = balanceMap[networkKey];
 
@@ -62,10 +63,10 @@ export default function useAccountBalance(currentNetworkKey: string,
     if (balanceItem.state.valueOf() === APIItemState.NOT_SUPPORT.valueOf()) {
       networkBalanceMaps[networkKey] = {
         symbol: 'Unit',
-          balanceValue: BN_ZERO,
-          convertedBalanceValue: BN_ZERO,
-          detailBalances: [],
-          childrenBalances: []
+        balanceValue: BN_ZERO,
+        convertedBalanceValue: BN_ZERO,
+        detailBalances: [],
+        childrenBalances: []
       };
 
       return;
@@ -87,13 +88,13 @@ export default function useAccountBalance(currentNetworkKey: string,
           frozenMisc: balanceItem.miscFrozen || '0'
         }
       }
-    })
+    });
 
     networkBalanceMaps[networkKey] = balanceInfo;
     totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);
   });
 
-  crowdloanNetworks.forEach(networkKey => {
+  crowdloanNetworks.forEach((networkKey) => {
     const networkMetadata = networkMetadataMap[networkKey];
 
     if (!networkMetadata || !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].includes(networkMetadata.group)) {
@@ -103,14 +104,14 @@ export default function useAccountBalance(currentNetworkKey: string,
     const registry = getCrowdloadChainRegistry(networkMetadata.group, chainRegistryMap);
     const crowdLoanItem = crowdLoanMap[networkKey];
 
-    if (!registry
-        || !crowdLoanItem
-        || crowdLoanItem.state.valueOf() !== APIItemState.READY.valueOf()) {
+    if (!registry ||
+        !crowdLoanItem ||
+        crowdLoanItem.state.valueOf() !== APIItemState.READY.valueOf()) {
       return;
     }
 
     const groupNetworkKey = getGroupNetworkKey(networkMetadata.group);
-    const price = !!groupNetworkKey ? priceMap[groupNetworkKey] : undefined;
+    const price = groupNetworkKey ? priceMap[groupNetworkKey] : undefined;
 
     const contributeInfo = getBalances({
       balance: crowdLoanItem.contribute,
@@ -125,7 +126,7 @@ export default function useAccountBalance(currentNetworkKey: string,
     };
 
     if (['all', 'polkadot', 'kusama'].includes(currentNetworkKey)) {
-        totalBalanceValue = totalBalanceValue.plus(contributeInfo.convertedBalanceValue);
+      totalBalanceValue = totalBalanceValue.plus(contributeInfo.convertedBalanceValue);
     }
   });
 

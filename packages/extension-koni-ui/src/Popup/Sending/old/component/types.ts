@@ -1,4 +1,4 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // import type { IconName } from '@fortawesome/fontawesome-svg-core';
@@ -7,9 +7,10 @@
 // import type { Abi } from '@polkadot/api-contract';
 // import type { ActionStatus } from '../react-components/Status/types';
 import type { AccountId } from '@polkadot/types/interfaces';
+
 // import type { TxCallback, TxFailedCallback } from './Status/types';
 //
-import {AccountIndex, Address} from '@polkadot/types/interfaces';
+import { AccountIndex, Address } from '@polkadot/types/interfaces';
 
 // export interface BareProps {
 //   children?: React.ReactNode;

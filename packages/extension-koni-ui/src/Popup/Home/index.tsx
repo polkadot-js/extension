@@ -6,11 +6,7 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  ChainRegistry,
-  CurrentNetworkInfo,
-  TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, CurrentNetworkInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -28,9 +24,11 @@ import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
+import useSetupTransactionHistory from '@polkadot/extension-koni-ui/hooks/store/useSetupTransactionHistory';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
+import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -44,8 +42,6 @@ import Crowdloans from './Crowdloans/Crowdloans';
 import StackingEmptyList from './Stacking/EmptyList';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
-import NftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer";
-import useSetupTransactionHistory from "@polkadot/extension-koni-ui/hooks/store/useSetupTransactionHistory";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -106,13 +102,10 @@ function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
 
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { hierarchy } = useContext(AccountContext);
-  const { currentAccount: { account: currentAccount },
+  const { chainRegistry: chainRegistryMap,
+    currentAccount: { account: currentAccount },
     currentNetwork,
-    chainRegistry: chainRegistryMap,
-    transactionHistory: {
-      items: transactionHistoryItems
-    }
-  } = useSelector((state: RootState) => state);
+    transactionHistory: { items: transactionHistoryItems } } = useSelector((state: RootState) => state);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
@@ -123,15 +116,15 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   }
 
   return (<Home
+    chainRegistryMap={chainRegistryMap}
     className={className}
     currentAccount={currentAccount}
     network={currentNetwork}
-    chainRegistryMap={chainRegistryMap}
     transactionHistoryItems={transactionHistoryItems}
-  />);
+          />);
 }
 
-function Home ({ className, currentAccount, network, chainRegistryMap, transactionHistoryItems }: Props): React.ReactElement {
+function Home ({ chainRegistryMap, className, currentAccount, network, transactionHistoryItems }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
     networkPrefix } = network;
@@ -161,18 +154,18 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
 
   const showedNetworks = useShowedNetworks(networkKey);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
+
   useSetupTransactionHistory(address, showedNetworks);
 
-  const {
-    crowdloanContributeMap,
+  const { crowdloanContributeMap,
     networkBalanceMaps,
-    totalBalanceValue
-  } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
+    totalBalanceValue } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
   const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 
   const _toggleZeroBalances = (): void => {
     setShowZeroBalances((v) => {
       window.localStorage.setItem('show_zero_balances', v ? '0' : '1');
+
       return !v;
     });
   };
@@ -255,7 +248,7 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
         )}
 
         {activatedTab === 2 && (
-          <NftContainer/>
+          <NftContainer />
         )}
 
         {activatedTab === 3 && (
@@ -272,8 +265,8 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
 
         {activatedTab === 5 && (
           <TransactionHistory
-            registryMap={chainRegistryMap}
             items={transactionHistoryItems}
+            registryMap={chainRegistryMap}
           />
         )}
       </div>

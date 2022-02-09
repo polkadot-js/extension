@@ -1,4 +1,4 @@
-// Copyright 2017-2021 @polkadot/react-hooks authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { PromiseResult, QueryableStorageEntry } from '@polkadot/api/types';
@@ -67,7 +67,7 @@ function isMapFn (fn: unknown): fn is QueryMapFn {
 // extract the serialized and mapped params, all ready for use in our call
 function extractParams <T> (fn: unknown, params: unknown[], { paramMap = transformIdentity }: CallOptions<T> = {}, depth?: any): [string, CallParams | null] {
   return [
-    JSON.stringify({ f: (fn as { name: string })?.name, p: params, d: depth}),
+    JSON.stringify({ f: (fn as { name: string })?.name, p: params, d: depth }),
     params.length === 0 || !params.some((param) => isNull(param) || isUndefined(param))
       ? paramMap(params)
       : null

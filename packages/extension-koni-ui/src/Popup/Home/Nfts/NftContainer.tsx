@@ -1,26 +1,26 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 // @ts-ignore
 import styled from 'styled-components';
 
-import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList';
+import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import NftCollectionPreview from './NftCollectionPreview';
-import EmptyList from "@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList";
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-const size = 9
+const size = 9;
 
 function NftContainer ({ className }: Props): React.ReactElement<Props> {
   const [nftJson, setNftJson] = useState();
@@ -31,16 +31,19 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
   const [totalCollection, setTotalCollection] = useState(0);
   const [page, setPage] = useState(1);
   const [currentNftList, setCurrentNftList] = useState();
-  const {nft: nftReducer} = useSelector((state: RootState) => state);
+  const { nft: nftReducer } = useSelector((state: RootState) => state);
 
   const _onChangeState = (): void => {
     if (!nftReducer?.ready) {
       setLoading(true);
+
       return;
     }
-    console.log('change state', nftReducer)
+
+    console.log('change state', nftReducer);
     const nftList = nftReducer?.nftList;
     const total = nftList.length;
+
     // @ts-ignore
     setNftJson(nftReducer);
     // @ts-ignore
@@ -49,7 +52,7 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
     // @ts-ignore
     setCurrentNftList(nftList.slice(0, total > size ? size : total));
     setLoading(false);
-  }
+  };
 
   useEffect(() => {
     _onChangeState();
@@ -86,18 +89,18 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {loading && <div className={'loading-container'}>
-        <Spinner size={'large'}/>
+        <Spinner size={'large'} />
       </div>}
 
-      {/*@ts-ignore*/}
+      {/* @ts-ignore */}
       {nftJson?.total === 0 && !loading &&
-        <EmptyList/>
+        <EmptyList />
       }
 
-      {/*@ts-ignore*/}
+      {/* @ts-ignore */}
       {!loading && !showCollectionDetail && nftJson?.total > 0 &&
       <div className={'total-title'}>
-        {/*@ts-ignore*/}
+        {/* @ts-ignore */}
         Own {nftJson?.total} NFT{nftJson?.total > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
       </div>
       }
@@ -154,17 +157,17 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
         </div>
       }
 
-      {/*{!loading &&*/}
-      {/*  <div className={'footer'}>*/}
-      {/*    <div>Don't see your tokens?</div>*/}
-      {/*    <div>*/}
-      {/*      <span*/}
-      {/*        className={'link'}*/}
-      {/*        onClick={() => _onChangeState()}*/}
-      {/*      >Refresh list</span> or <span className={'link'}>import tokens</span>*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
-      {/*}*/}
+      {/* {!loading && */}
+      {/*  <div className={'footer'}> */}
+      {/*    <div>Don't see your tokens?</div> */}
+      {/*    <div> */}
+      {/*      <span */}
+      {/*        className={'link'} */}
+      {/*        onClick={() => _onChangeState()} */}
+      {/*      >Refresh list</span> or <span className={'link'}>import tokens</span> */}
+      {/*    </div> */}
+      {/*  </div> */}
+      {/* } */}
     </div>
   );
 }

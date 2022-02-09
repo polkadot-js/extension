@@ -1,5 +1,8 @@
-import {AccountJson} from "@polkadot/extension-base/background/types";
-import {TransactionHistoryItemType} from "@polkadot/extension-base/background/KoniTypes";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson } from '@polkadot/extension-base/background/types';
 
 export type CurrentAccountType = {
   account?: AccountJson | null;

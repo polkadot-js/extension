@@ -1,13 +1,13 @@
-// Copyright 2017-2021 @polkadot/react-signer authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {KeyringPair} from '@polkadot/keyring/types';
-import type {AddressFlags} from './types';
+import type { KeyringPair } from '@polkadot/keyring/types';
+import type { AddressFlags } from './types';
 
-import {BackgroundWindow} from "@polkadot/extension-base/background/KoniTypes";
+import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const {keyring} = bWindow.pdotApi;
+const { keyring } = bWindow.pdotApi;
 
 const NO_FLAGS = { accountOffset: 0, addressOffset: 0, isHardware: false, isMultisig: false, isProxied: false, isQr: false, isUnlockable: false, threshold: 0, who: [] };
 
@@ -72,4 +72,3 @@ export function extractExternal (accountId: string | null): AddressFlags {
 export function recodeAddress (address: string | Uint8Array): string {
   return keyring.encodeAddress(keyring.decodeAddress(address));
 }
-

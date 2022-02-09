@@ -1,13 +1,13 @@
-// Copyright 2017-2021 @polkadot/react-signer authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import Password from "@polkadot/extension-koni-ui/Popup/Sending/parts/Password";
-import Toggle from "@polkadot/extension-koni-ui/components/Toggle";
 
+import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import Password from '@polkadot/extension-koni-ui/Popup/Sending/parts/Password';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 const UNLOCK_MINS = 15;
 
@@ -55,7 +55,7 @@ function Unlock ({ address, className, error, onChange, onEnter, tabIndex }: Pro
   );
 }
 
-export default React.memo(styled(Unlock)(({theme}: Props) => `
+export default React.memo(styled(Unlock)(({ theme }: Props) => `
   .kn-toggle-wrapper {
       display: flex;
       margin-top: 10px;

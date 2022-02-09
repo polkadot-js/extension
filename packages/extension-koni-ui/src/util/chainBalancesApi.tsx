@@ -110,12 +110,10 @@ export type BalanceValueType = {
   symbol: string
 }
 
-export const getBalances = ({
-                              balance,
-                              decimals,
-                              symbol,
-                              price,
-                            }: BalanceType): BalanceValueType => {
+export const getBalances = ({ balance,
+  decimals,
+  price,
+  symbol }: BalanceType): BalanceValueType => {
   const stable = symbol.toLowerCase().includes('usd') ? 1 : 0;
 
   const balanceValue = getBalanceWithDecimals({ balance, decimals });
@@ -132,7 +130,7 @@ export const getBalances = ({
 };
 
 export const parseBalancesInfo = (priceMap: Record<string, number>, balanceInfo: AccountInfoItem): BalanceInfo => {
-  const { info, tokenDecimals, tokenSymbol, networkKey } = balanceInfo;
+  const { info, networkKey, tokenDecimals, tokenSymbol } = balanceInfo;
 
   const decimals = tokenDecimals && !isEmptyArray(tokenDecimals) ? tokenDecimals[0] : 0;
   const symbol = tokenSymbol && !isEmptyArray(tokenSymbol) ? tokenSymbol[0] : '';

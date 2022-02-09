@@ -5,10 +5,10 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AccountJson, RequestAccountSubscribe } from '@polkadot/extension-base/background/types';
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 
 export interface StakingItem {
   name: string,
@@ -46,7 +46,6 @@ export interface NftJson {
   total: number;
   nftList: Array<NftCollection>;
 }
-
 
 export interface PriceJson {
   ready?: boolean,

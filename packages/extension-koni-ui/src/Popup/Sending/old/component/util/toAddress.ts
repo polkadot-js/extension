@@ -1,13 +1,13 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // import { keyring } from '@polkadot/ui-keyring';
+import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
 import { assert, hexToU8a, isHex } from '@polkadot/util';
 import { ethereumEncode } from '@polkadot/util-crypto';
-import {BackgroundWindow} from "@polkadot/extension-base/background/KoniTypes";
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const {keyring} = bWindow.pdotApi;
+const { keyring } = bWindow.pdotApi;
 
 export function toAddress (value?: string | Uint8Array | null, allowIndices = false): string | undefined {
   if (value) {

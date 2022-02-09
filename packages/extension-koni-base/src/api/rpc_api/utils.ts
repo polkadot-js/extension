@@ -1,3 +1,6 @@
+// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // Node >= 14 doesnt have require by default. Fix this maybe ?
 import { decodeAddress, encodeAddress } from '@polkadot/keyring';
 import { BN, hexToU8a, isHex } from '@polkadot/util';

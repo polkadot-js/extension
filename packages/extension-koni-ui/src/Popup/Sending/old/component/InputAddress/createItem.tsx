@@ -1,4 +1,4 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
@@ -13,8 +13,8 @@ export default function createItem (option: KeyringSectionOption, isUppercase = 
     ...option,
     text: (
       <KeyPair
-        name={option.name || ''}
         address={option.key || ''}
+        name={option.name || ''}
       />
     )
   };

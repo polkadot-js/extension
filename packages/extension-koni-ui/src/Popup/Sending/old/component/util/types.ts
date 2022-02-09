@@ -1,10 +1,11 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+import React from 'react';
 
 import { RegistrarIndex } from '@polkadot/types/interfaces/identity/types';
 
 import { DisplayedJudgement } from '../types';
-import React from "react";
 
 export interface DropdownOption {
   className?: string;

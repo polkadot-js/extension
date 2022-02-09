@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
 import { getBalances } from '@polkadot/extension-koni-base/api/rpc_api/index';
 import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
-import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
 
 jest.setTimeout(5000000000000);
 
@@ -21,8 +21,9 @@ describe('test rpc api', () => {
 describe('test api get staking', () => {
   test('test api get bonded token from endpoints', async () => {
     const resp = await getAllNftsByAccount('CmNYnM3pStTCKgXq67Cp8rURA6GTfdfseJx7posbg2vJVHQ');
-    const collection = resp.nftList[0]
-    const item = collection.nftItems
+    const collection = resp.nftList[0];
+    const item = collection.nftItems;
+
     console.log(item);
     // const allChainsMapping = getAllChainsMapping()
     // const apis = await connectChains(allChainsMapping)

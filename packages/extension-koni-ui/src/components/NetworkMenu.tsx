@@ -59,8 +59,8 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       if (selectedGroup && selectedGroup.length) {
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
-            .includes(lowerCaseFilteredNetwork)
-              && network.group === selectedGroup));
+            .includes(lowerCaseFilteredNetwork) &&
+              network.group === selectedGroup));
       } else {
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()

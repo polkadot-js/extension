@@ -3,7 +3,8 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+
+import { ChainRegistry, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import arrowReceived from '@polkadot/extension-koni-ui/assets/arrow-received.svg';
 import arrowSend from '@polkadot/extension-koni-ui/assets/arrow-send.svg';
 import arrowSendError from '@polkadot/extension-koni-ui/assets/arrow-send-error.svg';
@@ -13,7 +14,6 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getBalances, toShort } from '@polkadot/extension-koni-ui/util';
 import { customFormatDate } from '@polkadot/extension-koni-ui/util/customFormatDate';
-import {ChainRegistry} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   className?: string;

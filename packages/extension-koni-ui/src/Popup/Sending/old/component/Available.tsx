@@ -1,14 +1,15 @@
-// Copyright 2017-2021 @polkadot/react-query authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {DeriveBalancesAll} from '@polkadot/api-derive/types';
-import type {AccountId, AccountIndex, Address} from '@polkadot/types/interfaces';
+import type { DeriveBalancesAll } from '@polkadot/api-derive/types';
+import type { AccountId, AccountIndex, Address } from '@polkadot/types/interfaces';
 
 import React from 'react';
 
+import { ApiPromise } from '@polkadot/api';
+import { useCall } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall';
+
 import FormatBalance from './FormatBalance';
-import {ApiPromise} from "@polkadot/api";
-import {useCall} from "@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall";
 
 interface Props {
   children?: React.ReactNode;
@@ -19,7 +20,7 @@ interface Props {
   apiUrl: string
 }
 
-function AvailableDisplay ({ children, className = '', label, params, api, apiUrl}: Props): React.ReactElement<Props> {
+function AvailableDisplay ({ api, apiUrl, children, className = '', label, params }: Props): React.ReactElement<Props> {
   const allBalances = useCall<DeriveBalancesAll>(api.derive.balances?.all, [params], undefined, apiUrl);
 
   return (

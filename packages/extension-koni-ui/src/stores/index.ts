@@ -4,15 +4,15 @@
 import { configureStore } from '@reduxjs/toolkit/dist';
 
 import BalanceReducer from './Balance';
+import ChainRegistryReducer from './ChainRegistry';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
-import ChainRegistryReducer from './ChainRegistry';
-import TransactionHistoryReducer from './TransactionHistory';
 import NetworkMetadataReducer from './NetworkMetadata';
 import NftReducer from './Nft';
 import PriceReducer from './Price';
 import StakingReducer from './Staking';
+import TransactionHistoryReducer from './TransactionHistory';
 
 const reducers = {
   staking: StakingReducer,

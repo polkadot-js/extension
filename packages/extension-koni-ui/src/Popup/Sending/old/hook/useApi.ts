@@ -1,16 +1,21 @@
-import { TokenUnit } from "../component/InputNumber";
-import {formatBalance} from "@polkadot/util";
-import {ApiProps, BackgroundWindow} from "@polkadot/extension-base/background/KoniTypes";
-import {useEffect, useState} from "react";
-import {ApiInitStatus} from "@polkadot/extension-koni-base/api/dotsama";
-import { initApi } from "@polkadot/extension-koni-ui/messaging";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { useEffect, useState } from 'react';
+
+import { ApiProps, BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
+import { initApi } from '@polkadot/extension-koni-ui/messaging';
+import { formatBalance } from '@polkadot/util';
+
+import { TokenUnit } from '../component/InputNumber';
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const {apisMap} = bWindow.pdotApi;
+const { apisMap } = bWindow.pdotApi;
 
-function setupDefaultFormatBalance(apiProps: ApiProps, networkKey: string) {
-  const {defaultFormatBalance} = apiProps;
-  const {decimals, unit} = defaultFormatBalance;
+function setupDefaultFormatBalance (apiProps: ApiProps, networkKey: string) {
+  const { defaultFormatBalance } = apiProps;
+  const { decimals, unit } = defaultFormatBalance;
 
   formatBalance.setDefaults({
     decimals,
@@ -20,14 +25,13 @@ function setupDefaultFormatBalance(apiProps: ApiProps, networkKey: string) {
   TokenUnit.setAbbr(unit as string);
 }
 
-export default function useApi(networkKey: string): ApiProps {
-  const [value, setValue] = useState({isApiReady: false} as ApiProps);
+export default function useApi (networkKey: string): ApiProps {
+  const [value, setValue] = useState({ isApiReady: false } as ApiProps);
 
   useEffect(() => {
     let isSync = true;
 
     (async () => {
-
       let apiInfo = apisMap[networkKey];
 
       if (apiInfo) {
@@ -38,6 +42,7 @@ export default function useApi(networkKey: string): ApiProps {
           }
         } else {
           await apiInfo.isReady;
+
           if (isSync) {
             setupDefaultFormatBalance(apiInfo, networkKey);
             setValue(apiInfo);
@@ -54,14 +59,14 @@ export default function useApi(networkKey: string): ApiProps {
         // , ApiInitStatus.ALREADY_EXIST.valueOf()
       ].includes(apiInitiationStatus.valueOf())) {
         if (isSync) {
-          setValue({isApiReady: false, isNotSupport: true} as ApiProps);
+          setValue({ isApiReady: false, isNotSupport: true } as ApiProps);
         }
 
         return;
       }
 
       if (isSync) {
-        setValue({isApiReady: false} as ApiProps);
+        setValue({ isApiReady: false } as ApiProps);
       }
 
       apiInfo = apisMap[networkKey];

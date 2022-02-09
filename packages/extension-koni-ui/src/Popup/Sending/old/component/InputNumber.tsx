@@ -1,22 +1,21 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {SiDef} from '@polkadot/util/types';
-import type {BitLength} from './types';
+import type { SiDef } from '@polkadot/util/types';
+import type { BitLength } from './types';
 
 import BN from 'bn.js';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import {BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined} from '@polkadot/util';
-
+import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { Registry } from '@polkadot/types/types';
+import { BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
 
 import Dropdown from './Dropdown';
-import Input, {KEYS_PRE} from './Input';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {BitLengthOption} from "@polkadot/extension-koni-ui/components/constants";
-import {Registry} from "@polkadot/types/types";
+import Input, { KEYS_PRE } from './Input';
 
 interface Props {
   registry: Registry;
@@ -77,11 +76,11 @@ function getRegex (isDecimal: boolean): RegExp {
 function getSiOptions (symbol: string, decimals?: number): { text: string; value: string }[] {
   const a =
      formatBalance.getOptions(decimals).map(({ power, text, value }): { text: string; value: string } => ({
-    text: power === 0
-      ? symbol
-      : text,
-    value
-  }));
+       text: power === 0
+         ? symbol
+         : text,
+       value
+     }));
 
   return a;
 }
@@ -179,7 +178,7 @@ function getValues (registry: Registry, value: BN | string = '', si: SiDef | nul
     : getValuesFromString(registry, value, si, bitLength, isZeroable, maxValue, decimals);
 }
 
-function InputNumber ({registry, autoFocus, bitLength = DEFAULT_BITLENGTH, children, className = '', defaultValue, help, isDecimal, isFull, isSi, isDisabled, isError = false, isWarning, isZeroable = true, label, labelExtra, maxLength, maxValue, onChange, onEnter, onEscape, placeholder, siDecimals, siDefault, siSymbol, value: propsValue }: Props): React.ReactElement<Props> {
+function InputNumber ({ registry, autoFocus, bitLength = DEFAULT_BITLENGTH, children, className = '', defaultValue, help, isDecimal, isFull, isSi, isDisabled, isError = false, isWarning, isZeroable = true, label, labelExtra, maxLength, maxValue, onChange, onEnter, onEscape, placeholder, siDecimals, siDefault, siSymbol, value: propsValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [si, setSi] = useState<SiDef | null>(() =>
     isSi
@@ -318,7 +317,7 @@ function InputNumber ({registry, autoFocus, bitLength = DEFAULT_BITLENGTH, child
   );
 }
 
-export default React.memo(styled(InputNumber)(({ theme }: ThemeProps) =>`
+export default React.memo(styled(InputNumber)(({ theme }: ThemeProps) => `
   background: ${theme.backgroundAccountAddress};
   border-radius: 8px;
   padding: 7px 120px 7px 16px;

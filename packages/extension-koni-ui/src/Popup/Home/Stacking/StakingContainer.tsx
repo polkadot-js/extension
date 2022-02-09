@@ -25,6 +25,7 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
       if (currentAccount && currentAccount.address) {
         setLoading(true);
         const resp = await getStaking(currentAccount.address);
+
         console.log(resp);
         setData(resp);
         setLoading(false);

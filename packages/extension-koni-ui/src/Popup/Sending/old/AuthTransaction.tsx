@@ -1,27 +1,32 @@
-import React, {useCallback, useEffect, useState} from "react";
-import styled from "styled-components";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {assert, BN_ZERO} from '@polkadot/util';
-import type {SignerOptions} from '@polkadot/api/submittable/types';
-import {BackgroundWindow} from "@polkadot/extension-base/background/KoniTypes";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {SubmittableExtrinsic} from "@polkadot/api/types";
-import {AddressProxy, TxHandler} from "@polkadot/extension-koni-ui/Popup/Sending/old/types";
-import {cacheUnlock} from "@polkadot/extension-koni-ui/Popup/Sending/old/util";
-import {ApiPromise, SubmittableResult} from "@polkadot/api";
-import {KeyringPair} from "@polkadot/keyring/types";
-import AccountSigner from "@polkadot/extension-koni-ui/Popup/Sending/old/signers/AccountSigner";
-import {addressEq} from "@polkadot/util-crypto";
-import {useToggle} from "@polkadot/extension-koni-ui/hooks/useToggle";
-import Modal from "@polkadot/extension-koni-ui/components/Modal";
-import Transaction from "@polkadot/extension-koni-ui/Popup/Sending/old/parts/Transaction";
-import Address from "@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address";
-import Tip from "@polkadot/extension-koni-ui/Popup/Sending/old/parts/Tip";
-import {Button} from "@polkadot/extension-koni-ui/components";
-import Output from "@polkadot/extension-koni-ui/components/Output";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import type { SignerOptions } from '@polkadot/api/submittable/types';
+
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
+
+import { ApiPromise, SubmittableResult } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
+import { Button } from '@polkadot/extension-koni-ui/components';
+import Modal from '@polkadot/extension-koni-ui/components/Modal';
+import Output from '@polkadot/extension-koni-ui/components/Output';
+import { useToggle } from '@polkadot/extension-koni-ui/hooks/useToggle';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
+import Tip from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Tip';
+import Transaction from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Transaction';
+import AccountSigner from '@polkadot/extension-koni-ui/Popup/Sending/old/signers/AccountSigner';
+import { AddressProxy, TxHandler } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
+import { cacheUnlock } from '@polkadot/extension-koni-ui/Popup/Sending/old/util';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { assert, BN_ZERO } from '@polkadot/util';
+import { addressEq } from '@polkadot/util-crypto';
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const {keyring} = bWindow.pdotApi;
+const { keyring } = bWindow.pdotApi;
 
 interface Props extends ThemeProps {
   className?: string;
@@ -58,17 +63,17 @@ function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressPr
   return null;
 }
 
-export function handleTxResults(tx: SubmittableExtrinsic<'promise'>,
-                                {onTxUpdate, onTxSuccess, onTxFail}: TxHandler,
-                                unsubscribe: () => void): (result: SubmittableResult) => void {
+export function handleTxResults (tx: SubmittableExtrinsic<'promise'>,
+  { onTxFail, onTxSuccess, onTxUpdate }: TxHandler,
+  unsubscribe: () => void): (result: SubmittableResult) => void {
   return (result: SubmittableResult): void => {
     if (!result || !result.status) {
       return;
     }
 
     console.log(`: status :: ${JSON.stringify(result)}`);
-    console.log(`result============`, result);
-    console.log(`tx.toHash()`, tx.hash.toHex());
+    console.log('result============', result);
+    console.log('tx.toHash()', tx.hash.toHex());
 
     onTxUpdate && onTxUpdate(result);
 
@@ -120,13 +125,13 @@ async function extractParams (api: ApiPromise, address: string, options: Partial
   return [address, { ...options, signer: new AccountSigner(api.registry, pair) }];
 }
 
-function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHandler, api, apiUrl}: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ api, apiUrl, className, extrinsic, onCancel, requestAddress, txHandler }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [error, setError] = useState<Error | null>(null);
   const [isBusy, setBusy] = useState(false);
   const [isRenderError, toggleRenderError] = useToggle();
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({isUnlockCached: false, signAddress: requestAddress, signPassword: '' }));
+  const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: requestAddress, signPassword: '' }));
   const [callHash, setCallHash] = useState<string | null>(null);
   const [tip, setTip] = useState(BN_ZERO);
 
@@ -139,7 +144,6 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
     const method = extrinsic.method;
 
     setCallHash(method && method.hash.toHex() || null);
-
   }, [api, extrinsic, senderInfo]);
 
   const _unlock = useCallback(
@@ -147,7 +151,7 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
       let passwordError: string | null = null;
 
       if (senderInfo.signAddress) {
-          passwordError = unlockAccount(senderInfo);
+        passwordError = unlockAccount(senderInfo);
       }
 
       setPasswordError(passwordError);
@@ -186,7 +190,7 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
         _unlock()
           .then((isUnlocked): void => {
             if (isUnlocked) {
-              _onSend(txHandler, extrinsic, senderInfo).catch(errorHandler)
+              _onSend(txHandler, extrinsic, senderInfo).catch(errorHandler);
             } else {
               setBusy(false);
             }
@@ -200,9 +204,9 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
   );
 
   const _onCancel = useCallback(() => {
-      onCancel();
-    },
-    [onCancel]
+    onCancel();
+  },
+  [onCancel]
   );
 
   if (error) {
@@ -212,28 +216,33 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
   return (
     <div className={className}>
       <Modal className={'kn-signer-modal'}>
-        <div className="kn-l-header">
-          <div className="kn-l-header__part-1" />
-          <div className="kn-l-header__part-2">
+        <div className='kn-l-header'>
+          <div className='kn-l-header__part-1' />
+          <div className='kn-l-header__part-2'>
             {t<string>('Authorize Transaction')}
           </div>
-          <div className="kn-l-header__part-3">
-            {isBusy ? (
-              <span className={'kn-l-close-btn -disabled'}>{t('Cancel')}</span>
-              ) : (
-                <span className={'kn-l-close-btn'} onClick={_onCancel}>{t('Cancel')}</span>
+          <div className='kn-l-header__part-3'>
+            {isBusy
+              ? (
+                <span className={'kn-l-close-btn -disabled'}>{t('Cancel')}</span>
+              )
+              : (
+                <span
+                  className={'kn-l-close-btn'}
+                  onClick={_onCancel}
+                >{t('Cancel')}</span>
               )
             }
           </div>
         </div>
-        <div className="kn-l-body">
+        <div className='kn-l-body'>
           <div className={'kn-l-transaction-info-block'}>
             <Transaction
               accountId={senderInfo.signAddress}
-              extrinsic={extrinsic}
-              onError={toggleRenderError}
               api={api}
               apiUrl={apiUrl}
+              extrinsic={extrinsic}
+              onError={toggleRenderError}
             />
           </div>
 
@@ -251,15 +260,15 @@ function AuthTransaction({ className, extrinsic, onCancel, requestAddress, txHan
           />
 
           <Output
+            className={'kn-l-call-hash'}
             isDisabled
             isTrimmed
-            className={'kn-l-call-hash'}
             label={t<string>('Call hash')}
             value={callHash}
             withCopy
           />
 
-          <div className="kn-l-submit-wrapper">
+          <div className='kn-l-submit-wrapper'>
             <Button
               className={'kn-l-submit-btn'}
               isBusy={isBusy}

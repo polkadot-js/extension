@@ -1,8 +1,8 @@
-// Copyright 2017-2021 @polkadot/react-signer authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SignerResult } from '@polkadot/api/types';
 import { SubmittableResult } from '@polkadot/api';
+import { SignerResult } from '@polkadot/api/types';
 
 export interface AddressFlags {
   accountOffset: number;

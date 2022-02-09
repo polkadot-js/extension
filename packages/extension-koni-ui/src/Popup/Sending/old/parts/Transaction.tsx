@@ -1,4 +1,4 @@
-// Copyright 2017-2021 @polkadot/react-signer authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type BN from 'bn.js';
@@ -6,9 +6,10 @@ import type BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
 
+import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+
 import PaymentInfo from './PaymentInfo';
-import {SubmittableExtrinsic} from "@polkadot/api/types";
-import {ApiPromise} from "@polkadot/api";
 
 interface Props {
   accountId: string | null;
@@ -20,7 +21,7 @@ interface Props {
   apiUrl: string
 }
 
-function Transaction ({ accountId, className, extrinsic, isSendable, tip, api, apiUrl }: Props): React.ReactElement<Props> | null {
+function Transaction ({ accountId, api, apiUrl, className, extrinsic, isSendable, tip }: Props): React.ReactElement<Props> | null {
   if (!extrinsic) {
     return null;
   }
@@ -29,12 +30,12 @@ function Transaction ({ accountId, className, extrinsic, isSendable, tip, api, a
     <div className={className}>
       <PaymentInfo
         accountId={accountId}
+        api={api}
+        apiUrl={apiUrl}
         className='tx-details'
         extrinsic={extrinsic}
         isSendable={isSendable}
         tip={tip}
-        api={api}
-        apiUrl={apiUrl}
       />
     </div>
   );

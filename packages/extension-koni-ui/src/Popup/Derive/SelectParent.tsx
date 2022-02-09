@@ -88,6 +88,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
       } else {
         setIsHaveDerivationPath(true);
       }
+
       setSuriPath(path);
       setPathError('');
     },

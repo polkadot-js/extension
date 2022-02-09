@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
+import { TFunction } from 'react-i18next';
 import styled from 'styled-components';
 
+import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import {CrowdloanParaState} from "@polkadot/extension-base/background/KoniTypes";
-import {TFunction} from "react-i18next";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -39,17 +39,16 @@ function getContainerClassName (item: CrowdloanItemType, extraClassName = ''): s
 }
 
 function getParaStateLabel (paraState: CrowdloanParaState, t: TFunction): string {
-
   if (paraState.valueOf() === CrowdloanParaState.COMPLETED.valueOf()) {
-    return t('Winner')
+    return t('Winner');
   }
 
   if (paraState === CrowdloanParaState.FAILED.valueOf()) {
-    return t('Fail')
+    return t('Fail');
   }
 
   if (paraState === CrowdloanParaState.ONGOING.valueOf()) {
-    return t('Active')
+    return t('Active');
   }
 
   return '';
@@ -72,7 +71,7 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
             <div className='crowdloan-item__chain-name'>{item.networkDisplayName}</div>
 
             {!!item.paraState && (
-              <div className={`crowdloan-item__status`}>{getParaStateLabel(item.paraState, t)}</div>
+              <div className={'crowdloan-item__status'}>{getParaStateLabel(item.paraState, t)}</div>
             )}
           </div>
           <div className='crowdloan-item__chain-group'>{item.groupDisplayName}</div>

@@ -4,13 +4,13 @@
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
+import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
-import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 
 interface Props extends ThemeProps {
   address: string;
@@ -38,15 +38,14 @@ function isAllowToShow (
     return true;
   }
 
-  return isShowZeroBalances
-    || !!(balanceInfo && balanceInfo.balanceValue.gt(BN_ZERO));
+  return isShowZeroBalances ||
+    !!(balanceInfo && balanceInfo.balanceValue.gt(BN_ZERO));
 }
 
 function getAccountInfoByNetwork (
   address: string,
   networkKey: string,
   networkMetadata: NetWorkMetadataDef): AccountInfoByNetwork {
-
   return {
     key: networkKey,
     networkKey,
@@ -73,17 +72,15 @@ function getAccountInfoByNetworkMap (
   return result;
 }
 
-function ChainBalances ({
-                          address,
-                          className,
-                          setQrModalOpen,
-                          setQrModalProps ,
-                          networkKeys,
-                          currentNetworkKey,
-                          isShowZeroBalances,
-                          networkMetadataMap,
-                          networkBalanceMaps
-}: Props): React.ReactElement<Props> {
+function ChainBalances ({ address,
+  className,
+  currentNetworkKey,
+  isShowZeroBalances,
+  networkBalanceMaps,
+  networkKeys,
+  networkMetadataMap,
+  setQrModalOpen,
+  setQrModalProps }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> =
     getAccountInfoByNetworkMap(address, networkKeys, networkMetadataMap);
@@ -98,15 +95,15 @@ function ChainBalances ({
       networkKey,
       balanceInfo
     )) {
-      return (<Fragment key={info.key} />)
+      return (<Fragment key={info.key} />);
     }
 
     return (
       <ChainBalanceItem
-        key={info.key}
         accountInfo={info}
         balanceInfo={balanceInfo}
         isLoading={!balanceInfo}
+        key={info.key}
         setQrModalOpen={setQrModalOpen}
         setQrModalProps={setQrModalProps}
       />

@@ -1,33 +1,27 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {
-  KeyringOption$Type,
-  KeyringOptions,
-  KeyringSectionOption,
-  KeyringSectionOptions
-} from '@polkadot/ui-keyring/options/types';
-import type {Option} from './types';
+import type { KeyringOption$Type, KeyringOptions, KeyringSectionOption, KeyringSectionOptions } from '@polkadot/ui-keyring/options/types';
+import type { Option } from './types';
 
 import React from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
-
-import {createOptionItem} from '@polkadot/ui-keyring/options/item';
-import {isNull, isUndefined} from '@polkadot/util';
+import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
+import { withMulti, withObservable } from '@polkadot/extension-koni-ui/Popup/Sending/old/api/hoc';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { createOptionItem } from '@polkadot/ui-keyring/options/item';
+import { isNull, isUndefined } from '@polkadot/util';
 
 import Dropdown from '../Dropdown';
 import Static from '../Static';
-import {toAddress} from '../util';
+import { toAddress } from '../util';
 import createHeader from './createHeader';
 import createItem from './createItem';
-import {BackgroundWindow} from "@polkadot/extension-base/background/KoniTypes";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {withMulti, withObservable} from "@polkadot/extension-koni-ui/Popup/Sending/old/api/hoc";
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
-const {keyring} = bWindow.pdotApi;
+const { keyring } = bWindow.pdotApi;
 
 interface Props {
   className?: string;
@@ -184,12 +178,12 @@ class InputAddress extends React.PureComponent<Props, State> {
       <Dropdown
         className={`ui--InputAddress${hideAddress ? ' hideAddress' : ''} ${className}`}
         defaultValue={_defaultValue}
+        dropdownClassName='ui--AddressSearch'
         help={help}
         isDisabled={isDisabled}
         isError={isError}
         label={label}
         labelExtra={labelExtra}
-        dropdownClassName='ui--AddressSearch'
         onChange={this.onChange}
         onSearch={this.onSearch}
         options={actualOptions}

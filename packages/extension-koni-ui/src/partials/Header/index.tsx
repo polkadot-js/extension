@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
+import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
@@ -23,7 +24,7 @@ import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui
 import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
-import {RootState, store} from '@polkadot/extension-koni-ui/stores';
+import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -33,7 +34,6 @@ import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
-import {CurrentNetworkInfo} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -198,13 +198,13 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
         await tieAccount(currentAccount.address, genesisHash || null);
-        updateCurrentNetwork( {
-            networkPrefix,
-            icon,
-            genesisHash,
-            networkKey,
-            isEthereum
-          });
+        updateCurrentNetwork({
+          networkPrefix,
+          icon,
+          genesisHash,
+          networkKey,
+          isEthereum
+        });
       }
 
       setShowNetworkSelect(false);
@@ -248,7 +248,11 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       <div className='container'>
         <div className='top-container'>
           <div className='branding'>
-            <Link className='sub-wallet-logo' to={'/'} title={'SubWallet'}>
+            <Link
+              className='sub-wallet-logo'
+              title={'SubWallet'}
+              to={'/'}
+            >
               <img
                 className='logo'
                 src={logo}

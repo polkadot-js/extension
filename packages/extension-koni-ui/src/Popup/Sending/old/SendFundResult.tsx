@@ -33,6 +33,7 @@ function SendFundResult({className, networkKey, txResult: {isTxSuccess, txError,
   const navigate = useContext(ActionContext);
   const _backToHome = useCallback(
     () => {
+      window.localStorage.setItem('popupNavigation', '/');
       navigate('/');
     },
     [navigate]

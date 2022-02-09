@@ -4,7 +4,7 @@ import {subscribeStaking} from "@polkadot/extension-koni-ui/messaging";
 import {store} from "@polkadot/extension-koni-ui/stores";
 
 function updateStaking (stakingData: StakingJson): void {
-  store.dispatch({type: 'staking', payload: stakingData})
+  store.dispatch({type: 'staking/update', payload: stakingData})
 }
 
 export default function useSetupStaking (): void {

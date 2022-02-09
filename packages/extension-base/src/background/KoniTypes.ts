@@ -24,30 +24,6 @@ export interface StakingJson {
   details: Array<StakingItem>
 }
 
-export interface NftItem {
-  id: string;
-  name: string;
-  image: string;
-  external_url: string;
-  rarity: string;
-  collectionId: string;
-  properties: Record<any, any>;
-}
-
-export interface NftCollection {
-  collectionId: string;
-  collectionName: string;
-  image: string;
-  nftItems: Array<NftItem>;
-}
-
-export interface NftJson {
-  ready?: boolean;
-  total: number;
-  nftList: Array<NftCollection>;
-}
-
-
 export interface PriceJson {
   ready?: boolean,
   currency: string,
@@ -70,18 +46,19 @@ export enum CrowdloanParaState {
 
 export interface NftItem {
   id: string;
-  name: string;
-  image: string;
-  external_url: string;
-  rarity: string;
-  collectionId: string;
-  properties: Record<any, any>;
+  name?: string;
+  image?: string;
+  external_url?: string;
+  rarity?: string;
+  collectionId?: string;
+  description?: string;
+  properties?: Record<any, any>;
 }
 
 export interface NftCollection {
   collectionId: string;
-  collectionName: string;
-  image: string;
+  collectionName?: string;
+  image?: string;
   nftItems: Array<NftItem>;
 }
 

@@ -1,7 +1,7 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -9,28 +9,30 @@ import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import EmptyList from "@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList";
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
 function StakingContainer ({ className }: Props): React.ReactElement<Props> {
-  const currentAccount = useSelector((state: RootState) => state.currentAccount);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState();
+  const {staking: stakingReducer} = useSelector((state: RootState) => state);
 
-  const _onStateChange = () => {
-    if (currentAccount && currentAccount.address) {
+  const _onStateChange = (): void => {
+    if (!stakingReducer?.ready) {
       setLoading(true);
-      setLoading(false);
-    } else {
-      console.error('There is a problem getting staking');
+      return;
     }
+    // @ts-ignore
+    setData(stakingReducer)
+    setLoading(false);
   }
 
   useEffect(() => {
     _onStateChange();
-  }, [currentAccount]);
+  }, [stakingReducer]);
 
   const editBalance = (balance: string) => {
     if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
@@ -77,7 +79,13 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
       <div className={'staking-container'}>
         {loading && <Spinner />}
 
+        {/*@ts-ignore*/}
+        {data?.details.length === 0 && !loading &&
+          <EmptyList/>
+        }
+
         {!loading && data &&
+          // @ts-ignore
           data?.details.map((item: any, index: any) => {
             const name = item?.paraId;
             const icon = LogosMap[name];

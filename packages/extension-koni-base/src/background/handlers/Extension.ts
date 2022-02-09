@@ -318,15 +318,20 @@ export default class KoniExtension extends Extension {
 
   private getStaking (account: string | null): Promise<StakingJson> {
     return new Promise<StakingJson>((resolve, reject) => {
-      state.getStaking(account, (rs: StakingJson) => {
+      if (account === null) {
+        console.log('account is null')
+        return;
+      }
+
+      state.getStaking(account as string, (rs: StakingJson) => {
         resolve(rs);
       });
     });
   }
 
-  private subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson> {
+  private async subscribeStaking(id: string, port: chrome.runtime.Port): Promise<StakingJson> {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
-
+    const currentAccount = await state.getAccountAddress()
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {
         cb(rs);
@@ -338,7 +343,7 @@ export default class KoniExtension extends Extension {
       stakingSubscription.unsubscribe();
     });
 
-    return this.getStaking(account);
+    return this.getStaking(currentAccount as string);
   }
 
   // todo: add custom network metadata to here

@@ -38,7 +38,6 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
       setLoading(true);
       return;
     }
-    console.log('change state', nftReducer)
     const nftList = nftReducer?.nftList;
     const total = nftList.length;
     // @ts-ignore
@@ -98,7 +97,7 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
       {!loading && !showCollectionDetail && nftJson?.total > 0 &&
       <div className={'total-title'}>
         {/*@ts-ignore*/}
-        Own {nftJson?.total} NFT{nftJson?.total > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
+        {nftJson?.total} NFT{nftJson?.total > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
       </div>
       }
 

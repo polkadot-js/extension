@@ -42,11 +42,19 @@ export default class StatemineNftApi {
   }
 
   public async getTokenDetails(assetId: AssetId): Promise<any> {
-    if(!this.api) return
+    if(!this.api) return null
+
     const { classId, tokenId } = assetId
     const metadataNft = (await this.api.query.uniques.instanceMetadataOf(classId, tokenId)).toHuman() as any;
-    const result = await getMetadata(metadataNft.data)
-    return result
+    if (!metadataNft?.data) return null
+
+    return getMetadata(metadataNft?.data)
   }
 
+  public async getCollectionDetail(collectionId: number): Promise<any> {
+    if(!this.api) return
+    const metadataCollection = (await this.api.query.uniques.classMetadataOf(collectionId)).toHuman() as any;
+
+    return getMetadata(metadataCollection?.data)
+  }
 }

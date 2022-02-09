@@ -16,10 +16,16 @@ interface Props {
 
 function NftItemPreview ({ className, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
+  const [showImage, setShowImage] = useState(true);
 
   const handleOnLoad = () => {
     setLoading(false);
   };
+
+  const handleImageError = () => {
+    setLoading(false);
+    setShowImage(false);
+  }
 
   return (
     <div className={className}>
@@ -33,13 +39,29 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
             loading &&
             <Spinner className={'img-spinner'} />
           }
-          <img
-            alt={'collection-thumbnail'}
-            className={'collection-thumbnail'}
-            onLoad={() => handleOnLoad()}
-            src={data.image ? data?.image : logo}
-            style={{ borderRadius: '5px' }}
-          />
+          {
+            showImage ?
+              <img
+                alt={'collection-thumbnail'}
+                className={'collection-thumbnail'}
+                onLoad={() => handleOnLoad()}
+                onError={() => handleImageError()}
+                src={data.image ? data?.image : logo}
+                style={{ borderRadius: '5px' }}
+              />
+              :
+              <video width="124" height="124" autoPlay loop={true}>
+                <source src={data.image} type="video/mp4"/>
+              </video>
+          }
+          {/*// <img*/}
+          {/*//   alt={'collection-thumbnail'}*/}
+          {/*//   className={'collection-thumbnail'}*/}
+          {/*//   onLoad={() => handleOnLoad()}*/}
+          {/*//   onError={() => handleImageError()}*/}
+          {/*//   src={data.image ? data?.image : logo}*/}
+          {/*//   style={{ borderRadius: '5px' }}*/}
+          {/*// />*/}
         </div>
       </div>
     </div>

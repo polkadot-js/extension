@@ -8,10 +8,10 @@ import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/h
 import {
   CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
   CRON_REFRESH_NFT_INTERVAL,
-  CRON_REFRESH_PRICE_INTERVAL
+  CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
 import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
-import {reformatAddress} from "@polkadot/extension-koni-base/utils/utils";
+import {getStakingInfo} from "@polkadot/extension-koni-base/api/rpc_api/staking_info";
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -54,17 +54,17 @@ export class KoniCron {
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
-        console.log('refreshing')
-        // @ts-ignore
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
+        this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          console.log('refreshing')
           this.removeCron('refreshNft');
-          // @ts-ignore
+          this.removeCron('refreshStaking');
+
           this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
+          this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
         }
       });
     });
@@ -90,14 +90,23 @@ export class KoniCron {
 
   refreshNft(address: string) {
     return () => {
-      // 2 is prefix of Kusama
-      const reformattedAddress = reformatAddress(address, 2);
-
-      getAllNftsByAccount(reformattedAddress)
+      getAllNftsByAccount(address)
         .then((rs) => {
           state.setNft(rs, (nftData) => {
             console.log(`Update nft state to ${nftData}`);
           });
+        })
+        .catch((err) => console.log(err));
+    }
+  }
+
+  refreshStaking(address: string) {
+    return () => {
+      getStakingInfo(address)
+        .then((rs) => {
+          state.setStaking(rs, (stakingData) => {
+            console.log(`Update staking state to ${stakingData}`);
+          })
         })
         .catch((err) => console.log(err));
     }

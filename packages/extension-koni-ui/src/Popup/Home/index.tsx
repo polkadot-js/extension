@@ -41,7 +41,6 @@ import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
 import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
-import StackingEmptyList from './Staking/EmptyList';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
 import NftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer";
@@ -268,7 +267,7 @@ function Home ({ className, currentAccount, network, chainRegistryMap, transacti
         )}
 
         {activatedTab === 4 && (
-          <StakingContainer />
+          <StakingContainer/>
         )}
 
         {activatedTab === 5 && (

@@ -3,7 +3,8 @@
 
 import fetch from 'node-fetch';
 
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SERVER, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from './config';
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from './config';
+import {isUrl} from "@polkadot/extension-koni-base/utils/utils";
 
 // data for test
 // const singular_account = 'DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW';
@@ -32,14 +33,13 @@ export const getSingularByAccount = async (account: string) => {
         description,
         name,
         attributes,
-        animation_url: getIPFSLink(animation_url),
-        image: getIPFSLink(image)
+        animation_url: parseIpfsLink(animation_url),
+        image: parseIpfsLink(image)
       },
       external_url: SINGULAR_EXTERNAL_SERVER + data[i].id
     });
   }
 
-  // console.log(nfts)
   return nfts;
 };
 
@@ -60,7 +60,7 @@ export const getItemsKanariaByAccount = async (account: string) => {
       ...data[i],
       metadata: {
         ...result,
-        image: getIPFSLink(result.image),
+        image: parseIpfsLink(result.image),
         external_url: KANARIA_EXTERNAL_SERVER + data[i].id
       }
     });
@@ -93,8 +93,12 @@ export const getBirdsKanariaByAccount = async (account: string) => {
 };
 
 export const getMetadata = (metadata_url: string) => {
-  const url = parseIpfsLink(metadata_url)
-  if(!url) return undefined
+  let url: string | null = metadata_url
+  if (!isUrl(metadata_url)) {
+    url = parseIpfsLink(metadata_url)
+    if(!url || url.length === 0) return undefined
+  }
+
   return fetch(url, {
     method: 'GET',
     headers
@@ -103,7 +107,10 @@ export const getMetadata = (metadata_url: string) => {
 };
 
 const parseIpfsLink = (ipfsLink: string) => {
+  if (!ipfsLink || ipfsLink.length === 0) return null;
+
   if (!ipfsLink.includes('ipfs://ipfs/'))
-    return SERVER + ipfsLink;
-  return SERVER + ipfsLink.split('ipfs://ipfs/')[1];
+    return PINATA_SERVER + ipfsLink;
+
+  return PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
 };

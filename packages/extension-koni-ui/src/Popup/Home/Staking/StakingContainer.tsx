@@ -5,14 +5,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { AccountJson } from '@polkadot/extension-base/background/types';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import { getStaking } from '@polkadot/extension-koni-ui/messaging';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
-interface Props extends AccountJson {
+interface Props extends ThemeProps {
   className?: string;
 }
 
@@ -20,23 +18,18 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState();
-  const _onCreate = useCallback(
-    async (): void => {
-      if (currentAccount && currentAccount.address) {
-        setLoading(true);
-        const resp = await getStaking(currentAccount.address);
-        console.log(resp);
-        setData(resp);
-        setLoading(false);
-      } else {
-        console.error('There is a problem getting staking');
-      }
-    },
-    [currentAccount]
-  );
+
+  const _onStateChange = () => {
+    if (currentAccount && currentAccount.address) {
+      setLoading(true);
+      setLoading(false);
+    } else {
+      console.error('There is a problem getting staking');
+    }
+  }
 
   useEffect(() => {
-    _onCreate();
+    _onStateChange();
   }, [currentAccount]);
 
   const editBalance = (balance: string) => {

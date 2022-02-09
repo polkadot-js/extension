@@ -253,11 +253,12 @@ export type RequestSubscribeBalance = null
 export type RequestCrowdloan = null
 export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
+export type RequestSubscribeStaking = null
 
 export interface KoniRequestSignatures {
   'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(staking.getStaking)': [string, StakingJson]
-  'pri(staking.getSubscription)': [string, StakingJson, StakingJson]
+  'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson]
   'pri(nft.getNft)': [string, NftJson],
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson]
   'pri(price.getPrice)': [RequestPrice, PriceJson]

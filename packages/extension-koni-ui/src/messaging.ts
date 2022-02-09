@@ -19,7 +19,7 @@ import {
   PriceJson,
   RequestSubscribeBalance,
   RequestSubscribeCrowdloan, RequestSubscribeNft,
-  RequestSubscribePrice,
+  RequestSubscribePrice, RequestSubscribeStaking,
   StakingJson,
   TransactionHistoryItemType
 } from '@polkadot/extension-base/background/KoniTypes';
@@ -335,6 +335,6 @@ export async function getStaking (account: string): Promise<StakingJson> {
   return sendMessage('pri(staking.getStaking)', account);
 }
 
-export async function subscribeStaking (account: string, callback: (stakingData: StakingJson) => void): Promise<StakingJson> {
-  return sendMessage('pri(staking.getSubscription)', account, callback)
+export async function subscribeStaking (request: RequestSubscribeStaking, callback: (stakingData: StakingJson) => void): Promise<StakingJson> {
+  return sendMessage('pri(staking.getSubscription)', request, callback)
 }

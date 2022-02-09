@@ -10,8 +10,8 @@ function updateStaking (stakingData: StakingJson): void {
 export default function useSetupStaking (): void {
   useEffect((): void => {
     console.log('--- Setup redux: staking');
-    // subscribeStaking(null, updateStaking)
-    //   .then(updateStaking)
-    //   .catch(console.error);
+    subscribeStaking(null, updateStaking)
+      .then(updateStaking)
+      .catch(console.error);
   }, []);
 }

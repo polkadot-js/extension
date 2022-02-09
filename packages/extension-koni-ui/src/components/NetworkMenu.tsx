@@ -173,7 +173,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     font-size: 20px;
     line-height: 32px;
     font-weight: 500;
-    border-bottom: 1px solid ${theme.inputBorderColor};
+    border-bottom: 2px solid ${theme.inputBorderColor};
   }
 
   .network-filter-list {

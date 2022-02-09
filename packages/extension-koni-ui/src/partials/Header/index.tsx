@@ -248,7 +248,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       <div className='container'>
         <div className='top-container'>
           <div className='branding'>
-            <Link to={'/'} title={'SubWallet'}>
+            <Link className='sub-wallet-logo' to={'/'} title={'SubWallet'}>
               <img
                 className='logo'
                 src={logo}
@@ -298,7 +298,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                       iconTheme={theme}
                       prefix={prefix}
                       showLogo
-                      size={44}
+                      size={48}
                       value={formatted || currentAccount?.address}
                     />
                   )
@@ -419,15 +419,19 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     }
   }
 
+  .sub-wallet-logo {
+    opacity: 1;
+  }
+
   .only-top-container {
     padding-top: 6px;
   }
 
   .default-avatar {
-    width: 44px;
-    height: 44px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    padding: 1px;
+    padding: 2px;
     border: 2px solid ${theme.checkDotColor};
   }
 
@@ -533,7 +537,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
 
     &__text {
       margin: 4px 22px 4px 8px;
-      font-size: 15px;
+      font-size: 14px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

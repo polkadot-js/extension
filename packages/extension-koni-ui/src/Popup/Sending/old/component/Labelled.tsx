@@ -53,5 +53,7 @@ export default React.memo(styled(Labelled)(({theme}: Props) => `
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
   }
 `));

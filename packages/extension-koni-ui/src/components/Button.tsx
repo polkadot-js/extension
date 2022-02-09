@@ -59,7 +59,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   color: ${theme.buttonTextColor};
   font-size: 16px;
   line-height: 26px;
-  padding: 0 1rem;
+  padding: 0 12px;
   position: relative;
   text-align: center;
 

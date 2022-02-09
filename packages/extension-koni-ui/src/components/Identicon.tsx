@@ -44,7 +44,6 @@ function Identicon ({ className, genesisHash, iconTheme, onCopy, prefix, showLog
 }
 
 export default styled(Identicon)(({ theme }: ThemeProps) => `
-  background: ${theme.backgroundAccountAddress};
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -72,6 +71,8 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
 
   .icon {
     cursor: pointer;
+    border-radius: 50%;
+    background: ${theme.backgroundAccountAddress};
   }
 
   svg {

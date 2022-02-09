@@ -33,7 +33,7 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .menu-item__title {
     margin: 0;
     width: 100%;
-    font-size: ${theme.inputLabelFontSize};
+    font-size: 13px;
     line-height: 26px;
     letter-spacing: 0.03em;
     text-transform: uppercase;

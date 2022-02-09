@@ -87,10 +87,9 @@ export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
   .mnemonic-seed__display {
     textarea {
       color: ${theme.textColor3};
-      font-size: ${theme.fontSize};
+      font-size: 14px;
       height: unset;
-      letter-spacing: -0.01em;
-      line-height: ${theme.lineHeight};
+      line-height: 24px;
       margin-bottom: 10px;
       padding: 9px 16px;
       background-color: ${theme.backgroundAccountAddress}

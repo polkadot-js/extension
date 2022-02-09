@@ -29,7 +29,7 @@ export default styled(NextStepButton)(({ theme }: Props) => `
     margin: auto 0;
     top: 0;
     bottom: 0;
-    right: 16px;
+    right: -2px;
     color: ${theme.buttonTextColor};
   }
 `);

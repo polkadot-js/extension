@@ -507,7 +507,6 @@ export default React.memo(styled(Wrapper)(({theme}: Props) => `
     padding-bottom: 15px;
     flex: 1;
     padding-top: 25px;
-    margin-top: -25px;
     overflow-y: auto;
 
     // &::-webkit-scrollbar {
@@ -517,7 +516,7 @@ export default React.memo(styled(Wrapper)(({theme}: Props) => `
 
   .kn-l-screen-content {
     flex: 1;
-    padding: 0 15px 15px;
+    padding: 25px 15px 15px;
   }
 
   .kn-field {

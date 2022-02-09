@@ -275,7 +275,7 @@ const ExportedComponent = withMulti(
   align-items: flex-start;
   background: ${theme.background};
   position: relative;
-  border: 2px solid ${theme.boxBorderColor};
+  border: 2px solid ${theme.borderColor2};
   height: 72px;
   z-index: 3;
   border-radius: 8px;
@@ -303,8 +303,8 @@ const ExportedComponent = withMulti(
   }
 
   .ui--FormatBalance {
-    font-weight: 500;
-    font-size: 15px;
+    font-weight: 400;
+    font-size: 14px;
     color: ${theme.textColor};
   }
 
@@ -405,12 +405,14 @@ const ExportedComponent = withMulti(
 
     .name {
       flex: 1;
-      font-size: 18px;
+      font-size: 16px;
       color: ${theme.textColor};
       font-weight: 500;
     }
 
     .address {
+      font-size: 14px;
+      line-height: 24px;
       color: ${theme.textColor2};
       font-weight: 400
     }

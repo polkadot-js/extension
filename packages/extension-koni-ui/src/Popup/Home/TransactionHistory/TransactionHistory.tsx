@@ -93,4 +93,8 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
 export default styled(Wrapper)(({ theme }: Props) => `
   height: 100%;
   overflow-y: auto;
+
+  .transaction-item-wrapper {
+    color: ${theme.textColor};
+  }
 `);

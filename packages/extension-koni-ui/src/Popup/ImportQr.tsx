@@ -50,11 +50,17 @@ function ImportQr (): React.ReactElement {
       if (account && name) {
         if (account.isAddress) {
           createAccountExternal(name, account.content, account.genesisHash)
-            .then(() => onAction('/'))
+            .then(() => {
+              window.localStorage.setItem('popupNavigation', '/');
+              onAction('/');
+            })
             .catch((error: Error) => console.error(error));
         } else if (password) {
           createAccountSuri(name, password, account.content, 'sr25519', account.genesisHash)
-            .then(() => onAction('/'))
+            .then(() => {
+              window.localStorage.setItem('popupNavigation', '/');
+              onAction('/');
+            })
             .catch((error: Error) => console.error(error));
         }
       }

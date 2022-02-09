@@ -27,8 +27,8 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
 
   const _goHome = useCallback(
     () => {
-      onAction('/');
       window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
     },
     [onAction]
   );

@@ -108,6 +108,7 @@ function Upload ({ className }: Props): React.ReactElement {
 
       (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo[0].address) : jsonRestoreV2(file, password, accountsInfo[0].address))
         .then(() => {
+          window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
         }).catch(
           (e) => {

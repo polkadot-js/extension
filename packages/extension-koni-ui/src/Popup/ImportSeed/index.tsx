@@ -54,7 +54,10 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
       setIsBusy(true);
 
       createAccountSuriV2(name, password, account.suri, type, account.genesis)
-        .then(() => onAction('/'))
+        .then(() => {
+          window.localStorage.setItem('popupNavigation', '/');
+          onAction('/');
+        })
         .catch((error): void => {
           setIsBusy(false);
           console.error(error);

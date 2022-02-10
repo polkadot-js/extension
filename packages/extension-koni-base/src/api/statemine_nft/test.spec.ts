@@ -1,6 +1,6 @@
 import StatemineNftApi from "@polkadot/extension-koni-base/api/statemine_nft/index";
 
-jest.setTimeout(20000)
+jest.setTimeout(20000);
 
 describe('test get unique nft api', () => {
    test('test get unique nft from endpoints', async () => {

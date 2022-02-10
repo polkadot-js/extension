@@ -39,10 +39,12 @@ cryptoWaitReady()
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
 
     // Init subcription
-    (new KoniSubcription()).init();
+    const subscriptions = new KoniSubcription();
+
+    subscriptions.init();
 
     // Init cron
-    (new KoniCron()).init();
+    (new KoniCron(subscriptions)).init();
 
     initBackgroundWindow(keyring);
 

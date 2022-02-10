@@ -10,10 +10,18 @@ import {
   CRON_REFRESH_NFT_INTERVAL,
   CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
-import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
-import {getStakingInfo} from "@polkadot/extension-koni-base/api/rpc_api/staking_info";
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
+import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
+import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 
 export class KoniCron {
+  subscriptions: KoniSubcription;
+
+  constructor (subscriptions: KoniSubcription) {
+    this.subscriptions = subscriptions;
+  }
+
   private cronMap: Record<string, any> = {};
   private subjectMap: Record<string, Subject<any>> = {};
 
@@ -71,11 +79,21 @@ export class KoniCron {
   }
 
   recoverAPI () {
-    Object.values(dotSamaAPIMap).forEach(async (apiProp) => {
+    const failedAPIs: Array<Promise<ApiProps>> = [];
+
+    Object.values(dotSamaAPIMap).forEach((apiProp) => {
       if (!apiProp.isApiReady) {
-        await apiProp.isReady;
+        failedAPIs.push(apiProp.isReady);
       }
     });
+
+    if (failedAPIs.length > 0) {
+      Promise.all(failedAPIs).then((apiProps) => {
+        state.getCurrentAccount(({ address }) => {
+          this.subscriptions.subscribleBalancesAndCrowdloans(address);
+        });
+      }).catch(console.error);
+    }
   }
 
   refreshPrice () {
@@ -100,7 +118,7 @@ export class KoniCron {
     };
   }
 
-  refreshStaking(address: string) {
+  refreshStaking (address: string) {
     return () => {
       getStakingInfo(address)
         .then((rs) => {

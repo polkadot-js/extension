@@ -7,9 +7,9 @@ import styled from 'styled-components';
 
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import EmptyList from "@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -18,18 +18,20 @@ interface Props extends ThemeProps {
 function StakingContainer ({ className }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState();
-  const {staking: stakingReducer} = useSelector((state: RootState) => state);
+  const { staking: stakingReducer } = useSelector((state: RootState) => state);
 
   const _onStateChange = (): void => {
     if (!stakingReducer?.ready) {
       setLoading(true);
+
       return;
     }
-    console.log(stakingReducer)
+
+    console.log(stakingReducer);
     // @ts-ignore
-    setData(stakingReducer)
+    setData(stakingReducer);
     setLoading(false);
-  }
+  };
 
   useEffect(() => {
     _onStateChange();
@@ -80,9 +82,9 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
       <div className={'staking-container'}>
         {loading && <Spinner />}
 
-        {/*@ts-ignore*/}
+        {/* @ts-ignore */}
         {data?.details.length === 0 && !loading &&
-          <EmptyList/>
+          <EmptyList />
         }
 
         {!loading && data &&

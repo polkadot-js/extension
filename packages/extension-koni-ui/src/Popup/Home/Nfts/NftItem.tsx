@@ -3,13 +3,13 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
+import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import logo from '../../../assets/sub-wallet-logo.svg';
-import Spinner from "@polkadot/extension-koni-ui/components/Spinner";
 
 interface Props {
   className?: string;
@@ -37,11 +37,11 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
   const handleImageError = () => {
     setLoading(false);
     setShowImage(false);
-  }
+  };
 
   const handleOnClick = () => {
-    if (data.external_url) chrome.tabs.create({url: data?.external_url, active: true}).then();
-  }
+    if (data.external_url) chrome.tabs.create({ url: data?.external_url, active: true }).then();
+  };
 
   return (
     <div className={className}>
@@ -67,19 +67,26 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
           <Spinner className={'img-spinner'} />
         }
         {
-          showImage ?
-            <img
+          showImage
+            ? <img
               alt={'item-img'}
               className={'item-img'}
               onClick={() => handleOnClick()}
-              onLoad={() => handleOnLoad()}
               onError={() => handleImageError()}
+              onLoad={() => handleOnLoad()}
               src={data.image ? data?.image : logo}
               style={{ borderRadius: '5px' }}
-            />
-            :
-            <video width="100%" height="416" autoPlay loop={true}>
-              <source src={data.image} type="video/mp4"/>
+              />
+            : <video
+              autoPlay
+              height='416'
+              loop={true}
+              width='100%'
+            >
+              <source
+                src={data.image}
+                type='video/mp4'
+              />
             </video>
         }
         <div className={'send-button'}>Send</div>

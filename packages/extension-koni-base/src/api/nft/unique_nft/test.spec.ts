@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {handleUniqueNfts} from "@polkadot/extension-koni-base/api/nft";
+import { handleUniqueNfts } from '@polkadot/extension-koni-base/api/nft';
 
 jest.setTimeout(500000000);
 
 describe('test get unique nft api', () => {
   test('test get unique nft from endpoints', async () => {
-    await handleUniqueNfts('5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb')
+    await handleUniqueNfts('5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb');
     // test nft for unique
     // const collectionId_unique = 25;
     // const locale = 'en';

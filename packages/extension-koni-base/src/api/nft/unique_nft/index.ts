@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiPromise} from '@polkadot/api';
+import { ApiPromise } from '@polkadot/api';
+import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { parseIpfsLink } from '@polkadot/extension-koni-base/utils/utils';
 
-import {wsProvider} from '../../connector';
+import { wsProvider } from '../../connector';
 import networks from '../../endpoints';
-import {deserializeNft} from './protobuf';
+import { deserializeNft } from './protobuf';
 import unique_types from './runtime_types';
-import {NftCollection, NftItem} from "@polkadot/extension-base/background/KoniTypes";
-import {parseIpfsLink} from "@polkadot/extension-koni-base/utils/utils";
 
 interface Collection {
   SchemaVersion: string,
@@ -97,6 +97,7 @@ export default class UniqueNftApi {
 
   public async getCollectionCount (): Promise<number> {
     if (!this.api) return 0;
+
     return (await this.api.query.nft.createdCollectionCount()) as unknown as number;
   }
 
@@ -109,6 +110,7 @@ export default class UniqueNftApi {
     */
   public async getAddressTokens (collectionId: number, owner: string): Promise<any> {
     if (!this.api) return;
+
     return (await this.api.query.nft.addressTokens(collectionId, owner)).toJSON();
   }
 
@@ -257,7 +259,7 @@ export const handleUniqueNfts = async (account: string): Promise<any> => {
     } as NftCollection);
   }
 
-  await api.disconnect()
+  await api.disconnect();
 
   return { total, allCollections };
 };

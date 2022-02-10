@@ -3,16 +3,10 @@
 
 import fetch from 'node-fetch';
 
-import {
-  KANARIA_ENDPOINT,
-  KANARIA_EXTERNAL_SERVER,
-  PINATA_SERVER,
-  SINGULAR_COLLECTION_ENDPOINT,
-  SINGULAR_ENDPOINT,
-  SINGULAR_EXTERNAL_SERVER
-} from './config';
-import {isUrl} from "@polkadot/extension-koni-base/utils/utils";
-import {NftCollection, NftItem} from "@polkadot/extension-base/background/KoniTypes";
+import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
+
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_COLLECTION_ENDPOINT, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from './config';
 
 // data for test
 // const singular_account = 'DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW';
@@ -101,10 +95,11 @@ export const getBirdsKanariaByAccount = async (account: string) => {
 };
 
 export const getMetadata = (metadata_url: string) => {
-  let url: string | null = metadata_url
+  let url: string | null = metadata_url;
+
   if (!isUrl(metadata_url)) {
-    url = parseIpfsLink(metadata_url)
-    if(!url || url.length === 0) return undefined
+    url = parseIpfsLink(metadata_url);
+    if (!url || url.length === 0) return undefined;
   }
 
   return fetch(url, {
@@ -117,8 +112,7 @@ export const getMetadata = (metadata_url: string) => {
 const parseIpfsLink = (ipfsLink: string) => {
   if (!ipfsLink || ipfsLink.length === 0) return null;
 
-  if (!ipfsLink.includes('ipfs://ipfs/'))
-    return PINATA_SERVER + ipfsLink;
+  if (!ipfsLink.includes('ipfs://ipfs/')) { return PINATA_SERVER + ipfsLink; }
 
   return PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
 };

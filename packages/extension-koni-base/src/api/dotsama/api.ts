@@ -4,12 +4,12 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
+import { inJestTest } from '@polkadot/extension-koni-base/utils/utils';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
-import { inJestTest } from '@polkadot/extension-koni-base/utils/utils';
 
 export enum ApiInitStatus {
   SUCCESS,

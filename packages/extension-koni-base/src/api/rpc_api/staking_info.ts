@@ -69,10 +69,12 @@ export const getStakingInfo = async (accountId: string): Promise<StakingJson> =>
 
   for (const i in targetChains) {
     const currentChain = targetChains[i];
+
     if (balances && balances[i]) {
       const currentBalance = balances[i];
       const amount = currentBalance ? currentBalance.split(' ')[0] : '';
       const unit = currentBalance ? currentBalance.split(' ')[1] : '';
+
       result.push({
         name: networks[currentChain].chain,
         chainId: '',

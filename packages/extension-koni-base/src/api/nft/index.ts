@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NftJson} from '@polkadot/extension-base/background/KoniTypes';
-import {reformatAddress} from "@polkadot/extension-koni-base/utils/utils";
-import {handleUniqueNfts} from "@polkadot/extension-koni-base/api/nft/unique_nft";
-import {handleStatemineNfts} from "@polkadot/extension-koni-base/api/nft/statemine_nft";
-import {handleRmrkNfts} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
-import {handleKaruraNfts} from "@polkadot/extension-koni-base/api/nft/karura_nft";
-import {handleAcalaNfts} from "@polkadot/extension-koni-base/api/nft/acala_nft";
+import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
+import { handleAcalaNfts } from '@polkadot/extension-koni-base/api/nft/acala_nft';
+import { handleKaruraNfts } from '@polkadot/extension-koni-base/api/nft/karura_nft';
+import { handleRmrkNfts } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
+import { handleStatemineNfts } from '@polkadot/extension-koni-base/api/nft/statemine_nft';
+import { handleUniqueNfts } from '@polkadot/extension-koni-base/api/nft/unique_nft';
+import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
 export const getAllNftsByAccount = async (account: string): Promise<NftJson> => {
   try {
@@ -42,7 +42,7 @@ export const getAllNftsByAccount = async (account: string): Promise<NftJson> => 
     // const [statemineNfts] = await Promise.all([_statemineNfts]);
     // let total = statemineNfts.total;
     // let allCollections = [...statemineNfts.allCollections]
-    console.log(`Fetched ${total} nfts from api for account ${account}`)
+    console.log(`Fetched ${total} nfts from api for account ${account}`);
 
     return {
       total,
@@ -53,4 +53,3 @@ export const getAllNftsByAccount = async (account: string): Promise<NftJson> => 
     throw e;
   }
 };
-

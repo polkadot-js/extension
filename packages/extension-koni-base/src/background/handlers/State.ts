@@ -64,7 +64,7 @@ export default class KoniState extends State {
   private stakingState: StakingJson = {
     ready: true,
     details: []
-  } as StakingJson
+  } as StakingJson;
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
@@ -120,6 +120,7 @@ export default class KoniState extends State {
         callback(stakingData);
         // this.stakingStoreReady = true;
       }
+
       this.stakingSubject.next(stakingData);
     });
   }

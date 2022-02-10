@@ -4,14 +4,10 @@
 import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
-import {
-  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
-  CRON_REFRESH_NFT_INTERVAL,
-  CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL
-} from '@polkadot/extension-koni-base/constants';
-import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
-import {getStakingInfo} from "@polkadot/extension-koni-base/api/rpc_api/staking_info";
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   private cronMap: Record<string, any> = {};
@@ -100,15 +96,15 @@ export class KoniCron {
     };
   }
 
-  refreshStaking(address: string) {
+  refreshStaking (address: string) {
     return () => {
       getStakingInfo(address)
         .then((rs) => {
           state.setStaking(rs, (stakingData) => {
             console.log(`Update staking state for ${address}`);
-          })
+          });
         })
         .catch((err) => console.log(err));
-    }
+    };
   }
 }

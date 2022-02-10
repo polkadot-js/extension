@@ -29,6 +29,7 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer';
+import StakingContainer from '@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -41,7 +42,6 @@ import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
-import StakingContainer from "@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -260,7 +260,7 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         )}
 
         {activatedTab === 4 && (
-          <StakingContainer/>
+          <StakingContainer />
         )}
 
         {activatedTab === 5 && (

@@ -11,7 +11,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 0,
     provider: 'wss://polkadot.api.onfinality.io/public-ws',
     group: 'RELAY_CHAIN',
-    nativeToken: "DOT"
+    nativeToken: 'DOT'
   },
   kusama: {
     chain: 'Kusama Relay Chain',
@@ -20,7 +20,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 2,
     provider: 'wss://kusama.api.onfinality.io/public-ws',
     group: 'RELAY_CHAIN',
-    nativeToken: "KSM"
+    nativeToken: 'KSM'
   },
   westend: {
     chain: 'Westend Relay Chain',
@@ -29,7 +29,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://westend.api.onfinality.io/public-ws',
     group: 'RELAY_CHAIN',
-    nativeToken: "WND"
+    nativeToken: 'WND'
   },
   rococo: {
     chain: 'Rococo Relay Chain',
@@ -38,7 +38,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://rococo-rpc.polkadot.io',
     group: 'RELAY_CHAIN',
-    nativeToken: "ROC"
+    nativeToken: 'ROC'
   },
   koni: {
     chain: 'Koni test',
@@ -47,7 +47,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://rpc.koniverse.com',
     group: 'POLKADOT_PARACHAIN',
-    nativeToken: "DOT"
+    nativeToken: 'DOT'
   },
   statemint: {
     chain: 'Statemint',
@@ -57,7 +57,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://statemint.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
     paraId: 1000,
-    nativeToken: "KSM"
+    nativeToken: 'KSM'
   },
   acala: {
     chain: 'Acala',
@@ -66,7 +66,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://acala-polkadot.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2000,
-    nativeToken: "ACA"
+    nativeToken: 'ACA'
   },
   moonbeam: {
     chain: 'Moonbeam',
@@ -76,7 +76,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     group: 'POLKADOT_PARACHAIN',
     paraId: 2004,
     isEthereum: true,
-    nativeToken: "GLMR"
+    nativeToken: 'GLMR'
   },
   astar: {
     chain: 'Astar',
@@ -85,7 +85,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://astar.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2006,
-    nativeToken: "ASTR"
+    nativeToken: 'ASTR'
   },
   parallel: {
     chain: 'Parallel',
@@ -94,7 +94,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://parallel.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2012,
-    nativeToken: "PARA"
+    nativeToken: 'PARA'
   },
   clover: {
     chain: 'Clover',
@@ -103,7 +103,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://clover.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2002,
-    nativeToken: "CLV"
+    nativeToken: 'CLV'
   },
   hydradx: {
     chain: 'HydraDX',
@@ -112,7 +112,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc-01.snakenet.hydradx.io',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2034,
-    nativeToken: "HDX"
+    nativeToken: 'HDX'
   },
   edgeware: {
     chain: 'Edgeware',
@@ -120,7 +120,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 7,
     provider: 'wss://edgeware.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
-    nativeToken: "EDG"
+    nativeToken: 'EDG'
   },
   centrifuge: {
     chain: 'Centrifuge',
@@ -129,7 +129,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://fullnode.centrifuge.io',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2031,
-    nativeToken: "CFG"
+    nativeToken: 'CFG'
   },
   interlay: {
     chain: 'Interlay',
@@ -138,7 +138,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://api.interlay.io/parachain',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2032,
-    nativeToken: "interBTC"
+    nativeToken: 'interBTC'
   },
   equilibrium: {
     chain: 'Equilibrium',
@@ -147,7 +147,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://node.equilibrium.io',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2011,
-    nativeToken: "EQ"
+    nativeToken: 'EQ'
   },
   nodle: {
     chain: 'Nodle',
@@ -156,7 +156,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://main3.nodleprotocol.io',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2026,
-    nativeToken: "NODL"
+    nativeToken: 'NODL'
   },
   darwinia: {
     chain: 'Darwinia',
@@ -165,7 +165,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.darwinia.network',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2003,
-    nativeToken: "RING"
+    nativeToken: 'RING'
   },
   manta: {
     chain: 'Manta',
@@ -174,7 +174,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://pectinata.manta.systems',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2015,
-    nativeToken: "MANTA"
+    nativeToken: 'MANTA'
   },
   'sora-substrate': {
     chain: 'SORA',
@@ -182,7 +182,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 69,
     provider: 'wss://sora.api.onfinality.io/public-ws',
     group: 'POLKADOT_PARACHAIN',
-    nativeToken: "XOR"
+    nativeToken: 'XOR'
   },
   subgame: {
     chain: 'SubGame',
@@ -191,7 +191,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://mainnet.subgame.org',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2017,
-    nativeToken: "SGB"
+    nativeToken: 'SGB'
   },
   efinity: {
     chain: 'Efinity',
@@ -200,7 +200,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2021,
-    nativeToken: "EFI"
+    nativeToken: 'EFI'
   },
   composableFinance: {
     chain: 'Composable Finance',
@@ -209,7 +209,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2019,
-    nativeToken: "LAYR"
+    nativeToken: 'LAYR'
   },
   litentry: {
     chain: 'Litentry',
@@ -218,7 +218,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2013,
-    nativeToken: "LIT"
+    nativeToken: 'LIT'
   },
   phala: {
     chain: 'Phala Network',
@@ -227,7 +227,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2035,
-    nativeToken: "PHA"
+    nativeToken: 'PHA'
   },
   crust: {
     chain: 'Crust Network',
@@ -236,7 +236,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.crust.network',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2008,
-    nativeToken: "CRU"
+    nativeToken: 'CRU'
   },
   coinversation: {
     chain: 'Coinversation',
@@ -245,7 +245,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'POLKADOT_PARACHAIN',
     paraId: 2027,
-    nativeToken: "CTO"
+    nativeToken: 'CTO'
   },
   statemine: {
     chain: 'Statemine',
@@ -255,7 +255,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://statemine.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 1000,
-    nativeToken: "KSM"
+    nativeToken: 'KSM'
   },
   karura: {
     chain: 'Karura',
@@ -264,7 +264,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://karura.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2000,
-    nativeToken: "KAR"
+    nativeToken: 'KAR'
   },
   moonriver: {
     chain: 'Moonriver',
@@ -274,7 +274,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     group: 'KUSAMA_PARACHAIN',
     paraId: 2023,
     isEthereum: true,
-    nativeToken: "MOVR"
+    nativeToken: 'MOVR'
   },
   shiden: {
     chain: 'Shiden',
@@ -283,7 +283,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://shiden.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2007,
-    nativeToken: "SDN"
+    nativeToken: 'SDN'
   },
   khala: {
     chain: 'Khala',
@@ -292,7 +292,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://khala.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2004,
-    nativeToken: "PHA"
+    nativeToken: 'PHA'
   },
   bifrost: {
     chain: 'Bifrost',
@@ -301,7 +301,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://bifrost-parachain.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2001,
-    nativeToken: "BNC"
+    nativeToken: 'BNC'
   },
   kilt: {
     chain: 'KILT Spiritnet',
@@ -310,7 +310,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://spiritnet.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2086,
-    nativeToken: "KILT"
+    nativeToken: 'KILT'
   },
   calamari: {
     chain: 'Calamari Parachain',
@@ -319,7 +319,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://calamari.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2084,
-    nativeToken: "KMA"
+    nativeToken: 'KMA'
   },
   basilisk: {
     chain: 'Basilisk',
@@ -328,7 +328,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://basilisk.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2090,
-    nativeToken: "BSX"
+    nativeToken: 'BSX'
   },
   altair: {
     chain: 'Altair',
@@ -337,7 +337,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://altair.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2088,
-    nativeToken: "AIR"
+    nativeToken: 'AIR'
   },
   heiko: {
     chain: 'Heiko',
@@ -346,7 +346,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://parallel-heiko.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2085,
-    nativeToken: "HKO"
+    nativeToken: 'HKO'
   },
   kintsugi: {
     chain: 'Kintsugi',
@@ -355,7 +355,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://kintsugi.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2092,
-    nativeToken: "KINT"
+    nativeToken: 'KINT'
   },
   picasso: {
     chain: 'Picasso',
@@ -364,7 +364,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://picasso-rpc.composable.finance',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2087,
-    nativeToken: "PICA"
+    nativeToken: 'PICA'
   },
   pioneer: {
     chain: 'Pioneer Network',
@@ -373,7 +373,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://pioneer.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2096,
-    nativeToken: "NEER"
+    nativeToken: 'NEER'
   },
   quartz: {
     chain: 'QUARTZ by UNIQUE',
@@ -382,7 +382,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://quartz.api.onfinality.io/public-ws',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2095,
-    nativeToken: "QTZ"
+    nativeToken: 'QTZ'
   },
   genshiro: {
     chain: 'Genshiro',
@@ -391,7 +391,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://node.genshiro.io',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2024,
-    nativeToken: "GENS"
+    nativeToken: 'GENS'
   },
   subsocial: {
     chain: 'Subsocial',
@@ -400,7 +400,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.subsocial.network',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2100,
-    nativeToken: "SUB"
+    nativeToken: 'SUB'
   },
   zeitgeist: {
     chain: 'Zeitgeist',
@@ -409,7 +409,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2101,
-    nativeToken: "ZTG"
+    nativeToken: 'ZTG'
   },
   sakura: {
     chain: 'Sakura',
@@ -418,7 +418,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2016,
-    nativeToken: "SKU"
+    nativeToken: 'SKU'
   },
   shadow: {
     chain: 'Crust Shadow',
@@ -426,7 +426,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: -1,
     provider: 'PROVIDER',
     group: 'NOT_SURE',
-    nativeToken: "CSM"
+    nativeToken: 'CSM'
   },
   uniqueNft: {
     chain: 'Unique TestNet 2.0',
@@ -435,7 +435,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://testnet2.uniquenetwork.io',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2012,
-    nativeToken: "UNQ"
+    nativeToken: 'UNQ'
   },
   robonomics: {
     chain: 'Robonomics',
@@ -444,7 +444,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://kusama.rpc.robonomics.network',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2048,
-    nativeToken: "XRT"
+    nativeToken: 'XRT'
   },
   integritee: {
     chain: 'Integritee Network',
@@ -453,7 +453,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://api.solo.integritee.io',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2015,
-    nativeToken: "TEER"
+    nativeToken: 'TEER'
   },
   crab: {
     chain: 'Darwinia Crab',
@@ -462,7 +462,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://crab-rpc.darwinia.network',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2105,
-    nativeToken: "CRAB"
+    nativeToken: 'CRAB'
   },
   pichiu: {
     chain: 'Pichiu',
@@ -471,7 +471,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://kusama.kylin-node.co.uk',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2102,
-    nativeToken: "PCHU"
+    nativeToken: 'PCHU'
   }
 };
 

@@ -21,6 +21,9 @@ import getNetworkMap from '@polkadot/extension-koni-ui/util/getNetworkMap';
 
 import { AccountContext, MediaContext, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
+import {useSelector} from "react-redux";
+import {RootState} from "@polkadot/extension-koni-ui/stores";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -40,6 +43,14 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
   const [filter, setFilter] = useState('');
   const mediaAllowed = useContext(MediaContext);
   const isPopup = useIsPopup();
+  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
+  const [isAllAccount, setIsAllAccount] = useState(false);
+
+  useEffect(() => {
+    if (!!currentAccount) {
+      setIsAllAccount(isAccountAll(currentAccount.address));
+    }
+  }, []);
 
   const _openJson = useCallback(
     () => {
@@ -110,6 +121,7 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
             <MenuSettingItem className='account-menu-settings__menu-item'>
               <Link
                 className='account-menu-settings__menu-item-text'
+                isDisabled={isAllAccount}
                 to={`/account/derive/${master.address}`}
               >
                 <FontAwesomeIcon icon={faCodeBranch} />
@@ -123,6 +135,7 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
+              isDisabled={isAllAccount}
               to={'/account/export-all'}
             >
               <FontAwesomeIcon icon={faFileExport} />

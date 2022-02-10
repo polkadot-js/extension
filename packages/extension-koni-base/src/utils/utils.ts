@@ -25,3 +25,15 @@ export function reformatAddress (address: string, networkPrefix: number, isEther
 
   return encodeAddress(publicKey, networkPrefix);
 }
+
+export function isUrl (targetString: string) {
+  let url;
+
+  try {
+    url = new URL(targetString);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === "http:" || url.protocol === "https:";
+}

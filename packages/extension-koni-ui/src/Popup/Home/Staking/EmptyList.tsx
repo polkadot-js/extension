@@ -12,7 +12,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function StackingEmptyList ({ className }: Props): React.ReactElement {
+function StakingEmptyList ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -27,7 +27,7 @@ function StackingEmptyList ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(StackingEmptyList)`
+export default styled(StakingEmptyList)`
   display: flex;
   align-items: center;
   flex-direction: column;

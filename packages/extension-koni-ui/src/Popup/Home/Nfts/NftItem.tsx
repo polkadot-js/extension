@@ -3,12 +3,13 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import logo from '../../../assets/sub-wallet-logo.svg';
+import Spinner from "@polkadot/extension-koni-ui/components/Spinner";
 
 interface Props {
   className?: string;
@@ -17,6 +18,9 @@ interface Props {
 }
 
 function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
+  const [loading, setLoading] = useState(true);
+  const [showImage, setShowImage] = useState(true);
+
   const propDetail = (title: string, value: string) => {
     return (
       <div className={'prop-detail'}>
@@ -25,6 +29,15 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
       </div>
     );
   };
+
+  const handleOnLoad = () => {
+    setLoading(false);
+  };
+
+  const handleImageError = () => {
+    setLoading(false);
+    setShowImage(false);
+  }
 
   return (
     <div className={className}>
@@ -45,11 +58,25 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
       </div>
 
       <div className={'detail-container'}>
-        <img
-          alt={'item-img'}
-          className={'item-img'}
-          src={data.image ? data?.image : logo}
-        />
+        {
+          loading &&
+          <Spinner className={'img-spinner'} />
+        }
+        {
+          showImage ?
+            <img
+              alt={'item-img'}
+              className={'item-img'}
+              onLoad={() => handleOnLoad()}
+              onError={() => handleImageError()}
+              src={data.image ? data?.image : logo}
+              style={{ borderRadius: '5px' }}
+            />
+            :
+            <video width="100%" height="416" autoPlay loop={true}>
+              <source src={data.image} type="video/mp4"/>
+            </video>
+        }
         <div className={'send-button'}>Send</div>
         {
           data.description &&
@@ -88,6 +115,12 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
 }
 
 export default styled(NftItem)(({ theme }: ThemeProps) => `
+  .img-container {
+    position: relative;
+    height: 124px;
+    width: 124px;
+  }
+
   .back-icon:hover {
     cursor: pointer;
   }

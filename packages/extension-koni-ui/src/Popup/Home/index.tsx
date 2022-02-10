@@ -39,9 +39,10 @@ import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
 import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
-import StackingEmptyList from './Stacking/EmptyList';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
+import NftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer";
+import StakingContainer from "@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -260,7 +261,7 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         )}
 
         {activatedTab === 4 && (
-          <StackingEmptyList />
+          <StakingContainer/>
         )}
 
         {activatedTab === 5 && (

@@ -7,10 +7,7 @@ import State from '@polkadot/extension-base/background/handlers/State';
 import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-// import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-// import NftStore from '@polkadot/extension-koni-base/stores/Nft';
 import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
@@ -52,7 +49,7 @@ export default class KoniState extends State {
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
   // private nftStoreReady = false;
-  private stakingStoreReady = false;
+  // private stakingStoreReady = false;
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
@@ -63,6 +60,11 @@ export default class KoniState extends State {
     total: 0,
     nftList: []
   } as NftJson;
+
+  private stakingState: StakingJson = {
+    ready: true,
+    details: []
+  } as StakingJson
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
@@ -90,20 +92,22 @@ export default class KoniState extends State {
   };
 
   public getStaking (account: string, update: (value: StakingJson) => void): void {
-    this.stakingStore.get('StakingData', (rs) => {
-      if (this.stakingStoreReady) update(rs);
-      else {
-        getStakingInfo(account)
-          .then((rs) => {
-            this.setStaking(rs);
-            update(rs);
-          })
-          .catch((e) => {
-            console.error(e);
-            throw e;
-          });
-      }
-    });
+    update(this.stakingState);
+
+    // this.stakingStore.get('StakingData', (rs) => {
+    //   if (this.stakingStoreReady) update(rs);
+    //   else {
+    //     getStakingInfo(account)
+    //       .then((rs) => {
+    //         this.setStaking(rs);
+    //         update(rs);
+    //       })
+    //       .catch((e) => {
+    //         console.error(e);
+    //         throw e;
+    //       });
+    //   }
+    // });
   }
 
   public subscribeStaking () {
@@ -114,8 +118,9 @@ export default class KoniState extends State {
     this.stakingStore.set('StakingData', stakingData, () => {
       if (callback) {
         callback(stakingData);
-        this.stakingStoreReady = true;
+        // this.stakingStoreReady = true;
       }
+      this.stakingSubject.next(stakingData);
     });
   }
 

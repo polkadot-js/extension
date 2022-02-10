@@ -2,17 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import fetch from 'node-fetch';
-
-import { NftCollection, NftItem, NftJson } from '@polkadot/extension-base/background/KoniTypes';
-import { getBirdsKanariaByAccount, getItemsKanariaByAccount, getSingularByAccount } from '@polkadot/extension-koni-base/api/rmrk_nft';
-import { SERVER, SINGULAR_COLLECTION_ENDPOINT } from '@polkadot/extension-koni-base/api/rmrk_nft/config';
-
+import {NftCollection, NftItem, NftJson} from '@polkadot/extension-base/background/KoniTypes';
+import {
+  getBirdsKanariaByAccount,
+  getItemsKanariaByAccount,
+  getSingularByAccount
+} from '@polkadot/extension-koni-base/api/rmrk_nft';
+import {PINATA_SERVER, SINGULAR_COLLECTION_ENDPOINT} from '@polkadot/extension-koni-base/api/rmrk_nft/config';
 import UniqueNftApi from './unique_nft';
+import StatemineNftApi from "@polkadot/extension-koni-base/api/statemine_nft";
+import {reformatAddress} from "@polkadot/extension-koni-base/utils/utils";
 
 const parseIpfsLink = (ipfsLink: string) => {
   if (!ipfsLink.includes('ipfs://ipfs/')) return ipfsLink;
 
-  return SERVER + ipfsLink.split('ipfs://ipfs/')[1];
+  return PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
 };
 
 interface NftIdList {
@@ -28,6 +32,64 @@ interface TokenData {
   properties: any,
   image: string,
 }
+
+export const handleStatemineNfts = async (account: string): Promise<any> => {
+  const api = new StatemineNftApi();
+  await api.connect();
+  // const assetIds = [{classId: 52, tokenId: 0}, {classId: 0, tokenId: 1919}, {classId: 8, tokenId: 1}, {classId: 8, tokenId: 3}, {classId: 8, tokenId: 2}]
+  const assetIds = await api.getNfts(account);
+  let allCollections: NftCollection[] = [];
+
+  if (!assetIds || assetIds.length === 0) {
+    return { total: 0, allCollections };
+  }
+
+  assetIds.map(asset => {
+    const newCollection = {
+      collectionId: asset.classId.toString(),
+      nftItems: []
+    } as NftCollection
+
+    if (!allCollections.some(collection => collection.collectionId === asset.classId.toString()))
+      allCollections.push(newCollection);
+  })
+
+  const allItems: NftItem[] = [];
+  let collectionMetaDict: Record<any, any> = {};
+  await Promise.all(assetIds.map( async (assetId) => {
+    const tokenInfo = await api.getTokenDetails(assetId);
+    if (!(assetId.classId in collectionMetaDict)) {
+      collectionMetaDict[assetId.classId] = await api.getCollectionDetail(assetId.classId as number);
+    }
+
+    const parsedNft = {
+      id: assetId.tokenId.toString(),
+      name: tokenInfo?.name,
+      description: tokenInfo?.description,
+      image: tokenInfo && tokenInfo.image ? parseIpfsLink(tokenInfo?.image) : undefined,
+      collectionId: assetId.classId.toString()
+    } as NftItem
+    allItems.push(parsedNft);
+  }))
+
+  for (let collection of allCollections) {
+    const collectionMeta = collectionMetaDict[collection.collectionId];
+    if (collectionMeta) {
+      collection.collectionName = collectionMeta?.name;
+      collection.image = collectionMeta.image ? parseIpfsLink(collectionMeta?.image) : undefined;
+    }
+
+    for (let item of allItems) {
+      if (collection.collectionId === item.collectionId) {
+        collection.nftItems.push(item);
+      }
+    }
+  }
+
+  await api.disconnect();
+
+  return { total: assetIds.length, allCollections }
+};
 
 export const handleUniqueNfts = async (account: string): Promise<any> => {
   if (!account) return [];
@@ -95,6 +157,8 @@ export const handleUniqueNfts = async (account: string): Promise<any> => {
       nftItems: nftItems
     } as NftCollection);
   }
+
+  await api.disconnect()
 
   return { total, allCollections };
 };
@@ -187,28 +251,31 @@ export const handleRmrkNfts = async (account: string): Promise<any> => {
   }
 };
 
-// should get all nfts from all sources
 export const getAllNftsByAccount = async (account: string): Promise<NftJson> => {
   try {
-    console.log('Getting nfts for ', account);
-    // @ts-ignore
-    const _rmrkNfts = handleRmrkNfts(account);
-    const _uniqueNfts = handleUniqueNfts(account);
-    const [rmrkNfts, uniqueNfts] = await Promise.all([_rmrkNfts, _uniqueNfts]);
-    const total = rmrkNfts.total + uniqueNfts.total;
-    const allCollections = [...rmrkNfts.allCollections, ...uniqueNfts.allCollections];
+    const kusamaAddress = reformatAddress(account, 2);
+    const _rmrkNfts = handleRmrkNfts(kusamaAddress);
 
-    // const [rmrkNfts] = await Promise.all([_rmrkNfts]);
-    // let total = rmrkNfts.total;
-    // let allCollections = [...rmrkNfts.allCollections]
-    console.log(`Fetched ${total} nfts from api`);
+    const _uniqueNfts = handleUniqueNfts(account);
+
+    const _statemineNfts = handleStatemineNfts(account);
+
+    const [rmrkNfts, uniqueNfts, statemineNfts] = await Promise.all([_rmrkNfts, _uniqueNfts, _statemineNfts]);
+    const total = rmrkNfts.total + uniqueNfts.total + statemineNfts.total;
+    const allCollections = [...rmrkNfts.allCollections, ...uniqueNfts.allCollections, ...statemineNfts.allCollections];
+
+    // const [statemineNfts] = await Promise.all([_statemineNfts]);
+    // let total = statemineNfts.total;
+    // let allCollections = [...statemineNfts.allCollections]
+    console.log(`Fetched ${total} nfts from api for account ${account}`)
 
     return {
       total,
       nftList: allCollections
     } as NftJson;
   } catch (e) {
-    console.error('Failed to fetch nft', e);
+    console.error('Failed to fetch nft from api', e);
     throw e;
   }
 };
+

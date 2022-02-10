@@ -102,6 +102,8 @@ const parseAcalaIpfsLink = (ipfsLink: string) => {
 
 }
 
+const acalaExternalBaseUrl = 'https://apps.acala.network/portfolio/nft/'
+
 export const handleAcalaNfts = async (address: string) => {
   let allCollections: NftCollection[] = [];
   const api = new AcalaNftApi();
@@ -135,7 +137,8 @@ export const handleAcalaNfts = async (address: string) => {
     const parsedNft = {
       id: assetId.tokenId.toString(),
       name: tokenInfo?.name,
-      description: tokenInfo?.description,
+      description: tokenInfo && tokenInfo.description ? tokenInfo.description : collectionMeta?.description,
+      external_url: acalaExternalBaseUrl + assetId.classId.toString(),
       image: tokenInfo && tokenInfo.image ? parseAcalaIpfsLink(tokenInfo?.image) : collectionMeta?.image,
       collectionId: assetId.classId.toString()
     } as NftItem;

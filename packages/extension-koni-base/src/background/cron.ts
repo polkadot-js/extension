@@ -93,7 +93,7 @@ export class KoniCron {
       getAllNftsByAccount(address)
         .then((rs) => {
           state.setNft(rs, (nftData) => {
-            console.log(`Update nft state to ${nftData}`);
+            console.log(`Update nft state for ${address}`);
           });
         })
         .catch((err) => console.log(err));
@@ -105,7 +105,7 @@ export class KoniCron {
       getStakingInfo(address)
         .then((rs) => {
           state.setStaking(rs, (stakingData) => {
-            console.log(`Update staking state to ${stakingData}`);
+            console.log(`Update staking state for ${address}`);
           })
         })
         .catch((err) => console.log(err));

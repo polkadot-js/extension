@@ -40,7 +40,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
   }
 
   const handleOnClick = () => {
-    console.log(data?.external_url)
+    if (data.external_url) chrome.tabs.create({url: data?.external_url, active: true}).then();
   }
 
   return (
@@ -120,6 +120,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
 }
 
 export default styled(NftItem)(({ theme }: ThemeProps) => `
+  padding-bottom: 20px;
   .img-container {
     position: relative;
     height: 124px;
@@ -167,6 +168,7 @@ export default styled(NftItem)(({ theme }: ThemeProps) => `
     height: 416px;
     width: 100%;
     border-radius: 5px;
+    cursor: pointer;
   }
 
   .att-title {

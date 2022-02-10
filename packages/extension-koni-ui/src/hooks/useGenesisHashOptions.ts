@@ -3,10 +3,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
+
 import { getAllNetworkMetadata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
-import {NetWorkGroup} from "@polkadot/extension-base/background/KoniTypes";
 
 export default interface networkSelectOption {
   text: string;
@@ -20,7 +21,7 @@ export default interface networkSelectOption {
 
 const RELAY_CHAIN = 'Relay Chain';
 
-const availableChain = chains.filter(c => c.isAvailable);
+const availableChain = chains.filter((c) => c.isAvailable);
 
 export default function (): networkSelectOption[] {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function (): networkSelectOption[] {
 
     getAllNetworkMetadata().then((metadataDefs) => {
       if (mounted.current) {
-        const res = metadataDefs.filter(c => c.isAvailable).map((metadata) => (
+        const res = metadataDefs.filter((c) => c.isAvailable).map((metadata) => (
           {
             text: metadata.chain,
             value: metadata.genesisHash,

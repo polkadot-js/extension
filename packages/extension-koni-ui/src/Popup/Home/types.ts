@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BigN from 'bignumber.js';
-import {CrowdloanParaState} from "@polkadot/extension-base/background/KoniTypes";
+
+import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
 
 export type CrowdloanItemType = {
   networkKey: string;

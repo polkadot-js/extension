@@ -8,9 +8,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
+import { AccountsWithCurrentAddress } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import uiSettings from '@polkadot/ui-settings';
@@ -36,8 +38,6 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import {AccountsWithCurrentAddress} from '@polkadot/extension-base/background/KoniTypes';
-import useSetupStore from "@polkadot/extension-koni-ui/hooks/store/useSetupStore";
 
 const startSettings = uiSettings.get();
 

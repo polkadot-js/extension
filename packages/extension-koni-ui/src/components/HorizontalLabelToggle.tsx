@@ -18,13 +18,13 @@ interface Props {
 function HorizontalLabelToggle ({ checkedLabel, className, toggleFunc, uncheckedLabel, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <span className={!value ? 'kn-label' : 'kn-label unselected-label'}>{uncheckedLabel}</span>
+      <span className={!value ? 'horizontal-label' : 'horizontal-label unselected-label'}>{uncheckedLabel}</span>
       <Toggle
         className='horizontal-label-toggle'
         onChange={toggleFunc}
         value={value}
       />
-      <span className={value ? 'kn-label' : 'kn-label unselected-label'}>{checkedLabel}</span>
+      <span className={value ? 'horizontal-label' : 'horizontal-label unselected-label'}>{checkedLabel}</span>
     </div>
   );
 }

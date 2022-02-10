@@ -1,4 +1,4 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SiDef } from '@polkadot/util/types';
@@ -6,12 +6,13 @@ import type { SiDef } from '@polkadot/util/types';
 import BN from 'bn.js';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+
+import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
+import { BitLength } from '@polkadot/extension-koni-ui/components/types';
+import { Registry } from '@polkadot/types/types';
 import { formatBalance, isUndefined } from '@polkadot/util';
 
 import InputNumber from './InputNumber';
-import {BitLengthOption} from "@polkadot/extension-koni-ui/components/constants";
-import {BitLength} from "@polkadot/extension-koni-ui/components/types";
-import {Registry} from "@polkadot/types/types";
 
 interface Props {
   autoFocus?: boolean;
@@ -60,7 +61,7 @@ function reformat (value?: string | BN, isDisabled?: boolean, siDecimals?: numbe
   ];
 }
 
-function InputBalance ({ registry, autoFocus, children, className = '', defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, siDecimals, siSymbol, value, withEllipsis, withLabel, withMax }: Props): React.ReactElement<Props> {
+function InputBalance ({ autoFocus, children, className = '', defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, registry, siDecimals, siSymbol, value, withEllipsis, withLabel, withMax }: Props): React.ReactElement<Props> {
   const [defaultValue, siDefault] = useMemo(
     () => reformat(inDefault, isDisabled, siDecimals),
     [inDefault, isDisabled, siDecimals]
@@ -86,6 +87,7 @@ function InputBalance ({ registry, autoFocus, children, className = '', defaultV
       onEnter={onEnter}
       onEscape={onEscape}
       placeholder={placeholder}
+      registry={registry}
       siDecimals={siDecimals}
       siDefault={siDefault}
       siSymbol={siSymbol}
@@ -93,7 +95,6 @@ function InputBalance ({ registry, autoFocus, children, className = '', defaultV
       withEllipsis={withEllipsis}
       withLabel={withLabel}
       withMax={withMax}
-      registry={registry}
     >
       {children}
     </InputNumber>

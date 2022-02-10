@@ -17,7 +17,7 @@ const TextInput = css(({ theme, withError }: Props) => `
   color: ${withError ? theme.errorColor : theme.textColor2};
   display: block;
   font-family: ${theme.fontFamily};
-  font-size: ${theme.fontSize2};
+  font-size: 14px;
   height: 48px;
   outline: none;
   padding: 0.5rem 0.75rem;
@@ -30,6 +30,9 @@ const TextInput = css(({ theme, withError }: Props) => `
     box-shadow: none;
     outline: none;
   }
+  ::placeholder {
+  color: ${theme.textColor2};
+}
 `);
 
 export const TextArea = styled.textarea<Props>`${TextInput}`;

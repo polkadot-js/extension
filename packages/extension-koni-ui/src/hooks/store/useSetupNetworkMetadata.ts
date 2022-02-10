@@ -1,7 +1,11 @@
-import {store} from "@polkadot/extension-koni-ui/stores";
-import {useEffect} from "react";
-import {getAllNetworkMetadata} from "@polkadot/extension-koni-ui/messaging";
-import {NetWorkMetadataDef} from "@polkadot/extension-base/background/KoniTypes";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { useEffect } from 'react';
+
+import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { getAllNetworkMetadata } from '@polkadot/extension-koni-ui/messaging';
+import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateNetworkMetadata (metadataDefs: NetWorkMetadataDef[]): void {
   store.dispatch({ type: 'networkMetadata/update', payload: metadataDefs });

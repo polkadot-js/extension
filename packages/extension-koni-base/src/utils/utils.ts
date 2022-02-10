@@ -36,7 +36,11 @@ export function isUrl (targetString: string) {
     return false;
   }
 
-  return url.protocol === "http:" || url.protocol === "https:";
+  return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
+export function inJestTest () {
+  return process.env.JEST_WORKER_ID !== undefined;
 }
 
 export const parseIpfsLink = (ipfsLink: string) => {

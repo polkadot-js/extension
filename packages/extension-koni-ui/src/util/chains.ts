@@ -8,11 +8,11 @@ function getKnownHashes (): NetWorkMetadataDef[] {
   const result: NetWorkMetadataDef[] = [];
 
   Object.keys(NETWORKS).forEach((networkKey) => {
-    const { chain, genesisHash, group, icon, isEthereum, ss58Format, paraId } = NETWORKS[networkKey];
+    const { chain, genesisHash, group, icon, isEthereum, paraId, ss58Format } = NETWORKS[networkKey];
 
     let isAvailable = true;
 
-    //todo: add more logic in further update
+    // todo: add more logic in further update
     if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
       isAvailable = false;
     }

@@ -26,7 +26,7 @@ interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
   className?: string;
 }
 
-function KoniExportAccount ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+function ExportAccount ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
@@ -35,7 +35,10 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _goHome = useCallback(
-    () => onAction('/'),
+    () => {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    },
     [onAction]
   );
 
@@ -56,6 +59,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
 
           saveAs(blob, `${address}.json`);
 
+          window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
         })
         .catch((error: Error) => {
@@ -127,7 +131,7 @@ function KoniExportAccount ({ className, match: { params: { address } } }: Props
   );
 }
 
-export default withRouter(styled(KoniExportAccount)(({ theme }: Props) => `
+export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   margin: 0 15px;
   padding-top: 25px;
 

@@ -18,7 +18,7 @@ export default abstract class BaseStore <T> {
     this.#prefix = prefix ? `${prefix}:` : '';
   }
 
-  public getPrefix(): string {
+  public getPrefix (): string {
     return this.#prefix;
   }
 

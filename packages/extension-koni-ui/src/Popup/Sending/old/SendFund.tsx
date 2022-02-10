@@ -1,30 +1,35 @@
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import BN from 'bn.js';
-import {ThemeProps} from '@polkadot/extension-koni-ui/types';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {BN_HUNDRED, BN_ZERO, isFunction} from '@polkadot/util';
-import {DeriveBalancesAll} from '@polkadot/api-derive/types';
-import {checkAddress} from '@polkadot/phishing';
-import {AccountInfoWithProviders, AccountInfoWithRefCount} from '@polkadot/types/interfaces';
-import {ApiPromise, SubmittableResult} from "@polkadot/api";
-import {Button, Warning} from "@polkadot/extension-koni-ui/components";
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {Header} from "@polkadot/extension-koni-ui/partials";
-import LoadingContainer from "@polkadot/extension-koni-ui/components/LoadingContainer";
-import {SubmittableExtrinsic} from "@polkadot/api/types";
-import {TxResult} from "@polkadot/extension-koni-ui/Popup/Sending/old/types";
-import {useCall} from "@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall";
-import {TransactionHistoryItemType} from "@polkadot/extension-base/background/KoniTypes";
-import {updateTransactionHistory} from "@polkadot/extension-koni-ui/messaging";
-import InputAddress from './component/InputAddress';
+
+import { ApiPromise, SubmittableResult } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { DeriveBalancesAll } from '@polkadot/api-derive/types';
+import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { Button, Warning } from '@polkadot/extension-koni-ui/components';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { updateTransactionHistory } from '@polkadot/extension-koni-ui/messaging';
+import { Header } from '@polkadot/extension-koni-ui/partials';
+import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/old/AuthTransaction';
+import InputBalance from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputBalance';
+import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
+import { useCall } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall';
+import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFundResult';
+import { TxResult } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { checkAddress } from '@polkadot/phishing';
+import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
+import { BN_HUNDRED, BN_ZERO, isFunction } from '@polkadot/util';
+
 import Available from './component/Available';
-import InputBalance from "@polkadot/extension-koni-ui/Popup/Sending/old/component/InputBalance";
-import Toggle from "@polkadot/extension-koni-ui/components/Toggle";
-import SendFundResult from "@polkadot/extension-koni-ui/Popup/Sending/old/SendFundResult";
-import AuthTransaction from "@polkadot/extension-koni-ui/Popup/Sending/old/AuthTransaction";
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
-import useApi from "@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi";
+import InputAddress from './component/InputAddress';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -37,7 +42,7 @@ interface ContentProps extends ThemeProps {
   apiUrl: string;
 }
 
-function isRefcount(accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
+function isRefcount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
 }
 
@@ -46,13 +51,13 @@ type ExtractTxResultType = {
   fee?: string;
 }
 
-function extractTxResult(result: SubmittableResult): ExtractTxResultType {
+function extractTxResult (result: SubmittableResult): ExtractTxResultType {
   let change = '0';
   let fee;
 
-  const {events} = result;
+  const { events } = result;
 
-  const transferEvent = events.find(e =>
+  const transferEvent = events.find((e) =>
     e.event.section === 'balances' &&
     e.event.method.toLowerCase() === 'transfer'
   );
@@ -61,7 +66,7 @@ function extractTxResult(result: SubmittableResult): ExtractTxResultType {
     change = transferEvent.event.data[2]?.toString() || '0';
   }
 
-  const withdrawEvent = events.find(e =>
+  const withdrawEvent = events.find((e) =>
     e.event.section === 'balances' &&
     e.event.method.toLowerCase() === 'withdraw');
 
@@ -72,10 +77,10 @@ function extractTxResult(result: SubmittableResult): ExtractTxResultType {
   return {
     change,
     fee
-  }
+  };
 }
 
-async function checkPhishing(_senderId: string | null, recipientId: string | null): Promise<[string | null, string | null]> {
+async function checkPhishing (_senderId: string | null, recipientId: string | null): Promise<[string | null, string | null]> {
   return [
     // not being checked atm
     // senderId
@@ -88,13 +93,11 @@ async function checkPhishing(_senderId: string | null, recipientId: string | nul
   ];
 }
 
-
-
-function Wrapper({className, theme}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
   const [wrapperClass, setWrapperClass] = useState<string>('');
-  const {api, isApiReady, apiUrl, isNotSupport} = useApi(networkKey);
+  const { api, apiUrl, isApiReady, isNotSupport } = useApi(networkKey);
 
   const isProviderSupportSendFund = !!api && !!api.tx && !!api.tx.balances;
 
@@ -105,29 +108,29 @@ function Wrapper({className, theme}: Props): React.ReactElement<Props> {
           {t<string>('The action is not supported. Please change to another network.')}
         </Warning>
       </div>
-    )
+    );
   };
 
   return (
     <div className={`-wrapper ${className} ${wrapperClass}`}>
       <Header
         showAdd
+        showCancelButton
         showSearch
         showSettings
         showSubHeader
         subHeaderName={t<string>('Send fund')}
-        showCancelButton
       />
 
       {isApiReady
         ? isProviderSupportSendFund
           ? (
             <SendFund
-              theme={theme}
-              setWrapperClass={setWrapperClass}
-              className={'send-fund-container'}
               api={api}
               apiUrl={apiUrl}
+              className={'send-fund-container'}
+              setWrapperClass={setWrapperClass}
+              theme={theme}
             />
           )
           : notSupportSendFund()
@@ -139,17 +142,11 @@ function Wrapper({className, theme}: Props): React.ReactElement<Props> {
   );
 }
 
-function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): React.ReactElement {
-  const {t} = useTranslation();
+function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): React.ReactElement {
+  const { t } = useTranslation();
 
-  const {
-    currentAccount: {
-      account: currentAccount
-    },
-    currentNetwork: {
-      networkKey
-    }
-  } = useSelector((state: RootState) => state);
+  const { currentAccount: { account: currentAccount },
+    currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
   const propSenderId = currentAccount?.address;
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const [hasAvailable] = useState(true);
@@ -163,8 +160,8 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
   const accountInfo = useCall<AccountInfoWithProviders | AccountInfoWithRefCount>(api.query.system.account, [senderId], undefined, apiUrl);
   const [extrinsic, setExtrinsic] = useState<SubmittableExtrinsic<'promise'> | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [txResult, setTxResult] = useState<TxResult>({isShowTxResult: false, isTxSuccess: false});
-  const {isShowTxResult} = txResult;
+  const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
+  const { isShowTxResult } = txResult;
 
   useEffect((): void => {
     const fromId = senderId as string;
@@ -176,7 +173,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
           api.tx.balances
             .transfer(toId, balances.availableBalance)
             .paymentInfo(fromId)
-            .then(({partialFee}): void => {
+            .then(({ partialFee }): void => {
               const adjFee = partialFee.muln(110).div(BN_HUNDRED);
               const maxTransfer = balances.availableBalance.sub(adjFee);
 
@@ -214,8 +211,8 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
   const txParams: unknown[] | (() => unknown[]) | null =
     canToggleAll && isAll
       ? isFunction(api.tx.balances.transferAll)
-      ? [recipientId, false]
-      : [recipientId, maxTransfer]
+        ? [recipientId, false]
+        : [recipientId, maxTransfer]
       : [recipientId, amount];
 
   const tx: ((...args: any[]) => SubmittableExtrinsic<'promise'>) | null = canToggleAll && isAll && isFunction(api.tx.balances.transferAll)
@@ -230,7 +227,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
         isFunction(txParams)
           ? txParams()
           : (txParams || [])
-      )) as SubmittableExtrinsic<'promise'>);
+      )));
 
       setShowTxModal(true);
     }
@@ -260,7 +257,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
     }
 
     if (result && extrinsicHash) {
-      const {change, fee} = extractTxResult(result);
+      const { change, fee } = extractTxResult(result);
 
       const item: TransactionHistoryItemType = {
         action: 'send',
@@ -274,7 +271,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
 
       updateTransactionHistory(senderId, networkKey, item, (items) => {
         onGetTxResult(true, extrinsicHash);
-      }).catch(e => console.log('Error when update Transaction History', e));
+      }).catch((e) => console.log('Error when update Transaction History', e));
     } else {
       onGetTxResult(true);
     }
@@ -286,7 +283,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
     }
 
     if (result && extrinsicHash) {
-      const {change, fee} = extractTxResult(result);
+      const { change, fee } = extractTxResult(result);
 
       const item: TransactionHistoryItemType = {
         action: 'send',
@@ -300,7 +297,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
 
       updateTransactionHistory(senderId, networkKey, item, (items) => {
         onGetTxResult(false, extrinsicHash, error);
-      }).catch(e => console.log('Error when update Transaction History', e));
+      }).catch((e) => console.log('Error when update Transaction History', e));
     } else {
       onGetTxResult(false, undefined, error);
     }
@@ -323,56 +320,62 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
       {!isShowTxResult ? (
         <div className={`${className} -main-content`}>
           <InputAddress
-            withEllipsis
             className={'kn-field -field-1'}
             defaultValue={propSenderId}
             help={t<string>('The account you will send funds from.')}
-            // isDisabled={!!propSenderId}
             label={t<string>('Send from account')}
+            // isDisabled={!!propSenderId}
             labelExtra={
               <Available
-                label={t<string>('Transferable')}
-                params={senderId}
                 api={api}
                 apiUrl={apiUrl}
+                label={t<string>('Transferable')}
+                params={senderId}
               />
             }
             onChange={setSenderId}
             type='account'
+            withEllipsis
           />
           <InputAddress
-            withEllipsis
-            className={'kn-field -field-2'}
             autoPrefill={false}
+            className={'kn-field -field-2'}
             help={t<string>('Select a contact or paste the address you want to send funds to.')}
-            // isDisabled={!!propRecipientId}
             label={t<string>('Send to address')}
+            // isDisabled={!!propRecipientId}
             labelExtra={
               <Available
-                label={t<string>('Transferable')}
-                params={recipientId}
                 api={api}
                 apiUrl={apiUrl}
+                label={t<string>('Transferable')}
+                params={recipientId}
               />
             }
             onChange={setRecipientId}
             type='allPlus'
+            withEllipsis
           />
           {recipientPhish && (
-            <Warning isDanger className={'kn-l-warning'}>
-              {t<string>('The recipient is associated with a known phishing site on {{url}}', {replace: {url: recipientPhish}})}
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
+              {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
             </Warning>
           )}
           {isSameAddress && (
-            <Warning isDanger className={'kn-l-warning'}>
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
               {t<string>('The recipient address is the same as the sender address.')}
             </Warning>
           )}
           {canToggleAll && isAll
             ? (
               <InputBalance
-                className={'kn-field -field-3'}
                 autoFocus
+                className={'kn-field -field-3'}
                 defaultValue={maxTransfer}
                 help={t<string>('The full account balance to be transferred, minus the transaction fees')}
                 isDisabled
@@ -384,19 +387,22 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
             : (
               <>
                 <InputBalance
-                  className={'kn-field -field-3'}
                   autoFocus
+                  className={'kn-field -field-3'}
                   help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
                   isError={!hasAvailable}
                   isZeroable
-                  placeholder={'0'}
                   label={t<string>('amount')}
-                  // maxValue={maxTransfer}
                   onChange={setAmount}
+                  // maxValue={maxTransfer}
+                  placeholder={'0'}
                   registry={api.registry}
                 />
                 {amountGtAvailableBalance && (
-                  <Warning isDanger className={'kn-l-warning'}>
+                  <Warning
+                    className={'kn-l-warning'}
+                    isDanger
+                  >
                     {t<string>('The amount you want to transfer is greater than your available balance.')}
                   </Warning>
                 )}
@@ -459,18 +465,18 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
       ) : (
         <SendFundResult
           networkKey={networkKey}
-          txResult={txResult}
           onResend={_onResend}
+          txResult={txResult}
         />
       )}
 
       {extrinsic && isShowTxModal && (
         <AuthTransaction
-          extrinsic={extrinsic}
-          requestAddress={senderId}
-          onCancel={_onCancelTx}
           api={api}
           apiUrl={apiUrl}
+          extrinsic={extrinsic}
+          onCancel={_onCancelTx}
+          requestAddress={senderId}
           txHandler={{
             onTxSuccess: _onTxSuccess,
             onTxFail: _onTxFail
@@ -481,7 +487,7 @@ function SendFund({className, setWrapperClass, api, apiUrl}: ContentProps): Reac
   );
 }
 
-export default React.memo(styled(Wrapper)(({theme}: Props) => `
+export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -507,7 +513,6 @@ export default React.memo(styled(Wrapper)(({theme}: Props) => `
     padding-bottom: 15px;
     flex: 1;
     padding-top: 25px;
-    margin-top: -25px;
     overflow-y: auto;
 
     // &::-webkit-scrollbar {
@@ -517,7 +522,7 @@ export default React.memo(styled(Wrapper)(({theme}: Props) => `
 
   .kn-l-screen-content {
     flex: 1;
-    padding: 0 15px 15px;
+    padding: 25px 15px 15px;
   }
 
   .kn-field {

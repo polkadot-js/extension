@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
+
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-import {ActionContext, Link} from '../../components';
+
+import { ActionContext, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
@@ -48,7 +51,10 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
             className='add-account-btn'
             data-export-button
           >
-            <Link to={`/account/import-seed`} className='add-account-link'>
+            <Link
+              className='add-account-link'
+              to={'/account/import-seed'}
+            >
               {t<string>('Import account from pre-existing seed')}
             </Link>
           </Button>
@@ -57,7 +63,10 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
             className='add-account-btn'
             data-export-button
           >
-            <Link to={`/account/restore-json`} className='add-account-link'>
+            <Link
+              className='add-account-link'
+              to={'/account/restore-json'}
+            >
               {t<string>('Restore account from backup JSON file')}
             </Link>
           </Button>

@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
+
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
+
+import Link from '@polkadot/extension-koni-ui/components/Link';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-import Link from "@polkadot/extension-koni-ui/components/Link";
 
 interface Props extends ThemeProps {
   className?: string;

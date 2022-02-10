@@ -7,9 +7,11 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
+import { AccountJson } from '@polkadot/extension-base/background/types';
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import { store } from '@polkadot/extension-koni-ui/stores';
 
-import { ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
+import { AccountContext, ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
@@ -19,16 +21,21 @@ interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
+function updateCurrentAccount (currentAcc: AccountJson): void {
+  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
+}
+
 function Forget ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const { accounts } = useContext(AccountContext);
 
   const _goHome = useCallback(
     () => {
-      onAction('/');
       window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
     },
     [onAction]
   );
@@ -38,9 +45,12 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
       setIsBusy(true);
       forgetAccount(address)
         .then(() => {
+          if (accounts.length === 1) {
+            updateCurrentAccount({} as AccountJson);
+          }
+
           setIsBusy(false);
           _goHome();
-
         })
         .catch((error: Error) => {
           setIsBusy(false);

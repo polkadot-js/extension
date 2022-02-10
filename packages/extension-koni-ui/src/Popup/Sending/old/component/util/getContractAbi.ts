@@ -1,12 +1,12 @@
-// Copyright 2017-2021 @polkadot/react-components authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {Abi} from '@polkadot/api-contract';
+import { ApiPromise } from '@polkadot/api';
+import { Abi } from '@polkadot/api-contract';
 
-import {getAddressMeta} from './getAddressMeta';
-import {ApiPromise} from "@polkadot/api";
+import { getAddressMeta } from './getAddressMeta';
 
-export function getContractAbi (address: string | null, api: ApiPromise ): Abi | null {
+export function getContractAbi (address: string | null, api: ApiPromise): Abi | null {
   if (!address) {
     return null;
   }

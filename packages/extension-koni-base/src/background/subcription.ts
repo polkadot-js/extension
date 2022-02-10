@@ -24,8 +24,8 @@ export class KoniSubcription {
   init () {
     this.initChainRegistrySubscription();
 
-    let unsubBalances: Function | undefined;
-    let unsubCrowdloans: Function | undefined;
+    let unsubBalances: () => void | undefined;
+    let unsubCrowdloans: () => void | undefined;
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -86,13 +86,11 @@ export class KoniSubcription {
     });
 
     return () => {
-      Promise.all(subscriptionPromises)
-        .then((subscriptions) => {
-          subscriptions.forEach((unsub) => {
-            // @ts-ignore
-            unsub && unsub();
-          });
+      subscriptionPromises.forEach((subProm) => {
+        subProm.then((unsub) => {
+          unsub && unsub();
         }).catch(console.error);
+      });
     };
   }
 

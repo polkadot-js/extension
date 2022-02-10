@@ -1,17 +1,18 @@
-// Copyright 2017-2021 @polkadot/react-signer authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type BN from 'bn.js';
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 
-import {BN_ZERO} from '@polkadot/util';
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import Toggle from "@polkadot/extension-koni-ui/components/Toggle";
+import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { Registry } from '@polkadot/types/types';
+import { BN_ZERO } from '@polkadot/util';
+
 import InputBalance from '../component/InputBalance';
-import {Registry} from "@polkadot/types/types";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -19,8 +20,8 @@ interface Props extends ThemeProps {
   registry: Registry;
 }
 
-function Tip({className, onChange, registry}: Props): React.ReactElement<Props> | null {
-  const {t} = useTranslation();
+function Tip ({ className, onChange, registry }: Props): React.ReactElement<Props> | null {
+  const { t } = useTranslation();
   const [tip, setTip] = useState(BN_ZERO);
   const [showTip, setShowTip] = useState(false);
 

@@ -1,4 +1,4 @@
-// Copyright 2019-2021 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -59,7 +59,7 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   color: ${theme.buttonTextColor};
   font-size: 16px;
   line-height: 26px;
-  padding: 0 1rem;
+  padding: 0 12px;
   position: relative;
   text-align: center;
 

@@ -2,21 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type BN from 'bn.js';
-import type {SubmittableExtrinsic} from '@polkadot/api/promise/types';
-import type {DeriveBalancesAll} from '@polkadot/api-derive/types';
-import type {RuntimeDispatchInfo} from '@polkadot/types/interfaces';
+import type { SubmittableExtrinsic } from '@polkadot/api/promise/types';
+import type { DeriveBalancesAll } from '@polkadot/api-derive/types';
+import type { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
 
-import React, {useEffect, useState} from 'react';
-import {Trans, useTranslation} from 'react-i18next';
+import React, { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
-import {formatBalance, isFunction} from '@polkadot/util';
-
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import styled from "styled-components";
-import Warning from "@polkadot/extension-koni-ui/components/Warning";
-import {useCall} from "@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall";
-import {ApiPromise} from "@polkadot/api";
-import {useIsMountedRef} from "@polkadot/extension-koni-ui/Popup/Sending/old/hook/useIsMountedRef";
+import { ApiPromise } from '@polkadot/api';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import { useCall } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall';
+import { useIsMountedRef } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useIsMountedRef';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { formatBalance, isFunction } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   accountId: string | null;
@@ -29,7 +28,7 @@ interface Props extends ThemeProps {
   apiUrl: string
 }
 
-function PaymentInfo ({ accountId, className = '', extrinsic, api, apiUrl}: Props): React.ReactElement<Props> | null {
+function PaymentInfo ({ accountId, api, apiUrl, className = '', extrinsic }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [dispatchInfo, setDispatchInfo] = useState<RuntimeDispatchInfo | null>(null);
   const balances = useCall<DeriveBalancesAll>(api.derive.balances?.all, [accountId], undefined, apiUrl);

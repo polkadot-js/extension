@@ -4,19 +4,7 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import {
-  APIItemState,
-  BalanceItem,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  NftJson,
-  PriceJson,
-  StakingJson,
-  TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
@@ -70,12 +58,14 @@ export default class KoniState extends State {
   private nftState: NftJson = {
     ready: true,
     total: 0,
-    nftList: [],
+    nftList: []
   } as NftJson;
+
   private stakingState: StakingJson = {
     ready: true,
     details: []
   } as StakingJson
+
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
   private nftSubject = new Subject<NftJson>();
@@ -135,10 +125,12 @@ export default class KoniState extends State {
   }
 
   public setNft (nftData: NftJson, callback?: (nftData: NftJson) => void): void {
-    this.nftState = nftData
+    this.nftState = nftData;
+
     if (callback) {
       callback(nftData);
     }
+
     this.nftSubject.next(nftData);
   }
 

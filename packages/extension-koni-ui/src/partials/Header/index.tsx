@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
+import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { Chain } from '@polkadot/extension-chains/types';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
@@ -23,7 +24,7 @@ import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui
 import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
-import {RootState, store} from '@polkadot/extension-koni-ui/stores';
+import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -33,7 +34,6 @@ import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
-import {CurrentNetworkInfo} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -163,7 +163,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     return () => {
       isSync = false;
     };
-  }, [currentAccount?.genesisHash]);
+  }, [currentAccount?.genesisHash, accounts]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
@@ -198,13 +198,13 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
         await tieAccount(currentAccount.address, genesisHash || null);
-        updateCurrentNetwork( {
-            networkPrefix,
-            icon,
-            genesisHash,
-            networkKey,
-            isEthereum
-          });
+        updateCurrentNetwork({
+          networkPrefix,
+          icon,
+          genesisHash,
+          networkKey,
+          isEthereum
+        });
       }
 
       setShowNetworkSelect(false);
@@ -248,7 +248,11 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       <div className='container'>
         <div className='top-container'>
           <div className='branding'>
-            <Link to={'/'} title={'SubWallet'}>
+            <Link
+              className='sub-wallet-logo'
+              title={'SubWallet'}
+              to={'/'}
+            >
               <img
                 className='logo'
                 src={logo}
@@ -290,7 +294,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                 className={`setting-icon-wrapper ${isSettingsOpen && 'pointer-events-none'}`}
                 onClick={_toggleSettings}
               >
-                {currentAccount
+                {!!currentAccount && !!currentAccount.address
                   ? (
                     <Identicon
                       className='identityIcon'
@@ -298,7 +302,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                       iconTheme={theme}
                       prefix={prefix}
                       showLogo
-                      size={44}
+                      size={48}
                       value={formatted || currentAccount?.address}
                     />
                   )
@@ -419,15 +423,19 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     }
   }
 
+  .sub-wallet-logo {
+    opacity: 1;
+  }
+
   .only-top-container {
     padding-top: 6px;
   }
 
   .default-avatar {
-    width: 44px;
-    height: 44px;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
-    padding: 1px;
+    padding: 2px;
     border: 2px solid ${theme.checkDotColor};
   }
 
@@ -533,7 +541,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
 
     &__text {
       margin: 4px 22px 4px 8px;
-      font-size: 15px;
+      font-size: 14px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

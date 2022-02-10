@@ -34,7 +34,10 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
 
   const _goHome = useCallback(
-    () => onAction('/'),
+    () => {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    },
     [onAction]
   );
 
@@ -55,6 +58,7 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
 
           saveAs(blob, `batch_exported_account_${Date.now()}.json`);
 
+          window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
         })
         .catch((error: Error) => {

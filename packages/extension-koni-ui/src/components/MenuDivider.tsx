@@ -17,5 +17,5 @@ function KoniMenuDivider ({ className }: Props): React.ReactElement<Props> {
 }
 
 export default styled(KoniMenuDivider)(({ theme }: Props) => `
-  border-bottom: 1px solid ${theme.inputBorderColor};
+  border-bottom: 2px solid ${theme.borderColor2};
 `);

@@ -3,9 +3,11 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {ChainRegistry, TransactionHistoryItemType} from '@polkadot/extension-base/background/KoniTypes';
-import {ThemeProps} from '@polkadot/extension-koni-ui/types';
-import {getScanExplorerTransactionHistoryUrl, isSupportScanExplorer} from '@polkadot/extension-koni-ui/util';
+
+import { ChainRegistry, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
+
 import TransactionHistoryEmptyList from './EmptyList';
 import TransactionHistoryItem from './TransactionHistoryItem';
 
@@ -21,10 +23,10 @@ interface ContentProp {
   items: TransactionHistoryItemType[];
 }
 
-function getReadyNetwork(registryMap: Record<string, ChainRegistry>): string[] {
-  const result: string[]  = [];
+function getReadyNetwork (registryMap: Record<string, ChainRegistry>): string[] {
+  const result: string[] = [];
 
-  for (let networkKey in registryMap) {
+  for (const networkKey in registryMap) {
     if (!registryMap.hasOwnProperty(networkKey)) {
       continue;
     }
@@ -37,15 +39,19 @@ function getReadyNetwork(registryMap: Record<string, ChainRegistry>): string[] {
   return result;
 }
 
-function Wrapper ({ className, items, registryMap}: Props): React.ReactElement<Props> {
+function Wrapper ({ className, items, registryMap }: Props): React.ReactElement<Props> {
   const readyNetworks = getReadyNetwork(registryMap);
-  const readyItems = items.filter(i => readyNetworks.includes(i.networkKey));
+  const readyItems = items.filter((i) => readyNetworks.includes(i.networkKey));
 
   if (!readyItems.length) {
-    return (<TransactionHistoryEmptyList/>);
+    return (<TransactionHistoryEmptyList />);
   }
 
-  return (<TransactionHistory items={readyItems} registryMap={registryMap} className={className}/>)
+  return (<TransactionHistory
+    className={className}
+    items={readyItems}
+    registryMap={registryMap}
+  />);
 }
 
 function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {
@@ -93,4 +99,8 @@ function TransactionHistory ({ className, items, registryMap }: ContentProp): Re
 export default styled(Wrapper)(({ theme }: Props) => `
   height: 100%;
   overflow-y: auto;
+
+  .transaction-item-wrapper {
+    color: ${theme.textColor};
+  }
 `);

@@ -84,7 +84,7 @@ export default React.memo(styled(SimpleDropdown)(({ isError, label, theme }: Pro
     color: ${isError ? theme.errorBorderColor : theme.textColor};
     display: block;
     font-family: ${theme.fontFamily};
-    font-size: ${theme.fontSize};
+    font-size: 15px;
     padding: 0.5rem 0.75rem;
     width: 100%;
     cursor: pointer;

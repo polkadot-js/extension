@@ -19,7 +19,7 @@ import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, ActionContext, Theme } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2} from '../messaging';
+import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { isKeyringPairs$Json } from '../util/typeGuards';
 
@@ -108,6 +108,7 @@ function Upload ({ className }: Props): React.ReactElement {
 
       (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo[0].address) : jsonRestoreV2(file, password, accountsInfo[0].address))
         .then(() => {
+          window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
         }).catch(
           (e) => {
@@ -130,7 +131,10 @@ function Upload ({ className }: Props): React.ReactElement {
       <div className={className}>
         <div className='restore-from-json-wrapper'>
           {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
-            <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`} key={`${index}:${address}`}>
+            <div
+              className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}
+              key={`${index}:${address}`}
+            >
               <AccountInfo
                 address={address}
                 genesisHash={genesisHash}

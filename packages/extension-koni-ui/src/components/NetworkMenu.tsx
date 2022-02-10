@@ -59,8 +59,8 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       if (selectedGroup && selectedGroup.length) {
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
-            .includes(lowerCaseFilteredNetwork)
-              && network.group === selectedGroup));
+            .includes(lowerCaseFilteredNetwork) &&
+              network.group === selectedGroup));
       } else {
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
@@ -173,7 +173,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     font-size: 20px;
     line-height: 32px;
     font-weight: 500;
-    border-bottom: 1px solid ${theme.inputBorderColor};
+    border-bottom: 2px solid ${theme.inputBorderColor};
   }
 
   .network-filter-list {

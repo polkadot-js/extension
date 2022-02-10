@@ -291,7 +291,8 @@ export default class KoniExtension extends Extension {
   private getNft (account: string | null): Promise<NftJson> {
     return new Promise<NftJson>((resolve, reject) => {
       if (account === null) {
-        console.log('account is null')
+        console.log('account is null');
+
         return;
       }
 
@@ -301,7 +302,7 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private async subscribeNft(id: string, port: chrome.runtime.Port): Promise<NftJson> {
+  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
     const currentAccount = await state.getAccountAddress();
     getAllNftsByAccount(currentAccount as string)

@@ -52,7 +52,10 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
 
     setIsBusy(true);
     deriveAccountV2(parentAddress, account.suri, parentPassword, name, password, parentGenesis)
-      .then(() => onAction('/'))
+      .then(() => {
+        window.localStorage.setItem('popupNavigation', '/');
+        onAction('/');
+      })
       .catch((error): void => {
         setIsBusy(false);
         console.error(error);

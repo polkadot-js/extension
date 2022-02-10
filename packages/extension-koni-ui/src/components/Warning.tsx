@@ -50,7 +50,7 @@ export default React.memo(styled(Warning)<Props>(({ isDanger, theme }: Props) =>
 
   .warning-message {
     display: flex;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 24px;
     align-items: center;
     font-weight: 400;

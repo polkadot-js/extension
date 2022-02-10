@@ -1,13 +1,16 @@
-import React, {useCallback, useContext} from 'react';
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import successStatus from '@polkadot/extension-koni-ui/assets/success-status.svg';
 import failStatus from '@polkadot/extension-koni-ui/assets/fail-status.svg';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
-import {TxResult} from "@polkadot/extension-koni-ui/Popup/Sending/old/types";
+import successStatus from '@polkadot/extension-koni-ui/assets/success-status.svg';
+import { ActionContext, Button } from '@polkadot/extension-koni-ui/components';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import {ActionContext, Button} from "@polkadot/extension-koni-ui/components";
-import {getScanExplorerTransactionHistoryUrl, isSupportScanExplorer} from "@polkadot/extension-koni-ui/util";
+import { TxResult } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
 
 export interface Props extends ThemeProps {
   className?: string;
@@ -16,9 +19,9 @@ export interface Props extends ThemeProps {
   onResend: () => void
 }
 
-function getErrorMessage(txError?: Error | null): string | null {
+function getErrorMessage (txError?: Error | null): string | null {
   if (!txError) {
-    return null
+    return null;
   }
 
   if (txError.message) {
@@ -28,11 +31,12 @@ function getErrorMessage(txError?: Error | null): string | null {
   return null;
 }
 
-function SendFundResult({className, networkKey, txResult: {isTxSuccess, txError, extrinsicHash}, onResend}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function SendFundResult ({ className, networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const navigate = useContext(ActionContext);
   const _backToHome = useCallback(
     () => {
+      window.localStorage.setItem('popupNavigation', '/');
       navigate('/');
     },
     [navigate]
@@ -41,31 +45,39 @@ function SendFundResult({className, networkKey, txResult: {isTxSuccess, txError,
   const viewTransactionBtn = (networkKey: string, extrinsicHash: string) => {
     if (isSupportScanExplorer(networkKey)) {
       return (
-        <a href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)} target={'_blank'}
-           className='kn-send-fund-stt-btn kn-view-history-btn'
+        <a
+          className='kn-send-fund-stt-btn kn-view-history-btn'
+          href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+          rel='noreferrer'
+          target={'_blank'}
         >
           {t<string>('View Transaction')}
         </a>
-      )
+      );
     }
 
     return (
       <span className='kn-send-fund-stt-btn kn-view-history-btn -disabled'>
         {t<string>('View Transaction')}
       </span>
-    )
+    );
   };
 
   const errorMessage = getErrorMessage(txError);
 
   return (
     <div className={`kn-send-fund-result-wrapper ${className}`}>
-      {isTxSuccess ?
-        <div className='kn-send-fund-result'>
-          <img className='kn-status-img' src={successStatus} alt="success" />
+      {isTxSuccess
+        ? <div className='kn-send-fund-result'>
+          <img
+            alt='success'
+            className='kn-status-img'
+            src={successStatus}
+          />
           <div className='kn-stt-text'>{t<string>('Send Fund Successful')}</div>
           <div
-            className='kn-stt-subtext'>{t<string>('Your request has been confirmed. You can track its progress on the Transaction History page.')}</div>
+            className='kn-stt-subtext'
+          >{t<string>('Your request has been confirmed. You can track its progress on the Transaction History page.')}</div>
           <Button
             className='kn-send-fund-stt-btn'
             onClick={_backToHome}
@@ -75,9 +87,12 @@ function SendFundResult({className, networkKey, txResult: {isTxSuccess, txError,
 
           {extrinsicHash && viewTransactionBtn(networkKey, extrinsicHash)}
         </div>
-        :
-        <div className='kn-send-fund-result'>
-          <img className='kn-status-img' src={failStatus} alt="fail" />
+        : <div className='kn-send-fund-result'>
+          <img
+            alt='fail'
+            className='kn-status-img'
+            src={failStatus}
+          />
           <div className='kn-stt-text'>{t<string>('Send Fund Fail')}</div>
           <div className='kn-stt-subtext'>
             {extrinsicHash
@@ -104,7 +119,7 @@ function SendFundResult({className, networkKey, txResult: {isTxSuccess, txError,
   );
 }
 
-export default React.memo(styled(SendFundResult)(({theme}: ThemeProps) => `
+export default React.memo(styled(SendFundResult)(({ theme }: ThemeProps) => `
   margin: 20px 45px 0;
 
   .kn-send-fund-result {

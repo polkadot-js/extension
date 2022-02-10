@@ -65,7 +65,10 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         setIsBusy(true);
 
         createAccountSuriV2(name, password, seed, type, genesisHash)
-          .then(() => onAction('/'))
+          .then(() => {
+            window.localStorage.setItem('popupNavigation', '/');
+            onAction('/');
+          })
           .catch((error: Error): void => {
             setIsBusy(false);
             console.error(error);

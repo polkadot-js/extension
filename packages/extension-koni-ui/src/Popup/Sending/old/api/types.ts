@@ -1,7 +1,9 @@
-// helpers for HOC props
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
 
-import React from "react";
-import {ApiProps} from "@polkadot/extension-base/background/KoniTypes";
+import React from 'react';
+
+import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 
 export type OmitProps<T, K> = Pick<T, Exclude<keyof T, K>>;
 export type SubtractProps<T, K> = OmitProps<T, keyof K>;

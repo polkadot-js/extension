@@ -1,15 +1,15 @@
-// Copyright 2017-2021 @polkadot/react-query authors & contributors
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type BN from 'bn.js';
-import type {Compact} from '@polkadot/types';
-import type {Registry} from '@polkadot/types/types';
+import type { Compact } from '@polkadot/types';
+import type { Registry } from '@polkadot/types/types';
 
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import {BN_ZERO, formatBalance} from '@polkadot/util';
 
-import useTranslation from "@polkadot/extension-koni-ui/hooks/useTranslation";
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { BN_ZERO, formatBalance } from '@polkadot/util';
 
 interface Props {
   children?: React.ReactNode;
@@ -73,7 +73,7 @@ function applyFormat (value: Compact<any> | BN | string, [decimals, token]: [num
   return createElement(prefix, postfix, unitPost, labelPost, isShort);
 }
 
-function FormatBalance ({ children, className = '', format, formatIndex, registry, isShort, label, labelPost, value, valueFormatted, withCurrency, withSi }: Props): React.ReactElement<Props> {
+function FormatBalance ({ children, className = '', format, formatIndex, isShort, label, labelPost, registry, value, valueFormatted, withCurrency, withSi }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const formatInfo = useMemo(

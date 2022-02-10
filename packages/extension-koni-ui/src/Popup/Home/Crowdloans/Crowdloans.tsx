@@ -4,14 +4,15 @@
 import BigN from 'bignumber.js';
 import React from 'react';
 import styled from 'styled-components';
+
+import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { CrowdloanContributeValueType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
-import {CrowdloanItemType} from '@polkadot/extension-koni-ui/Popup/Home/types';
-import {ThemeProps} from '@polkadot/extension-koni-ui/types';
-import {BN_ZERO, getLogoByNetworkKey} from '@polkadot/extension-koni-ui/util';
+import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 
 import CrowdloanEmptyList from './EmptyList';
-import {CrowdloanContributeValueType} from "@polkadot/extension-koni-ui/hooks/screen/home/types";
-import {NetWorkMetadataDef} from "@polkadot/extension-base/background/KoniTypes";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -85,7 +86,7 @@ function getItems (
   return result;
 }
 
-function Wrapper ({ className, networkKeys, crowdloanContributeMap, networkMetadataMap }: Props): React.ReactElement<Props> {
+function Wrapper ({ className, crowdloanContributeMap, networkKeys, networkMetadataMap }: Props): React.ReactElement<Props> {
   const items: CrowdloanItemType[] = getItems(networkKeys, crowdloanContributeMap, networkMetadataMap);
 
   if (!items.length) {
@@ -100,7 +101,7 @@ function Wrapper ({ className, networkKeys, crowdloanContributeMap, networkMetad
 
 function Crowdloans ({ className, items }: ContentProp): React.ReactElement<ContentProp> {
   return (
-    <div className={`crowdloan-items-container ${className? className : ''}`}>
+    <div className={`crowdloan-items-container ${className || ''}`}>
       {items.map((item) => (
         <CrowdloanItem
           item={item}

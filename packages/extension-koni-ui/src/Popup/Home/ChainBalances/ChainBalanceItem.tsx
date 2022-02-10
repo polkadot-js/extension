@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 import cloneIcon from '@polkadot/extension-koni-ui/assets/clone.svg';
 import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
+import { Loading } from '@polkadot/extension-koni-ui/components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
@@ -14,7 +15,6 @@ import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBal
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { toShort } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
-import { Loading } from '@polkadot/extension-koni-ui/components';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -30,13 +30,12 @@ interface Props extends ThemeProps {
   }) => void;
 }
 
-function ChainBalanceItem ({
-                             accountInfo,
-                             balanceInfo,
-                             className,
-                             setQrModalOpen,
-                             isLoading,
-                             setQrModalProps }: Props): React.ReactElement<Props> {
+function ChainBalanceItem ({ accountInfo,
+  balanceInfo,
+  className,
+  isLoading,
+  setQrModalOpen,
+  setQrModalProps }: Props): React.ReactElement<Props> {
   const { address, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const [toggleDetail, setToggleDetail] = useState(false);
   const { show } = useToast();

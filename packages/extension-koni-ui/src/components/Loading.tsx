@@ -4,19 +4,23 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { AssetImageMap } from '@polkadot/extension-koni-ui/assets';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import {AssetImageMap} from "@polkadot/extension-koni-ui/assets";
 
 interface Props extends ThemeProps {
   className?: 'string';
 }
 
-function Loading({ className }: Props): React.ReactElement<Props> {
+function Loading ({ className }: Props): React.ReactElement<Props> {
   return (
     <div className={`${className} loading-layer`}>
-      <img src={AssetImageMap.loading} alt="Loading" className={'loading-img'} />
+      <img
+        alt='Loading'
+        className={'loading-img'}
+        src={AssetImageMap.loading}
+      />
     </div>
   );
 }
 
-export default React.memo(styled(Loading)(({ theme }: Props) => ``));
+export default React.memo(styled(Loading)(({ theme }: Props) => ''));

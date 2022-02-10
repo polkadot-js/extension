@@ -88,7 +88,7 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft(address: string) {
+  refreshNft (address: string) {
     return () => {
       getAllNftsByAccount(address)
         .then((rs) => {
@@ -97,7 +97,7 @@ export class KoniCron {
           });
         })
         .catch((err) => console.log(err));
-    }
+    };
   }
 
   refreshStaking(address: string) {

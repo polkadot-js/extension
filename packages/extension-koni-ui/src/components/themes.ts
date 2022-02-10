@@ -3,7 +3,7 @@
 
 const colors = {
   primary1: '#004BFF',
-  primary2: '#04C1B7'
+  primary2: '#42C59A'
 };
 
 const darkTheme = {
@@ -43,14 +43,14 @@ const darkTheme = {
   fontSize2: '15px',
   fontSize3: '13px',
   highlightedAreaBackground: '#EFEFEF',
-  headerBoxShadow: '0px 5px 40px #030d42',
+  headerBoxShadow: '0px 5px 40px #051258',
   iconDangerColor: '#AF1111',
-  iconNeutralColor: 'rgba(136, 136, 136, 0.8)',
+  iconNeutralColor: '#7B8098',
   iconWarningColor: '#FF7D01',
   id: 'dark',
   identiconBackground: '#F4F5F8',
   inputBackground: '#111218',
-  inputBorderColor: '#161934',
+  inputBorderColor: '#2D365C',
   uploadFileBorderColor: 'rgba(0, 75, 255, 0.2)',
   inputLabelFontSize: '14px',
   labelColor: '#9F9E99',
@@ -71,7 +71,7 @@ const darkTheme = {
   dangerBackgroundColor: 'rgba(175, 17, 17, 0.25)',
   subTextColor: '#DDD',
   textColor: '#FFFFFF',
-  textColor2: '#9196AB',
+  textColor2: '#7B8098',
   textColor3: colors.primary2,
   textColorDanger: '#FF8686',
   checkDotColor: colors.primary1,
@@ -128,7 +128,7 @@ const lightTheme: Theme = {
   iconNeutralColor: '#939CB1',
   id: 'light',
   inputBackground: '#FFFFFF',
-  inputBorderColor: '#DDE1EB',
+  inputBorderColor: '#EDEDED',
   labelColor: '#333333',
   menuBoxShadow: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 20px 60px rgba(0, 0, 0, 0.15)',
   menuItemsBorder: '#EEEEEE',
@@ -139,7 +139,7 @@ const lightTheme: Theme = {
   readonlyInputBackground: '#FFF',
   subTextColor: '#454545',
   textColor: '#00072D',
-  textColor2: '#666666',
+  textColor2: '#888888',
   textColor3: colors.primary1,
   textColorDanger: '#F24A4A',
   labelLightThemeColor: '#00072D',

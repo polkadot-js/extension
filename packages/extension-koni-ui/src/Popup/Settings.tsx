@@ -163,7 +163,8 @@ export default styled(Settings)(({ theme }: Props) => `
   padding-top: 25px;
 
   .settings__theme-setting {
-    .kn-label {
+    padding-top: 14px;
+    .horizontal-label {
       font-size: 18px;
       line-height: 30px;
     }

@@ -226,7 +226,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
     padding: 12px 16px;
     display: flex;
     justify-content: space-between;
-    border-bottom:2px solid ${theme.boxBorderColor};
+    border-bottom:2px solid ${theme.menuItemsBorder};
   }
 
   .openWindow, .manageWebsiteAccess{
@@ -322,5 +322,9 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
 
   .account-menu-settings__input-filter {
     width: 100%;
+  }
+
+  .account-menu-settings__input-filter > input {
+    height: 40px;
   }
 `));

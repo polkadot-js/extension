@@ -41,7 +41,6 @@ import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
-import NftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer";
 import StakingContainer from "@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer";
 
 interface WrapperProps extends ThemeProps {

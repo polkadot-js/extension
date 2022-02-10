@@ -3,8 +3,6 @@
 
 import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
 import { getBalances } from '@polkadot/extension-koni-base/api/rpc_api/index';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
-import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
 
 jest.setTimeout(5000000000000);
 
@@ -23,7 +21,7 @@ describe('test api get staking', () => {
   test('test api get bonded token from endpoints', async () => {
     const resp = await getAllNftsByAccount('5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W');
     const collection = resp.nftList[2];
-    const item = collection.nftItems;
+    // const item = collection.nftItems;
 
     console.log(collection);
     // const allChainsMapping = getAllChainsMapping()

@@ -1,4 +1,4 @@
-import StatemineNftApi from "@polkadot/extension-koni-base/api/statemine_nft/index";
+import StatemineNftApi from "@polkadot/extension-koni-base/api/nft/statemine_nft/index";
 
 jest.setTimeout(20000)
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getItemsKanariaByAccount, getSingularByAccount } from './api/rmrk_nft';
+import { getItemsKanariaByAccount, getSingularByAccount } from './api/nft/rmrk_nft';
 // import UniqueNftApi from "./api/unique_nft";
 //
 // // no direct exports

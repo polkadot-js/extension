@@ -16,6 +16,8 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import {getStakingInfo} from "@polkadot/extension-koni-base/api/rpc_api/staking_info";
+import {getAllNftsByAccount} from "@polkadot/extension-koni-base/api/nft";
 
 const bWindow = window as unknown as BackgroundWindow;
 
@@ -301,7 +303,15 @@ export default class KoniExtension extends Extension {
 
   private async subscribeNft(id: string, port: chrome.runtime.Port): Promise<NftJson> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
-    const currentAccount = await state.getAccountAddress()
+    const currentAccount = await state.getAccountAddress();
+    getAllNftsByAccount(currentAccount as string)
+      .then((rs) => {
+        state.setNft(rs, (nftData) => {
+          console.log(`Update nft state from subscription`);
+        });
+      })
+      .catch((err) => console.log(err));
+
     const nftSubscription = state.subscribeNft().subscribe({
       next: (rs) => {
         cb(rs);
@@ -332,6 +342,15 @@ export default class KoniExtension extends Extension {
   private async subscribeStaking(id: string, port: chrome.runtime.Port): Promise<StakingJson> {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
     const currentAccount = await state.getAccountAddress()
+    getStakingInfo(currentAccount as string)
+      .then((rs) => {
+        state.setStaking(rs, (stakingData) => {
+          console.log(`Update staking state from subscription ${stakingData}`);
+          console.log(stakingData);
+        })
+      })
+      .catch((err) => console.log(err));
+
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {
         cb(rs);

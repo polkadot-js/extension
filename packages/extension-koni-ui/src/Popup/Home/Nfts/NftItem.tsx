@@ -39,6 +39,10 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
     setShowImage(false);
   }
 
+  const handleOnClick = () => {
+    console.log(data?.external_url)
+  }
+
   return (
     <div className={className}>
       <div className={'header'}>
@@ -52,7 +56,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
           />
         </div>
         <div className={'header-title'}>
-          {data?.name}
+          {data.name ? data.name : '#' + data.id}
         </div>
         <div></div>
       </div>
@@ -67,6 +71,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
             <img
               alt={'item-img'}
               className={'item-img'}
+              onClick={() => handleOnClick()}
               onLoad={() => handleOnLoad()}
               onError={() => handleImageError()}
               src={data.image ? data?.image : logo}

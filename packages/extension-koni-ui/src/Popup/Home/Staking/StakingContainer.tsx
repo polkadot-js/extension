@@ -25,6 +25,7 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
       setLoading(true);
       return;
     }
+    console.log(stakingReducer)
     // @ts-ignore
     setData(stakingReducer)
     setLoading(false);
@@ -138,6 +139,7 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   .chain-name {
     font-size: 16px;
     font-weight: 500;
+    text-transform: capitalize;
   }
 
   .chain-symbol {
@@ -154,7 +156,6 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   }
 
   .chain-unit {
-    text-transform: uppercase;
     font-size: 14px;
     font-weight: normal;
     display: flex;

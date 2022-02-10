@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getBirdsKanariaByAccount, getItemsKanariaByAccount, getSingularByAccount } from '@polkadot/extension-koni-base/api/rmrk_nft/index';
+import { getBirdsKanariaByAccount, getItemsKanariaByAccount, getSingularByAccount } from '@polkadot/extension-koni-base/api/nft/rmrk_nft/index';
 
 jest.setTimeout(50000);
 

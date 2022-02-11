@@ -76,7 +76,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
         {isAllAccount ?
           <div>
             <Warning>
-              {t<string>(`Account "All" doesn't support this action. Please switch another account`)}
+              {t<string>(`Account "All" doesn't support this action. Please switch to another account`)}
             </Warning>
             <ActionBar className='forget-account__cancel-btn-wrapper'>
               <ActionText
@@ -138,6 +138,6 @@ export default withRouter(styled(Forget)(({theme}: Props) => `
   }
 
   .forget-account__cancel-btn-wrapper {
-    margin-top: 4px;
+    margin-top: 12px;
   }
 `));

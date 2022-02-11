@@ -4,7 +4,7 @@
 import type { Theme, ThemeProps } from '../types';
 
 import { saveAs } from 'file-saver';
-import React, { useCallback, useContext, useState } from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -19,6 +19,7 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 const MIN_LENGTH = 6;
 
@@ -33,6 +34,11 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const [isAllAccount, setIsAllAccount] = useState(false);
+
+  useEffect(() => {
+      setIsAllAccount(isAccountAll(address));
+  }, []);
 
   const _goHome = useCallback(
     () => {
@@ -79,53 +85,69 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
         subHeaderName={t<string>('Export account')}
       />
       <div className={className}>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
-          <AccountInfo address={address} />
-          <Warning className='export-warning'>
-            {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
-          </Warning>
+        {isAllAccount ?
+          <div>
+            <Warning>
+              {t<string>(`Account "All" doesn't support this action. Please switch to another account`)}
+            </Warning>
 
-          <div className='export__password-area'>
-            <InputWithLabel
-              className='export__input-label'
-              data-export-password
-              disabled={isBusy}
-              isError={pass.length < MIN_LENGTH || !!error}
-              label={t<string>('password for this account')}
-              onChange={onPassChange}
-              type='password'
-            />
-            {error && (
-              <Warning
-                isBelowInput
-                isDanger
-              >
-                {error}
-              </Warning>
-            )}
-          </div>
+            <ActionBar className='export__action-bar'>
+              <ActionText
+                className='cancel-button'
+                onClick={_goHome}
+                text={t<string>('Cancel')}
+              />
+            </ActionBar>
+          </div> :
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
+            <AccountInfo address={address} />
+            <Warning className='export-warning'>
+              {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
+            </Warning>
 
-          <div className='export__action-area'>
-            <div>
-              <Button
-                className='export-button'
-                data-export-button
-                isBusy={isBusy}
-                isDisabled={pass.length === 0 || !!error}
-                onClick={_onExportButtonClick}
-              >
-                {t<string>('I want to export this account')}
-              </Button>
-              <ActionBar className='export__action-bar'>
-                <ActionText
-                  className='cancel-button'
-                  onClick={_goHome}
-                  text={t<string>('Cancel')}
-                />
-              </ActionBar>
+            <div className='export__password-area'>
+              <InputWithLabel
+                className='export__input-label'
+                data-export-password
+                disabled={isBusy}
+                isError={pass.length < MIN_LENGTH || !!error}
+                label={t<string>('password for this account')}
+                onChange={onPassChange}
+                type='password'
+              />
+              {error && (
+                <Warning
+                  isBelowInput
+                  isDanger
+                >
+                  {error}
+                </Warning>
+              )}
+            </div>
+
+            <div className='export__action-area'>
+              <div>
+                <Button
+                  className='export-button'
+                  data-export-button
+                  isBusy={isBusy}
+                  isDisabled={pass.length === 0 || !!error}
+                  onClick={_onExportButtonClick}
+                >
+                  {t<string>('I want to export this account')}
+                </Button>
+                <ActionBar className='export__action-bar'>
+                  <ActionText
+                    className='cancel-button'
+                    onClick={_goHome}
+                    text={t<string>('Cancel')}
+                  />
+                </ActionBar>
+              </div>
             </div>
           </div>
-        </div>
+        }
+
       </div>
     </>
   );

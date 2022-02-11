@@ -87,7 +87,6 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
   return (
     <div className={className}>
       <div className='account-info-row'>
-        {!_isAccountAll && (
           <Identicon
             className='account-info-identity-icon'
             iconTheme={iconTheme}
@@ -95,7 +94,6 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
             size={32}
             value={formatted || address}
           />
-        )}
         <div className='account-info'>
           {parentName
             ? (

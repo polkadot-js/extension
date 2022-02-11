@@ -17,13 +17,12 @@ import {forgetAccount} from '../messaging';
 import {Header} from '../partials';
 import {Theme} from '../types';
 import {isAccountAll} from "@polkadot/extension-koni-ui/util";
-import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
-function updateCurrentAccount(currentAcc: AccountJson): void {
+function updateCurrentAccount(currentAcc: AccountJson | null): void {
   store.dispatch({type: 'currentAccount/update', payload: currentAcc});
 }
 
@@ -52,13 +51,18 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
       setIsBusy(true);
       forgetAccount(address)
         .then(() => {
-          const accountAll = accounts.find(acc => acc.address === ALL_ACCOUNT_KEY);
-          if (accountAll) {
-            updateCurrentAccount(accountAll);
-          }
+          const accountAll = accounts.find(acc => isAccountAll(acc.address));
 
-          if (accounts.length === 2) {
-            updateCurrentAccount({} as AccountJson);
+          if (accountAll) {
+            if (accounts.length === 1) {
+              console.error('There is problem with accounts', accounts);
+            } else if (accounts.length === 2) {
+              updateCurrentAccount(null);
+            } else if (accounts.length > 2) {
+              updateCurrentAccount(accountAll)
+            }
+          } else {
+            console.error('Can not find account All', accounts);
           }
 
           setIsBusy(false);

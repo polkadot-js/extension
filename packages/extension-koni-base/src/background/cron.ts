@@ -12,8 +12,6 @@ import {
   CRON_REFRESH_NFT_INTERVAL,
   CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
-import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
 import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 

@@ -44,6 +44,14 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.koniverse.com',
     group: 'POLKADOT_PARACHAIN'
   },
+  rmrk: {
+    chain: 'RMRK test',
+    genesisHash: '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1',
+    icon: 'polkadot',
+    ss58Format: 0,
+    provider: 'wss://staging.node.rmrk.app',
+    group: 'POLKADOT_PARACHAIN'
+  },
   statemint: {
     chain: 'Statemint',
     genesisHash: '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',

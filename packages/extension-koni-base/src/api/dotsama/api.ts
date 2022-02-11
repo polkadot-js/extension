@@ -9,6 +9,7 @@ import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
 import { formatBalance, isTestChain, objectSpread, stringify } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
+import { inJestTest } from '@polkadot/extension-koni-base/utils/utils';
 
 export enum ApiInitStatus {
   SUCCESS,
@@ -98,9 +99,14 @@ export function initApi (apiUrl: string | string[]): ApiProps {
 
   const provider = new WsProvider(apiUrl);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const api = new ApiPromise({ provider, registry, typesBundle, typesChain: typesChain });
-  // const api = new ApiPromise({provider, registry});
+  const apiOption = { provider, typesBundle, typesChain: typesChain };
+
+  if (!inJestTest()) {
+    // @ts-ignore
+    apiOption.registry = registry;
+  }
+
+  const api = new ApiPromise(apiOption);
 
   const result: ApiProps = ({
     api,

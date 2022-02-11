@@ -552,6 +552,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   .setting-icon-wrapper {
     margin-left: 1rem;
     cursor: pointer;
+    height: 56px;
   }
 
   .koni-subheader-btn {
@@ -671,7 +672,6 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     min-width: 56px;
     height: 56px;
     border: 2px solid ${theme.checkDotColor};
-    margin-right: 10px;
     padding: 2px;
     border-radius: 50%;
   }

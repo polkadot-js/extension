@@ -150,7 +150,7 @@ function DetailHeader({
           <div className='detail-header-account-info'>
             {isAllAccount ?
               <div className='detail-header__all-account'>
-                {t<string>('All Account')}
+                {t<string>('All Accounts')}
               </div> :
               <div className='detail-header-account-info-wrapper'>
                 <span className='detail-header-account-info__name'>{currentAccount?.name}</span>

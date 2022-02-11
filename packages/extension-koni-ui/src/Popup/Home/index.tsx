@@ -247,6 +247,34 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
             </div>
           </div>
         )}
+
+        {_isAccountAll && (
+          <div className='home-account-button-container'>
+            <div className='action-button-wrapper'>
+              <ActionButton
+                iconSrc={buyIcon}
+                tooltipContent={t<string>('Receive')}
+                isDisabled
+              />
+            </div>
+
+            <div className='action-button-wrapper'>
+              <ActionButton
+                iconSrc={sendIcon}
+                tooltipContent={t<string>('Send')}
+                isDisabled
+              />
+            </div>
+
+            <div className='action-button-wrapper'>
+              <ActionButton
+                iconSrc={swapIcon}
+                tooltipContent={t<string>('Swap')}
+                isDisabled
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={'home-tab-contents'}>

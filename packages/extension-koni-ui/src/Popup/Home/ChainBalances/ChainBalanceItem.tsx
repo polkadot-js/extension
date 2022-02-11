@@ -79,29 +79,39 @@ function ChainBalanceItem ({ accountInfo,
           <div className='chain-balance-item__meta-wrapper'>
             <div className='chain-balance-item__chain-name'>{accountInfo.networkDisplayName}</div>
 
-            {!_isAccountAll && (
               <div className='chain-balance-item__bottom-area'>
-                <CopyToClipboard text={formattedAddress}>
-                  <div
-                    className='chain-balance-item__address'
-                    onClick={_onCopy}
-                  >
-                    <span className='chain-balance-item__address-text'>{toShort(formattedAddress)}</span>
+                {!_isAccountAll && (
+                  <>
+                    <CopyToClipboard text={formattedAddress}>
+                      <div
+                        className='chain-balance-item__address'
+                        onClick={_onCopy}
+                      >
+                        <span className='chain-balance-item__address-text'>{toShort(formattedAddress)}</span>
+                        <img
+                          alt='copy'
+                          className='chain-balance-item__copy'
+                          src={cloneIcon}
+                        />
+                      </div>
+                    </CopyToClipboard>
                     <img
-                      alt='copy'
-                      className='chain-balance-item__copy'
-                      src={cloneIcon}
+                      alt='receive'
+                      className='chain-balance-item__receive'
+                      onClick={_openQr}
+                      src={receivedIcon}
                     />
+                  </>
+                )}
+
+                {_isAccountAll && (
+                  <div className='chain-balance-item__address'>
+                    <span className='chain-balance-item__address-text'>
+                      {accountInfo.networkDisplayName}
+                    </span>
                   </div>
-                </CopyToClipboard>
-                <img
-                  alt='receive'
-                  className='chain-balance-item__receive'
-                  onClick={_openQr}
-                  src={receivedIcon}
-                />
+                )}
               </div>
-            )}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, {useCallback, useContext, useMemo, useState} from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -42,6 +42,7 @@ import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
 import StakingContainer from "@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer";
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -55,8 +56,8 @@ interface Props {
   transactionHistoryItems: TransactionHistoryItemType[];
 }
 
-function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
-  return [
+function getTabHeaderItems (address: string, t: TFunction): TabHeaderItemType[] {
+  const result = [
     {
       tabId: 1,
       label: t('Crypto'),
@@ -88,16 +89,21 @@ function getTabHeaderItems (t: TFunction): TabHeaderItemType[] {
       darkIcon: staking,
       activatedLightIcon: stakingActive,
       activatedDarkIcon: stakingActive
-    },
-    {
+    }
+  ];
+
+  if (!isAccountAll(address)) {
+    result.push({
       tabId: 5,
       label: t('Transfers'),
       lightIcon: transfers,
       darkIcon: transfers,
       activatedLightIcon: transfersActive,
       activatedDarkIcon: transfersActive
-    }
-  ];
+    })
+  }
+
+  return result;
 }
 
 function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
@@ -115,13 +121,15 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<></>);
   }
 
-  return (<Home
-    chainRegistryMap={chainRegistryMap}
-    className={className}
-    currentAccount={currentAccount}
-    network={currentNetwork}
-    transactionHistoryItems={transactionHistoryItems}
-          />);
+  return (
+    <Home
+      chainRegistryMap={chainRegistryMap}
+      className={className}
+      currentAccount={currentAccount}
+      network={currentNetwork}
+      transactionHistoryItems={transactionHistoryItems}
+    />
+  );
 }
 
 function Home ({ chainRegistryMap, className, currentAccount, network, transactionHistoryItems }: Props): React.ReactElement {
@@ -183,6 +191,12 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
 
   const _closeQrModal = (): void => setQrModalOpen(false);
 
+  const _isAccountAll = isAccountAll(address);
+
+  const tabItems = useMemo<TabHeaderItemType[]>(() => {
+    return getTabHeaderItems(address, t)
+  }, [address, t]);
+
   return (
     <div className={`home-screen home ${className}`}>
       <Header
@@ -205,32 +219,34 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
           />
         </div>
 
-        <div className='home-account-button-container'>
-          <div className='action-button-wrapper'>
-            <ActionButton
-              iconSrc={buyIcon}
-              onClick={_showQrModal}
-              tooltipContent={t<string>('Receive')}
-            />
-          </div>
+        {!_isAccountAll && (
+          <div className='home-account-button-container'>
+            <div className='action-button-wrapper'>
+              <ActionButton
+                iconSrc={buyIcon}
+                onClick={_showQrModal}
+                tooltipContent={t<string>('Receive')}
+              />
+            </div>
 
-          <Link
-            className={'action-button-wrapper'}
-            to={'/account/send-fund'}
-          >
-            <ActionButton
-              iconSrc={sendIcon}
-              tooltipContent={t<string>('Send')}
-            />
-          </Link>
+            <Link
+              className={'action-button-wrapper'}
+              to={'/account/send-fund'}
+            >
+              <ActionButton
+                iconSrc={sendIcon}
+                tooltipContent={t<string>('Send')}
+              />
+            </Link>
 
-          <div className='action-button-wrapper'>
-            <ActionButton
-              iconSrc={swapIcon}
-              tooltipContent={t<string>('Swap')}
-            />
+            <div className='action-button-wrapper'>
+              <ActionButton
+                iconSrc={swapIcon}
+                tooltipContent={t<string>('Swap')}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className={'home-tab-contents'}>
@@ -274,7 +290,7 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
       <TabHeaders
         activatedItem={activatedTab}
         className={'home-tab-headers'}
-        items={getTabHeaderItems(t)}
+        items={tabItems}
         onSelectItem={_setActiveTab}
       />
 

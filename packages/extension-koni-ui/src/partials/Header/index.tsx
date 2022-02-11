@@ -96,6 +96,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
+  const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
   const { accounts } = useContext(AccountContext);
   const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
@@ -112,6 +113,8 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     () => windowOpen('/').catch(console.error),
     []
   );
+
+  const _isAccountAll = currentAccount && isAccountAll(currentAccount.address);
 
   useEffect((): void => {
     if (!currentAccount) {
@@ -144,6 +147,37 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   useEffect(() => {
     let isSync = true;
 
+    if (_isAccountAll) {
+      let networkSelected;
+
+      const accountAllNetworkGenesisHash = window.localStorage.getItem('accountAllNetworkGenesisHash');
+
+      if (!accountAllNetworkGenesisHash) {
+        networkSelected = genesisOptions[0];
+      } else {
+        networkSelected = genesisOptions.find((opt) => opt.value === currentAccount.genesisHash);
+
+        if (!networkSelected) {
+          window.localStorage.setItem('accountAllNetworkGenesisHash', '');
+          networkSelected = genesisOptions[0];
+        }
+      }
+
+      if (networkSelected) {
+        updateCurrentNetwork({
+          networkPrefix: networkSelected.networkPrefix,
+          icon: networkSelected.icon,
+          genesisHash: networkSelected.value,
+          networkKey: networkSelected.networkKey,
+          isEthereum: networkSelected.isEthereum
+        });
+
+        setLocalGenesisHash(networkSelected.value);
+      }
+
+      return;
+    }
+
     (async () => {
       let networkSelected;
 
@@ -166,13 +200,15 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
           networkKey: networkSelected.networkKey,
           isEthereum: networkSelected.isEthereum
         });
+
+        setLocalGenesisHash(networkSelected.value);
       }
     })();
 
     return () => {
       isSync = false;
     };
-  }, [currentAccount?.genesisHash, accounts]);
+  }, [currentAccount?.genesisHash, _isAccountAll, accounts, genesisOptions]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
@@ -206,9 +242,10 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   const _onChangeGenesis = useCallback(
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
-
         if (!isAccountAll(currentAccount.address)) {
           await tieAccount(currentAccount.address, genesisHash || null);
+        } else {
+          window.localStorage.setItem('accountAllNetworkGenesisHash', genesisHash);
         }
 
         updateCurrentNetwork({
@@ -218,6 +255,8 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
           networkKey,
           isEthereum
         });
+
+        setLocalGenesisHash(genesisHash);
       }
 
       setShowNetworkSelect(false);
@@ -290,10 +329,10 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
               <img
                 alt='logo'
                 className={'network-logo'}
-                src={getLogoByGenesisHash(currentAccount?.genesisHash as string)}
+                src={getLogoByGenesisHash(localGenesisHash)}
               />
               <div className='network-select-item__text'>
-                {getNetworkKey(currentAccount?.genesisHash as string) || genesisOptions[0].text}
+                {getNetworkKey(localGenesisHash) || genesisOptions[0].text}
               </div>
               <FontAwesomeIcon
                 className='network-select-item__icon'
@@ -311,7 +350,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                   ? (
                     <Identicon
                       className='identityIcon'
-                      genesisHash={currentAccount?.genesisHash as string}
+                      genesisHash={localGenesisHash}
                       iconTheme={theme}
                       prefix={prefix}
                       showLogo
@@ -333,7 +372,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
           {isNetworkSelectOpen && (
             <NetworkMenu
-              currentNetwork={currentAccount?.genesisHash ? currentAccount?.genesisHash : ''}
+              currentNetwork={localGenesisHash}
               reference={netRef}
               selectNetwork={_onChangeGenesis}
             />

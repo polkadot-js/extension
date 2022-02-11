@@ -35,6 +35,7 @@ import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
 import {accountAllRecoded, isAccountAll} from "@polkadot/extension-koni-ui/util";
+import allAccountLogo from "@polkadot/extension-koni-ui/assets/all-account-icon.svg";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -347,7 +348,9 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                 onClick={_toggleSettings}
               >
                 {!!currentAccount && !!currentAccount.address
-                  ? (
+                  ? _isAccountAll ?
+                    <img src={allAccountLogo} alt="all-account-icon" className='header__all-account-icon'/>
+                    : (
                     <Identicon
                       className='identityIcon'
                       genesisHash={localGenesisHash}
@@ -661,5 +664,15 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       cursor: pointer;
       background-color: color: ${theme.accountHoverBackground};
     }
+  }
+
+  .header__all-account-icon {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    border: 2px solid ${theme.checkDotColor};
+    margin-right: 10px;
+    padding: 2px;
+    border-radius: 50%;
   }
 `));

@@ -12,6 +12,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
+import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import {accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress} from '@polkadot/extension-koni-ui/util';
 import getNetworkInfoByGenesisHash from '@polkadot/extension-koni-ui/util/getNetworkInfoByGenesisHash';
@@ -87,13 +88,15 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
   return (
     <div className={className}>
       <div className='account-info-row'>
-          <Identicon
-            className='account-info-identity-icon'
-            iconTheme={iconTheme}
-            prefix={prefix}
-            size={32}
-            value={formatted || address}
-          />
+        {_isAccountAll ?
+          <img src={allAccountLogo} alt="all-account-icon" className='account-info__all-account-icon'/>
+          : <Identicon
+          className='account-info-identity-icon'
+          iconTheme={iconTheme}
+          prefix={prefix}
+          size={32}
+          value={formatted || address}
+        />}
         <div className='account-info'>
           {parentName
             ? (
@@ -121,7 +124,7 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
                 className='account-info__name'
                 data-field='name'
               >
-                <span title={displayName}>{displayName}</span>
+                <span title={displayName}>{_isAccountAll ? t<string>('All Accounts') : displayName}</span>
               </div>
             )
           }
@@ -138,7 +141,7 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
               className='account-info-full-address'
               data-field='address'
             >
-              {toShortAddress(formatted || address || t('<unknown>'), 10)}
+              {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), 10)}
             </div>
             {showCopyBtn && <CopyToClipboard text={(formatted && formatted) || ''}>
               <img
@@ -191,6 +194,16 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     justify-content: space-between;
     align-items: center;
     position: relative;
+  }
+
+  .account-info__all-account-icon {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    border: 2px solid ${theme.checkDotColor};
+    margin-right: 10px;
+    padding: 2px;
+    border-radius: 50%;
   }
 
   .account-info-address-display .svg-inline--fa {

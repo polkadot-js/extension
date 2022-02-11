@@ -58,6 +58,7 @@ function DetailHeader({
   const {show} = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
+  const isAllAccount = isAccountAll(currentAccount.address);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -113,8 +114,9 @@ function DetailHeader({
 
   return (
     <div className={`detail-header ${className}`}>
+      {!isAllAccount &&
       <div className='detail-header__part-1'>
-        {!isAccountAll(currentAccount.address) && <div
+        <div
           className='detail-header-connect-status-btn'
           data-for={trigger}
           data-tip={true}
@@ -139,29 +141,35 @@ function DetailHeader({
             text={'Account visibility'}
             trigger={trigger}
           />
-        </div>}
+        </div>
       </div>
+      }
 
       <div className='detail-header__part-2'>
         {!isEditing && (
           <div className='detail-header-account-info'>
-            <span className='detail-header-account-info__name'>{currentAccount?.name}</span>
-            {!isAccountAll(currentAccount.address) &&
-            <CopyToClipboard text={(formatted && formatted) || ''}>
-              <div
-                className='detail-header-account-info__formatted-wrapper'
-                onClick={_onCopy}
-              >
+            {isAllAccount ?
+              <div className='detail-header__all-account'>
+                {t<string>('All Account')}
+              </div> :
+              <div>
+                <span className='detail-header-account-info__name'>{currentAccount?.name}</span>
+                <CopyToClipboard text={(formatted && formatted) || ''}>
+                  <div
+                    className='detail-header-account-info__formatted-wrapper'
+                    onClick={_onCopy}
+                  >
                 <span
                   className='detail-header-account-info__formatted'
                 >{ellipsisCenterStr(formatted || currentAccount?.address)}</span>
-                <img
-                  alt='copy'
-                  className='detail-header-account-info__copy-icon'
-                  src={cloneLogo}
-                />
+                    <img
+                      alt='copy'
+                      className='detail-header-account-info__copy-icon'
+                      src={cloneLogo}
+                    />
+                  </div>
+                </CopyToClipboard>
               </div>
-            </CopyToClipboard>
             }
           </div>
         )}
@@ -178,7 +186,7 @@ function DetailHeader({
       </div>
 
       <div className='detail-header__part-3'>
-        {!(isAccountAll(currentAccount.address) && currentNetwork.networkKey !== 'all') &&
+        {!(isAllAccount && currentNetwork.networkKey !== 'all') &&
         <div
           className={`detail-header-more-button ${isActionOpen && 'pointer-events-none'}`}
           onClick={_toggleAccountAction}
@@ -206,6 +214,7 @@ function DetailHeader({
 export default styled(DetailHeader)(({theme}: Props) => `
   display: flex;
   align-items: center;
+  height: 40px;
   padding-bottom: 8px;
   padding-top: 6px;
 
@@ -247,6 +256,12 @@ export default styled(DetailHeader)(({theme}: Props) => `
     white-space: nowrap;
     max-width: 220px;
     overflow: hidden;
+  }
+
+  .detail-header__all-account {
+    font-size: 18px;
+    font-weight: 500;
+    padding-left: 25px;
   }
 
   .detail-header-account-info__formatted-wrapper {

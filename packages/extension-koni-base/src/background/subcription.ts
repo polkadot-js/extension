@@ -12,6 +12,10 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 
 export class KoniSubcription {
   private subscriptionMap: Record<string, any> = {};
+  // @ts-ignore
+  unsubBalances: () => void | undefined;
+  // @ts-ignore
+  unsubCrowdloans: () => void | undefined;
 
   getSubscriptionMap () {
     return this.subscriptionMap;
@@ -24,31 +28,16 @@ export class KoniSubcription {
   init () {
     this.initChainRegistrySubscription();
 
-    let unsubBalances: () => void | undefined;
-    let unsubCrowdloans: () => void | undefined;
-
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.detectAddresses(address)
-          .then((addresses) => {
-            unsubBalances = this.initBalanceSubscription(addresses);
-            unsubCrowdloans = this.initCrowdloanSubscription(addresses);
-          })
-          .catch(console.error);
+        this.subscribleBalancesAndCrowdloans(address);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          unsubBalances && unsubBalances();
-          unsubCrowdloans && unsubCrowdloans();
-          this.detectAddresses(address)
-            .then((addresses) => {
-              unsubBalances = this.initBalanceSubscription(addresses);
-              unsubCrowdloans = this.initCrowdloanSubscription(addresses);
-            })
-            .catch(console.error);
+          this.subscribleBalancesAndCrowdloans(address);
         }
       });
     });
@@ -65,6 +54,17 @@ export class KoniSubcription {
         return resolve([currentAccountAddress]);
       }
     });
+  }
+
+  subscribleBalancesAndCrowdloans (address: string) {
+    this.unsubBalances && this.unsubBalances();
+    this.unsubCrowdloans && this.unsubCrowdloans();
+    this.detectAddresses(address)
+      .then((addresses) => {
+        this.unsubBalances = this.initBalanceSubscription(addresses);
+        this.unsubCrowdloans = this.initCrowdloanSubscription(addresses);
+      })
+      .catch(console.error);
   }
 
   initChainRegistrySubscription () {

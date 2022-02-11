@@ -13,7 +13,7 @@ import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { toShort } from '@polkadot/extension-koni-ui/util';
+import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 interface Props extends ThemeProps {
@@ -36,7 +36,7 @@ function ChainBalanceItem ({ accountInfo,
   isLoading,
   setQrModalOpen,
   setQrModalProps }: Props): React.ReactElement<Props> {
-  const { address, networkIconTheme, networkKey, networkPrefix } = accountInfo;
+  const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const [toggleDetail, setToggleDetail] = useState(false);
   const { show } = useToast();
   const { t } = useTranslation();
@@ -61,6 +61,8 @@ function ChainBalanceItem ({ accountInfo,
     setQrModalOpen(true);
   };
 
+  const _isAccountAll = isAccountAll(address);
+
   return (
     <div
       className={`${className || ''} ${toggleDetail ? '-show-detail' : ''}`}
@@ -76,27 +78,30 @@ function ChainBalanceItem ({ accountInfo,
 
           <div className='chain-balance-item__meta-wrapper'>
             <div className='chain-balance-item__chain-name'>{accountInfo.networkDisplayName}</div>
-            <div className='chain-balance-item__bottom-area'>
-              <CopyToClipboard text={address}>
-                <div
-                  className='chain-balance-item__address'
-                  onClick={_onCopy}
-                >
-                  <span className='chain-balance-item__address-text'>{toShort(address)}</span>
-                  <img
-                    alt='copy'
-                    className='chain-balance-item__copy'
-                    src={cloneIcon}
-                  />
-                </div>
-              </CopyToClipboard>
-              <img
-                alt='receive'
-                className='chain-balance-item__receive'
-                onClick={_openQr}
-                src={receivedIcon}
-              />
-            </div>
+
+            {!_isAccountAll && (
+              <div className='chain-balance-item__bottom-area'>
+                <CopyToClipboard text={formattedAddress}>
+                  <div
+                    className='chain-balance-item__address'
+                    onClick={_onCopy}
+                  >
+                    <span className='chain-balance-item__address-text'>{toShort(formattedAddress)}</span>
+                    <img
+                      alt='copy'
+                      className='chain-balance-item__copy'
+                      src={cloneIcon}
+                    />
+                  </div>
+                </CopyToClipboard>
+                <img
+                  alt='receive'
+                  className='chain-balance-item__receive'
+                  onClick={_openQr}
+                  src={receivedIcon}
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -220,6 +225,12 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
     background-color: #fff;
     border: 1px solid #fff;
     margin-top:10px;
+  }
+
+  .chain-balance-item__meta-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .chain-balance-item__chain-name {

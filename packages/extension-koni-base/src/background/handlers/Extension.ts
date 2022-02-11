@@ -8,7 +8,7 @@ import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestor
 import { ApiInitStatus, initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -302,13 +302,14 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson> {
+  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson | null> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
     const currentAccount = await state.getAccountAddress();
+    if (currentAccount === null) return null;
 
     getAllNftsByAccount(currentAccount as string)
       .then((rs) => {
-        state.setNft(rs, (nftData) => {
+        state.setNft(rs, () => {
           console.log('Update nft state from subscription');
         });
       })
@@ -342,9 +343,10 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson> {
+  private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson | null> {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
     const currentAccount = await state.getAccountAddress();
+    if (currentAccount === null) return null;
 
     getStakingInfo(currentAccount as string)
       .then((rs) => {

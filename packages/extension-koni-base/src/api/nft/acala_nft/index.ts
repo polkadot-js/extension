@@ -110,12 +110,13 @@ const parseAcalaIpfsLink = (ipfsLink: string) => {
 
 const acalaExternalBaseUrl = 'https://apps.acala.network/portfolio/nft/';
 
+// 16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo
 export const handleAcalaNfts = async (address: string) => {
   const allCollections: NftCollection[] = [];
   const api = new AcalaNftApi();
 
   await api.connect();
-  const assetIds = await api.getNfts('16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo');
+  const assetIds = await api.getNfts(address);
 
   if (!assetIds || assetIds.length === 0) {
     return { total: 0, allCollections };

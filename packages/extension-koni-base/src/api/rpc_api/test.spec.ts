@@ -3,7 +3,7 @@
 
 import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
 import { getBalances } from '@polkadot/extension-koni-base/api/rpc_api/index';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
+import {getStakingInfo, subscribeStaking, testStaking} from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -22,8 +22,7 @@ describe('test rpc api', () => {
 
 describe('test api get staking', () => {
   test('test api get bonded token from endpoints', async () => {
-    const resp = await getStakingInfo('');
-
+    const resp = await subscribeStaking('');
     console.log(resp);
     // const resp = await getAllNftsByAccount('5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W');
     // const collection = resp.nftList[2]

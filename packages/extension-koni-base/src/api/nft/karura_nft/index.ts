@@ -109,12 +109,13 @@ const parseKaruraIpfsLink = (ipfsLink: string) => {
   return CLOUDFLARE_SERVER + ipfsLink.split('ipfs://')[1];
 };
 
+// Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
 export const handleKaruraNfts = async (account: string): Promise<any> => {
   const allCollections: NftCollection[] = [];
   const api = new KaruraNftApi();
 
   await api.connect();
-  const assetIds = await api.getNfts('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr');
+  const assetIds = await api.getNfts(account);
 
   if (!assetIds || assetIds.length === 0) {
     return { total: 0, allCollections };

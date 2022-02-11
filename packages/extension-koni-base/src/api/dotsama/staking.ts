@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise } from '@polkadot/api';
-import { StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import {StakingItem, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
 import { wsProvider } from '@polkadot/extension-koni-base/api/connector';
 import networks from '@polkadot/extension-koni-base/api/endpoints';
 
@@ -51,6 +51,20 @@ export const getMultiCurrentBonded = async ({ accountId, apis }: PropsMulti): Pr
   }
 };
 
+// const stakingMap = {
+//   'polkadot': NETWORKS.polkadot,
+//   'kusama': NETWORKS.kusama,
+//   'hydradx': NETWORKS.hydradx,
+//   'astar': NETWORKS.astar,
+//   'moonbeam': NETWORKS.moonbeam
+// }
+
+// export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (rs: StakingJson) => void, networks = NETWORKS): Promise<any> => {
+//   const dotSamaAPIMap = connectDotSamaApis(stakingMap);
+//   console.log(dotSamaAPIMap)
+//
+// }
+// '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'
 export const getStakingInfo = async (accountId: string): Promise<StakingJson> => {
   const result: any[] = [];
   const targetChains = ['polkadot', 'kusama', 'hydradx', 'astar', 'moonbeam'];
@@ -65,7 +79,7 @@ export const getStakingInfo = async (accountId: string): Promise<StakingJson> =>
   });
 
   const apis = await Promise.all(apiPromises);
-  const balances = await getMultiCurrentBonded({ apis, accountId: '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM' });
+  const balances = await getMultiCurrentBonded({ apis, accountId: accountId });
 
   for (const i in targetChains) {
     const currentChain = targetChains[i];

@@ -175,8 +175,9 @@ export default class KoniState extends State {
 
   public getAccountAddress () {
     return new Promise((resolve, reject) => {
-      this.getCurrentAccount(({ address }) => {
-        resolve(address);
+      this.getCurrentAccount((account) => {
+        if (account) resolve(account.address);
+        else resolve(null);
       });
     });
   }

@@ -34,6 +34,7 @@ import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
+import {accountAllRecoded, isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -62,7 +63,7 @@ interface Recoded {
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
-  return accounts.find(({ address }): boolean =>
+  return accounts.filter(a => !isAccountAll(a.address)).find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
   ) || null;
 }
@@ -122,6 +123,14 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
       return;
     }
+
+    if (isAccountAll(currentAccount.address)) {
+      setRecoded(accountAllRecoded);
+
+      return;
+    }
+
+    console.log('currentAccount.address', currentAccount.address);
 
     setRecoded(
       (
@@ -197,7 +206,11 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   const _onChangeGenesis = useCallback(
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
-        await tieAccount(currentAccount.address, genesisHash || null);
+
+        if (!isAccountAll(currentAccount.address)) {
+          await tieAccount(currentAccount.address, genesisHash || null);
+        }
+
         updateCurrentNetwork({
           networkPrefix,
           icon,

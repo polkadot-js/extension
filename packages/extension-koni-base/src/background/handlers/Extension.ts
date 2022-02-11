@@ -16,6 +16,7 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
+import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 const bWindow = window as unknown as BackgroundWindow;
 
@@ -35,6 +36,11 @@ function transformAccounts (accounts: SubjectInfo): AccountJson[] {
   }));
 }
 
+const ACCOUNT_ALL_JSON: AccountJson = {
+  address: ALL_ACCOUNT_KEY,
+  name: 'All'
+};
+
 export default class KoniExtension extends Extension {
   public decodeAddress = (key: string | Uint8Array, ignoreChecksum?: boolean, ss58Format?: Prefix): Uint8Array => {
     return keyring.decodeAddress(key, ignoreChecksum, ss58Format);
@@ -46,9 +52,23 @@ export default class KoniExtension extends Extension {
 
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.getAllWithCurrentAddress)'>(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+    const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
+      const transformedAccounts = transformAccounts(storedAccounts)
+
+      const accounts: AccountJson[] = transformedAccounts && transformedAccounts.length
+        ? [
+            {
+              ...ACCOUNT_ALL_JSON
+            },
+            ...transformedAccounts
+          ]
+        : [];
+
+      console.log('storedAccounts====', storedAccounts);
+      console.log('accounts====', accounts);
+
       const accountsWithCurrentAddress: AccountsWithCurrentAddress = {
-        accounts: transformAccounts(accounts)
+        accounts
       };
 
       state.getCurrentAccount((accountInfo) => {

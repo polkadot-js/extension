@@ -21,7 +21,7 @@ export function isAccountAll (address: string): boolean {
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
-  return accounts.find(({ address }): boolean =>
+  return accounts.filter(a => !isAccountAll(a.address)).find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
   ) || null;
 }
@@ -48,6 +48,15 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
 }
 
 export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
+
+export const accountAllRecoded: Recoded = {
+  account: {
+    address: ALL_ACCOUNT_KEY
+  },
+  formatted: ALL_ACCOUNT_KEY,
+  prefix: 42,
+  isEthereum: false
+};
 
 export function getLogoByNetworkKey (networkKey: string): string {
   return LogosMap[networkKey] || LogosMap.default;

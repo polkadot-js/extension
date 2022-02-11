@@ -152,7 +152,7 @@ function DetailHeader({
               <div className='detail-header__all-account'>
                 {t<string>('All Account')}
               </div> :
-              <div>
+              <div className='detail-header-account-info-wrapper'>
                 <span className='detail-header-account-info__name'>{currentAccount?.name}</span>
                 <CopyToClipboard text={(formatted && formatted) || ''}>
                   <div
@@ -262,6 +262,10 @@ export default styled(DetailHeader)(({theme}: Props) => `
     font-size: 18px;
     font-weight: 500;
     padding-left: 25px;
+  }
+
+  .detail-header-account-info-wrapper {
+    display: flex;
   }
 
   .detail-header-account-info__formatted-wrapper {

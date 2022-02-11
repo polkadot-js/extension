@@ -103,6 +103,6 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   }
 
   .account-unchecked-item {
-    width: 24px;
+    width: 19px;
   }
 `);

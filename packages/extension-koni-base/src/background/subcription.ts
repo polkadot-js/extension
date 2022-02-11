@@ -108,4 +108,19 @@ export class KoniSubcription {
       }).catch(console.error);
     };
   }
+
+  // initStakingSubscription (addresses: string[]) {
+  //   const subscriptionPromise = subscribeStaking(addresses, dotSamaAPIMap, (rs) => {
+  //     state.setStaking(rs);
+  //   });
+  //
+  //   return () => {
+  //     subscriptionPromise.then((unsubMap) => {
+  //       Object.values(unsubMap).forEach((unsub) => {
+  //         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  //         unsub && unsub();
+  //       });
+  //     }).catch(console.error);
+  //   };
+  // }
 }

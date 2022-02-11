@@ -68,7 +68,7 @@ export default styled(TabHeaderItem)(({ theme }: Props) => `
     flex-direction: column;
     align-items: center;
     position: relative;
-    padding: 18px 4px;
+    padding: 12px 4px;
   }
 
   .tab-header-item__content-wrapper:before {
@@ -95,5 +95,6 @@ export default styled(TabHeaderItem)(({ theme }: Props) => `
     line-height: 20px;
     color: ${theme.textColor2};
     font-weight: 400;
+    padding-top: 3px;
   }
 `);

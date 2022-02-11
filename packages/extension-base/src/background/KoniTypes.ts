@@ -151,6 +151,7 @@ export interface NetWorkInfo {
   group: NetWorkGroup;
   paraId?: number;
   isEthereum?: boolean;
+  nativeToken?: string;
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {

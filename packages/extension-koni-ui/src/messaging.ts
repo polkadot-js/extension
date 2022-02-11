@@ -9,20 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import {
-  AccountsWithCurrentAddress,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanJson,
-  NetWorkMetadataDef,
-  NftJson,
-  PriceJson,
-  RequestSubscribeBalance,
-  RequestSubscribeCrowdloan, RequestSubscribeNft,
-  RequestSubscribePrice, RequestSubscribeStaking,
-  StakingJson,
-  TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -336,5 +323,5 @@ export async function getStaking (account: string): Promise<StakingJson> {
 }
 
 export async function subscribeStaking (request: RequestSubscribeStaking, callback: (stakingData: StakingJson) => void): Promise<StakingJson> {
-  return sendMessage('pri(staking.getSubscription)', request, callback)
+  return sendMessage('pri(staking.getSubscription)', request, callback);
 }

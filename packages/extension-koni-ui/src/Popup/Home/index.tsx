@@ -276,7 +276,7 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         )}
 
         {activatedTab === 4 && (
-          <StakingContainer/>
+          <StakingContainer />
         )}
 
         {activatedTab === 5 && (

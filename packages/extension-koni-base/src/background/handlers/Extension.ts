@@ -7,6 +7,8 @@ import { AccountsWithCurrentAddress, BackgroundWindow, BalanceJson, ChainRegistr
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { ApiInitStatus, initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -320,9 +322,19 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson> {
+  private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson | null> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
     const currentAccount = await state.getAccountAddress();
+    if (currentAccount === null) return null;
+
+    getAllNftsByAccount(currentAccount as string)
+      .then((rs) => {
+        state.setNft(rs, () => {
+          console.log('Update nft state from subscription');
+        });
+      })
+      .catch((err) => console.log(err));
+
     const nftSubscription = state.subscribeNft().subscribe({
       next: (rs) => {
         cb(rs);
@@ -340,19 +352,31 @@ export default class KoniExtension extends Extension {
   private getStaking (account: string | null): Promise<StakingJson> {
     return new Promise<StakingJson>((resolve, reject) => {
       if (account === null) {
-        console.log('account is null')
+        console.log('account is null');
+
         return;
       }
 
-      state.getStaking(account as string, (rs: StakingJson) => {
+      state.getStaking(account, (rs: StakingJson) => {
         resolve(rs);
       });
     });
   }
 
-  private async subscribeStaking(id: string, port: chrome.runtime.Port): Promise<StakingJson> {
+  private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson | null> {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
-    const currentAccount = await state.getAccountAddress()
+    const currentAccount = await state.getAccountAddress();
+    if (currentAccount === null) return null;
+
+    getStakingInfo(currentAccount as string)
+      .then((rs) => {
+        state.setStaking(rs, (stakingData) => {
+          console.log(`Update staking state from subscription ${stakingData}`);
+          console.log(stakingData);
+        });
+      })
+      .catch((err) => console.log(err));
+
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {
         cb(rs);

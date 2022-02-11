@@ -4,14 +4,14 @@
 import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
+import { getStakingInfo } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import {
   CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
   CRON_REFRESH_NFT_INTERVAL,
   CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
-import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/rpc_api/staking_info';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
 import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 
@@ -72,7 +72,7 @@ export class KoniCron {
           this.removeCron('refreshStaking');
 
           this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
-          this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
+          this.addCron('refreshStaking', this.refreshStaking(address), CRON_REFRESH_STAKING_INTERVAL);
         }
       });
     });
@@ -111,7 +111,7 @@ export class KoniCron {
       getAllNftsByAccount(address)
         .then((rs) => {
           state.setNft(rs, (nftData) => {
-            console.log(`Update nft state to ${nftData}`);
+            console.log(`Update nft state for ${address}`);
           });
         })
         .catch((err) => console.log(err));
@@ -123,10 +123,10 @@ export class KoniCron {
       getStakingInfo(address)
         .then((rs) => {
           state.setStaking(rs, (stakingData) => {
-            console.log(`Update staking state to ${stakingData}`);
-          })
+            console.log(`Update staking state for ${address}`);
+          });
         })
         .catch((err) => console.log(err));
-    }
+    };
   }
 }

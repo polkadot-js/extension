@@ -12,3 +12,5 @@ export const SINGULAR_COLLECTION_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1
 export const SINGULAR_EXTERNAL_SERVER = 'https://singular.rmrk.app/collectibles/';
 
 export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
+
+export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';

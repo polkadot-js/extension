@@ -25,7 +25,7 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
   const handleImageError = () => {
     setLoading(false);
     setShowImage(false);
-  }
+  };
 
   return (
     <div className={className}>
@@ -40,28 +40,35 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
             <Spinner className={'img-spinner'} />
           }
           {
-            showImage ?
-              <img
+            showImage
+              ? <img
                 alt={'collection-thumbnail'}
                 className={'collection-thumbnail'}
-                onLoad={() => handleOnLoad()}
                 onError={() => handleImageError()}
+                onLoad={() => handleOnLoad()}
                 src={data.image ? data?.image : logo}
                 style={{ borderRadius: '5px' }}
-              />
-              :
-              <video width="124" height="124" autoPlay loop={true}>
-                <source src={data.image} type="video/mp4"/>
+                />
+              : <video
+                autoPlay
+                height='124'
+                loop={true}
+                width='124'
+              >
+                <source
+                  src={data.image}
+                  type='video/mp4'
+                />
               </video>
           }
-          {/*// <img*/}
-          {/*//   alt={'collection-thumbnail'}*/}
-          {/*//   className={'collection-thumbnail'}*/}
-          {/*//   onLoad={() => handleOnLoad()}*/}
-          {/*//   onError={() => handleImageError()}*/}
-          {/*//   src={data.image ? data?.image : logo}*/}
-          {/*//   style={{ borderRadius: '5px' }}*/}
-          {/*// />*/}
+          {/* // <img */}
+          {/* //   alt={'collection-thumbnail'} */}
+          {/* //   className={'collection-thumbnail'} */}
+          {/* //   onLoad={() => handleOnLoad()} */}
+          {/* //   onError={() => handleImageError()} */}
+          {/* //   src={data.image ? data?.image : logo} */}
+          {/* //   style={{ borderRadius: '5px' }} */}
+          {/* // /> */}
         </div>
       </div>
     </div>

@@ -5,10 +5,9 @@ import type { ThemeProps } from '../types';
 
 import { faCodeBranch, faCog, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Link from '@polkadot/extension-koni-ui/components/Link';
@@ -33,11 +32,15 @@ const jsonPath = '/account/restore-json';
 
 function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [filteredAccount, setFilteredAccount] = useState<AccountWithChildren[]>([]);
+  const [filter, setFilter] = useState('');
   const { hierarchy } = useContext(AccountContext);
+  const filteredAccount = filter ? hierarchy.filter((account) =>
+    account.name?.toLowerCase().includes(filter) ||
+    (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))
+  ) : hierarchy
+
   const { master } = useContext(AccountContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
-  const [filter, setFilter] = useState('');
   const mediaAllowed = useContext(MediaContext);
   const isPopup = useIsPopup();
 
@@ -47,17 +50,6 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
       windowOpen(jsonPath);
     }, []
   );
-
-  useEffect(() => {
-    setFilteredAccount(
-      filter
-        ? hierarchy.filter((account) =>
-          account.name?.toLowerCase().includes(filter) ||
-          (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))
-        )
-        : hierarchy
-    );
-  }, [filter, hierarchy, networkMap]);
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilter(filter);

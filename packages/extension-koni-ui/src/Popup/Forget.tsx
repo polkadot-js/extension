@@ -17,6 +17,7 @@ import {forgetAccount} from '../messaging';
 import {Header} from '../partials';
 import {Theme} from '../types';
 import {isAccountAll} from "@polkadot/extension-koni-ui/util";
+import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
@@ -51,7 +52,12 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
       setIsBusy(true);
       forgetAccount(address)
         .then(() => {
-          if (accounts.length === 1) {
+          const accountAll = accounts.find(acc => acc.address === ALL_ACCOUNT_KEY);
+          if (accountAll) {
+            updateCurrentAccount(accountAll);
+          }
+
+          if (accounts.length === 2) {
             updateCurrentAccount({} as AccountJson);
           }
 

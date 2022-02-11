@@ -30,6 +30,7 @@ import { BN_HUNDRED, BN_ZERO, isFunction } from '@polkadot/util';
 
 import Available from './component/Available';
 import InputAddress from './component/InputAddress';
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -93,36 +94,41 @@ async function checkPhishing (_senderId: string | null, recipientId: string | nu
   ];
 }
 
+type SupportType = 'NETWORK' | 'ACCOUNT';
+
 function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
+  const {
+    currentNetwork: { networkKey },
+    currentAccount: { account }
+  } = useSelector((state: RootState) => state);
   const [wrapperClass, setWrapperClass] = useState<string>('');
   const { api, apiUrl, isApiReady, isNotSupport } = useApi(networkKey);
 
   const isProviderSupportSendFund = !!api && !!api.tx && !!api.tx.balances;
 
-  const notSupportSendFund = () => {
+  const notSupportSendFund = (supportType: SupportType = 'NETWORK') => {
     return (
       <div className={'kn-l-screen-content'}>
         <Warning>
-          {t<string>('The action is not supported. Please change to another network.')}
+          { supportType === 'NETWORK'
+            && t<string>('The action is not supported for the current network. Please switch to another network.')
+          }
+          { supportType === 'ACCOUNT'
+            && t<string>('The action is not supported for the current account. Please switch to another account.')
+          }
         </Warning>
       </div>
     );
   };
 
-  return (
-    <div className={`-wrapper ${className} ${wrapperClass}`}>
-      <Header
-        showAdd
-        showCancelButton
-        showSearch
-        showSettings
-        showSubHeader
-        subHeaderName={t<string>('Send fund')}
-      />
+  const renderContent = () => {
+    if (account && isAccountAll(account.address)) {
+      return notSupportSendFund('ACCOUNT')
+    }
 
-      {isApiReady
+    return (
+      isApiReady
         ? isProviderSupportSendFund
           ? (
             <SendFund
@@ -137,7 +143,21 @@ function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
         : isNotSupport
           ? notSupportSendFund()
           : (<LoadingContainer />)
-      }
+    )
+  }
+
+  return (
+    <div className={`-wrapper ${className} ${wrapperClass}`}>
+      <Header
+        showAdd
+        showCancelButton
+        showSearch
+        showSettings
+        showSubHeader
+        subHeaderName={t<string>('Send fund')}
+      />
+
+      {renderContent()}
     </div>
   );
 }

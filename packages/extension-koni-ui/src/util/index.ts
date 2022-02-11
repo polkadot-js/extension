@@ -9,14 +9,12 @@ import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
+import {isAccountAll} from "@polkadot/extension-koni-ui/util/accountAll";
 export * from './common';
 export * from './chainBalancesApi';
+export * from './accountAll';
 
 // todo: Refactor this file
-
-export function isAccountAll (address: string): boolean {
-  return address === ALL_ACCOUNT_KEY;
-}
 
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();

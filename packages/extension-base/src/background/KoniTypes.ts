@@ -13,10 +13,9 @@ import { Keyring } from '@polkadot/ui-keyring';
 export interface StakingItem {
   name: string,
   chainId: string,
-  paraId: string,
-  balance: string,
+  balance?: string,
   nativeToken: string,
-  unit: string,
+  unit?: string,
 }
 
 export interface StakingJson {

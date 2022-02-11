@@ -9,6 +9,7 @@ import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/h
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import {subscribeStaking} from "@polkadot/extension-koni-base/api/dotsama/staking";
 
 export class KoniSubcription {
   private subscriptionMap: Record<string, any> = {};
@@ -109,18 +110,18 @@ export class KoniSubcription {
     };
   }
 
-  // initStakingSubscription (addresses: string[]) {
-  //   const subscriptionPromise = subscribeStaking(addresses, dotSamaAPIMap, (rs) => {
-  //     state.setStaking(rs);
-  //   });
-  //
-  //   return () => {
-  //     subscriptionPromise.then((unsubMap) => {
-  //       Object.values(unsubMap).forEach((unsub) => {
-  //         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  //         unsub && unsub();
-  //       });
-  //     }).catch(console.error);
-  //   };
-  // }
+  initStakingSubscription (addresses: string[]) {
+    const subscriptionPromise = subscribeStaking(addresses, dotSamaAPIMap, (rs) => {
+      state.setStaking(rs);
+    });
+
+    return () => {
+      subscriptionPromise.then((unsubMap) => {
+        Object.values(unsubMap).forEach((unsub) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          unsub && unsub();
+        });
+      }).catch(console.error);
+    };
+  }
 }

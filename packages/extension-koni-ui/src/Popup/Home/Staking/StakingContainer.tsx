@@ -90,7 +90,7 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
         {!loading && data &&
           // @ts-ignore
           data?.details.map((item: any, index: any) => {
-            const name = item?.paraId;
+            const name = item?.chainId;
             const icon = LogosMap[name];
 
             return StakingRow(icon, name, item.nativeToken, item.balance, item.unit, index);

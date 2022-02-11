@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise } from '@polkadot/api';
-import {StakingItem, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
+import {ApiProps, NetWorkInfo, StakingItem, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
 import { wsProvider } from '@polkadot/extension-koni-base/api/connector';
 import networks from '@polkadot/extension-koni-base/api/endpoints';
+import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
+import registry from "@polkadot/extension-koni-base/api/dotsama/typeRegistry";
 
 interface LedgerData {
   active: string,
@@ -51,19 +53,71 @@ export const getMultiCurrentBonded = async ({ accountId, apis }: PropsMulti): Pr
   }
 };
 
-// const stakingMap = {
-//   'polkadot': NETWORKS.polkadot,
-//   'kusama': NETWORKS.kusama,
-//   'hydradx': NETWORKS.hydradx,
-//   'astar': NETWORKS.astar,
-//   'moonbeam': NETWORKS.moonbeam
-// }
+const DEFAULT_STAKING_NETWORKS = {
+  'polkadot': NETWORKS.polkadot,
+  'kusama': NETWORKS.kusama,
+  'hydradx': NETWORKS.hydradx,
+  'astar': NETWORKS.astar,
+  'moonbeam': NETWORKS.moonbeam
+}
 
-// export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (rs: StakingJson) => void, networks = NETWORKS): Promise<any> => {
-//   const dotSamaAPIMap = connectDotSamaApis(stakingMap);
-//   console.log(dotSamaAPIMap)
-//
-// }
+interface PropsSubscribe {
+  addresses: string[],
+  apiMap: Record<string, any>[]
+}
+
+export const subscribeMultiCurrentBonded = async ({addresses, apiMap}: PropsSubscribe): Promise<any> => {
+  try {
+    let result: Record<string, any> = {};
+    addresses.map(address => {
+      result[address] = []
+    });
+
+    await Promise.all(apiMap.map(async ({chain, api: parentApi}) => {
+      const ledgers = await parentApi.api.query.staking?.ledger.multi(addresses);
+      if (ledgers) {
+        ledgers.map((ledger: any, index: number) => {
+          const data = ledger.toHuman() as unknown as LedgerData;
+          const currentAddress = addresses[index];
+          if (data && data.active) {
+            const balance = data.active;
+            const amount = balance ? balance.split(' ')[0] : '';
+            const unit = balance ? balance.split(' ')[1] : '';
+
+            result[currentAddress].push({
+              name: networks[chain].chain,
+              chainId: chain,
+              balance: amount,
+              nativeToken: networks[chain].nativeToken,
+              unit: unit || networks[chain].nativeToken
+            } as StakingItem);
+          }
+        });
+      }
+
+      return result;
+    }));
+  } catch (e) {
+    console.error('Error getting staking data', e);
+    return null;
+  }
+};
+
+export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (rs: StakingJson) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS): Promise<any> => {
+  let allApiPromise: Record<string, any>[] = []
+  let apis: Record<string, any>[] = []
+  Object.entries(networks).forEach(([networkKey, networkInfo]) => {
+    allApiPromise.push({chain: networkKey, api: dotSamaAPIMap[networkKey]});
+  });
+
+  await Promise.all(allApiPromise.map(async ({chain, api: apiPromise}) => {
+    const api = await apiPromise.isReady;
+    apis.push({chain, api});
+  }));
+
+  return await subscribeMultiCurrentBonded({ apiMap: apis, addresses });
+}
+
 // '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'
 export const getStakingInfo = async (accountId: string): Promise<StakingJson> => {
   const result: any[] = [];
@@ -91,8 +145,7 @@ export const getStakingInfo = async (accountId: string): Promise<StakingJson> =>
 
       result.push({
         name: networks[currentChain].chain,
-        chainId: '',
-        paraId: currentChain,
+        chainId: currentChain,
         balance: amount,
         nativeToken: networks[currentChain].nativeToken,
         unit: unit || networks[currentChain].nativeToken

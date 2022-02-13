@@ -2596,7 +2596,7 @@ __metadata:
     "@polkadot/util": ^8.3.4-10
     "@polkadot/util-crypto": ^8.3.4-10
     "@polkadot/x-global": ^8.3.4-10
-    "@types/chrome": ^0.0.177
+    "@types/chrome": ^0.0.178
     "@types/firefox-webext-browser": ^94.0.1
   peerDependencies:
     "@polkadot/api": "*"
@@ -3366,13 +3366,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chrome@npm:*, @types/chrome@npm:^0.0.177":
-  version: 0.0.177
-  resolution: "@types/chrome@npm:0.0.177"
+"@types/chrome@npm:*, @types/chrome@npm:^0.0.178":
+  version: 0.0.178
+  resolution: "@types/chrome@npm:0.0.178"
   dependencies:
     "@types/filesystem": "*"
     "@types/har-format": "*"
-  checksum: 02c070e07572439cad918c76ef760eaf43358ef110b49f76a6eecea76e40b272b48048e2a335a19a2591ae7adb2a87548a40e38fcc2dca66b130bc4a0775724f
+  checksum: 6b38bd864c146e6f0f4ec1d3f1dfc2f96c1ad32c36f8adf84b820ea9c6379d3bbe4f5de273d53aaaba804bb1f237b8dc7bd8bd12e5a3284ebe2e706e37a40791
   languageName: node
   linkType: hard
 

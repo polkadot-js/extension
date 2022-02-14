@@ -4,10 +4,10 @@
 const ALLOWED_PATH = ['/', '/account/import-ledger', '/account/restore-json'] as const;
 const PHISHING_PAGE_REDIRECT = '/phishing-page-detected';
 const EXTENSION_PREFIX = process.env.EXTENSION_PREFIX as string || '';
-const PORT_CONTENT = `${EXTENSION_PREFIX}content`;
-const PORT_EXTENSION = `${EXTENSION_PREFIX}extension`;
-const MESSAGE_ORIGIN_PAGE = `${EXTENSION_PREFIX}page`;
-const MESSAGE_ORIGIN_CONTENT = `${EXTENSION_PREFIX}content`;
+const PORT_CONTENT = `${EXTENSION_PREFIX}koni-content`;
+const PORT_EXTENSION = `${EXTENSION_PREFIX}koni-extension`;
+const MESSAGE_ORIGIN_PAGE = `${EXTENSION_PREFIX}koni-page`;
+const MESSAGE_ORIGIN_CONTENT = `${EXTENSION_PREFIX}koni-content`;
 const PASSWORD_EXPIRY_MIN = 15;
 const PASSWORD_EXPIRY_MS = PASSWORD_EXPIRY_MIN * 60 * 1000;
 

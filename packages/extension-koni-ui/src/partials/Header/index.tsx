@@ -134,8 +134,6 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       return;
     }
 
-    console.log('currentAccount.address', currentAccount.address);
-
     setRecoded(
       (
         chain?.definition.chainType === 'ethereum' ||
@@ -156,7 +154,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       if (!accountAllNetworkGenesisHash) {
         networkSelected = genesisOptions[0];
       } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === currentAccount.genesisHash);
+        networkSelected = genesisOptions.find((opt) => opt.value === accountAllNetworkGenesisHash);
 
         if (!networkSelected) {
           window.localStorage.setItem('accountAllNetworkGenesisHash', '');

@@ -29,7 +29,7 @@ export class AcalaNftApi extends BaseNftApi {
 
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
-  };
+  }
 
   // public async connect () {
   //   this.api = await wsProvider(networks.acala);
@@ -63,7 +63,7 @@ export class AcalaNftApi extends BaseNftApi {
     for (const key of accountAssets) {
       const data = key.toHuman() as string[];
 
-      assetIds.push({ classId: data[1], tokenId: parseInt(data[2]).toString() });
+      assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
     }
 
     return assetIds;
@@ -148,7 +148,6 @@ export class AcalaNftApi extends BaseNftApi {
 
     this.total = assetIds.length;
     this.data = allCollections;
-
   }
 }
 

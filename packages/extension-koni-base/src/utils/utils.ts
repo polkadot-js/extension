@@ -48,3 +48,46 @@ export const parseIpfsLink = (ipfsLink: string) => {
 
   return PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
 };
+
+export function hexToStr (buf: string): string {
+  let str = '';
+  let hexStart = buf.indexOf('0x');
+
+  if (hexStart < 0) hexStart = 0;
+  else hexStart = 2;
+
+  for (let i = hexStart, strLen = buf.length; i < strLen; i += 2) {
+    const ch = buf[i] + buf[i + 1];
+    const num = parseInt(ch, 16);
+
+    if (num != 0) str += String.fromCharCode(num);
+    else break;
+  }
+
+  return str;
+}
+
+export function utf16ToString (uint16_array: Array<number>): string {
+  let str = '';
+
+  for (let i = 0; i < uint16_array.length; i++) { str += String.fromCharCode(uint16_array[i]); }
+
+  return str;
+}
+
+export function hexToUTF16 (hex: string): Uint8Array {
+  const buf = [];
+  let hexStart = hex.indexOf('0x');
+
+  if (hexStart < 0) hexStart = 0;
+  else hexStart = 2;
+
+  for (let i = hexStart, strLen = hex.length; i < strLen; i += 2) {
+    const ch = hex[i] + hex[i + 1];
+    const num = parseInt(ch, 16);
+
+    buf.push(num);
+  }
+
+  return new Uint8Array(buf);
+}

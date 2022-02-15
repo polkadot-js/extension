@@ -2,25 +2,36 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {ApiProps} from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 import {KaruraNftApi} from "@polkadot/extension-koni-base/api/nft/karura_nft";
 import {AcalaNftApi} from "@polkadot/extension-koni-base/api/nft/acala_nft";
+import UniqueNftApi from "@polkadot/extension-koni-base/api/nft/unique_nft";
+import StatemineNftApi from "@polkadot/extension-koni-base/api/nft/statemine_nft";
+import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
 
-const SUPPORTED_NFT_NETWORKS = {
-  'karura': NETWORKS.karura,
-  'acala': NETWORKS.acala,
-  'rmrk': NETWORKS.rmrk,
-  'statemine': NETWORKS.statemine,
-  'quartz': NETWORKS.quartz
+enum SUPPORTED_NFT_NETWORKS {
+  karura = 'karura',
+  acala = 'acala',
+  rmrk = 'rmrk',
+  statemine = 'statemine',
+  uniqueNft = 'uniqueNft'
 }
 
 function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
   switch (chain) {
-    case 'karura':
+    case SUPPORTED_NFT_NETWORKS.karura:
       return new KaruraNftApi(api, addresses, chain);
-    case 'acala':
+    case SUPPORTED_NFT_NETWORKS.acala:
       return new AcalaNftApi(api, addresses, chain);
+    case SUPPORTED_NFT_NETWORKS.rmrk:
+      let rmrkNftApi = new RmrkNftApi();
+      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
+      rmrkNftApi.setAddresses(addresses);
+      return rmrkNftApi;
+    case SUPPORTED_NFT_NETWORKS.statemine:
+      return new StatemineNftApi(api, addresses, chain);
+    case SUPPORTED_NFT_NETWORKS.uniqueNft:
+      return new UniqueNftApi(api, addresses, chain);
   }
 
   return null;
@@ -32,28 +43,38 @@ export class NftHandler {
   addresses: string[] = [];
 
   constructor(dotSamaAPIMap: Record<string, ApiProps>, addresses: string[]) {
+    // console.log(dotSamaAPIMap)
     this.addresses = addresses;
 
-    Object.entries(SUPPORTED_NFT_NETWORKS).forEach(([networkKey, networkInfo]) => {
-      this.apiPromises.push({chain: networkKey, api: dotSamaAPIMap[networkKey]});
-    });
+    for (let item in SUPPORTED_NFT_NETWORKS) {
+      this.apiPromises.push({chain: item, api: dotSamaAPIMap[item]});
+    }
   }
 
   private async connect () {
     await Promise.all(this.apiPromises.map(async ({chain, api: apiPromise}) => {
-      const parentApi: ApiProps = await apiPromise.isReady;
-      let handler = createNftApi(chain, parentApi, this.addresses);
-      if (handler) this.handlers.push(handler);
+      if (apiPromise) {
+        const parentApi: ApiProps = await apiPromise.isReady;
+        let handler = createNftApi(chain, parentApi, this.addresses);
+        if (handler) this.handlers.push(handler);
+      }
     }));
   }
 
   public async handleNfts () {
     await this.connect();
-    console.log('fuck')
     await Promise.all(this.handlers.map(async (handler) => {
-      console.log(handler.getChain());
       handler.handleNfts();
     }));
+  }
+
+  public getNfts () {
+    if (this.handlers.length > 0) {
+      for (let handler of this.handlers) {
+        console.log(handler.getChain());
+        console.log(handler.getData());
+      }
+    }
   }
 }
 

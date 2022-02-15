@@ -4,7 +4,7 @@
 import fetch from 'node-fetch';
 
 import {NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
-import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
+import {isUrl, reformatAddress} from '@polkadot/extension-koni-base/utils/utils';
 
 import {
   KANARIA_ENDPOINT,
@@ -28,6 +28,17 @@ export class RmrkNftApi extends BaseNftApi {
 
   constructor () {
     super();
+  }
+
+  override setAddresses(addresses: string[]) {
+    super.setAddresses(addresses);
+    let kusamaAddresses = []
+    for (let address of this.addresses) {
+      let kusamaAddress = reformatAddress(address, 2);
+      kusamaAddresses.push(kusamaAddress);
+    }
+
+    this.addresses = kusamaAddresses;
   }
 
   override parseUrl(input: string): string | undefined {
@@ -132,11 +143,13 @@ export class RmrkNftApi extends BaseNftApi {
   };
 
   public async handleNfts() {
+    console.log('fetching RMRK Nfts');
+    const currentAddress = this.addresses[0];
     try {
       const [singular, birds, items] = await Promise.all([
-        this.getSingularByAccount(this.addresses[0]),
-        this.getBirdsKanariaByAccount(this.addresses[0]),
-        this.getItemsKanariaByAccount(this.addresses[0])
+        this.getSingularByAccount(currentAddress),
+        this.getBirdsKanariaByAccount(currentAddress),
+        this.getItemsKanariaByAccount(currentAddress)
         // getSingularByAccount('DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW'),
         // getBirdsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr'),
         // getItemsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr')
@@ -214,7 +227,6 @@ export class RmrkNftApi extends BaseNftApi {
 
       this.total = allNfts.length;
       this.data = allCollections;
-
     } catch (e) {
       console.error('Failed to fetch nft', e);
       throw e;

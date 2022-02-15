@@ -27,9 +27,18 @@ export abstract class BaseNftApi {
     this.dotSamaApi = api;
   };
 
+  setChain (chain: string) {
+    this.chain = chain;
+  }
+
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
   };
+
+  protected parseTokenId (tokenId: string) {
+    if (tokenId.includes(',')) return tokenId.replace(',', '');
+    return tokenId;
+  }
 
   parseUrl(input: string): string | undefined {
     if (!input || input.length === 0) return undefined;

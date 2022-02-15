@@ -52,7 +52,7 @@ export default styled(Checkbox)(({ theme }: Props) => `
     padding-left: 24px;
     padding-top: 1px;
     color: ${theme.textColor2};
-    font-size: ${theme.fontSize2};
+    font-size: 14px;
     line-height: ${theme.lineHeight2};
     font-weight: 400;
 
@@ -66,7 +66,9 @@ export default styled(Checkbox)(({ theme }: Props) => `
 
     & span {
       position: absolute;
-      top: 4px;
+      top: 0;
+      bottom: 0;
+      margin: auto 0;
       left: 0;
       height: 14px;
       width: 14px;

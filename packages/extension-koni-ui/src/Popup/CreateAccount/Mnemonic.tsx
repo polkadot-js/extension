@@ -86,7 +86,7 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
             isDisabled={!isMnemonicSaved}
             onClick={onNextStep}
           >
-            {t<string>('Next step')}
+            {t<string>('Next Step')}
           </NextStepButton>
         </ButtonArea>
       </div>

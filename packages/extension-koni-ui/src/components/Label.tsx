@@ -25,11 +25,11 @@ export default styled(Label)(({ theme }: ThemeProps) => `
   color: ${theme.textColor2};
 
   label {
-    font-size: 13px;
-    line-height: 26px;
+    font-size: 12px;
+    line-height: 24px;
     letter-spacing: 0.04em;
     margin-bottom: 12px;
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: 400;
   }
 `);

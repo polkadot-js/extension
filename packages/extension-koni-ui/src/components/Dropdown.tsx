@@ -88,7 +88,10 @@ export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
   }
 
   .dropdown__single-value {
-    color: ${theme.textColor2};
+    color: ${theme.textColor};
+    font-size: 14px;
+    line-height: 24px;
+    font-weight: 400;
   }
 
   .dropdown__indicator-separator {

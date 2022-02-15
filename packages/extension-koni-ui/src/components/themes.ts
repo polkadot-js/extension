@@ -19,7 +19,7 @@ const darkTheme = {
   backgroundDropdownSeclection: 'rgba(0, 7, 45, .7)',
   bodyColor: '#20222A',
   borderRadius: '3px',
-  boxBorderColor: '#343849',
+  boxBorderColor: '#212845',
   borderColor: '#EEEEEE',
   borderColor2: '#212845',
   boxMargin: '0.75rem 0',

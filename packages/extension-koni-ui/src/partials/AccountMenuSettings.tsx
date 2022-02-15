@@ -29,6 +29,7 @@ interface Props extends ThemeProps {
 }
 
 const jsonPath = '/account/restore-json';
+const createAccountPath = '/account/create';
 
 function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -44,11 +45,19 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
   const mediaAllowed = useContext(MediaContext);
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
+  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
 
   const _openJson = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', jsonPath);
       windowOpen(jsonPath);
+    }, []
+  );
+
+  const _openCreateAccount = useCallback(
+    () => {
+      window.localStorage.setItem('popupNavigation', createAccountPath);
+      windowOpen(createAccountPath);
     }, []
   );
 
@@ -93,7 +102,8 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
-              to={'/account/create'}
+              onClick={isPopup && (isFirefox || isLinux) ? _openCreateAccount : undefined}
+              to={isPopup && (isFirefox || isLinux) ? undefined : createAccountPath}
             >
               <FontAwesomeIcon icon={faPlusCircle} />
               <span>{ t('Create new account')}</span>
@@ -134,8 +144,8 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
-              onClick={isPopup && isFirefox ? _openJson : undefined}
-              to={isPopup && isFirefox ? undefined : jsonPath}
+              onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
+              to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >
               <FontAwesomeIcon icon={faFileUpload} />
               <span>{t<string>('Restore account from backup JSON file')}</span>

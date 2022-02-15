@@ -43,6 +43,7 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
   const networkMap = useMemo(() => getNetworkMap(), []);
   const mediaAllowed = useContext(MediaContext);
   const isPopup = useIsPopup();
+  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
 
   const _openJson = useCallback(
     () => {
@@ -133,8 +134,8 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'
-              onClick={isPopup ? _openJson : undefined}
-              to={isPopup ? undefined : jsonPath}
+              onClick={isPopup && isFirefox ? _openJson : undefined}
+              to={isPopup && isFirefox ? undefined : jsonPath}
             >
               <FontAwesomeIcon icon={faFileUpload} />
               <span>{t<string>('Restore account from backup JSON file')}</span>

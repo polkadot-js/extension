@@ -45,6 +45,7 @@ function Upload ({ className }: Props): React.ReactElement {
   const [file, setFile] = useState<KeyringPair$Json | KeyringPairs$Json | undefined>(undefined);
 
   useEffect((): void => {
+    window.localStorage.setItem('popupNavigation', '');
     !accounts.length && onAction();
   }, [accounts, onAction]);
 

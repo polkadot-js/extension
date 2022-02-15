@@ -40,6 +40,7 @@
     "@polkadot/util": "^8.3.1",
     "@polkadot/util-crypto": "^8.3.1",
     "@reduxjs/toolkit": "^1.7.1",
+    "bowser": "^2.11.0",
     "file-saver": "^2.0.5",
     "i18next": "^21.6.5",
     "react": "^17.0.2",

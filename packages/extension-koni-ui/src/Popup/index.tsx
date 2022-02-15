@@ -16,7 +16,7 @@ import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import uiSettings from '@polkadot/ui-settings';
-
+import * as Bowser from "bowser";
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
@@ -83,6 +83,12 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
+  const browser = Bowser.getParser(window.navigator.userAgent);
+  if (!!browser.getBrowser() && !!browser.getBrowser().name && !!browser.getOS().name ) {
+    window.localStorage.setItem('browserInfo', browser.getBrowser().name as string);
+    window.localStorage.setItem('osInfo', browser.getOS().name as string);
+  }
+
 
   const _onAction = useCallback(
     (to?: string): void => {

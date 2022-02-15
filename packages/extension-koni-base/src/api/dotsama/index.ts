@@ -29,7 +29,6 @@ export function connectDotSamaApis (networks = NETWORKS): Record<string, ApiProp
     if (!network.genesisHash || network.genesisHash.toLowerCase() === 'unknown' || !network.provider) {
       return;
     }
-
     apisMap[networkKey] = initApi(network.provider);
   });
 

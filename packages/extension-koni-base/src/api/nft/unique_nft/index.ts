@@ -1,14 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiPromise } from '@polkadot/api';
-import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { parseIpfsLink } from '@polkadot/extension-koni-base/utils/utils';
+import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
+import {hexToStr, hexToUTF16, parseIpfsLink, utf16ToString} from '@polkadot/extension-koni-base/utils/utils';
 
-import { wsProvider } from '../../connector';
-import networks from '../../endpoints';
-import { deserializeNft } from './protobuf';
-import unique_types from './runtime_types';
+import {deserializeNft} from './protobuf';
+import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 
 interface Collection {
   SchemaVersion: string,
@@ -24,81 +21,21 @@ interface Token {
   Owner: string
 }
 
-function hexToStr (buf: string): string {
-  let str = '';
-  let hexStart = buf.indexOf('0x');
-
-  if (hexStart < 0) hexStart = 0;
-  else hexStart = 2;
-
-  for (let i = hexStart, strLen = buf.length; i < strLen; i += 2) {
-    const ch = buf[i] + buf[i + 1];
-    const num = parseInt(ch, 16);
-
-    if (num != 0) str += String.fromCharCode(num);
-    else break;
-  }
-
-  return str;
-}
-
-function utf16ToString (uint16_array: Array<number>): string {
-  let str = '';
-
-  for (let i = 0; i < uint16_array.length; i++) { str += String.fromCharCode(uint16_array[i]); }
-
-  return str;
-}
-
-function hexToUTF16 (hex: string): Uint8Array {
-  const buf = [];
-  let hexStart = hex.indexOf('0x');
-
-  if (hexStart < 0) hexStart = 0;
-  else hexStart = 2;
-
-  for (let i = hexStart, strLen = hex.length; i < strLen; i += 2) {
-    const ch = hex[i] + hex[i + 1];
-    const num = parseInt(ch, 16);
-
-    buf.push(num);
-  }
-
-  return new Uint8Array(buf);
-}
-
 interface NftIdList {
   collectionId: number,
   nfts: string[]
 }
 
-interface TokenData {
-  owner: string,
-  prefix: string,
-  collectionName: string,
-  collectionDescription: string,
-  properties: any,
-  image: string,
-}
+export default class UniqueNftApi extends BaseNftApi {
 
-export default class UniqueNftApi {
-  api: ApiPromise | null = null;
-
-  constructor () {
-  }
-
-  public async connect () {
-    if (unique_types.types) { this.api = await wsProvider(networks.uniqueNft, unique_types.types[0]?.types); }
-  }
-
-  public async disconnect () {
-    if (this.api) { await this.api.disconnect(); }
+  constructor (api: ApiProps, addresses: string[], chain?: string) {
+    super(api, addresses, chain);
   }
 
   public async getCollectionCount (): Promise<number> {
-    if (!this.api) return 0;
+    if (!this.dotSamaApi) return 0;
 
-    return (await this.api.query.nft.createdCollectionCount()) as unknown as number;
+    return (await this.dotSamaApi.api.query.nft.createdCollectionCount()) as unknown as number;
   }
 
   /**
@@ -109,9 +46,9 @@ export default class UniqueNftApi {
     * @returns the array of NFTs
     */
   public async getAddressTokens (collectionId: number, owner: string): Promise<any> {
-    if (!this.api) return;
+    if (!this.dotSamaApi) return;
 
-    return (await this.api.query.nft.addressTokens(collectionId, owner)).toJSON();
+    return (await this.dotSamaApi.api.query.nft.addressTokens(collectionId, owner)).toJSON();
   }
 
   /**
@@ -122,8 +59,8 @@ export default class UniqueNftApi {
     * @returns the URL of the token image
     */
   public async getNftImageUrl (collectionId: number, tokenId: string) {
-    if (!this.api) return;
-    const collection = (await this.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
+    if (!this.dotSamaApi) return;
+    const collection = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
 
     let url = '';
 
@@ -140,8 +77,6 @@ export default class UniqueNftApi {
       // TBD: Query image URL from the RESTful service
     }
 
-    console.log(`NFT ${collectionId}-${tokenId} Image URL: `, url);
-
     return url;
   }
 
@@ -155,10 +90,10 @@ export default class UniqueNftApi {
     * @returns tokenData: Token data object
     */
   public async getNftData (collectionId: number, tokenId: string, locale = 'en') {
-    if (!this.api) return;
-    const collection = (await this.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
+    if (!this.dotSamaApi) return;
+    const collection = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
     const schemaRead = hexToStr(collection.ConstOnChainSchema);
-    const token = (await this.api.query.nft.nftItemList(collectionId, tokenId)).toJSON() as unknown as Token;
+    const token = (await this.dotSamaApi.api.query.nft.nftItemList(collectionId, tokenId)).toJSON() as unknown as Token;
     const nftProps = hexToUTF16(token.ConstData);
     const properties = deserializeNft(schemaRead, nftProps, locale);
 
@@ -177,7 +112,7 @@ export default class UniqueNftApi {
       // TBD: Query image URL from the RESTful service
     }
 
-    const tokenData = {
+    return {
       owner: token.Owner,
       prefix: hexToStr(collection.TokenPrefix),
       collectionName: utf16ToString(collection.Name),
@@ -185,81 +120,69 @@ export default class UniqueNftApi {
       properties: properties,
       image: url
     };
-
-    console.log(`NFT ${collectionId}-${tokenId} data: `, tokenData);
-
-    return tokenData;
-  }
-}
-
-export const handleUniqueNfts = async (account: string): Promise<any> => {
-  if (!account) return [];
-
-  const api = new UniqueNftApi();
-
-  await api.connect();
-
-  const collectionCount = await api.getCollectionCount();
-
-  const data: NftIdList[] = [];
-  const allCollections: NftCollection[] = [];
-
-  const addressTokenDict: any[] = [];
-
-  for (let i = 0; i < collectionCount; i++) {
-    addressTokenDict.push({ i, account });
   }
 
-  await Promise.all(addressTokenDict.map(async (item) => {
-    const rs = await api.getAddressTokens(item.i, item.account);
+  public async handleNfts () {
+    const collectionCount = await this.getCollectionCount();
 
-    if (rs && rs.length > 0) { data.push({ collectionId: item.i, nfts: rs }); }
-  }));
+    const data: NftIdList[] = [];
+    const allCollections: NftCollection[] = [];
 
-  let total = 0;
-
-  for (let j = 0; j < data.length; j++) {
-    const nftItems: NftItem[] = [];
-    const collectionId = data[j].collectionId;
-    const nfts = data[j].nfts;
-    let collectionName = '';
-    let collectionImage = '';
-
-    total += nfts.length;
-
-    for (let i = 0; i < nfts.length; i++) {
-      const tokenId = nfts[i];
-      // Get token image URL
-      const _imageUrl = api.getNftImageUrl(collectionId, tokenId) as unknown as string;
-      // Get token data
-      const _tokenData = api.getNftData(collectionId, tokenId, 'en') as unknown as TokenData;
-
-      const [imageUrl, tokenData] = await Promise.all([_imageUrl, _tokenData]);
-
-      collectionName = tokenData.collectionName;
-      collectionImage = parseIpfsLink(tokenData.image);
-      const tokenDetail: NftItem = {
-        id: tokenId,
-        name: tokenData.prefix + '#' + tokenId,
-        image: parseIpfsLink(imageUrl),
-        external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
-        collectionId: collectionId.toString(),
-        properties: tokenData.properties,
-        rarity: ''
-      };
-
-      nftItems.push(tokenDetail);
+    const addressTokenDict: any[] = [];
+    const account = this.addresses[0];
+    for (let i = 0; i < collectionCount; i++) {
+      addressTokenDict.push({ i, account });
     }
 
-    allCollections.push({
-      collectionId: collectionId.toString(),
-      collectionName: collectionName,
-      image: collectionImage,
-      nftItems: nftItems
-    } as NftCollection);
+    await Promise.all(addressTokenDict.map(async (item) => {
+      const rs = await this.getAddressTokens(item.i, item.account);
+
+      if (rs && rs.length > 0) { data.push({ collectionId: item.i, nfts: rs }); }
+    }));
+
+    let total = 0;
+
+    for (let j = 0; j < data.length; j++) {
+      const nftItems: NftItem[] = [];
+      const collectionId = data[j].collectionId;
+      const nfts = data[j].nfts;
+      let collectionName = '';
+      let collectionImage = '';
+
+      total += nfts.length;
+
+      for (let i = 0; i < nfts.length; i++) {
+        const tokenId = nfts[i];
+        const [imageUrl, tokenData] = await Promise.all([
+          this.getNftImageUrl(collectionId, tokenId),
+          this.getNftData(collectionId, tokenId, 'en')]);
+
+        if (tokenData && imageUrl) {
+          collectionName = tokenData.collectionName;
+          collectionImage = parseIpfsLink(tokenData.image);
+          const tokenDetail: NftItem = {
+            id: tokenId,
+            name: tokenData.prefix + '#' + tokenId,
+            image: parseIpfsLink(imageUrl),
+            external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
+            collectionId: collectionId.toString(),
+            properties: tokenData.properties,
+            rarity: ''
+          };
+
+          nftItems.push(tokenDetail);
+        }
+      }
+
+      allCollections.push({
+        collectionId: collectionId.toString(),
+        collectionName: collectionName,
+        image: collectionImage,
+        nftItems: nftItems
+      } as NftCollection);
+    }
+
+    this.total = total;
+    this.data = allCollections;
   }
-
-  await api.disconnect();
-
-  return { total, allCollections };
-};
+}

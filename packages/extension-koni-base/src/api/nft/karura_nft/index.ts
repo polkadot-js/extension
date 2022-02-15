@@ -29,7 +29,7 @@ export class KaruraNftApi extends BaseNftApi {
 
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
-  };
+  }
 
   // public async connect () {
   //   this.api = await wsProvider(networks.karura);
@@ -56,17 +56,14 @@ export class KaruraNftApi extends BaseNftApi {
    * @param address
    */
   private async getNfts (address: string): Promise<AssetId[]> {
-    console.log('getNft')
     if (!this.dotSamaApi) return [];
-    // console.log(this.dotSamaApi.api.query);
     const accountAssets = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
-    console.log('accountAssets', accountAssets)
     const assetIds: AssetId[] = [];
 
     for (const key of accountAssets) {
       const data = key.toHuman() as string[];
 
-      assetIds.push({ classId: data[1], tokenId: data[2] });
+      assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
     }
 
     return assetIds;
@@ -89,11 +86,9 @@ export class KaruraNftApi extends BaseNftApi {
     return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
   }
 
-  public async handleNfts() {
-    console.log('handleNft');
+  public async handleNfts () {
     const allCollections: NftCollection[] = [];
     const assetIds = await this.getNfts(this.addresses[0]);
-    console.log('assetIds', assetIds)
 
     if (!assetIds || assetIds.length === 0) {
       this.total = 0;
@@ -148,16 +143,11 @@ export class KaruraNftApi extends BaseNftApi {
         }
       }
     }
+
     this.total = assetIds.length;
     this.data = allCollections;
-
-    console.log('run ok')
   }
 }
-
-const headers = {
-  'Content-Type': 'application/json'
-};
 
 const getKaruraMetadata = (metadata_url: string) => {
   let url: string | null = metadata_url;
@@ -167,7 +157,7 @@ const getKaruraMetadata = (metadata_url: string) => {
 
   return fetch(url, {
     method: 'GET',
-    headers
+    headers : {'Content-Type': 'application/json'}
   })
     .then((res) => res.json());
 };

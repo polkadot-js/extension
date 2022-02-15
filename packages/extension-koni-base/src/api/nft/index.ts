@@ -1,26 +1,37 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps} from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
+import {ApiProps, NftCollection} from '@polkadot/extension-base/background/KoniTypes';
 import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 import {KaruraNftApi} from "@polkadot/extension-koni-base/api/nft/karura_nft";
 import {AcalaNftApi} from "@polkadot/extension-koni-base/api/nft/acala_nft";
+import UniqueNftApi from "@polkadot/extension-koni-base/api/nft/unique_nft";
+import StatemineNftApi from "@polkadot/extension-koni-base/api/nft/statemine_nft";
+import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
 
-const SUPPORTED_NFT_NETWORKS = {
-  'karura': NETWORKS.karura,
-  'acala': NETWORKS.acala,
-  'rmrk': NETWORKS.rmrk,
-  'statemine': NETWORKS.statemine,
-  'quartz': NETWORKS.quartz
+enum SUPPORTED_NFT_NETWORKS {
+  karura = 'karura',
+  acala = 'acala',
+  rmrk = 'rmrk',
+  statemine = 'statemine',
+  uniqueNft = 'uniqueNft'
 }
 
 function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
   switch (chain) {
-    case 'karura':
+    case SUPPORTED_NFT_NETWORKS.karura:
       return new KaruraNftApi(api, addresses, chain);
-    case 'acala':
+    case SUPPORTED_NFT_NETWORKS.acala:
       return new AcalaNftApi(api, addresses, chain);
+    case SUPPORTED_NFT_NETWORKS.rmrk:
+      let rmrkNftApi = new RmrkNftApi();
+      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
+      rmrkNftApi.setAddresses(addresses);
+      return rmrkNftApi;
+    case SUPPORTED_NFT_NETWORKS.statemine:
+      return new StatemineNftApi(api, addresses, chain);
+    case SUPPORTED_NFT_NETWORKS.uniqueNft:
+      return new UniqueNftApi(api, addresses, chain);
   }
 
   return null;
@@ -30,79 +41,52 @@ export class NftHandler {
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
+  total: number = 0;
+  data: NftCollection[] = [];
 
   constructor(dotSamaAPIMap: Record<string, ApiProps>, addresses: string[]) {
     this.addresses = addresses;
 
-    Object.entries(SUPPORTED_NFT_NETWORKS).forEach(([networkKey, networkInfo]) => {
-      this.apiPromises.push({chain: networkKey, api: dotSamaAPIMap[networkKey]});
-    });
+    for (let item in SUPPORTED_NFT_NETWORKS) {
+      this.apiPromises.push({chain: item, api: dotSamaAPIMap[item]});
+    }
   }
 
   private async connect () {
     await Promise.all(this.apiPromises.map(async ({chain, api: apiPromise}) => {
-      const parentApi: ApiProps = await apiPromise.isReady;
-      let handler = createNftApi(chain, parentApi, this.addresses);
-      if (handler) this.handlers.push(handler);
+      if (apiPromise) {
+        const parentApi: ApiProps = await apiPromise.isReady;
+        let handler = createNftApi(chain, parentApi, this.addresses);
+        if (handler) this.handlers.push(handler);
+      }
     }));
   }
 
   public async handleNfts () {
     await this.connect();
-    console.log('fuck')
+
     await Promise.all(this.handlers.map(async (handler) => {
-      console.log(handler.getChain());
-      handler.handleNfts();
+      await handler.handleNfts();
+      this.total += handler.getTotal();
+      this.data = [...this.data, ...handler.getData()]
     }));
+  }
+
+  public getTotal() {
+    return this.total;
+  }
+
+  public getNfts () {
+    return this.data;
   }
 }
 
-// export const getAllNftsByAccount = async (account: string): Promise<NftJson> => {
-//   try {
-//     const kusamaAddress = reformatAddress(account, 2);
-//     const _rmrkNfts = handleRmrkNfts(kusamaAddress);
-//
-//     // const _uniqueNfts = handleUniqueNfts(account);
-//     //
-//     // const _statemineNfts = handleStatemineNfts(account);
-//     //
-//     // const _karuraNfts = handleKaruraNfts(account);
-//     //
-//     // const _acalaNfts = handleAcalaNfts(account);
-//
-//     // const [rmrkNfts, uniqueNfts, statemineNfts, karuraNfts, acalaNfts] = await Promise.all([
-//     //   _rmrkNfts,
-//     //   _uniqueNfts,
-//     //   _statemineNfts,
-//     //   _karuraNfts,
-//     //   _acalaNfts
-//     // ]);
-//
-//     // const total = rmrkNfts.total + uniqueNfts.total + statemineNfts.total + karuraNfts.total + acalaNfts.total;
-//     // const allCollections = [
-//     //   ...rmrkNfts.allCollections,
-//     //   ...uniqueNfts.allCollections,
-//     //   ...statemineNfts.allCollections,
-//     //   ...karuraNfts.allCollections,
-//     //   ...acalaNfts.allCollections
-//     // ];
-//
-//     // const [statemineNfts] = await Promise.all([_statemineNfts]);
-//     // let total = statemineNfts.total;
-//     // let allCollections = [...statemineNfts.allCollections]
-//
-//     console.log('promise')
-//     console.log(_rmrkNfts)
-//     const total = 0
-//     const allCollections: any[] = []
-//     console.log(`Fetched ${total} nfts from api for account ${account}`);
-//
-//     return {
-//       total,
-//       nftList: allCollections
-//     } as NftJson;
-//   } catch (e) {
-//     console.error('Failed to fetch nft from api', e);
-//     throw e;
-//   }
-// };
+
+// nft test address
+// unique: 5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb
+// statemine: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
+// singular rmrk: DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW
+// birds kanaria rmrk: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
+// kanaria rmrk: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
+// karura: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
+// acala: 16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo

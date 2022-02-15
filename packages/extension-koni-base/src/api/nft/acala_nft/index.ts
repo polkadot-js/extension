@@ -45,8 +45,8 @@ export default class AcalaNftApi {
   /**
    * Retrieve id of NFTs
    *
-   * @param owner: address of account
    * @returns the array of NFT Ids
+   * @param address
    */
   public async getNfts (address: string): Promise<AssetId[]> {
     if (!this.api) return [];
@@ -115,8 +115,9 @@ export const handleAcalaNfts = async (address: string) => {
   const allCollections: NftCollection[] = [];
   const api = new AcalaNftApi();
 
-  await api.connect();
   const assetIds = await api.getNfts(address);
+
+  console.log(assetIds)
 
   if (!assetIds || assetIds.length === 0) {
     return { total: 0, allCollections };

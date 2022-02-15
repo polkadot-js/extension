@@ -60,22 +60,22 @@ export class KoniCron {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL);
 
-    state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo) {
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
-        this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
-      }
-
-      state.subscribeCurrentAccount().subscribe({
-        next: ({ address }) => {
-          this.removeCron('refreshNft');
-          this.removeCron('refreshStaking');
-
-          this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
-          this.addCron('refreshStaking', this.refreshStaking(address), CRON_REFRESH_STAKING_INTERVAL);
-        }
-      });
-    });
+    // state.getCurrentAccount((currentAccountInfo) => {
+    //   if (currentAccountInfo) {
+    //     // this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
+    //     // this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
+    //   }
+    //
+    //   state.subscribeCurrentAccount().subscribe({
+    //     next: ({ address }) => {
+    //       this.removeCron('refreshNft');
+    //       this.removeCron('refreshStaking');
+    //
+    //       this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
+    //       this.addCron('refreshStaking', this.refreshStaking(address), CRON_REFRESH_STAKING_INTERVAL);
+    //     }
+    //   });
+    // });
   }
 
   recoverAPI () {

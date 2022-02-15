@@ -6,7 +6,6 @@ import {ApiProps, NetWorkInfo, StakingItem, StakingJson} from '@polkadot/extensi
 import { wsProvider } from '@polkadot/extension-koni-base/api/connector';
 import networks from '@polkadot/extension-koni-base/api/endpoints';
 import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
-import registry from "@polkadot/extension-koni-base/api/dotsama/typeRegistry";
 
 interface LedgerData {
   active: string,
@@ -112,6 +111,7 @@ export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Recor
 
   await Promise.all(allApiPromise.map(async ({chain, api: apiPromise}) => {
     const api = await apiPromise.isReady;
+    console.log('api', api);
     apis.push({chain, api});
   }));
 

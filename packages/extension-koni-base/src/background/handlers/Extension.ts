@@ -307,13 +307,15 @@ export default class KoniExtension extends Extension {
     const currentAccount = await state.getAccountAddress();
     if (currentAccount === null) return null;
 
-    getAllNftsByAccount(currentAccount as string)
-      .then((rs) => {
-        state.setNft(rs, () => {
-          console.log('Update nft state from subscription');
-        });
-      })
-      .catch((err) => console.log(err));
+    console.log('subscribe nft')
+
+    // getAllNftsByAccount(currentAccount as string)
+    //   .then((rs) => {
+    //     state.setNft(rs, () => {
+    //       console.log('Update nft state from subscription');
+    //     });
+    //   })
+    //   .catch((err) => console.log(err));
 
     const nftSubscription = state.subscribeNft().subscribe({
       next: (rs) => {
@@ -348,14 +350,16 @@ export default class KoniExtension extends Extension {
     const currentAccount = await state.getAccountAddress();
     if (currentAccount === null) return null;
 
-    getStakingInfo(currentAccount as string)
-      .then((rs) => {
-        state.setStaking(rs, (stakingData) => {
-          console.log(`Update staking state from subscription ${stakingData}`);
-          console.log(stakingData);
-        });
-      })
-      .catch((err) => console.log(err));
+    console.log('subscribe staking')
+
+    // getStakingInfo(currentAccount as string)
+    //   .then((rs) => {
+    //     state.setStaking(rs, (stakingData) => {
+    //       console.log(`Update staking state from subscription ${stakingData}`);
+    //       console.log(stakingData);
+    //     });
+    //   })
+    //   .catch((err) => console.log(err));
 
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {

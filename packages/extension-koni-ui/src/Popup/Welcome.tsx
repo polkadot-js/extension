@@ -6,15 +6,19 @@ import type { ThemeProps } from '../types';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { ActionContext, Box, Button, ButtonArea, List, VerticalSpace } from '../components';
+import KoniButton from '@polkadot/extension-koni-ui/components/Button';
+import KoniButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import KoniHeader from '@polkadot/extension-koni-ui/partials/Header';
+
+import logo from '../assets/sub-wallet-logo.svg';
+import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { Header } from '../partials';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-const Welcome = function ({ className }: Props): React.ReactElement<Props> {
+function Welcome ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
@@ -28,27 +32,65 @@ const Welcome = function ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text={t<string>('Welcome')} />
+      <KoniHeader
+        isNotHaveAccount
+        isWelcomeScreen
+      />
       <div className={className}>
-        <p>{t<string>('Before we start, just a couple of notes regarding use:')}</p>
-        <Box>
-          <List>
-            <li>{t<string>('We do not send any clicks, pageviews or events to a central server')}</li>
-            <li>{t<string>('We do not use any trackers or analytics')}</li>
-            <li>{t<string>("We don't collect keys, addresses or any information - your information never leaves this machine")}</li>
-          </List>
-        </Box>
-        <p>{t<string>('... we are not in the information collection business (even anonymized).')}</p>
+        <div className='welcome-container'>
+          <img
+            alt='logo'
+            className='welcome-logo'
+            src={logo}
+          />
+          <span className='welcome-title'>
+            Welcome Back
+          </span>
+          <span className='welcome-subtitle'>
+            The decentralized web awaits
+          </span>
+          <KoniButtonArea className='welcome-button-wrapper'>
+            <KoniButton onClick={_onClick}>{t<string>('Get started')}</KoniButton>
+          </KoniButtonArea>
+        </div>
       </div>
-      <VerticalSpace />
-      <ButtonArea>
-        <Button onClick={_onClick}>{t<string>('Understood, let me continue')}</Button>
-      </ButtonArea>
     </>
   );
-};
+}
 
 export default styled(Welcome)(({ theme }: Props) => `
+  .welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 47px;
+  }
+
+  .welcome-logo {
+    margin: 15px 0 30px 0;
+    width: 118px;
+    height: 118px;
+  }
+
+  .welcome-title {
+    font-size: 32px;
+    line-height: 44px;
+    color: ${theme.textColor};
+    font-weight: 500;
+  }
+
+  .welcome-subtitle {
+    margin-top: 3px;
+    font-size: 18px;
+    line-height: 30px;
+    color: ${theme.textColor2};
+  }
+
+  .welcome-button-wrapper {
+    width: 100%;
+    margin-top: 30px;
+  }
+
   p {
     color: ${theme.subTextColor};
     margin-bottom: 6px;

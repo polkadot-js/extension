@@ -8,7 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, InputWithLabel } from '../../components';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps{
@@ -59,11 +61,11 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
           />
         </div>
         <Button
-          className='lockButton'
+          className='derivation-path__lock-button'
           onClick={_onExpand}
         >
           <FontAwesomeIcon
-            className='lockIcon'
+            className='derivation-path__lock-icon'
             icon={isDisabled ? faLock : faLockOpen}
           />
         </Button>
@@ -78,12 +80,13 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
     flex-direction: row;
   }
 
-  .lockButton {
+  .derivation-path__lock-button {
     background: none;
     height: 14px;
-    margin: 36px 2px 0 10px;
+    margin: 50px 2px 0 10px;
     padding: 3px;
     width: 11px;
+    flex: 1;
 
     &:not(:disabled):hover {
       background: none;
@@ -98,12 +101,12 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
     }
   }
 
-  .lockIcon {
+  .derivation-path__lock-icon {
     color: ${theme.iconNeutralColor}
   }
 
   .pathInput {
-    width: 100%;
+    flex: 9;
 
     &.locked input {
       opacity: 50%;

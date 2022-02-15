@@ -1,14 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
-import Button from './Button';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+
+import next from '../assets/caret-right.svg';
 
 type Props = React.ComponentProps<typeof Button>;
 
@@ -16,20 +14,22 @@ function NextStepButton ({ children, ...props }: Props): React.ReactElement<Prop
   return (
     <Button {...props}>
       {children}
-      <FontAwesomeIcon
-        className='arrowRight'
-        icon={faArrowRight}
-        size='sm'
+      <img
+        alt='next'
+        className='next-step-btn__arrow-right'
+        src={next}
       />
     </Button>
   );
 }
 
-export default styled(NextStepButton)(({ theme }: ThemeProps) => `
-  .arrowRight{
-    float: right;
-    margin-top: 4px;
-    margin-right: 1px;
+export default styled(NextStepButton)(({ theme }: Props) => `
+  .next-step-btn__arrow-right {
+    position: absolute;
+    margin: auto 0;
+    top: 0;
+    bottom: 0;
+    right: -2px;
     color: ${theme.buttonTextColor};
   }
 `);

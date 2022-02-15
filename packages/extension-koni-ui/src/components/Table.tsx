@@ -27,7 +27,7 @@ export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
   display: block;
   font-size: ${theme.labelFontSize};
   line-height: ${theme.labelLineHeight};
-  margin-bottom: 1rem;
+  margin: 18px 15px;
 
   &.isFull {
     height: 100%;

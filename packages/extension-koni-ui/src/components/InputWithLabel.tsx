@@ -4,10 +4,11 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import Label from '@polkadot/extension-koni-ui/components/Label';
+import { Input } from '@polkadot/extension-koni-ui/components/TextInputs';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+
 import useTranslation from '../hooks/useTranslation';
-import Label from './Label';
-import { Input } from './TextInputs';
-import Warning from './Warning';
 
 interface Props {
   className?: string;
@@ -81,7 +82,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
 }
 
 export default styled(InputWithLabel)`
-  margin-bottom: 16px;
+  margin-top: 12px;
 
   &.withoutMargin {
     margin-bottom: 0px;

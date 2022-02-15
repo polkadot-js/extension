@@ -3,15 +3,23 @@
 
 import axios from 'axios';
 
-import networks from '@polkadot/extension-koni-base/api/endpoints';
-import { PriceJson } from '@polkadot/extension-koni-base/stores/types';
+import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 const alternativeNameMap: Record<string, string> = {
-  acala: 'acala-token',
   bifrost: 'bifrost-native-coin',
   calamari: 'calamari-network',
+  crab: 'darwinia-crab-network',
+  crust: 'crust-network',
+  darwinia: 'darwinia-network-native-token',
   kilt: 'kilt-protocol',
-  parallel: 'par-stablecoin'
+  kintsugi: 'kintsugi',
+  parallel: 'paralink-network',
+  phala: 'pha',
+  picasso: 'pica',
+  robonomics: 'robonomics-network',
+  shadow: 'crust-storage-market',
+  'sora-substrate': 'sora'
 };
 
 interface GeckoItem {
@@ -20,7 +28,7 @@ interface GeckoItem {
   current_price: number
 }
 
-export const getTokenPrice = async (chains: Array<string> = Object.keys(networks), currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS), currency = 'usd'): Promise<PriceJson> => {
   try {
     const inverseMap: Record<string, string> = {};
     const finalChains = chains.map((chain) => {

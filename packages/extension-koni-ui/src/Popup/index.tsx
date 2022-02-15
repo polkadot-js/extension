@@ -8,18 +8,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
-import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
+import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
+import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary, Loading } from '../components';
+import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getPrice, subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribePrice, subscribeSigningRequests } from '../messaging';
+import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-import Accounts from './Accounts';
 import AuthList from './AuthManagement';
 import Authorize from './Authorize';
 import CreateAccount from './CreateAccount';
@@ -27,7 +30,7 @@ import Derive from './Derive';
 import Export from './Export';
 import ExportAll from './ExportAll';
 import Forget from './Forget';
-import ImportLedger from './ImportLedger';
+import Home from './Home';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
@@ -66,8 +69,8 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
   };
 }
 
-function updatePrice (priceData: PriceJson): void {
-  store.dispatch({ type: 'price/update', payload: priceData });
+function updateCurrentAccount (currentAcc: AccountJson): void {
+  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
 export default function Popup (): React.ReactElement {
@@ -85,24 +88,46 @@ export default function Popup (): React.ReactElement {
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
 
+      const beforeNav = window.localStorage.getItem('popupNavigation');
+
       if (to) {
         window.location.hash = to;
+      } else if (beforeNav) {
+        window.location.hash = beforeNav;
       }
     },
     []
   );
 
-  useEffect((): void => {
-    getPrice().then(updatePrice).catch(console.error);
-  }, []);
+  // @ts-ignore
+  const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
+    const { accounts, currentAddress } = data;
+
+    setAccounts(accounts);
+
+    if (accounts && accounts.length) {
+      let selectedAcc = accounts.find((acc) => acc.address === currentAddress);
+
+      if (!selectedAcc) {
+        selectedAcc = accounts[0];
+        saveCurrentAccountAddress(selectedAcc.address).then(() => {
+          updateCurrentAccount(selectedAcc as AccountJson);
+        }).catch((e) => {
+          console.error('There is a problem when set Current Account', e);
+        });
+      } else {
+        updateCurrentAccount(selectedAcc);
+      }
+    }
+  };
 
   useEffect((): void => {
     Promise.all([
-      subscribeAccounts(setAccounts),
+      // subscribeAccounts(setAccounts),
+      getAccountsWithCurrentAddress(handleGetAccountsWithCurrentAddress),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
-      subscribeSigningRequests(setSignRequests),
-      subscribePrice(null, updatePrice)
+      subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);
 
     uiSettings.on('change', (settings): void => {
@@ -113,6 +138,8 @@ export default function Popup (): React.ReactElement {
     _onAction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useSetupStore();
 
   useEffect((): void => {
     setAccountCtx(initAccountContext(accounts || []));
@@ -135,13 +162,13 @@ export default function Popup (): React.ReactElement {
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
         : signRequests && signRequests.length
           ? wrapWithErrorBoundary(<Signing />, 'signing')
-          : wrapWithErrorBoundary(<Accounts />, 'accounts')
+          : wrapWithErrorBoundary(<Home />, 'Home')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');
 
   return (
-    <Loading>{accounts && authRequests && metaRequests && signRequests && (
+    <LoadingContainer>{accounts && authRequests && metaRequests && signRequests && (
       <Provider store={store}>
-        <ActionContext.Provider value={_onAction}>
+        <ActionContext.Provider value={_onAction}><div id='tooltips' />
           <SettingsContext.Provider value={settingsCtx}>
             <AccountContext.Provider value={accountCtx}>
               <AuthorizeReqContext.Provider value={authRequests}>
@@ -155,12 +182,13 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                           <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
                           <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route>
-                          <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
                           <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
                           <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
                           <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
+                          <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
+                          <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact
@@ -178,6 +206,6 @@ export default function Popup (): React.ReactElement {
           </SettingsContext.Provider>
         </ActionContext.Provider>
       </Provider>
-    )}</Loading>
+    )}</LoadingContainer>
   );
 }

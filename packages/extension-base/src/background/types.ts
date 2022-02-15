@@ -11,7 +11,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
+import { CurrentNetworkInfo, KoniRequestSignatures } from '@polkadot/extension-base/background/KoniTypes';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
@@ -44,6 +44,16 @@ export interface AccountJson extends KeyringPair$Meta {
   whenCreated?: number;
 }
 
+// all Accounts and the address of the current Account
+export interface AccountsWithCurrentAddress {
+  accounts: AccountJson[];
+  currentAddress?: string;
+}
+
+export interface CurrentAccountInfo {
+  address: string;
+}
+
 export type AccountWithChildren = AccountJson & {
   children?: AccountWithChildren[];
 }
@@ -52,6 +62,16 @@ export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
+}
+
+export type CurrentAccContext = {
+  currentAccount: AccountJson | null;
+  setCurrentAccount: (account: AccountJson | null) => void;
+}
+
+export type AccNetworkContext = {
+  network: CurrentNetworkInfo;
+  setNetwork: (network: CurrentNetworkInfo) => void;
 }
 
 export interface AuthorizeRequest {
@@ -79,6 +99,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
+  'pri(accounts.create.suriV2)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
@@ -88,15 +109,21 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
+  'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.list)': [null, ResponseAuthorizeList];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.toggle)': [string, ResponseAuthorizeList];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
+  'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
   'pri(json.batchRestore)': [RequestBatchRestore, void];
+  'pri(json.validate.password)': []
+  'pri(json.restoreV2)': [RequestJsonRestore, void];
+  'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
@@ -142,7 +169,7 @@ export type MessageTypesWithNullRequest = NullKeys<RequestTypes>
 export interface TransportRequestMessage<TMessageType extends MessageTypes> {
   id: string;
   message: TMessageType;
-  origin: string;
+  origin: 'page' | 'extension';
   request: RequestTypes[TMessageType];
 }
 
@@ -162,6 +189,10 @@ export type RequestAuthorizeSubscribe = null;
 
 export interface RequestMetadataApprove {
   id: string;
+}
+
+export interface RequestCurrentAccountAddress {
+  address: string;
 }
 
 export interface RequestMetadataReject {
@@ -383,11 +414,13 @@ export interface RequestSign {
 export interface RequestJsonRestore {
   file: KeyringPair$Json;
   password: string;
+  address: string;
 }
 
 export interface RequestBatchRestore {
   file: KeyringPairs$Json;
   password: string;
+  address: string;
 }
 
 export interface ResponseJsonRestore {

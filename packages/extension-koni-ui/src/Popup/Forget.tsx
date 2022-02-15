@@ -5,24 +5,38 @@ import type { ThemeProps } from '../types';
 
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
-import { ActionBar, ActionContext, ActionText, Address, Button, Warning } from '../components';
+import { AccountJson } from '@polkadot/extension-base/background/types';
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import { store } from '@polkadot/extension-koni-ui/stores';
+
+import { AccountContext, ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { forgetAccount } from '../messaging';
 import { Header } from '../partials';
+import { Theme } from '../types';
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
+}
+
+function updateCurrentAccount (currentAcc: AccountJson): void {
+  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
 function Forget ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const { accounts } = useContext(AccountContext);
 
   const _goHome = useCallback(
-    () => onAction('/'),
+    () => {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    },
     [onAction]
   );
 
@@ -31,8 +45,12 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
       setIsBusy(true);
       forgetAccount(address)
         .then(() => {
+          if (accounts.length === 1) {
+            updateCurrentAccount({} as AccountJson);
+          }
+
           setIsBusy(false);
-          onAction('/');
+          _goHome();
         })
         .catch((error: Error) => {
           setIsBusy(false);
@@ -45,15 +63,16 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   return (
     <>
       <Header
-        showBackArrow
-        text={t<string>('Forget account')}
+        showSubHeader
+        subHeaderName={t<string>('Forget Account')}
       />
       <div className={className}>
-        <Address address={address}>
-          <Warning className='movedWarning'>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+          <AccountInfo address={address} />
+          <Warning className='forget-account__warning'>
             {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
           </Warning>
-          <div className='actionArea'>
+          <div className='forget-account__action-area'>
             <Button
               isBusy={isBusy}
               isDanger
@@ -61,34 +80,43 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
             >
               {t<string>('I want to forget this account')}
             </Button>
-            <ActionBar className='withMarginTop'>
+            <ActionBar className='forget-account__cancel-btn-wrapper'>
               <ActionText
-                className='center'
+                className='forget-account__cancel-btn'
                 onClick={_goHome}
                 text={t<string>('Cancel')}
               />
             </ActionBar>
           </div>
-        </Address>
+        </div>
       </div>
     </>
   );
 }
 
-export default withRouter(styled(Forget)`
-  .actionArea {
+export default withRouter(styled(Forget)(({ theme }: Props) => `
+  padding: 25px 15px 0;
+
+  .forget-account__action-area {
     padding: 10px 24px;
   }
 
-  .center {
+  .forget-account__cancel-btn {
     margin: auto;
   }
 
-  .movedWarning {
+  .forget-account__cancel-btn > span {
+    font-weight: 500;
+    color: ${theme.buttonBackground2};
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  .forget-account__warning {
     margin-top: 8px;
   }
 
-  .withMarginTop {
+  .forget-account__cancel-btn-wrapper {
     margin-top: 4px;
   }
-`);
+`));

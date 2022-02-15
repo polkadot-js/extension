@@ -1,0 +1,25 @@
+{
+  "name": "Kusama",
+  "longName": "Kusama Relay Chain",
+  "description": "Kusama is a 'canary network' for Polkadot; an early release of the code that is available first and holds real economic value",
+  "nativeToken": "KSM",
+  "tokenDecimals": 12,
+  "links": {
+    "Website": "https://kusama.network/",
+    "Twitter": "https://twitter.com/kusamanetwork",
+    "Support": "mailto:support@kusama.network",
+    "Discord": "https://discord.com/invite/9AWjTf8wSk",
+    "Github": "https://github.com/paritytech/polkadot/",
+    "Reddit": "https://www.reddit.com/r/Kusama/",
+    "YouTube": "https://www.youtube.com/channel/UCq4MRrQhdoIR0b44GxcCPxw"
+  },
+  "isRelay": true,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2/assets/card.png"
+  },
+  "rpcs": [
+    "wss://kusama-rpc.polkadot.io"
+  ]
+}

@@ -3,9 +3,11 @@
 
 import React, { useContext, useMemo } from 'react';
 
-import { AccountContext, InputWithLabel, ValidatedInput } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { isNotShorterThan } from '../util/validators';
+import { AccountContext } from '@polkadot/extension-koni-ui/components';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import ValidatedInput from '@polkadot/extension-koni-ui/components/ValidatedInput';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { isNotShorterThan } from '@polkadot/extension-koni-ui/util/validators';
 
 interface Props {
   address?: string;

@@ -1,15 +1,28 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import { saveAs } from 'file-saver';
+import React, { useCallback, useContext, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
-import { ButtonArea, Checkbox, MnemonicSeed, NextStepButton, VerticalSpace, Warning } from '../../components';
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
+import MnemonicSeed from '@polkadot/extension-koni-ui/components/MnemonicSeed';
+import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
+
 import useToast from '../../hooks/useToast';
 import useTranslation from '../../hooks/useTranslation';
 
-interface Props {
+interface Props extends ThemeProps {
   onNextStep: () => void;
   seed: string;
+  address?: string;
+  genesisHash?: string;
+  name?: string;
+  className?: string;
 }
 
 const onCopy = (): void => {
@@ -23,41 +36,75 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
+function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const _onCopy = useCallback((): void => {
     onCopy();
     show(t('Copied'));
   }, [show, t]);
 
+  const _backupMnemonicSeed = (): void => {
+    const blob = new Blob([JSON.stringify(seed)], { type: 'application/json; charset=utf-8' });
+
+    saveAs(blob, 'mnemonic-seed.json');
+  };
+
   return (
     <>
-      <MnemonicSeed
-        onCopy={_onCopy}
-        seed={seed}
-      />
-      <Warning>
-        {t<string>("Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.")}
-      </Warning>
-      <VerticalSpace />
-      <Checkbox
-        checked={isMnemonicSaved}
-        label={t<string>('I have saved my mnemonic seed safely.')}
-        onChange={setIsMnemonicSaved}
-      />
-      <ButtonArea>
-        <NextStepButton
-          isDisabled={!isMnemonicSaved}
-          onClick={onNextStep}
-        >
-          {t<string>('Next step')}
-        </NextStepButton>
-      </ButtonArea>
+      <div className={className}>
+        <div className='account-info-wrapper'>
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+            <AccountInfo
+              address={address}
+              genesisHash={genesisHash}
+              name={name}
+            />
+            <MnemonicSeed
+              backupMnemonicSeed={_backupMnemonicSeed}
+              isShowDownloadButton
+              onCopy={_onCopy}
+              seed={seed}
+            />
+            <Warning className='create-account-warning'>
+              {t<string>("Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.")}
+            </Warning>
+            <Checkbox
+              checked={isMnemonicSaved}
+              label={t<string>('I have saved my mnemonic seed safely.')}
+              onChange={setIsMnemonicSaved}
+            />
+          </div>
+        </div>
+
+        <ButtonArea className='kn-next-area'>
+          <NextStepButton
+            className='next-step-btn'
+            isDisabled={!isMnemonicSaved}
+            onClick={onNextStep}
+          >
+            {t<string>('Next step')}
+          </NextStepButton>
+        </ButtonArea>
+      </div>
     </>
   );
 }
 
-export default React.memo(Mnemonic);
+export default React.memo(styled(Mnemonic)(({ theme }: Props) => `
+  padding: 25px 15px 15px;
+  flex: 1;
+  overflow-y: auto;
+
+  .next-step-btn {
+    > .children {
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
+    }
+  }
+`));

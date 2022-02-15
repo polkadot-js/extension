@@ -6,6 +6,7 @@
     "rootDir": "./src"
   },
   "references": [
+    { "path": "../extension-koni-base" },
     { "path": "../extension-chains" },
     { "path": "../extension-dapp" },
     { "path": "../extension-inject" },

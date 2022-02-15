@@ -6,14 +6,20 @@ import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
+import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import InputFileWithLabel from '@polkadot/extension-koni-ui/components/InputFileWithLabel';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, ActionContext, Address, Button, InputFileWithLabel, InputWithLabel, Warning } from '../components';
+import { AccountContext, ActionContext, Theme } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { batchRestore, jsonGetAccountInfo, jsonRestore } from '../messaging';
-import { Header } from '../partials';
+import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
 import { isKeyringPairs$Json } from '../util/typeGuards';
 
@@ -33,6 +39,7 @@ function Upload ({ className }: Props): React.ReactElement {
   const [isFileError, setFileError] = useState(false);
   const [requirePassword, setRequirePassword] = useState(false);
   const [isPasswordError, setIsPasswordError] = useState(false);
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
   // don't use the info from the file directly
   // rather use what comes from the background from jsonGetAccountInfo
   const [file, setFile] = useState<KeyringPair$Json | KeyringPairs$Json | undefined>(undefined);
@@ -99,13 +106,16 @@ function Upload ({ className }: Props): React.ReactElement {
 
       setIsBusy(true);
 
-      (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
-        .then(() => { onAction('/'); })
-        .catch((e) => {
-          console.error(e);
-          setIsBusy(false);
-          setIsPasswordError(true);
-        });
+      (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo[0].address) : jsonRestoreV2(file, password, accountsInfo[0].address))
+        .then(() => {
+          window.localStorage.setItem('popupNavigation', '/');
+          onAction('/');
+        }).catch(
+          (e) => {
+            console.error(e);
+            setIsBusy(false);
+            setIsPasswordError(true);
+          });
     },
     [file, onAction, password, requirePassword]
   );
@@ -114,19 +124,26 @@ function Upload ({ className }: Props): React.ReactElement {
     <>
       <Header
         showBackArrow
+        showSubHeader
         smallMargin
-        text={t<string>('Restore from JSON')}
+        subHeaderName={t<string>('Restore from JSON')}
       />
       <div className={className}>
-        {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
-          <Address
-            address={address}
-            genesisHash={genesisHash}
-            key={`${index}:${address}`}
-            name={name}
-            type={type}
-          />
-        ))}
+        <div className='restore-from-json-wrapper'>
+          {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
+            <div
+              className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}
+              key={`${index}:${address}`}
+            >
+              <AccountInfo
+                address={address}
+                genesisHash={genesisHash}
+                name={name}
+                type={type}
+              />
+            </div>
+          ))}
+        </div>
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={isFileError}
@@ -151,6 +168,7 @@ function Upload ({ className }: Props): React.ReactElement {
             />
             {isPasswordError && (
               <Warning
+                className='restore-json-warning'
                 isBelowInput
                 isDanger
               >
@@ -159,21 +177,39 @@ function Upload ({ className }: Props): React.ReactElement {
             )}
           </div>
         )}
-        <Button
-          className='restoreButton'
-          isBusy={isBusy}
-          isDisabled={isFileError || isPasswordError}
-          onClick={_onRestore}
-        >
-          {t<string>('Restore')}
-        </Button>
+        <ButtonArea className='restore-json-button-area'>
+          <Button
+            className='restoreButton'
+            isBusy={isBusy}
+            isDisabled={isFileError || isPasswordError}
+            onClick={_onRestore}
+          >
+            {t<string>('Restore')}
+          </Button>
+        </ButtonArea>
       </div>
     </>
   );
 }
 
 export default styled(Upload)`
-  .restoreButton {
-    margin-top: 16px;
+  padding: 25px 15px 0;
+  height: 100%;
+  overflow-y: auto;
+  .restore-from-json-wrapper {
+    max-height: 188px;
+    overflow-y: auto;
+  }
+
+  .restore-json__account-info {
+    margin-bottom: 10px;
+  }
+
+  .restore-json-warning {
+    margin-top: 10px;
+  }
+
+  .restore-json-button-area {
+    bottom: 0;
   }
 `;

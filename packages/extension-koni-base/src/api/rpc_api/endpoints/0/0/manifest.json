@@ -1,0 +1,23 @@
+{
+  "name": "Polkadot",
+  "longName": "Polkadot Relay Chain",
+  "description": "Polkadot is a heterogeneous multichain with shared security and interoperability",
+  "nativeToken": "DOT",
+  "tokenDecimals": 10,
+  "links": {
+    "Website": "https://polkadot.network",
+    "Twitter": "https://twitter.com/Polkadot",
+    "Support": "https://support.polkadot.network/support/home",
+    "Discord": "https://discord.com/invite/wGUDt2p",
+    "Github": "https://github.com/paritytech/polkadot"
+  },
+  "isRelay": true,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/0/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/0/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/polkadot/0/assets/card.png"
+  },
+  "rpcs": [
+    "wss://rpc.polkadot.io"
+  ]
+}

@@ -44,43 +44,45 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
 
   return (
     <div className={className}>
-      <Table>
-        <tr>
-          <td className='label'>{t<string>('from')}</td>
-          <td className='data'>{url}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('chain')}</td>
-          <td className='data'>{request.chain}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('icon')}</td>
-          <td className='data'>{request.icon}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('decimals')}</td>
-          <td className='data'>{request.tokenDecimals}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('symbol')}</td>
-          <td className='data'>{request.tokenSymbol}</td>
-        </tr>
-        <tr>
-          <td className='label'>{t<string>('upgrade')}</td>
-          <td className='data'>{chain ? chain.specVersion : t('<unknown>')} -&gt; {request.specVersion}</td>
-        </tr>
-      </Table>
-      <div className='requestInfo'>
-        <Warning className='requestWarning'>
+      <div className='request-wrapper'>
+        <Table>
+          <tr>
+            <td className='label'>{t<string>('from')}</td>
+            <td className='data'>{url}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('chain')}</td>
+            <td className='data'>{request.chain}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('icon')}</td>
+            <td className='data'>{request.icon}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('decimals')}</td>
+            <td className='data'>{request.tokenDecimals}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('symbol')}</td>
+            <td className='data'>{request.tokenSymbol}</td>
+          </tr>
+          <tr>
+            <td className='label'>{t<string>('upgrade')}</td>
+            <td className='data'>{chain ? chain.specVersion : t('<unknown>')} -&gt; {request.specVersion}</td>
+          </tr>
+        </Table>
+        <Warning>
           {t<string>('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}
         </Warning>
+      </div>
+
+      <div className='metadata-request__request-info'>
         <Button
-          className='btnAccept'
           onClick={_onApprove}
         >
           {t<string>('Yes, do this metadata update')}
         </Button>
-        <ActionBar className='btnReject'>
+        <ActionBar className='metadata-request__reject-btn'>
           <Link
             isDanger
             onClick={_onReject}
@@ -94,14 +96,13 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
 }
 
 export default styled(Request)(({ theme }: ThemeProps) => `
-  .btnAccept {
-    margin: 25px auto 0;
-    width: 90%;
-  }
+  padding: 25px 15px 15px;
+  flex: 1;
+  margin-top: -25px;
+  overflow-y: auto;
 
-  .btnReject {
-    margin: 8px 0 15px 0;
-    text-decoration: underline;
+  .metadata-request__reject-btn {
+    margin-top: 8px;
   }
 
   .icon {
@@ -117,15 +118,17 @@ export default styled(Request)(({ theme }: ThemeProps) => `
     padding-left: 0.5px;
   }
 
-  .requestInfo {
+  .metadata-request__request-info {
     align-items: center;
-    background: ${theme.highlightedAreaBackground};
     display: flex;
     flex-direction: column;
-    margin-bottom: 8px;
-  }
-
-  .requestWarning {
-    margin: 24px 24px 0 1.45rem;
+    margin: 0 15px;
+    position: sticky;
+    bottom: -15px;
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-bottom: -15px;
+    padding: 15px;
+    background-color: ${theme.background};
   }
 `);

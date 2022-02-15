@@ -36,13 +36,13 @@ function Button ({ children, className = '', isBusy, isDisabled, onClick, to }: 
 
   return (
     <button
-      className={`${className}${(isDisabled || isBusy) ? ' isDisabled' : ''}${isBusy ? ' isBusy' : ''}`}
+      className={`${className}${(isDisabled || isBusy) ? ' is-disabled' : ''}${isBusy ? ' is-busy' : ''}`}
       disabled={isDisabled || isBusy}
       onClick={_onClick}
     >
       <div className='children'>{children}</div>
-      <div className='disabledOverlay' />
-      <Spinner className='busyOverlay' />
+      <div className='button__disabled-overlay' />
+      <Spinner className='button__busy-overlay' />
     </button>
   );
 }
@@ -52,33 +52,36 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
   cursor: pointer;
   display: block;
   width: 100%;
-  height: ${isDanger ? '40px' : '48px'};
+  height: 48px;
   box-sizing: border-box;
   border: none;
-  border-radius: ${theme.borderRadius};
+  border-radius: 8px;
   color: ${theme.buttonTextColor};
-  font-size: 15px;
-  line-height: 20px;
-  padding: 0 1rem;
+  font-size: 16px;
+  line-height: 26px;
+  padding: 0 12px;
   position: relative;
   text-align: center;
+
+
+  .children {
+    font-family: ${theme.fontFamily};
+    font-weight: 500;
+  }
 
   &:disabled {
     cursor: default;
   }
 
-  &:not(:disabled):hover {
-    background: ${isDanger ? theme.buttonBackgroundDangerHover : theme.buttonBackgroundHover};
-  }
-
-  .busyOverlay,
-  .disabledOverlay {
+  .button__busy-overlay,
+  .button__disabled-overlay {
     visibility: hidden;
   }
 
-  .disabledOverlay {
-    background: rgba(96,96,96,0.75);
+  .button__disabled-overlay {
+    background: ${theme.overlayBackground};
     border-radius: ${theme.borderRadius};
+    opacity: 0.7;
     bottom: 0;
     left: 0;
     position: absolute;
@@ -90,19 +93,19 @@ export default styled(Button)(({ isDanger, theme }: Props) => `
     margin-right: 0.3rem;
   }
 
-  &.isBusy {
+  &.is-busy {
     background: rgba(96,96,96,0.15);
 
     .children {
       opacity: 0.25;
     }
 
-    .busyOverlay {
+    .button__busy-overlay {
       visibility: visible;
     }
   }
 
-  &.isDisabled .disabledOverlay {
+  &.is-disabled .button__disabled-overlay {
     visibility: visible;
   }
 `);

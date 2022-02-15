@@ -10,14 +10,12 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function MenuDivider ({ className }: Props): React.ReactElement<Props> {
+function KoniMenuDivider ({ className }: Props): React.ReactElement<Props> {
   return (
     <div className={className} />
   );
 }
 
-export default styled(MenuDivider)(({ theme }: Props) => `
-  padding-top: 16px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid ${theme.inputBorderColor};
+export default styled(KoniMenuDivider)(({ theme }: Props) => `
+  border-bottom: 2px solid ${theme.borderColor2};
 `);

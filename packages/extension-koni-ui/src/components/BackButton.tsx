@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import styled from 'styled-components';
 
-import Button from './Button';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
@@ -22,7 +21,7 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
       onClick={onClick}
     >
       <FontAwesomeIcon
-        className='arrowLeft'
+        className='back-button__arrow-left-icon'
         icon={faArrowLeft}
         size='sm'
       />
@@ -35,7 +34,7 @@ export default styled(BackButton)(({ theme }: ThemeProps) => `
   margin-right: 11px;
   width: 42px;
 
-  .arrowLeft {
+  .back-button__arrow-left-icon {
     color: ${theme.backButtonTextColor};
     display: block;
     margin: auto;

@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
-
 import React from 'react';
 import styled from 'styled-components';
+
+import { ThemeProps } from '../types';
 
 interface Props extends ThemeProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
   return (
     <div className={`${className}${title ? ' isTitled' : ''}`}>
       {title && (
-        <div className='itemTitle'>{title}</div>
+        <div className='menu-item__title'>{title}</div>
       )}
       {children}
     </div>
@@ -25,22 +25,19 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
 }
 
 export default styled(MenuItem)(({ theme }: ThemeProps) => `
-  min-width: 13rem;
   padding: 0 16px;
   max-width: 100%;
+  margin-top: 14px;
+  flex: 1;
 
-  > .itemTitle {
+  > .menu-item__title {
     margin: 0;
     width: 100%;
-    font-size: ${theme.inputLabelFontSize};
-    line-height: 14px;
-    letter-spacing: 0.04em;
+    font-size: 13px;
+    line-height: 26px;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: ${theme.textColor};
-    opacity: 0.65;
-  }
-
-  &+&.isTitled {
-    margin-top: 16px;
+    color: ${theme.textColor2};
+    font-weight: 500;
   }
 `);

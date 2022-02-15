@@ -40,40 +40,40 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   return (
     <div className={className}>
-      <div className='requestInfo'>
-        <div className='info'>
+      <div className='request-info-wrapper'>
+        <div className='request-info'>
           <Icon
             icon='X'
             onClick={_onReject}
           />
           <div className='tab-info'>
-            <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
-              <a
-                href={url}
-                rel='noopener noreferrer'
-                target='_blank'
-              >
-                <span className='tab-url'>{url}</span>
-              </a>.
+            <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is
+              requesting access from{' '}
+            <a
+              href={url}
+              rel='noopener noreferrer'
+              target='_blank'
+            >
+              <span className='tab-url'>{url}</span>
+            </a>.
             </Trans>
           </div>
         </div>
         {isFirst && (
           <>
-            <Warning className='warningMargin'>
+            <Warning className='request__warning'>
               {t<string>('Only approve this request if you trust the application. Approving gives the application access to the addresses of your accounts.')}
             </Warning>
             <Button
-              className='acceptButton'
+              className='request__accept-button'
               onClick={_onApprove}
             >
               {t<string>('Yes, allow this application access')}
             </Button>
           </>
         )}
-        <ActionBar className='rejectionButton'>
+        <ActionBar className='request__rejection-button'>
           <Link
-            isDanger
             onClick={_onReject}
           >
             Reject
@@ -94,14 +94,16 @@ export default styled(Request)(({ theme }: Props) => `
     height: 18px;
     font-size: 10px;
     line-height: 20px;
-    margin: 16px 15px 0 1.35rem;
+    margin: 16px 15px 0 0;
     font-weight: 800;
-    padding-left: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .tab-info {
     overflow: hidden;
-    margin: 0.75rem 20px 0 0;
+    margin-top: 0.75rem;
   }
 
   .tab-name,
@@ -116,30 +118,38 @@ export default styled(Request)(({ theme }: Props) => `
     text-decoration: underline;
   }
 
-  .requestInfo {
+  .request-info-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-bottom: 8px;
-    background: ${theme.highlightedAreaBackground};
   }
 
-  .info {
+  .request-info {
     display: flex;
     flex-direction: row;
+    padding-top: 20px;
   }
 
-  .acceptButton {
-    width: 90%;
-    margin: 25px auto 0;
+  .request__accept-button {
+    margin-top: 25px;
   }
 
-  .warningMargin {
-    margin: 24px 24px 0 1.45rem;
+  .request__warning {
+    margin-top: 24px;
   }
 
-  .rejectionButton {
+  .request__rejection-button {
     margin: 8px 0 15px 0;
-    text-decoration: underline;
+
+    span {
+      color: ${theme.buttonTextColor2};
+      font-weight: 500;
+    }
+
+    a {
+      text-decoration: underline;
+    }
+
   }
 `);

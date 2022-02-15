@@ -3,7 +3,9 @@
 
 import React, { useContext } from 'react';
 
-import { Loading, MetadataReqContext } from '../../components';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+
+import { MetadataReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';
 import Request from './Request';
@@ -14,7 +16,10 @@ export default function Metadata (): React.ReactElement {
 
   return (
     <>
-      <Header text={t<string>('Metadata')} />
+      <Header
+        showSubHeader
+        subHeaderName={t<string>('Metadata')}
+      />
       {requests[0]
         ? (
           <Request
@@ -24,7 +29,7 @@ export default function Metadata (): React.ReactElement {
             url={requests[0].url}
           />
         )
-        : <Loading />
+        : <LoadingContainer />
       }
     </>
   );

@@ -18,6 +18,10 @@ export default abstract class BaseStore <T> {
     this.#prefix = prefix ? `${prefix}:` : '';
   }
 
+  public getPrefix (): string {
+    return this.#prefix;
+  }
+
   public all (update: (key: string, value: T) => void): void {
     this.allMap((map): void => {
       Object.entries(map).forEach(([key, value]): void => {

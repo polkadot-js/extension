@@ -9,11 +9,12 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { PriceJson, RequestSubscribePrice } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
+import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -76,6 +77,10 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
+export async function saveCurrentAccountAddress (address: string): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAddress)', { address });
+}
+
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }
@@ -132,6 +137,10 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
+export async function createAccountSuriV2 (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
+  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, type });
+}
+
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, seed, type });
 }
@@ -185,6 +194,10 @@ export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void):
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 
+export async function getAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
+  return sendMessage('pri(accounts.getAllWithCurrentAddress)', null, cb);
+}
+
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(authorize.requests)', null, cb);
 }
@@ -217,6 +230,10 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
   return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
+export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri });
+}
+
 export async function windowOpen (path: AllowedPath): Promise<boolean> {
   return sendMessage('pri(window.open)', path);
 }
@@ -225,12 +242,20 @@ export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<Respo
   return sendMessage('pri(json.account.info)', json);
 }
 
-export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.restore)', { file, password });
+export async function jsonRestore (file: KeyringPair$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.restore)', { file, password, address });
 }
 
-export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.batchRestore)', { file, password });
+export async function batchRestore (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.batchRestore)', { file, password, address });
+}
+
+export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.restoreV2)', { file, password, address });
+}
+
+export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
+  return sendMessage('pri(json.batchRestoreV2)', { file, password, address });
 }
 
 export async function setNotification (notification: string): Promise<boolean> {
@@ -241,6 +266,62 @@ export async function getPrice (): Promise<PriceJson> {
   return sendMessage('pri(price.getPrice)', null);
 }
 
-export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<boolean> {
+export async function subscribePrice (request: RequestSubscribePrice, callback: (priceData: PriceJson) => void): Promise<PriceJson> {
   return sendMessage('pri(price.getSubscription)', request, callback);
+}
+
+export async function getBalance (): Promise<BalanceJson> {
+  return sendMessage('pri(balance.getBalance)', null);
+}
+
+export async function subscribeBalance (request: RequestSubscribeBalance, callback: (balanceData: BalanceJson) => void): Promise<BalanceJson> {
+  return sendMessage('pri(balance.getSubscription)', request, callback);
+}
+
+export async function getCrowdloan (): Promise<CrowdloanJson> {
+  return sendMessage('pri(crowdloan.getCrowdloan)', null);
+}
+
+export async function subscribeCrowdloan (request: RequestSubscribeCrowdloan, callback: (crowdloanData: CrowdloanJson) => void): Promise<CrowdloanJson> {
+  return sendMessage('pri(crowdloan.getSubscription)', request, callback);
+}
+
+export async function subscribeChainRegistry (callback: (map: Record<string, ChainRegistry>) => void): Promise<Record<string, ChainRegistry>> {
+  return sendMessage('pri(chainRegistry.getSubscription)', null, callback);
+}
+
+export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
+  return sendMessage('pri(networkMetadata.list)');
+}
+
+export async function getTransactionHistory (address: string, networkKey: string, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.get)', { address, networkKey }, callback);
+}
+
+export async function getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.getByMultiNetwork)', { address, networkKeys }, callback);
+}
+
+export async function updateTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
+  return sendMessage('pri(transaction.history.add)', { address, networkKey, item }, callback);
+}
+
+export async function initApi (networkKey: string): Promise<ApiInitStatus> {
+  return sendMessage('pri(api.init)', { networkKey });
+}
+
+export async function getNft (account: string): Promise<NftJson> {
+  return sendMessage('pri(nft.getNft)', account);
+}
+
+export async function subscribeNft (request: RequestSubscribeNft, callback: (nftData: NftJson) => void): Promise<NftJson> {
+  return sendMessage('pri(nft.getSubscription)', request, callback);
+}
+
+export async function getStaking (account: string): Promise<StakingJson> {
+  return sendMessage('pri(staking.getStaking)', account);
+}
+
+export async function subscribeStaking (request: RequestSubscribeStaking, callback: (stakingData: StakingJson) => void): Promise<StakingJson> {
+  return sendMessage('pri(staking.getSubscription)', request, callback);
 }

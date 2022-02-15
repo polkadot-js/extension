@@ -3,36 +3,44 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import Select from 'react-select';
 import styled from 'styled-components';
 
-import arrow from '../assets/arrow-down.svg';
-import Label from './Label';
+import networkSelectOption from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 
-interface DropdownOption {
-  text: string;
-  value: string;
-}
+import Label from './Label';
 
 interface Props extends ThemeProps {
   className?: string;
-  defaultValue?: string | null;
-  isDisabled?: boolean
-  isError?: boolean;
-  isFocussed?: boolean;
   label: string;
-  onBlur?: () => void;
   onChange?: (value: string) => void;
-  options: DropdownOption[];
+  options: networkSelectOption[];
   value?: string;
 }
 
-function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onBlur, onChange, options, value }: Props): React.ReactElement<Props> {
-  const _onChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>) =>
-      onChange && onChange(value.trim()),
-    [onChange]
+function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
+  const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
+  const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
+
+  const handleChange = useCallback(
+    ({ value }): void => {
+      onChange && onChange(value.trim());
+      setSelectedValue(value);
+    }, []
   );
+
+  const customStyles = {
+    option: (base: any) => {
+      return {
+        ...base,
+        textAlign: 'left',
+        fontFamily: 'Lexend',
+        fontSize: '15px'
+      };
+    },
+    noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' })
+  };
 
   return (
     <>
@@ -40,64 +48,65 @@ function Dropdown ({ className, defaultValue, isDisabled, isFocussed, label, onB
         className={className}
         label={label}
       >
-        <select
-          autoFocus={isFocussed}
-          defaultValue={defaultValue || undefined}
-          disabled={isDisabled}
-          onBlur={onBlur}
-          onChange={_onChange}
-          value={value}
-        >
-          {options.map(({ text, value }): React.ReactNode => (
-            <option
-              key={value}
-              value={value}
-            >
-              {text}
-            </option>
-          ))}
-        </select>
+        <Select
+          className='dropdown-wrapper'
+          classNamePrefix='dropdown'
+          isSearchable
+          menuPortalTarget={document.body}
+          onChange={handleChange}
+          options={transformOptions}
+          placeholder=''
+          styles={customStyles}
+          value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
+        />
       </Label>
     </>
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isError, label, theme }: Props) => `
-  position: relative;
+export default React.memo(styled(Dropdown)(({ label, theme }: Props) => `
+  font-weight: 500;
+  color: ${theme.textColor2};
 
-  select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background: ${theme.readonlyInputBackground};
-    border-color: ${isError ? theme.errorBorderColor : theme.inputBorderColor};
-    border-radius: ${theme.borderRadius};
-    border-style: solid;
-    border-width: 1px;
-    box-sizing: border-box;
-    color: ${isError ? theme.errorBorderColor : theme.textColor};
-    display: block;
-    font-family: ${theme.fontFamily};
-    font-size: ${theme.fontSize};
-    padding: 0.5rem 0.75rem;
+  .dropdown__control {
+    height: 48px;
+    border-radius: 8px;
     width: 100%;
     cursor: pointer;
-
-    &:read-only {
-      box-shadow: none;
-      outline: none;
-    }
+    margin-top: 4px;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    display: flex;
+    font-family: ${theme.fontFamily};
+    background: ${theme.backgroundAccountAddress};
+    box-shadow: none;
   }
 
-  label::after {
-    content: '';
-    position: absolute;
-    top: ${label ? 'calc(50% + 14px)' : '50%'};
-    transform: translateY(-50%);
-    right: 12px;
-    width: 8px;
-    height: 6px;
-    background: url(${arrow}) center no-repeat;
-    pointer-events: none;
+  .dropdown__control:hover {
+    border: 1px solid transparent;
+    box-shadow: none;
   }
+
+  .dropdown__single-value {
+    color: ${theme.textColor2};
+  }
+
+  .dropdown__indicator-separator {
+    display: none;
+  }
+
+  .dropdown__input-container {
+    color: ${theme.textColor2};
+  }
+
+  .dropdown__menu-portal {
+    text-align: left;
+    font-size: 15px;
+  }
+
+  .dropdown__menu-notice--no-options {
+    text-align: left;
+    font-family: ${theme.fontFamily};
+  }
+
 `));

@@ -8,10 +8,16 @@ import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
 
-import { AccountContext, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components';
+import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
+import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
+import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
+
+import { AccountContext, ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccounts } from '../messaging';
-import { Header } from '../partials';
 
 const MIN_LENGTH = 6;
 
@@ -19,7 +25,7 @@ interface Props extends RouteComponentProps, ThemeProps {
   className?: string;
 }
 
-function ExportAll ({ className }: Props): React.ReactElement<Props> {
+function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -28,7 +34,10 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   const [error, setError] = useState('');
 
   const _goHome = useCallback(
-    () => onAction('/'),
+    () => {
+      window.localStorage.setItem('popupNavigation', '/');
+      onAction('/');
+    },
     [onAction]
   );
 
@@ -49,6 +58,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
 
           saveAs(blob, `batch_exported_account_${Date.now()}.json`);
 
+          window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
         })
         .catch((error: Error) => {
@@ -64,10 +74,11 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
     <>
       <Header
         showBackArrow
-        text={t<string>('All account')}
+        showSubHeader
+        subHeaderName={t<string>('All account')}
       />
       <div className={className}>
-        <div className='actionArea'>
+        <div className='action-area'>
           <InputWithLabel
             data-export-all-password
             disabled={isBusy}
@@ -84,19 +95,21 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
               {error}
             </Warning>
           )}
-          <Button
-            className='export-button'
-            data-export-button
-            isBusy={isBusy}
-            isDanger
-            isDisabled={pass.length === 0 || !!error}
-            onClick={_onExportAllButtonClick}
-          >
-            {t<string>('I want to export all my accounts')}
-          </Button>
-          <ActionBar className='withMarginTop'>
+          <div className='forget-button-wrapper'>
+            <Button
+              className='export-button'
+              data-export-button
+              isBusy={isBusy}
+              isDisabled={pass.length === 0 || !!error}
+              onClick={_onExportAllButtonClick}
+            >
+              {t<string>('I want to export all my accounts')}
+            </Button>
+          </div>
+
+          <ActionBar className='export-all__action-bar'>
             <ActionText
-              className='center'
+              className='export-all__action-text'
               onClick={_goHome}
               text={t<string>('Cancel')}
             />
@@ -107,24 +120,35 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default withRouter(styled(ExportAll)`
-  .actionArea {
-    padding: 10px 24px;
+export default withRouter(styled(KoniExportAll)(({ theme }: Props) => `
+  .action-area {
+    padding: 25px 15px 10px 15px;
   }
 
-  .center {
+  .action-area > div {
+    margin-top: 0;
+  }
+
+  .export-all__action-text {
     margin: auto;
+    margin-top: 10px;
+    > span {
+      color: ${theme.buttonTextColor2};
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 26px;
+    }
+  }
+
+  .forget-button-wrapper {
+    padding: 0 70px;
   }
 
   .export-button {
     margin-top: 6px;
   }
 
-  .movedWarning {
-    margin-top: 8px;
-  }
-
-  .withMarginTop {
+  .export-all__action-bar {
     margin-top: 4px;
   }
-`);
+`));

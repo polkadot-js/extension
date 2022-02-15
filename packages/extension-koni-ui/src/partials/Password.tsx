@@ -3,7 +3,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { InputWithLabel, ValidatedInput } from '../components';
+import InputWithLabel from '../components/InputWithLabel';
+import ValidatedInput from '../components/ValidatedInput';
 import useTranslation from '../hooks/useTranslation';
 import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators';
 
@@ -20,6 +21,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   const [pass2, setPass2] = useState<string | null>(null);
   const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')), [t]);
   const isSecondPasswordValid = useCallback((firstPassword: string): Validator<string> => allOf(
+    isNotShorterThan(1, t<string>('Please fill repeat password')),
     isNotShorterThan(MIN_LENGTH, t<string>('Password is too short')),
     isSameAs(firstPassword, t<string>('Passwords do not match'))
   ), [t]);
@@ -31,6 +33,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   return (
     <>
       <ValidatedInput
+
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}

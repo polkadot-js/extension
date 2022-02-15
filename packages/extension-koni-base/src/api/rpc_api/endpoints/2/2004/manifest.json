@@ -1,0 +1,24 @@
+{
+  "name": "Khala Network",
+  "description": "Khala Network is the Phala pre-mainnet on Kusama, as published on the roadmap last year.",
+  "nativeToken": "PHA",
+  "tokenDecimals": 12,
+  "links": {
+    "Website": "https://crowdloan.phala.network/en/",
+    "Twitter": "https://twitter.com/PhalaNetwork",
+    "Telegram": "https://t.me/phalanetwork",
+    "Medium": "https://medium.com/phala-network",
+    "Github": "https://github.com/Phala-Network",
+    "Discord": "https://discord.gg/myBmQu5"
+  },
+  "isRelay": false,
+  "assets": {
+    "logo": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2004/assets/logo.svg",
+    "banner": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2004/assets/banner.png",
+    "card": "https://gitlab.com/nampc/polkadot-meta/-/raw/main/kusama/2004/assets/card.png"
+  },
+  "rpcs": [
+    "wss://khala-api.phala.network/ws",
+    "wss://khala.api.onfinality.io/public-ws"
+  ]
+}

@@ -7,7 +7,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
-import { Switch } from '@polkadot/extension-koni-ui/components';
+import HorizontalLabelToggle from '@polkadot/extension-koni-ui/components/HorizontalLabelToggle';
 
 import useTranslation from '../../hooks/useTranslation';
 
@@ -30,12 +30,12 @@ function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.
       <div className='url'>
         {url}
       </div>
-      <Switch
-        checked={info.isAllowed}
+      <HorizontalLabelToggle
         checkedLabel={t<string>('allowed')}
         className='info'
-        onChange={switchAccess}
+        toggleFunc={switchAccess}
         uncheckedLabel={t<string>('denied')}
+        value={info.isAllowed}
       />
     </div>
   );
@@ -44,14 +44,47 @@ function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.
 export default styled(WebsiteEntry)(({ theme }: Props) => `
   display: flex;
   align-items: center;
+  margin-bottom: 10px;
 
   .url{
     flex: 1;
+    color: ${theme.manageWebsiteAccessColor};
+    font-weight: 400;
   }
 
-  &.denied {
-    .slider::before {
-        background-color: ${theme.backButtonBackground};
-      }
+  .info {
+    display: flex;
+    align-items: center;
+    .lightLabel {
+      font-size: 15px;
+      line-height: 32px;
+      color: ${theme.textColor2};
+    }
+
+    .darkLabel {
+      font-size: 15px;
+      line-height: 32px;
+      color: ${theme.textColor};
+    }
+
+    label {
+      width: 43px;
+      height: 24px;
+    }
+
+    .slider {
+      background-color: ${theme.buttonBackground2};
+    }
+
+    .slider:before {
+      width: 18px;
+      height: 18px;
+      left: 4px;
+      background-color: #FFF;
+    }
+
+    .checkbox:checked + .slider:before {
+      transform: translateX(18px);
+    }
   }
 `);

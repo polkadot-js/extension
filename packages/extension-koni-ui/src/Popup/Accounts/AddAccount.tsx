@@ -11,17 +11,29 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 
 import { ActionContext, Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import {windowOpen} from "@polkadot/extension-koni-ui/messaging";
+import useIsPopup from "@polkadot/extension-koni-ui/hooks/useIsPopup";
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
+const jsonPath = '/account/restore-json';
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
+  const isPopup = useIsPopup();
+  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const _createNewAccount = useCallback(
     () => onAction('/account/create'),
     [onAction]
+  );
+
+  const _openJson = useCallback(
+    () => {
+      window.localStorage.setItem('popupNavigation', jsonPath);
+      windowOpen(jsonPath);
+    }, []
   );
 
   return (
@@ -65,7 +77,8 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           >
             <Link
               className='add-account-link'
-              to={'/account/restore-json'}
+              onClick={isPopup && isFirefox ? _openJson : undefined}
+              to={isPopup && isFirefox ? undefined : jsonPath}
             >
               {t<string>('Restore account from backup JSON file')}
             </Link>

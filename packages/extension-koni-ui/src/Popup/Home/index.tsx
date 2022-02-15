@@ -201,7 +201,7 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
     if (isAccountAll(address)) {
       _setActiveTab(1);
     }
-  }, [])
+  }, [_setActiveTab])
 
   return (
     <div className={`home-screen home ${className}`}>

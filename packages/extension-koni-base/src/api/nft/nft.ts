@@ -1,6 +1,6 @@
 import {ApiProps, NftCollection} from "@polkadot/extension-base/background/KoniTypes";
 import {isUrl} from "@polkadot/extension-koni-base/utils/utils";
-import {PINATA_SERVER} from "@polkadot/extension-koni-base/api/nft/rmrk_nft/config";
+import {PINATA_SERVER} from "@polkadot/extension-koni-base/api/nft/config";
 
 export abstract class BaseNftApi {
   chain: string | null = null;
@@ -9,9 +9,9 @@ export abstract class BaseNftApi {
   total: number = 0;
   addresses: string[] = [];
 
-  protected constructor (api: ApiProps, addresses: string[], chain?: string) {
-    this.dotSamaApi = api;
-    this.addresses = addresses;
+  protected constructor (api?: ApiProps, addresses?: string[], chain?: string) {
+    if (api) this.dotSamaApi = api;
+    if (addresses) this.addresses = addresses;
     if (chain) this.chain = chain;
   };
 

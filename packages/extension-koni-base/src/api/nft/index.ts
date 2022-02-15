@@ -4,7 +4,8 @@
 import {ApiProps} from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
-import KaruraNftApi from "@polkadot/extension-koni-base/api/nft/karura_nft";
+import {KaruraNftApi} from "@polkadot/extension-koni-base/api/nft/karura_nft";
+import {AcalaNftApi} from "@polkadot/extension-koni-base/api/nft/acala_nft";
 
 const SUPPORTED_NFT_NETWORKS = {
   'karura': NETWORKS.karura,
@@ -18,6 +19,8 @@ function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNf
   switch (chain) {
     case 'karura':
       return new KaruraNftApi(api, addresses, chain);
+    case 'acala':
+      return new AcalaNftApi(api, addresses, chain);
   }
 
   return null;
@@ -36,7 +39,7 @@ export class NftHandler {
     });
   }
 
-  async connect () {
+  private async connect () {
     await Promise.all(this.apiPromises.map(async ({chain, api: apiPromise}) => {
       const parentApi: ApiProps = await apiPromise.isReady;
       let handler = createNftApi(chain, parentApi, this.addresses);
@@ -46,7 +49,7 @@ export class NftHandler {
 
   public async handleNfts () {
     await this.connect();
-
+    console.log('fuck')
     await Promise.all(this.handlers.map(async (handler) => {
       console.log(handler.getChain());
       handler.handleNfts();

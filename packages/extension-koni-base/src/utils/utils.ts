@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/rmrk_nft/config';
+import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
 
 export const notDef = (x: any) => x === null || typeof x === 'undefined';

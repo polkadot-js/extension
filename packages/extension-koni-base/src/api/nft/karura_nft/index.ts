@@ -4,7 +4,7 @@
 import fetch from 'node-fetch';
 
 import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
-import {CLOUDFLARE_SERVER} from '@polkadot/extension-koni-base/api/nft/rmrk_nft/config';
+import {CLOUDFLARE_SERVER} from '@polkadot/extension-koni-base/api/nft/config';
 import {isUrl} from '@polkadot/extension-koni-base/utils/utils';
 import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 
@@ -25,7 +25,7 @@ interface Token {
   data: Record<string, any>
 }
 
-export default class KaruraNftApi extends BaseNftApi {
+export class KaruraNftApi extends BaseNftApi {
 
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);

@@ -3,10 +3,18 @@
 
 import fetch from 'node-fetch';
 
-import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import {NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_COLLECTION_ENDPOINT, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from './config';
+import {
+  KANARIA_ENDPOINT,
+  KANARIA_EXTERNAL_SERVER,
+  PINATA_SERVER,
+  SINGULAR_COLLECTION_ENDPOINT,
+  SINGULAR_ENDPOINT,
+  SINGULAR_EXTERNAL_SERVER
+} from '../config';
+import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 
 // data for test
 // const singular_account = 'DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW';
@@ -16,190 +24,288 @@ const headers = {
   'Content-Type': 'application/json'
 };
 
-export const getSingularByAccount = async (account: string) => {
-  const url = SINGULAR_ENDPOINT + account;
-  const data = await fetch(url, {
-    method: 'GET',
-    headers
-  })
-    .then((res) => res.json());
+export class RmrkNftApi extends BaseNftApi {
 
-  const nfts = [];
-
-  for (let i = 0; i < data.length; i++) {
-    const { animation_url, attributes, description, image, name } = await getMetadata(data[i].metadata);
-
-    nfts.push({
-      ...data[i],
-      metadata: {
-        description,
-        name,
-        attributes,
-        animation_url: parseIpfsLink(animation_url),
-        image: parseIpfsLink(image)
-      },
-      external_url: SINGULAR_EXTERNAL_SERVER + data[i].id
-    });
+  constructor () {
+    super();
   }
 
-  return nfts;
-};
+  override parseUrl(input: string): string | undefined {
+    if (!input || input.length === 0) return undefined;
 
-export const getItemsKanariaByAccount = async (account: string) => {
-  const url = KANARIA_ENDPOINT + 'account-items/' + account;
-  const data = await fetch(url, {
-    method: 'GET',
-    headers
-  })
-    .then((res) => res.json());
+    if (!input.includes('ipfs://ipfs/')) { return PINATA_SERVER + input; }
 
-  const nfts = [];
-
-  for (let i = 0; i < data.length; i++) {
-    const result = await getMetadata(data[i].metadata);
-
-    nfts.push({
-      ...data[i],
-      metadata: {
-        ...result,
-        image: parseIpfsLink(result.image),
-        external_url: KANARIA_EXTERNAL_SERVER + data[i].id
-      }
-    });
+    return PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
 
-  return nfts;
-};
+  private getMetadata (metadata_url: string) {
+    let url: string | undefined = metadata_url;
 
-export const getBirdsKanariaByAccount = async (account: string) => {
-  const url = KANARIA_ENDPOINT + 'account-birds/' + account;
-  const data = await fetch(url, {
-    method: 'GET',
-    headers
-  })
-    .then((res) => res.json());
-
-  const nfts = [];
-
-  for (let i = 0; i < data.length; i++) {
-    const result = await getMetadata(data[i].metadata);
-
-    nfts.push({
-      ...data[i],
-      metadata: result,
-      external_url: KANARIA_EXTERNAL_SERVER + data[i].id
-    });
-  }
-
-  return nfts;
-};
-
-export const getMetadata = (metadata_url: string) => {
-  let url: string | null = metadata_url;
-
-  if (!isUrl(metadata_url)) {
-    url = parseIpfsLink(metadata_url);
-    if (!url || url.length === 0) return undefined;
-  }
-
-  return fetch(url, {
-    method: 'GET',
-    headers
-  })
-    .then((res) => res.json());
-};
-
-const parseIpfsLink = (ipfsLink: string) => {
-  if (!ipfsLink || ipfsLink.length === 0) return null;
-
-  if (!ipfsLink.includes('ipfs://ipfs/')) { return PINATA_SERVER + ipfsLink; }
-
-  return PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
-};
-
-export const handleRmrkNfts = async (account: string): Promise<any> => {
-  if (!account) return;
-
-  try {
-    const [singular, birds, items] = await Promise.all([
-      getSingularByAccount(account),
-      getBirdsKanariaByAccount(account),
-      getItemsKanariaByAccount(account)
-      // getSingularByAccount('DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW'),
-      // getBirdsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr'),
-      // getItemsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr')
-    ]);
-    const allNfts = [...singular, ...birds, ...items];
-    let allCollections: any[] = [];
-    const collectionInfoUrl: string[] = [];
-
-    allNfts.map((item) => {
-      const url = SINGULAR_COLLECTION_ENDPOINT + item.collectionId;
-
-      if (!collectionInfoUrl.includes(url)) {
-        allCollections.push({ collectionId: item.collectionId });
-        collectionInfoUrl.push(url);
-      }
-    });
-    const allCollectionMetaUrl: any[] = [];
-    const collectionInfo = await Promise.all(collectionInfoUrl.map(async (url) => {
-      const resp = await fetch(url);
-      const data: any[] = await resp.json();
-      const result = data[0];
-
-      if (result && 'metadata' in result) allCollectionMetaUrl.push({ url: parseIpfsLink(result?.metadata), id: result?.id });
-      if (data.length > 0) return result;
-      else return {};
-    }));
-
-    const allCollectionMeta = {};
-
-    await Promise.all(allCollectionMetaUrl.map(async (item) => {
-      const resp = await fetch(item.url);
-      const data = await resp.json();
-
-      // @ts-ignore
-      allCollectionMeta[item?.id] = { ...data };
-    }));
-
-    const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
-    const nftDict = {};
-
-    for (const item of allNfts) {
-      const parsedItem = {
-        id: item?.id,
-        name: item?.metadata?.name,
-        image: item?.metadata?.image,
-        description: item?.metadata?.description,
-        external_url: item?.external_url,
-        rarity: item?.metadata_rarity,
-        collectionId: item?.collectionId,
-        properties: item?.metadata?.properties
-      } as NftItem;
-
-      if (item.collectionId in nftDict) {
-        // @ts-ignore
-        nftDict[item.collectionId] = [...nftDict[item.collectionId], parsedItem];
-      } else {
-        // @ts-ignore
-        nftDict[item.collectionId] = [parsedItem];
-      }
+    if (!isUrl(metadata_url)) {
+      url = this.parseUrl(metadata_url);
+      if (!url || url.length === 0) return undefined;
     }
 
-    allCollections = allCollections.map((item) => {
-      return {
-        collectionId: item.collectionId,
-        collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] : null,
-        // @ts-ignore
-        image: allCollectionMeta[item.collectionId] ? parseIpfsLink(allCollectionMeta[item.collectionId].image) : null,
-        // @ts-ignore
-        nftItems: nftDict[item.collectionId]
-      } as NftCollection;
-    });
+    return fetch(url, {
+      method: 'GET',
+      headers
+    })
+      .then((res) => res.json());
+  };
 
-    return { total: allNfts.length, allCollections };
-  } catch (e) {
-    console.error('Failed to fetch nft', e);
-    throw e;
+  private async getSingularByAccount(account: string) {
+    const url = SINGULAR_ENDPOINT + account;
+    const data = await fetch(url, {
+      method: 'GET',
+      headers
+    })
+      .then((res) => res.json());
+
+    let nfts: any[] = [];
+
+    await Promise.all(data.map(async (item: any) => {
+      const { animation_url, attributes, description, image, name } = await this.getMetadata(item.metadata);
+
+      nfts.push({
+        ...item,
+        metadata: {
+          description,
+          name,
+          attributes,
+          animation_url: this.parseUrl(animation_url),
+          image: this.parseUrl(image)
+        },
+        external_url: SINGULAR_EXTERNAL_SERVER + item.id
+      });
+    }));
+
+    return nfts;
   }
-};
+
+  private async getItemsKanariaByAccount (account: string) {
+    const url = KANARIA_ENDPOINT + 'account-items/' + account;
+    const data = await fetch(url, {
+      method: 'GET',
+      headers
+    })
+      .then((res) => res.json());
+
+    let nfts: any[] = [];
+
+    await Promise.all(data.map(async (item: any) => {
+      const result = await this.getMetadata(item.metadata);
+
+      nfts.push({
+        ...item,
+        metadata: {
+          ...result,
+          image: this.parseUrl(result.image),
+          external_url: KANARIA_EXTERNAL_SERVER + item.id
+        }
+      });
+    }));
+
+    return nfts;
+  };
+
+  private async getBirdsKanariaByAccount (account: string) {
+    const url = KANARIA_ENDPOINT + 'account-birds/' + account;
+    const data = await fetch(url, {
+      method: 'GET',
+      headers
+    })
+      .then((res) => res.json());
+
+    let nfts: any[] = [];
+
+    await Promise.all(data.map(async (item: any) => {
+      const result = await this.getMetadata(item.metadata);
+
+      nfts.push({
+        ...item,
+        metadata: result,
+        external_url: KANARIA_EXTERNAL_SERVER + item.id
+      });
+    }));
+
+    return nfts;
+  };
+
+  public async handleNfts() {
+    try {
+      const [singular, birds, items] = await Promise.all([
+        this.getSingularByAccount(this.addresses[0]),
+        this.getBirdsKanariaByAccount(this.addresses[0]),
+        this.getItemsKanariaByAccount(this.addresses[0])
+        // getSingularByAccount('DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW'),
+        // getBirdsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr'),
+        // getItemsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr')
+      ]);
+      const allNfts = [...singular, ...birds, ...items];
+      let allCollections: any[] = [];
+      const collectionInfoUrl: string[] = [];
+
+      allNfts.map((item) => {
+        const url = SINGULAR_COLLECTION_ENDPOINT + item.collectionId;
+
+        if (!collectionInfoUrl.includes(url)) {
+          allCollections.push({collectionId: item.collectionId});
+          collectionInfoUrl.push(url);
+        }
+      });
+      const allCollectionMetaUrl: any[] = [];
+      const collectionInfo = await Promise.all(collectionInfoUrl.map(async (url) => {
+        const resp = await fetch(url);
+        const data: any[] = await resp.json();
+        const result = data[0];
+
+        if (result && 'metadata' in result) allCollectionMetaUrl.push({
+          url: this.parseUrl(result?.metadata),
+          id: result?.id
+        });
+        if (data.length > 0) return result;
+        else return {};
+      }));
+
+      const allCollectionMeta = {};
+
+      await Promise.all(allCollectionMetaUrl.map(async (item) => {
+        const resp = await fetch(item.url);
+        const data = await resp.json();
+
+        // @ts-ignore
+        allCollectionMeta[item?.id] = {...data};
+      }));
+
+      const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({[item.id]: item.name})));
+      const nftDict = {};
+
+      for (const item of allNfts) {
+        const parsedItem = {
+          id: item?.id,
+          name: item?.metadata?.name,
+          image: item?.metadata?.image,
+          description: item?.metadata?.description,
+          external_url: item?.external_url,
+          rarity: item?.metadata_rarity,
+          collectionId: item?.collectionId,
+          properties: item?.metadata?.properties
+        } as NftItem;
+
+        if (item.collectionId in nftDict) {
+          // @ts-ignore
+          nftDict[item.collectionId] = [...nftDict[item.collectionId], parsedItem];
+        } else {
+          // @ts-ignore
+          nftDict[item.collectionId] = [parsedItem];
+        }
+      }
+
+      allCollections = allCollections.map((item) => {
+        return {
+          collectionId: item.collectionId,
+          collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] : null,
+          // @ts-ignore
+          image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image) : null,
+          // @ts-ignore
+          nftItems: nftDict[item.collectionId]
+        } as NftCollection;
+      });
+
+      this.total = allNfts.length;
+      this.data = allCollections;
+
+    } catch (e) {
+      console.error('Failed to fetch nft', e);
+      throw e;
+    }
+  }
+
+}
+
+// export const handleRmrkNfts = async (account: string): Promise<any> => {
+//   if (!account) return;
+//
+//   try {
+//     const [singular, birds, items] = await Promise.all([
+//       getSingularByAccount(account),
+//       getBirdsKanariaByAccount(account),
+//       getItemsKanariaByAccount(account)
+//       // getSingularByAccount('DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW'),
+//       // getBirdsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr'),
+//       // getItemsKanariaByAccount('Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr')
+//     ]);
+//     const allNfts = [...singular, ...birds, ...items];
+//     let allCollections: any[] = [];
+//     const collectionInfoUrl: string[] = [];
+//
+//     allNfts.map((item) => {
+//       const url = SINGULAR_COLLECTION_ENDPOINT + item.collectionId;
+//
+//       if (!collectionInfoUrl.includes(url)) {
+//         allCollections.push({ collectionId: item.collectionId });
+//         collectionInfoUrl.push(url);
+//       }
+//     });
+//     const allCollectionMetaUrl: any[] = [];
+//     const collectionInfo = await Promise.all(collectionInfoUrl.map(async (url) => {
+//       const resp = await fetch(url);
+//       const data: any[] = await resp.json();
+//       const result = data[0];
+//
+//       if (result && 'metadata' in result) allCollectionMetaUrl.push({ url: parseIpfsLink(result?.metadata), id: result?.id });
+//       if (data.length > 0) return result;
+//       else return {};
+//     }));
+//
+//     const allCollectionMeta = {};
+//
+//     await Promise.all(allCollectionMetaUrl.map(async (item) => {
+//       const resp = await fetch(item.url);
+//       const data = await resp.json();
+//
+//       // @ts-ignore
+//       allCollectionMeta[item?.id] = { ...data };
+//     }));
+//
+//     const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
+//     const nftDict = {};
+//
+//     for (const item of allNfts) {
+//       const parsedItem = {
+//         id: item?.id,
+//         name: item?.metadata?.name,
+//         image: item?.metadata?.image,
+//         description: item?.metadata?.description,
+//         external_url: item?.external_url,
+//         rarity: item?.metadata_rarity,
+//         collectionId: item?.collectionId,
+//         properties: item?.metadata?.properties
+//       } as NftItem;
+//
+//       if (item.collectionId in nftDict) {
+//         // @ts-ignore
+//         nftDict[item.collectionId] = [...nftDict[item.collectionId], parsedItem];
+//       } else {
+//         // @ts-ignore
+//         nftDict[item.collectionId] = [parsedItem];
+//       }
+//     }
+//
+//     allCollections = allCollections.map((item) => {
+//       return {
+//         collectionId: item.collectionId,
+//         collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] : null,
+//         // @ts-ignore
+//         image: allCollectionMeta[item.collectionId] ? parseIpfsLink(allCollectionMeta[item.collectionId].image) : null,
+//         // @ts-ignore
+//         nftItems: nftDict[item.collectionId]
+//       } as NftCollection;
+//     });
+//
+//     return { total: allNfts.length, allCollections };
+//   } catch (e) {
+//     console.error('Failed to fetch nft', e);
+//     throw e;
+//   }
+// };

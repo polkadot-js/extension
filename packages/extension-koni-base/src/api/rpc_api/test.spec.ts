@@ -10,6 +10,7 @@ import connectDotSamaApis from "@polkadot/extension-koni-base/api/dotsama";
 import {state} from "@polkadot/extension-koni-base/background/handlers";
 import {nft} from "@edgeware/node-types/dist/src/interfaces/definitions";
 import {handleAcalaNfts} from "@polkadot/extension-koni-base/api/nft/acala_nft";
+import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
 
 jest.setTimeout(5000000000000);
 
@@ -26,11 +27,17 @@ describe('test rpc api', () => {
 
 describe('test api get staking', () => {
   test('test api get bonded token from endpoints', async () => {
-    const resp = await handleAcalaNfts('16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo')
-    console.log(resp)
+    // const resp = await handleAcalaNfts('16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo')
+    // console.log(resp)
     // const dotSamaAPIMap = connectDotSamaApis();
     // const nftHandler = new NftHandler(dotSamaAPIMap, ['Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr', 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM']);
     // await nftHandler.handleNfts();
+
+    const rmrkHandler = new RmrkNftApi();
+    rmrkHandler.setChain('rmrk');
+    rmrkHandler.setAddresses(['Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr', 'Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr'])
+    await rmrkHandler.handleNfts();
+    console.log(rmrkHandler);
     // const resp = await subscribeStaking(
     //   ['5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W', 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'],
     //   dotSamaAPIMap,

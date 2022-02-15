@@ -3,7 +3,11 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { AccountJson, RequestAccountSubscribe } from '@polkadot/extension-base/background/types';
+import {
+  AccountJson,
+  RequestAccountSubscribe,
+  RequestCurrentAccountAddress
+} from '@polkadot/extension-base/background/types';
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 import { u128 } from '@polkadot/types';
@@ -245,7 +249,8 @@ export interface KoniRequestSignatures {
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson],
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson],
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson],
-  'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]],
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>],
   'pri(transaction.history.get)': [RequestTransactionHistoryGet, boolean, TransactionHistoryItemType[]];

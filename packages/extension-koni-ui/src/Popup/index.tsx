@@ -20,7 +20,7 @@ import * as Bowser from "bowser";
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { getAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import { subscribeAccountsWithCurrentAddress, saveCurrentAccountAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AuthList from './AuthManagement';
@@ -130,7 +130,7 @@ export default function Popup (): React.ReactElement {
   useEffect((): void => {
     Promise.all([
       // subscribeAccounts(setAccounts),
-      getAccountsWithCurrentAddress(handleGetAccountsWithCurrentAddress),
+      subscribeAccountsWithCurrentAddress(handleGetAccountsWithCurrentAddress),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests)

@@ -53,7 +53,7 @@ export default class KoniExtension extends Extension {
   };
 
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pri(accounts.getAllWithCurrentAddress)'>(id, port);
+    const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
       const transformedAccounts = transformAccounts(storedAccounts)
 
@@ -486,7 +486,7 @@ export default class KoniExtension extends Extension {
         return this.apiInit(request as RequestApi);
       case 'pri(accounts.create.suriV2)':
         return this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
-      case 'pri(accounts.getAllWithCurrentAddress)':
+      case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
       case 'pri(currentAccount.saveAddress)':
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);

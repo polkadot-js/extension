@@ -109,8 +109,6 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
   'pri(accounts.validate)': [RequestAccountValidate, boolean];
   'pri(accounts.changePassword)': [RequestAccountChangePassword, boolean];
-  'pri(accounts.getAllWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
-  'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
   'pri(authorize.approve)': [RequestAuthorizeApprove, boolean];
   'pri(authorize.list)': [null, ResponseAuthorizeList];
   'pri(authorize.reject)': [RequestAuthorizeReject, boolean];

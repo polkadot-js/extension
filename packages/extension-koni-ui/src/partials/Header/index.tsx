@@ -54,6 +54,7 @@ interface Props extends ThemeProps {
   isNotHaveAccount?: boolean;
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
+  changeAccountCallback?: (address: string) => void;
 }
 
 interface Recoded {
@@ -91,7 +92,7 @@ function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances, changeAccountCallback }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -383,6 +384,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
             <AccountMenuSettings
               className='account-menu-setting'
               closeSetting={_toggleSettings}
+              changeAccountCallback={changeAccountCallback}
               reference={setRef}
             />
           )}

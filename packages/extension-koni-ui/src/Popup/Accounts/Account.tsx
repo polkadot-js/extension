@@ -19,9 +19,10 @@ interface Props extends AccountJson {
   className?: string;
   parentName?: string;
   closeSetting?: () => void;
+  changeAccountCallback?: (address: string) => void;
 }
 
-function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type }: Props): React.ReactElement<Props> {
+function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type, changeAccountCallback }: Props): React.ReactElement<Props> {
   const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -48,6 +49,8 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
             triggerAccountsSubscription().catch((e) => {
               console.error('There is a problem when trigger Accounts Subscription', e);
             });
+
+            changeAccountCallback && changeAccountCallback(address);
           }).catch((e) => {
             console.error('There is a problem when set Current Account', e);
           });
@@ -58,7 +61,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
 
       closeSetting && closeSetting();
       onAction('/');
-    }, [address]);
+    }, [address, changeAccountCallback]);
 
   return (
     <div

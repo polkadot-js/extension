@@ -10,9 +10,10 @@ import Account from '@polkadot/extension-koni-ui/Popup/Accounts/Account';
 interface Props extends AccountWithChildren {
   parentName?: string;
   closeSetting?: () => void;
+  changeAccountCallback?: (address: string) => void;
 }
 
-export default function KoniAccountsTree ({ closeSetting, parentName, suri, ...account }: Props): React.ReactElement<Props> {
+export default function AccountsTree ({ closeSetting, parentName, suri, changeAccountCallback,...account }: Props): React.ReactElement<Props> {
   return (
     <>
       <Account
@@ -20,9 +21,10 @@ export default function KoniAccountsTree ({ closeSetting, parentName, suri, ...a
         closeSetting={closeSetting}
         parentName={parentName}
         suri={suri}
+        changeAccountCallback={changeAccountCallback}
       />
       {account?.children?.map((child, index) => (
-        <KoniAccountsTree
+        <AccountsTree
           closeSetting={closeSetting}
           key={`${index}:${child.address}`}
           {...child}

@@ -26,12 +26,13 @@ interface Props extends ThemeProps {
   reference: React.MutableRefObject<null>;
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
+  changeAccountCallback?: (address: string) => void;
 }
 
 const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
 
-function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
+function AccountMenuSettings ({ className, closeSetting, onFilter, reference, changeAccountCallback }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
   const { hierarchy } = useContext(AccountContext);
@@ -93,6 +94,7 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference }: 
             closeSetting={closeSetting}
             {...json}
             key={`${index}:${json.address}`}
+            changeAccountCallback={changeAccountCallback}
           />
         ))}
       </div>

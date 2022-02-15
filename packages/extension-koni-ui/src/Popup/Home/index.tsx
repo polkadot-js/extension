@@ -197,6 +197,12 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
     return getTabHeaderItems(address, t)
   }, [address, t]);
 
+  const onChangeAccount = useCallback( (address: string) => {
+    if (isAccountAll(address)) {
+      _setActiveTab(1);
+    }
+  }, [])
+
   return (
     <div className={`home-screen home ${className}`}>
       <Header
@@ -208,6 +214,7 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         showSettings
         text={t<string>('Accounts')}
         toggleZeroBalances={_toggleZeroBalances}
+        changeAccountCallback={onChangeAccount}
       />
 
       <div className={'home-action-block'}>

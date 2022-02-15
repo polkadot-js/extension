@@ -10,8 +10,8 @@ import styled from 'styled-components';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import { AccountContext, ActionContext } from '@polkadot/extension-koni-ui/components';
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import { saveCurrentAccountAddress } from '@polkadot/extension-koni-ui/messaging';
-import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import {saveCurrentAccountAddress, triggerAccountsSubscription} from '@polkadot/extension-koni-ui/messaging';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
 
@@ -44,8 +44,10 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
 
         if (accountByAddress) {
           saveCurrentAccountAddress(address).then(() => {
-            store.dispatch({ type: 'currentAccount/update', payload: accountByAddress });
             window.localStorage.removeItem('accountAllNetworkGenesisHash');
+            triggerAccountsSubscription().catch((e) => {
+              console.error('There is a problem when trigger Accounts Subscription', e);
+            });
           }).catch((e) => {
             console.error('There is a problem when set Current Account', e);
           });

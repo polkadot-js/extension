@@ -90,6 +90,14 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private triggerAccountsSubscription (): boolean {
+    const accountsSubject = accountsObservable.subject;
+
+    accountsSubject.next(accountsSubject.getValue());
+
+    return true;
+  }
+
   private _saveCurrentAccountAddress (address: string, callback?: () => void) {
     state.getCurrentAccount((accountInfo) => {
       if (!accountInfo) {
@@ -488,6 +496,8 @@ export default class KoniExtension extends Extension {
         return this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
       case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
+      case 'pri(accounts.triggerSubscription)':
+        return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
       case 'pri(price.getPrice)':

@@ -250,6 +250,7 @@ export interface KoniRequestSignatures {
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson],
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson],
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]],
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>],

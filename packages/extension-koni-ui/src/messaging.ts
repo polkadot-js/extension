@@ -198,6 +198,10 @@ export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWi
   return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
 }
 
+export async function triggerAccountsSubscription (): Promise<boolean> {
+  return sendMessage('pri(accounts.triggerSubscription)');
+}
+
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(authorize.requests)', null, cb);
 }

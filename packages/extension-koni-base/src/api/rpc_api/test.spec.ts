@@ -8,7 +8,6 @@ import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 import connectDotSamaApis, {initApi} from "@polkadot/extension-koni-base/api/dotsama";
 import {state} from "@polkadot/extension-koni-base/background/handlers";
-import {nft} from "@edgeware/node-types/dist/src/interfaces/definitions";
 import {AcalaNftApi, handleAcalaNfts} from "@polkadot/extension-koni-base/api/nft/acala_nft";
 import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
 import {wsProvider} from "@polkadot/extension-koni-base/api/connector";
@@ -38,7 +37,9 @@ describe('test api get staking', () => {
     const dotSamaAPIMap = connectDotSamaApis();
     const nftHandler = new NftHandler(dotSamaAPIMap, ['Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr', 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM']);
     await nftHandler.handleNfts();
-    nftHandler.getNfts();
+    const result = nftHandler.getNfts();
+    console.log(result.length);
+    console.log(nftHandler.getTotal());
     // const dotSamaApi = initApi(NETWORKS.uniqueNft.provider);
     // const parentApi: ApiProps = await dotSamaApi.isReady;
     // const nftHandler = new UniqueNftApi(parentApi, ['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb'], 'karura');

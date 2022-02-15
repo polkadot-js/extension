@@ -5,7 +5,7 @@ import {PINATA_SERVER} from "@polkadot/extension-koni-base/api/nft/config";
 export abstract class BaseNftApi {
   chain: string | null = null;
   dotSamaApi: ApiProps | null = null;
-  data: NftCollection[] | null = null;
+  data: NftCollection[] = [];
   total: number = 0;
   addresses: string[] = [];
 
@@ -13,10 +13,14 @@ export abstract class BaseNftApi {
     if (api) this.dotSamaApi = api;
     if (addresses) this.addresses = addresses;
     if (chain) this.chain = chain;
-  };
+  }
 
-  getChain() {
+  getChain () {
     return this.chain;
+  }
+
+  getTotal () {
+    return this.total;
   }
 
   getData () {
@@ -25,7 +29,7 @@ export abstract class BaseNftApi {
 
   setApi (api: ApiProps) {
     this.dotSamaApi = api;
-  };
+  }
 
   setChain (chain: string) {
     this.chain = chain;
@@ -33,7 +37,7 @@ export abstract class BaseNftApi {
 
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
-  };
+  }
 
   protected parseTokenId (tokenId: string) {
     if (tokenId.includes(',')) return tokenId.replace(',', '');

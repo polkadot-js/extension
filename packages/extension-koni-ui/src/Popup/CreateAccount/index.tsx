@@ -34,6 +34,11 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
   const networkRef = useRef(null);
+  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
+  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  if (isFirefox || isLinux) {
+    window.localStorage.setItem('popupNavigation', '');
+  }
 
   useEffect((): void => {
     createSeed(undefined)

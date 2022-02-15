@@ -43,9 +43,11 @@ function Upload ({ className }: Props): React.ReactElement {
   // don't use the info from the file directly
   // rather use what comes from the background from jsonGetAccountInfo
   const [file, setFile] = useState<KeyringPair$Json | KeyringPairs$Json | undefined>(undefined);
+  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
+  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
 
   useEffect((): void => {
-    window.localStorage.setItem('popupNavigation', '');
+    (isFirefox || isLinux) && window.localStorage.setItem('popupNavigation', '');
     !accounts.length && onAction();
   }, [accounts, onAction]);
 

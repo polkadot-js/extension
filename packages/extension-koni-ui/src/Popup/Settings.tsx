@@ -2,24 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
-
 import { faExpand, faList } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
-import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
-import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
-import HorizontalLabelToggle from '@polkadot/extension-koni-ui/components/HorizontalLabelToggle';
-import MenuDivider from '@polkadot/extension-koni-ui/components/MenuDivider';
-import MenuItem from '@polkadot/extension-koni-ui/components/MenuItem';
-import SimpleDropdown from '@polkadot/extension-koni-ui/components/SimpleDropdown';
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import { setNotification, windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
-
-import { ActionContext, themes, ThemeSwitchContext } from '../components';
+import { ActionContext, themes, ThemeSwitchContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { Theme } from '../types';
 

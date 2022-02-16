@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type {ThemeProps} from '../types';
-
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteComponentProps, withRouter} from 'react-router';
 import styled, {ThemeContext} from 'styled-components';
-
 import {AccountJson} from '@polkadot/extension-base/background/types';
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import {store} from '@polkadot/extension-koni-ui/stores';
-
 import {AccountContext, ActionBar, ActionContext, ActionText, Button, Warning} from '../components';
 import useTranslation from '../hooks/useTranslation';
 import {forgetAccount} from '../messaging';

@@ -18,8 +18,7 @@ import staking from '@polkadot/extension-koni-ui/assets/home-tab-icon/staking.sv
 import stakingActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/staking-active.svg';
 import transfers from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
-import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
-import AccountQrModal from '@polkadot/extension-koni-ui/components/AccountQrModal';
+import { AccountContext, Link, AccountQrModal } from '@polkadot/extension-koni-ui/components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
@@ -33,7 +32,6 @@ import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-
 import buyIcon from '../../assets/buy-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';

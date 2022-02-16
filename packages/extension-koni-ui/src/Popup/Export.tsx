@@ -2,21 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Theme, ThemeProps } from '../types';
-
 import { saveAs } from 'file-saver';
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
-
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
-import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-
-import { ActionContext } from '../components';
+import { ActionContext, AccountInfoEl, ActionBar, ActionText, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
 import {isAccountAll} from "@polkadot/extension-koni-ui/util";
@@ -100,7 +91,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
             </ActionBar>
           </div> :
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
-            <AccountInfo address={address} />
+            <AccountInfoEl address={address} />
             <Warning className='export-warning'>
               {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
             </Warning>

@@ -5,16 +5,12 @@ import type { AccountJson, RequestSign } from '@polkadot/extension-base/backgrou
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
-
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import MenuDivider from '@polkadot/extension-koni-ui/components/MenuDivider';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
-
-import { AccountContext, ActionContext, Theme } from '../../../components';
+import { AccountContext, ActionContext, Theme, MenuDivider } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';

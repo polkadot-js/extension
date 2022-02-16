@@ -3,10 +3,8 @@
 
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import { QrScanAddress } from '@polkadot/react-qr';
-
 import { ActionContext, Theme } from '../components';
 import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
 import useTranslation from '../hooks/useTranslation';

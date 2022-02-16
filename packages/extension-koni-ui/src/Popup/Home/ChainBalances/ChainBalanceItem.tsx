@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import cloneIcon from '@polkadot/extension-koni-ui/assets/clone.svg';
 import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
-import { Loading } from '@polkadot/extension-koni-ui/components';
+import { Loading } from '../../../components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';

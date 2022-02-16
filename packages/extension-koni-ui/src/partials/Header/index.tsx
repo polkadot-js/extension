@@ -10,8 +10,6 @@ import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { Chain } from '@polkadot/extension-chains/types';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link, SettingsContext } from '@polkadot/extension-koni-ui/components';
@@ -27,15 +25,13 @@ import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 import { IconTheme } from '@polkadot/react-identicon/types';
-import { SettingsStruct } from '@polkadot/ui-settings/types';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
-
 import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
 import {accountAllRecoded, isAccountAll} from "@polkadot/extension-koni-ui/util";
 import allAccountLogo from "@polkadot/extension-koni-ui/assets/all-account-icon.svg";
+import reformatAddress from "@polkadot/extension-koni-ui/util/reformatAddress";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -57,37 +53,6 @@ interface Props extends ThemeProps {
   changeAccountCallback?: (address: string) => void;
 }
 
-interface Recoded {
-  formatted: string | null;
-  prefix?: number;
-}
-
-function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
-  const pkStr = publicKey.toString();
-
-  return accounts.filter(a => !isAccountAll(a.address)).find(({ address }): boolean =>
-    decodeAddress(address).toString() === pkStr
-  ) || null;
-}
-
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
-  // decode and create a shortcut for the encoded address
-  const publicKey = decodeAddress(address);
-  // find our account using the actual publicKey, and then find the associated chain
-  const account = findSubstrateAccount(accounts, publicKey);
-  const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
-
-  // always allow the actual settings to override the display
-  return {
-    formatted: account?.type === 'ethereum'
-      ? address
-      : encodeAddress(publicKey, prefix),
-    prefix
-  };
-}
-
-const defaultRecoded = { formatted: null, prefix: 42 };
-
 function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
@@ -97,13 +62,13 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
+  const {genesisHash, networkPrefix, isEthereum} = useSelector((state: RootState) => state.currentNetwork);
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
   const { accounts } = useContext(AccountContext);
   const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
   const settings = useContext(SettingsContext);
-  const [{ formatted, prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
+  const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const popupTheme = themeContext.id;
   const setRef = useRef(null);
@@ -124,24 +89,17 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     }
 
     if (!currentAccount.address) {
-      setRecoded(defaultRecoded);
-
+      setFormattedAddress(null);
       return;
     }
 
     if (isAccountAll(currentAccount.address)) {
-      setRecoded(accountAllRecoded);
-
+      setFormattedAddress(accountAllRecoded.formatted);
       return;
     }
 
-    setRecoded(
-      (
-        chain?.definition.chainType === 'ethereum' ||
-        currentAccount?.type === 'ethereum'
-      )
-        ? { formatted: currentAccount?.address }
-        : recodeAddress(currentAccount?.address, accounts, chain, settings));
+    const formattedAddress = reformatAddress(currentAccount.address, networkPrefix, isEthereum);
+    setFormattedAddress(formattedAddress);
   }, [accounts, currentAccount?.address, chain, settings]);
 
   useEffect(() => {
@@ -354,10 +312,10 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
                       className='identityIcon'
                       genesisHash={localGenesisHash}
                       iconTheme={theme}
-                      prefix={prefix}
+                      prefix={networkPrefix}
                       showLogo
                       size={48}
-                      value={formatted || currentAccount?.address}
+                      value={formattedAddress || currentAccount?.address}
                     />
                   )
                   : (
@@ -393,7 +351,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
         {isContainDetailHeader &&
           <DetailHeader
             currentAccount={currentAccount}
-            formatted={formatted}
+            formatted={formattedAddress}
             isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}
             toggleVisibility={_toggleVisibility}

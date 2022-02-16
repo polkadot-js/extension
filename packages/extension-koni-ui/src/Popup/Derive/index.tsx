@@ -4,10 +4,8 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
-
-import AccountNamePasswordCreation from '@polkadot/extension-koni-ui/components/AccountNamePasswordCreation';
+import { AccountNamePasswordCreation } from '../../components';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-
 import { AccountContext, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { deriveAccountV2 } from '../../messaging';

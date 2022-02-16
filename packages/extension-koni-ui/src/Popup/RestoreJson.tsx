@@ -4,10 +4,8 @@
 import type { ResponseJsonGetAccountInfo } from '@polkadot/extension-base/background/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
-
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
@@ -16,7 +14,6 @@ import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabe
 import Warning from '@polkadot/extension-koni-ui/components/Warning';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { u8aToString } from '@polkadot/util';
-
 import { AccountContext, ActionContext, Theme } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging';

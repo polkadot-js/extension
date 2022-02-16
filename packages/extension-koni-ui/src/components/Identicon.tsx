@@ -75,6 +75,10 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
     background: ${theme.backgroundAccountAddress};
   }
 
+  .icon > img {
+    border-radius: 50%;
+  }
+
   svg {
     circle:first-of-type {
       display: none;

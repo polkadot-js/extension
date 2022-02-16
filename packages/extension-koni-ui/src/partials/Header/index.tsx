@@ -13,7 +13,7 @@ import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniType
 import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
+import { Link } from '@polkadot/extension-koni-ui/components';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -64,7 +64,6 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
-  const { accounts } = useContext(AccountContext);
   const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
@@ -102,7 +101,7 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
     const formattedAddress = reformatAddress(currentAccount.address, networkPrefix, isEthereum);
 
     setFormattedAddress(formattedAddress);
-  }, [accounts, currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
+  }, [ currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
 
   useEffect(() => {
     let isSync = true;
@@ -168,7 +167,7 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
     return () => {
       isSync = false;
     };
-  }, [currentAccount, currentAccount?.genesisHash, _isAccountAll, accounts, genesisOptions]);
+  }, [currentAccount, currentAccount?.genesisHash, _isAccountAll, genesisOptions]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {

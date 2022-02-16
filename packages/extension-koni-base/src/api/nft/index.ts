@@ -9,6 +9,8 @@ import UniqueNftApi from "@polkadot/extension-koni-base/api/nft/unique_nft";
 import StatemineNftApi from "@polkadot/extension-koni-base/api/nft/statemine_nft";
 import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
 
+const NFT_TIMEOUT = 30000
+
 enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',
@@ -40,9 +42,10 @@ function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNf
 export class NftHandler {
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
-  addresses: string[] = [];
+  addresses: string[] = ['Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr', 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'];
   total: number = 0;
   data: NftCollection[] = [];
+  running: boolean = false;
 
   constructor(dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
     if (addresses) this.addresses = addresses;
@@ -57,23 +60,51 @@ export class NftHandler {
   }
 
   private async connect () {
-    await Promise.all(this.apiPromises.map(async ({chain, api: apiPromise}) => {
-      if (apiPromise) {
-        const parentApi: ApiProps = await apiPromise.isReady;
-        let handler = createNftApi(chain, parentApi, this.addresses);
-        if (handler) this.handlers.push(handler);
-      }
-    }));
+    if (this.handlers.length > 0) {
+      await Promise.all(this.handlers.map(async handler => {
+        await handler.connect();
+      }));
+    }
+    else {
+      await Promise.all(this.apiPromises.map(async ({chain, api: apiPromise}) => {
+        if (apiPromise) {
+          const parentApi: ApiProps = await apiPromise.isReady;
+          let handler = createNftApi(chain, parentApi, this.addresses);
+          if (handler) this.handlers.push(handler);
+        }
+      }));
+    }
   }
 
   public async handleNfts () {
-    await this.connect();
+    if (this.running) {
+      console.log('already fetching nft')
+      return;
+    }
 
-    await Promise.all(this.handlers.map(async (handler) => {
+    this.running = true;
+    await this.connect();
+    let total = 0;
+    let data: NftCollection[] = [];
+    let timer: any;
+
+    const allPromises = Promise.all(this.handlers.map(async (handler) => {
       await handler.handleNfts();
-      this.total += handler.getTotal();
-      this.data = [...this.data, ...handler.getData()]
+      total += handler.getTotal();
+      data = [...data, ...handler.getData()];
     }));
+
+    // Set timeout for all requests
+    await Promise
+      .race([allPromises, new Promise((_r, rej) => timer = setTimeout(rej, NFT_TIMEOUT))])
+      .finally(() => clearTimeout(timer));
+
+    if (total > this.total) {
+      console.log(`nft old length: ${this.total}, new length: ${total}`);
+      this.total = total;
+      this.data = data;
+    }
+    this.running = false;
   }
 
   public getTotal() {
@@ -86,6 +117,7 @@ export class NftHandler {
 
   public getNftJson () {
     return {
+      ready: true,
       total: this.total,
       nftList: this.data
     } as NftJson

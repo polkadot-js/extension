@@ -93,15 +93,6 @@ export function hexToUTF16 (hex: string): Uint8Array {
   return new Uint8Array(buf);
 }
 
-export const loadJSON = (path: string) => {
-  try {
-    return require(path);
-  } catch (e) {
-    console.log(e);
-    console.log('Error parsing JSON file');
-  }
-};
-
 export const isValidAddress = (address: string) => {
   try {
     encodeAddress(

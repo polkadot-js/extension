@@ -72,13 +72,13 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
           onClickBack={() => setShowItemDetail(false)}
         />
       }
-
     </div>
   );
 }
 
 export default styled(NftCollection)(({ theme }: ThemeProps) => `
   .grid-container {
+    padding-bottom: 20px;
     width: 100%;
     display: grid;
     column-gap: 20px;

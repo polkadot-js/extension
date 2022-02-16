@@ -4,9 +4,9 @@
 import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
+import {dotSamaAPIMap, state} from '@polkadot/extension-koni-base/background/handlers';
 import {
-  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
+  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL,
   CRON_REFRESH_PRICE_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
@@ -57,22 +57,24 @@ export class KoniCron {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL);
 
-    // state.getCurrentAccount((currentAccountInfo) => {
-    //   if (currentAccountInfo) {
-    //     // this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
-    //     // this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
-    //   }
-    //
-    //   state.subscribeCurrentAccount().subscribe({
-    //     next: ({ address }) => {
-    //       this.removeCron('refreshNft');
-    //       this.removeCron('refreshStaking');
-    //
-    //       this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
-    //       this.addCron('refreshStaking', this.refreshStaking(address), CRON_REFRESH_STAKING_INTERVAL);
-    //     }
-    //   });
-    // });
+    state.getCurrentAccount((currentAccountInfo) => {
+      if (currentAccountInfo) {
+        console.log('at cron', currentAccountInfo);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
+        // this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
+      }
+
+      state.subscribeCurrentAccount().subscribe({
+        next: ({ address }) => {
+          console.log('at cron subscribe', address);
+          this.removeCron('refreshNft');
+          // this.removeCron('refreshStaking');
+
+          this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
+          // this.addCron('refreshStaking', this.refreshStaking(address), CRON_REFRESH_STAKING_INTERVAL);
+        }
+      });
+    });
   }
 
   recoverAPI () {
@@ -103,17 +105,13 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  // refreshNft (address: string) {
-  //   return () => {
-  //     getAllNftsByAccount(address)
-  //       .then((rs) => {
-  //         state.setNft(rs, (nftData) => {
-  //           console.log(`Update nft state for ${address}`);
-  //         });
-  //       })
-  //       .catch((err) => console.log(err));
-  //   };
-  // }
+  refreshNft (address: string) {
+    return () => {
+      console.log('Refresh Nft state');
+      this.subscriptions.subscribeNft(address);
+    };
+  }
+
   //
   // refreshStaking (address: string) {
   //   return () => {

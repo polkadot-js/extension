@@ -15,6 +15,10 @@ export abstract class BaseNftApi {
     if (chain) this.chain = chain;
   }
 
+  async connect() {
+    await this.dotSamaApi?.isReady;
+  }
+
   getChain () {
     return this.chain;
   }

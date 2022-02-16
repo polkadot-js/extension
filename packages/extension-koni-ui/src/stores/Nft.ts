@@ -20,7 +20,7 @@ const nftSlice = createSlice({
 
       state.total = payload.total;
       state.nftList = payload.nftList;
-      state.ready = true;
+      state.ready = payload.ready;
     }
   }
 });

@@ -6,15 +6,10 @@ import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
-import InputFileWithLabel from '@polkadot/extension-koni-ui/components/InputFileWithLabel';
-import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
+
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { u8aToString } from '@polkadot/util';
-import { AccountContext, ActionContext, Theme } from '../components';
+import { AccountContext, ActionContext, Theme, AccountInfoEl, Button, ButtonArea, InputFileWithLabel, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
@@ -135,7 +130,7 @@ function Upload ({ className }: Props): React.ReactElement {
               className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}
               key={`${index}:${address}`}
             >
-              <AccountInfo
+              <AccountInfoEl
                 address={address}
                 genesisHash={genesisHash}
                 name={name}

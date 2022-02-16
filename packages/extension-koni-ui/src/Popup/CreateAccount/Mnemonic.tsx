@@ -4,7 +4,7 @@
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import { AccountInfo, ButtonArea, Checkbox, MnemonicSeed, NextStepButton, Warning } from '@polkadot/extension-koni-ui/components';
+import { AccountInfoEl, ButtonArea, Checkbox, MnemonicSeed, NextStepButton, Warning } from '@polkadot/extension-koni-ui/components';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import useToast from '../../hooks/useToast';
@@ -52,7 +52,7 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
       <div className={className}>
         <div className='account-info-wrapper'>
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfo
+            <AccountInfoEl
               address={address}
               genesisHash={genesisHash}
               name={name}

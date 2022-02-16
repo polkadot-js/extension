@@ -6,9 +6,8 @@ import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {RouteComponentProps, withRouter} from 'react-router';
 import styled, {ThemeContext} from 'styled-components';
 import {AccountJson} from '@polkadot/extension-base/background/types';
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import {store} from '@polkadot/extension-koni-ui/stores';
-import {AccountContext, ActionBar, ActionContext, ActionText, Button, Warning} from '../components';
+import {AccountContext, ActionBar, ActionContext, ActionText, Button, Warning, AccountInfoEl} from '../components';
 import useTranslation from '../hooks/useTranslation';
 import {forgetAccount} from '../messaging';
 import {Header} from '../partials';
@@ -95,7 +94,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
           </div>
           :
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfo address={address}/>
+            <AccountInfoEl address={address}/>
             <Warning className='forget-account__warning'>
               {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
             </Warning>

@@ -10,9 +10,10 @@ import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
+import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import { AccountContext, Link, SettingsContext } from '@polkadot/extension-koni-ui/components';
+import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -23,15 +24,15 @@ import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMen
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { accountAllRecoded, isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
+import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
+
 import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
-import {accountAllRecoded, isAccountAll} from "@polkadot/extension-koni-ui/util";
-import allAccountLogo from "@polkadot/extension-koni-ui/assets/all-account-icon.svg";
-import reformatAddress from "@polkadot/extension-koni-ui/util/reformatAddress";
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -47,7 +48,6 @@ interface Props extends ThemeProps {
   subHeaderName?: string;
   showCancelButton?: boolean;
   isWelcomeScreen?: boolean;
-  isNotHaveAccount?: boolean;
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
   changeAccountCallback?: (address: string) => void;
@@ -57,17 +57,16 @@ function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances, changeAccountCallback }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const {genesisHash, networkPrefix, isEthereum} = useSelector((state: RootState) => state.currentNetwork);
+  const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
   const { accounts } = useContext(AccountContext);
   const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
-  const settings = useContext(SettingsContext);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const popupTheme = themeContext.id;
@@ -90,17 +89,20 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
     if (!currentAccount.address) {
       setFormattedAddress(null);
+
       return;
     }
 
     if (isAccountAll(currentAccount.address)) {
       setFormattedAddress(accountAllRecoded.formatted);
+
       return;
     }
 
     const formattedAddress = reformatAddress(currentAccount.address, networkPrefix, isEthereum);
+
     setFormattedAddress(formattedAddress);
-  }, [accounts, currentAccount?.address, chain, settings]);
+  }, [accounts, currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
 
   useEffect(() => {
     let isSync = true;
@@ -166,7 +168,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     return () => {
       isSync = false;
     };
-  }, [currentAccount?.genesisHash, _isAccountAll, accounts, genesisOptions]);
+  }, [currentAccount, currentAccount?.genesisHash, _isAccountAll, accounts, genesisOptions]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
@@ -180,7 +182,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       }
 
       return networkKey;
-    }, [currentAccount?.genesisHash]
+    }, [currentAccount, genesisOptions]
   );
 
   const _toggleZeroBalances = useCallback(
@@ -219,7 +221,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
       setShowNetworkSelect(false);
     },
-    [genesisHash, currentAccount]
+    [currentAccount]
   );
 
   useOutsideClick(setRef, (): void => {
@@ -281,7 +283,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
               />
             </div>)}
             <div
-              className={`network-select-item ${isNetworkSelectOpen && 'pointer-events-none'}`}
+              className={`network-select-item ${isNetworkSelectOpen ? 'pointer-events-none' : ''}`}
               onClick={_toggleNetwork}
             >
               <img
@@ -301,23 +303,27 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
             {!isWelcomeScreen && (
               <div
-                className={`setting-icon-wrapper ${isSettingsOpen && 'pointer-events-none'}`}
+                className={`setting-icon-wrapper ${isSettingsOpen ? 'pointer-events-none' : ''}`}
                 onClick={_toggleSettings}
               >
                 {!!currentAccount && !!currentAccount.address
-                  ? _isAccountAll ?
-                    <img src={allAccountLogo} alt="all-account-icon" className='header__all-account-icon'/>
-                    : (
-                    <Identicon
-                      className='identityIcon'
-                      genesisHash={localGenesisHash}
-                      iconTheme={theme}
-                      prefix={networkPrefix}
-                      showLogo
-                      size={48}
-                      value={formattedAddress || currentAccount?.address}
+                  ? _isAccountAll
+                    ? <img
+                      alt='all-account-icon'
+                      className='header__all-account-icon'
+                      src={allAccountLogo}
                     />
-                  )
+                    : (
+                      <Identicon
+                        className='identityIcon'
+                        genesisHash={localGenesisHash}
+                        iconTheme={theme}
+                        prefix={networkPrefix}
+                        showLogo
+                        size={48}
+                        value={formattedAddress || currentAccount?.address}
+                      />
+                    )
                   : (
                     <img
                       alt='default-img'
@@ -340,9 +346,9 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
           {isSettingsOpen && (
             <AccountMenuSettings
+              changeAccountCallback={changeAccountCallback}
               className='account-menu-setting'
               closeSetting={_toggleSettings}
-              changeAccountCallback={changeAccountCallback}
               reference={setRef}
             />
           )}

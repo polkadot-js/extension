@@ -4,13 +4,10 @@
 import { Subject } from 'rxjs';
 
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { getAllNftsByAccount } from '@polkadot/extension-koni-base/api/nft';
-import { getStakingInfo } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import {
   CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
-  CRON_REFRESH_NFT_INTERVAL,
-  CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL
+  CRON_REFRESH_PRICE_INTERVAL
 } from '@polkadot/extension-koni-base/constants';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
 import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
@@ -106,27 +103,27 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft (address: string) {
-    return () => {
-      getAllNftsByAccount(address)
-        .then((rs) => {
-          state.setNft(rs, (nftData) => {
-            console.log(`Update nft state for ${address}`);
-          });
-        })
-        .catch((err) => console.log(err));
-    };
-  }
-
-  refreshStaking (address: string) {
-    return () => {
-      getStakingInfo(address)
-        .then((rs) => {
-          state.setStaking(rs, (stakingData) => {
-            console.log(`Update staking state for ${address}`);
-          });
-        })
-        .catch((err) => console.log(err));
-    };
-  }
+  // refreshNft (address: string) {
+  //   return () => {
+  //     getAllNftsByAccount(address)
+  //       .then((rs) => {
+  //         state.setNft(rs, (nftData) => {
+  //           console.log(`Update nft state for ${address}`);
+  //         });
+  //       })
+  //       .catch((err) => console.log(err));
+  //   };
+  // }
+  //
+  // refreshStaking (address: string) {
+  //   return () => {
+  //     getStakingInfo(address)
+  //       .then((rs) => {
+  //         state.setStaking(rs, (stakingData) => {
+  //           console.log(`Update staking state for ${address}`);
+  //         });
+  //       })
+  //       .catch((err) => console.log(err));
+  //   };
+  // }
 }

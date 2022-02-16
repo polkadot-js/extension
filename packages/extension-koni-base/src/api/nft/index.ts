@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps, NftCollection} from '@polkadot/extension-base/background/KoniTypes';
+import {ApiProps, NftCollection, NftJson} from '@polkadot/extension-base/background/KoniTypes';
 import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 import {KaruraNftApi} from "@polkadot/extension-koni-base/api/nft/karura_nft";
 import {AcalaNftApi} from "@polkadot/extension-koni-base/api/nft/acala_nft";
@@ -44,12 +44,16 @@ export class NftHandler {
   total: number = 0;
   data: NftCollection[] = [];
 
-  constructor(dotSamaAPIMap: Record<string, ApiProps>, addresses: string[]) {
-    this.addresses = addresses;
+  constructor(dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
+    if (addresses) this.addresses = addresses;
 
     for (let item in SUPPORTED_NFT_NETWORKS) {
       this.apiPromises.push({chain: item, api: dotSamaAPIMap[item]});
     }
+  }
+
+  setAddresses (addresses: string[]) {
+    this.addresses = addresses;
   }
 
   private async connect () {
@@ -78,6 +82,13 @@ export class NftHandler {
 
   public getNfts () {
     return this.data;
+  }
+
+  public getNftJson () {
+    return {
+      total: this.total,
+      nftList: this.data
+    } as NftJson
   }
 }
 

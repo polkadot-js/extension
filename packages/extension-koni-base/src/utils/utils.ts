@@ -3,6 +3,7 @@
 
 import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
+import {BN, hexToU8a, isHex} from "@polkadot/util";
 
 export const notDef = (x: any) => x === null || typeof x === 'undefined';
 export const isDef = (x: any) => !notDef(x);
@@ -91,3 +92,34 @@ export function hexToUTF16 (hex: string): Uint8Array {
 
   return new Uint8Array(buf);
 }
+
+export const loadJSON = (path: string) => {
+  try {
+    return require(path);
+  } catch (e) {
+    console.log(e);
+    console.log('Error parsing JSON file');
+  }
+};
+
+export const isValidAddress = (address: string) => {
+  try {
+    encodeAddress(
+      isHex(address)
+        ? hexToU8a(address)
+        : decodeAddress(address)
+    );
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const toUnit = (balance: number, decimals: number) => {
+  const base = new BN(10).pow(new BN(decimals));
+  // @ts-ignore
+  const dm = new BN(balance).divmod(base);
+
+  return parseFloat(dm.div.toString() + '.' + dm.mod.toString());
+};

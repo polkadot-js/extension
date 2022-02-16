@@ -25,10 +25,11 @@ interface Props extends ThemeProps {
   onChange?: (hasAvailable: boolean) => void;
   tip?: BN;
   api: ApiPromise;
-  apiUrl: string
+  apiUrl: string;
+  isBusy?: boolean;
 }
 
-function PaymentInfo ({ accountId, api, apiUrl, className = '', extrinsic }: Props): React.ReactElement<Props> | null {
+function PaymentInfo ({ accountId, api, apiUrl, className = '', extrinsic, isBusy }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [dispatchInfo, setDispatchInfo] = useState<RuntimeDispatchInfo | null>(null);
   const balances = useCall<DeriveBalancesAll>(api.derive.balances?.all, [accountId], undefined, apiUrl);
@@ -64,7 +65,7 @@ function PaymentInfo ({ accountId, api, apiUrl, className = '', extrinsic }: Pro
           Fees of <span className='highlight'>{formatBalance(dispatchInfo.partialFee, { withSiFull: true })}</span> will be applied to the submission
         </Trans>
       </div>
-      {isFeeError && (
+      {!isBusy && isFeeError && (
         <Warning className='kn-l-warning'>
           {t<string>('The account does not have enough free funds (excluding locked/bonded/reserved) available to cover the transaction fees without dropping the balance below the account existential amount.')}
         </Warning>

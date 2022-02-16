@@ -5,15 +5,12 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-// @ts-ignore
 import styled from 'styled-components';
-
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList';
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-
 import NftCollectionPreview from './NftCollectionPreview';
 
 interface Props extends ThemeProps {
@@ -32,11 +29,11 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
   const [page, setPage] = useState(1);
   const [currentNftList, setCurrentNftList] = useState();
   const { nft: nftReducer } = useSelector((state: RootState) => state);
+  console.log('nft', nftReducer);
 
   const _onChangeState = (): void => {
     if (!nftReducer?.ready) {
       setLoading(true);
-
       return;
     }
 
@@ -115,6 +112,7 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
               return <div key={index}>
                 <NftCollectionPreview
                   data={item}
+                  currentPage={page}
                   onClick={handleShowCollectionDetail}
                 />
               </div>;
@@ -143,6 +141,9 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
               className='arrowLeftIcon'
               icon={faArrowLeft}
             />
+          </div>
+          <div>
+            {page}/{Math.round(totalCollection / size)}
           </div>
           <div
             className={'nav-item'}
@@ -186,7 +187,7 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
     align-items: center;
     padding: 8px 16px;
     border-radius: 5px;
-    background-color: #181E42;
+    background-color: ${theme.popupBackground};
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
   }
 
@@ -196,6 +197,7 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
 
   .pagination {
     margin-top: 25px;
+    margin-bottom: 25px;
     display: flex;
     width: 100%;
     gap: 20px;

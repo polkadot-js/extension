@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiPromise } from '@polkadot/api';
+import {ApiPromise, WsProvider} from '@polkadot/api';
 import {ApiProps, NetWorkInfo, StakingItem, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
-import { wsProvider } from '@polkadot/extension-koni-base/api/connector';
 import networks from '@polkadot/extension-koni-base/api/endpoints';
 import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 
@@ -23,6 +22,13 @@ interface PropsMulti {
   apis: any,
   accountId: string,
 }
+const wsProvider = async ({ provider }: NetWorkInfo, type?: any): Promise<ApiPromise> => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const wsProvider = new WsProvider(provider);
+
+  return ApiPromise.create({ provider: wsProvider, types: type });
+};
+
 
 export const getCurrentBonded = async ({ accountId, api }: Props): Promise<string> => {
   const ledger = (await api.query.staking.ledger(accountId));

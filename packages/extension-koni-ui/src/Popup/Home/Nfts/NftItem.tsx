@@ -21,9 +21,9 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
 
-  const propDetail = (title: string, value: string) => {
+  const propDetail = (title: string, value: string, key: number) => {
     return (
-      <div className={'prop-detail'}>
+      <div className={'prop-detail'} key={key}>
         <div className={'prop-title'}>{title}</div>
         <div className={'prop-value'}>{value}</div>
       </div>
@@ -40,7 +40,9 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
   };
 
   const handleOnClick = () => {
-    if (data.external_url) chrome.tabs.create({ url: data?.external_url, active: true }).then();
+    if (data.external_url) {
+      chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
+    }
   };
 
   return (
@@ -55,8 +57,13 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
             icon={faArrowLeft}
           />
         </div>
-        <div className={'header-title'}>
-          {data.name ? data.name : '#' + data.id}
+        <div
+          className={'header-title'}
+          title={data.name ? data.name : '#' + data.id}
+        >
+          <div className={'collection-name'}>
+            {data.name ? data.name : '#' + data.id}
+          </div>
         </div>
         <div></div>
       </div>
@@ -111,7 +118,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
               <div className={'prop-container'}>
                 {
                   Object.keys(data?.properties).map((key, index) => {
-                    return propDetail(key, data?.properties[key].value);
+                    return propDetail(key, data?.properties[key].value, index);
                   })
                 }
 
@@ -150,6 +157,9 @@ export default styled(NftItem)(({ theme }: ThemeProps) => `
     display: flex;
     justify-content: center;
     margin-bottom: 12px;
+  }
+
+  .collection-name {
     font-size: 20px;
     white-space: nowrap;
     overflow: hidden;
@@ -164,6 +174,7 @@ export default styled(NftItem)(({ theme }: ThemeProps) => `
     justify-content: center;
     align-items: center;
     padding: 10px;
+    color: #FFFFFF;
   }
 
   .send-button:hover {
@@ -198,14 +209,14 @@ export default styled(NftItem)(({ theme }: ThemeProps) => `
 
   .prop-detail {
     padding: 5px 10px;
-    background: #262C4A;
+    background: ${theme.popupBackground};
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.15);
     border-radius: 5px;
   }
 
   .prop-title {
     text-transform: uppercase;
-    color: #7B8098;
+    color: ${theme.iconNeutralColor};
     font-size: 13px;
   }
 

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
@@ -97,7 +97,7 @@ export default styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
       padding-right: 10px;
       display: flex;
       align-items: center;
-      background-color: #181E42;
+      background-color: ${theme.popupBackground};
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
       border-radius: 0 0 5px 5px;
     }
@@ -106,7 +106,7 @@ export default styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
       font-size: 14px;
       margin-left: 5px;
       font-weight: normal;
-      color: #7B8098;
+      color: ${theme.iconNeutralColor};
     }
   }
 `);

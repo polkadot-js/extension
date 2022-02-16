@@ -10,11 +10,14 @@ import KoniExtension from '@polkadot/extension-koni-base/background/handlers/Ext
 import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
 import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
 import { assert } from '@polkadot/util';
+import {NftHandler} from "@polkadot/extension-koni-base/api/nft";
 
 export const state = new KoniState();
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
+export const nftHandler = new NftHandler(dotSamaAPIMap);
+
 
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};

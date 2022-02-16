@@ -56,7 +56,7 @@ export default class KoniState extends State {
   private balanceSubject = new Subject<BalanceJson>();
 
   private nftState: NftJson = {
-    ready: true,
+    ready: false,
     total: 0,
     nftList: []
   } as NftJson;

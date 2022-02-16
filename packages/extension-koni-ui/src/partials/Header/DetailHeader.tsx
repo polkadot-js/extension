@@ -54,7 +54,6 @@ function DetailHeader({
   const {t} = useTranslation();
   const [{isEditing}, setEditing] = useState<EditState>({isEditing: false, toggleActions: 0});
   const [isActionOpen, setShowAccountAction] = useState(false);
-  const [editedName, setName] = useState<string | undefined | null>(currentAccount?.name);
   const {show} = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
@@ -102,14 +101,14 @@ function DetailHeader({
   );
 
   const _saveChanges = useCallback(
-    (): void => {
-      editedName && currentAccount &&
+    (editedName: string): void => {
+      currentAccount &&
       editAccount(currentAccount.address, editedName)
         .catch(console.error);
 
       _toggleEdit();
     },
-    [editedName, currentAccount?.address, _toggleEdit]
+    [currentAccount?.address, _toggleEdit]
   );
 
   return (
@@ -173,14 +172,13 @@ function DetailHeader({
             }
           </div>
         )}
-        {isEditing && (
+        {isEditing && currentAccount && (
           <HeaderEditName
-            address={currentAccount?.address}
+            defaultValue={currentAccount.name}
             className='kn-l-edit-name'
             isFocused
             label={' '}
             onBlur={_saveChanges}
-            onChange={setName}
           />
         )}
       </div>

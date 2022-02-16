@@ -16,7 +16,7 @@ type Props<T extends BasicProps> = T & {
   className?: string;
   component: React.ComponentType<T>;
   defaultValue?: string;
-  onValidatedChange: (value: string | null) => void;
+  onValidatedChange?: (value: string | null) => void;
   validator: Validator<string>;
 }
 
@@ -42,7 +42,9 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
       const result = await validator(value);
 
       setValidationResult(result);
-      onValidatedChange(Result.isOk(result) ? value : null);
+      if (onValidatedChange) {
+        onValidatedChange(Result.isOk(result) ? value : null);
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, validator, onValidatedChange]);

@@ -1,10 +1,10 @@
 ## SubWallet Extension
-SubWallet is forked from polkadot-js/extension. We aim add many features but can rebase polkadot origin anytime.
+Our SubWallet is forked from polkadot-js/extension. We aim to adding more features while being able to rebase the polkadot origin at any time.
 ## Main Concept
 ![Main Concept](https://github.com/Koniverse/Subwallet-V2/wiki/images/ExtensionConcept.png)
-Extension is compiled from folder `packages/extension-koni`
-- **Background environment**: Background environment is compiled from `packages/extension-koni/src/background.ts`. 
-  - Background is use to handle message from Extensions pages and Chrome tabs via Chrome API Message Passing.
+The extension is compiled from folder `packages/extension-koni`
+- **Background environment**: The Background environment is compiled from `packages/extension-koni/src/background.ts`. 
+  - The Background is use to handle message from Extensions pages and Chrome tabs via Chrome API Message Passing.
   - Save all state to store and persist to chrome storage.
   - Run cronjob.
 - **Extension**: Is frontend and page of extension:
@@ -12,7 +12,7 @@ Extension is compiled from folder `packages/extension-koni`
   - portfolio.html: Frontend to display more complicated view.
 - **Inject Scripts**: Inject script into chrome tabs.
 
-All data request must be call and handle by in background. Extension Pages and Inject Scripts use data from background environment and not call API directly.  
+All data requests must be called and processed in the background. Extension Pages and Inject Scripts use data from the background environment and do not call APIs directly. 
 
 ## Project structure
 - **extension-base** - Contain main features run in background, call api, persist data into chrome store and inject script.

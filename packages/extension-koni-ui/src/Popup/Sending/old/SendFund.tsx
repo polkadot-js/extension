@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BN from 'bn.js';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -26,7 +25,7 @@ import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { checkAddress } from '@polkadot/phishing';
 import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
-import { BN_HUNDRED, BN_ZERO, isFunction } from '@polkadot/util';
+import { BN, BN_HUNDRED, BN_ZERO, isFunction } from '@polkadot/util';
 
 import Available from './component/Available';
 import InputAddress from './component/InputAddress';

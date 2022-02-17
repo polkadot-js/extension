@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type BN from 'bn.js';
+import { BN } from '@polkadot/util';
 
 import React from 'react';
 import styled from 'styled-components';

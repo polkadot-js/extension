@@ -5,13 +5,12 @@ import type { ApiPromise } from '@polkadot/api';
 import type { SiDef } from '@polkadot/util/types';
 import type { BitLength } from './types';
 
-import BN from 'bn.js';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 // import {useApi} from "@polkadot/extension-koni-ui/hooks/SendFundHooks";
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
+import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
 
 import Dropdown from './AdvanceDropdown';
 import { BitLengthOption } from './constants';

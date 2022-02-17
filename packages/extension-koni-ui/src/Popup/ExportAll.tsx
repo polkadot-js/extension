@@ -70,6 +70,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
         showBackArrow
         showSubHeader
         subHeaderName={t<string>('All account')}
+        isBusy={isBusy}
       />
       <div className={className}>
         <div className='action-area'>
@@ -103,7 +104,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
 
           <ActionBar className='export-all__action-bar'>
             <ActionText
-              className='export-all__action-text'
+              className={`export-all__action-text ${isBusy ? 'disabled-btn' : ''}`}
               onClick={_goHome}
               text={t<string>('Cancel')}
             />
@@ -117,6 +118,12 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
 export default withRouter(styled(ExportAll)(({ theme }: Props) => `
   .action-area {
     padding: 25px 15px 10px 15px;
+  }
+
+  .disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .action-area > div {

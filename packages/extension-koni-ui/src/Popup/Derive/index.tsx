@@ -75,6 +75,7 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
         onBackClick={_onBackClick}
         step={account ? 2 : 1}
         text={t<string>('Add new account')}
+        isBusy={isBusy}
       />
       {!account && (
         <SelectParent
@@ -82,6 +83,8 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
           onDerivationConfirmed={_onDerivationConfirmed}
           parentAddress={parentAddress}
           parentGenesis={parentGenesis}
+          isBusy={isBusy}
+          setBusy={setIsBusy}
         />
       )}
       {account && (

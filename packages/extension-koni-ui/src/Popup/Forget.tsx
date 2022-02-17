@@ -77,6 +77,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
       <Header
         showSubHeader
         subHeaderName={t<string>('Forget Account')}
+        isBusy={isBusy}
       />
       <div className={className}>
         {isAllAccount ?
@@ -108,7 +109,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
               </Button>
               <ActionBar className='forget-account__cancel-btn-wrapper'>
                 <ActionText
-                  className='forget-account__cancel-btn'
+                  className={`forget-account__cancel-btn ${isBusy ? 'disabled-btn' : ''}`}
                   onClick={_goHome}
                   text={t<string>('Cancel')}
                 />
@@ -126,6 +127,12 @@ export default withRouter(styled(Forget)(({theme}: Props) => `
 
   .forget-account__action-area {
     padding: 10px 24px;
+  }
+
+  .disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .forget-account__cancel-btn {

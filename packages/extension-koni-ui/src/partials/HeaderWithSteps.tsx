@@ -17,21 +17,24 @@ interface Props extends ThemeProps {
   step: number;
   text: string;
   onBackClick: () => void;
+  isBusy: boolean;
 }
 
-function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.ReactElement<Props> {
+function HeaderWithSteps ({ className, onBackClick, step, text, isBusy }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  console.log('isBusy', isBusy);
 
   return (
     <Header
       className={className}
       text={text}
+      isBusy={isBusy}
     >
       <div className='header-with-steps'>
-        <div className='header-with-steps-left-content'>
+        <div className='header-with-steps-left-content' >
           {step === 2 && (
             <FontAwesomeIcon
-              className='back-button-icon'
+              className={`back-button-icon ${isBusy ? 'disabled-button' : ''}`}
               icon={faArrowLeft}
               onClick={onBackClick}
             />
@@ -44,7 +47,7 @@ function HeaderWithSteps ({ className, onBackClick, step, text }: Props): React.
             <span className='total'>/2</span>
           </div>
           <Link
-            className='header-with-steps-cancel-btn'
+            className={`header-with-steps-cancel-btn ${isBusy ? 'disabled-button' : ''}`}
             to='/'
           >
             <span>{t<string>('Cancel')}</span>
@@ -62,6 +65,12 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
     display: flex;
     align-items: center;
     padding: 7px 0;
+  }
+
+  .disabled-button {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .header-with-steps-title {

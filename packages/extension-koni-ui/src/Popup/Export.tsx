@@ -74,6 +74,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
         showBackArrow
         showSubHeader
         subHeaderName={t<string>('Export account')}
+        isBusy={isBusy}
       />
       <div className={className}>
         {isAllAccount ?
@@ -129,7 +130,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                 </Button>
                 <ActionBar className='export__action-bar'>
                   <ActionText
-                    className='cancel-button'
+                    className={`cancel-button ${isBusy? 'disabled-btn' : ''}`}
                     onClick={_goHome}
                     text={t<string>('Cancel')}
                   />
@@ -150,6 +151,12 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
 
   .export__password-area {
     padding-top: 13px;
+  }
+
+  .disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .export__action-area {

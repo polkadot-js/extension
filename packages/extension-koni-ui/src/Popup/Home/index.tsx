@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useContext, useMemo, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -163,6 +163,12 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
 
   useSetupTransactionHistory(address, showedNetworks);
 
+  useEffect(() => {
+    if (isAccountAll(address) && activatedTab === 5) {
+      _setActiveTab(1);
+    }
+  }, [address, activatedTab])
+
   const { crowdloanContributeMap,
     networkBalanceMaps,
     totalBalanceValue } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
@@ -195,12 +201,6 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
     return getTabHeaderItems(address, t)
   }, [address, t]);
 
-  const onChangeAccount = useCallback( (address: string) => {
-    if (isAccountAll(address)) {
-      _setActiveTab(1);
-    }
-  }, [_setActiveTab])
-
   return (
     <div className={`home-screen home ${className}`}>
       <Header
@@ -212,7 +212,6 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         showSettings
         text={t<string>('Accounts')}
         toggleZeroBalances={_toggleZeroBalances}
-        changeAccountCallback={onChangeAccount}
       />
 
       <div className={'home-action-block'}>

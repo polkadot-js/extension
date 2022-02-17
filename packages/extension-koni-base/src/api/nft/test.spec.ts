@@ -12,22 +12,25 @@ const TEST_NFT_ADDRESSES = [
   '5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb',
   'Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr',
   '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM',
-  '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo'
+  '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo',
+  'yGJJkW9RiA7bFHRuUESSudCZZ1QNQGNbZQyqWJwMf1VeQ2HZo',
+  'yGHkvgGth212LzAokvhCMLvs5a9vTpRjKkqjCHfRqwxHn3Lum'
 ]
 
 describe('test api get nft', () => {
   test('test api get nft from all chains', async () => {
     const dotSamaAPIMap = connectDotSamaApis();
-    const nftHandler = new NftHandler(dotSamaAPIMap);
+    const nftHandler = new NftHandler(dotSamaAPIMap, TEST_NFT_ADDRESSES);
     await nftHandler.handleNfts();
     console.log(nftHandler.getTotal());
   });
 });
 
+
 describe('test single api get nft', () => {
   test('test single api get nft', async () => {
     const provider = initApi(NETWORKS.uniqueNft.provider);
-    const testNftApi = new UniqueNftApi(provider, TEST_NFT_ADDRESSES, 'acala');
+    const testNftApi = new UniqueNftApi(provider, TEST_NFT_ADDRESSES, 'quartz');
     await testNftApi.connect();
     await testNftApi.handleNfts();
     console.log(testNftApi.getData());

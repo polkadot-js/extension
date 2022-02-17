@@ -383,15 +383,15 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   //   paraId: 2096,
   //   nativeToken: 'NEER'
   // },
-  // quartz: {
-  //   chain: 'QUARTZ by UNIQUE',
-  //   genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554',
-  //   ss58Format: 255,
-  //   provider: 'wss://quartz.api.onfinality.io/public-ws',
-  //   group: 'KUSAMA_PARACHAIN',
-  //   paraId: 2095,
-  //   nativeToken: 'QTZ'
-  // },
+  quartz: {
+    chain: 'QUARTZ by UNIQUE',
+    genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554',
+    ss58Format: 255,
+    provider: 'wss://quartz.api.onfinality.io/public-ws',
+    group: 'KUSAMA_PARACHAIN',
+    paraId: 2095,
+    nativeToken: 'QTZ'
+  },
   // genshiro: {
   //   chain: 'Genshiro',
   //   genesisHash: '0x9b8cefc0eb5c568b527998bdd76c184e2b76ae561be76e4667072230217ea243',

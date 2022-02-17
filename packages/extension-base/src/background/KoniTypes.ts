@@ -55,7 +55,7 @@ export interface NftItem {
   rarity?: string;
   collectionId?: string;
   description?: string;
-  properties?: Record<any, any>;
+  properties?: Record<any, any> | null;
 }
 
 export interface NftCollection {

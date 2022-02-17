@@ -8,6 +8,7 @@ import {AcalaNftApi} from "@polkadot/extension-koni-base/api/nft/acala_nft";
 import UniqueNftApi from "@polkadot/extension-koni-base/api/nft/unique_nft";
 import StatemineNftApi from "@polkadot/extension-koni-base/api/nft/statemine_nft";
 import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
+import QuartzNftApi from "@polkadot/extension-koni-base/api/nft/quartz_nft";
 
 const NFT_TIMEOUT = 30000
 
@@ -16,7 +17,8 @@ enum SUPPORTED_NFT_NETWORKS {
   acala = 'acala',
   rmrk = 'rmrk',
   statemine = 'statemine',
-  uniqueNft = 'uniqueNft'
+  uniqueNft = 'uniqueNft',
+  quartz = 'quartz'
 }
 
 function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
@@ -34,6 +36,8 @@ function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNf
       return new StatemineNftApi(api, addresses, chain);
     case SUPPORTED_NFT_NETWORKS.uniqueNft:
       return new UniqueNftApi(api, addresses, chain);
+    case SUPPORTED_NFT_NETWORKS.quartz:
+      return new QuartzNftApi(api, addresses, chain);
   }
 
   return null;
@@ -135,3 +139,4 @@ export class NftHandler {
 // kanaria rmrk: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
 // karura: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
 // acala: 16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo
+// quartz: yGJJkW9RiA7bFHRuUESSudCZZ1QNQGNbZQyqWJwMf1VeQ2HZo

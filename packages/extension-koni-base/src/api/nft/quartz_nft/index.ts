@@ -11,6 +11,9 @@ interface CollectionProperties {
   schemaVersion: string,
   offchainSchema: string,
   constOnChainSchema: string,
+  variableOnChainSchema: {
+    collectionCover: string
+  },
   tokenPrefix: string,
   description: number[],
   name: number[]
@@ -70,35 +73,8 @@ export default class QuartzNftApi extends BaseNftApi {
     return (await this.dotSamaApi.api.rpc.unique.collectionById(collectionId)).toJSON() as CollectionProperties;
   }
 
-
   /**
-    * Retrieve NFT image URL according to the collection offchain schema
-    *
-    * @param collectionProperties: collection properties
-    * @param tokenId: Token ID
-    * @returns the URL of the token image
-    */
-  public async getNftImageUrl (collectionProperties: CollectionProperties, tokenId: number) {
-    if (!this.dotSamaApi) return;
-
-    let url = '';
-
-    const schemaVersion = collectionProperties.schemaVersion;
-    const offchainSchema = hexToStr(collectionProperties.offchainSchema);
-
-    if (schemaVersion == 'ImageURL') {
-      // Replace {id} with token ID
-      url = offchainSchema;
-      url = url.replace('{id}', `${tokenId}`);
-    } else {
-      // TBD: Query image URL from the RESTful service
-    }
-
-    return url;
-  }
-
-  /**
-    * Retrieve and deserialize properties
+    * Retrieve and deserialize nft details
     *
     *
     * @param collectionProperties: Id of the collection
@@ -117,25 +93,30 @@ export default class QuartzNftApi extends BaseNftApi {
     const nftProps = hexToUTF16(constMetadata);
     const properties = deserializeNft(schemaRead, nftProps, locale);
 
-    let url = '';
-
+    let tokenImage = '';
     const schemaVersion = collectionProperties.schemaVersion;
-    const offchainSchema = hexToStr(collectionProperties.offchainSchema);
-
     if (schemaVersion == 'ImageURL') {
       // Replace {id} with token ID
-      url = offchainSchema;
-      url = url.replace('{id}', `${tokenId}`);
+      tokenImage = hexToStr(collectionProperties.offchainSchema);
+      tokenImage = tokenImage.replace('{id}', `${tokenId}`);
     } else {
-      // TBD: Query image URL from the RESTful service
+      // TBD: Query from the RESTful service
+    }
+
+    let collectionImage = '';
+    if (collectionProperties.variableOnChainSchema &&  collectionProperties.variableOnChainSchema.collectionCover) {
+      collectionImage = `https://ipfs.unique.network/ipfs/${collectionProperties.variableOnChainSchema.collectionCover}`;
+    } else {
+      // TBD: Query from the RESTful service
     }
 
     return {
       prefix: hexToStr(collectionProperties.tokenPrefix),
       collectionName: utf16ToString(collectionProperties.name),
       collectionDescription: utf16ToString(collectionProperties.description),
+      collectionImage: collectionImage,
       properties: properties,
-      image: url
+      image: tokenImage
     };
   }
 
@@ -175,7 +156,7 @@ export default class QuartzNftApi extends BaseNftApi {
           const nftData = await this.getNftData(collectionProperties, collectionId, tokenId);
           if (nftData) {
             collectionName = nftData.collectionName;
-            collectionImage = parseIpfsLink(nftData.image);
+            collectionImage = parseIpfsLink(nftData.collectionImage);
             const tokenDetail: NftItem = {
               id: tokenId.toString(),
               name: nftData.prefix + '#' + tokenId,

@@ -25,16 +25,6 @@ describe('test quartz_nft api', () => {
     expect(collectionProperties?.owner).toEqual('yGHkvgGth212LzAokvhCMLvs5a9vTpRjKkqjCHfRqwxHn3Lum');
   });
 
-  test('test quartz_nft getNftImageUrl', async () => {
-    await quartzNftApi.connect();
-    const collectionProperties = await quartzNftApi.getCollectionProperties(5);
-    if (collectionProperties) {
-      const imageUrl = await quartzNftApi.getNftImageUrl(collectionProperties, 173);
-      expect(imageUrl).toEqual(
-        'http://ipfs-gateway.usetech.com/ipfs/Qmap7uz7JKZNovCdLfdDE3p4XA6shghdADS7EsHvLjL6jT/nft_image_173.png');
-    }
-  });
-
   test('test quartz_nft getNftData', async () => {
     await quartzNftApi.connect();
     const collectionProperties = await quartzNftApi.getCollectionProperties(5);

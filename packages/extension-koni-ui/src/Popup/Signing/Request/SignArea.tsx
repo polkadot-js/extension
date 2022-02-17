@@ -129,8 +129,12 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
 export default styled(SignArea)`
   flex-direction: column;
+  position: sticky;
+  bottom: 0;
+  margin-left: -15px;
+  margin-right: -15px;
+  margin-bottom: -15px;
   padding: 15px;
-
   .cancel-button {
     margin-top: 4px;
     margin-bottom: 4px;

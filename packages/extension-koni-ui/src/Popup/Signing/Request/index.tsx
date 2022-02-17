@@ -17,8 +17,10 @@ import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
+import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 
-interface Props {
+interface Props extends ThemeProps {
   account: AccountJson;
   buttonText: string;
   isFirst: boolean;
@@ -83,15 +85,13 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
     const json = request.payload as SignerPayloadJSON;
 
     return (
-      <>
-        <div className={className}>
-          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfo
-              address={json.address}
-              className='transaction-account-info'
-              genesisHash={json.genesisHash}
-            />
-          </div>
+      <div className={className}>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+          <AccountInfo
+            address={json.address}
+            className='transaction-account-info'
+            genesisHash={json.genesisHash}
+          />
         </div>
         {isExternal && !isHardware
           ? (
@@ -131,15 +131,17 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
           setError={setError}
           signId={signId}
         />
-      </>
+      </div>
     );
   } else if (hexBytes !== null) {
     const { address, data } = request.payload as SignerPayloadRaw;
-    const account = accounts.find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
+    const account = accounts
+      .filter(a => !isAccountAll(a.address))
+      .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
     return (
-      <>
-        <div>
+      <div className={className}>
+        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
           <AccountInfo
             address={address}
           />
@@ -169,7 +171,7 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
           setError={setError}
           signId={signId}
         />
-      </>
+      </div>
     );
   }
 
@@ -177,7 +179,9 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
 }
 
 export default styled(Request)`
-  padding: 0 15px;
+  padding: 25px 15px 0;
+  flex: 1;
+  overflow-y: auto;
   .transaction-account-info {
     padding-bottom: 0;
   }

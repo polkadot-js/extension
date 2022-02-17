@@ -55,7 +55,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
               target='_blank'
             >
               <span className='tab-url'>{url}</span>
-            </a>.
+            </a>
             </Trans>
           </div>
         </div>

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type {ThemeProps} from '../types';
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useState} from 'react';
 import {RouteComponentProps, withRouter} from 'react-router';
 import styled, {ThemeContext} from 'styled-components';
 import {AccountJson} from '@polkadot/extension-base/background/types';
@@ -28,11 +28,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
   const [isBusy, setIsBusy] = useState(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const {accounts} = useContext(AccountContext);
-  const [isAllAccount, setIsAllAccount] = useState(false);
-
-  useEffect(() => {
-    setIsAllAccount(isAccountAll(address));
-  }, []);
+  const _isAllAccount = isAccountAll(address);
 
   const _goHome = useCallback(
     () => {
@@ -80,7 +76,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
         isBusy={isBusy}
       />
       <div className={className}>
-        {isAllAccount ?
+        {_isAllAccount ?
           <div>
             <Warning>
               {t<string>(`Account "All" doesn't support this action. Please switch to another account`)}

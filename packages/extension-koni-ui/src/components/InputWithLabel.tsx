@@ -18,9 +18,9 @@ interface Props {
   isFocused?: boolean;
   isReadOnly?: boolean;
   label: string;
-  onBlur?: () => void;
+  onBlur?: (value: string) => void;
   onChange?: (value: string) => void;
-  onEnter?: () => void;
+  onEnter?: (value: string) => void;
   placeholder?: string;
   type?: 'text' | 'password';
   value?: string;
@@ -33,7 +33,8 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
 
   const _checkKey = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
-      onEnter && event.key === 'Enter' && onEnter();
+      // @ts-ignore
+      onEnter && event.key === 'Enter' && onEnter(event.target.value);
 
       if (type === 'password') {
         if (event.getModifierState('CapsLock')) {
@@ -53,6 +54,13 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
     [onChange]
   );
 
+  const _onBlur = useCallback(
+    ({ target: { value } }: React.FocusEvent<HTMLInputElement>): void => {
+      onBlur && onBlur(value);
+    },
+    [onBlur]
+  );
+
   return (
     <Label
       className={`${className || ''} ${withoutMargin ? 'withoutMargin' : ''}`}
@@ -64,7 +72,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         autoFocus={isFocused}
         defaultValue={defaultValue || undefined}
         disabled={disabled}
-        onBlur={onBlur}
+        onBlur={_onBlur}
         onChange={_onChange}
         onKeyPress={_checkKey}
         placeholder={placeholder}

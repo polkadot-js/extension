@@ -8,10 +8,9 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
-import { AccountContext, ActionContext } from '@polkadot/extension-koni-ui/components';
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import { saveCurrentAccountAddress } from '@polkadot/extension-koni-ui/messaging';
-import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { AccountContext, ActionContext, AccountInfoEl } from '@polkadot/extension-koni-ui/components';
+import {saveCurrentAccountAddress, triggerAccountsSubscription} from '@polkadot/extension-koni-ui/messaging';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
 
@@ -19,9 +18,10 @@ interface Props extends AccountJson {
   className?: string;
   parentName?: string;
   closeSetting?: () => void;
+  changeAccountCallback?: (address: string) => void;
 }
 
-function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type }: Props): React.ReactElement<Props> {
+function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type, changeAccountCallback }: Props): React.ReactElement<Props> {
   const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -44,7 +44,12 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
 
         if (accountByAddress) {
           saveCurrentAccountAddress(address).then(() => {
-            store.dispatch({ type: 'currentAccount/update', payload: accountByAddress });
+            window.localStorage.removeItem('accountAllNetworkGenesisHash');
+            triggerAccountsSubscription().catch((e) => {
+              console.error('There is a problem when trigger Accounts Subscription', e);
+            });
+
+            changeAccountCallback && changeAccountCallback(address);
           }).catch((e) => {
             console.error('There is a problem when set Current Account', e);
           });
@@ -55,7 +60,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
 
       closeSetting && closeSetting();
       onAction('/');
-    }, [address]);
+    }, [address, changeAccountCallback]);
 
   return (
     <div
@@ -73,7 +78,7 @@ function Account ({ address, className, closeSetting, genesisHash, name, parentN
           <div className='account-unchecked-item' />
         )
       }
-      <AccountInfo
+      <AccountInfoEl
         address={address}
         className='account__account-item'
         genesisHash={genesisHash}
@@ -103,6 +108,6 @@ export default styled(Account)(({ theme }: ThemeProps) => `
   }
 
   .account-unchecked-item {
-    width: 24px;
+    width: 19px;
   }
 `);

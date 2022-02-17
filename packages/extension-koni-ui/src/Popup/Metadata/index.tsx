@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext } from 'react';
-
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
-
 import { MetadataReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Header } from '../../partials';

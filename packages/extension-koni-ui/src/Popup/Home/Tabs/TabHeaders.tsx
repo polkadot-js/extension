@@ -3,7 +3,6 @@
 
 import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
 import TabHeaderItem from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaderItem';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';

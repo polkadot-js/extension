@@ -4,9 +4,7 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
-import KoniNextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
+import { AccountInfoEl, ButtonArea, NextStepButton } from '../components';
 import Name from '@polkadot/extension-koni-ui/partials/Name';
 import Password from '@polkadot/extension-koni-ui/partials/Password';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -48,7 +46,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
       <div className={className}>
         <div className='account-info-wrapper'>
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} account-name-and-password-creation-wrapper`}>
-            <AccountInfo
+            <AccountInfoEl
               address={address}
               genesisHash={genesis}
               name={name}
@@ -64,7 +62,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
           </div>
         </div>
         <ButtonArea className='kn-button-area'>
-          <KoniNextStepButton
+          <NextStepButton
             className='next-step-btn'
             data-button-action='add new root'
             isBusy={isBusy}
@@ -72,7 +70,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
             onClick={_onCreate}
           >
             {buttonLabel}
-          </KoniNextStepButton>
+          </NextStepButton>
         </ButtonArea>
       </div>
     </>

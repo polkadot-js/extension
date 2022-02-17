@@ -4,13 +4,10 @@
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
-
 import BN from 'bn.js';
 import { TFunction } from 'i18next';
 import React, { useMemo, useRef } from 'react';
-
 import { bnToBn, formatNumber } from '@polkadot/util';
-
 import { Table } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';

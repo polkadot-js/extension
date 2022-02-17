@@ -3,9 +3,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
-
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props {

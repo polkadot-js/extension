@@ -69,9 +69,10 @@ export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
       display: flex;
       align-items: center;
       > span {
-        font-size: 15px;
+        font-size: 14px;
         line-height: 24px;
-        color: ${theme.textColor}
+        color: ${theme.textColor};
+        padding-left: 10px;
       }
     }
   }

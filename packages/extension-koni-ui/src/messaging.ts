@@ -194,8 +194,12 @@ export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void):
   return sendMessage('pri(accounts.subscribe)', null, cb);
 }
 
-export async function getAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
-  return sendMessage('pri(accounts.getAllWithCurrentAddress)', null, cb);
+export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
+  return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
+}
+
+export async function triggerAccountsSubscription (): Promise<boolean> {
+  return sendMessage('pri(accounts.triggerSubscription)');
 }
 
 export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {

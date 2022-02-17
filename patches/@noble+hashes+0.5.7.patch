@@ -1,0 +1,44 @@
+diff --git a/node_modules/@noble/hashes/esm/sha3.js b/node_modules/@noble/hashes/esm/sha3.js
+index 6a2aafb..cc152d3 100644
+--- a/node_modules/@noble/hashes/esm/sha3.js
++++ b/node_modules/@noble/hashes/esm/sha3.js
+@@ -7,7 +7,7 @@ const _1n = BigInt(1);
+ const _2n = BigInt(2);
+ const _7n = BigInt(7);
+ const _256n = BigInt(256);
+-const _0x71n = BigInt(0x71);
++const _ox71n = BigInt(0x71);
+ for (let round = 0, R = _1n, x = 1, y = 0; round < 24; round++) {
+     // Pi
+     [x, y] = [y, (2 * x + 3 * y) % 5];
+@@ -17,7 +17,7 @@ for (let round = 0, R = _1n, x = 1, y = 0; round < 24; round++) {
+     // Iota
+     let t = _0n;
+     for (let j = 0; j < 7; j++) {
+-        R = ((R << _1n) ^ ((R >> _7n) * _0x71n)) % _256n;
++        R = ((R << _1n) ^ ((R >> _7n) * _ox71n)) % _256n;
+         if (R & _2n)
+             t ^= _1n << ((_1n << BigInt(j)) - _1n);
+     }
+diff --git a/node_modules/@noble/hashes/sha3.js b/node_modules/@noble/hashes/sha3.js
+index 80c558b..ef57b83 100644
+--- a/node_modules/@noble/hashes/sha3.js
++++ b/node_modules/@noble/hashes/sha3.js
+@@ -29,7 +29,7 @@ const _1n = BigInt(1);
+ const _2n = BigInt(2);
+ const _7n = BigInt(7);
+ const _256n = BigInt(256);
+-const _0x71n = BigInt(0x71);
++const _ox71n = BigInt(0x71);
+ for (let round = 0, R = _1n, x = 1, y = 0; round < 24; round++) {
+     // Pi
+     [x, y] = [y, (2 * x + 3 * y) % 5];
+@@ -39,7 +39,7 @@ for (let round = 0, R = _1n, x = 1, y = 0; round < 24; round++) {
+     // Iota
+     let t = _0n;
+     for (let j = 0; j < 7; j++) {
+-        R = ((R << _1n) ^ ((R >> _7n) * _0x71n)) % _256n;
++        R = ((R << _1n) ^ ((R >> _7n) * _ox71n)) % _256n;
+         if (R & _2n)
+             t ^= _1n << ((_1n << BigInt(j)) - _1n);
+     }

@@ -3,25 +3,41 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 
-import { ActionContext, Link } from '../../components';
+import { Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
+import {windowOpen} from "@polkadot/extension-koni-ui/messaging";
+import useIsPopup from "@polkadot/extension-koni-ui/hooks/useIsPopup";
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
+const jsonPath = '/account/restore-json';
+const createAccountPath = '/account/create';
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const onAction = useContext(ActionContext);
-  const _createNewAccount = useCallback(
-    () => onAction('/account/create'),
-    [onAction]
+  const isPopup = useIsPopup();
+  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
+  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+
+  const _openJson = useCallback(
+    () => {
+      window.localStorage.setItem('popupNavigation', jsonPath);
+      windowOpen(jsonPath);
+    }, []
+  );
+
+  const _openCreateAccount = useCallback(
+    () => {
+      window.localStorage.setItem('popupNavigation', createAccountPath);
+      windowOpen(createAccountPath);
+    }, []
   );
 
   return (
@@ -42,9 +58,14 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           <Button
             className='add-account-btn create-account'
             data-export-button
-            onClick={_createNewAccount}
           >
-            {t<string>('Create new account')}
+            <Link
+              className='add-account-link__create-account'
+              onClick={isPopup && (isFirefox || isLinux) ? _openCreateAccount : undefined}
+              to={isPopup && (isFirefox || isLinux) ? undefined : createAccountPath}
+            >
+              {t<string>('Create new account')}
+            </Link>
           </Button>
 
           <Button
@@ -65,7 +86,8 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
           >
             <Link
               className='add-account-link'
-              to={'/account/restore-json'}
+              onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
+              to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >
               {t<string>('Restore account from backup JSON file')}
             </Link>
@@ -96,6 +118,12 @@ export default React.memo(styled(AddAccount)(({ theme }: Props) => `
   .add-account-link {
     justify-content: center;
     color: ${theme.textColor};
+    opacity: 1;
+  }
+
+  .add-account-link__create-account {
+    justify-content: center;
+    color: ${theme.buttonTextColor3};
     opacity: 1;
   }
 

@@ -7,17 +7,11 @@ import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
-
-import ActionBar from '@polkadot/extension-koni-ui/components/ActionBar';
-import ActionText from '@polkadot/extension-koni-ui/components/ActionText';
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-
-import { AccountContext, ActionContext } from '../components';
+import { AccountContext, ActionContext, ActionBar, ActionText, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccounts } from '../messaging';
+import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 const MIN_LENGTH = 6;
 
@@ -25,7 +19,7 @@ interface Props extends RouteComponentProps, ThemeProps {
   className?: string;
 }
 
-function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
+function ExportAll ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -52,7 +46,7 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
     (): void => {
       setIsBusy(true);
 
-      exportAccounts(accounts.map((account) => account.address), pass)
+      exportAccounts(accounts.filter(acc => acc.address !== ALL_ACCOUNT_KEY).map((account) => account.address), pass)
         .then(({ exportedJson }) => {
           const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 
@@ -120,7 +114,7 @@ function KoniExportAll ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default withRouter(styled(KoniExportAll)(({ theme }: Props) => `
+export default withRouter(styled(ExportAll)(({ theme }: Props) => `
   .action-area {
     padding: 25px 15px 10px 15px;
   }

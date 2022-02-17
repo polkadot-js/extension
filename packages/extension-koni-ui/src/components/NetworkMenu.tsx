@@ -12,6 +12,7 @@ import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
+import {triggerAccountsSubscription} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -93,6 +94,15 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
     [selectedGroup]
   );
 
+  const _selectNetwork = useCallback((value: string, networkPrefix: number, icon: string, networkKey: string) => {
+    return () => {
+      selectNetwork(value, networkPrefix, icon, networkKey);
+      triggerAccountsSubscription().catch((e) => {
+        console.error('There is a problem when trigger Accounts Subscription', e);
+      });
+    }
+  }, [selectNetwork]);
+
   return (
     <Menu
       className={className}
@@ -126,9 +136,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
               <div
                 className='network-item-container'
                 key={value}
-                onClick={() => {
-                  selectNetwork(value, networkPrefix, icon, networkKey);
-                }}
+                onClick={_selectNetwork(value, networkPrefix, icon, networkKey)}
               >
                 <img
                   alt='logo'

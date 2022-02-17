@@ -4,13 +4,7 @@
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
-import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
-import MnemonicSeed from '@polkadot/extension-koni-ui/components/MnemonicSeed';
-import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
+import { AccountInfoEl, ButtonArea, Checkbox, MnemonicSeed, NextStepButton, Warning } from '@polkadot/extension-koni-ui/components';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import useToast from '../../hooks/useToast';
@@ -58,7 +52,7 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
       <div className={className}>
         <div className='account-info-wrapper'>
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfo
+            <AccountInfoEl
               address={address}
               genesisHash={genesisHash}
               name={name}
@@ -86,7 +80,7 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
             isDisabled={!isMnemonicSaved}
             onClick={onNextStep}
           >
-            {t<string>('Next step')}
+            {t<string>('Next Step')}
           </NextStepButton>
         </ButtonArea>
       </div>

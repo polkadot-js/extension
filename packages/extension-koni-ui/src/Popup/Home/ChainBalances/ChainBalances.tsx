@@ -47,13 +47,14 @@ function getAccountInfoByNetwork (
   networkKey: string,
   networkMetadata: NetWorkMetadataDef): AccountInfoByNetwork {
   return {
+    address,
     key: networkKey,
     networkKey,
     networkDisplayName: networkMetadata.chain,
     networkPrefix: networkMetadata.ss58Format,
     networkLogo: getLogoByNetworkKey(networkKey),
     networkIconTheme: networkMetadata.isEthereum ? 'ethereum' : (networkMetadata.icon || 'polkadot'),
-    address: reformatAddress(address, networkMetadata.ss58Format, networkMetadata.isEthereum)
+    formattedAddress: reformatAddress(address, networkMetadata.ss58Format, networkMetadata.isEthereum)
   };
 }
 

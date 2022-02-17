@@ -2,14 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
-
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-
-import KoniButton from '@polkadot/extension-koni-ui/components/Button';
-import KoniButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
-import KoniHeader from '@polkadot/extension-koni-ui/partials/Header';
-
+import Button from '@polkadot/extension-koni-ui/components/Button';
+import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
+import Header from '@polkadot/extension-koni-ui/partials/Header';
 import logo from '../assets/sub-wallet-logo.svg';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -32,7 +29,7 @@ function Welcome ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <KoniHeader
+      <Header
         isNotHaveAccount
         isWelcomeScreen
       />
@@ -49,9 +46,9 @@ function Welcome ({ className }: Props): React.ReactElement<Props> {
           <span className='welcome-subtitle'>
             The decentralized web awaits
           </span>
-          <KoniButtonArea className='welcome-button-wrapper'>
-            <KoniButton onClick={_onClick}>{t<string>('Get started')}</KoniButton>
-          </KoniButtonArea>
+          <ButtonArea className='welcome-button-wrapper'>
+            <Button onClick={_onClick}>{t<string>('Get started')}</Button>
+          </ButtonArea>
         </div>
       </div>
     </>

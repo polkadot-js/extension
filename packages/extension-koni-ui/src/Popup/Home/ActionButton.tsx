@@ -3,7 +3,6 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-
 import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
@@ -14,15 +13,26 @@ interface Props extends ThemeProps {
   onClick?: () => void;
   tooltipContent?: string;
   iconSrc: string;
+  isDisabled?: boolean;
 }
 
-function HomeActionButton ({ className, iconSrc, onClick, tooltipContent }: Props): React.ReactElement {
+function getContainerClassName (isDisabled: boolean, extraClassName = ''): string {
+  let className = `home-action-button action-button ${extraClassName}`;
+
+  if (isDisabled) {
+    className += ' -disabled ';
+  }
+
+  return className;
+}
+
+function HomeActionButton ({ className, iconSrc, onClick, tooltipContent, isDisabled = false }: Props): React.ReactElement {
   const [trigger] = useState(() => `home-action-button-${++tooltipId}`);
 
   return (
     <>
       <div
-        className={`home-action-button action-button ${className || ''}`}
+        className={getContainerClassName(isDisabled, className)}
         data-for={trigger}
         data-tip={true}
         onClick={onClick}
@@ -56,5 +66,10 @@ export default styled(HomeActionButton)(({ theme }: Props) => `
     img {
       width: 24px;
       height: 24px;
+    }
+
+    &.-disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
     }
 `);

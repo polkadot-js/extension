@@ -3,7 +3,6 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
-
 import { ChainRegistry, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import arrowReceived from '@polkadot/extension-koni-ui/assets/arrow-received.svg';
 import arrowSend from '@polkadot/extension-koni-ui/assets/arrow-send.svg';

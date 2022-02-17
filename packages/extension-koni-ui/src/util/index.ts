@@ -8,16 +8,18 @@ import { Recoded } from '@polkadot/extension-koni-ui/types';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
-
+import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
+import {isAccountAll} from "@polkadot/extension-koni-ui/util/accountAll";
 export * from './common';
 export * from './chainBalancesApi';
+export * from './accountAll';
 
 // todo: Refactor this file
 
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
-  return accounts.find(({ address }): boolean =>
+  return accounts.filter(a => !isAccountAll(a.address)).find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
   ) || null;
 }
@@ -44,6 +46,15 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
 }
 
 export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
+
+export const accountAllRecoded: Recoded = {
+  account: {
+    address: ALL_ACCOUNT_KEY
+  },
+  formatted: ALL_ACCOUNT_KEY,
+  prefix: 42,
+  isEthereum: false
+};
 
 export function getLogoByNetworkKey (networkKey: string): string {
   return LogosMap[networkKey] || LogosMap.default;

@@ -33,11 +33,11 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .menu-item__title {
     margin: 0;
     width: 100%;
-    font-size: 13px;
-    line-height: 26px;
+    font-size: 12px;
+    line-height: 24px;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: ${theme.textColor2};
-    font-weight: 500;
+    font-weight: 400;
   }
 `);

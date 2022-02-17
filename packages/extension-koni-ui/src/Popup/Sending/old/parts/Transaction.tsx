@@ -18,10 +18,11 @@ interface Props {
   isSendable: boolean;
   tip?: BN;
   api: ApiPromise;
-  apiUrl: string
+  apiUrl: string;
+  isBusy?: boolean;
 }
 
-function Transaction ({ accountId, api, apiUrl, className, extrinsic, isSendable, tip }: Props): React.ReactElement<Props> | null {
+function Transaction ({ accountId, api, apiUrl, className, extrinsic, isSendable, tip, isBusy }: Props): React.ReactElement<Props> | null {
   if (!extrinsic) {
     return null;
   }
@@ -36,6 +37,7 @@ function Transaction ({ accountId, api, apiUrl, className, extrinsic, isSendable
         extrinsic={extrinsic}
         isSendable={isSendable}
         tip={tip}
+        isBusy={isBusy}
       />
     </div>
   );

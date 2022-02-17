@@ -19,7 +19,7 @@ const darkTheme = {
   backgroundDropdownSeclection: 'rgba(0, 7, 45, .7)',
   bodyColor: '#20222A',
   borderRadius: '3px',
-  boxBorderColor: '#343849',
+  boxBorderColor: '#212845',
   borderColor: '#EEEEEE',
   borderColor2: '#212845',
   boxMargin: '0.75rem 0',
@@ -93,7 +93,8 @@ const darkTheme = {
   scrollBarThumbHover: '#9196AB',
   crowdloanWinnerStatus: '#42C59A',
   crowdloanActiveStatus: '#F7A21B',
-  crowdloanFailStatus: '#F5000E'
+  crowdloanFailStatus: '#F5000E',
+  extensionBorder: 'transparent'
 };
 
 export declare type Theme = typeof darkTheme;
@@ -152,8 +153,8 @@ const lightTheme: Theme = {
   toggleInactiveBgc: '#ddd',
   toggleInactiveThumbColor: '#fff',
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
-  scrollBarThumb: 'rgba(0, 0, 0, .25)'
-
+  scrollBarThumb: 'rgba(0, 0, 0, .25)',
+  extensionBorder: '#EDEDED'
 };
 
 export const themes = {

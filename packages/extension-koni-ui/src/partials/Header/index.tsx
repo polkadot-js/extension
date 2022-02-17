@@ -10,11 +10,10 @@ import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { Chain } from '@polkadot/extension-chains/types';
+import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import { AccountContext, Link, SettingsContext } from '@polkadot/extension-koni-ui/components';
+import { Link } from '@polkadot/extension-koni-ui/components';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -25,10 +24,10 @@ import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMen
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { accountAllRecoded, isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
+import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
-import { SettingsStruct } from '@polkadot/ui-settings/types';
-import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
@@ -49,57 +48,25 @@ interface Props extends ThemeProps {
   subHeaderName?: string;
   showCancelButton?: boolean;
   isWelcomeScreen?: boolean;
-  isNotHaveAccount?: boolean;
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
+  changeAccountCallback?: (address: string) => void;
 }
-
-interface Recoded {
-  formatted: string | null;
-  prefix?: number;
-}
-
-function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
-  const pkStr = publicKey.toString();
-
-  return accounts.find(({ address }): boolean =>
-    decodeAddress(address).toString() === pkStr
-  ) || null;
-}
-
-function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
-  // decode and create a shortcut for the encoded address
-  const publicKey = decodeAddress(address);
-  // find our account using the actual publicKey, and then find the associated chain
-  const account = findSubstrateAccount(accounts, publicKey);
-  const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);
-
-  // always allow the actual settings to override the display
-  return {
-    formatted: account?.type === 'ethereum'
-      ? address
-      : encodeAddress(publicKey, prefix),
-    prefix
-  };
-}
-
-const defaultRecoded = { formatted: null, prefix: 42 };
 
 function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ children, className = '', isContainDetailHeader, isNotHaveAccount, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const genesisHash = useSelector((state: RootState) => state.currentNetwork.genesisHash);
-  const { accounts } = useContext(AccountContext);
+  const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
+  const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
   const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
-  const settings = useContext(SettingsContext);
-  const [{ formatted, prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
+  const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const popupTheme = themeContext.id;
   const setRef = useRef(null);
@@ -112,28 +79,63 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
     []
   );
 
+  const _isAccountAll = currentAccount && isAccountAll(currentAccount.address);
+
   useEffect((): void => {
     if (!currentAccount) {
       return;
     }
 
     if (!currentAccount.address) {
-      setRecoded(defaultRecoded);
+      setFormattedAddress(null);
 
       return;
     }
 
-    setRecoded(
-      (
-        chain?.definition.chainType === 'ethereum' ||
-        currentAccount?.type === 'ethereum'
-      )
-        ? { formatted: currentAccount?.address }
-        : recodeAddress(currentAccount?.address, accounts, chain, settings));
-  }, [accounts, currentAccount?.address, chain, settings]);
+    if (isAccountAll(currentAccount.address)) {
+      setFormattedAddress(accountAllRecoded.formatted);
+
+      return;
+    }
+
+    const formattedAddress = reformatAddress(currentAccount.address, networkPrefix, isEthereum);
+
+    setFormattedAddress(formattedAddress);
+  }, [ currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
 
   useEffect(() => {
     let isSync = true;
+
+    if (_isAccountAll) {
+      let networkSelected;
+
+      const accountAllNetworkGenesisHash = window.localStorage.getItem('accountAllNetworkGenesisHash');
+
+      if (!accountAllNetworkGenesisHash) {
+        networkSelected = genesisOptions[0];
+      } else {
+        networkSelected = genesisOptions.find((opt) => opt.value === accountAllNetworkGenesisHash);
+
+        if (!networkSelected) {
+          window.localStorage.setItem('accountAllNetworkGenesisHash', '');
+          networkSelected = genesisOptions[0];
+        }
+      }
+
+      if (networkSelected) {
+        updateCurrentNetwork({
+          networkPrefix: networkSelected.networkPrefix,
+          icon: networkSelected.icon,
+          genesisHash: networkSelected.value,
+          networkKey: networkSelected.networkKey,
+          isEthereum: networkSelected.isEthereum
+        });
+
+        setLocalGenesisHash(networkSelected.value);
+      }
+
+      return;
+    }
 
     (async () => {
       let networkSelected;
@@ -157,13 +159,15 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
           networkKey: networkSelected.networkKey,
           isEthereum: networkSelected.isEthereum
         });
+
+        setLocalGenesisHash(networkSelected.value);
       }
     })();
 
     return () => {
       isSync = false;
     };
-  }, [currentAccount?.genesisHash, accounts]);
+  }, [currentAccount, currentAccount?.genesisHash, _isAccountAll, genesisOptions]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
@@ -177,7 +181,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
       }
 
       return networkKey;
-    }, [currentAccount?.genesisHash]
+    }, [currentAccount, genesisOptions]
   );
 
   const _toggleZeroBalances = useCallback(
@@ -197,7 +201,12 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
   const _onChangeGenesis = useCallback(
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
       if (currentAccount) {
-        await tieAccount(currentAccount.address, genesisHash || null);
+        if (!isAccountAll(currentAccount.address)) {
+          await tieAccount(currentAccount.address, genesisHash || null);
+        } else {
+          window.localStorage.setItem('accountAllNetworkGenesisHash', genesisHash);
+        }
+
         updateCurrentNetwork({
           networkPrefix,
           icon,
@@ -205,11 +214,13 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
           networkKey,
           isEthereum
         });
+
+        setLocalGenesisHash(genesisHash);
       }
 
       setShowNetworkSelect(false);
     },
-    [genesisHash, currentAccount]
+    [currentAccount]
   );
 
   useOutsideClick(setRef, (): void => {
@@ -271,16 +282,16 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
               />
             </div>)}
             <div
-              className={`network-select-item ${isNetworkSelectOpen && 'pointer-events-none'}`}
+              className={`network-select-item ${isNetworkSelectOpen ? 'pointer-events-none' : ''}`}
               onClick={_toggleNetwork}
             >
               <img
                 alt='logo'
                 className={'network-logo'}
-                src={getLogoByGenesisHash(currentAccount?.genesisHash as string)}
+                src={getLogoByGenesisHash(localGenesisHash)}
               />
               <div className='network-select-item__text'>
-                {getNetworkKey(currentAccount?.genesisHash as string) || genesisOptions[0].text}
+                {getNetworkKey(localGenesisHash) || genesisOptions[0].text}
               </div>
               <FontAwesomeIcon
                 className='network-select-item__icon'
@@ -291,21 +302,27 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
             {!isWelcomeScreen && (
               <div
-                className={`setting-icon-wrapper ${isSettingsOpen && 'pointer-events-none'}`}
+                className={`setting-icon-wrapper ${isSettingsOpen ? 'pointer-events-none' : ''}`}
                 onClick={_toggleSettings}
               >
                 {!!currentAccount && !!currentAccount.address
-                  ? (
-                    <Identicon
-                      className='identityIcon'
-                      genesisHash={currentAccount?.genesisHash as string}
-                      iconTheme={theme}
-                      prefix={prefix}
-                      showLogo
-                      size={48}
-                      value={formatted || currentAccount?.address}
+                  ? _isAccountAll
+                    ? <img
+                      alt='all-account-icon'
+                      className='header__all-account-icon'
+                      src={allAccountLogo}
                     />
-                  )
+                    : (
+                      <Identicon
+                        className='identityIcon'
+                        genesisHash={localGenesisHash}
+                        iconTheme={theme}
+                        prefix={networkPrefix}
+                        showLogo
+                        size={48}
+                        value={formattedAddress || currentAccount?.address}
+                      />
+                    )
                   : (
                     <img
                       alt='default-img'
@@ -320,7 +337,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
           {isNetworkSelectOpen && (
             <NetworkMenu
-              currentNetwork={currentAccount?.genesisHash ? currentAccount?.genesisHash : ''}
+              currentNetwork={localGenesisHash}
               reference={netRef}
               selectNetwork={_onChangeGenesis}
             />
@@ -328,6 +345,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
 
           {isSettingsOpen && (
             <AccountMenuSettings
+              changeAccountCallback={changeAccountCallback}
               className='account-menu-setting'
               closeSetting={_toggleSettings}
               reference={setRef}
@@ -338,7 +356,7 @@ function Header ({ children, className = '', isContainDetailHeader, isNotHaveAcc
         {isContainDetailHeader &&
           <DetailHeader
             currentAccount={currentAccount}
-            formatted={formatted}
+            formatted={formattedAddress}
             isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}
             toggleVisibility={_toggleVisibility}
@@ -497,6 +515,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   .setting-icon-wrapper {
     margin-left: 1rem;
     cursor: pointer;
+    height: 56px;
   }
 
   .koni-subheader-btn {
@@ -609,5 +628,14 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       cursor: pointer;
       background-color: color: ${theme.accountHoverBackground};
     }
+  }
+
+  .header__all-account-icon {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    border: 2px solid ${theme.checkDotColor};
+    padding: 2px;
+    border-radius: 50%;
   }
 `));

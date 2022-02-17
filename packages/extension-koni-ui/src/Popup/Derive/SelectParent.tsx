@@ -3,15 +3,8 @@
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
 import { canDerive } from '@polkadot/extension-base/utils';
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
-import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
-import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
-import Label from '@polkadot/extension-koni-ui/components/Label';
-import NextStepButton from '@polkadot/extension-koni-ui/components/NextStepButton';
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
-
+import { AccountInfoEl, ButtonArea, InputWithLabel, Label, NextStepButton, Warning } from '../../components';
 import { AccountContext, ActionContext, Theme } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
@@ -141,7 +134,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
         <div className='derive-account'>
           {isLocked
             ? (
-              <AccountInfo
+              <AccountInfoEl
                 address={parentAddress}
                 className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}
                 genesisHash={parentGenesis}

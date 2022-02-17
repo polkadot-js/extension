@@ -1,19 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type {ThemeProps} from '../types';
 
 import React from 'react';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import styled from 'styled-components';
 
-import { canDerive } from '@polkadot/extension-base/utils';
+import {canDerive} from '@polkadot/extension-base/utils';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import Link from '@polkadot/extension-koni-ui/components/Link';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import MenuDivider from '@polkadot/extension-koni-ui/components/MenuDivider';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
+import {RootState} from '@polkadot/extension-koni-ui/stores';
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -23,58 +24,64 @@ interface Props extends ThemeProps {
   toggleZeroBalances?: () => void;
 }
 
-function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
-  const { t } = useTranslation();
+function AccountAction({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
+  const {t} = useTranslation();
 
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
+  const currentNetwork = useSelector((state: RootState) => state.currentNetwork)
 
   return (
     <Menu
       className={className}
       reference={reference}
     >
-      <div className='actions-wrapper'>
-        <Link
-          className='account-action__menu-item'
-          onClick={toggleEdit}
-        >
-          {t<string>('Rename')}
-        </Link>
-        {!currentAccount?.isExternal && canDerive(currentAccount?.type) && (
+      {currentAccount && !isAccountAll(currentAccount.address) &&
+      <div>
+        <div className='actions-wrapper'>
           <Link
             className='account-action__menu-item'
-            to={`/account/derive/${currentAccount?.address}/locked`}
+            onClick={toggleEdit}
           >
-            {t<string>('Derive New Account')}
+            {t<string>('Rename')}
           </Link>
-        )}
-      </div>
-      <MenuDivider />
+          {!currentAccount?.isExternal && canDerive(currentAccount?.type) && (
+            <Link
+              className='account-action__menu-item'
+              to={`/account/derive/${currentAccount?.address}/locked`}
+            >
+              {t<string>('Derive New Account')}
+            </Link>
+          )}
+        </div>
 
-      <div className='actions-wrapper'>
-        {!currentAccount?.isExternal && (
+        <MenuDivider/>
+
+        <div className='actions-wrapper'>
+          {!currentAccount?.isExternal && (
+            <Link
+              className='account-action__menu-item'
+              isDanger
+              to={`/account/export/${currentAccount?.address}`}
+            >
+              {t<string>('Export Account')}
+            </Link>
+          )}
           <Link
             className='account-action__menu-item'
             isDanger
-            to={`/account/export/${currentAccount?.address}`}
+            to={`/account/forget/${currentAccount?.address}`}
           >
-            {t<string>('Export Account')}
+            {t<string>('Forget Account')}
           </Link>
-        )}
-        <Link
-          className='account-action__menu-item'
-          isDanger
-          to={`/account/forget/${currentAccount?.address}`}
-        >
-          {t<string>('Forget Account')}
-        </Link>
+        </div>
       </div>
+      }
 
-      {(networkKey === 'all') && !!toggleZeroBalances && (
+      {(currentNetwork.networkKey === 'all') && !!toggleZeroBalances && (
         <>
-          <MenuDivider />
-
+          {currentAccount && !isAccountAll(currentAccount.address) &&
+          <MenuDivider/>
+          }
           <div className='actions-wrapper'>
             <Link
               className={`account-action__menu-item account-action__show-zero-balance ${isShowZeroBalances ? '-check' : ''}`}
@@ -96,7 +103,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
   );
 }
 
-export default React.memo(styled(AccountAction)(({ theme }: Props) => `
+export default React.memo(styled(AccountAction)(({theme}: Props) => `
   top: 60px;
 
   .actions-wrapper {

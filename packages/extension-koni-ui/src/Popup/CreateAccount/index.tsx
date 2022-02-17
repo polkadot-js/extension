@@ -3,12 +3,9 @@
 
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-
-import { ActionContext, Dropdown } from '../../components';
-import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
+import { ActionContext, Dropdown, AccountNamePasswordCreation } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
@@ -34,6 +31,11 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
   const networkRef = useRef(null);
+  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
+  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  if (isFirefox || isLinux) {
+    window.localStorage.setItem('popupNavigation', '');
+  }
 
   useEffect((): void => {
     createSeed(undefined)

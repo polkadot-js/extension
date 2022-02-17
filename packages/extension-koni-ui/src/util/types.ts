@@ -49,6 +49,7 @@ export type AccountInfoByNetwork = {
   networkLogo: string;
   networkIconTheme: string;
   address: string;
+  formattedAddress: string;
 }
 
 export type BalanceInfo = {

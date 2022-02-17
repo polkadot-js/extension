@@ -2,6 +2,7 @@ import connectDotSamaApis, {initApi} from "@polkadot/extension-koni-base/api/dot
 import {NftHandler} from "@polkadot/extension-koni-base/api/nft/index";
 import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
 import UniqueNftApi from "@polkadot/extension-koni-base/api/nft/unique_nft";
+import {subscribeStaking} from "@polkadot/extension-koni-base/api/dotsama/staking";
 
 jest.setTimeout(5000000000)
 
@@ -20,5 +21,13 @@ describe('test single api get nft', () => {
     const uniqueNftApi = new UniqueNftApi(api, ['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb'], 'unique');
     await uniqueNftApi.connect();
     await uniqueNftApi.handleNfts();
+  });
+});
+
+describe('test single api get staking', () => {
+  test('test single api get staking', async () => {
+    const dotSamaAPIMap = connectDotSamaApis();
+    const resp = await subscribeStaking(['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'], dotSamaAPIMap);
+    console.log(resp);
   });
 });

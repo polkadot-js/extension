@@ -4,24 +4,24 @@
 import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
 
 const NETWORKS: Record<string, NetWorkInfo> = {
-  // polkadot: {
-  //   chain: 'Polkadot Relay Chain',
-  //   genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
-  //   icon: 'polkadot',
-  //   ss58Format: 0,
-  //   provider: 'wss://polkadot.api.onfinality.io/public-ws',
-  //   group: 'RELAY_CHAIN',
-  //   nativeToken: 'DOT'
-  // },
-  // kusama: {
-  //   chain: 'Kusama Relay Chain',
-  //   genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
-  //   icon: 'polkadot',
-  //   ss58Format: 2,
-  //   provider: 'wss://kusama.api.onfinality.io/public-ws',
-  //   group: 'RELAY_CHAIN',
-  //   nativeToken: 'KSM'
-  // },
+  polkadot: {
+    chain: 'Polkadot Relay Chain',
+    genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
+    icon: 'polkadot',
+    ss58Format: 0,
+    provider: 'wss://polkadot.api.onfinality.io/public-ws',
+    group: 'RELAY_CHAIN',
+    nativeToken: 'DOT'
+  },
+  kusama: {
+    chain: 'Kusama Relay Chain',
+    genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+    icon: 'polkadot',
+    ss58Format: 2,
+    provider: 'wss://kusama.api.onfinality.io/public-ws',
+    group: 'RELAY_CHAIN',
+    nativeToken: 'KSM'
+  },
   // westend: {
   //   chain: 'Westend Relay Chain',
   //   genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
@@ -76,25 +76,25 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2000,
     nativeToken: 'ACA'
   },
-  // moonbeam: {
-  //   chain: 'Moonbeam',
-  //   genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
-  //   ss58Format: 1284,
-  //   provider: 'wss://moonbeam.api.onfinality.io/public-ws',
-  //   group: 'POLKADOT_PARACHAIN',
-  //   paraId: 2004,
-  //   isEthereum: true,
-  //   nativeToken: 'GLMR'
-  // },
-  // astar: {
-  //   chain: 'Astar',
-  //   genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
-  //   ss58Format: 5,
-  //   provider: 'wss://astar.api.onfinality.io/public-ws',
-  //   group: 'POLKADOT_PARACHAIN',
-  //   paraId: 2006,
-  //   nativeToken: 'ASTR'
-  // },
+  moonbeam: {
+    chain: 'Moonbeam',
+    genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
+    ss58Format: 1284,
+    provider: 'wss://moonbeam.api.onfinality.io/public-ws',
+    group: 'POLKADOT_PARACHAIN',
+    paraId: 2004,
+    isEthereum: true,
+    nativeToken: 'GLMR'
+  },
+  astar: {
+    chain: 'Astar',
+    genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
+    ss58Format: 5,
+    provider: 'wss://astar.api.onfinality.io/public-ws',
+    group: 'POLKADOT_PARACHAIN',
+    paraId: 2006,
+    nativeToken: 'ASTR'
+  },
   // parallel: {
   //   chain: 'Parallel',
   //   genesisHash: '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97',
@@ -113,15 +113,15 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   //   paraId: 2002,
   //   nativeToken: 'CLV'
   // },
-  // hydradx: {
-  //   chain: 'HydraDX',
-  //   genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
-  //   ss58Format: 63,
-  //   provider: 'wss://rpc-01.snakenet.hydradx.io',
-  //   group: 'POLKADOT_PARACHAIN',
-  //   paraId: 2034,
-  //   nativeToken: 'HDX'
-  // },
+  hydradx: {
+    chain: 'HydraDX',
+    genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',
+    ss58Format: 63,
+    provider: 'wss://rpc-01.snakenet.hydradx.io',
+    group: 'POLKADOT_PARACHAIN',
+    paraId: 2034,
+    nativeToken: 'HDX'
+  },
   // edgeware: {
   //   chain: 'Edgeware',
   //   genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',

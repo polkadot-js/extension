@@ -62,7 +62,7 @@ export default class KoniState extends State {
   } as NftJson;
 
   private stakingState: StakingJson = {
-    ready: true,
+    ready: false,
     details: []
   } as StakingJson;
 

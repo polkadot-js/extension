@@ -82,6 +82,7 @@ export class NftHandler {
       return;
     }
 
+    console.log(`fetching nft from ${this.handlers.length} chains`);
     this.running = true;
     await this.connect();
     let total = 0;
@@ -100,7 +101,7 @@ export class NftHandler {
       .finally(() => clearTimeout(timer));
 
     if (total > this.total) {
-      console.log(`nft old length: ${this.total}, new length: ${total}`);
+      console.log(`detected ${total - this.total} new nft`);
       this.total = total;
       this.data = data;
     }

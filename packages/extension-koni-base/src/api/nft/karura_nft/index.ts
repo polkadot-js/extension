@@ -31,14 +31,6 @@ export class KaruraNftApi extends BaseNftApi {
     super(api, addresses, chain);
   }
 
-  // public async connect () {
-  //   this.api = await wsProvider(networks.karura);
-  // }
-  //
-  // public async disconnect () {
-  //   if (this.api) { await this.api.disconnect(); }
-  // }
-
   override parseUrl(input: string): string | undefined {
     if (!input || input.length === 0) return undefined;
 

@@ -17,14 +17,6 @@ export default class StatemineNftApi extends BaseNftApi {
     super(api, addresses, chain);
   }
 
-  // public async connect () {
-  //   this.api = await wsProvider(networks.statemine);
-  // }
-  //
-  // public async disconnect () {
-  //   if (this.api) { await this.api.disconnect(); }
-  // }
-
   private getMetadata (metadata_url: string) {
     let url: string | undefined = metadata_url;
 

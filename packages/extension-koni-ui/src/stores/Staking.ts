@@ -18,7 +18,7 @@ const stakingSlice = createSlice({
       const payload = action.payload;
 
       state.details = payload.details;
-      state.ready = true;
+      state.ready = payload.ready;
     }
   }
 });

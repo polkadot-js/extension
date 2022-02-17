@@ -29,7 +29,6 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
   const [page, setPage] = useState(1);
   const [currentNftList, setCurrentNftList] = useState();
   const { nft: nftReducer } = useSelector((state: RootState) => state);
-  console.log('nft', nftReducer);
 
   const _onChangeState = (): void => {
     if (!nftReducer?.ready) {
@@ -112,7 +111,6 @@ function NftContainer ({ className }: Props): React.ReactElement<Props> {
               return <div key={index}>
                 <NftCollectionPreview
                   data={item}
-                  currentPage={page}
                   onClick={handleShowCollectionDetail}
                 />
               </div>;

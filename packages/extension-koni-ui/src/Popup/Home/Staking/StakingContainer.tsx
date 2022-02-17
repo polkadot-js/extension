@@ -23,11 +23,9 @@ function StakingContainer ({ className }: Props): React.ReactElement<Props> {
   const _onStateChange = (): void => {
     if (!stakingReducer?.ready) {
       setLoading(true);
-
       return;
     }
 
-    console.log(stakingReducer);
     // @ts-ignore
     setData(stakingReducer);
     setLoading(false);
@@ -128,7 +126,7 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
     flex-grow: 1;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #212845;
+    border-bottom: 1px solid ${theme.borderColor2};
     padding-bottom: 20px;
   }
 

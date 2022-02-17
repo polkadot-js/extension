@@ -36,14 +36,19 @@ export default class StatemineNftApi extends BaseNftApi {
    * Retrieve id of NFTs
    *
    * @returns the array of NFT Ids
-   * @param address
+   * @param addresses
    */
-  private async getNfts (address: string): Promise<AssetId[]> {
+  private async getNfts (addresses: string[]): Promise<AssetId[]> {
     if (!this.dotSamaApi) return [];
-    const accountAssets = await this.dotSamaApi.api.query.uniques.account.keys(address);
+
+    let accountAssets: any[] = [];
+    await Promise.all(addresses.map(async (address) => {
+      // @ts-ignore
+      const resp = await this.dotSamaApi.api.query.uniques.account.keys(address);
+      accountAssets = [...accountAssets, ...resp];
+    }));
 
     const assetIds: AssetId[] = [];
-
     for (const key of accountAssets) {
       const data = key.toHuman() as string[];
       assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
@@ -71,7 +76,7 @@ export default class StatemineNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
-    const assetIds = await this.getNfts(this.addresses[0]);
+    const assetIds = await this.getNfts(this.addresses);
     const allCollections: NftCollection[] = [];
 
     if (!assetIds || assetIds.length === 0) {

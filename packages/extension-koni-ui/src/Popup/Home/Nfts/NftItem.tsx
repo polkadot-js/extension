@@ -198,6 +198,7 @@ export default styled(NftItem)(({ theme }: ThemeProps) => `
   .att-value {
     font-size: 15px;
     color: #7B8098;
+    word-break: break-all;
   }
 
   .prop-container {

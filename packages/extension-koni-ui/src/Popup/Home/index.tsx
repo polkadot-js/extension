@@ -41,6 +41,7 @@ import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
 import StakingContainer from "@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer";
 import {isAccountAll} from "@polkadot/extension-koni-ui/util";
+import useFetchNft from "@polkadot/extension-koni-ui/hooks/screen/home/useFetchNft";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -162,6 +163,8 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
   useSetupTransactionHistory(address, showedNetworks);
+
+  const {nftList, nftJson, totalCollection, loading: loadingNft} = useFetchNft();
 
   const { crowdloanContributeMap,
     networkBalanceMaps,
@@ -297,7 +300,12 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         )}
 
         {activatedTab === 2 && (
-          <NftContainer />
+          <NftContainer
+            nftJson={nftJson}
+            nftList={nftList}
+            totalCollection={totalCollection}
+            loading={loadingNft}
+          />
         )}
 
         {activatedTab === 3 && (

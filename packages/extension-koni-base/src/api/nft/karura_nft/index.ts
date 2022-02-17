@@ -45,13 +45,19 @@ export class KaruraNftApi extends BaseNftApi {
    * Retrieve id of NFTs
    *
    * @returns the array of NFT Ids
-   * @param address
+   * @param addresses
    */
-  private async getNfts (address: string): Promise<AssetId[]> {
+  private async getNfts (addresses: string[]): Promise<AssetId[]> {
     if (!this.dotSamaApi) return [];
-    const accountAssets = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
-    const assetIds: AssetId[] = [];
 
+    let accountAssets: any[] = [];
+    await Promise.all(addresses.map(async (address) => {
+      // @ts-ignore
+      const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
+      accountAssets = [...accountAssets, ...resp];
+    }));
+
+    let assetIds: AssetId[] = [];
     for (const key of accountAssets) {
       const data = key.toHuman() as string[];
 
@@ -80,7 +86,7 @@ export class KaruraNftApi extends BaseNftApi {
 
   public async handleNfts () {
     const allCollections: NftCollection[] = [];
-    const assetIds = await this.getNfts(this.addresses[0]);
+    const assetIds = await this.getNfts(this.addresses);
 
     if (!assetIds || assetIds.length === 0) {
       this.total = 0;

@@ -42,7 +42,7 @@ function createNftApi(chain: string, api: ApiProps, addresses: string[]): BaseNf
 export class NftHandler {
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
-  addresses: string[] = ['Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr', 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'];
+  addresses: string[] = ['Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr', 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM', '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo'];
   total: number = 0;
   data: NftCollection[] = [];
   running: boolean = false;
@@ -105,6 +105,7 @@ export class NftHandler {
       this.total = total;
       this.data = data;
     }
+    console.log(`done fetching nft from rpc`);
     this.running = false;
   }
 

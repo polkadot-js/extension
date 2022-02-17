@@ -139,14 +139,17 @@ export class RmrkNftApi extends BaseNftApi {
   };
 
   public async handleNfts() {
-    const currentAddress = this.addresses[0];
     try {
-      const [singular, birds, items] = await Promise.all([
-        this.getSingularByAccount(currentAddress),
-        this.getBirdsKanariaByAccount(currentAddress),
-        this.getItemsKanariaByAccount(currentAddress)
-      ]);
-      const allNfts = [...singular, ...birds, ...items];
+      let allNfts: any[] = [];
+      await Promise.all(this.addresses.map(async (address) => {
+        const [singular, birds, items] = await Promise.all([
+          this.getSingularByAccount(address),
+          this.getBirdsKanariaByAccount(address),
+          this.getItemsKanariaByAccount(address)
+        ])
+        allNfts = [...allNfts, ...singular, ...birds, ...items];
+      }));
+
       let allCollections: any[] = [];
       const collectionInfoUrl: string[] = [];
 

@@ -3,55 +3,59 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList';
-import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import NftCollectionPreview from './NftCollectionPreview';
+import {NftJson} from "@polkadot/extension-base/background/KoniTypes";
+import NftCollection from './NftCollection';
 
 interface Props extends ThemeProps {
   className?: string;
+  nftList: any[];
+  nftJson: NftJson;
+  totalCollection: number;
+  loading: boolean;
 }
 
 const size = 9;
 
-function NftContainer ({ className }: Props): React.ReactElement<Props> {
-  const [nftJson, setNftJson] = useState();
-  const [nftList, setNftList] = useState();
-  const [loading, setLoading] = useState(false);
+function NftContainer ({ className, nftJson, nftList, totalCollection, loading }: Props): React.ReactElement<Props> {
+  // const [nftJson, setNftJson] = useState();
+  // const [nftList, setNftList] = useState();
+  // const [totalCollection, setTotalCollection] = useState(0);
+  // const [loading, setLoading] = useState(false);
+
   const [chosenCollection, setChosenCollection] = useState();
   const [showCollectionDetail, setShowCollectionDetail] = useState(false);
-  const [totalCollection, setTotalCollection] = useState(0);
   const [page, setPage] = useState(1);
-  const [currentNftList, setCurrentNftList] = useState();
-  const { nft: nftReducer } = useSelector((state: RootState) => state);
+  const [currentNftList, setCurrentNftList] = useState(nftList.slice(0, totalCollection > size ? size : totalCollection));
 
-  const _onChangeState = (): void => {
-    if (!nftReducer?.ready) {
-      setLoading(true);
-      return;
-    }
-
-    const nftList = nftReducer?.nftList;
-    const total = nftList.length;
-
-    // @ts-ignore
-    setNftJson(nftReducer);
-    // @ts-ignore
-    setNftList(nftList);
-    setTotalCollection(total);
-    // @ts-ignore
-    setCurrentNftList(nftList.slice(0, total > size ? size : total));
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    _onChangeState();
-  }, [nftReducer]);
+  // const { nft: nftReducer } = useSelector((state: RootState) => state);
+  // const _onChangeState = (): void => {
+  //   if (!nftReducer?.ready) {
+  //     setLoading(true);
+  //     return;
+  //   }
+  //
+  //   const nftList = nftReducer?.nftList;
+  //   const total = nftList.length;
+  //
+  //   // @ts-ignore
+  //   setNftJson(nftReducer);
+  //   // @ts-ignore
+  //   setNftList(nftList);
+  //   setTotalCollection(total);
+  //   // @ts-ignore
+  //   setCurrentNftList(nftList.slice(0, total > size ? size : total));
+  //   setLoading(false);
+  // };
+  //
+  // useEffect(() => {
+  //   _onChangeState();
+  // }, [nftReducer]);
 
   const handleShowCollectionDetail = (data: any) => {
     setShowCollectionDetail(true);

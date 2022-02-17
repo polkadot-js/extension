@@ -129,9 +129,10 @@ export default class UniqueNftApi extends BaseNftApi {
     const allCollections: NftCollection[] = [];
 
     const addressTokenDict: any[] = [];
-    const account = this.addresses[0];
     for (let i = 0; i < collectionCount; i++) {
-      addressTokenDict.push({ i, account });
+      for (let address of this.addresses) {
+        addressTokenDict.push({ i, account: address });
+      }
     }
 
     await Promise.all(addressTokenDict.map(async (item) => {

@@ -16,6 +16,7 @@
        1	Caio                          	Implement signRaw (#196)
        1	Chakrarin Sarnt               	Add Thai language (#788)
        1	David Hawig                   	Update README.md (#403)
+       1	f00                           	fix(authorize): long urls pushes the cta down (#1005)
        1	Forrest                       	Add Web3AccountsOptions to web3FromAddress function (#617)
        1	itsonal                       	add new language - Urdu (#847)
        1	KarishmaBothara               	Added code to support custom signed extension/user extension (#670)

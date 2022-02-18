@@ -71,7 +71,7 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
           // @ts-ignore
           data?.details.map((item: any, index: any) => {
             const name = item?.chainId;
-            const icon = LogosMap[name];
+            const icon = LogosMap[name] || LogosMap.default;
 
             return StakingRow(icon, name, item.nativeToken, item.balance, item.unit, index);
           })
@@ -99,9 +99,14 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
 
   .network-logo {
     display: block;
-    width: 56px;
-    height: 56px;
-    border-radius: 15px;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 100%;
+    overflow: hidden;
+    margin-right: 12px;
+    background-color: #fff;
+    border: 1px solid #fff;
+    margin-top:10px;
   }
 
   .info-wrapper {

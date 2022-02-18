@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
+
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import ButtonArea from '@polkadot/extension-koni-ui/components/ButtonArea';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
+
 import logo from '../assets/sub-wallet-logo.svg';
 import { ActionContext } from '../components';
 import useTranslation from '../hooks/useTranslation';

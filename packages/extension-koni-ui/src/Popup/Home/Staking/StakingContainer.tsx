@@ -1,40 +1,22 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import styled from 'styled-components';
 
+import { StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
+  loading: boolean;
+  data: StakingJson;
 }
 
-function StakingContainer ({ className }: Props): React.ReactElement<Props> {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState();
-  const { staking: stakingReducer } = useSelector((state: RootState) => state);
-
-  const _onStateChange = (): void => {
-    if (!stakingReducer?.ready) {
-      setLoading(true);
-      return;
-    }
-
-    // @ts-ignore
-    setData(stakingReducer);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    _onStateChange();
-  }, [stakingReducer]);
-
+function StakingContainer ({ className, data, loading }: Props): React.ReactElement<Props> {
   const editBalance = (balance: string) => {
     if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
 

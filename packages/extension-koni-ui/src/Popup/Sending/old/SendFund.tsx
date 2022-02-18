@@ -24,13 +24,13 @@ import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFu
 import { TxResult } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { checkAddress } from '@polkadot/phishing';
 import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
 import { BN_HUNDRED, BN_ZERO, isFunction } from '@polkadot/util';
 
 import Available from './component/Available';
 import InputAddress from './component/InputAddress';
-import {isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -98,10 +98,8 @@ type SupportType = 'NETWORK' | 'ACCOUNT';
 
 function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const {
-    currentNetwork: { networkKey },
-    currentAccount: { account }
-  } = useSelector((state: RootState) => state);
+  const { currentAccount: { account },
+    currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
   const [wrapperClass, setWrapperClass] = useState<string>('');
   const { api, apiUrl, isApiReady, isNotSupport } = useApi(networkKey);
 
@@ -111,11 +109,11 @@ function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
     return (
       <div className={'kn-l-screen-content'}>
         <Warning>
-          { supportType === 'NETWORK'
-            && t<string>('The action is not supported for the current network. Please switch to another network.')
+          { supportType === 'NETWORK' &&
+            t<string>('The action is not supported for the current network. Please switch to another network.')
           }
-          { supportType === 'ACCOUNT'
-            && t<string>('The action is not supported for the current account. Please switch to another account.')
+          { supportType === 'ACCOUNT' &&
+            t<string>('The action is not supported for the current account. Please switch to another account.')
           }
         </Warning>
       </div>
@@ -124,7 +122,7 @@ function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
 
   const renderContent = () => {
     if (account && isAccountAll(account.address)) {
-      return notSupportSendFund('ACCOUNT')
+      return notSupportSendFund('ACCOUNT');
     }
 
     return (
@@ -143,8 +141,8 @@ function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
         : isNotSupport
           ? notSupportSendFund()
           : (<LoadingContainer />)
-    )
-  }
+    );
+  };
 
   return (
     <div className={`-wrapper ${className} ${wrapperClass}`}>

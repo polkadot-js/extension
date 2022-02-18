@@ -11,10 +11,10 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
+import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
-import {accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress} from '@polkadot/extension-koni-ui/util';
+import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@polkadot/extension-koni-ui/util';
 import getNetworkInfoByGenesisHash from '@polkadot/extension-koni-ui/util/getNetworkInfoByGenesisHash';
 
 import useToast from '../hooks/useToast';
@@ -48,7 +48,7 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
 
   const _isAccountAll = address && isAccountAll(address);
 
-    useEffect((): void => {
+  useEffect((): void => {
     if (!address) {
       setRecoded(defaultRecoded);
 
@@ -88,15 +88,19 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
   return (
     <div className={className}>
       <div className='account-info-row'>
-        {_isAccountAll ?
-          <img src={allAccountLogo} alt="all-account-icon" className='account-info__all-account-icon'/>
+        {_isAccountAll
+          ? <img
+            alt='all-account-icon'
+            className='account-info__all-account-icon'
+            src={allAccountLogo}
+          />
           : <Identicon
-          className='account-info-identity-icon'
-          iconTheme={iconTheme}
-          prefix={prefix}
-          size={32}
-          value={formatted || address}
-        />}
+            className='account-info-identity-icon'
+            iconTheme={iconTheme}
+            prefix={prefix}
+            size={32}
+            value={formatted || address}
+          />}
         <div className='account-info'>
           {parentName
             ? (

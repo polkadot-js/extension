@@ -5,11 +5,11 @@ import { take } from 'rxjs';
 
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import {dotSamaAPIMap, nftHandler, state} from '@polkadot/extension-koni-base/background/handlers';
+import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import {subscribeStaking} from "@polkadot/extension-koni-base/api/dotsama/staking";
 
 export class KoniSubcription {
   private subscriptionMap: Record<string, any> = {};
@@ -121,11 +121,11 @@ export class KoniSubcription {
   }
 
   initNftSubscription (addresses: string[]) {
-    // nftHandler.setAddresses(addresses);
-    nftHandler.handleNfts().then(r => {
+    nftHandler.setAddresses(addresses);
+    nftHandler.handleNfts().then((r) => {
       state.setNft(nftHandler.getNftJson());
-      console.log(`set nft state done`);
-    })
+      console.log('set nft state done');
+    });
   }
 
   subscribeStaking (address: string) {
@@ -137,7 +137,7 @@ export class KoniSubcription {
   }
 
   initStakingSubscription (addresses: string[]) {
-    subscribeStaking(['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'], dotSamaAPIMap).then((stakingData) => {
+    subscribeStaking(addresses, dotSamaAPIMap).then((stakingData) => {
       state.setStaking(stakingData);
       console.log('set staking state done');
     });

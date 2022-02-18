@@ -42,6 +42,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
       const result = await validator(value);
 
       setValidationResult(result);
+
       if (onValidatedChange) {
         onValidatedChange(Result.isOk(result) ? value : null);
       }

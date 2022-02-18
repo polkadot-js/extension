@@ -1,20 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ThemeProps} from '../types';
+import type { ThemeProps } from '../types';
 
 import React from 'react';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import {canDerive} from '@polkadot/extension-base/utils';
+import { canDerive } from '@polkadot/extension-base/utils';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import Link from '@polkadot/extension-koni-ui/components/Link';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import MenuDivider from '@polkadot/extension-koni-ui/components/MenuDivider';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import {RootState} from '@polkadot/extension-koni-ui/stores';
-import {isAccountAll} from "@polkadot/extension-koni-ui/util";
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -24,11 +24,11 @@ interface Props extends ThemeProps {
   toggleZeroBalances?: () => void;
 }
 
-function AccountAction({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
 
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const currentNetwork = useSelector((state: RootState) => state.currentNetwork)
+  const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
 
   return (
     <Menu
@@ -54,7 +54,7 @@ function AccountAction({ className, isShowZeroBalances, reference, toggleEdit, t
           )}
         </div>
 
-        <MenuDivider/>
+        <MenuDivider />
 
         <div className='actions-wrapper'>
           {!currentAccount?.isExternal && (
@@ -80,7 +80,7 @@ function AccountAction({ className, isShowZeroBalances, reference, toggleEdit, t
       {(currentNetwork.networkKey === 'all') && !!toggleZeroBalances && (
         <>
           {currentAccount && !isAccountAll(currentAccount.address) &&
-          <MenuDivider/>
+          <MenuDivider />
           }
           <div className='actions-wrapper'>
             <Link
@@ -103,7 +103,7 @@ function AccountAction({ className, isShowZeroBalances, reference, toggleEdit, t
   );
 }
 
-export default React.memo(styled(AccountAction)(({theme}: Props) => `
+export default React.memo(styled(AccountAction)(({ theme }: Props) => `
   top: 60px;
 
   .actions-wrapper {

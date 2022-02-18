@@ -242,8 +242,8 @@ function AuthTransaction ({ api, apiUrl, className, extrinsic, onCancel, request
               api={api}
               apiUrl={apiUrl}
               extrinsic={extrinsic}
-              onError={toggleRenderError}
               isBusy={isBusy}
+              onError={toggleRenderError}
             />
           </div>
 

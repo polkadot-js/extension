@@ -11,8 +11,8 @@ import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
-import {triggerAccountsSubscription} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -100,7 +100,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       triggerAccountsSubscription().catch((e) => {
         console.error('There is a problem when trigger Accounts Subscription', e);
       });
-    }
+    };
   }, [selectNetwork]);
 
   return (

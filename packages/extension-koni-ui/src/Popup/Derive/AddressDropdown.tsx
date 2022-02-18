@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
+
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+
 import arrow from '../../assets/arrow-down.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';

@@ -3,11 +3,7 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import {
-  AccountJson,
-  RequestAccountSubscribe,
-  RequestCurrentAccountAddress
-} from '@polkadot/extension-base/background/types';
+import { AccountJson, RequestAccountSubscribe, RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 import { u128 } from '@polkadot/types';
@@ -238,9 +234,9 @@ export type RequestSubscribeStaking = null
 
 export interface KoniRequestSignatures {
   'pri(api.init)': [RequestApi, ApiInitStatus];
-  'pri(staking.getStaking)': [string, StakingJson]
+  'pri(staking.getStaking)': [null, StakingJson]
   'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson]
-  'pri(nft.getNft)': [string, NftJson],
+  'pri(nft.getNft)': [null, NftJson],
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson]
   'pri(price.getPrice)': [RequestPrice, PriceJson]
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],

@@ -4,13 +4,16 @@
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
+
 import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import { Dropdown, AccountInfoEl, ButtonArea, InputWithLabel, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
+
 import { validateSeed } from '@polkadot/extension-koni-ui/messaging';
 import { objectSpread } from '@polkadot/util';
+
+import { AccountInfoEl, ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';

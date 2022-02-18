@@ -3,8 +3,10 @@
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+
 import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useMetadata from '../../hooks/useMetadata';

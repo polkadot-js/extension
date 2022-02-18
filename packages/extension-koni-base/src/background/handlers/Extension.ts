@@ -8,6 +8,7 @@ import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestor
 import { ApiInitStatus, initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { createPair } from '@polkadot/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
@@ -16,7 +17,6 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
-import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 const bWindow = window as unknown as BackgroundWindow;
 
@@ -53,15 +53,15 @@ export default class KoniExtension extends Extension {
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((storedAccounts: SubjectInfo): void => {
-      const transformedAccounts = transformAccounts(storedAccounts)
+      const transformedAccounts = transformAccounts(storedAccounts);
 
       const accounts: AccountJson[] = transformedAccounts && transformedAccounts.length
         ? [
-            {
-              ...ACCOUNT_ALL_JSON
-            },
-            ...transformedAccounts
-          ]
+          {
+            ...ACCOUNT_ALL_JSON
+          },
+          ...transformedAccounts
+        ]
         : [];
 
       console.log('storedAccounts====', storedAccounts);
@@ -314,14 +314,9 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private getNft (account: string | null): Promise<NftJson> {
+  private getNft (): Promise<NftJson> {
     return new Promise<NftJson>((resolve, reject) => {
-      if (account === null) {
-        console.log('account is null');
-        return;
-      }
-
-      state.getNft(account, (rs: NftJson) => {
+      state.getNft((rs: NftJson) => {
         resolve(rs);
       });
     });
@@ -329,9 +324,6 @@ export default class KoniExtension extends Extension {
 
   private async subscribeNft (id: string, port: chrome.runtime.Port): Promise<NftJson | null> {
     const cb = createSubscription<'pri(nft.getSubscription)'>(id, port);
-    const currentAccount = await state.getAccountAddress();
-    if (currentAccount === null) return null;
-
     const nftSubscription = state.subscribeNft().subscribe({
       next: (rs) => {
         cb(rs);
@@ -343,16 +335,12 @@ export default class KoniExtension extends Extension {
       nftSubscription.unsubscribe();
     });
 
-    return this.getNft(currentAccount as string);
+    return this.getNft();
   }
 
-  private getStaking (account: string | null): Promise<StakingJson> {
+  private getStaking (): Promise<StakingJson> {
     return new Promise<StakingJson>((resolve, reject) => {
-      if (account === null) {
-        return;
-      }
-
-      state.getStaking(account, (rs: StakingJson) => {
+      state.getStaking((rs: StakingJson) => {
         resolve(rs);
       });
     });
@@ -360,9 +348,6 @@ export default class KoniExtension extends Extension {
 
   private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson | null> {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
-    const currentAccount = await state.getAccountAddress();
-    if (currentAccount === null) return null;
-
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {
         cb(rs);
@@ -374,7 +359,7 @@ export default class KoniExtension extends Extension {
       stakingSubscription.unsubscribe();
     });
 
-    return this.getStaking(currentAccount as string);
+    return this.getStaking();
   }
 
   // todo: add custom network metadata to here
@@ -501,11 +486,11 @@ export default class KoniExtension extends Extension {
       case 'pri(chainRegistry.getSubscription)':
         return this.subscribeChainRegistry(id, port);
       case 'pri(nft.getNft)':
-        return await this.getNft(request as string);
+        return await this.getNft();
       case 'pri(nft.getSubscription)':
         return await this.subscribeNft(id, port);
       case 'pri(staking.getStaking)':
-        return await this.getStaking(request as string);
+        return await this.getStaking();
       case 'pri(staking.getSubscription)':
         return await this.subscribeStaking(id, port);
       case 'pri(transaction.history.add)':

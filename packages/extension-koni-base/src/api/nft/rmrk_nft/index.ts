@@ -3,41 +3,35 @@
 
 import fetch from 'node-fetch';
 
-import {NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
-import {isUrl, reformatAddress} from '@polkadot/extension-koni-base/utils/utils';
+import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
+import { isUrl, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
-import {
-  KANARIA_ENDPOINT,
-  KANARIA_EXTERNAL_SERVER,
-  PINATA_SERVER,
-  SINGULAR_COLLECTION_ENDPOINT,
-  SINGULAR_ENDPOINT,
-  SINGULAR_EXTERNAL_SERVER
-} from '../config';
-import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_COLLECTION_ENDPOINT, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from '../config';
 
 const headers = {
   'Content-Type': 'application/json'
 };
 
 export class RmrkNftApi extends BaseNftApi {
-
   constructor () {
     super();
   }
 
-  override setAddresses(addresses: string[]) {
+  override setAddresses (addresses: string[]) {
     super.setAddresses(addresses);
-    let kusamaAddresses = []
-    for (let address of this.addresses) {
-      let kusamaAddress = reformatAddress(address, 2);
+    const kusamaAddresses = [];
+
+    for (const address of this.addresses) {
+      const kusamaAddress = reformatAddress(address, 2);
+
       kusamaAddresses.push(kusamaAddress);
     }
 
     this.addresses = kusamaAddresses;
   }
 
-  override parseUrl(input: string): string | undefined {
+  override parseUrl (input: string): string | undefined {
     if (!input || input.length === 0) return undefined;
 
     if (!input.includes('ipfs://ipfs/')) { return PINATA_SERVER + input; }
@@ -58,9 +52,9 @@ export class RmrkNftApi extends BaseNftApi {
       headers
     })
       .then((res) => res.json());
-  };
+  }
 
-  private async getSingularByAccount(account: string) {
+  private async getSingularByAccount (account: string) {
     const url = SINGULAR_ENDPOINT + account;
     const data = await fetch(url, {
       method: 'GET',
@@ -68,7 +62,7 @@ export class RmrkNftApi extends BaseNftApi {
     })
       .then((res) => res.json());
 
-    let nfts: any[] = [];
+    const nfts: any[] = [];
 
     await Promise.all(data.map(async (item: any) => {
       const { animation_url, attributes, description, image, name } = await this.getMetadata(item.metadata);
@@ -97,7 +91,7 @@ export class RmrkNftApi extends BaseNftApi {
     })
       .then((res) => res.json());
 
-    let nfts: any[] = [];
+    const nfts: any[] = [];
 
     await Promise.all(data.map(async (item: any) => {
       const result = await this.getMetadata(item.metadata);
@@ -113,7 +107,7 @@ export class RmrkNftApi extends BaseNftApi {
     }));
 
     return nfts;
-  };
+  }
 
   private async getBirdsKanariaByAccount (account: string) {
     const url = KANARIA_ENDPOINT + 'account-birds/' + account;
@@ -123,7 +117,7 @@ export class RmrkNftApi extends BaseNftApi {
     })
       .then((res) => res.json());
 
-    let nfts: any[] = [];
+    const nfts: any[] = [];
 
     await Promise.all(data.map(async (item: any) => {
       const result = await this.getMetadata(item.metadata);
@@ -136,17 +130,19 @@ export class RmrkNftApi extends BaseNftApi {
     }));
 
     return nfts;
-  };
+  }
 
-  public async handleNfts() {
+  public async handleNfts () {
     try {
       let allNfts: any[] = [];
+
       await Promise.all(this.addresses.map(async (address) => {
         const [singular, birds, items] = await Promise.all([
           this.getSingularByAccount(address),
           this.getBirdsKanariaByAccount(address),
           this.getItemsKanariaByAccount(address)
-        ])
+        ]);
+
         allNfts = [...allNfts, ...singular, ...birds, ...items];
       }));
 
@@ -157,7 +153,7 @@ export class RmrkNftApi extends BaseNftApi {
         const url = SINGULAR_COLLECTION_ENDPOINT + item.collectionId;
 
         if (!collectionInfoUrl.includes(url)) {
-          allCollections.push({collectionId: item.collectionId});
+          allCollections.push({ collectionId: item.collectionId });
           collectionInfoUrl.push(url);
         }
       });
@@ -167,10 +163,13 @@ export class RmrkNftApi extends BaseNftApi {
         const data: any[] = await resp.json();
         const result = data[0];
 
-        if (result && 'metadata' in result) allCollectionMetaUrl.push({
-          url: this.parseUrl(result?.metadata),
-          id: result?.id
-        });
+        if (result && 'metadata' in result) {
+          allCollectionMetaUrl.push({
+            url: this.parseUrl(result?.metadata),
+            id: result?.id
+          });
+        }
+
         if (data.length > 0) return result;
         else return {};
       }));
@@ -182,10 +181,10 @@ export class RmrkNftApi extends BaseNftApi {
         const data = await resp.json();
 
         // @ts-ignore
-        allCollectionMeta[item?.id] = {...data};
+        allCollectionMeta[item?.id] = { ...data };
       }));
 
-      const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({[item.id]: item.name})));
+      const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
       const nftDict = {};
 
       for (const item of allNfts) {

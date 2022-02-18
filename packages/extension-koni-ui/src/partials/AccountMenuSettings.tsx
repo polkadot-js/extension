@@ -32,14 +32,16 @@ interface Props extends ThemeProps {
 const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
 
-function AccountMenuSettings ({ className, closeSetting, onFilter, reference, changeAccountCallback }: Props): React.ReactElement<Props> {
+function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
   const { hierarchy } = useContext(AccountContext);
-  const filteredAccount = filter ? hierarchy.filter((account) =>
-    account.name?.toLowerCase().includes(filter) ||
+  const filteredAccount = filter
+    ? hierarchy.filter((account) =>
+      account.name?.toLowerCase().includes(filter) ||
     (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))
-  ) : hierarchy
+    )
+    : hierarchy;
 
   const { master } = useContext(AccountContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
@@ -93,8 +95,8 @@ function AccountMenuSettings ({ className, closeSetting, onFilter, reference, ch
           <AccountsTree
             closeSetting={closeSetting}
             {...json}
-            key={`${index}:${json.address}`}
             changeAccountCallback={changeAccountCallback}
+            key={`${index}:${json.address}`}
           />
         ))}
       </div>

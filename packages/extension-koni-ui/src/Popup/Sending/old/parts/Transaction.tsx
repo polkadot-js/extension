@@ -22,7 +22,7 @@ interface Props {
   isBusy?: boolean;
 }
 
-function Transaction ({ accountId, api, apiUrl, className, extrinsic, isSendable, tip, isBusy }: Props): React.ReactElement<Props> | null {
+function Transaction ({ accountId, api, apiUrl, className, extrinsic, isBusy, isSendable, tip }: Props): React.ReactElement<Props> | null {
   if (!extrinsic) {
     return null;
   }
@@ -35,9 +35,9 @@ function Transaction ({ accountId, api, apiUrl, className, extrinsic, isSendable
         apiUrl={apiUrl}
         className='tx-details'
         extrinsic={extrinsic}
+        isBusy={isBusy}
         isSendable={isSendable}
         tip={tip}
-        isBusy={isBusy}
       />
     </div>
   );

@@ -1,10 +1,11 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
-import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
-import {isUrl} from "@polkadot/extension-koni-base/utils/utils";
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
+
+import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
+import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
 interface AssetId {
   classId: string | number,
@@ -12,7 +13,6 @@ interface AssetId {
 }
 
 export default class StatemineNftApi extends BaseNftApi {
-
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
@@ -27,10 +27,10 @@ export default class StatemineNftApi extends BaseNftApi {
 
     return fetch(url, {
       method: 'GET',
-      headers: {'Content-Type': 'application/json'}
+      headers: { 'Content-Type': 'application/json' }
     })
       .then((res) => res.json());
-  };
+  }
 
   /**
    * Retrieve id of NFTs
@@ -42,15 +42,19 @@ export default class StatemineNftApi extends BaseNftApi {
     if (!this.dotSamaApi) return [];
 
     let accountAssets: any[] = [];
+
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.uniques.account.keys(address);
+
       accountAssets = [...accountAssets, ...resp];
     }));
 
     const assetIds: AssetId[] = [];
+
     for (const key of accountAssets) {
       const data = key.toHuman() as string[];
+
       assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
     }
 

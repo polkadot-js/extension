@@ -1,6 +1,9 @@
-import QuartzNftApi from "@polkadot/extension-koni-base/api/nft/quartz_nft";
-import NETWORKS from "@polkadot/extension-koni-base/api/endpoints";
-import {initApi} from "@polkadot/extension-koni-base/api/dotsama";
+// [object Object]
+// SPDX-License-Identifier: Apache-2.0
+
+import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 
 describe('test quartz_nft api', () => {
   const api = initApi(NETWORKS.quartz.provider);
@@ -9,6 +12,7 @@ describe('test quartz_nft api', () => {
   test('test quartz_nft getCreatedCollectionCount', async () => {
     await quartzNftApi.connect();
     const createdCollectionCount = await quartzNftApi.getCreatedCollectionCount();
+
     expect(createdCollectionCount).toBeGreaterThan(16);
   });
 
@@ -16,13 +20,15 @@ describe('test quartz_nft api', () => {
     await quartzNftApi.connect();
     const addressTokens = await quartzNftApi.getAddressTokens(5,
       '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo');
-    console.log(addressTokens)
+
+    console.log(addressTokens);
     // expect(addressTokens.length).toBeGreaterThan(1);
   });
 
   test('test quartz_nft getCollectionProperties', async () => {
     await quartzNftApi.connect();
     const collectionProperties = await quartzNftApi.getCollectionProperties(9);
+
     console.log(collectionProperties);
     // expect(collectionProperties?.owner).toEqual('yGHkvgGth212LzAokvhCMLvs5a9vTpRjKkqjCHfRqwxHn3Lum');
   });
@@ -30,8 +36,10 @@ describe('test quartz_nft api', () => {
   test('test quartz_nft getNftData', async () => {
     await quartzNftApi.connect();
     const collectionProperties = await quartzNftApi.getCollectionProperties(5);
+
     if (collectionProperties) {
       const nftData = await quartzNftApi.getNftData(collectionProperties, 5, 173);
+
       expect(nftData?.prefix).toEqual('AAA');
       expect(nftData?.collectionName).toEqual('Workaholics');
       expect(nftData?.collectionDescription).toEqual('Workaholics test collection');

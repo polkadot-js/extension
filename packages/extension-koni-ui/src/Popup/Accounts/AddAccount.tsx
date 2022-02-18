@@ -7,12 +7,12 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import Button from '@polkadot/extension-koni-ui/components/Button';
+import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
+import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 
 import { Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import {windowOpen} from "@polkadot/extension-koni-ui/messaging";
-import useIsPopup from "@polkadot/extension-koni-ui/hooks/useIsPopup";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -20,6 +20,7 @@ interface Props extends ThemeProps {
 
 const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
+
 function AddAccount ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const isPopup = useIsPopup();

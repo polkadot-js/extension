@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
-import {hexToStr, hexToUTF16, parseIpfsLink, utf16ToString} from '@polkadot/extension-koni-base/utils/utils';
+import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
+import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@polkadot/extension-koni-base/utils/utils';
 
-import {deserializeNft} from './protobuf';
-import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
+import { deserializeNft } from './protobuf';
 
 interface Collection {
   SchemaVersion: string,
@@ -27,7 +27,6 @@ interface NftIdList {
 }
 
 export default class UniqueNftApi extends BaseNftApi {
-
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
@@ -129,8 +128,9 @@ export default class UniqueNftApi extends BaseNftApi {
     const allCollections: NftCollection[] = [];
 
     const addressTokenDict: any[] = [];
+
     for (let i = 0; i < collectionCount; i++) {
-      for (let address of this.addresses) {
+      for (const address of this.addresses) {
         addressTokenDict.push({ i, account: address });
       }
     }

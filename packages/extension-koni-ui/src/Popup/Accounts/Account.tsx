@@ -8,8 +8,8 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
-import { AccountContext, ActionContext, AccountInfoEl } from '@polkadot/extension-koni-ui/components';
-import {saveCurrentAccountAddress, triggerAccountsSubscription} from '@polkadot/extension-koni-ui/messaging';
+import { AccountContext, AccountInfoEl, ActionContext } from '@polkadot/extension-koni-ui/components';
+import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress } from '@polkadot/extension-koni-ui/util';
@@ -21,7 +21,7 @@ interface Props extends AccountJson {
   changeAccountCallback?: (address: string) => void;
 }
 
-function Account ({ address, className, closeSetting, genesisHash, name, parentName, suri, type, changeAccountCallback }: Props): React.ReactElement<Props> {
+function Account ({ address, changeAccountCallback, className, closeSetting, genesisHash, name, parentName, suri, type }: Props): React.ReactElement<Props> {
   const [isSelected, setSelected] = useState(false);
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);

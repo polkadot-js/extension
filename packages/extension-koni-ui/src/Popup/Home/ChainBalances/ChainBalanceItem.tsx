@@ -7,7 +7,6 @@ import styled from 'styled-components';
 
 import cloneIcon from '@polkadot/extension-koni-ui/assets/clone.svg';
 import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
-import { Loading } from '../../../components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
@@ -15,6 +14,8 @@ import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBal
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
+
+import { Loading } from '../../../components';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -79,39 +80,39 @@ function ChainBalanceItem ({ accountInfo,
           <div className='chain-balance-item__meta-wrapper'>
             <div className='chain-balance-item__chain-name'>{accountInfo.networkDisplayName}</div>
 
-              <div className='chain-balance-item__bottom-area'>
-                {!_isAccountAll && (
-                  <>
-                    <CopyToClipboard text={formattedAddress}>
-                      <div
-                        className='chain-balance-item__address'
-                        onClick={_onCopy}
-                      >
-                        <span className='chain-balance-item__address-text'>{toShort(formattedAddress)}</span>
-                        <img
-                          alt='copy'
-                          className='chain-balance-item__copy'
-                          src={cloneIcon}
-                        />
-                      </div>
-                    </CopyToClipboard>
-                    <img
-                      alt='receive'
-                      className='chain-balance-item__receive'
-                      onClick={_openQr}
-                      src={receivedIcon}
-                    />
-                  </>
-                )}
+            <div className='chain-balance-item__bottom-area'>
+              {!_isAccountAll && (
+                <>
+                  <CopyToClipboard text={formattedAddress}>
+                    <div
+                      className='chain-balance-item__address'
+                      onClick={_onCopy}
+                    >
+                      <span className='chain-balance-item__address-text'>{toShort(formattedAddress)}</span>
+                      <img
+                        alt='copy'
+                        className='chain-balance-item__copy'
+                        src={cloneIcon}
+                      />
+                    </div>
+                  </CopyToClipboard>
+                  <img
+                    alt='receive'
+                    className='chain-balance-item__receive'
+                    onClick={_openQr}
+                    src={receivedIcon}
+                  />
+                </>
+              )}
 
-                {_isAccountAll && (
-                  <div className='chain-balance-item__address'>
-                    <span className='chain-balance-item__address-text'>
-                      {accountInfo.networkDisplayName}
-                    </span>
-                  </div>
-                )}
-              </div>
+              {_isAccountAll && (
+                <div className='chain-balance-item__address'>
+                  <span className='chain-balance-item__address-text'>
+                    {accountInfo.networkDisplayName}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

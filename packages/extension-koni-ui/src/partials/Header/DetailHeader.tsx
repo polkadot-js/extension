@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useRef, useState} from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
@@ -16,13 +17,12 @@ import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import {editAccount} from '@polkadot/extension-koni-ui/messaging';
+import { editAccount } from '@polkadot/extension-koni-ui/messaging';
 import AccountAction from '@polkadot/extension-koni-ui/partials/AccountAction';
 import HeaderEditName from '@polkadot/extension-koni-ui/partials/HeaderEditName';
-import {ThemeProps} from '@polkadot/extension-koni-ui/types';
-import {isAccountAll} from "@polkadot/extension-koni-ui/util";
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
+import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 interface Props extends ThemeProps {
   className?: string,
@@ -41,27 +41,25 @@ interface EditState {
 
 let tooltipId = 0;
 
-function DetailHeader({
-                        className,
-                        currentAccount,
-                        formatted,
-                        isShowZeroBalances,
-                        popupTheme,
-                        toggleVisibility,
-                        toggleZeroBalances
-                      }: Props): React.ReactElement {
+function DetailHeader ({ className,
+  currentAccount,
+  formatted,
+  isShowZeroBalances,
+  popupTheme,
+  toggleVisibility,
+  toggleZeroBalances }: Props): React.ReactElement {
   const actionsRef = useRef(null);
-  const {t} = useTranslation();
-  const [{isEditing}, setEditing] = useState<EditState>({isEditing: false, toggleActions: 0});
+  const { t } = useTranslation();
+  const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [isActionOpen, setShowAccountAction] = useState(false);
-  const {show} = useToast();
+  const { show } = useToast();
   const [trigger] = useState(() => `overview-btn-${++tooltipId}`);
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
   const isAllAccount = isAccountAll(currentAccount.address);
 
   const _toggleEdit = useCallback(
     (): void => {
-      setEditing(({toggleActions}) => ({isEditing: !isEditing, toggleActions: ++toggleActions}));
+      setEditing(({ toggleActions }) => ({ isEditing: !isEditing, toggleActions: ++toggleActions }));
       setShowAccountAction(false);
     },
     [isEditing]
@@ -147,20 +145,20 @@ function DetailHeader({
       <div className='detail-header__part-2'>
         {!isEditing && (
           <div className='detail-header-account-info'>
-            {isAllAccount ?
-              <div className='detail-header__all-account'>
+            {isAllAccount
+              ? <div className='detail-header__all-account'>
                 {t<string>('All Accounts')}
-              </div> :
-              <div className='detail-header-account-info-wrapper'>
+              </div>
+              : <div className='detail-header-account-info-wrapper'>
                 <span className='detail-header-account-info__name'>{currentAccount?.name}</span>
                 <CopyToClipboard text={(formatted && formatted) || ''}>
                   <div
                     className='detail-header-account-info__formatted-wrapper'
                     onClick={_onCopy}
                   >
-                <span
-                  className='detail-header-account-info__formatted'
-                >{ellipsisCenterStr(formatted || currentAccount?.address)}</span>
+                    <span
+                      className='detail-header-account-info__formatted'
+                    >{ellipsisCenterStr(formatted || currentAccount?.address)}</span>
                     <img
                       alt='copy'
                       className='detail-header-account-info__copy-icon'
@@ -174,8 +172,8 @@ function DetailHeader({
         )}
         {isEditing && currentAccount && (
           <HeaderEditName
-            defaultValue={currentAccount.name}
             className='kn-l-edit-name'
+            defaultValue={currentAccount.name}
             isFocused
             label={' '}
             onBlur={_saveChanges}
@@ -209,7 +207,7 @@ function DetailHeader({
   );
 }
 
-export default styled(DetailHeader)(({theme}: Props) => `
+export default styled(DetailHeader)(({ theme }: Props) => `
   display: flex;
   align-items: center;
   height: 40px;

@@ -7,11 +7,13 @@ import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled from 'styled-components';
+
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-import { AccountContext, ActionContext, ActionBar, ActionText, Button, InputWithLabel, Warning } from '../components';
+
+import { AccountContext, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccounts } from '../messaging';
-import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 const MIN_LENGTH = 6;
 
@@ -46,7 +48,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
     (): void => {
       setIsBusy(true);
 
-      exportAccounts(accounts.filter(acc => acc.address !== ALL_ACCOUNT_KEY).map((account) => account.address), pass)
+      exportAccounts(accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).map((account) => account.address), pass)
         .then(({ exportedJson }) => {
           const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
 

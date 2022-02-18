@@ -91,7 +91,7 @@ export default class KoniState extends State {
     this.lazyMap[key] = lazy;
   };
 
-  public getStaking (account: string, update: (value: StakingJson) => void): void {
+  public getStaking (update: (value: StakingJson) => void): void {
     update(this.stakingState);
 
     // this.stakingStore.get('StakingData', (rs) => {
@@ -135,7 +135,7 @@ export default class KoniState extends State {
     this.nftSubject.next(nftData);
   }
 
-  public getNft (account: string, update: (value: NftJson) => void): void {
+  public getNft (update: (value: NftJson) => void): void {
     update(this.nftState);
 
     // return this.nftState;

@@ -3,8 +3,9 @@
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
+import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
+
 import getNetworkMap from './getNetworkMap';
-import {isAccountAll} from "@polkadot/extension-koni-ui/util/accountAll";
 
 type ChildFilter = (account: AccountJson) => AccountWithChildren;
 
@@ -64,16 +65,16 @@ export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
 }
 
 export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] {
-  const accountAll = accounts.find(a => isAccountAll(a.address));
+  const accountAll = accounts.find((a) => isAccountAll(a.address));
 
   const otherAccountsExceptAll = accounts
-    .filter(({address, parentAddress }) => {
+    .filter(({ address, parentAddress }) => {
       if (isAccountAll(address)) {
         return false;
       }
 
-      return !parentAddress // it is a parent
-        || !accounts.some(({ address }) => parentAddress === address) // we don't have a parent for this one
+      return !parentAddress || // it is a parent
+        !accounts.some(({ address }) => parentAddress === address); // we don't have a parent for this one
     })
     .map(accountWithChildren(accounts))
     .sort(compareByNetwork)
@@ -81,5 +82,5 @@ export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] 
 
   return accountAll
     ? [accountAll, ...otherAccountsExceptAll]
-    : [...otherAccountsExceptAll]
+    : [...otherAccountsExceptAll];
 }

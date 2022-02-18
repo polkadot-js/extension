@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useContext, useMemo, useState} from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -18,20 +18,25 @@ import staking from '@polkadot/extension-koni-ui/assets/home-tab-icon/staking.sv
 import stakingActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/staking-active.svg';
 import transfers from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
-import { AccountContext, Link, AccountQrModal } from '@polkadot/extension-koni-ui/components';
+import { AccountContext, AccountQrModal, Link } from '@polkadot/extension-koni-ui/components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
+import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNft';
+import useFetchStaking from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useSetupTransactionHistory from '@polkadot/extension-koni-ui/hooks/store/useSetupTransactionHistory';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer';
+import StakingContainer from '@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+
 import buyIcon from '../../assets/buy-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 import swapIcon from '../../assets/swap-icon.svg';
@@ -39,9 +44,6 @@ import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
-import StakingContainer from "@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer";
-import {isAccountAll} from "@polkadot/extension-koni-ui/util";
-import useFetchNft from "@polkadot/extension-koni-ui/hooks/screen/home/useFetchNft";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -99,7 +101,7 @@ function getTabHeaderItems (address: string, t: TFunction): TabHeaderItemType[] 
       darkIcon: transfers,
       activatedLightIcon: transfersActive,
       activatedDarkIcon: transfersActive
-    })
+    });
   }
 
   return result;
@@ -164,7 +166,8 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
 
   useSetupTransactionHistory(address, showedNetworks);
 
-  const {nftList, nftJson, totalCollection, loading: loadingNft} = useFetchNft();
+  const { loading: loadingNft, nftJson, nftList, totalCollection } = useFetchNft();
+  const { data: stakingData, loading: loadingStaking } = useFetchStaking();
 
   const { crowdloanContributeMap,
     networkBalanceMaps,
@@ -195,18 +198,19 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
   const _isAccountAll = isAccountAll(address);
 
   const tabItems = useMemo<TabHeaderItemType[]>(() => {
-    return getTabHeaderItems(address, t)
+    return getTabHeaderItems(address, t);
   }, [address, t]);
 
-  const onChangeAccount = useCallback( (address: string) => {
+  const onChangeAccount = useCallback((address: string) => {
     if (isAccountAll(address)) {
       _setActiveTab(1);
     }
-  }, [_setActiveTab])
+  }, [_setActiveTab]);
 
   return (
     <div className={`home-screen home ${className}`}>
       <Header
+        changeAccountCallback={onChangeAccount}
         className={'home-header'}
         isContainDetailHeader={true}
         isShowZeroBalances={isShowZeroBalances}
@@ -215,7 +219,6 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         showSettings
         text={t<string>('Accounts')}
         toggleZeroBalances={_toggleZeroBalances}
-        changeAccountCallback={onChangeAccount}
       />
 
       <div className={'home-action-block'}>
@@ -261,24 +264,24 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
-                tooltipContent={t<string>('Receive')}
                 isDisabled
+                tooltipContent={t<string>('Receive')}
               />
             </div>
 
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={sendIcon}
-                tooltipContent={t<string>('Send')}
                 isDisabled
+                tooltipContent={t<string>('Send')}
               />
             </div>
 
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={swapIcon}
-                tooltipContent={t<string>('Swap')}
                 isDisabled
+                tooltipContent={t<string>('Swap')}
               />
             </div>
           </div>
@@ -301,10 +304,10 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
 
         {activatedTab === 2 && (
           <NftContainer
+            loading={loadingNft}
             nftJson={nftJson}
             nftList={nftList}
             totalCollection={totalCollection}
-            loading={loadingNft}
           />
         )}
 
@@ -317,7 +320,10 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
         )}
 
         {activatedTab === 4 && (
-          <StakingContainer />
+          <StakingContainer
+            data={stakingData}
+            loading={loadingStaking}
+          />
         )}
 
         {activatedTab === 5 && (

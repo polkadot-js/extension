@@ -3,10 +3,10 @@
 
 import fetch from 'node-fetch';
 
-import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
+import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { CLOUDFLARE_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
+import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
-import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
 
 interface AssetId {
   classId: string | number,
@@ -26,12 +26,11 @@ interface Token {
 }
 
 export class AcalaNftApi extends BaseNftApi {
-
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
 
-  override parseUrl(input: string): string | undefined {
+  override parseUrl (input: string): string | undefined {
     if (!input || input.length === 0) return undefined;
 
     if (isUrl(input)) return input;
@@ -51,13 +50,16 @@ export class AcalaNftApi extends BaseNftApi {
     if (!this.dotSamaApi) return [];
 
     let accountAssets: any[] = [];
+
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
+
       accountAssets = [...accountAssets, ...resp];
     }));
 
-    let assetIds: AssetId[] = [];
+    const assetIds: AssetId[] = [];
+
     for (const key of accountAssets) {
       const data = key.toHuman() as string[];
 

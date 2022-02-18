@@ -3,9 +3,10 @@
 
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+
 import { canDerive } from '@polkadot/extension-base/utils';
-import { AccountInfoEl, ButtonArea, InputWithLabel, Label, NextStepButton, Warning } from '../../components';
-import { AccountContext, ActionContext, Theme } from '../../components';
+
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, InputWithLabel, Label, NextStepButton, Theme, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';

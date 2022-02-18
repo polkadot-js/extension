@@ -4,10 +4,11 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { AccountInfoEl, ButtonArea, NextStepButton } from '../components';
 import Name from '@polkadot/extension-koni-ui/partials/Name';
 import Password from '@polkadot/extension-koni-ui/partials/Password';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
+
+import { AccountInfoEl, ButtonArea, NextStepButton } from '../components';
 
 interface Props {
   buttonLabel?: string;

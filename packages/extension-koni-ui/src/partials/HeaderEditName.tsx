@@ -5,6 +5,7 @@ import React, { useMemo } from 'react';
 
 import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
 import ValidatedInput2 from '@polkadot/extension-koni-ui/components/ValidatedInput2';
+
 import useTranslation from '../hooks/useTranslation';
 import { isNotShorterThan } from '../util/validators';
 
@@ -17,7 +18,7 @@ interface Props {
   defaultValue?: string;
 }
 
-export default function HeaderEditName ({ className, isFocused, label, onBlur, onChange, defaultValue }: Props): React.ReactElement<Props> {
+export default function HeaderEditName ({ className, defaultValue, isFocused, label, onBlur, onChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const isNameValid = useMemo(() => isNotShorterThan(3, t<string>('Account name is too short')), [t]);
 

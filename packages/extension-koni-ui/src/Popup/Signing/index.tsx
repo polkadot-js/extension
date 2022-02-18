@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SignerPayloadJSON } from '@polkadot/types/types';
+
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { SigningReqContext, LoadingContainer } from '../../components';
+
+import { LoadingContainer, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Request from './Request';
 import TransactionIndex from './TransactionIndex';

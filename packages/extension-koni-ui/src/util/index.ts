@@ -3,13 +3,14 @@
 
 import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import { Recoded } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
-import {isAccountAll} from "@polkadot/extension-koni-ui/util/accountAll";
+
 export * from './common';
 export * from './chainBalancesApi';
 export * from './accountAll';
@@ -19,7 +20,7 @@ export * from './accountAll';
 function findSubstrateAccount (accounts: AccountJson[], publicKey: Uint8Array): AccountJson | null {
   const pkStr = publicKey.toString();
 
-  return accounts.filter(a => !isAccountAll(a.address)).find(({ address }): boolean =>
+  return accounts.filter((a) => !isAccountAll(a.address)).find(({ address }): boolean =>
     decodeAddress(address).toString() === pkStr
   ) || null;
 }

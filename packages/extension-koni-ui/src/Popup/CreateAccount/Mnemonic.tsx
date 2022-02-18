@@ -4,6 +4,7 @@
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+
 import { AccountInfoEl, ButtonArea, Checkbox, MnemonicSeed, NextStepButton, Warning } from '@polkadot/extension-koni-ui/components';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 

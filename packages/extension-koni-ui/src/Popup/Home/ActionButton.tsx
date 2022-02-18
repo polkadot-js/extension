@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
+
 import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
@@ -26,7 +27,7 @@ function getContainerClassName (isDisabled: boolean, extraClassName = ''): strin
   return className;
 }
 
-function HomeActionButton ({ className, iconSrc, onClick, tooltipContent, isDisabled = false }: Props): React.ReactElement {
+function HomeActionButton ({ className, iconSrc, isDisabled = false, onClick, tooltipContent }: Props): React.ReactElement {
   const [trigger] = useState(() => `home-action-button-${++tooltipId}`);
 
   return (

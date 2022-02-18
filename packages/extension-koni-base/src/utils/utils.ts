@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
+import { BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
-import {BN, hexToU8a, isHex} from "@polkadot/util";
-import {ALL_ACCOUNT_KEY} from "@polkadot/extension-koni-base/constants";
 
 export const notDef = (x: any) => x === null || typeof x === 'undefined';
 export const isDef = (x: any) => !notDef(x);

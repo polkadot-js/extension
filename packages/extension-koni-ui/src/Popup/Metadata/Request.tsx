@@ -3,8 +3,10 @@
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { ThemeProps } from '../../types';
+
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+
 import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';

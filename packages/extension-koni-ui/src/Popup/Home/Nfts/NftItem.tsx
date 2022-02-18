@@ -23,7 +23,10 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
-      <div className={'prop-detail'} key={key}>
+      <div
+        className={'prop-detail'}
+        key={key}
+      >
         <div className={'prop-title'}>{title}</div>
         <div className={'prop-value'}>{value}</div>
       </div>

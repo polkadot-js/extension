@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
-import {hexToStr, hexToUTF16, utf16ToString} from '@polkadot/extension-koni-base/utils/utils';
+import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
+import { hexToStr, hexToUTF16, utf16ToString } from '@polkadot/extension-koni-base/utils/utils';
 
-import {deserializeNft} from './protobuf';
-import {BaseNftApi} from "@polkadot/extension-koni-base/api/nft/nft";
+import { deserializeNft } from './protobuf';
 
 interface CollectionProperties {
   schemaVersion: string,
@@ -26,7 +26,6 @@ interface NftIdList {
 }
 
 export default class QuartzNftApi extends BaseNftApi {
-
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
@@ -56,7 +55,7 @@ export default class QuartzNftApi extends BaseNftApi {
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
-    return (await this.dotSamaApi.api.rpc.unique.accountTokens(collectionId, {Substrate: address})).toJSON();
+    return (await this.dotSamaApi.api.rpc.unique.accountTokens(collectionId, { Substrate: address })).toJSON();
   }
 
   /**
@@ -95,6 +94,7 @@ export default class QuartzNftApi extends BaseNftApi {
 
     let tokenImage = '';
     const schemaVersion = collectionProperties.schemaVersion;
+
     if (schemaVersion == 'ImageURL') {
       // Replace {id} with token ID
       tokenImage = hexToStr(collectionProperties.offchainSchema);
@@ -104,7 +104,8 @@ export default class QuartzNftApi extends BaseNftApi {
     }
 
     let collectionImage = '';
-    if (collectionProperties.variableOnChainSchema &&  collectionProperties.variableOnChainSchema.collectionCover) {
+
+    if (collectionProperties.variableOnChainSchema && collectionProperties.variableOnChainSchema.collectionCover) {
       collectionImage = `https://ipfs.unique.network/ipfs/${collectionProperties.variableOnChainSchema.collectionCover}`;
     } else {
       // TBD: Query from the RESTful service
@@ -122,8 +123,8 @@ export default class QuartzNftApi extends BaseNftApi {
 
   public async handleNfts () {
     const collectionCount = await this.getCreatedCollectionCount();
-    let collectionPropertiesMap: Record<number, any> = {};
-    let collectionIds: number[] = [];
+    const collectionPropertiesMap: Record<number, any> = {};
+    const collectionIds: number[] = [];
 
     for (let i = 0; i < collectionCount; i++) {
       collectionIds.push(i);
@@ -135,8 +136,9 @@ export default class QuartzNftApi extends BaseNftApi {
 
     const data: NftIdList[] = [];
     const addressTokenDict: any[] = [];
+
     for (let i = 0; i < collectionCount; i++) {
-      for (let address of this.addresses) {
+      for (const address of this.addresses) {
         if (collectionPropertiesMap[i] !== null) addressTokenDict.push({ i, account: address });
       }
     }
@@ -151,7 +153,7 @@ export default class QuartzNftApi extends BaseNftApi {
       }
     }));
 
-    let allCollections: NftCollection[] = [];
+    const allCollections: NftCollection[] = [];
 
     let total = 0;
 
@@ -169,6 +171,7 @@ export default class QuartzNftApi extends BaseNftApi {
         for (let i = 0; i < nfts.length; i++) {
           const tokenId = nfts[i];
           const nftData = await this.getNftData(collectionProperties, collectionId, tokenId);
+
           if (nftData) {
             collectionName = nftData.collectionName;
             collectionImage = this.parseUrl(nftData.collectionImage);

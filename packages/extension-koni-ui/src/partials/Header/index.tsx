@@ -101,7 +101,7 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
     const formattedAddress = reformatAddress(currentAccount.address, networkPrefix, isEthereum);
 
     setFormattedAddress(formattedAddress);
-  }, [ currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
+  }, [currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
 
   useEffect(() => {
     let isSync = true;

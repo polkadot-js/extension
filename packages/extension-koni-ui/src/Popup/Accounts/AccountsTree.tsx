@@ -13,15 +13,15 @@ interface Props extends AccountWithChildren {
   changeAccountCallback?: (address: string) => void;
 }
 
-export default function AccountsTree ({ closeSetting, parentName, suri, changeAccountCallback,...account }: Props): React.ReactElement<Props> {
+export default function AccountsTree ({ changeAccountCallback, closeSetting, parentName, suri, ...account }: Props): React.ReactElement<Props> {
   return (
     <>
       <Account
         {...account}
+        changeAccountCallback={changeAccountCallback}
         closeSetting={closeSetting}
         parentName={parentName}
         suri={suri}
-        changeAccountCallback={changeAccountCallback}
       />
       {account?.children?.map((child, index) => (
         <AccountsTree

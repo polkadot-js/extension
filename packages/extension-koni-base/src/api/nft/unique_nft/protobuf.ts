@@ -8,6 +8,7 @@ function defineMessage (schema: string) {
     return Root.fromJSON(JSON.parse(schema));
   } catch (e) {
     console.error(e);
+
     return null;
   }
 }

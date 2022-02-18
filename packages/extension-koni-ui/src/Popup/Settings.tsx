@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
+
 import { faExpand, faList } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import { setNotification, windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
-import { ActionContext, themes, ThemeSwitchContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown } from '../components';
+
+import { ActionContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { Theme } from '../types';
 

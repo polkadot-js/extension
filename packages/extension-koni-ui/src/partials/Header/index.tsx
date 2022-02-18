@@ -51,13 +51,14 @@ interface Props extends ThemeProps {
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
   changeAccountCallback?: (address: string) => void;
+  isBusy?: boolean;
 }
 
 function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ changeAccountCallback, children, className = '', isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances, isBusy }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -257,7 +258,7 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
   return (
     <div className={`${className} ${smallMargin ? 'smallMargin' : ''}`}>
       <div className='container'>
-        <div className='top-container'>
+        <div className={`top-container ${isBusy ? 'disabled-item' : ''}`}>
           <div className='branding'>
             <Link
               className='sub-wallet-logo'
@@ -369,6 +370,7 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
             showBackArrow={showBackArrow}
             showCancelButton={showCancelButton}
             subHeaderName={subHeaderName}
+            isBusy={isBusy}
           />
         }
 
@@ -400,6 +402,12 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     margin-left: -100%;
     margin-right: -100%;
     text-align: center;
+  }
+
+  .disabled-item {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .pointer-events-none {

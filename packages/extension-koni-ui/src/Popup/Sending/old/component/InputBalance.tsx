@@ -3,14 +3,13 @@
 
 import type { SiDef } from '@polkadot/util/types';
 
-import BN from 'bn.js';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
 import { BitLength } from '@polkadot/extension-koni-ui/components/types';
 import { Registry } from '@polkadot/types/types';
-import { formatBalance, isUndefined } from '@polkadot/util';
+import { BN, formatBalance, isUndefined } from '@polkadot/util';
 
 import InputNumber from './InputNumber';
 

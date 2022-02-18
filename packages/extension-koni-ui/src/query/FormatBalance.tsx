@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type BN from 'bn.js';
 import type { Compact } from '@polkadot/types';
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
-import { BN_ZERO, formatBalance } from '@polkadot/util';
+import { BN, BN_ZERO, formatBalance } from '@polkadot/util';
 
 import { useTranslation } from './translate';
 

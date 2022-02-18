@@ -4,7 +4,6 @@
 import type { SiDef } from '@polkadot/util/types';
 import type { BitLength } from './types';
 
-import BN from 'bn.js';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -12,7 +11,7 @@ import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constant
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { Registry } from '@polkadot/types/types';
-import { BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
+import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
 
 import Dropdown from './Dropdown';
 import Input, { KEYS_PRE } from './Input';

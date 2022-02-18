@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -169,6 +169,12 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
   const { loading: loadingNft, nftJson, nftList, totalCollection } = useFetchNft();
   const { data: stakingData, loading: loadingStaking } = useFetchStaking();
 
+  useEffect(() => {
+    if (isAccountAll(address) && activatedTab === 5) {
+      _setActiveTab(1);
+    }
+  }, [address, activatedTab])
+
   const { crowdloanContributeMap,
     networkBalanceMaps,
     totalBalanceValue } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
@@ -210,7 +216,6 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
   return (
     <div className={`home-screen home ${className}`}>
       <Header
-        changeAccountCallback={onChangeAccount}
         className={'home-header'}
         isContainDetailHeader={true}
         isShowZeroBalances={isShowZeroBalances}

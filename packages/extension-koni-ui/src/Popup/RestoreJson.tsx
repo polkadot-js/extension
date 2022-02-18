@@ -124,6 +124,7 @@ function Upload ({ className }: Props): React.ReactElement {
         showSubHeader
         smallMargin
         subHeaderName={t<string>('Restore from JSON')}
+        isBusy={isBusy}
       />
       <div className={className}>
         <div className='restore-from-json-wrapper'>

@@ -3,7 +3,7 @@
 
 import type { AccountId, AccountIndex, Address } from '@polkadot/types/interfaces';
 
-import BN from 'bn.js';
+import { BN } from '@polkadot/util';
 import React from 'react';
 
 import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';

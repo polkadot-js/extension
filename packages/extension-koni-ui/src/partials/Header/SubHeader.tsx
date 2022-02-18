@@ -14,10 +14,11 @@ interface Props extends ThemeProps {
   className?: string,
   showBackArrow?: boolean,
   subHeaderName?: string,
-  showCancelButton?: boolean
+  showCancelButton?: boolean,
+  isBusy?: boolean
 }
 
-function SubHeader ({ className, showBackArrow, showCancelButton, subHeaderName }: Props): React.ReactElement {
+function SubHeader ({ className, showBackArrow, showCancelButton, subHeaderName, isBusy }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -29,7 +30,7 @@ function SubHeader ({ className, showBackArrow, showCancelButton, subHeaderName 
             to='/'
           >
             <FontAwesomeIcon
-              className='arrowLeftIcon'
+              className={`arrowLeftIcon ${isBusy ? 'disabled-btn' : ''}`}
               icon={faArrowLeft}
             />
           </Link>
@@ -67,6 +68,12 @@ export default styled(SubHeader)(({ theme }: Props) => `
     line-height: 30px;
     font-weight: 500;
     color: ${theme.textColor};
+  }
+
+  .disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .subheader-container__part-1 {

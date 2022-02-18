@@ -19,15 +19,16 @@ interface Props {
   parentAddress: string;
   parentGenesis: string | null;
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
+  isBusy: boolean;
+  setBusy: (isBusy: boolean) => void;
 }
 
 // match any single slash
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
-function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis }: Props): React.ReactElement<Props> {
+function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis, isBusy, setBusy }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const [isBusy, setIsBusy] = useState(false);
   const { accounts, hierarchy } = useContext(AccountContext);
   const defaultPath = useMemo(() => nextDerivationPath(accounts, parentAddress), [accounts, parentAddress]);
   const [suriPath, setSuriPath] = useState<null | string>(defaultPath);
@@ -99,24 +100,22 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
   const _onSubmit = useCallback(
     async (): Promise<void> => {
       if (suriPath && parentAddress && parentPassword) {
-        setIsBusy(true);
+        setBusy(true);
 
         const isUnlockable = await validateAccount(parentAddress, parentPassword);
-
         if (isUnlockable) {
           try {
             const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
 
             onDerivationConfirmed({ account, parentPassword });
           } catch (error) {
-            setIsBusy(false);
             setPathError(t('Invalid derivation path'));
             console.error(error);
           }
         } else {
-          setIsBusy(false);
           setIsProperParentPassword(false);
         }
+        setBusy(false);
       }
     },
     [parentAddress, parentPassword, onDerivationConfirmed, suriPath, t]

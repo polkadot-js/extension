@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Theme, ThemeProps } from '../types';
-
 import { saveAs } from 'file-saver';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {useCallback, useContext, useState} from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
-
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util';
-
-import { AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components';
+import { ActionContext, AccountInfoEl, ActionBar, ActionText, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccount } from '../messaging';
+import {isAccountAll} from "@polkadot/extension-koni-ui/util";
 
 const MIN_LENGTH = 6;
 
@@ -28,11 +25,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const [isAllAccount, setIsAllAccount] = useState(false);
-
-  useEffect(() => {
-    setIsAllAccount(isAccountAll(address));
-  }, []);
+  const _isAllAccount = isAccountAll(address);
 
   const _goHome = useCallback(
     () => {
@@ -77,12 +70,13 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
         showBackArrow
         showSubHeader
         subHeaderName={t<string>('Export account')}
+        isBusy={isBusy}
       />
       <div className={className}>
-        {isAllAccount
-          ? <div>
+        {_isAllAccount ?
+          <div>
             <Warning>
-              {t<string>('Account "All" doesn\'t support this action. Please switch to another account')}
+              {t<string>(`Account "All" doesn't support this action. Please switch to another account`)}
             </Warning>
 
             <ActionBar className='export__action-bar'>
@@ -92,8 +86,8 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                 text={t<string>('Cancel')}
               />
             </ActionBar>
-          </div>
-          : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
+          </div> :
+          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
             <AccountInfoEl address={address} />
             <Warning className='export-warning'>
               {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
@@ -132,7 +126,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                 </Button>
                 <ActionBar className='export__action-bar'>
                   <ActionText
-                    className='cancel-button'
+                    className={`cancel-button ${isBusy? 'disabled-btn' : ''}`}
                     onClick={_goHome}
                     text={t<string>('Cancel')}
                   />
@@ -153,6 +147,12 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
 
   .export__password-area {
     padding-top: 13px;
+  }
+
+  .disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none !important;
   }
 
   .export__action-area {

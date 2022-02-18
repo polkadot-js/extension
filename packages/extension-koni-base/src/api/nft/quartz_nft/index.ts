@@ -200,6 +200,5 @@ export default class QuartzNftApi extends BaseNftApi {
 
     this.total = total;
     this.data = allCollections;
-    console.log(allCollections);
   }
 }

@@ -10,7 +10,7 @@ import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 
-const NFT_TIMEOUT = 30000;
+const NFT_TIMEOUT = 20000;
 
 enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -51,7 +51,6 @@ export class NftHandler {
   addresses: string[] = [];
   total = 0;
   data: NftCollection[] = [];
-  running = false;
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
     if (addresses) this.addresses = addresses;
@@ -63,6 +62,9 @@ export class NftHandler {
 
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
+    this.handlers.map((handler) => {
+      handler.setAddresses(addresses);
+    })
   }
 
   private async connect () {
@@ -76,22 +78,16 @@ export class NftHandler {
           const parentApi: ApiProps = await apiPromise.isReady;
           const handler = createNftApi(chain, parentApi, this.addresses);
 
-          if (handler) this.handlers.push(handler);
+          if (handler && !this.handlers.includes(handler)) this.handlers.push(handler);
         }
       }));
     }
   }
 
   public async handleNfts () {
-    if (this.running) {
-      console.log('already fetching nft');
-
-      return;
-    }
-
-    console.log(`fetching nft from ${this.handlers.length} chains`);
-    this.running = true;
     await this.connect();
+    console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
+
     let total = 0;
     let data: NftCollection[] = [];
     let timer: any;
@@ -107,14 +103,10 @@ export class NftHandler {
       .race([allPromises, new Promise((_r, rej) => timer = setTimeout(rej, NFT_TIMEOUT))])
       .finally(() => clearTimeout(timer));
 
-    if (total > this.total) {
-      console.log(`detected ${total - this.total} new nft`);
-      this.total = total;
-      this.data = data;
-    }
+    this.total = total;
+    this.data = data;
 
-    console.log('done fetching nft from rpc');
-    this.running = false;
+    console.log(`done fetching ${total} nft from rpc`);
   }
 
   public getTotal () {

@@ -3,7 +3,7 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 
 import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
@@ -29,6 +29,10 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
   const [showCollectionDetail, setShowCollectionDetail] = useState(false);
   const [page, setPage] = useState(1);
   const [currentNftList, setCurrentNftList] = useState(nftList.slice(0, totalCollection > size ? size : totalCollection));
+
+  useEffect(() => {
+    setCurrentNftList(nftList.slice(0, totalCollection > size ? size : totalCollection));
+  }, [nftList])
 
   const handleShowCollectionDetail = (data: any) => {
     setShowCollectionDetail(true);
@@ -81,7 +85,7 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
         !showCollectionDetail &&
         <div className={'grid-container'}>
           {
-            !loading && nftList &&
+            !loading && nftList.length > 0 &&
             // @ts-ignore
             currentNftList.map((item: any, index: React.Key | null | undefined) => {
               // @ts-ignore

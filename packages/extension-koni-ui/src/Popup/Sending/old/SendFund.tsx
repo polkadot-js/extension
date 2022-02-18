@@ -180,9 +180,10 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
 
-  useEffect((): void => {
+  useEffect(() => {
     const fromId = senderId as string;
     const toId = recipientId as string;
+    let isSync = true;
 
     if (balances && balances.accountId.eq(fromId) && fromId && toId && isFunction(api.rpc.payment?.queryInfo)) {
       setTimeout((): void => {
@@ -194,11 +195,13 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
               const adjFee = partialFee.muln(110).div(BN_HUNDRED);
               const maxTransfer = balances.availableBalance.sub(adjFee);
 
-              setMaxTransfer(
-                maxTransfer.gt(api.consts.balances.existentialDeposit as unknown as BN)
-                  ? [maxTransfer, false]
-                  : [null, true]
-              );
+              if (isSync) {
+                setMaxTransfer(
+                  maxTransfer.gt(api.consts.balances.existentialDeposit as unknown as BN)
+                    ? [maxTransfer, false]
+                    : [null, true]
+                );
+              }
             })
             .catch(console.error);
         } catch (error) {
@@ -208,6 +211,10 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
     } else {
       setMaxTransfer([null, false]);
     }
+
+    return () => {
+      isSync = false;
+    };
   }, [api, balances, propSenderId, recipientId, senderId]);
 
   useEffect((): void => {
@@ -331,6 +338,8 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
   };
 
   const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
+
+  console.log('amountGtAvailableBalance - noFees', amountGtAvailableBalance, noFees);
 
   return (
     <>

@@ -59,7 +59,7 @@ export default function (): networkSelectOption[] {
       value: '',
       networkKey: 'all',
       networkPrefix: -1,
-      icon: 'substrate',
+      icon: 'polkadot',
       group: 'UNKNOWN' as NetWorkGroup,
       isEthereum: false
     },

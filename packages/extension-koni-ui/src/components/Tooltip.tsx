@@ -7,6 +7,7 @@ import ReactTooltip from 'react-tooltip';
 import styled, { ThemeContext } from 'styled-components';
 
 import { Theme } from '@polkadot/extension-koni-ui/components';
+import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 
 function rootElement () {
   return typeof document === 'undefined'
@@ -14,7 +15,7 @@ function rootElement () {
     : document.getElementById('tooltips');
 }
 
-interface Props {
+interface Props extends ThemeProps {
   className?: string;
   clickable?: boolean;
   dataFor?: string;
@@ -51,14 +52,14 @@ function Tooltip ({ className = '', clickable = false, effect = 'solid', offset,
 
   return ReactDOM.createPortal(
     <ReactTooltip
-      backgroundColor={theme === 'dark' ? '#fff' : ''}
+      backgroundColor={theme === 'dark' ? '#181E42' : ''}
       className={`ui--Tooltip ${className}`}
       clickable={clickable}
       effect={effect}
       id={trigger}
       offset={offset}
       place={place}
-      textColor={theme === 'dark' ? '#00072D' : ''}
+      textColor={theme === 'dark' ? '#FFF' : ''}
     >
       {className?.includes('address') ? <div>{text}</div> : text}
     </ReactTooltip>,
@@ -66,7 +67,7 @@ function Tooltip ({ className = '', clickable = false, effect = 'solid', offset,
   );
 }
 
-export default React.memo(styled(Tooltip)`
+export default React.memo(styled(Tooltip)(({ theme }: Props) => `
   > div {
     overflow: hidden;
   }
@@ -75,6 +76,17 @@ export default React.memo(styled(Tooltip)`
     z-index: 1100;
     max-width: 300px;
     text-align: center;
+    border: 1px solid #2D365C;
+    box-shadow: 0px 10px 40px rgba(0, 75, 255, 0.4);
+    border-radius: 5px;
+  }
+
+  &.__react_component_tooltip.place-top:before {
+    border-top: 8px solid #2D365C;
+  }
+
+  &.__react_component_tooltip.place-right:before {
+    border-right: 8px solid #2D365C;
   }
 
   table {
@@ -125,4 +137,4 @@ export default React.memo(styled(Tooltip)`
   .row+.row {
     margin-top: 0.5rem;
   }
-`);
+`));

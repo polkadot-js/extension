@@ -48,6 +48,7 @@ function HomeActionButton ({ className, iconSrc, isDisabled = false, onClick, to
         <Tooltip
           text={tooltipContent}
           trigger={trigger}
+          offset={{'top': 8}}
         />
       )}
     </>

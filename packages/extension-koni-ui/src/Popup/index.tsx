@@ -94,13 +94,8 @@ export default function Popup (): React.ReactElement {
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
-
-      const beforeNav = window.localStorage.getItem('popupNavigation');
-
       if (to) {
         window.location.hash = to;
-      } else if (beforeNav) {
-        window.location.hash = beforeNav;
       }
     },
     []
@@ -128,6 +123,20 @@ export default function Popup (): React.ReactElement {
     }
   };
 
+  useEffect(():void => {
+    setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+    const beforeNav = window.localStorage.getItem('popupNavigation');
+    if (beforeNav) {
+      if ((authRequests && authRequests.length)
+        || (metaRequests && metaRequests.length)
+        || (signRequests && signRequests.length)) {
+        window.location.hash = '/';
+      } else {
+        window.location.hash = beforeNav;
+      }
+    }
+  }, [authRequests, metaRequests, signRequests])
+
   useEffect((): void => {
     Promise.all([
       // subscribeAccounts(setAccounts),
@@ -141,8 +150,6 @@ export default function Popup (): React.ReactElement {
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
     });
-
-    _onAction();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

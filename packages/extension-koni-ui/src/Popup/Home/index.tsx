@@ -207,11 +207,11 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
     return getTabHeaderItems(address, t);
   }, [address, t]);
 
-  const onChangeAccount = useCallback((address: string) => {
-    if (isAccountAll(address)) {
-      _setActiveTab(1);
-    }
-  }, [_setActiveTab]);
+  // const onChangeAccount = useCallback((address: string) => {
+  //   if (isAccountAll(address)) {
+  //     _setActiveTab(1);
+  //   }
+  // }, [_setActiveTab]);
 
   return (
     <div className={`home-screen home ${className}`}>

@@ -9,7 +9,7 @@ import { RootState } from '@polkadot/extension-koni-ui/stores';
 export default function useFetchStaking (): StakingType {
   const { staking: stakingReducer } = useSelector((state: RootState) => state);
 
-  console.log('fetch staking from state');
+  // console.log('fetch staking from state');
 
   return {
     loading: !stakingReducer.ready,

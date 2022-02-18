@@ -9,7 +9,7 @@ import { RootState } from '@polkadot/extension-koni-ui/stores';
 export default function useFetchNft (): NftType {
   const { nft: nftReducer } = useSelector((state: RootState) => state);
 
-  console.log('fetch nft from state', nftReducer);
+  // console.log('fetch nft from state');
 
   return {
     nftList: nftReducer?.nftList,

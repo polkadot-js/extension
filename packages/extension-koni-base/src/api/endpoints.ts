@@ -412,9 +412,9 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   },
   zeitgeist: {
     chain: 'Zeitgeist',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    provider: 'PROVIDER',
+    genesisHash: '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060',
+    ss58Format: 73,
+    provider: 'wss://rpc-0.zeitgeist.pm',
     group: 'KUSAMA_PARACHAIN',
     paraId: 2101,
     nativeToken: 'ZTG'
@@ -430,10 +430,11 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   },
   shadow: {
     chain: 'Crust Shadow',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    provider: 'PROVIDER',
-    group: 'NOT_SURE',
+    genesisHash: '0xd4c0c08ca49dc7c680c3dac71a7c0703e5b222f4b6c03fe4c5219bb8f22c18dc',
+    ss58Format: 66,
+    provider: 'wss://rpc-shadow.crust.network/',
+    group: 'KUSAMA_PARACHAIN',
+    paraId: 2012,
     nativeToken: 'CSM'
   },
   uniqueNft: {

@@ -108,6 +108,7 @@ export default styled(Request)(({ theme }: Props) => `
   .tab-url {
     color: ${theme.textColor};
     display: inline-block;
+    max-height: 10rem;
     max-width: 20rem;
     overflow: hidden;
     text-overflow: ellipsis;

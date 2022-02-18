@@ -246,7 +246,7 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
 
   .chain-balance-item__chain-name {
     font-weight: 500;
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .chain-balance-item__bottom-area {

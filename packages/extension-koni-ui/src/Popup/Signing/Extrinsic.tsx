@@ -117,7 +117,6 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
   return (
     <Table
       className={className}
-      isFull
     >
       <tr>
         <td className='label'>{t<string>('from')}</td>

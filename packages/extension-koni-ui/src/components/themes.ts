@@ -94,7 +94,7 @@ const darkTheme = {
   crowdloanWinnerStatus: '#42C59A',
   crowdloanActiveStatus: '#F7A21B',
   crowdloanFailStatus: '#F5000E',
-  extensionBorder: 'transparent'
+  extensionBorder: '#030E45'
 };
 
 export declare type Theme = typeof darkTheme;

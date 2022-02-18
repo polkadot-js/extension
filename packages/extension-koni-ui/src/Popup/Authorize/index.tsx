@@ -43,6 +43,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
 
 export default styled(Authorize)`
   overflow-y: auto;
+  height: 100%;
 
   &.lastRequest {
     overflow: hidden;

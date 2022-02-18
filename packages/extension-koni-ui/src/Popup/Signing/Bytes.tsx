@@ -43,8 +43,8 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
 export default styled(Bytes)`
   border: 0;
   display: block;
-  font-size: 0.75rem;
-  margin-top: 0.75rem;
+  font-size: 15px;
+  margin: 20px 15px 0;
 
   td.data {
     max-width: 0;

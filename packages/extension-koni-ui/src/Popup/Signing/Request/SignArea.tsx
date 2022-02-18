@@ -10,8 +10,9 @@ import { ActionBar, ActionContext, Button, Checkbox, Link } from '../../../compo
 import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
 import Unlock from '../Unlock';
+import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 
-interface Props {
+interface Props extends ThemeProps {
   buttonText: string;
   className?: string;
   error: string | null;
@@ -19,9 +20,10 @@ interface Props {
   isFirst: boolean;
   setError: (value: string | null) => void;
   signId: string;
+  children?: React.ReactElement
 }
 
-function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId, children }: Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -93,6 +95,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
   return (
     <div className={className}>
+      {children}
       {isFirst && !isExternal && (
         <>
           { isLocked && (
@@ -129,14 +132,15 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   );
 }
 
-export default styled(SignArea)`
+export default styled(SignArea)(({ theme }: Props) => `
   flex-direction: column;
   position: sticky;
   bottom: 0;
   margin-left: -15px;
   margin-right: -15px;
   margin-bottom: -15px;
-  padding: 15px;
+  padding: 0 15px 15px;
+  background-color: ${theme.background};
   .cancel-button {
     margin-top: 4px;
     margin-bottom: 4px;
@@ -156,4 +160,4 @@ export default styled(SignArea)`
   .sign-button {
     padding: 0 85px;
   }
-`;
+`);

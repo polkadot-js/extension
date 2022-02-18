@@ -27,7 +27,7 @@ import pencil from '../assets/pencil.svg';
 interface Props extends ThemeProps {
   className?: string;
   closeModal?: () => void;
-  accountName: string | undefined | null;
+  accountName: string | undefined;
   address: string;
   networkPrefix: number;
   networkKey: string;
@@ -112,7 +112,7 @@ function AccountQrModal ({ accountName, address, className,
             </div>
             {isEditing && (
               <HeaderEditName
-                address={address}
+                defaultValue={accountName}
                 className='account-qr-modal__edit-name'
                 isFocused
                 label={' '}
@@ -291,10 +291,11 @@ export default styled(AccountQrModal)(({ theme }: ThemeProps) => `
     margin-bottom: 10px;
     cursor: pointer;
     text-decoration: none;
+    opacity: 1;
   }
 
   .account-qr-modal-button__text {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 26px;
     font-weight: 500;
     color: ${theme.textColor3};

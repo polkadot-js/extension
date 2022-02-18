@@ -125,7 +125,6 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
             setError={setError}
           />
         )}
-        <MenuDivider className='transaction-divider' />
         <SignArea
           buttonText={buttonText}
           error={error}
@@ -133,7 +132,9 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
           isFirst={isFirst}
           setError={setError}
           signId={signId}
-        />
+        >
+          <MenuDivider className='transaction-divider' />
+        </SignArea>
       </div>
     );
   } else if (hexBytes !== null) {

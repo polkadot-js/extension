@@ -3,6 +3,7 @@
 
 import { Subject } from 'rxjs';
 
+import { NftJson, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
@@ -57,14 +58,14 @@ export class KoniCron {
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
-        console.log('at cron', currentAccountInfo);
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          console.log('at cron subscribe', address);
+          this.resetNft();
+          this.resetStaking();
           this.removeCron('refreshNft');
           this.removeCron('refreshStaking');
 
@@ -104,5 +105,22 @@ export class KoniCron {
       console.log('Refresh Staking state');
       this.subscriptions.subscribeStaking(address);
     };
+  }
+
+  resetNft () {
+    state.setNft({
+      ready: false,
+      total: 0,
+      nftList: []
+    } as NftJson);
+    console.log('Reset Nft state');
+  }
+
+  resetStaking () {
+    state.setStaking({
+      ready: false,
+      details: []
+    } as StakingJson);
+    console.log('Reset Staking state');
   }
 }

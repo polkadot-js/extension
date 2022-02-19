@@ -34,13 +34,11 @@ export class KoniSubcription {
         const { address } = currentAccountInfo;
 
         this.subscribleBalancesAndCrowdloans(address);
-        this.subscribeNft(address);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.subscribleBalancesAndCrowdloans(address);
-          this.subscribeNft(address);
         }
       });
     });
@@ -124,7 +122,7 @@ export class KoniSubcription {
     nftHandler.setAddresses(addresses);
     nftHandler.handleNfts().then((r) => {
       state.setNft(nftHandler.getNftJson());
-      console.log('set nft state done');
+      console.log('set nft state done for address', addresses);
     });
   }
 

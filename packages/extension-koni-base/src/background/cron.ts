@@ -26,8 +26,10 @@ export class KoniCron {
     return this.subjectMap[name];
   }
 
-  addCron (name: string, callback: (param?: any) => void, interval: number) {
-    callback();
+  addCron (name: string, callback: (param?: any) => void, interval: number, runFirst = true) {
+    if (runFirst) {
+      callback();
+    }
 
     this.cronMap[name] = setInterval(callback, interval);
   }
@@ -51,7 +53,7 @@ export class KoniCron {
 
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
-    this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL);
+    this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -76,7 +78,7 @@ export class KoniCron {
   recoverAPI () {
     state.getCurrentAccount(({ address }) => {
       console.log('Auto recovering API');
-      this.subscriptions.subscribleBalancesAndCrowdloans(address);
+      this.subscriptions?.subscribleBalancesAndCrowdloans && this.subscriptions.subscribleBalancesAndCrowdloans(address);
     });
   }
 

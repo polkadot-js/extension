@@ -3,9 +3,8 @@
 
 import { Subject } from 'rxjs';
 
-import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
 import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL } from '@polkadot/extension-koni-base/constants';
 
@@ -75,21 +74,10 @@ export class KoniCron {
   }
 
   recoverAPI () {
-    const failedAPIs: Array<Promise<ApiProps>> = [];
-
-    Object.values(dotSamaAPIMap).forEach((apiProp) => {
-      if (!apiProp.isApiReady) {
-        failedAPIs.push(apiProp.isReady);
-      }
+    state.getCurrentAccount(({ address }) => {
+      console.log('Auto recovering API');
+      this.subscriptions.subscribleBalancesAndCrowdloans(address);
     });
-
-    if (failedAPIs.length > 0) {
-      Promise.all(failedAPIs).then((apiProps) => {
-        state.getCurrentAccount(({ address }) => {
-          this.subscriptions.subscribleBalancesAndCrowdloans(address);
-        });
-      }).catch(console.error);
-    }
   }
 
   refreshPrice () {

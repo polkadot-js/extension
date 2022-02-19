@@ -36,10 +36,10 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       text: 'All',
       type: ''
     },
-    {
-      text: 'Relaychains',
-      type: 'RELAY_CHAIN'
-    },
+    // {
+    //   text: 'Relaychains',
+    //   type: 'RELAY_CHAIN'
+    // },
     {
       text: 'Polkadot',
       type: 'POLKADOT_PARACHAIN'
@@ -185,7 +185,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
 
   .network-item-list-header {
     padding: 10px;
-    width: 420px;
+    width: 360px;
     display: flex;
     justify-content: space-between;
     align-items: center;

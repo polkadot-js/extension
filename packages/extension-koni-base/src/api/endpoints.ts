@@ -46,7 +46,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     icon: 'polkadot',
     ss58Format: 42,
     provider: 'wss://rpc.koniverse.com',
-    groups: ['POLKADOT_PARACHAIN', 'TEST_NET'],
+    groups: ['TEST_NET'],
     nativeToken: 'DOT'
   },
   rmrk: {
@@ -55,7 +55,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     icon: 'polkadot',
     ss58Format: 0,
     provider: 'wss://staging.node.rmrk.app',
-    groups: ['POLKADOT_PARACHAIN']
+    groups: ['TEST_NET']
   },
   statemint: {
     chain: 'Statemint',
@@ -127,7 +127,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
     ss58Format: 7,
     provider: 'wss://edgeware.api.onfinality.io/public-ws',
-    groups: ['POLKADOT_PARACHAIN'],
+    groups: ['MAIN_NET'],
     nativeToken: 'EDG'
   },
   centrifuge: {
@@ -211,7 +211,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'AMAS'
   },
   polkadex: {
-    chain: 'Ares Odyssey',
+    chain: 'Polkadex',
     genesisHash: '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
     ss58Format: 88,
     provider: 'wss://mainnet.polkadex.trade',
@@ -493,7 +493,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: 'UPDATING',
     ss58Format: -1,
     provider: 'wss://testnet2.uniquenetwork.io',
-    groups: ['KUSAMA_PARACHAIN'],
+    groups: ['TEST_NET'],
     paraId: 2012,
     nativeToken: 'UNQ'
   },

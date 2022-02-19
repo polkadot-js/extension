@@ -201,6 +201,57 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2017,
     nativeToken: 'SGB'
   },
+  odyssey: {
+    chain: 'Ares Odyssey',
+    genesisHash: '0x52097bd7416205228bf13ac3eda6f16de56c19cac3476866b8b8a9c00d515870',
+    ss58Format: 42,
+    provider: 'wss://wss.odyssey.aresprotocol.io',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2028,
+    nativeToken: 'AMAS'
+  },
+  polkadex: {
+    chain: 'Ares Odyssey',
+    genesisHash: '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
+    ss58Format: 88,
+    provider: 'wss://mainnet.polkadex.trade',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2028,
+    nativeToken: 'PDEX'
+  },
+  aleph: {
+    chain: 'Aleph Zero',
+    genesisHash: '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e',
+    ss58Format: 42,
+    provider: 'wss://ws.azero.dev/',
+    groups: ['MAIN_NET'],
+    nativeToken: 'AZERO'
+  },
+  alephTest: {
+    chain: 'Aleph Zero Testnet',
+    genesisHash: '0x49574664f45654c043c2690b76b5bf4a05c49160e112d32b8b71b0dfb023169c',
+    ss58Format: 42,
+    provider: 'wss://ws.test.azero.dev/',
+    groups: ['TEST_NET'],
+    nativeToken: 'TZERO'
+  },
+  opal: {
+    chain: 'OPAL by UNIQUE',
+    genesisHash: '0x3fa374fbc8d0a9077356aefe327c88f447ce7f1fda905b1d4b4a2680a7b5cefa',
+    ss58Format: 42,
+    provider: 'wss://opal.unique.network',
+    groups: ['TEST_NET'],
+    nativeToken: 'OPL'
+  },
+  moonbaseAlpha: {
+    chain: 'Moonbase Alpha',
+    genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
+    ss58Format: 1287,
+    provider: 'wss://moonbeam-alpha.api.onfinality.io/public-ws',
+    groups: ['TEST_NET'],
+    nativeToken: 'DEV',
+    isEthereum: true
+  },
   efinity: {
     chain: 'Efinity',
     genesisHash: 'UNKNOWN',

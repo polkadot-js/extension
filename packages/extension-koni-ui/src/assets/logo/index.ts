@@ -54,6 +54,12 @@ const LogosMap: Record<string, string> = {
   westend: require('./westend.svg'),
   rococo: require('./rococo.svg'),
   robonomics: require('./robonomics.svg'),
+  odyssey: require('./odyssey.svg'),
+  polkadex: require('./polkadex.svg'),
+  aleph: require('./aleph.svg'),
+  alephTest: require('./aleph.svg'),
+  opal: require('./opal.png'),
+  moonbaseAlpha: require('./moonbaseAlpha.png'),
   default: require('./default.svg')
 };
 

@@ -138,7 +138,7 @@ export interface ApiProps extends ApiState {
   isReady: Promise<ApiProps>;
 }
 
-export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'UNKNOWN' | 'NOT_SURE';
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
 
 export interface NetWorkInfo {
   chain: string;
@@ -147,7 +147,7 @@ export interface NetWorkInfo {
   ss58Format: number;
   chainType?: 'substrate' | 'ethereum';
   provider: string;
-  group: NetWorkGroup;
+  groups: NetWorkGroup[];
   paraId?: number;
   isEthereum?: boolean;
   nativeToken?: string;
@@ -155,7 +155,7 @@ export interface NetWorkInfo {
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkKey: string;
-  group: NetWorkGroup
+  groups: NetWorkGroup[];
   isEthereum: boolean;
   paraId?: number;
   isAvailable: boolean;

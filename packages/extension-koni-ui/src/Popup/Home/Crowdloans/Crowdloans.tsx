@@ -5,7 +5,7 @@ import BigN from 'bignumber.js';
 import React from 'react';
 import styled from 'styled-components';
 
-import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { NetWorkGroup, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import { CrowdloanContributeValueType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
@@ -31,12 +31,22 @@ const GroupDisplayNameMap: Record<string, string> = {
   KUSAMA_PARACHAIN: 'Kusama\'s parachain'
 };
 
+function getGroupDisplayName(groups: NetWorkGroup[]): string {
+  for (const group of groups) {
+    if (GroupDisplayNameMap[group]) {
+      return GroupDisplayNameMap[group];
+    }
+  }
+
+  return '';
+}
+
 function getItem (
   networkKey: string,
   contributeValueInfo: CrowdloanContributeValueType,
   networkMetadata: NetWorkMetadataDef
 ): CrowdloanItemType {
-  const groupDisplayName = GroupDisplayNameMap[networkMetadata.group] || '';
+  const groupDisplayName = getGroupDisplayName(networkMetadata.groups);
   const { balanceValue,
     convertedBalanceValue,
     symbol } = contributeValueInfo.contribute;

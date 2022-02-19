@@ -8,7 +8,7 @@ function getKnownHashes (): NetWorkMetadataDef[] {
   const result: NetWorkMetadataDef[] = [];
 
   Object.keys(NETWORKS).forEach((networkKey) => {
-    const { chain, genesisHash, group, icon, isEthereum, paraId, ss58Format } = NETWORKS[networkKey];
+    const { chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = NETWORKS[networkKey];
 
     let isAvailable = true;
 
@@ -23,7 +23,7 @@ function getKnownHashes (): NetWorkMetadataDef[] {
       genesisHash,
       icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
       ss58Format,
-      group,
+      groups,
       isEthereum: !!isEthereum,
       paraId,
       isAvailable

@@ -15,7 +15,7 @@ export default interface networkSelectOption {
   networkKey: string;
   networkPrefix: number;
   icon: string;
-  group: NetWorkGroup;
+  groups: NetWorkGroup[];
   isEthereum: boolean;
 }
 
@@ -40,7 +40,7 @@ export default function (): networkSelectOption[] {
             networkKey: metadata.networkKey,
             networkPrefix: metadata.ss58Format,
             icon: metadata.icon,
-            group: metadata.group,
+            groups: metadata.groups,
             isEthereum: metadata.isEthereum
           }));
 
@@ -60,27 +60,27 @@ export default function (): networkSelectOption[] {
       networkKey: 'all',
       networkPrefix: -1,
       icon: 'polkadot',
-      group: 'UNKNOWN' as NetWorkGroup,
+      groups: ['UNKNOWN'] as NetWorkGroup[],
       isEthereum: false
     },
     // put the relay chains at the top
     ...availableChain.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
+      .map(({ chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
         networkKey,
         icon,
-        group,
+        groups,
         isEthereum
       })),
-    ...availableChain.map(({ chain, genesisHash, group, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChain.map(({ chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
       networkKey,
       icon,
-      group,
+      groups,
       isEthereum
     }))
       // remove the relay chains, they are at the top already

@@ -10,24 +10,24 @@ import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { BN_ZERO, getBalances, parseBalancesInfo } from '@polkadot/extension-koni-ui/util';
 import { BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
-function getCrowdloadChainRegistry (group: NetWorkGroup, chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
-  if (group === 'POLKADOT_PARACHAIN' && chainRegistryMap.polkadot) {
+function getCrowdloadChainRegistry (groups: NetWorkGroup[], chainRegistryMap: Record<string, ChainRegistry>): ChainRegistry | null {
+  if (groups.includes('POLKADOT_PARACHAIN') && chainRegistryMap.polkadot) {
     return chainRegistryMap.polkadot;
   }
 
-  if (group === 'KUSAMA_PARACHAIN' && chainRegistryMap.kusama) {
+  if (groups.includes('KUSAMA_PARACHAIN') && chainRegistryMap.kusama) {
     return chainRegistryMap.kusama;
   }
 
   return null;
 }
 
-function getGroupNetworkKey (group: NetWorkGroup): string {
-  if (group === 'POLKADOT_PARACHAIN') {
+function getGroupNetworkKey (groups: NetWorkGroup[]): string {
+  if (groups.includes('POLKADOT_PARACHAIN')) {
     return 'polkadot';
   }
 
-  if (group === 'KUSAMA_PARACHAIN') {
+  if (groups.includes('KUSAMA_PARACHAIN')) {
     return 'kusama';
   }
 
@@ -97,11 +97,12 @@ export default function useAccountBalance (currentNetworkKey: string,
   crowdloanNetworks.forEach((networkKey) => {
     const networkMetadata = networkMetadataMap[networkKey];
 
-    if (!networkMetadata || !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].includes(networkMetadata.group)) {
+    if (!networkMetadata
+      || !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].some(g => networkMetadata.groups.includes(g as NetWorkGroup))) {
       return;
     }
 
-    const registry = getCrowdloadChainRegistry(networkMetadata.group, chainRegistryMap);
+    const registry = getCrowdloadChainRegistry(networkMetadata.groups, chainRegistryMap);
     const crowdLoanItem = crowdLoanMap[networkKey];
 
     if (!registry ||
@@ -110,7 +111,7 @@ export default function useAccountBalance (currentNetworkKey: string,
       return;
     }
 
-    const groupNetworkKey = getGroupNetworkKey(networkMetadata.group);
+    const groupNetworkKey = getGroupNetworkKey(networkMetadata.groups);
     const price = groupNetworkKey ? priceMap[groupNetworkKey] : undefined;
 
     const contributeInfo = getBalances({

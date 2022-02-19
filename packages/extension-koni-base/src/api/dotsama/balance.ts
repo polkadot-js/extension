@@ -8,17 +8,17 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
   return Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
     const networkAPI = await apiProps.isReady;
 
-    if (!apiProps.api.tx || !apiProps.api.tx.balances) {
-      callback(networkKey, {
-        state: APIItemState.NOT_SUPPORT,
-        free: '0',
-        reserved: '0',
-        miscFrozen: '0',
-        feeFrozen: '0'
-      } as BalanceItem);
-
-      return null;
-    }
+    // if (!apiProps.api.tx || !apiProps.api.tx.balances) {
+    //   callback(networkKey, {
+    //     state: APIItemState.NOT_SUPPORT,
+    //     free: '0',
+    //     reserved: '0',
+    //     miscFrozen: '0',
+    //     feeFrozen: '0'
+    //   } as BalanceItem);
+    //
+    //   return null;
+    // }
 
     // @ts-ignore
     return networkAPI.api.query.system.account.multi(addresses, (balances: BalanceRPCResponse[]) => {

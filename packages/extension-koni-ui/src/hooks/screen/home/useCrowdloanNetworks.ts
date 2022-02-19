@@ -26,9 +26,9 @@ function getCrowdloadNetworksMap (source: Record<string, NetWorkMetadataDef>): R
 
     result.all.push(networkKey);
 
-    if (networkInfo.group === 'POLKADOT_PARACHAIN') {
+    if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
       result.polkadot.push(networkKey);
-    } else if (networkInfo.group === 'KUSAMA_PARACHAIN') {
+    } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {
       result.kusama.push(networkKey);
     }
   }

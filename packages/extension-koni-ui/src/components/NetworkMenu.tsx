@@ -13,6 +13,7 @@ import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisH
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
+import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -40,12 +41,20 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       type: 'RELAY_CHAIN'
     },
     {
-      text: 'DOT Chains',
+      text: 'Polkadot',
       type: 'POLKADOT_PARACHAIN'
     },
     {
-      text: 'KSM Chains',
+      text: 'Kusama',
       type: 'KUSAMA_PARACHAIN'
+    },
+    {
+      text: 'Mainnets',
+      type: 'MAIN_NET'
+    },
+    {
+      text: 'Testnets',
+      type: 'TEST_NET'
     }
   ];
 
@@ -61,7 +70,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
             .includes(lowerCaseFilteredNetwork) &&
-              network.group === selectedGroup));
+              network.groups.includes(selectedGroup as NetWorkGroup)));
       } else {
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
@@ -69,7 +78,8 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       }
     } else {
       if (selectedGroup && selectedGroup.length) {
-        setFilteredGenesisOption(genesisOptions.filter((network) => network.group === selectedGroup));
+        setFilteredGenesisOption(genesisOptions
+          .filter((network) => network.groups.includes(selectedGroup as NetWorkGroup)));
       } else {
         setFilteredGenesisOption(genesisOptions);
       }
@@ -86,7 +96,8 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
       setSelectedGroup(type);
 
       if (type && type.length) {
-        setFilteredGenesisOption(genesisOptions.filter((f) => f.group === type && f.text.toLowerCase().includes(filteredNetwork)));
+        setFilteredGenesisOption(genesisOptions
+          .filter((f) => f.groups.includes(type) && f.text.toLowerCase().includes(filteredNetwork)));
       } else {
         setFilteredGenesisOption(genesisOptions.filter((f) => f.text.toLowerCase().includes(filteredNetwork)));
       }
@@ -174,7 +185,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
 
   .network-item-list-header {
     padding: 10px;
-    width: 350px;
+    width: 420px;
     display: flex;
     justify-content: space-between;
     align-items: center;

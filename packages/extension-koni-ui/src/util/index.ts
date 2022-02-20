@@ -108,7 +108,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   // 'subsocial': 'https://subsocial.subscan.io',
   // 'zeitgeist': 'https://zeitgeist.subscan.io',
   westend: 'https://westend.subscan.io',
-  // 'rococo': 'https://rococo.subscan.io',
+  rococo: 'https://rococo.subscan.io',
   robonomics: 'https://robonomics.subscan.io'
 
 };

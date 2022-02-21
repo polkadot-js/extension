@@ -4,15 +4,12 @@
 import type { KeyringOption$Type, KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 import type { Option } from './types';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import store from 'store';
+import React from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { toAddress } from '@polkadot/extension-koni-ui/util';
-import { isUndefined } from '@polkadot/util';
-
-import Dropdown from '../AdvanceDropdown';
+//
+// import Dropdown from '../AdvanceDropdown';
 
 interface Props {
   className?: string;
@@ -37,30 +34,30 @@ interface Props {
   withLabel?: boolean;
 }
 
-const STORAGE_KEY = 'options:InputAddress';
-const DEFAULT_TYPE = 'all';
+// const STORAGE_KEY = 'options:InputAddress';
+// const DEFAULT_TYPE = 'all';
 
-function transformToAddress (value?: string | Uint8Array | null): string | null {
-  try {
-    return toAddress(value) || null;
-  } catch (error) {
-    // noop, handled by return
-  }
+// function transformToAddress (value?: string | Uint8Array | null): string | null {
+//   try {
+//     return toAddress(value) || null;
+//   } catch (error) {
+//     // noop, handled by return
+//   }
+//
+//   return null;
+// }
 
-  return null;
-}
-
-function transformToAccountId (value: string): string | null {
-  if (!value) {
-    return null;
-  }
-
-  const accountId = transformToAddress(value);
-
-  return !accountId
-    ? null
-    : accountId;
-}
+// function transformToAccountId (value: string): string | null {
+//   if (!value) {
+//     return null;
+//   }
+//
+//   const accountId = transformToAddress(value);
+//
+//   return !accountId
+//     ? null
+//     : accountId;
+// }
 
 // function createOption (address: string): Option {
 //   let isRecent: boolean | undefined;
@@ -83,104 +80,106 @@ function transformToAccountId (value: string): string | null {
 //   return createItem(createOptionItem(address, name), !isRecent);
 // }
 
-function readOptions (): Record<string, Record<string, string>> {
-  return store.get(STORAGE_KEY) as Record<string, Record<string, string>> || { defaults: {} };
-}
+// function readOptions (): Record<string, Record<string, string>> {
+//   return store.get(STORAGE_KEY) as Record<string, Record<string, string>> || { defaults: {} };
+// }
+//
+// function getLastValue (type: KeyringOption$Type = DEFAULT_TYPE): string {
+//   const options = readOptions();
+//
+//   return options.defaults[type];
+// }
 
-function getLastValue (type: KeyringOption$Type = DEFAULT_TYPE): string {
-  const options = readOptions();
+// function setLastValue (type: KeyringOption$Type = DEFAULT_TYPE, value: string): void {
+//   const options = readOptions();
+//
+//   options.defaults[type] = value;
+//   store.set(STORAGE_KEY, options);
+// }
 
-  return options.defaults[type];
-}
+// eslint-disable-next-line no-empty-pattern
+function InputAddress ({}: Props): React.ReactElement {
+  // const [lastValue, setInputAddressLastValue] = useState('');
+  // const [value, setInputAddressValue] = useState<string |(string | undefined)[] | undefined>('');
 
-function setLastValue (type: KeyringOption$Type = DEFAULT_TYPE, value: string): void {
-  const options = readOptions();
+  // useEffect(() => {
+  //   setInputAddressLastValue(getLastValue(type));
+  //
+  //   if (Array.isArray(value)) {
+  //     const addressVal = value.map((v) => toAddress(v));
+  //
+  //     setInputAddressValue(addressVal);
+  //   } else {
+  //     setInputAddressValue(toAddress(value) || undefined);
+  //   }
+  // }, [lastValue, type, value]);
 
-  options.defaults[type] = value;
-  store.set(STORAGE_KEY, options);
-}
+  // const actualOptions = [{
+  //   label: 'ACCOUNTS',
+  //   options: [
+  //     { value: '5CoT5i2xrtg8ZfP9AGvCHnxFH8T6h7RyYM7n8VEaxTzu7hG8', label: '111' },
+  //     { value: '5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k', label: '123123' }
+  //   ]
+  // }];
 
-function InputAddress ({ className = '', defaultValue, filter, onChange, help, hideAddress = false, isDisabled = false, isError, label, labelExtra, optionsAll, placeholder, type = DEFAULT_TYPE, withEllipsis, withLabel, autoPrefill = true }: Props): React.ReactElement {
-  const [lastValue, setInputAddressLastValue] = useState('');
-  const [value, setInputAddressValue] = useState<string |(string | undefined)[] | undefined>('');
+  // const getFiltered = (): Option[] => {
+  //   return !optionsAll
+  //     ? []
+  //     : optionsAll[type].filter(({ value }) => !filter || (!!value && filter.includes(value)));
+  // };
 
-  useEffect(() => {
-    setInputAddressLastValue(getLastValue(type));
+  // const getLastOptionValue = (): KeyringSectionOption | undefined => {
+  //   const available = getFiltered();
+  //
+  //   return available.length
+  //     ? available[available.length - 1]
+  //     : undefined;
+  // };
 
-    if (Array.isArray(value)) {
-      const addressVal = value.map((v) => toAddress(v));
+  // const lastOption = getLastOptionValue();
 
-      setInputAddressValue(addressVal);
-    } else {
-      setInputAddressValue(toAddress(value) || undefined);
-    }
-  }, [lastValue, type, value]);
+  // const actualValue = transformToAddress(
+  //   isDisabled || defaultValue
+  //     ? defaultValue
+  //     : lastValue || (lastOption && lastOption.value)
+  // );
 
-  const actualOptions = [{
-    label: 'ACCOUNTS',
-    options: [
-      { value: '5CoT5i2xrtg8ZfP9AGvCHnxFH8T6h7RyYM7n8VEaxTzu7hG8', label: '111' },
-      { value: '5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k', label: '123123' }
-    ]
-  }];
+  // const _defaultValue = ((!autoPrefill && !isDisabled) || !isUndefined(value))
+  //   ? undefined
+  //   : actualValue;
 
-  const getFiltered = (): Option[] => {
-    return !optionsAll
-      ? []
-      : optionsAll[type].filter(({ value }) => !filter || (!!value && filter.includes(value)));
-  };
-
-  const getLastOptionValue = (): KeyringSectionOption | undefined => {
-    const available = getFiltered();
-
-    return available.length
-      ? available[available.length - 1]
-      : undefined;
-  };
-
-  const lastOption = getLastOptionValue();
-
-  const actualValue = transformToAddress(
-    isDisabled || defaultValue
-      ? defaultValue
-      : lastValue || (lastOption && lastOption.value)
-  );
-
-  const _defaultValue = ((!autoPrefill && !isDisabled) || !isUndefined(value))
-    ? undefined
-    : actualValue;
-
-  const onChangeData = useCallback((address: string): void => {
-    !filter && setLastValue(type, address);
-    setInputAddressLastValue(getLastValue(type));
-    setInputAddressValue(toAddress(address));
-
-    onChange && onChange(
-      address
-        ? transformToAccountId(address)
-        : null
-    );
-  }, [filter, onChange, type]);
+  // const onChangeData = useCallback((address: string): void => {
+  //   !filter && setLastValue(type, address);
+  //   setInputAddressLastValue(getLastValue(type));
+  //   setInputAddressValue(toAddress(address));
+  //
+  //   onChange && onChange(
+  //     address
+  //       ? transformToAccountId(address)
+  //       : null
+  //   );
+  // }, [filter, onChange, type]);
 
   return (
-    <Dropdown
-      className={`ui--InputAddress${hideAddress ? ' hideAddress' : ''} ${className}`}
-      defaultValue={_defaultValue}
-      help={help}
-      isCustomOption={true}
-      isDisabled={isDisabled}
-      isError={isError}
-      isSearchable={true}
-      label={label}
-      labelExtra={labelExtra}
-      // onSearch={this.onSearch}
-      onChange={onChangeData}
-      optionsData={actualOptions}
-      placeholder={placeholder || ''}
-      value={value}
-      withEllipsis={withEllipsis}
-      withLabel={withLabel}
-    />
+    // <Dropdown
+    //   className={`ui--InputAddress${hideAddress ? ' hideAddress' : ''} ${className}`}
+    //   defaultValue={_defaultValue}
+    //   help={help}
+    //   isCustomOption={true}
+    //   isDisabled={isDisabled}
+    //   isError={isError}
+    //   isSearchable={true}
+    //   label={label}
+    //   labelExtra={labelExtra}
+    //   // onSearch={this.onSearch}
+    //   onChange={onChangeData}
+    //   optionsData={actualOptions}
+    //   placeholder={placeholder || ''}
+    //   value={value}
+    //   withEllipsis={withEllipsis}
+    //   withLabel={withLabel}
+    // />
+    <div />
   );
 }
 

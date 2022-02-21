@@ -23,8 +23,6 @@ interface Props extends ThemeProps {
 function HeaderWithSteps ({ className, isBusy, onBackClick, step, text }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  console.log('isBusy', isBusy);
-
   return (
     <Header
       className={className}

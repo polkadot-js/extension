@@ -6,7 +6,6 @@ export { default as AccountNamePasswordCreation } from './AccountNamePasswordCre
 export { default as AccountQrModal } from './AccountQrModal';
 export { default as ActionBar } from './ActionBar';
 export { default as ActionText } from './ActionText';
-export { default as AdvanceDropdown } from './AdvanceDropdown';
 export { default as AdvanceIcon } from './AdvanceIcon';
 export { default as BackButton } from './BackButton';
 export { default as Box } from './Box';
@@ -19,7 +18,6 @@ export { default as ErrorBoundary } from './ErrorBoundary';
 export { default as HorizontalLabelToggle } from './HorizontalLabelToggle';
 export { default as Icon } from './Icon';
 export { default as Identicon } from './Identicon';
-export { default as InputBalance } from './InputBalance';
 export { default as InputFileWithLabel } from './InputFileWithLabel';
 export { default as InputFilter } from './InputFilter';
 export { default as InputWithLabel } from './InputWithLabel';

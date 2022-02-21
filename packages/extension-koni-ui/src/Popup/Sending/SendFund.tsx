@@ -7,7 +7,6 @@ import styled from 'styled-components';
 
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import InputAddress from '@polkadot/extension-koni-ui/components/InputAddress';
-import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
@@ -105,16 +104,16 @@ function SendFund ({ className }: Props): React.ReactElement {
               withEllipsis
             />
 
-            <InputBalance
-              autoFocus
-              className={'send-fund-balance-item'}
-              defaultValue={4}
-              help={'The full account balance to be transferred, minus the transaction fees'}
-              isDisabled={false}
-              isSi
-              key={'key'}
-              label={'transferable minus fees'}
-            />
+            {/* <InputBalance */}
+            {/*  autoFocus */}
+            {/*  className={'send-fund-balance-item'} */}
+            {/*  defaultValue={4} */}
+            {/*  help={'The full account balance to be transferred, minus the transaction fees'} */}
+            {/*  isDisabled={false} */}
+            {/*  isSi */}
+            {/*  key={'key'} */}
+            {/*  label={'transferable minus fees'} */}
+            {/* /> */}
             <div className='submit-btn-wrapper'>
               <Button
                 className={'kn-submit-btn'}

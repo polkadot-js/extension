@@ -17,5 +17,5 @@ exclude_patterns:
 - "**/*.spec.ts"
 - "**/*.spec.tsx"
 - "**/*.test.js"
-- "**/*.test.ts"
+- "**/*.ignore-component-test.spec.ts"
 - "**/*.test.tsx"

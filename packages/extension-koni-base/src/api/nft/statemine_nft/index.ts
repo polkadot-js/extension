@@ -1,6 +1,7 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import fetch from 'node-fetch';
 
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
@@ -12,16 +13,37 @@ interface AssetId {
   tokenId: string | number
 }
 
+interface MetadataResponse {
+  deposit?: string,
+  data?: string,
+  isFrozen?: boolean
+}
+
+interface TokenDetail {
+  description?: string,
+  name?: string,
+  attributes?: any[],
+  image?: string
+}
+
+interface CollectionDetail {
+  name?: string,
+  image?: string,
+  external_url?: string,
+  description?: string
+}
+
 export default class StatemineNftApi extends BaseNftApi {
+  // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
 
-  private getMetadata (metadata_url: string) {
-    let url: string | undefined = metadata_url;
+  private getMetadata (metadataUrl: string) {
+    let url: string | undefined = metadataUrl;
 
-    if (!isUrl(metadata_url)) {
-      url = this.parseUrl(metadata_url);
+    if (!isUrl(metadataUrl)) {
+      url = this.parseUrl(metadataUrl);
       if (!url || url.length === 0) return undefined;
     }
 
@@ -47,12 +69,13 @@ export default class StatemineNftApi extends BaseNftApi {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.uniques.account.keys(address);
 
-      accountAssets = [...accountAssets, ...resp];
+      accountAssets = accountAssets.concat(...resp);
     }));
 
     const assetIds: AssetId[] = [];
 
     for (const key of accountAssets) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const data = key.toHuman() as string[];
 
       assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
@@ -61,22 +84,24 @@ export default class StatemineNftApi extends BaseNftApi {
     return assetIds;
   }
 
-  private async getTokenDetails (assetId: AssetId): Promise<any> {
+  private async getTokenDetails (assetId: AssetId): Promise<TokenDetail | null> {
     if (!this.dotSamaApi) return null;
 
     const { classId, tokenId } = assetId;
-    const metadataNft = (await this.dotSamaApi.api.query.uniques.instanceMetadataOf(classId, tokenId)).toHuman() as any;
+    const metadataNft = (await this.dotSamaApi.api.query.uniques.instanceMetadataOf(classId, tokenId)).toHuman() as MetadataResponse;
 
     if (!metadataNft?.data) return null;
 
     return this.getMetadata(metadataNft?.data);
   }
 
-  private async getCollectionDetail (collectionId: number): Promise<any> {
-    if (!this.dotSamaApi) return;
-    const metadataCollection = (await this.dotSamaApi.api.query.uniques.classMetadataOf(collectionId)).toHuman() as any;
+  private async getCollectionDetail (collectionId: number): Promise<CollectionDetail | null> {
+    if (!this.dotSamaApi) return null;
+    const collectionMetadata = (await this.dotSamaApi.api.query.uniques.classMetadataOf(collectionId)).toHuman() as MetadataResponse;
 
-    return this.getMetadata(metadataCollection?.data);
+    if (!collectionMetadata?.data) return null;
+
+    return this.getMetadata(collectionMetadata?.data);
   }
 
   public async handleNfts () {
@@ -90,7 +115,7 @@ export default class StatemineNftApi extends BaseNftApi {
       return;
     }
 
-    assetIds.map((asset) => {
+    for (const asset of assetIds) {
       const newCollection = {
         collectionId: asset.classId.toString(),
         nftItems: []
@@ -99,16 +124,19 @@ export default class StatemineNftApi extends BaseNftApi {
       if (!allCollections.some((collection) => collection.collectionId === asset.classId.toString())) {
         allCollections.push(newCollection);
       }
-    });
+    }
 
     const allItems: NftItem[] = [];
-    const collectionMetaDict: Record<any, any> = {};
+    const collectionMetaDict: Record<string | number, CollectionDetail | null> = {};
 
     await Promise.all(assetIds.map(async (assetId) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const tokenInfo = await this.getTokenDetails(assetId);
 
       if (!(assetId.classId in collectionMetaDict)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         collectionMetaDict[assetId.classId] = await this.getCollectionDetail(assetId.classId as number);
+        console.log('handleNft', collectionMetaDict[assetId.classId]);
       }
 
       const parsedNft = {

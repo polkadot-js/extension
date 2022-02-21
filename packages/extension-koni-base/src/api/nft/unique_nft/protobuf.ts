@@ -7,7 +7,7 @@ function defineMessage (schema: string) {
   try {
     return Root.fromJSON(JSON.parse(schema));
   } catch (e) {
-    console.error(e);
+    console.log('Error parsing JSON schema', e);
 
     return null;
   }

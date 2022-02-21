@@ -26,6 +26,7 @@ interface NftIdList {
 }
 
 export default class QuartzNftApi extends BaseNftApi {
+  // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
@@ -40,7 +41,8 @@ export default class QuartzNftApi extends BaseNftApi {
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
-    return (await this.dotSamaApi.api.rpc.unique.collectionStats()).toJSON().created;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    return (await this.dotSamaApi.api.rpc.unique.collectionStats()).toJSON().created as number;
   }
 
   /**
@@ -53,8 +55,9 @@ export default class QuartzNftApi extends BaseNftApi {
   public async getAddressTokens (collectionId: number, address: string): Promise<any> {
     if (!this.dotSamaApi) return;
 
-    // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
     return (await this.dotSamaApi.api.rpc.unique.accountTokens(collectionId, { Substrate: address })).toJSON();
   }
 
@@ -69,6 +72,7 @@ export default class QuartzNftApi extends BaseNftApi {
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     return (await this.dotSamaApi.api.rpc.unique.collectionById(collectionId)).toJSON() as CollectionProperties;
   }
 
@@ -86,8 +90,8 @@ export default class QuartzNftApi extends BaseNftApi {
     if (!this.dotSamaApi) return;
 
     // @ts-ignore
-    // noinspection TypeScriptValidateJSTypes
-    const constMetadata = (await this.dotSamaApi.api.rpc.unique.constMetadata(collectionId, tokenId)).toHuman();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const constMetadata = (await this.dotSamaApi.api.rpc.unique.constMetadata(collectionId, tokenId)).toHuman() as string;
     const schemaRead = hexToStr(collectionProperties.constOnChainSchema);
     const nftProps = hexToUTF16(constMetadata);
     const properties = deserializeNft(schemaRead, nftProps, locale);
@@ -95,7 +99,7 @@ export default class QuartzNftApi extends BaseNftApi {
     let tokenImage = '';
     const schemaVersion = collectionProperties.schemaVersion;
 
-    if (schemaVersion == 'ImageURL') {
+    if (schemaVersion === 'ImageURL') {
       // Replace {id} with token ID
       tokenImage = hexToStr(collectionProperties.offchainSchema);
       tokenImage = tokenImage.replace('{id}', `${tokenId}`);
@@ -143,11 +147,13 @@ export default class QuartzNftApi extends BaseNftApi {
       }
     }
 
-    await Promise.all(addressTokenDict.map(async (item) => {
+    await Promise.all(addressTokenDict.map(async (item: Record<string | number, string | number>) => {
       try {
-        const rs = await this.getAddressTokens(item.i, item.account);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const rs = await this.getAddressTokens(item.i as number, item.account as string);
 
-        if (rs && rs.length > 0) { data.push({ collectionId: item.i, nfts: rs }); }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (rs && rs.length > 0) { data.push({ collectionId: item.i as number, nfts: rs as number[] }); }
       } catch (e) {
         console.log(`error at ${item.i} ${item.account}`);
       }
@@ -160,7 +166,7 @@ export default class QuartzNftApi extends BaseNftApi {
     for (let j = 0; j < data.length; j++) {
       const nftItems: NftItem[] = [];
       const collectionId = data[j].collectionId;
-      const collectionProperties = collectionPropertiesMap[collectionId];
+      const collectionProperties = collectionPropertiesMap[collectionId] as CollectionProperties;
       const nfts = data[j].nfts;
       let collectionName = '';
       let collectionImage: string | undefined = '';
@@ -177,7 +183,7 @@ export default class QuartzNftApi extends BaseNftApi {
             collectionImage = this.parseUrl(nftData.collectionImage);
             const tokenDetail: NftItem = {
               id: tokenId.toString(),
-              name: nftData.prefix + '#' + tokenId,
+              name: nftData.prefix + '#' + tokenId.toString(),
               image: this.parseUrl(nftData.image),
               external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
               collectionId: collectionId.toString(),

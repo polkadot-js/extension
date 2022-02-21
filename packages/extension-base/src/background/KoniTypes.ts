@@ -58,7 +58,7 @@ export interface NftCollection {
   collectionId: string;
   collectionName?: string;
   image?: string;
-  nftItems: Array<NftItem>;
+  nftItems?: Array<NftItem>;
 }
 
 export interface NftJson {

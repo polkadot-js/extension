@@ -1,6 +1,7 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import { ApiProps, NftCollection } from '@polkadot/extension-base/background/KoniTypes';
 import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';

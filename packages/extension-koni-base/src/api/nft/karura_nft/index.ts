@@ -1,6 +1,7 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import fetch from 'node-fetch';
 
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
@@ -23,9 +24,13 @@ interface Token {
   metadata: string | undefined,
   owner: string,
   data: Record<string, any>
+  name?: string,
+  description?: string,
+  image?: string
 }
 
 export class KaruraNftApi extends BaseNftApi {
+  // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
@@ -55,12 +60,13 @@ export class KaruraNftApi extends BaseNftApi {
       // @ts-ignore
       const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.keys(address);
 
-      accountAssets = [...accountAssets, ...resp];
+      accountAssets = accountAssets.concat(resp);
     }));
 
     const assetIds: AssetId[] = [];
 
     for (const key of accountAssets) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const data = key.toHuman() as string[];
 
       assetIds.push({ classId: data[1], tokenId: this.parseTokenId(data[2]) });
@@ -69,19 +75,19 @@ export class KaruraNftApi extends BaseNftApi {
     return assetIds;
   }
 
-  private async getCollectionDetails (collectionId: number | string): Promise<any> {
+  private async getCollectionDetails (collectionId: number | string): Promise<Record<string, any> | null> {
     if (!this.dotSamaApi) return null;
 
-    const metadataCollection = (await this.dotSamaApi.api.query.ormlNFT.classes(collectionId)).toHuman() as any;
+    const metadataCollection = (await this.dotSamaApi.api.query.ormlNFT.classes(collectionId)).toHuman() as Record<string, any>;
 
     if (!metadataCollection?.metadata) return null;
 
-    const data = await getKaruraMetadata(metadataCollection?.metadata) as unknown as Collection;
+    const data = await getKaruraMetadata(metadataCollection?.metadata as string) as unknown as Collection;
 
     return { ...data, image: this.parseUrl(data.image) };
   }
 
-  private async getTokenDetails (assetId: AssetId): Promise<any> {
+  private async getTokenDetails (assetId: AssetId): Promise<Token | null> {
     if (!this.dotSamaApi) return null;
 
     return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
@@ -98,14 +104,14 @@ export class KaruraNftApi extends BaseNftApi {
       return;
     }
 
-    assetIds.map((asset) => {
+    for (const asset of assetIds) {
       const newCollection = {
         collectionId: asset.classId.toString(),
         nftItems: []
       } as NftCollection;
 
       if (!allCollections.some((collection) => collection.collectionId === asset.classId.toString())) { allCollections.push(newCollection); }
-    });
+    }
 
     const allItems: NftItem[] = [];
     const collectionMetaDict: Record<any, any> = {};
@@ -116,6 +122,7 @@ export class KaruraNftApi extends BaseNftApi {
 
       if (!(assetId.classId in collectionMetaDict)) {
         collectionMeta = await this.getCollectionDetails(assetId.classId as number);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         collectionMetaDict[assetId.classId] = collectionMeta;
       }
 
@@ -123,6 +130,7 @@ export class KaruraNftApi extends BaseNftApi {
         id: assetId.tokenId.toString(),
         name: tokenInfo?.name,
         description: tokenInfo?.description,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
         collectionId: assetId.classId.toString()
       } as NftItem;
@@ -131,15 +139,18 @@ export class KaruraNftApi extends BaseNftApi {
     }));
 
     for (const collection of allCollections) {
-      const collectionMeta = collectionMetaDict[collection.collectionId];
+      const collectionMeta = collectionMetaDict[collection.collectionId] as Record<string, any>;
 
       if (collectionMeta) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         collection.collectionName = collectionMeta?.name;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         collection.image = collectionMeta.image;
       }
 
       for (const item of allItems) {
         if (collection.collectionId === item.collectionId) {
+          // @ts-ignore
           collection.nftItems.push(item);
         }
       }
@@ -150,11 +161,11 @@ export class KaruraNftApi extends BaseNftApi {
   }
 }
 
-const getKaruraMetadata = (metadata_url: string) => {
-  let url: string | null = metadata_url;
+const getKaruraMetadata = (metadataUrl: string) => {
+  let url: string | null = metadataUrl;
 
-  if (!metadata_url) return null;
-  url = CLOUDFLARE_SERVER + metadata_url + '/metadata.json';
+  if (!metadataUrl) return null;
+  url = CLOUDFLARE_SERVER + metadataUrl + '/metadata.json';
 
   return fetch(url, {
     method: 'GET',
@@ -162,67 +173,3 @@ const getKaruraMetadata = (metadata_url: string) => {
   })
     .then((res) => res.json());
 };
-
-// Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr
-// export const handleKaruraNfts = async (account: string): Promise<any> => {
-//   const allCollections: NftCollection[] = [];
-//   const api = new KaruraNftApi();
-//
-//   await api.connect();
-//   const assetIds = await api.getNfts(account);
-//
-//   if (!assetIds || assetIds.length === 0) {
-//     return { total: 0, allCollections };
-//   }
-//
-//   assetIds.map((asset) => {
-//     const newCollection = {
-//       collectionId: asset.classId.toString(),
-//       nftItems: []
-//     } as NftCollection;
-//
-//     if (!allCollections.some((collection) => collection.collectionId === asset.classId.toString())) { allCollections.push(newCollection); }
-//   });
-//
-//   const allItems: NftItem[] = [];
-//   const collectionMetaDict: Record<any, any> = {};
-//
-//   await Promise.all(assetIds.map(async (assetId) => {
-//     const tokenInfo = await api.getTokenDetails(assetId);
-//     let collectionMeta: any;
-//
-//     if (!(assetId.classId in collectionMetaDict)) {
-//       collectionMeta = await api.getCollectionDetails(assetId.classId as number);
-//       collectionMetaDict[assetId.classId] = collectionMeta;
-//     }
-//
-//     const parsedNft = {
-//       id: assetId.tokenId.toString(),
-//       name: tokenInfo?.name,
-//       description: tokenInfo?.description,
-//       image: tokenInfo && tokenInfo.image ? parseKaruraIpfsLink(tokenInfo?.image) : collectionMeta?.image,
-//       collectionId: assetId.classId.toString()
-//     } as NftItem;
-//
-//     allItems.push(parsedNft);
-//   }));
-//
-//   for (const collection of allCollections) {
-//     const collectionMeta = collectionMetaDict[collection.collectionId];
-//
-//     if (collectionMeta) {
-//       collection.collectionName = collectionMeta?.name;
-//       collection.image = collectionMeta.image;
-//     }
-//
-//     for (const item of allItems) {
-//       if (collection.collectionId === item.collectionId) {
-//         collection.nftItems.push(item);
-//       }
-//     }
-//   }
-//
-//   await api.disconnect();
-//
-//   return { total: assetIds.length, allCollections };
-// };

@@ -21,10 +21,10 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
 
         return networkAPI.api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          freeMap[address] = balance.freeBalance.toBn() || new BN(0);
-          reservedMap[address] = balance.reservedBalance.toBn() || new BN(0);
-          miscFrozenMap[address] = balance.frozenMisc.toBn() || new BN(0);
-          feeFrozenMap[address] = balance.frozenFee.toBn() || new BN(0);
+          freeMap[address] = balance.freeBalance?.toBn() || new BN(0);
+          reservedMap[address] = balance.reservedBalance?.toBn() || new BN(0);
+          miscFrozenMap[address] = balance.frozenMisc?.toBn() || new BN(0);
+          feeFrozenMap[address] = balance.frozenFee?.toBn() || new BN(0);
 
           const balanceItem = {
             state: APIItemState.READY,

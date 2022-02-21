@@ -130,10 +130,10 @@ export const toUnit = (balance: number, decimals: number) => {
 };
 
 export function sumBN (inputArr: BN[]) {
-  const rs = new BN(0);
+  let rs = new BN(0);
 
   inputArr.forEach((input) => {
-    rs.add(input);
+    rs = rs.add(input);
   });
 
   return rs;

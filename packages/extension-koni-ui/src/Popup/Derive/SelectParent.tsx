@@ -26,7 +26,7 @@ interface Props {
 // match any single slash
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
-function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddress, parentGenesis, isBusy, setBusy }: Props): React.ReactElement<Props> {
+function SelectParent ({ className, isBusy, isLocked, onDerivationConfirmed, parentAddress, parentGenesis, setBusy }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts, hierarchy } = useContext(AccountContext);
@@ -103,6 +103,7 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
         setBusy(true);
 
         const isUnlockable = await validateAccount(parentAddress, parentPassword);
+
         if (isUnlockable) {
           try {
             const account = await validateDerivationPath(parentAddress, suriPath, parentPassword);
@@ -115,10 +116,11 @@ function SelectParent ({ className, isLocked, onDerivationConfirmed, parentAddre
         } else {
           setIsProperParentPassword(false);
         }
+
         setBusy(false);
       }
     },
-    [parentAddress, parentPassword, onDerivationConfirmed, suriPath, t]
+    [suriPath, parentAddress, parentPassword, setBusy, onDerivationConfirmed, t]
   );
 
   useEffect(() => {

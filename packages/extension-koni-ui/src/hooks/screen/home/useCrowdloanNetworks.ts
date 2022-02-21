@@ -14,12 +14,14 @@ function getCrowdloadNetworksMap (source: Record<string, NetWorkMetadataDef>): R
   result.kusama = [];
 
   for (const networkKey in source) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!source.hasOwnProperty(networkKey)) {
       continue;
     }
 
     const networkInfo = source[networkKey];
 
+    // eslint-disable-next-line eqeqeq
     if (networkInfo.paraId == undefined) {
       continue;
     }

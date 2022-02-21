@@ -10,6 +10,8 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
@@ -20,8 +22,6 @@ import Extrinsic from '../Extrinsic';
 import LedgerSign from '../LedgerSign';
 import Qr from '../Qr';
 import SignArea from './SignArea';
-import {isAccountAll} from "@polkadot/extension-koni-ui/util";
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 
 interface Props extends ThemeProps {
   account: AccountJson;
@@ -140,7 +140,7 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
   } else if (hexBytes !== null) {
     const { address, data } = request.payload as SignerPayloadRaw;
     const account = accounts
-      .filter(a => !isAccountAll(a.address))
+      .filter((a) => !isAccountAll(a.address))
       .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
     return (

@@ -10,7 +10,7 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 interface Props {
   className: string;
   toggleFunc: (isChecked: boolean) => void;
-  value: any;
+  value: boolean;
   uncheckedLabel: string;
   checkedLabel: string;
 }

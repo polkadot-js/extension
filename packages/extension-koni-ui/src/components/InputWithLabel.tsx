@@ -34,6 +34,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
   const _checkKey = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>): void => {
       // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       onEnter && event.key === 'Enter' && onEnter(event.target.value);
 
       if (type === 'password') {

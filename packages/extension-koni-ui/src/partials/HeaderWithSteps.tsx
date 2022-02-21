@@ -20,18 +20,19 @@ interface Props extends ThemeProps {
   isBusy: boolean;
 }
 
-function HeaderWithSteps ({ className, onBackClick, step, text, isBusy }: Props): React.ReactElement<Props> {
+function HeaderWithSteps ({ className, isBusy, onBackClick, step, text }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+
   console.log('isBusy', isBusy);
 
   return (
     <Header
       className={className}
-      text={text}
       isBusy={isBusy}
+      text={text}
     >
       <div className='header-with-steps'>
-        <div className='header-with-steps-left-content' >
+        <div className='header-with-steps-left-content'>
           {step === 2 && (
             <FontAwesomeIcon
               className={`back-button-icon ${isBusy ? 'disabled-button' : ''}`}

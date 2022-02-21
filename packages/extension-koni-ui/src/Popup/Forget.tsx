@@ -1,33 +1,36 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ThemeProps} from '../types';
-import React, {useCallback, useContext, useState} from 'react';
-import {RouteComponentProps, withRouter} from 'react-router';
-import styled, {ThemeContext} from 'styled-components';
-import {AccountJson} from '@polkadot/extension-base/background/types';
-import {store} from '@polkadot/extension-koni-ui/stores';
-import {AccountContext, ActionBar, ActionContext, ActionText, Button, Warning, AccountInfoEl} from '../components';
+import type { ThemeProps } from '../types';
+
+import React, { useCallback, useContext, useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
+import styled, { ThemeContext } from 'styled-components';
+
+import { AccountJson } from '@polkadot/extension-base/background/types';
+import { store } from '@polkadot/extension-koni-ui/stores';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+
+import { AccountContext, AccountInfoEl, ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import {forgetAccount} from '../messaging';
-import {Header} from '../partials';
-import {Theme} from '../types';
-import {isAccountAll} from "@polkadot/extension-koni-ui/util";
+import { forgetAccount } from '../messaging';
+import { Header } from '../partials';
+import { Theme } from '../types';
 
 interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
-function updateCurrentAccount(currentAcc: AccountJson | null): void {
-  store.dispatch({type: 'currentAccount/update', payload: currentAcc});
+function updateCurrentAccount (currentAcc: AccountJson | null): void {
+  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
-function Forget({className, match: {params: {address}}}: Props): React.ReactElement<Props> {
-  const {t} = useTranslation();
+function Forget ({ className, match: { params: { address } } }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const {accounts} = useContext(AccountContext);
+  const { accounts } = useContext(AccountContext);
   const _isAllAccount = isAccountAll(address);
 
   const _goHome = useCallback(
@@ -43,7 +46,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
       setIsBusy(true);
       forgetAccount(address)
         .then(() => {
-          const accountAll = accounts.find(acc => isAccountAll(acc.address));
+          const accountAll = accounts.find((acc) => isAccountAll(acc.address));
 
           if (accountAll) {
             if (accounts.length === 1) {
@@ -51,7 +54,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
             } else if (accounts.length === 2) {
               updateCurrentAccount(null);
             } else if (accounts.length > 2) {
-              updateCurrentAccount(accountAll)
+              updateCurrentAccount(accountAll);
             }
           } else {
             console.error('Can not find account All', accounts);
@@ -65,21 +68,21 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
           console.error(error);
         });
     },
-    [address, onAction]
+    [_goHome, accounts, address]
   );
 
   return (
     <>
       <Header
+        isBusy={isBusy}
         showSubHeader
         subHeaderName={t<string>('Forget Account')}
-        isBusy={isBusy}
       />
       <div className={className}>
-        {_isAllAccount ?
-          <div>
+        {_isAllAccount
+          ? <div>
             <Warning>
-              {t<string>(`Account "All" doesn't support this action. Please switch to another account`)}
+              {t<string>('Account "All" doesn\'t support this action. Please switch to another account')}
             </Warning>
             <ActionBar className='forget-account__cancel-btn-wrapper'>
               <ActionText
@@ -89,9 +92,8 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
               />
             </ActionBar>
           </div>
-          :
-          <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfoEl address={address}/>
+          : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+            <AccountInfoEl address={address} />
             <Warning className='forget-account__warning'>
               {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
             </Warning>
@@ -118,7 +120,7 @@ function Forget({className, match: {params: {address}}}: Props): React.ReactElem
   );
 }
 
-export default withRouter(styled(Forget)(({theme}: Props) => `
+export default withRouter(styled(Forget)(({ theme }: Props) => `
   padding: 25px 15px 0;
 
   .forget-account__action-area {

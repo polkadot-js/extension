@@ -43,7 +43,7 @@ function Upload ({ className }: Props): React.ReactElement {
   useEffect((): void => {
     (isFirefox || isLinux) && window.localStorage.setItem('popupNavigation', '');
     !accounts.length && onAction();
-  }, [accounts, onAction]);
+  }, [accounts, isFirefox, isLinux, onAction]);
 
   const _onChangePass = useCallback(
     (pass: string): void => {
@@ -114,17 +114,17 @@ function Upload ({ className }: Props): React.ReactElement {
             setIsPasswordError(true);
           });
     },
-    [file, onAction, password, requirePassword]
+    [accountsInfo, file, onAction, password, requirePassword]
   );
 
   return (
     <>
       <Header
+        isBusy={isBusy}
         showBackArrow
         showSubHeader
         smallMargin
         subHeaderName={t<string>('Restore from JSON')}
-        isBusy={isBusy}
       />
       <div className={className}>
         <div className='restore-from-json-wrapper'>

@@ -29,7 +29,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   const _selectParent = useCallback((newParent: string) => () => {
     onSelect(newParent);
     _hideDropdown();
-  }, [onSelect]);
+  }, [_hideDropdown, onSelect]);
 
   useOutsideClick(ref, _hideDropdown);
 

@@ -27,6 +27,7 @@ function getReadyNetwork (registryMap: Record<string, ChainRegistry>): string[] 
   const result: string[] = [];
 
   for (const networkKey in registryMap) {
+    // eslint-disable-next-line no-prototype-builtins
     if (!registryMap.hasOwnProperty(networkKey)) {
       continue;
     }

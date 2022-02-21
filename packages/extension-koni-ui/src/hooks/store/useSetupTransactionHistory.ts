@@ -19,5 +19,5 @@ export default function useSetupTransactionHistory (address: string, networkKeys
 
     getTransactionHistoryByMultiNetworks(address, networkKeys, updateTransactionHistory)
       .catch((e) => console.log('Error when get Transaction History', e));
-  }, [address, dep]);
+  }, [address, dep, networkKeys]);
 }

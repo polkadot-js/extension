@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import useGenesisHashOptions, { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 
-function getShowedNetworks (genesisOptions: any[], networkKey: string): string[] {
+function getShowedNetworks (genesisOptions: networkSelectOption[], networkKey: string): string[] {
   if (networkKey === 'all') {
     return genesisOptions.filter((i) => (i.networkKey) && (i.networkKey !== 'all')).map((i) => i.networkKey);
   }

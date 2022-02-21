@@ -5,12 +5,12 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import { ActionBar, ActionContext, Button, Checkbox, Link } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
 import Unlock from '../Unlock';
-import {ThemeProps} from "@polkadot/extension-koni-ui/types";
 
 interface Props extends ThemeProps {
   buttonText: string;
@@ -23,7 +23,7 @@ interface Props extends ThemeProps {
   children?: React.ReactElement
 }
 
-function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId, children }: Props): JSX.Element {
+function SignArea ({ buttonText, children, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');

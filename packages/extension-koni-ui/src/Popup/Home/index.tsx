@@ -133,7 +133,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   );
 }
 
-function Home ({ chainRegistryMap, className, currentAccount, network, transactionHistoryItems }: Props): React.ReactElement {
+function Home ({ chainRegistryMap, className = '', currentAccount, network, transactionHistoryItems }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
     networkPrefix } = network;
@@ -173,22 +173,22 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
     if (isAccountAll(address) && activatedTab === 5) {
       _setActiveTab(1);
     }
-  }, [address, activatedTab])
+  }, [address, activatedTab, _setActiveTab]);
 
   const { crowdloanContributeMap,
     networkBalanceMaps,
     totalBalanceValue } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
   const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 
-  const _toggleZeroBalances = (): void => {
+  const _toggleZeroBalances = useCallback(() => {
     setShowZeroBalances((v) => {
       window.localStorage.setItem('show_zero_balances', v ? '0' : '1');
 
       return !v;
     });
-  };
+  }, []);
 
-  const _showQrModal = (): void => {
+  const _showQrModal = useCallback(() => {
     setQrModalProps({
       networkPrefix: networkPrefix,
       networkKey: networkKey,
@@ -197,9 +197,11 @@ function Home ({ chainRegistryMap, className, currentAccount, network, transacti
     });
 
     setQrModalOpen(true);
-  };
+  }, [iconTheme, networkKey, networkPrefix]);
 
-  const _closeQrModal = (): void => setQrModalOpen(false);
+  const _closeQrModal = useCallback(() => {
+    setQrModalOpen(false);
+  }, []);
 
   const _isAccountAll = isAccountAll(address);
 

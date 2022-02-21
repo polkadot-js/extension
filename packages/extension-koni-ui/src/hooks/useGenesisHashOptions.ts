@@ -9,7 +9,7 @@ import { getAllNetworkMetadata } from '../messaging';
 import chains from '../util/chains';
 import useTranslation from './useTranslation';
 
-export default interface networkSelectOption {
+export interface networkSelectOption {
   text: string;
   value: string;
   networkKey: string;

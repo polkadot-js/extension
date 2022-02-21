@@ -23,7 +23,7 @@ interface Props {
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
   type: KeypairType;
-  account: any;
+  account: AccountInfo;
   name: string | null;
 }
 

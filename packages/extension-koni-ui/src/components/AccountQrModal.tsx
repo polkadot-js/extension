@@ -112,8 +112,8 @@ function AccountQrModal ({ accountName, address, className,
             </div>
             {isEditing && (
               <HeaderEditName
-                defaultValue={accountName}
                 className='account-qr-modal__edit-name'
+                defaultValue={accountName}
                 isFocused
                 label={' '}
                 onBlur={_saveChanges}

@@ -60,7 +60,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
       closeSetting && closeSetting();
       onAction('/');
-    }, [address, changeAccountCallback]);
+    }, [accounts, address, changeAccountCallback, closeSetting, onAction]);
 
   return (
     <div

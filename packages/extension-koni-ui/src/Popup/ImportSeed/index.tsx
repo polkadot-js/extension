@@ -78,10 +78,10 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   return (
     <>
       <HeaderWithSteps
+        isBusy={isBusy}
         onBackClick={_onBackClick}
         step={step1 ? 1 : 2}
         text={t<string>('Import account')}
-        isBusy={isBusy}
       />
       {step1
         ? (

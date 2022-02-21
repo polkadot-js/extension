@@ -5,6 +5,7 @@ import LogosMap from './logo';
 
 export { default as LogosMap } from './logo';
 export const AssetImageMap: Record<string, string> = {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   loading: require('./loading.gif')
 };
 

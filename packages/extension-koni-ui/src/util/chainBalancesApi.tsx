@@ -74,6 +74,7 @@ export const getAcalaCrowdloanContribute = async (polkadotAddress: string) => {
       console.warn('Failed to get Acala crowdloan contribute');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return res.data;
   } catch (err) {
     console.error('Failed to get Acala crowdloan contribute', err);

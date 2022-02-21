@@ -58,7 +58,7 @@ function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ changeAccountCallback, children, className = '', isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances, isBusy }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -354,7 +354,7 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
           )}
         </div>
         {isWelcomeScreen && (<div className='only-top-container' />)}
-        {isContainDetailHeader &&
+        {isContainDetailHeader && currentAccount &&
           <DetailHeader
             currentAccount={currentAccount}
             formatted={formattedAddress}
@@ -367,10 +367,10 @@ function Header ({ changeAccountCallback, children, className = '', isContainDet
 
         {showSubHeader &&
           <SubHeader
+            isBusy={isBusy}
             showBackArrow={showBackArrow}
             showCancelButton={showCancelButton}
             subHeaderName={subHeaderName}
-            isBusy={isBusy}
           />
         }
 

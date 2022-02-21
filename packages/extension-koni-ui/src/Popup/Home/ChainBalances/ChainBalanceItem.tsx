@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
@@ -42,16 +42,16 @@ function ChainBalanceItem ({ accountInfo,
   const { show } = useToast();
   const { t } = useTranslation();
 
-  const _onCopy = (e: React.MouseEvent<HTMLElement>) => {
+  const _onCopy = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     show(t('Copied'));
-  };
+  }, [show, t]);
 
-  const _onToggleDetail = (e: React.MouseEvent<HTMLElement>) => {
+  const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setToggleDetail((toggleDetail) => !toggleDetail);
-  };
+  }, []);
 
-  const _openQr = (e: React.MouseEvent<HTMLElement>) => {
+  const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     setQrModalProps({
       networkPrefix: networkPrefix,
@@ -60,7 +60,7 @@ function ChainBalanceItem ({ accountInfo,
       showExportButton: false
     });
     setQrModalOpen(true);
-  };
+  }, [networkIconTheme, networkKey, networkPrefix, setQrModalOpen, setQrModalProps]);
 
   const _isAccountAll = isAccountAll(address);
 

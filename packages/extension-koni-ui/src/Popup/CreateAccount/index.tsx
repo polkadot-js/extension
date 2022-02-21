@@ -101,10 +101,10 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   return (
     <>
       <HeaderWithSteps
+        isBusy={isBusy}
         onBackClick={_onPreviousStep}
         step={step}
         text={t<string>('Create an account')}
-        isBusy={isBusy}
       />
       <LoadingContainer>
         {seed && (

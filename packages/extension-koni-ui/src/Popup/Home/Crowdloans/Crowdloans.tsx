@@ -31,7 +31,7 @@ const GroupDisplayNameMap: Record<string, string> = {
   KUSAMA_PARACHAIN: 'Kusama\'s parachain'
 };
 
-function getGroupDisplayName(groups: NetWorkGroup[]): string {
+function getGroupDisplayName (groups: NetWorkGroup[]): string {
   for (const group of groups) {
     if (GroupDisplayNameMap[group]) {
       return GroupDisplayNameMap[group];

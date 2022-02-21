@@ -94,6 +94,7 @@ export default function Popup (): React.ReactElement {
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+
       if (to) {
         window.location.hash = to;
       }
@@ -123,19 +124,20 @@ export default function Popup (): React.ReactElement {
     }
   };
 
-  useEffect(():void => {
+  useEffect((): void => {
     setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
     const beforeNav = window.localStorage.getItem('popupNavigation');
+
     if (beforeNav) {
-      if ((authRequests && authRequests.length)
-        || (metaRequests && metaRequests.length)
-        || (signRequests && signRequests.length)) {
+      if ((authRequests && authRequests.length) ||
+        (metaRequests && metaRequests.length) ||
+        (signRequests && signRequests.length)) {
         window.location.hash = '/';
       } else {
         window.location.hash = beforeNav;
       }
     }
-  }, [authRequests, metaRequests, signRequests])
+  }, [authRequests, metaRequests, signRequests]);
 
   useEffect((): void => {
     Promise.all([

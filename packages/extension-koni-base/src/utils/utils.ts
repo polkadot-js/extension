@@ -70,6 +70,7 @@ export function hexToStr (buf: string): string {
     const ch = buf[i] + buf[i + 1];
     const num = parseInt(ch, 16);
 
+    // eslint-disable-next-line eqeqeq
     if (num != 0) str += String.fromCharCode(num);
     else break;
   }
@@ -77,9 +78,11 @@ export function hexToStr (buf: string): string {
   return str;
 }
 
+// eslint-disable-next-line camelcase
 export function utf16ToString (uint16_array: Array<number>): string {
   let str = '';
 
+  // eslint-disable-next-line camelcase
   for (let i = 0; i < uint16_array.length; i++) { str += String.fromCharCode(uint16_array[i]); }
 
   return str;
@@ -119,7 +122,9 @@ export const isValidAddress = (address: string) => {
 export const toUnit = (balance: number, decimals: number) => {
   const base = new BN(10).pow(new BN(decimals));
   // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
   const dm = new BN(balance).divmod(base);
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/restrict-plus-operands
   return parseFloat(dm.div.toString() + '.' + dm.mod.toString());
 };

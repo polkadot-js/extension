@@ -69,10 +69,10 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   return (
     <>
       <Header
+        isBusy={isBusy}
         showBackArrow
         showSubHeader
         subHeaderName={t<string>('All account')}
-        isBusy={isBusy}
       />
       <div className={className}>
         <div className='action-area'>

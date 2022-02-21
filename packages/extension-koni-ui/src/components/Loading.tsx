@@ -8,10 +8,10 @@ import { AssetImageMap } from '@polkadot/extension-koni-ui/assets';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
-  className?: 'string';
+  className?: string;
 }
 
-function Loading ({ className }: Props): React.ReactElement<Props> {
+function Loading ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <div className={`${className} loading-layer`}>
       <img

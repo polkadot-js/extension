@@ -7,14 +7,14 @@ import React, { useCallback, useState } from 'react';
 import Select from 'react-select';
 import styled from 'styled-components';
 
-import networkSelectOption from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 
 import Label from './Label';
 
 interface Props extends ThemeProps {
   className?: string;
   label: string;
-  onChange?: (value: string) => void;
+  onChange?: any;
   options: networkSelectOption[];
   value?: string;
 }
@@ -25,13 +25,16 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
 
   const handleChange = useCallback(
     ({ value }): void => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       onChange && onChange(value.trim());
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setSelectedValue(value);
-    }, []
+    }, [onChange]
   );
 
   const customStyles = {
     option: (base: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
         textAlign: 'left',
@@ -39,6 +42,7 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
         fontSize: '15px'
       };
     },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' })
   };
 

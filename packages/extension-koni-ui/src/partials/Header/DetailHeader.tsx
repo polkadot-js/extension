@@ -6,6 +6,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { AccountJson } from '@polkadot/extension-base/background/types';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import moreButtonDark from '@polkadot/extension-koni-ui/assets/dots-three-vertical-dark.svg';
 import moreButtonLight from '@polkadot/extension-koni-ui/assets/dots-three-vertical-light.svg';
@@ -27,9 +28,9 @@ import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 interface Props extends ThemeProps {
   className?: string,
   popupTheme: string,
-  toggleVisibility: any,
-  currentAccount: any,
-  toggleZeroBalances: any,
+  toggleVisibility: () => void,
+  currentAccount: AccountJson,
+  toggleZeroBalances: () => void,
   formatted: string | null,
   isShowZeroBalances?: boolean,
 }
@@ -41,7 +42,7 @@ interface EditState {
 
 let tooltipId = 0;
 
-function DetailHeader ({ className,
+function DetailHeader ({ className = '',
   currentAccount,
   formatted,
   isShowZeroBalances,
@@ -106,7 +107,7 @@ function DetailHeader ({ className,
 
       _toggleEdit();
     },
-    [currentAccount?.address, _toggleEdit]
+    [currentAccount, _toggleEdit]
   );
 
   return (
@@ -184,7 +185,7 @@ function DetailHeader ({ className,
       <div className='detail-header__part-3'>
         {!(isAllAccount && currentNetwork.networkKey !== 'all') &&
         <div
-          className={`detail-header-more-button ${isActionOpen && 'pointer-events-none'}`}
+          className={`detail-header-more-button ${isActionOpen ? 'pointer-events-none' : ''}`}
           onClick={_toggleAccountAction}
         >
           <img
@@ -200,7 +201,7 @@ function DetailHeader ({ className,
           isShowZeroBalances={isShowZeroBalances}
           reference={actionsRef}
           toggleEdit={_toggleEdit}
-          toggleZeroBalances={toggleZeroBalances ? _toggleZeroBalances : undefined}
+          toggleZeroBalances={_toggleZeroBalances}
         />
       )}
     </div>

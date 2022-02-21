@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
   isBusy?: boolean
 }
 
-function SubHeader ({ className, showBackArrow, showCancelButton, subHeaderName, isBusy }: Props): React.ReactElement {
+function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, subHeaderName }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (

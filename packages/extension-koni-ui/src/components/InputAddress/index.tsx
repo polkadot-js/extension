@@ -114,7 +114,7 @@ function InputAddress ({ className = '', defaultValue, filter, onChange, help, h
     } else {
       setInputAddressValue(toAddress(value) || undefined);
     }
-  }, [lastValue]);
+  }, [lastValue, type, value]);
 
   const actualOptions = [{
     label: 'ACCOUNTS',

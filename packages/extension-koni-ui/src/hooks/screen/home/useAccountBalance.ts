@@ -97,8 +97,8 @@ export default function useAccountBalance (currentNetworkKey: string,
   crowdloanNetworks.forEach((networkKey) => {
     const networkMetadata = networkMetadataMap[networkKey];
 
-    if (!networkMetadata
-      || !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].some(g => networkMetadata.groups.includes(g as NetWorkGroup))) {
+    if (!networkMetadata ||
+      !['POLKADOT_PARACHAIN', 'KUSAMA_PARACHAIN'].some((g) => networkMetadata.groups.includes(g as NetWorkGroup))) {
       return;
     }
 

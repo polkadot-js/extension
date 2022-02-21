@@ -6,6 +6,7 @@ import type { ThemeProps } from '../types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
@@ -13,7 +14,6 @@ import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisH
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
-import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -59,6 +59,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
   ];
 
   if (isNotHaveAccount) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     genesisOptions = useGenesisHashOptions().slice(0, 1);
   }
 

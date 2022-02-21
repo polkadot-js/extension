@@ -42,11 +42,11 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
     show(t('Copied'));
   }, [show, t]);
 
-  const _backupMnemonicSeed = (): void => {
+  const _backupMnemonicSeed = useCallback(() => {
     const blob = new Blob([JSON.stringify(seed)], { type: 'application/json; charset=utf-8' });
 
     saveAs(blob, 'mnemonic-seed.json');
-  };
+  }, [seed]);
 
   return (
     <>

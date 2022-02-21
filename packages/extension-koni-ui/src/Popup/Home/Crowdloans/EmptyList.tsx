@@ -12,7 +12,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function CrowdloanEmptyList ({ className }: Props): React.ReactElement<Props> {
+function CrowdloanEmptyList ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (

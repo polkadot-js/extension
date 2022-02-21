@@ -216,7 +216,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 88,
     provider: 'wss://mainnet.polkadex.trade',
     groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2028,
+    paraId: 2036,
     nativeToken: 'PDEX'
   },
   aleph: {

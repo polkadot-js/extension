@@ -53,14 +53,14 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
   const _openJson = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', jsonPath);
-      windowOpen(jsonPath);
+      windowOpen(jsonPath).catch((e) => console.log('error', e));
     }, []
   );
 
   const _openCreateAccount = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', createAccountPath);
-      windowOpen(createAccountPath);
+      windowOpen(createAccountPath).catch((e) => console.log('error', e));
     }, []
   );
 

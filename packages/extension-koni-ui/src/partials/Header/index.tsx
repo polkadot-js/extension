@@ -163,7 +163,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
 
         setLocalGenesisHash(networkSelected.value);
       }
-    })();
+    })().catch((e) => console.log('error is', e));
 
     return () => {
       isSync = false;

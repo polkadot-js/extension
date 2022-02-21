@@ -395,6 +395,7 @@ export default class KoniExtension extends Extension {
   private apiInit ({ networkKey }: RequestApi): ApiInitStatus {
     const { apisMap } = bWindow.pdotApi;
 
+    // eslint-disable-next-line no-prototype-builtins
     if (!rpcsMap.hasOwnProperty(networkKey) || !rpcsMap[networkKey]) {
       return ApiInitStatus.NOT_SUPPORT;
     }

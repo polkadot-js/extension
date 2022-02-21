@@ -31,7 +31,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
   const [filteredGenesisOptions, setFilteredGenesisOption] = useState(genesisOptions);
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
-  const filterCategories = [
+  const filterCategories: {text: string, type: NetWorkGroup | string}[] = [
     {
       text: 'All',
       type: ''
@@ -85,25 +85,27 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
         setFilteredGenesisOption(genesisOptions);
       }
     }
-  }, [filteredNetwork, selectedGroup]);
+  }, [filteredNetwork, genesisOptions, selectedGroup]);
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilteredNetwork(filter);
     onFilter && onFilter(filter);
-  }, []);
+  }, [onFilter]);
 
   const _selectGroup = useCallback(
-    (type): void => {
-      setSelectedGroup(type);
+    (type: NetWorkGroup) => {
+      return () => {
+        setSelectedGroup(type);
 
-      if (type && type.length) {
-        setFilteredGenesisOption(genesisOptions
-          .filter((f) => f.groups.includes(type) && f.text.toLowerCase().includes(filteredNetwork)));
-      } else {
-        setFilteredGenesisOption(genesisOptions.filter((f) => f.text.toLowerCase().includes(filteredNetwork)));
-      }
+        if (type && type.length) {
+          setFilteredGenesisOption(genesisOptions
+            .filter((f) => f.groups.includes(type) && f.text.toLowerCase().includes(filteredNetwork)));
+        } else {
+          setFilteredGenesisOption(genesisOptions.filter((f) => f.text.toLowerCase().includes(filteredNetwork)));
+        }
+      };
     },
-    [selectedGroup]
+    [filteredNetwork, genesisOptions]
   );
 
   const _selectNetwork = useCallback((value: string, networkPrefix: number, icon: string, networkKey: string) => {
@@ -135,7 +137,7 @@ function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, r
           <div
             className={type === selectedGroup ? 'network-filter-item__selected-text' : 'network-filter-item__text'}
             key={text}
-            onClick={() => { _selectGroup(type); }}
+            onClick={_selectGroup(type as NetWorkGroup)}
           >
             {text}
           </div>

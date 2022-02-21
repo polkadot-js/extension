@@ -160,7 +160,7 @@ function InputAddress ({ className = '', defaultValue, filter, onChange, help, h
         ? transformToAccountId(address)
         : null
     );
-  }, []);
+  }, [filter, onChange, type]);
 
   return (
     <Dropdown

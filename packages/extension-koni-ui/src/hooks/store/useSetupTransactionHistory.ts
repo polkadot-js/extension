@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import { useEffect } from 'react';
 
 import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
@@ -19,5 +21,5 @@ export default function useSetupTransactionHistory (address: string, networkKeys
 
     getTransactionHistoryByMultiNetworks(address, networkKeys, updateTransactionHistory)
       .catch((e) => console.log('Error when get Transaction History', e));
-  }, [address, dep, networkKeys]);
+  }, [address, dep]);
 }

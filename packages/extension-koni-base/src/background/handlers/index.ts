@@ -38,6 +38,7 @@ export const rpcsMap: Record<string, string> = getRpcsMap();
 
 export function initBackgroundWindow (keyring: any) {
   (window as any as BackgroundWindow).pdotApi = {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     keyring,
     apisMap: dotSamaAPIMap
   };

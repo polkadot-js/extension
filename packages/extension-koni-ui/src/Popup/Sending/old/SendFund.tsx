@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -95,7 +95,7 @@ async function checkPhishing (_senderId: string | null, recipientId: string | nu
 
 type SupportType = 'NETWORK' | 'ACCOUNT';
 
-function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
+function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { currentAccount: { account },
     currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
@@ -159,7 +159,7 @@ function Wrapper ({ className, theme }: Props): React.ReactElement<Props> {
   );
 }
 
-function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): React.ReactElement {
+function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
 
   const { currentAccount: { account: currentAccount },
@@ -233,11 +233,13 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
   const amountGtAvailableBalance = amount && balances && amount.gt(balances.availableBalance);
 
   const txParams: unknown[] | (() => unknown[]) | null =
-    canToggleAll && isAll
-      ? isFunction(api.tx.balances.transferAll)
-        ? [recipientId, false]
-        : [recipientId, maxTransfer]
-      : [recipientId, amount];
+    useMemo(() => {
+      return canToggleAll && isAll
+        ? isFunction(api.tx.balances.transferAll)
+          ? [recipientId, false]
+          : [recipientId, maxTransfer]
+        : [recipientId, amount];
+    }, [amount, api.tx.balances.transferAll, canToggleAll, isAll, maxTransfer, recipientId]);
 
   const tx: ((...args: any[]) => SubmittableExtrinsic<'promise'>) | null = canToggleAll && isAll && isFunction(api.tx.balances.transferAll)
     ? api.tx.balances.transferAll
@@ -247,6 +249,7 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
 
   const _onSend = useCallback(() => {
     if (tx) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setExtrinsic(tx(...(
         isFunction(txParams)
           ? txParams()
@@ -262,7 +265,7 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
     setShowTxModal(true);
   }, []);
 
-  const onGetTxResult = (isTxSuccess: boolean, extrinsicHash?: string, txError?: Error | null) => {
+  const onGetTxResult = useCallback((isTxSuccess: boolean, extrinsicHash?: string, txError?: Error | null) => {
     setWrapperClass('-disable-header-action');
 
     setTxResult({
@@ -273,7 +276,7 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
     });
 
     _onCancelTx();
-  };
+  }, [_onCancelTx, setWrapperClass]);
 
   const _onTxSuccess = useCallback((result: SubmittableResult, extrinsicHash?: string) => {
     if (!senderId) {
@@ -293,13 +296,13 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
         time: Date.now()
       };
 
-      updateTransactionHistory(senderId, networkKey, item, (items) => {
+      updateTransactionHistory(senderId, networkKey, item, () => {
         onGetTxResult(true, extrinsicHash);
       }).catch((e) => console.log('Error when update Transaction History', e));
     } else {
       onGetTxResult(true);
     }
-  }, [senderId, networkKey]);
+  }, [senderId, networkKey, onGetTxResult]);
 
   const _onTxFail = useCallback((result: SubmittableResult | null, error: Error | null, extrinsicHash?: string) => {
     if (!senderId) {
@@ -319,15 +322,15 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
         time: Date.now()
       };
 
-      updateTransactionHistory(senderId, networkKey, item, (items) => {
+      updateTransactionHistory(senderId, networkKey, item, () => {
         onGetTxResult(false, extrinsicHash, error);
       }).catch((e) => console.log('Error when update Transaction History', e));
     } else {
       onGetTxResult(false, undefined, error);
     }
-  }, [senderId, networkKey]);
+  }, [senderId, networkKey, onGetTxResult]);
 
-  const _onResend = () => {
+  const _onResend = useCallback(() => {
     setTxResult({
       isTxSuccess: false,
       isShowTxResult: false,
@@ -335,14 +338,13 @@ function SendFund ({ api, apiUrl, className, setWrapperClass }: ContentProps): R
     });
 
     setWrapperClass('');
-  };
+  }, [setWrapperClass]);
 
   const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
 
-  console.log('amountGtAvailableBalance - noFees', amountGtAvailableBalance, noFees);
-
   return (
     <>
+      {/* eslint-disable-next-line multiline-ternary */}
       {!isShowTxResult ? (
         <div className={`${className} -main-content`}>
           <InputAddress

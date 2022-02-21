@@ -79,7 +79,7 @@ function Address ({ className, onChange, onEnter, passwordError, requestAddress 
   );
 }
 
-export default React.memo(styled(Address)(({ theme }: ThemeProps) => `
+export default React.memo(styled(Address)(() => `
   .sending-address-password-wrapper {
     margin-top: 10px;
   }

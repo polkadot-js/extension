@@ -31,7 +31,7 @@ function getErrorMessage (txError?: Error | null): string | null {
   return null;
 }
 
-function SendFundResult ({ className, networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
+function SendFundResult ({ className = '', networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useContext(ActionContext);
   const _backToHome = useCallback(

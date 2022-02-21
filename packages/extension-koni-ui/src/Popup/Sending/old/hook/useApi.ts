@@ -84,7 +84,9 @@ export default function useApi (networkKey: string): ApiProps {
         setupDefaultFormatBalance(apiInfo, networkKey);
         setValue(apiInfo);
       }
-    })();
+    })().catch((e) => {
+      console.log('Error in useAPI: ', e);
+    });
 
     return () => {
       isSync = false;

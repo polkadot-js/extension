@@ -193,7 +193,7 @@ function InputNumber ({ registry, autoFocus, bitLength = DEFAULT_BITLENGTH, chil
 
   const siOptions = useMemo(
     () => getSiOptions(siSymbol || TokenUnit.abbr, siDecimals),
-    [siDecimals, siSymbol, TokenUnit.abbr]
+    [siDecimals, siSymbol]
   );
 
   useEffect((): void => {

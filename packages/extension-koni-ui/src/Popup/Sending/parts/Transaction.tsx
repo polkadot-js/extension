@@ -1,17 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BN } from '@polkadot/util';
-
 import React from 'react';
 import styled from 'styled-components';
 
 import PaymentInfo from '@polkadot/extension-koni-ui/Popup/Sending/parts/PaymentInfo';
+import { BN } from '@polkadot/util';
 
 interface Props {
   accountId: string | null;
   className?: string;
-  extrinsic: any; // TODO: change type when do logic
+  extrinsic: never; // TODO: change type when do logic
   isSendable: boolean;
   tip?: BN;
 }

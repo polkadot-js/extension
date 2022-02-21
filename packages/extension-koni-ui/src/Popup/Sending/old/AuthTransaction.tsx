@@ -117,6 +117,7 @@ async function signAndSend (txHandler: TxHandler, tx: SubmittableExtrinsic<'prom
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 async function extractParams (api: ApiPromise, address: string, options: Partial<SignerOptions>): Promise<[string, Partial<SignerOptions>]> {
   const pair = keyring.getPair(address);
 
@@ -143,10 +144,11 @@ function AuthTransaction ({ api, apiUrl, className, extrinsic, onCancel, request
   useEffect((): void => {
     const method = extrinsic.method;
 
-    setCallHash(method && method.hash.toHex() || null);
+    setCallHash((method && method.hash.toHex()) || null);
   }, [api, extrinsic, senderInfo]);
 
   const _unlock = useCallback(
+    // eslint-disable-next-line @typescript-eslint/require-await
     async (): Promise<boolean> => {
       let passwordError: string | null = null;
 
@@ -158,7 +160,7 @@ function AuthTransaction ({ api, apiUrl, className, extrinsic, onCancel, request
 
       return !passwordError;
     },
-    [senderInfo, t]
+    [senderInfo]
   );
 
   const _onSend = useCallback(
@@ -172,7 +174,7 @@ function AuthTransaction ({ api, apiUrl, className, extrinsic, onCancel, request
         await signAndSend(txHandler, tx, pairOrAddress, options);
       }
     },
-    [api, tip, extrinsic]
+    [api, tip]
   );
 
   const _doStart = useCallback(

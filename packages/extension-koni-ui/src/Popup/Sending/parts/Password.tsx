@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
   tabIndex?: number;
 }
 
-function Unlock ({ address, className, error, onChange, onEnter, tabIndex }: Props): React.ReactElement<Props> | null {
+function Unlock ({ className, error, onChange, onEnter, tabIndex }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [isUnlockCached, setIsUnlockCached] = useState(false);
@@ -55,7 +55,7 @@ function Unlock ({ address, className, error, onChange, onEnter, tabIndex }: Pro
   );
 }
 
-export default React.memo(styled(Unlock)(({ theme }: Props) => `
+export default React.memo(styled(Unlock)(() => `
   .sending-password-toggle-wrapper {
       display: flex;
       margin-top: 10px;

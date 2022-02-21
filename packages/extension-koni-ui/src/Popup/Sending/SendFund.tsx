@@ -28,16 +28,19 @@ function SendFund ({ className }: Props): React.ReactElement {
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
   const [senderId, setSenderId] = useState<string | null>(null);
-  const [extrinsic, setExtrinsic] = useState<any | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const _onSend = useCallback(() => {
     setShowTxModal(true);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const _onTxSuccess = useCallback(() => {
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const _onTxFail = useCallback(() => {
   }, []);
 
@@ -46,16 +49,17 @@ function SendFund ({ className }: Props): React.ReactElement {
     setShowTxModal(false);
   }, []);
 
-  const _onResend = () => {
+  const _onResend = useCallback(() => {
     setTxResult({
       isTxSuccess: false,
       isShowTxResult: false,
       txError: undefined
     });
-  };
+  }, []);
 
   return (
     <>
+      {/* eslint-disable-next-line multiline-ternary */}
       {!isShowTxResult ? (
         <div className={className}>
           <Header

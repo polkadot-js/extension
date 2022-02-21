@@ -52,7 +52,7 @@ function Tip ({ className, onChange }: Props): React.ReactElement<Props> | null 
   );
 }
 
-export default React.memo(styled(Tip)(({ theme }: ThemeProps) => `
+export default React.memo(styled(Tip)(() => `
   .sending-tip__toggle {
     display: flex;
     justify-content: flex-end;

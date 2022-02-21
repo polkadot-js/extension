@@ -8,6 +8,7 @@ import React from 'react';
 
 import KeyPair from './KeyPair';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function createItem (option: KeyringSectionOption, isUppercase = true): Option {
   return {
     ...option,

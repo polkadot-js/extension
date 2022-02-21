@@ -1,13 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BN } from '@polkadot/util';
-
 import React from 'react';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { BN } from '@polkadot/util';
 
 import PaymentInfo from './PaymentInfo';
 

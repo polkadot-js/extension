@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
   requestAddress: string;
-  extrinsic: any;
+  extrinsic: never;
 }
 
 function AuthTransaction ({ className, extrinsic, onCancel, requestAddress }: Props): React.ReactElement<Props> | null {
@@ -65,7 +65,7 @@ function AuthTransaction ({ className, extrinsic, onCancel, requestAddress }: Pr
       //     });
       // }, 0);
     },
-    [extrinsic, senderInfo]
+    []
   );
 
   return (

@@ -67,6 +67,7 @@ function isMapFn (fn: unknown): fn is QueryMapFn {
 // extract the serialized and mapped params, all ready for use in our call
 function extractParams <T> (fn: unknown, params: unknown[], { paramMap = transformIdentity }: CallOptions<T> = {}, depth?: any): [string, CallParams | null] {
   return [
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     JSON.stringify({ f: (fn as { name: string })?.name, p: params, d: depth }),
     params.length === 0 || !params.some((param) => isNull(param) || isUndefined(param))
       ? paramMap(params)

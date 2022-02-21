@@ -128,3 +128,13 @@ export const toUnit = (balance: number, decimals: number) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/restrict-plus-operands
   return parseFloat(dm.div.toString() + '.' + dm.mod.toString());
 };
+
+export function sumBN (inputArr: BN[]) {
+  const rs = new BN(0);
+
+  inputArr.forEach((input) => {
+    rs.add(input);
+  });
+
+  return rs;
+}

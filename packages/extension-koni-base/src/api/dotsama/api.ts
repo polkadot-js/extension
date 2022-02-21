@@ -4,6 +4,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
+import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 import { inJestTest } from '@polkadot/extension-koni-base/utils/utils';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
@@ -97,7 +98,7 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
 export function initApi (apiUrl: string | string[]): ApiProps {
   const registry = new TypeRegistry();
 
-  const provider = new WsProvider(apiUrl);
+  const provider = new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
   const apiOption = { provider, typesBundle, typesChain: typesChain };
 
@@ -126,6 +127,12 @@ export function initApi (apiUrl: string | string[]): ApiProps {
     systemChain: '',
     systemName: '',
     systemVersion: '',
+    apiRetry: 0,
+    recoverConnect: () => {
+      result.apiRetry = 0;
+      console.log('Recover connect to', apiUrl);
+      provider.connect().then(console.log).catch(console.error);
+    },
     get isReady () {
       const self = this as ApiProps;
 
@@ -135,11 +142,6 @@ export function initApi (apiUrl: string | string[]): ApiProps {
         }
 
         return new Promise<ApiProps>((resolve, reject) => {
-          // todo: may reject if timeout
-          // const timer = setTimeout(() => {
-          //   reject(new Error(`API timed out after 10000 ms`));
-          // }, 10000);
-
           (function wait () {
             if (self.isApiReady) {
               return resolve(self);
@@ -155,7 +157,8 @@ export function initApi (apiUrl: string | string[]): ApiProps {
   }) as unknown as ApiProps;
 
   api.on('connected', () => {
-    console.log('DotSamaAPI connected', apiUrl);
+    console.log('DotSamaAPI connected to', apiUrl);
+    result.apiRetry = 0;
 
     if (result.isApiReadyOnce) {
       result.isApiReady = true;
@@ -165,13 +168,22 @@ export function initApi (apiUrl: string | string[]): ApiProps {
   });
 
   api.on('disconnected', () => {
-    console.log('DotSamaAPI disconnected', apiUrl);
     result.isApiConnected = false;
     result.isApiReady = false;
+    result.apiRetry = (result.apiRetry || 0) + 1;
+
+    console.log(`DotSamaAPI disconnected from ${JSON.stringify(apiUrl)} ${JSON.stringify(result.apiRetry)} times`);
+
+    if (result.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
+      console.log(`Discontinue to use ${JSON.stringify(apiUrl)} because max retry`);
+      provider.disconnect()
+        .then(console.log)
+        .catch(console.error);
+    }
   });
 
   api.on('ready', () => {
-    console.log('DotSamaAPI ready', apiUrl);
+    console.log('DotSamaAPI ready with', apiUrl);
     loadOnReady(registry, api)
       .then((rs) => {
         objectSpread(result, rs);

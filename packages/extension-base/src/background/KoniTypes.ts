@@ -136,6 +136,8 @@ export interface ApiProps extends ApiState {
   isEthereum: boolean;
   isApiInitialized: boolean;
   isReady: Promise<ApiProps>;
+  apiRetry?: number;
+  recoverConnect?: () => void;
 }
 
 export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';

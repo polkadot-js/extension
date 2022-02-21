@@ -6,6 +6,7 @@ import { initApi } from '@polkadot/extension-koni-base/api/dotsama/api';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { AccountInfo } from '@polkadot/types/interfaces';
 
+jest.setTimeout(50000);
 describe('test DotSama APIs', () => {
   let api: ApiPromise;
 

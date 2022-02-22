@@ -136,7 +136,6 @@ export default class StatemineNftApi extends BaseNftApi {
       if (!(assetId.classId in collectionMetaDict)) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         collectionMetaDict[assetId.classId] = await this.getCollectionDetail(assetId.classId as number);
-        console.log('handleNft', collectionMetaDict[assetId.classId]);
       }
 
       const parsedNft = {
@@ -160,6 +159,7 @@ export default class StatemineNftApi extends BaseNftApi {
 
       for (const item of allItems) {
         if (collection.collectionId === item.collectionId) {
+          // @ts-ignore
           collection.nftItems.push(item);
         }
       }

@@ -28,6 +28,7 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
     case SUPPORTED_NFT_NETWORKS.acala:
       return new AcalaNftApi(api, addresses, chain);
     case SUPPORTED_NFT_NETWORKS.rmrk:
+      // eslint-disable-next-line no-case-declarations
       const rmrkNftApi = new RmrkNftApi();
 
       rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
@@ -62,9 +63,10 @@ export class NftHandler {
 
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
-    this.handlers.map((handler) => {
+
+    for (const handler of this.handlers) {
       handler.setAddresses(addresses);
-    });
+    }
   }
 
   private async connect () {
@@ -75,7 +77,9 @@ export class NftHandler {
     } else {
       await Promise.all(this.apiPromises.map(async ({ api: apiPromise, chain }) => {
         if (apiPromise) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           const parentApi: ApiProps = await apiPromise.isReady;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           const handler = createNftApi(chain, parentApi, this.addresses);
 
           if (handler && !this.handlers.includes(handler)) this.handlers.push(handler);
@@ -92,7 +96,8 @@ export class NftHandler {
     let data: NftCollection[] = [];
     let timer: any;
 
-    const allPromises = Promise.all(this.handlers.map(async (handler) => {
+    const allPromises = await Promise.all(this.handlers.map(async (handler) => {
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       await handler.handleNfts();
       total += handler.getTotal();
       data = [...data, ...handler.getData()];
@@ -100,7 +105,9 @@ export class NftHandler {
 
     // Set timeout for all requests
     await Promise
-      .race([allPromises, new Promise((_r, rej) => timer = setTimeout(rej, NFT_TIMEOUT))])
+      // eslint-disable-next-line no-return-assign
+      .race([allPromises, new Promise((resolve, reject) => timer = setTimeout(reject, NFT_TIMEOUT))])
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       .finally(() => clearTimeout(timer));
 
     this.total = total;

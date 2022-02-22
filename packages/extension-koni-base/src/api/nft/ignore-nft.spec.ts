@@ -1,11 +1,12 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama';
 import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import { NftHandler } from '@polkadot/extension-koni-base/api/nft/index';
 
-jest.setTimeout(50000);
+jest.setTimeout(5000000);
 
 describe('test api get nft from all chains', () => {
   const dotSamaAPIMap = connectDotSamaApis();

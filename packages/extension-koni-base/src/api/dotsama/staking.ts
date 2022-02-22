@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NetWorkInfo, StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
-import networks from '@polkadot/extension-koni-base/api/endpoints';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 interface LedgerData {
@@ -26,17 +25,19 @@ interface PropsSubscribe {
   apiMap: Record<string, any>[]
 }
 
-export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSubscribe): Promise<any> => {
+export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSubscribe): Promise<StakingItem[]> => {
   try {
     const result: Array<StakingItem> = [];
 
     await Promise.all(apiMap.map(async ({ api: parentApi, chain }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       const ledgers = await parentApi.api.query.staking?.ledger.multi(addresses);
       let totalBalance = 0;
       let unit = '';
 
       if (ledgers) {
-        ledgers.map((ledger: any, index: number) => {
+        for (const ledger of ledgers) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const data = ledger.toHuman() as unknown as LedgerData;
 
           // const currentAddress = addresses[index];
@@ -47,15 +48,15 @@ export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSu
             unit = balance ? balance.split(' ')[1] : '';
             totalBalance += parseFloat(amount);
           }
-        });
+        }
 
         if (totalBalance > 0) {
           result.push({
-            name: networks[chain].chain,
-            chainId: chain,
+            name: NETWORKS[chain as string].chain,
+            chainId: chain as string,
             balance: totalBalance.toString(),
-            nativeToken: networks[chain].nativeToken,
-            unit: unit || networks[chain].nativeToken
+            nativeToken: NETWORKS[chain as string].nativeToken,
+            unit: unit || NETWORKS[chain as string].nativeToken
           } as StakingItem);
         }
       }
@@ -65,7 +66,7 @@ export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSu
   } catch (e) {
     console.error('Error getting staking data', e);
 
-    return null;
+    return [];
   }
 };
 
@@ -78,14 +79,16 @@ export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Recor
   });
 
   await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     const api = await apiPromise.isReady;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     apis.push({ chain, api });
   }));
 
   const stakingItems = await subscribeMultiCurrentBonded({ apiMap: apis, addresses });
 
-  console.log(`fetched ${stakingItems.length} staking items`);
+  console.log(`fetched ${stakingItems?.length} staking items`);
 
   return {
     ready: true,

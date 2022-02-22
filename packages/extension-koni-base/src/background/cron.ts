@@ -3,7 +3,7 @@
 
 import { Subject } from 'rxjs';
 
-import { NftJson, StakingJson} from '@polkadot/extension-base/background/KoniTypes';
+import { NftJson, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';

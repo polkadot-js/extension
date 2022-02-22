@@ -3,9 +3,10 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
@@ -13,7 +14,7 @@ import logo from '../../../assets/sub-wallet-logo.svg';
 
 interface Props {
   className?: string;
-  data: any;
+  data: _NftItem;
   onClickBack: () => void;
 }
 
@@ -33,27 +34,32 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
     );
   };
 
-  const handleOnLoad = () => {
-    setLoading(false);
-  };
+  const handleClickBack = useCallback(() => {
+    onClickBack();
+  }, [onClickBack]);
 
-  const handleImageError = () => {
+  const handleOnLoad = useCallback(() => {
+    setLoading(false);
+  }, []);
+
+  const handleImageError = useCallback(() => {
     setLoading(false);
     setShowImage(false);
-  };
+  }, []);
 
-  const handleOnClick = () => {
+  const handleOnClick = useCallback(() => {
     if (data.external_url) {
-      chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
+      // eslint-disable-next-line no-void
+      void chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
     }
-  };
+  }, [data]);
 
   return (
     <div className={className}>
       <div className={'header'}>
         <div
           className={'back-icon'}
-          onClick={() => onClickBack()}
+          onClick={handleClickBack}
         >
           <FontAwesomeIcon
             className='arrowLeftIcon'
@@ -81,12 +87,12 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
             ? <img
               alt={'item-img'}
               className={'item-img'}
-              onClick={() => handleOnClick()}
-              onError={() => handleImageError()}
-              onLoad={() => handleOnLoad()}
+              onClick={handleOnClick}
+              onError={handleImageError}
+              onLoad={handleOnLoad}
               src={data.image ? data?.image : logo}
               style={{ borderRadius: '5px' }}
-              />
+            />
             : <video
               autoPlay
               height='416'
@@ -121,7 +127,11 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
               <div className={'prop-container'}>
                 {
                   Object.keys(data?.properties).map((key, index) => {
-                    return propDetail(key, data?.properties[key].value, index);
+                    // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    // @ts-ignore
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    return propDetail(key, data?.properties[key]?.value, index);
+                    // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
                   })
                 }
 

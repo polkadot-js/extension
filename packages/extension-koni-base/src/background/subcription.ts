@@ -120,10 +120,12 @@ export class KoniSubcription {
 
   initNftSubscription (addresses: string[]) {
     nftHandler.setAddresses(addresses);
-    nftHandler.handleNfts().then((r) => {
-      state.setNft(nftHandler.getNftJson());
-      console.log('set nft state done for address', addresses);
-    });
+    nftHandler.handleNfts()
+      .then((r) => {
+        state.setNft(nftHandler.getNftJson());
+        console.log('set nft state done for address', addresses);
+      })
+      .catch(console.log);
   }
 
   subscribeStaking (address: string) {
@@ -135,9 +137,11 @@ export class KoniSubcription {
   }
 
   initStakingSubscription (addresses: string[]) {
-    subscribeStaking(addresses, dotSamaAPIMap).then((stakingData) => {
-      state.setStaking(stakingData);
-      console.log('set staking state done');
-    });
+    subscribeStaking(addresses, dotSamaAPIMap)
+      .then((stakingData) => {
+        state.setStaking(stakingData);
+        console.log('set staking state done');
+      })
+      .catch(console.log);
   }
 }

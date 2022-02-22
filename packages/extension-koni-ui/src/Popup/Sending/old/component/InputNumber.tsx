@@ -193,7 +193,8 @@ function InputNumber ({ registry, autoFocus, bitLength = DEFAULT_BITLENGTH, chil
 
   const siOptions = useMemo(
     () => getSiOptions(siSymbol || TokenUnit.abbr, siDecimals),
-    [siDecimals, siSymbol]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [siDecimals, siSymbol, TokenUnit.abbr]
   );
 
   useEffect((): void => {

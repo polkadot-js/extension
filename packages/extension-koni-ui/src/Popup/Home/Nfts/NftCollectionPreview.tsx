@@ -63,7 +63,7 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
   );
 }
 
-export default styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
+export default React.memo(styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
   .img-container {
     position: relative;
     height: 124px;
@@ -115,4 +115,4 @@ export default styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
       color: ${theme.iconNeutralColor};
     }
   }
-`);
+`));

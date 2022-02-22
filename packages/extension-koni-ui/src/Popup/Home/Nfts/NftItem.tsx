@@ -146,7 +146,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
   );
 }
 
-export default styled(NftItem)(({ theme }: ThemeProps) => `
+export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
   padding-bottom: 20px;
   .img-container {
     position: relative;
@@ -237,4 +237,4 @@ export default styled(NftItem)(({ theme }: ThemeProps) => `
   .prop-value {
     font-size: 14px;
   }
-`);
+`));

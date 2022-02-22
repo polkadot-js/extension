@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## 0.2.2 (Koni) Feb 22, 2022
+Changes:
+- Improve stabling
+- Fix eslint and test issues
+  - ...
+
+## 0.2.1 (Koni) Feb 20, 2022
+Changes:
+- Fix performance bugs
+- ...
+
+## 0.2.0 (Koni) Feb 18, 2022
+Changes:
+- Add support staking
+- Fix bugs
+- ...
+
+## 0.1.0 (Koni) Jan 28, 2022
+Changes:
+- Update UI
+- Add support get account balances in USD
+- Add support get crowdloan balances in USD
+- Add support NFT
+- Add support send funds
+- ...
+
 ## 0.0.1 (Koni) Jan 17, 2022
 Changes:
 - Start folk and custom polkadot extension with packages extension-koni, extension-koni-base, extension-koni-ui

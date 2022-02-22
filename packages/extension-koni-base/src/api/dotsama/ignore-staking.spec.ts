@@ -1,7 +1,6 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama/index';
 import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 

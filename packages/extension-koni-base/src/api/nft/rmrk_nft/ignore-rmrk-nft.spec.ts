@@ -1,7 +1,6 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft/index';
 

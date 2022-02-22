@@ -1,8 +1,7 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
-import fetch from 'node-fetch';
+import fetch from 'cross-fetch';
 
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { CLOUDFLARE_SERVER } from '@polkadot/extension-koni-base/api/nft/config';

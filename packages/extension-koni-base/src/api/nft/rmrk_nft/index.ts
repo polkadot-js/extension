@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import fetch from 'node-fetch';
+import fetch from 'cross-fetch';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';

@@ -4,7 +4,7 @@
   "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
   "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension-koni-ui#readme",
-  "license": "Apache-2",
+  "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension-koni-ui",
   "repository": {

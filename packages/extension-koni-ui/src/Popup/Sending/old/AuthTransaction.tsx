@@ -174,7 +174,8 @@ function AuthTransaction ({ api, apiUrl, className, extrinsic, onCancel, request
         await signAndSend(txHandler, tx, pairOrAddress, options);
       }
     },
-    [api, tip]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [api, tip, extrinsic]
   );
 
   const _doStart = useCallback(

@@ -1,10 +1,11 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import React from 'react';
 import styled from 'styled-components';
 
-import { StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import { StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList';
@@ -31,7 +32,7 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
     );
   };
 
-  const StakingRow = (logo: string, chainName: string, symbol: string, amount: string, unit: string, index: any) => {
+  const StakingRow = (logo: string, chainName: string, symbol: string, amount: string | undefined, unit: string | undefined, index: number) => {
     return (
       <div
         className={'staking-row'}
@@ -49,7 +50,7 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
           </div>
 
           <div className={'meta-container'}>
-            <div className={'staking-amount'}>{editBalance(amount)}</div>
+            <div className={'staking-amount'}>{editBalance(amount || '')}</div>
             <div className={'chain-unit'}>{unit}</div>
           </div>
         </div>
@@ -69,7 +70,7 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
 
         {!loading && data &&
           // @ts-ignore
-          data?.details.map((item: any, index: any) => {
+          data?.details.map((item: StakingItem, index: number) => {
             const name = item?.chainId;
             const icon = LogosMap[name] || LogosMap.default;
 

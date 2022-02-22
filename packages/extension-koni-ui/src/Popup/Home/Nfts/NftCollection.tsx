@@ -3,27 +3,36 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
 import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItemPreview';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
-  data: any;
+  data: _NftCollection | undefined;
   onClickBack: () => void;
 }
 
 function NftCollection ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
-  const [chosenItem, setChosenItem] = useState();
-  const [showItemDetail, setShowItemDetail] = useState(false);
+  const [chosenItem, setChosenItem] = useState<_NftItem>({ id: 'init' });
+  const [showItemDetail, setShowItemDetail] = useState<boolean>(false);
 
-  const handleShowItem = (data: any) => {
+  const handleShowItem = useCallback((data: _NftItem) => {
     setChosenItem(data);
     setShowItemDetail(true);
-  };
+  }, []);
+
+  const handleClickBack = useCallback(() => {
+    onClickBack();
+  }, [onClickBack]);
+
+  const handleHideItemDetail = useCallback(() => {
+    setShowItemDetail(false);
+  }, []);
 
   return (
     <div className={className}>
@@ -33,7 +42,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
           <div className={'header'}>
             <div
               className={'back-icon'}
-              onClick={() => onClickBack()}
+              onClick={handleClickBack}
             >
               <FontAwesomeIcon
                 className='arrowLeftIcon'
@@ -42,17 +51,22 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
             </div>
             <div
               className={'header-title'}
+              // @ts-ignore
               title={data.collectionName ? data?.collectionName : data?.collectionId}
             >
+              {/* @ts-ignore */}
               <div className={'collection-name'}>{data.collectionName ? data?.collectionName : data?.collectionId}</div>
+              {/* @ts-ignore */}
               <div className={'collection-item-count'}>{data?.nftItems.length}</div>
             </div>
             <div></div>
           </div>
           <div className={'grid-container'}>
             {
+              // @ts-ignore
               data?.nftItems.length > 0 &&
-              data?.nftItems.map((item: any, index: React.Key | null | undefined) => {
+              // @ts-ignore
+              data?.nftItems.map((item: _NftItem, index: React.Key | null | undefined) => {
                 return <div key={index}>
                   <NftItemPreview
                     data={item}
@@ -69,7 +83,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
         showItemDetail &&
         <NftItem
           data={chosenItem}
-          onClickBack={() => setShowItemDetail(false)}
+          onClickBack={handleHideItemDetail}
         />
       }
     </div>
@@ -118,6 +132,4 @@ export default styled(NftCollection)(({ theme }: ThemeProps) => `
     font-weight: normal;
     color: #7B8098;
   }
-
-
 `);

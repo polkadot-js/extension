@@ -27,6 +27,7 @@ interface NftIdList {
 }
 
 export default class UniqueNftApi extends BaseNftApi {
+  // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
@@ -68,7 +69,7 @@ export default class UniqueNftApi extends BaseNftApi {
     const schemaVersion = collection.SchemaVersion;
     const offchainSchema = hexToStr(collection.OffchainSchema);
 
-    if (schemaVersion == 'ImageURL') {
+    if (schemaVersion === 'ImageURL') {
       // Replace {id} with token ID
       url = offchainSchema;
       url = url.replace('{id}', `${tokenId}`);
@@ -103,7 +104,7 @@ export default class UniqueNftApi extends BaseNftApi {
     const schemaVersion = collection.SchemaVersion;
     const offchainSchema = hexToStr(collection.OffchainSchema);
 
-    if (schemaVersion == 'ImageURL') {
+    if (schemaVersion === 'ImageURL') {
       // Replace {id} with token ID
       url = offchainSchema;
       url = url.replace('{id}', `${tokenId}`);
@@ -135,10 +136,12 @@ export default class UniqueNftApi extends BaseNftApi {
       }
     }
 
-    await Promise.all(addressTokenDict.map(async (item) => {
-      const rs = await this.getAddressTokens(item.i, item.account);
+    await Promise.all(addressTokenDict.map(async (item: Record<string, string | number>) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const rs = await this.getAddressTokens(item.i as number, item.account as string);
 
-      if (rs && rs.length > 0) { data.push({ collectionId: item.i, nfts: rs }); }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (rs && rs.length > 0) { data.push({ collectionId: item.i as number, nfts: rs as string[] }); }
     }));
 
     let total = 0;

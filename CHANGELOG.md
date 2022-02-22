@@ -4,7 +4,7 @@
 Changes:
 - Start folk and custom polkadot extension with packages extension-koni, extension-koni-base, extension-koni-ui
 - Add support redux in extension-koni-ui
-- Add subscribable store 
+- Add subscribable store
 - Add api get price from coingecko
 - ...
 
@@ -15,7 +15,7 @@ Changes:
 Changes:
 
 - Ensure that only latest metadata is applied (when multiple genesis)
-- Rename all `*.test.ts` to `*.spec.ts` (cross-repo consistency)
+- Rename all `*.ignore-component-test.spec.ts` to `*.spec.ts` (cross-repo consistency)
 - Only apply cross-browser environment globally in non-content scripts
 - Ensure package path is availble under ESM & CJS
 - Bump `@polkadot/util` to 8.3.1

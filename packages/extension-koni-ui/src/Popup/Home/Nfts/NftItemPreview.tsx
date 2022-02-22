@@ -1,16 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
-  data: any;
+  data: NftItem;
   onClick: (data: any) => void;
 }
 
@@ -18,20 +19,24 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
 
-  const handleOnLoad = () => {
+  const handleOnLoad = useCallback(() => {
     setLoading(false);
-  };
+  }, []);
 
-  const handleImageError = () => {
+  const handleOnClick = useCallback(() => {
+    onClick(data);
+  }, [data, onClick]);
+
+  const handleImageError = useCallback(() => {
     setLoading(false);
     setShowImage(false);
-  };
+  }, []);
 
   return (
     <div className={className}>
       <div
         className={'nft-preview'}
-        onClick={() => onClick(data)}
+        onClick={handleOnClick}
         style={{ height: '124px' }}
       >
         <div className={'img-container'}>
@@ -44,11 +49,11 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
               ? <img
                 alt={'collection-thumbnail'}
                 className={'collection-thumbnail'}
-                onError={() => handleImageError()}
-                onLoad={() => handleOnLoad()}
+                onError={handleImageError}
+                onLoad={handleOnLoad}
                 src={data.image ? data?.image : logo}
                 style={{ borderRadius: '5px' }}
-                />
+              />
               : <video
                 autoPlay
                 height='124'

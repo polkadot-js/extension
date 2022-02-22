@@ -13,7 +13,16 @@ const headers = {
   'Content-Type': 'application/json'
 };
 
+interface NFTMetadata {
+  animation_url?: string,
+  attributes?: any[],
+  description?: string,
+  image?: string,
+  name?: string
+}
+
 export class RmrkNftApi extends BaseNftApi {
+  // eslint-disable-next-line no-useless-constructor
   constructor () {
     super();
   }
@@ -39,19 +48,19 @@ export class RmrkNftApi extends BaseNftApi {
     return PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
 
-  private getMetadata (metadata_url: string) {
-    let url: string | undefined = metadata_url;
+  private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {
+    let url: string | undefined = metadataUrl;
 
-    if (!isUrl(metadata_url)) {
-      url = this.parseUrl(metadata_url);
+    if (!isUrl(metadataUrl)) {
+      url = this.parseUrl(metadataUrl);
       if (!url || url.length === 0) return undefined;
     }
 
-    return fetch(url, {
+    return await fetch(url, {
       method: 'GET',
       headers
     })
-      .then((res) => res.json());
+      .then((res) => res.json()) as NFTMetadata;
   }
 
   private async getSingularByAccount (account: string) {
@@ -60,23 +69,23 @@ export class RmrkNftApi extends BaseNftApi {
       method: 'GET',
       headers
     })
-      .then((res) => res.json());
+      .then((res) => res.json()) as Record<number | string, number | string>[];
 
-    const nfts: any[] = [];
+    const nfts: Record<string | number, any>[] = [];
 
-    await Promise.all(data.map(async (item: any) => {
-      const { animation_url, attributes, description, image, name } = await this.getMetadata(item.metadata);
+    await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
+      const resp = await this.getMetadata(item.metadata as string);
 
       nfts.push({
         ...item,
         metadata: {
-          description,
-          name,
-          attributes,
-          animation_url: this.parseUrl(animation_url),
-          image: this.parseUrl(image)
+          description: resp?.description,
+          name: resp?.name,
+          attributes: resp?.attributes,
+          animation_url: this.parseUrl(resp?.animation_url as string),
+          image: this.parseUrl(resp?.image as string)
         },
-        external_url: SINGULAR_EXTERNAL_SERVER + item.id
+        external_url: SINGULAR_EXTERNAL_SERVER + item.id.toString()
       });
     }));
 
@@ -89,19 +98,19 @@ export class RmrkNftApi extends BaseNftApi {
       method: 'GET',
       headers
     })
-      .then((res) => res.json());
+      .then((res) => res.json()) as Record<number | string, number | string>[];
 
-    const nfts: any[] = [];
+    const nfts: Record<string | number, any>[] = [];
 
-    await Promise.all(data.map(async (item: any) => {
-      const result = await this.getMetadata(item.metadata);
+    await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
+      const result = await this.getMetadata(item.metadata as string);
 
       nfts.push({
         ...item,
         metadata: {
           ...result,
-          image: this.parseUrl(result.image),
-          external_url: KANARIA_EXTERNAL_SERVER + item.id
+          image: this.parseUrl(result?.image as string),
+          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
         }
       });
     }));
@@ -115,17 +124,17 @@ export class RmrkNftApi extends BaseNftApi {
       method: 'GET',
       headers
     })
-      .then((res) => res.json());
+      .then((res) => res.json()) as Record<number | string, number | string>[];
 
-    const nfts: any[] = [];
+    const nfts: Record<string | number, any>[] = [];
 
-    await Promise.all(data.map(async (item: any) => {
-      const result = await this.getMetadata(item.metadata);
+    await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
+      const result = await this.getMetadata(item.metadata as string);
 
       nfts.push({
         ...item,
         metadata: result,
-        external_url: KANARIA_EXTERNAL_SERVER + item.id
+        external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
       });
     }));
 
@@ -134,7 +143,7 @@ export class RmrkNftApi extends BaseNftApi {
 
   public async handleNfts () {
     try {
-      let allNfts: any[] = [];
+      let allNfts: Record<string | number, any>[] = [];
 
       await Promise.all(this.addresses.map(async (address) => {
         const [singular, birds, items] = await Promise.all([
@@ -143,29 +152,31 @@ export class RmrkNftApi extends BaseNftApi {
           this.getItemsKanariaByAccount(address)
         ]);
 
-        allNfts = [...allNfts, ...singular, ...birds, ...items];
+        allNfts = allNfts.concat([...singular, ...birds, ...items]);
       }));
 
-      let allCollections: any[] = [];
+      let allCollections: NftCollection[] = [];
       const collectionInfoUrl: string[] = [];
 
-      allNfts.map((item) => {
-        const url = SINGULAR_COLLECTION_ENDPOINT + item.collectionId;
+      for (const item of allNfts) {
+        const url = SINGULAR_COLLECTION_ENDPOINT + (item.collectionId as string);
 
         if (!collectionInfoUrl.includes(url)) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           allCollections.push({ collectionId: item.collectionId });
           collectionInfoUrl.push(url);
         }
-      });
-      const allCollectionMetaUrl: any[] = [];
+      }
+
+      const allCollectionMetaUrl: Record<string, any>[] = [];
       const collectionInfo = await Promise.all(collectionInfoUrl.map(async (url) => {
         const resp = await fetch(url);
-        const data: any[] = await resp.json();
+        const data = await resp.json() as Record<string | number, string | number>[];
         const result = data[0];
 
         if (result && 'metadata' in result) {
           allCollectionMetaUrl.push({
-            url: this.parseUrl(result?.metadata),
+            url: this.parseUrl(result?.metadata as string),
             id: result?.id
           });
         }
@@ -174,48 +185,54 @@ export class RmrkNftApi extends BaseNftApi {
         else return {};
       }));
 
-      const allCollectionMeta = {};
+      const allCollectionMeta: Record<string | number, any> = {};
 
       await Promise.all(allCollectionMetaUrl.map(async (item) => {
-        const resp = await fetch(item.url);
-        const data = await resp.json();
+        const resp = await fetch(item?.url as string);
+        const data = await resp.json() as Record<string, any>;
 
         // @ts-ignore
-        allCollectionMeta[item?.id] = { ...data };
+        allCollectionMeta[item?.id as string] = { ...data };
       }));
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
-      const nftDict = {};
+      const nftDict: Record<string | number, any> = {};
 
       for (const item of allNfts) {
         const parsedItem = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           id: item?.id,
-          name: item?.metadata?.name,
-          image: item?.metadata?.image,
-          description: item?.metadata?.description,
-          external_url: item?.external_url,
-          rarity: item?.metadata_rarity,
-          collectionId: item?.collectionId,
-          properties: item?.metadata?.properties
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          name: item?.metadata?.name as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          image: item?.metadata?.image as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          description: item?.metadata?.description as string,
+          external_url: item?.external_url as string,
+          rarity: item?.metadata_rarity as string,
+          collectionId: item?.collectionId as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          properties: item?.metadata?.properties as Record<any, any>
         } as NftItem;
 
         if (item.collectionId in nftDict) {
-          // @ts-ignore
-          nftDict[item.collectionId] = [...nftDict[item.collectionId], parsedItem];
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          nftDict[item.collectionId as string] = [...nftDict[item.collectionId as string], parsedItem];
         } else {
-          // @ts-ignore
-          nftDict[item.collectionId] = [parsedItem];
+          nftDict[item.collectionId as string] = [parsedItem];
         }
       }
 
       allCollections = allCollections.map((item) => {
         return {
           collectionId: item.collectionId,
-          collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] : null,
-          // @ts-ignore
-          image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image) : null,
-          // @ts-ignore
-          nftItems: nftDict[item.collectionId]
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] as string : null,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image as string) : null,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          nftItems: nftDict[item.collectionId] as NftItem[]
         } as NftCollection;
       });
 

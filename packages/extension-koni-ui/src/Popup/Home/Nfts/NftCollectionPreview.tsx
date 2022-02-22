@@ -1,31 +1,36 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { NftCollection } from '@polkadot/extension-base/background/KoniTypes';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
-  data: any;
-  onClick: (data: any) => void;
+  data: NftCollection;
+  onClick: (data: NftCollection) => void;
 }
 
 function NftCollectionPreview ({ className, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
 
-  const handleOnLoad = () => {
+  const handleOnLoad = useCallback(() => {
     setLoading(false);
-  };
+  }, []);
+
+  const handleOnClick = useCallback(() => {
+    onClick(data);
+  }, [data, onClick]);
 
   return (
     <div className={className}>
       <div
         className={'nft-preview'}
-        onClick={() => onClick(data)}
+        onClick={handleOnClick}
         style={{ height: '164px' }}
       >
         <div className={'img-container'}>
@@ -36,7 +41,7 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
           <img
             alt={'collection-thumbnail'}
             className={'collection-thumbnail'}
-            onLoad={() => handleOnLoad()}
+            onLoad={handleOnLoad}
             src={data.image ? data?.image : logo}
             style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
           />
@@ -50,6 +55,7 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
             {/* show only first 10 characters */}
             {data.collectionName ? data.collectionName : data?.collectionId}
           </div>
+          {/* @ts-ignore */}
           <div className={'collection-item-count'}>{data?.nftItems.length}</div>
         </div>
       </div>

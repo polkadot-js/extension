@@ -92,6 +92,7 @@ export default class StatemineNftApi extends BaseNftApi {
 
     if (!metadataNft?.data) return null;
 
+    // @ts-ignore
     return this.getMetadata(metadataNft?.data);
   }
 
@@ -101,6 +102,7 @@ export default class StatemineNftApi extends BaseNftApi {
 
     if (!collectionMetadata?.data) return null;
 
+    // @ts-ignore
     return this.getMetadata(collectionMetadata?.data);
   }
 

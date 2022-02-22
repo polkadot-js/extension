@@ -1,32 +1,41 @@
-     465	Jaco
-      82	Thibaut Sardan
-       8	AnhMTV
-       8	Hieu Dao
-       7	Ivan Rukhavets
-       4	Amaury Martiny
-       3	Antoine Estienne
-       2	Axel Chalon
-       2	Bartłomiej Rutkowski
-       2	carumusan
-       2	ccris02
-       2	joe petrowski
-       2	Remon Nashid
-       2	Shawn Tabrizi
-       2	WoeOm
-       1	Aleksandr Ishchenko
-       1	Andrei Eres
-       1	Caio
-       1	Chakrarin Sarnt
-       1	David Hawig
-       1	Forrest
-       1	itsonal
-       1	KarishmaBothara
-       1	Marcel Jackisch
-       1	Michael Healy
-       1	Minh Ha
-       1	murat onur
-       1	Nikos Kontakis
-       1	Stéphane P
-       1	Tore19
-       1	Vlad Proshchavaiev
-       1	雪霁
+     465	Jaco                          	0.42.5 (#969)
+      82	Thibaut Sardan                	Add account filtering feature (#832)
+      60	quangdo                       	Update AccountQrModal, Tooltip style
+      58	Nam Phạm                      	fix es-lint quartz nft
+      50	leewong                       	# update condition to display correct message on send fund screen
+      36	AnhMTV                        	Update version 0.2.2
+      15	lw                            	# refactor code (eslint)
+      10	Hieu Dao                      	Update README.md
+      10	Trang Trịnh                   	api get karura and acala nfts
+       8	Dominhquangdev                	Refactor code (yarn test)
+       7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
+       5	Minh Le                       	refactor code quartz_nft
+       4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
+       4	namph                         	update UI for nft
+       3	Antoine Estienne              	Add eth test for extension signature (#909)
+       3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
+       2	Axel Chalon                   	Add typings to messages (#130)
+       2	Bartłomiej Rutkowski          	Allow account creation by derivation from existing one (#296)
+       2	carumusan                     	Support ipfs and ipns urls (#667)
+       2	ccris02                       	Adding Polish Language Option to the Extension (#761)
+       2	joe petrowski                 	add plasm (#462)
+       2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
+       2	Shawn Tabrizi                 	Add configurable notifications (#767)
+       2	WoeOm                         	add darwinia network (#493)
+       1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
+       1	Andrei Eres                   	Add extension prefix (#891)
+       1	Caio                          	Implement signRaw (#196)
+       1	Chakrarin Sarnt               	Add Thai language (#788)
+       1	David Hawig                   	Update README.md (#403)
+       1	Forrest                       	Add Web3AccountsOptions to web3FromAddress function (#617)
+       1	itsonal                       	add new language - Urdu (#847)
+       1	KarishmaBothara               	Added code to support custom signed extension/user extension (#670)
+       1	Marcel Jackisch               	Minor changes to readme (#376)
+       1	Michael Healy                 	Small typo (#932)
+       1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
+       1	murat onur                    	tr language support added (#681)
+       1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
+       1	Stéphane P                    	README Fix typo (#700)
+       1	Tore19                        	Add Stafi network (#454)
+       1	Vlad Proshchavaiev            	Update extension with Subsocial SS58 included (#416)
+       1	雪霁                            	Batch export (#666)

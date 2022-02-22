@@ -12,7 +12,9 @@ import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, Address, Button, Input, SigningReqContext, themes } from '../../components';
+import Address from '@polkadot/extension-koni-ui/Popup/Sending/parts/Address';
+
+import { ActionContext, Button, Input, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';
 import * as MetadataCache from '../../MetadataCache';
 import { flushAllPromises } from '../../testHelpers';

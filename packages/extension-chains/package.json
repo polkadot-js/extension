@@ -4,7 +4,7 @@
   "contributors": [],
   "description": "Definitions for all known chains as exposed by the extension.",
   "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension-chains#readme",
-  "license": "Apache-2",
+  "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension-chains",
   "repository": {
@@ -17,11 +17,11 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "0.0.2-1",
+  "version": "0.2.2-1",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/extension-inject": "^0.0.2-1",
+    "@polkadot/extension-inject": "^0.2.2-1",
     "@polkadot/networks": "^8.3.1",
     "@polkadot/util": "^8.3.1",
     "@polkadot/util-crypto": "^8.3.1"

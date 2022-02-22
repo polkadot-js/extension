@@ -4,7 +4,7 @@
   "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
   "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension#readme",
-  "license": "Apache-2",
+  "license": "Apache-2.0",
   "maintainers": [],
   "name": "@polkadot/extension",
   "repository": {
@@ -14,12 +14,12 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.0.2-1",
+  "version": "0.2.2-1",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/extension-base": "^0.0.2-1",
-    "@polkadot/extension-inject": "^0.0.2-1",
-    "@polkadot/extension-ui": "^0.0.2-1"
+    "@polkadot/extension-base": "^0.2.2-1",
+    "@polkadot/extension-inject": "^0.2.2-1",
+    "@polkadot/extension-ui": "^0.2.2-1"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

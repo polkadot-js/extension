@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true
+  },
+  "files": [],
+  "references": [
+    { "path": "./packages/extension-koni/tsconfig.build.json" },
+    { "path": "./packages/extension-base/tsconfig.build.json" },
+    { "path": "./packages/extension-koni-base/tsconfig.build.json" },
+    { "path": "./packages/extension-chains/tsconfig.build.json" },
+    { "path": "./packages/extension-compat-metamask/tsconfig.build.json" },
+    { "path": "./packages/extension-dapp/tsconfig.build.json" },
+    { "path": "./packages/extension-inject/tsconfig.build.json" },
+    { "path": "./packages/extension-mocks/tsconfig.build.json" },
+    { "path": "./packages/extension-koni-ui/tsconfig.build.json" }
+  ]
+}

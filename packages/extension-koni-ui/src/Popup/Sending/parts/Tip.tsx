@@ -4,9 +4,9 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import InputBalance from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputBalance';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 

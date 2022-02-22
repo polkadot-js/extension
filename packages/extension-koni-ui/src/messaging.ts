@@ -9,12 +9,11 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountsWithCurrentAddress, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -315,6 +314,7 @@ export async function initApi (networkKey: string): Promise<ApiInitStatus> {
 }
 
 export async function getNft (account: string): Promise<NftJson> {
+  // @ts-ignore
   return sendMessage('pri(nft.getNft)', account);
 }
 
@@ -323,6 +323,7 @@ export async function subscribeNft (request: RequestSubscribeNft, callback: (nft
 }
 
 export async function getStaking (account: string): Promise<StakingJson> {
+  // @ts-ignore
   return sendMessage('pri(staking.getStaking)', account);
 }
 

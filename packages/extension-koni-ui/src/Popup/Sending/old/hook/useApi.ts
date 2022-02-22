@@ -3,8 +3,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { ApiProps, BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
-import { ApiInitStatus } from '@polkadot/extension-koni-base/api/dotsama';
+import { ApiInitStatus, ApiProps, BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
 import { initApi } from '@polkadot/extension-koni-ui/messaging';
 import { formatBalance } from '@polkadot/util';
 

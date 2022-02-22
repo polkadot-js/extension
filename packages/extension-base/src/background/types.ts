@@ -167,7 +167,7 @@ export type MessageTypesWithNullRequest = NullKeys<RequestTypes>
 export interface TransportRequestMessage<TMessageType extends MessageTypes> {
   id: string;
   message: TMessageType;
-  origin: 'page' | 'extension';
+  origin: 'page' | 'extension' | string;
   request: RequestTypes[TMessageType];
 }
 

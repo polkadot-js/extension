@@ -80,7 +80,7 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
   );
 }
 
-export default styled(NftItemPreview)(({ theme }: ThemeProps) => `
+export default React.memo(styled(NftItemPreview)(({ theme }: ThemeProps) => `
   .img-container {
     position: relative;
     height: 124px;
@@ -132,4 +132,4 @@ export default styled(NftItemPreview)(({ theme }: ThemeProps) => `
       color: #7B8098;
     }
   }
-`);
+`));

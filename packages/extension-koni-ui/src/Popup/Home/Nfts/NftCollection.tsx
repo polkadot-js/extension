@@ -90,7 +90,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
   );
 }
 
-export default styled(NftCollection)(({ theme }: ThemeProps) => `
+export default React.memo(styled(NftCollection)(({ theme }: ThemeProps) => `
   .grid-container {
     padding-bottom: 20px;
     width: 100%;
@@ -132,4 +132,4 @@ export default styled(NftCollection)(({ theme }: ThemeProps) => `
     font-weight: normal;
     color: #7B8098;
   }
-`);
+`));

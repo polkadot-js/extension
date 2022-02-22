@@ -1,6 +1,7 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
@@ -18,6 +19,7 @@ describe('test quartz_nft api', () => {
 
   test('test quartz_nft getAddressTokens', async () => {
     await quartzNftApi.connect();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const addressTokens = await quartzNftApi.getAddressTokens(5,
       '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo');
 

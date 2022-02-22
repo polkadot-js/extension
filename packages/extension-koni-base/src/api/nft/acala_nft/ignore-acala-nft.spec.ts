@@ -1,6 +1,7 @@
 // [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft/index';

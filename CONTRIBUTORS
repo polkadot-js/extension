@@ -1,4 +1,4 @@
-     484	Jaco                          	Use jacogr/action-approve (#1007)
+     485	Jaco                          	Skip job on non-local repo
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

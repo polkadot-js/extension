@@ -1,0 +1,2 @@
+## Run this after change query from folder subquery
+- `npx apollo codegen:generate --endpoint=https://api.subquery.network/sq/subvis-io/polkadot-auctions-and-crowdloans --target=typescript --tagName=gql --globalTypesFile="./src/api/graphqlTypes.ts"`

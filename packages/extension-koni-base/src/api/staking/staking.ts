@@ -96,6 +96,17 @@ export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Recor
   } as StakingJson;
 };
 
+// export const getStakingReward = async (addresses: string[]): Promise<any> => {
+//
+//
+//   return fetch(url, {
+//     method: 'GET',
+//     headers: { 'Content-Type': 'application/json' }
+//   })
+//     .then((res) => res.json());
+//   return;
+// }
+
 // deprecated
 
 // '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'

@@ -30,6 +30,8 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
   const [page, setPage] = useState<number>(1);
   const [currentNftList, setCurrentNftList] = useState<_NftCollection[]>(nftList.slice(0, totalCollection > size ? size : totalCollection));
 
+  console.log('change nft data', nftJson);
+
   useEffect(() => {
     setCurrentNftList(nftList.slice(0, totalCollection > size ? size : totalCollection));
   }, [nftList, totalCollection]);

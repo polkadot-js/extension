@@ -12,7 +12,7 @@ import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults'
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import { KoniCron } from '@polkadot/extension-koni-base/background/cron';
 import handlers, { initBackgroundWindow } from '@polkadot/extension-koni-base/background/handlers';
-import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
+import { KoniSubcription } from '@polkadot/extension-koni-base/background/subscription';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';

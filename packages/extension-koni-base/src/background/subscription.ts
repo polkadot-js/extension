@@ -33,12 +33,12 @@ export class KoniSubcription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribleBalancesAndCrowdloans(address);
+        this.subscribeBalancesAndCrowdloans(address);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          this.subscribleBalancesAndCrowdloans(address);
+          this.subscribeBalancesAndCrowdloans(address);
         }
       });
     });
@@ -57,9 +57,10 @@ export class KoniSubcription {
     });
   }
 
-  subscribleBalancesAndCrowdloans (address: string) {
+  subscribeBalancesAndCrowdloans (address: string) {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
+    state.resetBalanceMap();
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubBalances = this.initBalanceSubscription(addresses);

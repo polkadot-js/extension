@@ -186,6 +186,13 @@ export default class KoniState extends State {
     return { details: this.balanceMap } as BalanceJson;
   }
 
+  public resetBalanceMap () {
+    Object.values(this.balanceMap).forEach((balance) => {
+      balance.state = APIItemState.PENDING;
+    });
+    this.balanceSubject.next(this.getBalance());
+  }
+
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
     this.lazyNext('setBalanceItem', () => {

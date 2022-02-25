@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@types/node": "^17.0.10",
+    "apollo": "^2.33.9",
     "typescript": "^4.5.4"
   },
   "devDependencies": {

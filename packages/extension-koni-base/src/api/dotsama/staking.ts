@@ -3,6 +3,7 @@
 
 import { ApiProps, NetWorkInfo, StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import axios from "axios";
 
 interface LedgerData {
   active: string,
@@ -94,6 +95,32 @@ export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Recor
     ready: true,
     details: stakingItems
   } as StakingJson;
+};
+
+export const getSubqueryStakingReward = async (account: string): Promise<Record<string, any>> => {
+  const resp = await axios({
+    url: 'https://api.subquery.network/sq/nova-wallet/nova-kusama',
+    method: 'post',
+    data: {
+      query: `
+        query {
+          accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
+            nodes {
+              id
+              amount
+            }
+          }
+        }
+      `
+    }
+  });
+
+  if (resp.status === 200) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return resp.data.data as Record<string, any>;
+  }
+
+  return {};
 };
 
 // export const getStakingReward = async (addresses: string[]): Promise<any> => {

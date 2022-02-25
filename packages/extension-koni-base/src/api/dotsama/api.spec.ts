@@ -4,7 +4,7 @@
 import { ApiPromise } from '@polkadot/api';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama/api';
 import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama/index';
-import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking/staking';
+import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { AccountInfo } from '@polkadot/types/interfaces';
 

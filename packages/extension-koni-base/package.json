@@ -66,5 +66,6 @@
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "^0.2.2-1"
-  }
+  },
+  "postinstall": "rm -r node_modules/apollo-language-server/node_modules/graphql"
 }

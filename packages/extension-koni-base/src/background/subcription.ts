@@ -5,7 +5,7 @@ import { take } from 'rxjs';
 
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking/staking';
+import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';

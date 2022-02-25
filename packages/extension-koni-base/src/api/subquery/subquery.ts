@@ -12,6 +12,7 @@ export const client = new ApolloClient({
   })
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 export const FETCH_FUNDS_QUERY = gql`
     query FundInfos($first: Int = 100, $offset: Int = null) {
         crowdloans (first: $first, offset: $offset) {

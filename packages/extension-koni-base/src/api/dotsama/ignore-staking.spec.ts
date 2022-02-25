@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import connectDotSamaApis, { initApi } from '@polkadot/extension-koni-base/api/dotsama';
+import connectDotSamaApis, { initApi } from '@polkadot/extension-koni-base/api/dotsama/index';
+import {getSubqueryStakingReward, subscribeStaking} from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking/staking';
 
 jest.setTimeout(50000);
 
@@ -29,5 +29,11 @@ describe('test staking api', () => {
     for (const ledger of ledgers) {
       console.log(ledger.toHuman());
     }
+  });
+
+  test('subquery get reward', async () => {
+    const resp = await getSubqueryStakingReward('Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ');
+
+    console.log(resp);
   });
 });

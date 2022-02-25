@@ -3,10 +3,11 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 
+import { Header } from '@polkadot/extension-koni-ui/partials';
+
 import { LoadingContainer, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Request from './Request';
-import { Header } from '@polkadot/extension-koni-ui/partials';
 
 export default function Signing (): React.ReactElement {
   const { t } = useTranslation();

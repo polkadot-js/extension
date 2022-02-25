@@ -8,7 +8,6 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 // import ConnectAccount from '@polkadot/extension-koni-ui/Popup/Authorize/ConnectAccount';
-
 import { ActionContext, Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';

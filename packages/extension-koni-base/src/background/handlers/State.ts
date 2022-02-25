@@ -9,11 +9,11 @@ import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
+import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
-import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};

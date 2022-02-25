@@ -100,7 +100,7 @@ Cronjob is define in folder `packages/extension-koni-base/src/cron`.
 ## Develop UI
 
 ### UI Structure
-- Koni Extension UI build with React Native.
+- SubWallet Extension UI build with ReactJS.
 - Popup: Main extension page, show when click into extension icon in browser extension list.
 - Portfolio (Coming soon): Display more complicated view like dashboard, transaction...
 - Another folders:

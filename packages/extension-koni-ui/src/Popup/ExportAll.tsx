@@ -92,7 +92,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
               {error}
             </Warning>
           )}
-          <div className='forget-button-wrapper'>
+          <div className='export-button-wrapper'>
             <Button
               className='export-btn'
               isBusy={isBusy}
@@ -131,7 +131,7 @@ export default withRouter(styled(ExportAll)(({ theme }: Props) => `
     margin-top: 0;
   }
 
-  .forget-button-wrapper {
+  .export-button-wrapper {
     display: flex;
     padding-top: 20px;
   }

@@ -143,10 +143,10 @@ export function sumBN (inputArr: BN[]) {
 }
 
 export const convertFundStatus = (status: string) => {
-  if (status === 'Started' || status === 'Retiring') {
-    return CrowdloanParaState.ONGOING;
-  } else if (status === 'Won') {
+  if (status === 'Won' || status === 'Retiring') {
     return CrowdloanParaState.COMPLETED;
+  } else if (status === 'Started') {
+    return CrowdloanParaState.ONGOING;
   } else if (status === 'Dissolved') {
     return CrowdloanParaState.FAILED;
   } else {

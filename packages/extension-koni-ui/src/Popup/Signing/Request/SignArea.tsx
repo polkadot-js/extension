@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
-import { ActionBar, ActionContext, Button, Checkbox, Link } from '../../../components';
+import { ActionContext, Button, Checkbox } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging';
 import Unlock from '../Unlock';
@@ -109,8 +109,19 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
             />
           )}
           <RememberPasswordCheckbox />
-          <div className='sign-button'>
+
+          <div className='sign-button-container'>
             <Button
+              className='sign-button'
+              onClick={_onCancel}
+            >
+              <span>
+                {t<string>('Cancel')}
+              </span>
+
+            </Button>
+            <Button
+              className='sign-button'
               isBusy={isBusy}
               isDisabled={(!!isLocked && !password) || !!error}
               onClick={_onSign}
@@ -120,14 +131,7 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
           </div>
         </>
       )}
-      <ActionBar className='cancel-button'>
-        <Link
-          isDanger
-          onClick={_onCancel}
-        >
-          {t<string>('Cancel')}
-        </Link>
-      </ActionBar>
+
     </div>
   );
 }
@@ -141,23 +145,25 @@ export default styled(SignArea)(({ theme }: Props) => `
   margin-bottom: -15px;
   padding: 0 15px 15px;
   background-color: ${theme.background};
-  .cancel-button {
-    margin-top: 4px;
-    margin-bottom: 4px;
+
+  .sign-button-container {
     display: flex;
-    justify-content: center;
-
-    a {
-      margin: auto;
-      text-decoration: underline;
-    }
-
-    span {
-      font-weight: 500;
-    }
   }
 
   .sign-button {
-    padding: 0 85px;
+    flex: 1;
+  }
+
+  .sign-button:first-child {
+    background-color: #181E42;
+    margin-right: 8px;
+
+    span {
+      color: ${theme.buttonTextColor2};
+    }
+  }
+
+  .sign-button:last-child {
+    margin-left: 8px;
   }
 `);

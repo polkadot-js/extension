@@ -7,20 +7,19 @@ import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types'
 import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
 
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import Qr from '@polkadot/extension-koni-ui/Popup/Signing/Qr';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, ActionContext, MenuDivider, Theme } from '../../../components';
+import { AccountContext, AccountInfoEl, ActionContext } from '../../../components';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
 import Extrinsic from '../Extrinsic';
-import LedgerSign from '../LedgerSign';
-import Qr from '../Qr';
 import SignArea from './SignArea';
 
 interface Props extends ThemeProps {
@@ -48,12 +47,14 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-function Request ({ account: { accountIndex, addressOffset, isExternal, isHardware }, buttonText, className, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+function Request ({ account: { isExternal, isHardware }, buttonText, className, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+  const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
+  const [isShowDetails, setShowDetails] = useState<boolean>(false);
   const { accounts } = useContext(AccountContext);
-  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const { hostname } = new URL(url);
 
   useEffect((): void => {
     const payload = request.payload;
@@ -84,109 +85,196 @@ function Request ({ account: { accountIndex, addressOffset, isExternal, isHardwa
     [onAction, signId]
   );
 
-  if (payload !== null) {
-    const json = request.payload as SignerPayloadJSON;
+  const renderDataRequest = () => {
+    if (payload !== null) {
+      const json = request.payload as SignerPayloadJSON;
 
-    return (
-      <div className={className}>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-          <AccountInfo
-            address={json.address}
-            className='transaction-account-info'
-            genesisHash={json.genesisHash}
-          />
-        </div>
-        {isExternal && !isHardware
-          ? (
-            <Qr
-              address={json.address}
-              cmd={CMD_MORTAL}
-              genesisHash={json.genesisHash}
-              onSignature={_onSignature}
-              payload={payload}
-            />
-          )
-          : (
-            <Extrinsic
-              payload={payload}
-              request={json}
-              url={url}
-            />
-          )
-        }
-        {isHardware && (
-          <LedgerSign
-            accountIndex={accountIndex as number || 0}
-            addressOffset={addressOffset as number || 0}
-            error={error}
-            genesisHash={json.genesisHash}
-            onSignature={_onSignature}
-            payload={payload}
-            setError={setError}
-          />
-        )}
-        <SignArea
-          buttonText={buttonText}
-          error={error}
-          isExternal={isExternal}
-          isFirst={isFirst}
-          setError={setError}
-          signId={signId}
-        >
-          <MenuDivider className='transaction-divider' />
-        </SignArea>
-      </div>
-    );
-  } else if (hexBytes !== null) {
-    const { address, data } = request.payload as SignerPayloadRaw;
-    const account = accounts
-      .filter((a) => !isAccountAll(a.address))
-      .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
+      return (
+        <>
+          {isExternal && !isHardware
+            ? (
+              <Qr
+                address={json.address}
+                cmd={CMD_MORTAL}
+                genesisHash={json.genesisHash}
+                onSignature={_onSignature}
+                payload={payload}
+              />
+            )
+            : (
+              <Extrinsic
+                payload={payload}
+                request={json}
+                url={url}
+              />
+            )
+          }
+        </>
+      )
+      ;
+    } else if (hexBytes !== null) {
+      const { data } = request.payload as SignerPayloadRaw;
 
-    return (
-      <div className={className}>
-        <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-          <AccountInfo
-            address={address}
-          />
-        </div>
-        {isExternal && !isHardware && account?.genesisHash
-          ? (
-            <Qr
-              address={address}
-              cmd={CMD_SIGN_MESSAGE}
-              genesisHash={account.genesisHash}
-              onSignature={_onSignature}
-              payload={data}
-            />
-          )
-          : (
-            <Bytes
-              bytes={data}
-              url={url}
-            />
-          )
-        }
-        <SignArea
-          buttonText={buttonText}
-          error={error}
-          isExternal={isExternal}
-          isFirst={isFirst}
-          setError={setError}
-          signId={signId}
+      return (
+        <Bytes
+          bytes={data}
+          url={url}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  return null;
+    return null;
+  };
+
+  const _viewDetails = useCallback(() => {
+    setShowDetails(!isShowDetails);
+  }, [isShowDetails]);
+
+  const { address } = request.payload as SignerPayloadRaw;
+  const account = accounts
+    .filter((a) => !isAccountAll(a.address))
+    .find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
+
+  return (
+    <div className={className}>
+      <img
+        alt={`${hostname}`}
+        className='signing-request__logo'
+        src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
+      />
+      <div className='signing-request__host-name'>
+        {hostname}
+      </div>
+      <span className='signing-request__title'>
+        {t<string>('Approve Request')}
+      </span>
+
+      <span className='signing-request__text'>
+        {t<string>('You are approving a request with account')}
+      </span>
+
+      <div className='signing-request__text-wrapper'>
+        {account &&
+        <AccountInfoEl
+          address={account.address}
+          className='signing-request__account'
+          genesisHash={account.genesisHash}
+          iconSize={20}
+          isShowAddress={false}
+          isShowBanner={false}
+          name={account.name}
+          showCopyBtn={false}
+        />}
+        <div className='signing-request__text'>{t<string>(`on ${hostname}`)}</div>
+      </div>
+
+      {isShowDetails && renderDataRequest()}
+
+      <div
+        className='signing-request__view-detail-btn'
+        onClick={_viewDetails}
+      >
+        <div
+          className='signing-request__view-detail-btn-text'
+        >{isShowDetails ? t<string>('Hide Details') : t<string>('View Details')}</div>
+      </div>
+
+      <SignArea
+        buttonText={buttonText}
+        error={error}
+        isExternal={isExternal}
+        isFirst={isFirst}
+        setError={setError}
+        signId={signId}
+      />
+    </div>
+  );
 }
 
-export default styled(Request)`
+export default styled(Request)(({ theme }: Props) => `
   padding: 25px 15px 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   .transaction-account-info {
     padding-bottom: 0;
   }
-`;
+
+  .signing-request__logo {
+    min-width: 56px;
+    width: 56px;
+    align-self: center;
+    padding-bottom: 8px;
+    padding-top: 25px;
+  }
+
+  .signing-request__host-name {
+    text-align: center;
+    color: ${theme.textColor2};
+    font-size: 14px;
+    line-height: 24px;
+    padding-bottom: 13px;
+  }
+
+  .signing-request__title {
+    text-align: center;
+    font-size: 24px;
+    line-height: 36px;
+    font-weight: 500;
+    padding-bottom: 30px;
+  }
+
+  .signing-request__text-wrapper {
+    padding: 13px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .signing-request__text {
+    text-align: center;
+    font-size: 15px;
+    line-height: 26px;
+    font-weight: 500;
+    color: ${theme.textColor2};
+  }
+
+  .signing-request__account {
+    padding: 6px 10px;
+    background-color: ${theme.accountAuthorizeRequest};
+    border-radius: 8px;
+    width: fit-content;
+    margin-right: 10px;
+
+    .account-info-row {
+      height: auto;
+      width: fit-content;
+    }
+
+    .account-info {
+      width: fit-content;
+    }
+  }
+
+  .signing-request__view-detail-btn {
+    padding: 2px 8px;
+    border-radius: 3px;
+    background-color: ${theme.accountAuthorizeRequest};
+    width: fit-content;
+    align-self: center;
+    height: 24px;
+  }
+
+  .signing-request__view-detail-btn:hover {
+    cursor: pointer;
+  }
+
+  .signing-request__view-detail-btn-text {
+    font-size: 13px;
+    line-height: 20px;
+    color: ${theme.textColor2};
+  }
+
+`);

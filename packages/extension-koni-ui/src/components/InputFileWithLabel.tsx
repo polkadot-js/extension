@@ -105,7 +105,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
           <div className='label'>
             {
               !file || clearContent
-                ? placeholder || t('Click to select or drag and drop the file here')
+                ? placeholder || t('Drag and drop the file here')
                 : placeholder || t('{{name}} ({{size}} bytes)', {
                   replace: {
                     name: file.name,
@@ -124,6 +124,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
       <Label
         label={label}
       >
+        <div className='input-file__sub-label'>{t<string>('Please drag an drop the .json file you exported from Polkadot.js')}</div>
         {dropZone}
       </Label>
     )
@@ -138,16 +139,17 @@ export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps 
   font-size: 1rem;
   margin: 0.25rem 0;
   overflow-wrap: anywhere;
-  padding: 14px 12px;
+  padding: 44px 12px;
 
   .label {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 26px;
     color: ${theme.textColor};
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
   }
 
   &:hover {

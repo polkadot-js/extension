@@ -92,26 +92,28 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
               />
             </ActionBar>
           </div>
-          : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+          : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} forget-account-wrapper`}>
             <AccountInfoEl address={address} />
             <Warning className='forget-account__warning'>
               {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
             </Warning>
             <div className='forget-account__action-area'>
               <Button
+                className='forget-account-btn'
+                isBusy={isBusy}
+                onClick={_goHome}
+              >
+                <span>{t<string>('Cancel')}</span>
+              </Button>
+              <Button
+                className='forget-account-btn'
                 isBusy={isBusy}
                 isDanger
                 onClick={_onClick}
               >
-                {t<string>('I want to forget this account')}
+                {t<string>('Forget')}
               </Button>
-              <ActionBar className='forget-account__cancel-btn-wrapper'>
-                <ActionText
-                  className={`forget-account__cancel-btn ${isBusy ? 'disabled-btn' : ''}`}
-                  onClick={_goHome}
-                  text={t<string>('Cancel')}
-                />
-              </ActionBar>
+
             </div>
           </div>
         }
@@ -123,18 +125,30 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
 export default withRouter(styled(Forget)(({ theme }: Props) => `
   padding: 25px 15px 0;
 
+  .forget-account-wrapper {
+    padding-bottom: 8px;
+  }
+
   .forget-account__action-area {
-    padding: 10px 24px;
+    padding-top: 20px;
+    display: flex;
   }
 
-  .disabled-btn {
-    cursor: not-allowed;
-    opacity: 0.5;
-    pointer-events: none !important;
+  .forget-account-btn {
+    flex: 1;
   }
 
-  .forget-account__cancel-btn {
-    margin: auto;
+  .forget-account-btn:first-child {
+    margin-right: 8px;
+    background-color: ${theme.buttonBackground1};
+
+    span {
+      color: ${theme.buttonTextColor2};
+    }
+  }
+
+  .forget-account-btn:last-child {
+    margin-left: 8px;
   }
 
   .forget-account__cancel-btn > span {

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 
-import { AccountContext, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components';
+import { AccountContext, ActionContext, Button, InputWithLabel, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { exportAccounts } from '../messaging';
 
@@ -94,23 +94,22 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
           )}
           <div className='forget-button-wrapper'>
             <Button
-              className='export-button'
+              className='export-btn'
+              isBusy={isBusy}
+              onClick={_goHome}
+            >
+              <span>{t<string>('Cancel')}</span>
+            </Button>
+            <Button
+              className='export-btn'
               data-export-button
               isBusy={isBusy}
               isDisabled={pass.length === 0 || !!error}
               onClick={_onExportAllButtonClick}
             >
-              {t<string>('I want to export all my accounts')}
+              {t<string>('Export')}
             </Button>
           </div>
-
-          <ActionBar className='export-all__action-bar'>
-            <ActionText
-              className={`export-all__action-text ${isBusy ? 'disabled-btn' : ''}`}
-              onClick={_goHome}
-              text={t<string>('Cancel')}
-            />
-          </ActionBar>
         </div>
       </div>
     </>
@@ -132,26 +131,25 @@ export default withRouter(styled(ExportAll)(({ theme }: Props) => `
     margin-top: 0;
   }
 
-  .export-all__action-text {
-    margin: auto;
-    margin-top: 10px;
-    > span {
+  .forget-button-wrapper {
+    display: flex;
+    padding-top: 20px;
+  }
+
+  .export-btn {
+    flex: 1;
+  }
+
+  .export-btn:first-child {
+    margin-right: 8px;
+    background-color: ${theme.buttonBackground1};
+
+    span {
       color: ${theme.buttonTextColor2};
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 26px;
     }
   }
 
-  .forget-button-wrapper {
-    padding: 0 70px;
-  }
-
-  .export-button {
-    margin-top: 6px;
-  }
-
-  .export-all__action-bar {
-    margin-top: 4px;
+  .export-btn:last-child {
+    margin-left: 8px;
   }
 `));

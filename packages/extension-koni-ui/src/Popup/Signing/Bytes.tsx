@@ -44,7 +44,7 @@ export default styled(Bytes)`
   border: 0;
   display: block;
   font-size: 15px;
-  margin: 20px 15px 0;
+  padding: 0 20px 13px;
 
   td.data {
     max-width: 0;

@@ -1,29 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SignerPayloadJSON } from '@polkadot/types/types';
-
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { LoadingContainer, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import Request from './Request';
-import TransactionIndex from './TransactionIndex';
+import { Header } from '@polkadot/extension-koni-ui/partials';
 
 export default function Signing (): React.ReactElement {
   const { t } = useTranslation();
   const requests = useContext(SigningReqContext);
   const [requestIndex, setRequestIndex] = useState(0);
-
-  const _onNextClick = useCallback(
-    () => setRequestIndex((requestIndex) => requestIndex + 1),
-    []
-  );
-
-  const _onPreviousClick = useCallback(
-    () => setRequestIndex((requestIndex) => requestIndex - 1),
-    []
-  );
 
   useEffect(() => {
     setRequestIndex(
@@ -41,21 +29,15 @@ export default function Signing (): React.ReactElement {
         : requests[requests.length - 1]
       : requests[0]
     : null;
-  const isTransaction = !!((request?.request?.payload as SignerPayloadJSON)?.blockNumber);
+  // const isTransaction = !!((request?.request?.payload as SignerPayloadJSON)?.blockNumber);
 
   return request
     ? (
       <>
-        <TransactionIndex
-          index={requestIndex}
-          name={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}
-          onNextClick={_onNextClick}
-          onPreviousClick={_onPreviousClick}
-          totalItems={requests.length}
-        />
+        <Header />
         <Request
           account={request.account}
-          buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}
+          buttonText={t('Approve')}
           isFirst={requestIndex === 0}
           request={request.request}
           signId={request.id}

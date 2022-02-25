@@ -27,7 +27,7 @@ export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
   display: block;
   font-size: ${theme.labelFontSize};
   line-height: ${theme.labelLineHeight};
-  margin: 18px 15px;
+  padding: 0 20px 13px;
 
   &.isFull {
     height: 100%;
@@ -50,7 +50,7 @@ export default React.memo(styled(Table)(({ theme }: ThemeProps) => `
   }
 
   td.label {
-    opacity: 0.5;
+    color: ${theme.textColor2};
     padding: 0 0.5rem;
     text-align: right;
     vertical-align: top;

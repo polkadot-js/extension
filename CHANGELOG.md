@@ -1,10 +1,17 @@
 # CHANGELOG
 
+## 0.2.5 (Koni) Feb 22, 2022
+Changes:
+- Add crowdloan funds status
+- Support SubSquid Graphql
+- Update style Authorize, Metadata, Signing, Export All, Export, Forget screen
+- ...
+
 ## 0.2.2 (Koni) Feb 22, 2022
 Changes:
 - Improve stabling
 - Fix eslint and test issues
-  - ...
+- ...
 
 ## 0.2.1 (Koni) Feb 20, 2022
 Changes:

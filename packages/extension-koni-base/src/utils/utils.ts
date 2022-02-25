@@ -5,6 +5,7 @@ import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
+import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
 
 export const notDef = (x: any) => x === null || typeof x === 'undefined';
 export const isDef = (x: any) => !notDef(x);
@@ -83,7 +84,9 @@ export function utf16ToString (uint16_array: Array<number>): string {
   let str = '';
 
   // eslint-disable-next-line camelcase
-  for (let i = 0; i < uint16_array.length; i++) { str += String.fromCharCode(uint16_array[i]); }
+  for (let i = 0; i < uint16_array.length; i++) {
+    str += String.fromCharCode(uint16_array[i]);
+  }
 
   return str;
 }
@@ -138,3 +141,15 @@ export function sumBN (inputArr: BN[]) {
 
   return rs;
 }
+
+export const convertFundStatus = (status: string) => {
+  if (status === 'Started') {
+    return CrowdloanParaState.ONGOING;
+  } else if (status === 'Won') {
+    return CrowdloanParaState.COMPLETED;
+  } else if (status === 'Dissolved') {
+    return CrowdloanParaState.FAILED;
+  } else {
+    return undefined;
+  }
+};

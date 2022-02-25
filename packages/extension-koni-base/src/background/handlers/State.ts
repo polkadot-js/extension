@@ -7,9 +7,13 @@ import State from '@polkadot/extension-base/background/handlers/State';
 import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+// eslint-disable-next-line camelcase
+import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
+import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/subquery';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
+import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -66,6 +70,8 @@ export default class KoniState extends State {
     details: []
   } as StakingJson;
 
+  // eslint-disable-next-line camelcase
+  private crowdloanFundmap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
   private nftSubject = new Subject<NftJson>();
@@ -193,6 +199,13 @@ export default class KoniState extends State {
     this.balanceSubject.next(this.getBalance());
   }
 
+  public resetCrowdloanMap () {
+    Object.values(this.crowdloanMap).forEach((item) => {
+      item.state = APIItemState.PENDING;
+    });
+    this.crowdloanSubject.next(this.getCrowdloan());
+  }
+
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
     this.lazyNext('setBalanceItem', () => {
@@ -204,11 +217,23 @@ export default class KoniState extends State {
     return this.balanceSubject;
   }
 
+  public async fetchCrowdloanFundMap () {
+    this.crowdloanFundmap = await fetchDotSamaCrowdloan();
+  }
+
   public getCrowdloan (): CrowdloanJson {
     return { details: this.crowdloanMap } as CrowdloanJson;
   }
 
   public setCrowdloanItem (networkKey: string, item: CrowdloanItem) {
+    // Fill para state
+    const crowdloanFundNode = this.crowdloanFundmap[networkKey];
+
+    if (crowdloanFundNode) {
+      item.paraState = convertFundStatus(crowdloanFundNode.status);
+    }
+
+    // Update crowdloan map
     this.crowdloanMap[networkKey] = item;
     this.lazyNext('setCrowdloanItem', () => {
       this.crowdloanSubject.next(this.getCrowdloan());

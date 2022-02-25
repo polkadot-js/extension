@@ -27,6 +27,7 @@ export class KoniSubcription {
   }
 
   init () {
+    state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
     this.initChainRegistrySubscription();
 
     state.getCurrentAccount((currentAccountInfo) => {
@@ -61,6 +62,7 @@ export class KoniSubcription {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
     state.resetBalanceMap();
+    state.resetCrowdloanMap();
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubBalances = this.initBalanceSubscription(addresses);

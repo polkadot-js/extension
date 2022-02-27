@@ -1,5 +1,5 @@
 ## SubWallet Extension
-Our SubWallet is forked from polkadot-js/extension. We aim to adding more features while being able to rebase the polkadot origin at any time.
+Our SubWallet is forked from polkadot-js/extension. We aim to adding more features while being able to rebase the polkadot-js origin at any time.
 ## Main Concept
 ![Main Concept](https://github.com/Koniverse/Subwallet-V2/wiki/images/ExtensionConcept.png)
 The extension is compiled from folder `packages/extension-koni`

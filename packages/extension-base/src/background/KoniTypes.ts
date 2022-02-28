@@ -158,6 +158,7 @@ export interface NetWorkInfo {
   paraId?: number;
   isEthereum?: boolean;
   nativeToken?: string;
+  crowdloanUrl?: string;
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {

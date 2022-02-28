@@ -13,6 +13,7 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 
 import CrowdloanEmptyList from './EmptyList';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -41,6 +42,10 @@ function getGroupDisplayName (groups: NetWorkGroup[]): string {
   return '';
 }
 
+function getCrowdloanUrl (networkKey: string) {
+  return NETWORKS[networkKey].crowdloanUrl;
+}
+
 function getItem (
   networkKey: string,
   contributeValueInfo: CrowdloanContributeValueType,
@@ -59,7 +64,8 @@ function getItem (
     networkKey,
     symbol,
     groupDisplayName,
-    paraState: contributeValueInfo.paraState
+    paraState: contributeValueInfo.paraState,
+    crowdloanUrl: getCrowdloanUrl(networkKey)
   };
 }
 

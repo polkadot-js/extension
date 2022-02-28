@@ -58,7 +58,12 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (
-    <div className={getContainerClassName(item, className)}>
+    <a
+      className={getContainerClassName(item, className)}
+      href={item.crowdloanUrl ? item.crowdloanUrl : 'javascript:;'}
+      rel='noreferrer'
+      target='_blank'
+    >
       <div className='crowdloan-item__part-1'>
         <img
           alt='Logo'
@@ -93,7 +98,7 @@ function CrowdloanItem ({ className, item }: Props): React.ReactElement<Props> {
           />
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 

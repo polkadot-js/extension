@@ -36,9 +36,9 @@ function npmGetVersion () {
 
 function uploadBuild(){
   const nowTimestamp = new Date().getTime()
-  const newName = `./build-${npmGetVersion()}-${nowTimestamp}`
+  const newName = `./build-${npmGetVersion()}-${nowTimestamp}.zip`
   fs.renameSync('./master-build.zip', newName)
-  discordHook.sendFile(file)
+  discordHook.sendFile(newName)
 }
 
 runClean();

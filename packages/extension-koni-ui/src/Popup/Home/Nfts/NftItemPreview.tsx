@@ -13,11 +13,13 @@ interface Props {
   className?: string;
   data: NftItem;
   onClick: (data: any) => void;
+  collectionImage?: string;
 }
 
-function NftItemPreview ({ className, data, onClick }: Props): React.ReactElement<Props> {
+function NftItemPreview ({ className, collectionImage, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const handleOnLoad = useCallback(() => {
     setLoading(false);
@@ -31,6 +33,18 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
     setLoading(false);
     setShowImage(false);
   }, []);
+
+  const handleVideoError = useCallback(() => {
+    setImageError(true);
+    setShowImage(true);
+  }, []);
+
+  const getItemImage = useCallback(() => {
+    if (data.image && !imageError) return data.image;
+    else if (collectionImage) return collectionImage;
+
+    return logo;
+  }, [collectionImage, data.image, imageError]);
 
   return (
     <div className={className}>
@@ -51,17 +65,18 @@ function NftItemPreview ({ className, data, onClick }: Props): React.ReactElemen
                 className={'collection-thumbnail'}
                 onError={handleImageError}
                 onLoad={handleOnLoad}
-                src={data.image ? data?.image : logo}
+                src={getItemImage()}
                 style={{ borderRadius: '5px' }}
               />
               : <video
                 autoPlay
                 height='124'
                 loop={true}
+                onError={handleVideoError}
                 width='124'
               >
                 <source
-                  src={data.image}
+                  src={getItemImage()}
                   type='video/mp4'
                 />
               </video>

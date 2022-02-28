@@ -13,6 +13,12 @@ describe('test rmrk nft api', () => {
     testNftApi.setAddresses(TEST_NFT_ADDRESSES);
     await testNftApi.connect();
     await testNftApi.handleNfts();
+    const result = testNftApi.getData();
+
+    for (const collection of result) {
+      console.log(collection.nftItems);
+    }
+
     expect(testNftApi.getTotal()).toBeGreaterThanOrEqual(0);
   });
 });

@@ -154,7 +154,6 @@ export class RmrkNftApi extends BaseNftApi {
 
         allNfts = allNfts.concat([...singular, ...birds, ...items]);
       }));
-
       let allCollections: NftCollection[] = [];
       const collectionInfoUrl: string[] = [];
 
@@ -205,8 +204,8 @@ export class RmrkNftApi extends BaseNftApi {
           id: item?.id,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           name: item?.metadata?.name as string,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          image: item?.metadata?.image as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+          image: item.metadata.image ? item.metadata.image : item.metadata.animation_url as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           description: item?.metadata?.description as string,
           external_url: item?.external_url as string,

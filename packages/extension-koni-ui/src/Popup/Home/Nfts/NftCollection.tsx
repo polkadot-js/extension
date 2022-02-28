@@ -19,6 +19,7 @@ interface Props {
 
 function NftCollection ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
   const [chosenItem, setChosenItem] = useState<_NftItem>({ id: 'init' });
+  console.log('chosenItem init', chosenItem);
   const [showItemDetail, setShowItemDetail] = useState<boolean>(false);
 
   const handleShowItem = useCallback((data: _NftItem) => {
@@ -46,6 +47,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
             >
               <FontAwesomeIcon
                 className='arrowLeftIcon'
+                // @ts-ignore
                 icon={faArrowLeft}
               />
             </div>
@@ -69,6 +71,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
               data?.nftItems.map((item: _NftItem, index: React.Key | null | undefined) => {
                 return <div key={index}>
                   <NftItemPreview
+                    collectionImage={data?.image}
                     data={item}
                     onClick={handleShowItem}
                   />
@@ -82,6 +85,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
       {
         showItemDetail &&
         <NftItem
+          collectionImage={data?.image}
           data={chosenItem}
           onClickBack={handleHideItemDetail}
         />

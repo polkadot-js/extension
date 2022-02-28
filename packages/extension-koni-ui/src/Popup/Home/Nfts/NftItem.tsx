@@ -16,11 +16,13 @@ interface Props {
   className?: string;
   data: _NftItem;
   onClickBack: () => void;
+  collectionImage?: string;
 }
 
-function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
+function NftItem ({ className, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
@@ -47,12 +49,24 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
     setShowImage(false);
   }, []);
 
+  const handleVideoError = useCallback(() => {
+    setImageError(true);
+    setShowImage(true);
+  }, []);
+
   const handleOnClick = useCallback(() => {
     if (data.external_url) {
       // eslint-disable-next-line no-void
       void chrome.tabs.create({ url: data?.external_url, active: true }).then(() => console.log('redirecting'));
     }
   }, [data]);
+
+  const getItemImage = useCallback(() => {
+    if (data.image && !imageError) return data.image;
+    else if (collectionImage) return collectionImage;
+
+    return logo;
+  }, [collectionImage, data.image, imageError]);
 
   return (
     <div className={className}>
@@ -63,6 +77,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
         >
           <FontAwesomeIcon
             className='arrowLeftIcon'
+            // @ts-ignore
             icon={faArrowLeft}
           />
         </div>
@@ -90,17 +105,18 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
               onClick={handleOnClick}
               onError={handleImageError}
               onLoad={handleOnLoad}
-              src={data.image ? data?.image : logo}
+              src={getItemImage()}
               style={{ borderRadius: '5px' }}
             />
             : <video
               autoPlay
               height='416'
               loop={true}
+              onError={handleVideoError}
               width='100%'
             >
               <source
-                src={data.image}
+                src={getItemImage()}
                 type='video/mp4'
               />
             </video>
@@ -110,7 +126,7 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
           data.description &&
             <div>
               <div className={'att-title'}>Description</div>
-              <div className={'att-value'}>{data?.description}</div>
+              <div className={'att-value'}><pre>{data?.description}</pre></div>
             </div>
         }
         {
@@ -148,6 +164,12 @@ function NftItem ({ className, data, onClickBack }: Props): React.ReactElement<P
 
 export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
   padding-bottom: 20px;
+
+  pre {
+    white-space: pre-wrap;
+    word-break: keep-all;
+  }
+
   .img-container {
     position: relative;
     height: 124px;

@@ -15,12 +15,14 @@
     "packages/*"
   ],
   "bin": {
-    "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs"
+    "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
+    "koni-ci-build-dev": "./scripts/koni-ci-build-dev.mjs"
   },
   "scripts": {
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
     "build:extra": "yarn build:i18n && yarn build:ui",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
+    "build:koni-dev": "koni-ci-build-dev",
     "build:release": "koni-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
     "build:ui": "cd packages/extension-koni && NODE_ENV=production yarn webpack --config webpack.extension.cjs --mode production",
@@ -43,6 +45,7 @@
     "@babel/core": "^7.16.7",
     "@polkadot/dev": "^0.65.23",
     "@types/jest": "^27.4.0",
+    "discord-webhook-node": "^1.1.8",
     "i18next-scanner": "^3.1.0",
     "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",

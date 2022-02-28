@@ -206,7 +206,6 @@ export default styled(Request)(({ theme }: Props) => `
     width: 56px;
     align-self: center;
     padding-bottom: 8px;
-    padding-top: 25px;
   }
 
   .signing-request__host-name {
@@ -214,7 +213,6 @@ export default styled(Request)(({ theme }: Props) => `
     color: ${theme.textColor2};
     font-size: 14px;
     line-height: 24px;
-    padding-bottom: 13px;
   }
 
   .signing-request__title {

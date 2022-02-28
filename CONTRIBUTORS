@@ -2,7 +2,7 @@
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
       58	Nam Phạm                      	fix es-lint quartz nft
-      54	AnhMTV                        	Update github action runner tags
+      55	AnhMTV                        	Release version 0.2.5
       50	leewong                       	# update condition to display correct message on send fund screen
       16	lw                            	
       12	Hieu Dao                      	Update README.md

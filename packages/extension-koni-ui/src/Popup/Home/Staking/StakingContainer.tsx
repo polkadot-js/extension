@@ -17,6 +17,8 @@ interface Props extends ThemeProps {
 }
 
 function StakingContainer ({ className, data, loading }: Props): React.ReactElement<Props> {
+  console.log('here', data);
+
   const editBalance = (balance: string) => {
     if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
 

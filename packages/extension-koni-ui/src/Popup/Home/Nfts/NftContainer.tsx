@@ -3,36 +3,31 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { NftCollection as _NftCollection, NftJson } from '@polkadot/extension-base/background/KoniTypes';
+import { NftCollection as _NftCollection } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList';
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { NFT_GRID_SIZE } from '@polkadot/extension-koni-ui/util';
 
 import NftCollectionPreview from './NftCollectionPreview';
 
 interface Props extends ThemeProps {
   className?: string;
   nftList: _NftCollection[];
-  nftJson: NftJson;
+  totalItems: number;
   totalCollection: number;
   loading: boolean;
+  page: number;
+  setPage: (newPage: number) => void;
 }
 
-const size = 9;
-
-function NftContainer ({ className, loading, nftJson, nftList, totalCollection }: Props): React.ReactElement<Props> {
+function NftContainer ({ className, loading, nftList, page, setPage, totalCollection, totalItems }: Props): React.ReactElement<Props> {
   const [chosenCollection, setChosenCollection] = useState<_NftCollection>();
   const [showCollectionDetail, setShowCollectionDetail] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [currentNftList, setCurrentNftList] = useState<_NftCollection[]>(nftList.slice(0, totalCollection > size ? size : totalCollection));
-
-  useEffect(() => {
-    setCurrentNftList(nftList.slice(0, totalCollection > size ? size : totalCollection));
-  }, [nftList, totalCollection]);
 
   const handleShowCollectionDetail = useCallback((data: _NftCollection) => {
     setShowCollectionDetail(true);
@@ -45,24 +40,18 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
 
   const onPreviousClick = useCallback(() => {
     if (page === 1) return;
-    const prevPage = page - 1;
-    const from = (prevPage - 1) * size;
-    const to = from + size;
 
-    setPage(prevPage);
-    setCurrentNftList(nftList.slice(from, to));
-  }, [nftList, page]);
+    setPage(page - 1);
+  }, [page, setPage]);
 
   const onNextClick = useCallback(() => {
     const nextPage = page + 1;
-    const from = (nextPage - 1) * size;
-    const to = from + size;
+    const from = (nextPage - 1) * NFT_GRID_SIZE;
 
     if (from > totalCollection) return;
 
     setPage(nextPage);
-    setCurrentNftList(nftList.slice(from, to));
-  }, [nftList, page, totalCollection]);
+  }, [page, setPage, totalCollection]);
 
   return (
     <div className={className}>
@@ -71,15 +60,15 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
       </div>}
 
       {/* @ts-ignore */}
-      {nftJson?.total === 0 && !loading &&
+      {totalItems === 0 && !loading &&
         <EmptyList />
       }
 
       {/* @ts-ignore */}
-      {!loading && !showCollectionDetail && nftJson?.total > 0 &&
+      {!loading && !showCollectionDetail && totalItems > 0 &&
       <div className={'total-title'}>
         {/* @ts-ignore */}
-        {nftJson?.total} NFT{nftJson?.total > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
+        {totalItems} NFT{totalItems > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
       </div>
       }
 
@@ -89,7 +78,7 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
           {
             !loading && nftList.length > 0 &&
             // @ts-ignore
-            currentNftList.map((item: _NftCollection, index: React.Key | null | undefined) => {
+            nftList.map((item: _NftCollection, index: React.Key | null | undefined) => {
               // @ts-ignore
               return <div key={index}>
                 <NftCollectionPreview
@@ -112,7 +101,7 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
 
       {
         // @ts-ignore
-        !loading && !showCollectionDetail && nftJson?.total > size &&
+        !loading && !showCollectionDetail && totalItems > NFT_GRID_SIZE &&
         <div className={'pagination'}>
           <div
             className={'nav-item'}
@@ -125,7 +114,7 @@ function NftContainer ({ className, loading, nftJson, nftList, totalCollection }
             />
           </div>
           <div>
-            {page}/{Math.round(totalCollection / size)}
+            {page}/{Math.round(totalCollection / NFT_GRID_SIZE)}
           </div>
           <div
             className={'nav-item'}

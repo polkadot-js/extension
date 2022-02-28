@@ -16,14 +16,20 @@ export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
 export const TEST_NFT_ADDRESSES = [
-  '5EZKPCdzFcvtpAJ9EqULWp1QCLZZUJFcyiPZh1U3BeWbGC4M'
-  // 'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp',
-  // '5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb',
-  // 'Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr',
-  // '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM',
-  // '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo',
-  // 'yGJJkW9RiA7bFHRuUESSudCZZ1QNQGNbZQyqWJwMf1VeQ2HZo',
-  // 'yGHkvgGth212LzAokvhCMLvs5a9vTpRjKkqjCHfRqwxHn3Lum'
+  // '5EZKPCdzFcvtpAJ9EqULWp1QCLZZUJFcyiPZh1U3BeWbGC4M'
+  'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp',
+  '5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb',
+  'Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr',
+  '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM',
+  '16J48LCbpH9j1bVngG6E3Nj4NaZFy9SDCSZdg1YjwDaNdMVo',
+  'yGJJkW9RiA7bFHRuUESSudCZZ1QNQGNbZQyqWJwMf1VeQ2HZo',
+  'yGHkvgGth212LzAokvhCMLvs5a9vTpRjKkqjCHfRqwxHn3Lum'
+];
+
+export const TEST_STAKING_ADDRESSES = [
+  '17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m',
+  '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM',
+  'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ'
 ];
 
 // nft test address

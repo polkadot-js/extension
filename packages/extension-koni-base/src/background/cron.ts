@@ -3,11 +3,11 @@
 
 import { Subject } from 'rxjs';
 
-import { NftJson, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -59,18 +59,14 @@ export class KoniCron {
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
-        this.addCron('refreshStaking', this.refreshStaking(currentAccountInfo.address), CRON_REFRESH_STAKING_INTERVAL);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.resetNft();
-          this.resetStaking();
           this.removeCron('refreshNft');
-          this.removeCron('refreshStaking');
 
           this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
-          this.addCron('refreshStaking', this.refreshStaking(address), CRON_REFRESH_STAKING_INTERVAL);
         }
       });
     });
@@ -105,12 +101,12 @@ export class KoniCron {
     };
   }
 
-  refreshStaking (address: string) {
-    return () => {
-      console.log('Refresh Staking state');
-      this.subscriptions.subscribeStaking(address);
-    };
-  }
+  // refreshStaking (address: string) {
+  //   return () => {
+  //     console.log('Refresh Staking state');
+  //     this.subscriptions.subscribeStaking(address);
+  //   };
+  // }
 
   resetNft () {
     state.setNft({
@@ -121,11 +117,11 @@ export class KoniCron {
     console.log('Reset Nft state');
   }
 
-  resetStaking () {
-    state.setStaking({
-      ready: false,
-      details: []
-    } as StakingJson);
-    console.log('Reset Staking state');
-  }
+  // resetStaking () {
+  //   state.setStakingItem({
+  //     ready: false,
+  //     details: []
+  //   } as StakingJson);
+  //   console.log('Reset Staking state');
+  // }
 }

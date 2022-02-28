@@ -3,7 +3,7 @@
 
 import BigN from 'bignumber.js';
 
-import { CrowdloanParaState, NftCollection, NftJson, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import { CrowdloanParaState, NftCollection, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { BalanceValueType } from '@polkadot/extension-koni-ui/util';
 import { BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
@@ -20,7 +20,7 @@ export type AccountBalanceType = {
 
 export type NftType = {
   nftList: NftCollection[];
-  nftJson: NftJson;
+  totalItems: number;
   totalCollection: number;
   loading: boolean;
 }

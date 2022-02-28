@@ -6,11 +6,11 @@ import { take } from 'rxjs';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import {TEST_NFT_ADDRESSES, TEST_STAKING_ADDRESSES} from '@polkadot/extension-koni-base/api/nft/config';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import {TEST_NFT_ADDRESSES} from "@polkadot/extension-koni-base/api/nft/config";
 
 export class KoniSubcription {
   private subscriptionMap: Record<string, any> = {};
@@ -18,6 +18,9 @@ export class KoniSubcription {
   unsubBalances: () => void | undefined;
   // @ts-ignore
   unsubCrowdloans: () => void | undefined;
+
+  // @ts-ignore
+  unsubStaking: () => void | undefined;
 
   getSubscriptionMap () {
     return this.subscriptionMap;
@@ -35,11 +38,13 @@ export class KoniSubcription {
         const { address } = currentAccountInfo;
 
         this.subscribleBalancesAndCrowdloans(address);
+        this.subscribeStaking(address);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.subscribleBalancesAndCrowdloans(address);
+          this.subscribeStaking(address);
         }
       });
     });
@@ -130,19 +135,31 @@ export class KoniSubcription {
   }
 
   subscribeStaking (address: string) {
+    this.unsubStaking && this.unsubStaking();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initStakingSubscription(addresses);
+        this.unsubStaking = this.initStakingSubscription(TEST_STAKING_ADDRESSES);
       })
       .catch(console.error);
   }
 
   initStakingSubscription (addresses: string[]) {
-    subscribeStaking(addresses, dotSamaAPIMap)
-      .then((stakingData) => {
-        state.setStaking(stakingData);
-        console.log('set staking state done');
-      })
-      .catch(console.log);
+    const subscriptionPromises = subscribeStaking(addresses, dotSamaAPIMap, (networkKey, rs) => {
+      state.setStakingItem(networkKey, rs);
+      console.log('set new staking item', rs);
+    });
+
+    return () => {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      subscriptionPromises.forEach((subProm) => {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        subProm.then((unsub) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          unsub && unsub();
+        }).catch(console.error);
+      });
+    };
   }
 }

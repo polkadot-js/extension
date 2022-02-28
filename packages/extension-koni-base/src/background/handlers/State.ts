@@ -4,11 +4,11 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingItem, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import StakingStore from '@polkadot/extension-koni-base/stores/Staking';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
 function generateDefaultBalanceMap () {
@@ -25,6 +25,21 @@ function generateDefaultBalanceMap () {
   });
 
   return balanceMap;
+}
+
+function generateDefaultStakingMap () {
+  const stakingMap: Record<string, StakingItem> = {};
+
+  Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
+    stakingMap[networkKey] = {
+      name: NETWORKS[networkKey].chain,
+      chainId: networkKey,
+      balance: '0',
+      nativeToken: NETWORKS[networkKey].nativeToken
+    } as StakingItem;
+  });
+
+  return stakingMap;
 }
 
 function generateDefaultCrowdloanMap () {
@@ -44,7 +59,7 @@ export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   // private readonly nftStore = new NftStore();
-  private readonly stakingStore = new StakingStore();
+  // private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
@@ -61,10 +76,7 @@ export default class KoniState extends State {
     nftList: []
   } as NftJson;
 
-  private stakingState: StakingJson = {
-    ready: false,
-    details: []
-  } as StakingJson;
+  private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
@@ -91,37 +103,18 @@ export default class KoniState extends State {
     this.lazyMap[key] = lazy;
   };
 
-  public getStaking (update: (value: StakingJson) => void): void {
-    update(this.stakingState);
-
-    // this.stakingStore.get('StakingData', (rs) => {
-    //   if (this.stakingStoreReady) update(rs);
-    //   else {
-    //     getStakingInfo(account)
-    //       .then((rs) => {
-    //         this.setStaking(rs);
-    //         update(rs);
-    //       })
-    //       .catch((e) => {
-    //         console.error(e);
-    //         throw e;
-    //       });
-    //   }
-    // });
+  public getStaking (): StakingJson {
+    return { details: this.stakingMap } as StakingJson;
   }
 
   public subscribeStaking () {
     return this.stakingSubject;
   }
 
-  public setStaking (stakingData: StakingJson, callback?: (stakingData: StakingJson) => void): void {
-    this.stakingStore.set('StakingData', stakingData, () => {
-      if (callback) {
-        callback(stakingData);
-        // this.stakingStoreReady = true;
-      }
-
-      this.stakingSubject.next(stakingData);
+  public setStakingItem (networkKey: string, item: StakingItem): void {
+    this.stakingMap[networkKey] = item;
+    this.lazyNext('setStakingItem', () => {
+      this.stakingSubject.next(this.getStaking());
     });
   }
 

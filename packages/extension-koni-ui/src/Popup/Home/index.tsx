@@ -6,12 +6,7 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import {
-  ChainRegistry,
-  CurrentNetworkInfo,
-  NftCollection as _NftCollection,
-  TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, CurrentNetworkInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -61,8 +56,6 @@ interface Props {
   chainRegistryMap: Record<string, ChainRegistry>;
   transactionHistoryItems: TransactionHistoryItemType[];
 }
-
-const NFT_GRID_SIZE = 9;
 
 function getTabHeaderItems (address: string, t: TFunction): TabHeaderItemType[] {
   const result = [
@@ -173,8 +166,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
 
   useSetupTransactionHistory(address, showedNetworks);
 
-  const { loading: loadingNft, nftJson, nftList, totalCollection } = useFetchNft();
+  const [nftPage, setNftPage] = useState(1);
+
+  const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage);
   const { data: stakingData, loading: loadingStaking } = useFetchStaking();
+
+  const handleNftPage = useCallback((page: number) => {
+    setNftPage(page);
+  }, []);
 
   useEffect(() => {
     if (isAccountAll(address) && activatedTab === 5) {
@@ -221,8 +220,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
   //     _setActiveTab(1);
   //   }
   // }, [_setActiveTab]);
-
-  // const [currentNftList, setCurrentNftList] = useState<_NftCollection[]>(nftList.slice(0, totalCollection > NFT_GRID_SIZE ? NFT_GRID_SIZE : totalCollection));
 
   return (
     <div className={`home-screen home ${className}`}>
@@ -321,9 +318,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
         {activatedTab === 2 && (
           <NftContainer
             loading={loadingNft}
-            nftJson={nftJson}
             nftList={nftList}
+            page={nftPage}
+            setPage={handleNftPage}
             totalCollection={totalCollection}
+            totalItems={totalItems}
           />
         )}
 

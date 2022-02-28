@@ -19,7 +19,6 @@ interface Props {
 
 function NftCollection ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
   const [chosenItem, setChosenItem] = useState<_NftItem>({ id: 'init' });
-  console.log('chosenItem init', chosenItem);
   const [showItemDetail, setShowItemDetail] = useState<boolean>(false);
 
   const handleShowItem = useCallback((data: _NftItem) => {

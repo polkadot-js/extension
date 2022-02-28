@@ -25,7 +25,7 @@ export interface StakingItem {
 
 export interface StakingJson {
   ready?: boolean,
-  details: Array<StakingItem>
+  details: Record<string, StakingItem>
 }
 
 export interface PriceJson {

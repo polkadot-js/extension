@@ -6,8 +6,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const initialState = {
-  ready: false,
-  details: []
+  details: {}
 } as StakingJson;
 
 const stakingSlice = createSlice({
@@ -18,7 +17,6 @@ const stakingSlice = createSlice({
       const payload = action.payload;
 
       state.details = payload.details;
-      state.ready = payload.ready;
     }
   }
 });

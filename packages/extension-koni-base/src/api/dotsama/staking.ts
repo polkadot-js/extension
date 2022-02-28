@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NetWorkInfo, StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import axios from 'axios';
+
+import { ApiProps, NetWorkInfo, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import axios from "axios";
 
 interface LedgerData {
   active: string,
@@ -13,26 +14,33 @@ interface LedgerData {
   unlocking: string[]
 }
 
-const DEFAULT_STAKING_NETWORKS = {
+export const DEFAULT_STAKING_NETWORKS = {
   polkadot: NETWORKS.polkadot,
   kusama: NETWORKS.kusama,
   hydradx: NETWORKS.hydradx,
-  astar: NETWORKS.astar,
-  moonbeam: NETWORKS.moonbeam
+  astar: NETWORKS.astar
+  // moonbeam: NETWORKS.moonbeam
 };
 
-interface PropsSubscribe {
-  addresses: string[],
-  apiMap: Record<string, any>[]
-}
+export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
+  const allApiPromise: Record<string, any>[] = [];
+  const apis: Record<string, any>[] = [];
 
-export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSubscribe): Promise<StakingItem[]> => {
-  try {
-    const result: Array<StakingItem> = [];
+  Object.entries(networks).forEach(([networkKey, networkInfo]) => {
+    allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
+  });
 
-    await Promise.all(apiMap.map(async ({ api: parentApi, chain }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      const ledgers = await parentApi.api.query.staking?.ledger.multi(addresses);
+  await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    const api = await apiPromise.isReady;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    apis.push({ chain, api });
+  }));
+
+  const unsubPromises = apis.map(({ api: parentApi, chain }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return
+    return parentApi.api.query.staking?.ledger.multi(addresses, (ledgers: any[]) => {
       let totalBalance = 0;
       let unit = '';
 
@@ -52,50 +60,30 @@ export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSu
         }
 
         if (totalBalance > 0) {
-          result.push({
+          const stakingItem = {
             name: NETWORKS[chain as string].chain,
             chainId: chain as string,
             balance: totalBalance.toString(),
             nativeToken: NETWORKS[chain as string].nativeToken,
             unit: unit || NETWORKS[chain as string].nativeToken
-          } as StakingItem);
+          } as StakingItem;
+
+          // eslint-disable-next-line node/no-callback-literal
+          callback(chain as string, stakingItem);
         }
       }
-    }));
-
-    return result;
-  } catch (e) {
-    console.error('Error getting staking data', e);
-
-    return [];
-  }
-};
-
-export const subscribeStaking = async (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS): Promise<StakingJson> => {
-  const allApiPromise: Record<string, any>[] = [];
-  const apis: Record<string, any>[] = [];
-
-  Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
+    });
   });
 
-  await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-    const api = await apiPromise.isReady;
+  return async () => {
+    const unsubs = await Promise.all(unsubPromises);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    apis.push({ chain, api });
-  }));
-
-  const stakingItems = await subscribeMultiCurrentBonded({ apiMap: apis, addresses });
-
-  console.log(`fetched ${stakingItems?.length} staking items`);
-
-  return {
-    ready: true,
-    details: stakingItems
-  } as StakingJson;
-};
+    unsubs.forEach((unsub) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      unsub && unsub();
+    });
+  };
+}
 
 export const getSubqueryStakingReward = async (account: string): Promise<Record<string, any>> => {
   const resp = await axios({
@@ -122,6 +110,51 @@ export const getSubqueryStakingReward = async (account: string): Promise<Record<
 
   return {};
 };
+
+// const getMultiCurrentBonded = async ({ addresses, apiMap }: PropsSubscribe): Promise<StakingItem[]> => {
+//   try {
+//     const result: Array<StakingItem> = [];
+//
+//     await Promise.all(apiMap.map(async ({ api: parentApi, chain }) => {
+//       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+//       const ledgers = await parentApi.api.query.staking?.ledger.multi(addresses);
+//       let totalBalance = 0;
+//       let unit = '';
+//
+//       if (ledgers) {
+//         for (const ledger of ledgers) {
+//           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+//           const data = ledger.toHuman() as unknown as LedgerData;
+//
+//           // const currentAddress = addresses[index];
+//           if (data && data.active) {
+//             const balance = data.active;
+//             const amount = balance ? balance.split(' ')[0] : '';
+//
+//             unit = balance ? balance.split(' ')[1] : '';
+//             totalBalance += parseFloat(amount);
+//           }
+//         }
+//
+//         if (totalBalance > 0) {
+//           result.push({
+//             name: NETWORKS[chain as string].chain,
+//             chainId: chain as string,
+//             balance: totalBalance.toString(),
+//             nativeToken: NETWORKS[chain as string].nativeToken,
+//             unit: unit || NETWORKS[chain as string].nativeToken
+//           } as StakingItem);
+//         }
+//       }
+//     }));
+//
+//     return result;
+//   } catch (e) {
+//     console.error('Error getting staking data', e);
+//
+//     return [];
+//   }
+// };
 
 // export const getStakingReward = async (addresses: string[]): Promise<any> => {
 //

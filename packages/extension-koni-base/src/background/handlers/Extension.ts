@@ -338,15 +338,11 @@ export default class KoniExtension extends Extension {
     return this.getNft();
   }
 
-  private getStaking (): Promise<StakingJson> {
-    return new Promise<StakingJson>((resolve, reject) => {
-      state.getStaking((rs: StakingJson) => {
-        resolve(rs);
-      });
-    });
+  private getStaking (): StakingJson {
+    return state.getStaking();
   }
 
-  private async subscribeStaking (id: string, port: chrome.runtime.Port): Promise<StakingJson | null> {
+  private subscribeStaking (id: string, port: chrome.runtime.Port): StakingJson {
     const cb = createSubscription<'pri(staking.getSubscription)'>(id, port);
     const stakingSubscription = state.subscribeStaking().subscribe({
       next: (rs) => {
@@ -491,9 +487,9 @@ export default class KoniExtension extends Extension {
       case 'pri(nft.getSubscription)':
         return await this.subscribeNft(id, port);
       case 'pri(staking.getStaking)':
-        return await this.getStaking();
+        return this.getStaking();
       case 'pri(staking.getSubscription)':
-        return await this.subscribeStaking(id, port);
+        return this.subscribeStaking(id, port);
       case 'pri(transaction.history.add)':
         return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
       case 'pri(transaction.history.get)':

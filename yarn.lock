@@ -16264,8 +16264,8 @@ __metadata:
     sinon-chrome: ^3.0.1
     typescript: ^4.5.4
   bin:
+    koni-ci-build-dev: ./scripts/koni-ci-build-dev.mjs
     koni-ci-ghact-build: ./scripts/koni-ci-ghact-build.mjs
-    send-discord-webhook: ./scripts/send-discord-webhook.mjs
   languageName: unknown
   linkType: soft
 

@@ -160,6 +160,7 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
     display: flex;
     justify-content: center;
     align-items: center;
+    padding-top: 10px;
   }
 
   .export-account-wrapper {
@@ -192,7 +193,7 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   }
 
   .export__input-label {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .cancel-button {

@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
 
-import {AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown} from '../../components';
+import { AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';

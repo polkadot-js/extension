@@ -38,6 +38,8 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
+  const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
+  const name = `Account ${accountsWithoutAll.length + 1}`;
 
   const parentGenesis = useMemo(
     () => accounts.find((a) => a.address === parentAddress)?.genesisHash || null,
@@ -96,7 +98,7 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
             className='koni-import-seed-content'
             genesis={parentGenesis}
             isBusy={isBusy}
-            onBackClick={_onBackClick}
+            name={name}
             onCreate={_onCreate}
           />
         </>

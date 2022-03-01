@@ -15,12 +15,24 @@ export enum ApiInitStatus {
   NOT_SUPPORT
 }
 
+export interface StakingRewardItem {
+  name: string,
+  chainId: string,
+  latestReward: string,
+  accumulatedReward: string
+}
+
+export interface StakingRewardJson {
+  details: Array<StakingRewardItem>
+}
+
 export interface StakingItem {
   name: string,
   chainId: string,
   balance?: string,
   nativeToken: string,
   unit?: string,
+  state: APIItemState
 }
 
 export interface StakingJson {

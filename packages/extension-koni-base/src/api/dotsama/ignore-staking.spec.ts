@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import connectDotSamaApis, { initApi } from '@polkadot/extension-koni-base/api/dotsama/index';
-import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { getSubqueryKusamaStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 jest.setTimeout(50000);
@@ -36,7 +36,7 @@ describe('test staking api', () => {
   });
 
   test('subquery get reward', async () => {
-    const resp = await getSubqueryStakingReward('Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ');
+    const resp = await getSubqueryKusamaStakingReward('Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ');
 
     console.log(resp);
   });

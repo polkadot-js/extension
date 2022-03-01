@@ -4,20 +4,21 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import { StakingItem } from '@polkadot/extension-base/background/KoniTypes';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
-import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
-  loading: boolean;
-  data: StakingJson;
+  data: StakingItem[];
 }
 
-function StakingContainer ({ className, data, loading }: Props): React.ReactElement<Props> {
-  console.log('here', data);
+function StakingContainer ({ className, data }: Props): React.ReactElement<Props> {
+  // TODO:
+  // fetch state
+  // render reward
+  // consider removing loading
 
   const editBalance = (balance: string) => {
     if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
@@ -62,16 +63,15 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
   return (
     <div className={className}>
       <div className={'staking-container'}>
-        {loading && <Spinner />}
 
         {/* @ts-ignore */}
-        {data?.details.length === 0 && !loading &&
+        {data.length === 0 &&
           <EmptyList />
         }
 
-        {!loading && data &&
+        {data.length > 0 &&
           // @ts-ignore
-          data?.details.map((item: StakingItem, index: number) => {
+          data.map((item: StakingItem, index: number) => {
             const name = item?.chainId;
             const icon = LogosMap[name] || LogosMap.default;
 
@@ -116,7 +116,7 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
     display: flex;
     justify-content: space-between;
     border-bottom: 1px solid ${theme.borderColor2};
-    padding-bottom: 20px;
+    padding-bottom: 10px;
   }
 
   .meta-container {

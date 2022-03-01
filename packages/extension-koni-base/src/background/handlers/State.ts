@@ -1,14 +1,27 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Subject } from 'rxjs';
+import {Subject} from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingItem, StakingJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import {
+  APIItemState,
+  BalanceItem,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  NftJson,
+  PriceJson,
+  StakingItem,
+  StakingJson,
+  TransactionHistoryItemType
+} from '@polkadot/extension-base/background/KoniTypes';
+import {getTokenPrice} from '@polkadot/extension-koni-base/api/coingecko';
+import {DEFAULT_STAKING_NETWORKS} from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
+import {CurrentAccountStore, PriceStore} from '@polkadot/extension-koni-base/stores';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
 function generateDefaultBalanceMap () {
@@ -34,8 +47,8 @@ function generateDefaultStakingMap () {
     stakingMap[networkKey] = {
       name: NETWORKS[networkKey].chain,
       chainId: networkKey,
-      balance: '0',
-      nativeToken: NETWORKS[networkKey].nativeToken
+      nativeToken: NETWORKS[networkKey].nativeToken,
+      state: APIItemState.PENDING
     } as StakingItem;
   });
 

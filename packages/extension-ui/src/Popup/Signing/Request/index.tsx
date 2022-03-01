@@ -70,13 +70,14 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
   }, [request]);
 
   const _onSignature = useCallback(
-    ({ signature }: { signature: HexString }): Promise<void> =>
+    ({ signature }: { signature: HexString }): void => {
       approveSignSignature(signId, signature)
         .then(() => onAction())
         .catch((error: Error): void => {
           setError(error.message);
           console.error(error);
-        }),
+        });
+    },
     [onAction, signId]
   );
 

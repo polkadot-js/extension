@@ -50,10 +50,9 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   }, [isExternal, signId]);
 
   const _onSign = useCallback(
-    (): Promise<void> => {
+    (): void => {
       setIsBusy(true);
-
-      return approveSignPassword(signId, savePass, password)
+      approveSignPassword(signId, savePass, password)
         .then((): void => {
           setIsBusy(false);
           onAction();
@@ -68,9 +67,11 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   );
 
   const _onCancel = useCallback(
-    (): Promise<void> => cancelSignRequest(signId)
-      .then(() => onAction())
-      .catch((error: Error) => console.error(error)),
+    (): void => {
+      cancelSignRequest(signId)
+        .then(() => onAction())
+        .catch((error: Error) => console.error(error));
+    },
     [onAction, signId]
   );
 
@@ -95,7 +96,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
     <ButtonArea className={className}>
       {isFirst && !isExternal && (
         <>
-          { isLocked && (
+          {isLocked && (
             <Unlock
               error={error}
               isBusy={isBusy}

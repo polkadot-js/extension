@@ -31,12 +31,15 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
 
   const _openJson = useCallback(
-    () => windowOpen(jsonPath)
-    , []);
+    (): void => {
+      windowOpen(jsonPath).catch(console.error);
+    }, []
+  );
 
   const _onOpenLedgerConnect = useCallback(
-    () => windowOpen(ledgerPath),
-    []
+    (): void => {
+      windowOpen(ledgerPath).catch(console.error);
+    }, []
   );
 
   return (

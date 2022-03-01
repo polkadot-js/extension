@@ -10,7 +10,7 @@ interface Props {
   className?: string;
   error?: string | null;
   isBusy: boolean;
-  onSign: () => Promise<void>;
+  onSign: () => void;
   password: string;
   setError: (error: string | null) => void;
   setPassword: (password: string) => void;

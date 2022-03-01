@@ -25,16 +25,20 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
   const onAction = useContext(ActionContext);
 
   const _onApprove = useCallback(
-    () => approveAuthRequest(authId)
-      .then(() => onAction())
-      .catch((error: Error) => console.error(error)),
+    (): void => {
+      approveAuthRequest(authId)
+        .then(() => onAction())
+        .catch((error: Error) => console.error(error));
+    },
     [authId, onAction]
   );
 
   const _onReject = useCallback(
-    () => rejectAuthRequest(authId)
-      .then(() => onAction())
-      .catch((error: Error) => console.error(error)),
+    (): void => {
+      rejectAuthRequest(authId)
+        .then(() => onAction())
+        .catch((error: Error) => console.error(error));
+    },
     [authId, onAction]
   );
 

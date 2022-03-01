@@ -3,6 +3,8 @@
 
 import { ApiProps, NetWorkInfo, StakingItem, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 
 interface LedgerData {
   active: string,
@@ -28,10 +30,12 @@ interface PropsSubscribe {
 export const subscribeMultiCurrentBonded = async ({ addresses, apiMap }: PropsSubscribe): Promise<StakingItem[]> => {
   try {
     const result: Array<StakingItem> = [];
+    const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
     await Promise.all(apiMap.map(async ({ api: parentApi, chain }) => {
+      const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      const ledgers = await parentApi.api.query.staking?.ledger.multi(addresses);
+      const ledgers = await parentApi.api.query.staking?.ledger.multi(useAddresses);
       let totalBalance = 0;
       let unit = '';
 

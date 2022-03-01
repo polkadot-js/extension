@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { BN, hexToU8a, isHex } from '@polkadot/util';
@@ -36,6 +37,39 @@ export function reformatAddress (address: string, networkPrefix: number, isEther
   }
 
   return encodeAddress(publicKey, networkPrefix);
+}
+
+export function filterAddressByNetworkKey (addresses: string[], networkKey: string) {
+  if (ethereumChains.indexOf(networkKey) > -1) {
+    return addresses.filter((address) => {
+      return isEthereumAddress(address);
+    });
+  } else {
+    return addresses.filter((address) => {
+      return !isEthereumAddress(address);
+    });
+  }
+}
+
+export function categoryAddresses (addresses: string[]) {
+  const substrateAddresses: string[] = [];
+  const evmAddresses: string[] = [];
+
+  addresses.forEach((address) => {
+    if (isEthereumAddress(address)) {
+      evmAddresses.push(address);
+    } else {
+      substrateAddresses.push(address);
+    }
+  });
+
+  return [substrateAddresses, evmAddresses];
+}
+
+export function convertToEvmAddress (substrateAddress: string): string {
+  const addressBytes = decodeAddress(substrateAddress);
+
+  return ethereumEncode('0x' + Buffer.from(addressBytes.subarray(0, 20)).toString('hex'));
 }
 
 export function isUrl (targetString: string) {

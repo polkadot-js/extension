@@ -8,7 +8,7 @@ import { APIItemState, ApiProps, CrowdloanItem } from '@polkadot/extension-base/
 import registry from '@polkadot/extension-koni-base/api/dotsama/typeRegistry';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@polkadot/extension-koni-base/constants';
-import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
+import { categoryAddresses, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { BN } from '@polkadot/util';
 
 function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddresses: string[], callback: (rs: CrowdloanItem) => void) {
@@ -73,11 +73,14 @@ export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], ca
 };
 
 // Get All crowdloan
-export async function subcribeCrowdloan (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = NETWORKS) {
+export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = NETWORKS) {
   const polkadotAPI = await dotSamaAPIMap.polkadot.isReady;
   const kusamaAPI = await dotSamaAPIMap.kusama.isReady;
   const unsubMap: Record<string, any> = {};
-  const hexAddresses = addresses.map((address) => {
+
+  const substrateAddresses = categoryAddresses(addresses)[0];
+
+  const hexAddresses = substrateAddresses.map((address) => {
     return registry.createType('AccountId', address).toHex();
   });
 
@@ -86,7 +89,7 @@ export async function subcribeCrowdloan (addresses: string[], dotSamaAPIMap: Rec
       callback(networkKey, rs);
     };
 
-    if (networkInfo.paraId === undefined) {
+    if (networkInfo.paraId === undefined || addresses.length === 0) {
       return;
     }
 

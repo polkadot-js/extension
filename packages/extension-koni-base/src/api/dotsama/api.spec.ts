@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiPromise } from '@polkadot/api';
+import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama/api';
 import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama/index';
 import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
@@ -11,26 +11,37 @@ import { AccountInfo } from '@polkadot/types/interfaces';
 jest.setTimeout(50000);
 
 describe('test DotSama APIs', () => {
-  let api: ApiPromise;
+  let apiMap: Record<string, ApiProps>;
 
   beforeAll(async () => {
-    const koniProp = await initApi(NETWORKS.koni.provider).isReady;
+    apiMap = {};
+    const networkList = ['moonbase'];
 
-    api = koniProp.api;
+    const promList = networkList.map((networkKey) => {
+      return initApi(NETWORKS[networkKey].provider).isReady;
+    });
+
+    const apiPropsList = await Promise.all(promList);
+
+    networkList.forEach((networkKey, index) => {
+      apiMap[networkKey] = apiPropsList[index];
+    });
   });
 
   afterAll(async () => {
-    await api.disconnect();
+    await Promise.all(Object.values(apiMap).map((apiProps) => {
+      return apiProps.api.disconnect();
+    }));
   });
 
   it('test get Balances', async () => {
-    const balances = await api.query.system.account.multi(['5FEdUhBmtK1rYifarmUXYzZhi6fmLbC6SZ7jcNvGuC2gaa2r']);
+    const balances = await apiMap.moonbase?.api.query.system.account.multi(['0x25B12Fe4D6D7ACca1B4035b26b18B4602cA8b10F']);
 
     balances.forEach((rs) => {
       // @ts-ignore
       const balanceInfo = rs as AccountInfo;
 
-      expect(balanceInfo.data.free.toNumber()).toBeGreaterThanOrEqual(0);
+      console.log(balanceInfo.data.free.toString());
     });
   });
 

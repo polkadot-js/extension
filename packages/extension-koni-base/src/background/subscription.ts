@@ -4,7 +4,7 @@
 import { take } from 'rxjs';
 
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
-import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
+import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
@@ -99,7 +99,7 @@ export class KoniSubcription {
   }
 
   initCrowdloanSubscription (addresses: string[]) {
-    const subscriptionPromise = subcribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
+    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 

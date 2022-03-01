@@ -143,6 +143,7 @@ export interface ApiProps extends ApiState {
   isReady: Promise<ApiProps>;
   apiRetry?: number;
   recoverConnect?: () => void;
+  useEvmAddress?: boolean
 }
 
 export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';

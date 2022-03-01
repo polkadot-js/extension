@@ -5,7 +5,8 @@ import { take } from 'rxjs';
 
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subcribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import { subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { TEST_STAKING_ADDRESSES, TEST_STAKING_REWARD_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -137,7 +138,7 @@ export class KoniSubcription {
     this.unsubStaking && this.unsubStaking();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.unsubStaking = this.initStakingSubscription(addresses);
+        this.unsubStaking = this.initStakingSubscription(TEST_STAKING_ADDRESSES);
       })
       .catch(console.error);
   }
@@ -160,5 +161,15 @@ export class KoniSubcription {
         }).catch(console.error);
       });
     };
+  }
+
+  async subscribeStakingReward (address: string) {
+    const addresses = await this.detectAddresses(address);
+
+    await getSubqueryStakingReward(TEST_STAKING_REWARD_ADDRESSES)
+      .then((result) => {
+        state.setStakingReward(result);
+      })
+      .catch(console.error);
   }
 }

@@ -32,6 +32,11 @@ export const TEST_STAKING_ADDRESSES = [
   'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ'
 ];
 
+export const TEST_STAKING_REWARD_ADDRESSES = [
+  'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ',
+  '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S'
+];
+
 // nft test address
 // unique: 5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb
 // statemine: Fys7d6gikP6rLDF9dvhCJcAMaPrrLuHbGZRVgqLPn26fWmr

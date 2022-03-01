@@ -169,7 +169,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
   const [nftPage, setNftPage] = useState(1);
 
   const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage);
-  const { data: stakingData } = useFetchStaking();
+  const { data: stakingData, loading: loadingStaking } = useFetchStaking();
 
   const handleNftPage = useCallback((page: number) => {
     setNftPage(page);
@@ -337,6 +337,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
         {activatedTab === 4 && (
           <StakingContainer
             data={stakingData}
+            loading={loadingStaking}
           />
         )}
 

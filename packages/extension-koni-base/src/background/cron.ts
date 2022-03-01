@@ -7,7 +7,7 @@ import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -59,14 +59,17 @@ export class KoniCron {
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
+        this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.resetNft();
           this.removeCron('refreshNft');
+          this.removeCron('refreshStakingReward');
 
           this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
+          this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         }
       });
     });
@@ -101,13 +104,6 @@ export class KoniCron {
     };
   }
 
-  // refreshStaking (address: string) {
-  //   return () => {
-  //     console.log('Refresh Staking state');
-  //     this.subscriptions.subscribeStaking(address);
-  //   };
-  // }
-
   resetNft () {
     state.setNft({
       ready: false,
@@ -117,11 +113,11 @@ export class KoniCron {
     console.log('Reset Nft state');
   }
 
-  // resetStaking () {
-  //   state.setStakingItem({
-  //     ready: false,
-  //     details: []
-  //   } as StakingJson);
-  //   console.log('Reset Staking state');
-  // }
+  refreshStakingReward (address: string) {
+    return () => {
+      this.subscriptions.subscribeStakingReward(address)
+        .then(() => console.log('Refresh staking reward state'))
+        .catch(console.error);
+    };
+  }
 }

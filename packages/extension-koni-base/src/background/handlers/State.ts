@@ -1,27 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {Subject} from 'rxjs';
+import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import {
-  APIItemState,
-  BalanceItem,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanItem,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  NftJson,
-  PriceJson,
-  StakingItem,
-  StakingJson,
-  TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
-import {getTokenPrice} from '@polkadot/extension-koni-base/api/coingecko';
-import {DEFAULT_STAKING_NETWORKS} from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import {CurrentAccountStore, PriceStore} from '@polkadot/extension-koni-base/stores';
+import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 
 function generateDefaultBalanceMap () {
@@ -90,11 +77,15 @@ export default class KoniState extends State {
   } as NftJson;
 
   private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
+  private stakingRewardState: StakingRewardJson = {
+    details: []
+  } as StakingRewardJson;
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
   private nftSubject = new Subject<NftJson>();
   private stakingSubject = new Subject<StakingJson>();
+  private stakingRewardSubject = new Subject<StakingRewardJson>();
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -117,7 +108,7 @@ export default class KoniState extends State {
   };
 
   public getStaking (): StakingJson {
-    return { details: this.stakingMap } as StakingJson;
+    return { ready: true, details: this.stakingMap } as StakingJson;
   }
 
   public subscribeStaking () {
@@ -143,28 +134,28 @@ export default class KoniState extends State {
 
   public getNft (update: (value: NftJson) => void): void {
     update(this.nftState);
-
-    // return this.nftState;
-
-    // this.nftStore.get('NftData', (rs) => {
-    //   if (this.nftStoreReady) update(rs);
-    //   else {
-    //     getAllNftsByAccount(account)
-    //       .then((rs) => {
-    //         this.nftState = rs;
-    //         console.log('got nft', this.nftState)
-    //         update(rs);
-    //       })
-    //       .catch((e) => {
-    //         console.error(e);
-    //         throw e;
-    //       });
-    //   }
-    // });
   }
 
   public subscribeNft () {
     return this.nftSubject;
+  }
+
+  public setStakingReward (stakingRewardData: StakingRewardJson, callback?: (stakingRewardData: StakingRewardJson) => void): void {
+    this.stakingRewardState = stakingRewardData;
+
+    if (callback) {
+      callback(stakingRewardData);
+    }
+
+    this.stakingRewardSubject.next(stakingRewardData);
+  }
+
+  public getStakingReward (update: (value: StakingRewardJson) => void): void {
+    update(this.stakingRewardState);
+  }
+
+  public subscribeStakingReward () {
+    return this.stakingRewardSubject;
   }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {

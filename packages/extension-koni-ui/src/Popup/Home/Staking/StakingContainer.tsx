@@ -4,78 +4,51 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { StakingItem } from '@polkadot/extension-base/background/KoniTypes';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
+import { StakingDataType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
+import StakingRow from './StakingRow';
+import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+
 interface Props extends ThemeProps {
   className?: string;
-  data: StakingItem[];
+  data: StakingDataType[];
+  loading: boolean;
 }
 
-function StakingContainer ({ className, data }: Props): React.ReactElement<Props> {
-  // TODO:
-  // fetch state
-  // render reward
-  // consider removing loading
-
-  const editBalance = (balance: string) => {
-    if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
-
-    const balanceSplit = balance.split('.');
-
-    return (
-      <span>
-        <span className={'major-balance'}>{balanceSplit[0]}</span>
-        {balance.includes('.') && '.'}
-        <span className={'decimal-balance'}>{balanceSplit[1]}</span>
-      </span>
-    );
-  };
-
-  const StakingRow = (logo: string, chainName: string, symbol: string, amount: string | undefined, unit: string | undefined, index: number) => {
-    return (
-      <div
-        className={'staking-row'}
-        key={index}
-      >
-        <img
-          alt='logo'
-          className={'network-logo'}
-          src={logo}
-        />
-        <div className={'info-wrapper'}>
-          <div className={'meta-container'}>
-            <div className={'chain-name'}>{chainName}</div>
-            <div className={'chain-symbol'}>{symbol}</div>
-          </div>
-
-          <div className={'meta-container'}>
-            <div className={'staking-amount'}>{editBalance(amount || '')}</div>
-            <div className={'chain-unit'}>{unit}</div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
+function StakingContainer ({ className, data, loading }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <div className={'staking-container'}>
 
+        {loading && <Spinner />}
+
         {/* @ts-ignore */}
-        {data.length === 0 &&
+        {data.length === 0 && !loading &&
           <EmptyList />
         }
 
-        {data.length > 0 &&
+        {data.length > 0 && !loading &&
           // @ts-ignore
-          data.map((item: StakingItem, index: number) => {
+          data.map((stakingDataType: StakingDataType, index: number) => {
+            const item = stakingDataType.staking;
+            const reward = stakingDataType?.reward;
+
             const name = item?.chainId;
             const icon = LogosMap[name] || LogosMap.default;
 
-            return StakingRow(icon, name, item.nativeToken, item.balance, item.unit, index);
+            return <StakingRow
+              amount={item.balance}
+              chainName={name}
+              index={index}
+              key={index}
+              logo={icon}
+              reward={reward}
+              symbol={item.nativeToken}
+              unit={item.unit}
+            />;
           })
         }
       </div>
@@ -90,71 +63,5 @@ export default React.memo(styled(StakingContainer)(({ theme }: Props) => `
   .staking-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-  }
-
-  .staking-row {
-    width: 100%;
-    display: flex;
-    gap: 12px;
-  }
-
-  .network-logo {
-    display: block;
-    min-width: 32px;
-    height: 32px;
-    border-radius: 100%;
-    overflow: hidden;
-    margin-right: 12px;
-    background-color: #fff;
-    border: 1px solid #fff;
-    margin-top:10px;
-  }
-
-  .info-wrapper {
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid ${theme.borderColor2};
-    padding-bottom: 10px;
-  }
-
-  .meta-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .chain-name {
-    font-size: 16px;
-    font-weight: 500;
-    text-transform: capitalize;
-  }
-
-  .chain-symbol {
-    text-transform: uppercase;
-    font-size: 14px;
-    color: #7B8098;
-  }
-
-  .staking-amount {
-    font-size: 15px;
-    font-weight: 500;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .chain-unit {
-    font-size: 14px;
-    font-weight: normal;
-    display: flex;
-    justify-content: flex-end;
-    color: #7B8098;
-  }
-
-  .major-balance {}
-
-  .decimal-balance {
-    color: #7B8098;
   }
 `));

@@ -11,7 +11,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 0,
     provider: 'wss://polkadot.api.onfinality.io/public-ws',
     groups: ['RELAY_CHAIN'],
-    nativeToken: 'DOT'
+    nativeToken: 'DOT',
+    decimals: 10
   },
   kusama: {
     chain: 'Kusama Relay Chain',
@@ -20,7 +21,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 2,
     provider: 'wss://kusama.api.onfinality.io/public-ws',
     groups: ['RELAY_CHAIN'],
-    nativeToken: 'KSM'
+    nativeToken: 'KSM',
+    decimals: 12
   },
   westend: {
     chain: 'Westend Relay Chain',
@@ -93,7 +95,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://astar.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2006,
-    nativeToken: 'ASTR'
+    nativeToken: 'ASTR',
+    decimals: 18
   },
   parallel: {
     chain: 'Parallel',

@@ -12,9 +12,11 @@ import NetworkMetadataReducer from './NetworkMetadata';
 import NftReducer from './Nft';
 import PriceReducer from './Price';
 import StakingReducer from './Staking';
+import StakingRewardReducer from './StakingReward';
 import TransactionHistoryReducer from './TransactionHistory';
 
 const reducers = {
+  stakingReward: StakingRewardReducer,
   staking: StakingReducer,
   nft: NftReducer,
   price: PriceReducer,

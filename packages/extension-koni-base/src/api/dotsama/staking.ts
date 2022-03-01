@@ -3,8 +3,9 @@
 
 import axios from 'axios';
 
-import { APIItemState, ApiProps, NetWorkInfo, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, NetWorkInfo, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 interface LedgerData {
   active: string,
@@ -12,6 +13,11 @@ interface LedgerData {
   stash: string,
   total: string,
   unlocking: string[]
+}
+
+interface StakingResponseItem {
+  id: string,
+  amount: string
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
@@ -86,12 +92,13 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
   };
 }
 
-export const getSubqueryKusamaStakingReward = async (account: string): Promise<Record<string, any>> => {
-  const resp = await axios({
-    url: 'https://api.subquery.network/sq/nova-wallet/nova-kusama',
-    method: 'post',
-    data: {
-      query: `
+export const getSubqueryKusamaStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+  const amounts = await Promise.all(accounts.map(async (account) => {
+    const resp = await axios({
+      url: 'https://api.subquery.network/sq/nova-wallet/nova-kusama',
+      method: 'post',
+      data: {
+        query: `
         query {
           accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
             nodes {
@@ -101,23 +108,49 @@ export const getSubqueryKusamaStakingReward = async (account: string): Promise<R
           }
         }
       `
-    }
-  });
+      }
+    });
 
-  if (resp.status === 200) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return resp.data.data as Record<string, any>;
+    if (resp.status === 200) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const respData = resp.data.data as Record<string, any>;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const rewardList = respData.accumulatedRewards.nodes as StakingResponseItem[];
+
+      if (rewardList.length > 0) {
+        return parseFloat(rewardList[0].amount);
+      }
+
+      return 0;
+    }
+
+    return 0;
+  }));
+
+  let parsedAmount = 0;
+
+  for (const amount of amounts) {
+    parsedAmount += amount;
   }
 
-  return {};
+  // @ts-ignore
+  parsedAmount = toUnit(parsedAmount, NETWORKS.kusama.decimals);
+
+  return {
+    name: NETWORKS.kusama.chain,
+    chainId: 'kusama',
+    accumulatedReward: parsedAmount.toString(),
+    state: APIItemState.READY
+  } as StakingRewardItem;
 };
 
-export const getSubqueryPolkadotStakingReward = async (account: string): Promise<Record<string, any>> => {
-  const resp = await axios({
-    url: 'https://api.subquery.network/sq/nova-wallet/nova-polkadot',
-    method: 'post',
-    data: {
-      query: `
+export const getSubqueryPolkadotStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+  const amounts = await Promise.all(accounts.map(async (account) => {
+    const resp = await axios({
+      url: 'https://api.subquery.network/sq/nova-wallet/nova-polkadot',
+      method: 'post',
+      data: {
+        query: `
         query {
           accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
             nodes {
@@ -127,23 +160,49 @@ export const getSubqueryPolkadotStakingReward = async (account: string): Promise
           }
         }
       `
-    }
-  });
+      }
+    });
 
-  if (resp.status === 200) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return resp.data.data as Record<string, any>;
+    if (resp.status === 200) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const respData = resp.data.data as Record<string, any>;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const rewardList = respData.accumulatedRewards.nodes as StakingResponseItem[];
+
+      if (rewardList.length > 0) {
+        return parseFloat(rewardList[0].amount);
+      }
+
+      return 0;
+    }
+
+    return 0;
+  }));
+
+  let parsedAmount = 0;
+
+  for (const amount of amounts) {
+    parsedAmount += amount;
   }
 
-  return {};
+  // @ts-ignore
+  parsedAmount = toUnit(parsedAmount, NETWORKS.polkadot.decimals);
+
+  return {
+    name: NETWORKS.polkadot.chain,
+    chainId: 'polkadot',
+    accumulatedReward: parsedAmount.toString(),
+    state: APIItemState.READY
+  } as StakingRewardItem;
 };
 
-export const getSubqueryAstarStakingReward = async (account: string): Promise<Record<string, any>> => {
-  const resp = await axios({
-    url: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-astar',
-    method: 'post',
-    data: {
-      query: `
+export const getSubqueryAstarStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+  const amounts = await Promise.all(accounts.map(async (account) => {
+    const resp = await axios({
+      url: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-astar',
+      method: 'post',
+      data: {
+        query: `
         query {
           accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
             nodes {
@@ -153,19 +212,56 @@ export const getSubqueryAstarStakingReward = async (account: string): Promise<Re
           }
         }
       `
-    }
-  });
+      }
+    });
 
-  if (resp.status === 200) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    return resp.data.data as Record<string, any>;
+    if (resp.status === 200) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const respData = resp.data.data as Record<string, any>;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const rewardList = respData.accumulatedRewards.nodes as StakingResponseItem[];
+
+      if (rewardList.length > 0) {
+        return parseFloat(rewardList[0].amount);
+      }
+
+      return 0;
+    }
+
+    return 0;
+  }));
+
+  let parsedAmount = 0;
+
+  for (const amount of amounts) {
+    parsedAmount += amount;
   }
 
-  return {};
+  // @ts-ignore
+  parsedAmount = toUnit(parsedAmount, NETWORKS.astar.decimals);
+
+  return {
+    name: NETWORKS.astar.chain,
+    chainId: 'astar',
+    accumulatedReward: parsedAmount.toString(),
+    state: APIItemState.READY
+  } as StakingRewardItem;
 };
 
-export const getSubqueryStakingReward = async (account: string[]): Promise<> => {
+export const getSubqueryStakingReward = async (accounts: string[]): Promise<StakingRewardJson> => {
+  let rewardList: StakingRewardItem[] = [];
 
-}
+  const rewardItems = await Promise.all([
+    getSubqueryKusamaStakingReward(accounts),
+    getSubqueryPolkadotStakingReward(accounts),
+    getSubqueryAstarStakingReward(accounts)
+  ]);
+
+  rewardList = rewardList.concat(rewardItems);
+
+  return {
+    details: rewardList
+  } as StakingRewardJson;
+};
 
 // '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'

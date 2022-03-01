@@ -3,7 +3,7 @@
 
 import Extension from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestApi, RequestTransactionHistoryAdd, RequestTransactionHistoryGet, RequestTransactionHistoryGetByMultiNetworks, StakingJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestApi, RequestTransactionHistoryAdd, RequestTransactionHistoryGet, RequestTransactionHistoryGetByMultiNetworks, StakingJson, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -338,6 +338,30 @@ export default class KoniExtension extends Extension {
     return this.getNft();
   }
 
+  private getStakingReward (): Promise<StakingRewardJson> {
+    return new Promise<StakingRewardJson>((resolve, reject) => {
+      state.getStakingReward((rs: StakingRewardJson) => {
+        resolve(rs);
+      });
+    });
+  }
+
+  private subscribeStakingReward (id: string, port: chrome.runtime.Port): Promise<StakingRewardJson | null> {
+    const cb = createSubscription<'pri(stakingReward.getSubscription)'>(id, port);
+    const stakingRewardSubscription = state.subscribeStakingReward().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      stakingRewardSubscription.unsubscribe();
+    });
+
+    return this.getStakingReward();
+  }
+
   private getStaking (): StakingJson {
     return state.getStaking();
   }
@@ -490,6 +514,10 @@ export default class KoniExtension extends Extension {
         return this.getStaking();
       case 'pri(staking.getSubscription)':
         return this.subscribeStaking(id, port);
+      case 'pri(stakingReward.getStakingReward)':
+        return this.getStakingReward();
+      case 'pri(stakingReward.getSubscription)':
+        return this.subscribeStakingReward(id, port);
       case 'pri(transaction.history.add)':
         return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
       case 'pri(transaction.history.get)':

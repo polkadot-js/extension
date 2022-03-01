@@ -4,15 +4,18 @@
 import { useSelector } from 'react-redux';
 
 import { APIItemState, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
-import { StakingType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
+import { StakingDataType, StakingType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 export default function useFetchStaking (): StakingType {
-  const { staking: stakingReducer } = useSelector((state: RootState) => state);
+  const { staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
-  // console.log('fetch staking from state');
   const stakingItemMap = stakingReducer.details;
+  const stakingRewardList = stakingRewardReducer.details;
   const readyStakingItems: StakingItem[] = [];
+  const stakingData: StakingDataType[] = [];
+
+  console.log('loading', stakingReducer.ready);
 
   Object.keys(stakingItemMap).forEach((key) => {
     const stakingItem = stakingItemMap[key];
@@ -22,7 +25,20 @@ export default function useFetchStaking (): StakingType {
     }
   });
 
+  for (const stakingItem of readyStakingItems) {
+    const stakingDataType = { staking: stakingItem } as StakingDataType;
+
+    for (const reward of stakingRewardList) {
+      if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
+        stakingDataType.reward = reward;
+      }
+    }
+
+    stakingData.push(stakingDataType);
+  }
+
   return {
-    data: readyStakingItems
+    loading: !stakingReducer.ready,
+    data: stakingData
   } as StakingType;
 }

@@ -16,10 +16,11 @@ export enum ApiInitStatus {
 }
 
 export interface StakingRewardItem {
+  state: APIItemState
   name: string,
   chainId: string,
-  latestReward: string,
-  accumulatedReward: string
+  latestReward?: string,
+  accumulatedReward?: string
 }
 
 export interface StakingRewardJson {
@@ -170,6 +171,7 @@ export interface NetWorkInfo {
   paraId?: number;
   isEthereum?: boolean;
   nativeToken?: string;
+  decimals?: number;
 }
 
 export interface NetWorkMetadataDef extends MetadataDefBase {
@@ -250,11 +252,14 @@ export type RequestCrowdloan = null
 export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
+export type RequestSubscribeStakingReward = null
 
 export interface KoniRequestSignatures {
   'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(staking.getStaking)': [null, StakingJson]
   'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson]
+  'pri(stakingReward.getStakingReward)': [null, StakingRewardJson]
+  'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson]
   'pri(nft.getNft)': [null, NftJson],
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson]
   'pri(price.getPrice)': [RequestPrice, PriceJson]

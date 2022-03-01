@@ -14,8 +14,6 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   const feeFrozenMap: Record<string, BN> = {};
 
   const unsubProms = addresses.map((address) => {
-    console.log(address);
-
     return networkAPI.api.derive.balances?.all(address, (balance: DeriveBalancesAll) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       freeMap[address] = balance.freeBalance?.toBn() || new BN(0);

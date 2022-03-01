@@ -260,7 +260,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['TEST_NET'],
     nativeToken: 'OPL'
   },
-  moonbaseAlpha: {
+  moonbase: {
     chain: 'Moonbase Alpha',
     genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
     ss58Format: 1287,

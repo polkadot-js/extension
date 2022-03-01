@@ -8,7 +8,6 @@ import { subscribeBalance } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateBalance (balanceData: BalanceJson): void {
-  console.log(balanceData);
   store.dispatch({ type: 'balance/update', payload: balanceData });
 }
 

@@ -160,7 +160,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 
   const _toggleVisibility = useCallback(
-    () => address && showAccount(address, isHidden || false).catch(console.error),
+    (): void => {
+      address && showAccount(address, isHidden || false).catch(console.error);
+    },
     [address, isHidden]
   );
 

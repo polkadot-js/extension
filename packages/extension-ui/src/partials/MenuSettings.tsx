@@ -51,8 +51,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     (value: string): void => {
       setPrefix(value);
       settings.set({ prefix: parseInt(value, 10) });
-    },
-    []
+    }, []
   );
 
   const _onChangeNotification = useCallback(
@@ -61,8 +60,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
 
       updateNotification(value);
       settings.set({ notification: value });
-    },
-    []
+    }, []
   );
 
   const _onChangeTheme = useCallback(
@@ -71,15 +69,15 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   );
 
   const _onWindowOpen = useCallback(
-    () => windowOpen('/').catch(console.error),
-    []
+    (): void => {
+      windowOpen('/').catch(console.error);
+    }, []
   );
 
   const _onChangeLang = useCallback(
     (value: string): void => {
       settings.set({ i18nLang: value });
-    },
-    []
+    }, []
   );
 
   const _goToAuthList = useCallback(

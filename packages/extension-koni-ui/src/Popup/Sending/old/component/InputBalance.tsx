@@ -27,7 +27,7 @@ interface Props {
   label?: React.ReactNode;
   labelExtra?: React.ReactNode;
   maxValue?: BN;
-  onChange?: (value?: BN) => void;
+  onChange?: (value?: BN | string) => void;
   onEnter?: () => void;
   onEscape?: () => void;
   placeholder?: string;

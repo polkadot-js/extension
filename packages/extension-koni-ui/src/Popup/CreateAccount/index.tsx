@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
 
-import { AccountNamePasswordCreation, ActionContext, Dropdown } from '../../components';
+import {AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown} from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
@@ -28,7 +28,9 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const [address, setAddress] = useState<null | string>(null);
   const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
-  const [name, setName] = useState('');
+  const { accounts } = useContext(AccountContext);
+  const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
+  const name = `Account ${accountsWithoutAll.length + 1}`;
   const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
@@ -125,9 +127,8 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                   buttonLabel={t<string>('Add the account with the generated seed')}
                   genesis={genesisHash}
                   isBusy={isBusy}
-                  onBackClick={_onPreviousStep}
                   onCreate={_onCreate}
-                  onNameChange={setName}
+                  name={name}
                 >
                   <Dropdown
                     className='create-account-network-select'

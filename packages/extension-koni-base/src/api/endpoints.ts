@@ -75,7 +75,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2000,
     nativeToken: 'ACA',
-    crowdloanUrl: 'https://acala.network/'
+    crowdloanUrl: 'https://distribution.acala.network/'
   },
   moonbeam: {
     chain: 'Moonbeam',

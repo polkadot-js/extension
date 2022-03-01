@@ -28,8 +28,8 @@ interface ContentProp {
 }
 
 const GroupDisplayNameMap: Record<string, string> = {
-  POLKADOT_PARACHAIN: 'Polkadot\'s parachain',
-  KUSAMA_PARACHAIN: 'Kusama\'s parachain'
+  POLKADOT_PARACHAIN: 'Polkadot parachain',
+  KUSAMA_PARACHAIN: 'Kusama parachain'
 };
 
 function getGroupDisplayName (groups: NetWorkGroup[]): string {

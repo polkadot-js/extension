@@ -44,6 +44,7 @@ import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
+import TransferNftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/TransferNftContainer";
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -316,14 +317,15 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
         )}
 
         {activatedTab === 2 && (
-          <NftContainer
-            loading={loadingNft}
-            nftList={nftList}
-            page={nftPage}
-            setPage={handleNftPage}
-            totalCollection={totalCollection}
-            totalItems={totalItems}
-          />
+          <TransferNftContainer/>
+          // <NftContainer
+          //   loading={loadingNft}
+          //   nftList={nftList}
+          //   page={nftPage}
+          //   setPage={handleNftPage}
+          //   totalCollection={totalCollection}
+          //   totalItems={totalItems}
+          // />
         )}
 
         {activatedTab === 3 && (

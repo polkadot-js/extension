@@ -77,6 +77,18 @@ export class NftHandler {
     }
   }
 
+  private sortData (data: NftCollection[]) {
+    const sortedData = this.data;
+
+    for (const collection of data) {
+      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.image === collection.image && e.collectionId === collection.collectionId)) {
+        sortedData.push(collection);
+      }
+    }
+
+    return sortedData;
+  }
+
   private async connect () {
     if (this.handlers.length > 0) {
       await Promise.all(this.handlers.map(async (handler) => {
@@ -123,7 +135,7 @@ export class NftHandler {
       .finally(() => clearTimeout(timer));
 
     this.total = total;
-    this.data = data;
+    this.data = this.sortData(data);
 
     console.log(`done fetching ${total} nft from rpc`);
   }

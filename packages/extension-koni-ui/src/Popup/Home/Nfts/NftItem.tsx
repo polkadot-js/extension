@@ -218,7 +218,7 @@ export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
 
   .item-img {
     display: block;
-    height: 416px;
+    height: 402px;
     width: 100%;
     border-radius: 5px;
     cursor: pointer;

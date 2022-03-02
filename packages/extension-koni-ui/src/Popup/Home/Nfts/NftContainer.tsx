@@ -114,7 +114,7 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
             />
           </div>
           <div>
-            {page}/{Math.round(totalCollection / NFT_GRID_SIZE)}
+            {page}/{Math.ceil(totalCollection / NFT_GRID_SIZE)}
           </div>
           <div
             className={'nav-item'}

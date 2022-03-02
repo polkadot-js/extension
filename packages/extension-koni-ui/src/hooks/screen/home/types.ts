@@ -33,4 +33,5 @@ export type StakingDataType = {
 export type StakingType = {
   loading: boolean;
   data: StakingDataType[];
+  priceMap: Record<string, number>;
 }

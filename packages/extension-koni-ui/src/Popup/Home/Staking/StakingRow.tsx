@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { StakingRewardItem } from '@polkadot/extension-base/background/KoniTypes';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { formatLocaleNumber } from '@polkadot/extension-koni-ui/util/formatNumber';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -16,9 +17,10 @@ interface Props extends ThemeProps {
   unit: string | undefined;
   index: number;
   reward: StakingRewardItem;
+  price: number;
 }
 
-function StakingRow ({ amount, chainName, className, index, logo, reward, symbol, unit }: Props): React.ReactElement<Props> {
+function StakingRow ({ amount, chainName, className, index, logo, price, reward, unit }: Props): React.ReactElement<Props> {
   const [showReward, setShowReward] = useState(false);
 
   const handleToggleReward = useCallback(() => {
@@ -32,13 +34,24 @@ function StakingRow ({ amount, chainName, className, index, logo, reward, symbol
 
     if (balanceSplit[0] === '') return <span>--</span>;
 
+    const number = balanceSplit[0];
+    const decimal = balanceSplit[1];
+
     return (
       <span>
-        <span className={'major-balance'}>{balanceSplit[0]}</span>
+        <span className={'major-balance'}>{formatLocaleNumber(parseInt(number))}</span>
         {balance.includes('.') && '.'}
-        <span className={'decimal-balance'}>{balanceSplit[1]}</span>
+        <span className={'decimal-balance'}>{decimal ? decimal.slice(0, 2) : ''}</span>
       </span>
     );
+  };
+
+  const parsePrice = (price: number, amount: string) => {
+    if (!price) return ' --';
+
+    const balance = parseFloat(amount) * price;
+
+    return editBalance(balance.toString());
   };
 
   return (
@@ -61,13 +74,16 @@ function StakingRow ({ amount, chainName, className, index, logo, reward, symbol
           >
             <div className={'meta-container'}>
               <div className={'chain-name'}>{chainName}</div>
-              <div className={'chain-symbol'}>{symbol}</div>
+              <div className={'balance-description'}>Staking balance</div>
             </div>
 
             <div className={'balance-container'}>
               <div className={'meta-container'}>
-                <div className={'staking-amount'}>{editBalance(amount || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
+                <div className={'staking-amount'}>
+                  <span className={'staking-balance'}>{editBalance(amount || '')}</span>
+                  {unit}
+                </div>
+                <div className={'price-container'}>${parsePrice(price, amount as string)}</div>
               </div>
 
               <div>
@@ -80,12 +96,21 @@ function StakingRow ({ amount, chainName, className, index, logo, reward, symbol
 
           {
             showReward &&
-            <div className={'reward-container'}>
-              <div className={'reward-title'}>Accumulated reward</div>
-              <div className={'reward-amount'}>
-                <div>{editBalance(reward?.accumulatedReward || '')}</div>
-                <div className={'chain-unit'}>{unit}</div>
+            <div className={'extra-container'}>
+              <div className={'reward-container'}>
+                <div className={'reward-title'}>Total reward</div>
+                <div className={'reward-amount'}>
+                  <div>{editBalance(reward?.accumulatedReward || '')}</div>
+                  <div className={'chain-unit'}>{unit}</div>
+                </div>
               </div>
+
+              {/* <div className={'reward-container'}> */}
+              {/*  <div className={'reward-title'}>APR</div> */}
+              {/*  <div className={'reward-amount'}> */}
+              {/*    14% */}
+              {/*  </div> */}
+              {/* </div> */}
             </div>
           }
         </div>
@@ -95,9 +120,23 @@ function StakingRow ({ amount, chainName, className, index, logo, reward, symbol
 }
 
 export default React.memo(styled(StakingRow)(({ theme }: Props) => `
+  .extra-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .balance-description {
+    font-size: 14px;
+    color: #7B8098;
+  }
+
+  .staking-balance {
+    margin-right: 3px;
+  }
+
   .reward-container {
     padding-top: 4px;
-    padding-bottom: 4px;
     display: flex;
     justify-content: space-between;
   }
@@ -193,6 +232,11 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
     font-weight: 500;
     display: flex;
     justify-content: flex-end;
+    text-align: right;
+  }
+
+  .price-container {
+    text-align: right;
   }
 
   .chain-unit {
@@ -210,6 +254,7 @@ export default React.memo(styled(StakingRow)(({ theme }: Props) => `
   }
 
   &.-show-detail .chain-balance-item__toggle {
+    top: 12px;
     transform: rotate(-135deg);
   }
 `));

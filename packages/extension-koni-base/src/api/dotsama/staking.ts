@@ -43,12 +43,12 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     apis.push({ chain, api });
   }));
-
   const unsubPromises = apis.map(({ api: parentApi, chain }) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return
     return parentApi.api.query.staking?.ledger.multi(addresses, (ledgers: any[]) => {
       let totalBalance = 0;
       let unit = '';
+      let stakingItem: StakingItem;
 
       if (ledgers) {
         for (const ledger of ledgers) {
@@ -66,7 +66,7 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
         }
 
         if (totalBalance > 0) {
-          const stakingItem = {
+          stakingItem = {
             name: NETWORKS[chain as string].chain,
             chainId: chain as string,
             balance: totalBalance.toString(),
@@ -74,10 +74,19 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
             unit: unit || NETWORKS[chain as string].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
-
-          // eslint-disable-next-line node/no-callback-literal
-          callback(chain as string, stakingItem);
+        } else {
+          stakingItem = {
+            name: NETWORKS[chain as string].chain,
+            chainId: chain as string,
+            balance: totalBalance.toString(),
+            nativeToken: NETWORKS[chain as string].nativeToken,
+            unit: unit || NETWORKS[chain as string].nativeToken,
+            state: APIItemState.READY
+          } as StakingItem;
         }
+
+        // eslint-disable-next-line node/no-callback-literal
+        callback(chain as string, stakingItem);
       }
     });
   });

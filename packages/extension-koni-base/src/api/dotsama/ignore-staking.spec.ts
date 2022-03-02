@@ -8,7 +8,7 @@ import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 jest.setTimeout(50000);
 
 describe('test staking api', () => {
-  const testAddress = ['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m', '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM', 'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ'];
+  const testAddress = ['Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ'];
 
   test('test get staking', async () => {
     const dotSamaAPIMap = connectDotSamaApis();
@@ -36,7 +36,7 @@ describe('test staking api', () => {
   });
 
   test('subquery get reward', async () => {
-    const resp = await getSubqueryStakingReward(['Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ', '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S']);
+    const resp = await getSubqueryStakingReward(['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m', 'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ', '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S']);
 
     console.log(resp);
   });

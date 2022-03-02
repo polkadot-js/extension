@@ -14,14 +14,17 @@ export default function useFetchStaking (): StakingType {
   const stakingRewardList = stakingRewardReducer.details;
   const readyStakingItems: StakingItem[] = [];
   const stakingData: StakingDataType[] = [];
-
-  console.log('loading', stakingReducer.ready);
+  let loading = true;
 
   Object.keys(stakingItemMap).forEach((key) => {
     const stakingItem = stakingItemMap[key];
 
     if (stakingItem.state === APIItemState.READY) {
-      readyStakingItems.push(stakingItem);
+      loading = false;
+
+      if (stakingItem.balance !== '0') {
+        readyStakingItems.push(stakingItem);
+      }
     }
   });
 
@@ -38,7 +41,7 @@ export default function useFetchStaking (): StakingType {
   }
 
   return {
-    loading: !stakingReducer.ready,
+    loading,
     data: stakingData
   } as StakingType;
 }

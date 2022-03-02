@@ -17,7 +17,7 @@ import { exportAccount } from '../messaging';
 
 const MIN_LENGTH = 6;
 
-interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
+interface Props extends RouteComponentProps<{ address: string }>, ThemeProps {
   className?: string;
 }
 
@@ -117,24 +117,22 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
             </div>
 
             <div className='export__action-area'>
-              <div>
-                <Button
-                  className='export-button'
-                  data-export-button
-                  isBusy={isBusy}
-                  isDisabled={pass.length === 0 || !!error}
-                  onClick={_onExportButtonClick}
-                >
-                  {t<string>('I want to export this account')}
-                </Button>
-                <ActionBar className='export__action-bar'>
-                  <ActionText
-                    className={`cancel-button ${isBusy ? 'disabled-btn' : ''}`}
-                    onClick={_goHome}
-                    text={t<string>('Cancel')}
-                  />
-                </ActionBar>
-              </div>
+              <Button
+                className='export-button'
+                isBusy={isBusy}
+                onClick={_goHome}
+              >
+                <span>{t<string>('Cancel')}</span>
+              </Button>
+              <Button
+                className='export-button'
+                data-export-button
+                isBusy={isBusy}
+                isDisabled={pass.length === 0 || !!error}
+                onClick={_onExportButtonClick}
+              >
+                {t<string>('Export')}
+              </Button>
             </div>
           </div>
         }
@@ -161,6 +159,8 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   .export__action-area {
     display: flex;
     justify-content: center;
+    align-items: center;
+    padding-top: 10px;
   }
 
   .export-account-wrapper {
@@ -168,7 +168,20 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   }
 
   .export-button {
-    margin-bottom: 4px;
+    flex: 1;
+  }
+
+  .export-button:first-child {
+    margin-right: 8px;
+    background-color: ${theme.buttonBackground1};
+
+    span {
+      color: ${theme.buttonTextColor2};
+    }
+  }
+
+  .export-button:last-child {
+    margin-left: 8px;
   }
 
   .export-warning {
@@ -180,7 +193,7 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   }
 
   .export__input-label {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .cancel-button {

@@ -4,10 +4,10 @@
 // This file was automatically generated and should not be edited.
 
 // ====================================================
-// GraphQL query operation: FundInfos
+// GraphQL query operation: DotSamaCrowdloan
 // ====================================================
 
-export interface FundInfos_crowdloans_nodes {
+export interface DotSamaCrowdloan_crowdloans_nodes {
   __typename: "Crowdloan";
   id: string;
   parachainId: string;
@@ -28,22 +28,22 @@ export interface FundInfos_crowdloans_nodes {
   wonAuctionId: string | null;
 }
 
-export interface FundInfos_crowdloans {
+export interface DotSamaCrowdloan_crowdloans {
   __typename: "CrowdloansConnection";
   /**
    * A list of `Crowdloan` objects.
    */
-  nodes: (FundInfos_crowdloans_nodes | null)[];
+  nodes: (DotSamaCrowdloan_crowdloans_nodes | null)[];
 }
 
-export interface FundInfos {
+export interface DotSamaCrowdloan {
   /**
    * Reads and enables pagination through a set of `Crowdloan`.
    */
-  crowdloans: FundInfos_crowdloans | null;
+  crowdloans: DotSamaCrowdloan_crowdloans | null;
 }
 
-export interface FundInfosVariables {
+export interface DotSamaCrowdloanVariables {
   first?: number | null;
   offset?: number | null;
 }

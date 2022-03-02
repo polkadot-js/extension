@@ -14,6 +14,7 @@ export type CrowdloanItemType = {
   logo: string;
   symbol: string;
   paraState?: CrowdloanParaState;
+  crowdloanUrl?: string
 }
 
 export type TabHeaderItemType = {

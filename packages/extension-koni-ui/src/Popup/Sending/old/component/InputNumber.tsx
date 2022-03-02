@@ -42,7 +42,7 @@ interface Props {
   siDecimals?: number;
   siDefault?: SiDef;
   siSymbol?: string;
-  value?: BN | null;
+  value?: BN | null | string;
   withEllipsis?: boolean;
   withLabel?: boolean;
   withMax?: boolean;
@@ -146,11 +146,36 @@ function inputToBn (registry: Registry, input: string, si: SiDef | null, bitLeng
   ];
 }
 
+function addCommas (x: string) {
+  const parts = x.split('.');
+
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  return parts.join('.');
+}
+
 function getValuesFromString (registry: Registry, value: string, si: SiDef | null, bitLength: BitLength, isZeroable: boolean, maxValue?: BN, decimals?: number): [string, BN, boolean] {
   const [valueBn, isValid] = inputToBn(registry, value, si, bitLength, isZeroable, maxValue, decimals);
 
   return [
     value,
+    valueBn,
+    isValid
+  ];
+}
+
+function getFormattedValuesFromString (registry: Registry, isAddComma: boolean, value: string, si: SiDef | null, bitLength: BitLength, isZeroable: boolean, maxValue?: BN, decimals?: number): [string, BN, boolean] {
+  const [valueBn, isValid] = inputToBn(registry, value, si, bitLength, isZeroable, maxValue, decimals);
+  let formattedValue;
+
+  if (isAddComma) {
+    formattedValue = addCommas(value);
+  } else {
+    formattedValue = value.replace(/,/g, '');
+  }
+
+  return [
+    formattedValue,
     valueBn,
     isValid
   ];
@@ -211,6 +236,20 @@ function InputNumber ({ registry, autoFocus, bitLength = DEFAULT_BITLENGTH, chil
   const _onChange = useCallback(
     (input: string) => _onChangeWithSi(input, si),
     [_onChangeWithSi, si]
+  );
+
+  const _onBlur = useCallback(
+    () => {
+      setValues(getFormattedValuesFromString(registry, true, value, si, bitLength, isZeroable, maxValue, siDecimals));
+    },
+    [bitLength, isZeroable, maxValue, registry, si, siDecimals, value]
+  );
+
+  const _onFocus = useCallback(
+    () => {
+      setValues(getFormattedValuesFromString(registry, false, value, si, bitLength, isZeroable, maxValue, siDecimals));
+    },
+    [bitLength, isZeroable, maxValue, registry, si, siDecimals, value]
   );
 
   useEffect((): void => {
@@ -285,9 +324,11 @@ function InputNumber ({ registry, autoFocus, bitLength = DEFAULT_BITLENGTH, chil
       label={label}
       labelExtra={labelExtra}
       maxLength={maxLength || maxValueLength}
+      onBlur={_onBlur}
       onChange={_onChange}
       onEnter={onEnter}
       onEscape={onEscape}
+      onFocus={_onFocus}
       onKeyDown={_onKeyDown}
       onKeyUp={_onKeyUp}
       onPaste={_onPaste}

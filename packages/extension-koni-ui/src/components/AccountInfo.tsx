@@ -31,9 +31,12 @@ export interface Props {
   suri?: string;
   showCopyBtn?: boolean
   type?: KeypairType;
+  isShowAddress?: boolean;
+  isShowBanner?: boolean;
+  iconSize?: number;
 }
 
-function AccountInfo ({ address, className, genesisHash, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -98,7 +101,7 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
             className='account-info-identity-icon'
             iconTheme={iconTheme}
             prefix={prefix}
-            size={32}
+            size={iconSize}
             value={formatted || address}
           />}
         <div className='account-info'>
@@ -132,7 +135,7 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
               </div>
             )
           }
-          {networkInfo?.genesisHash && (
+          {networkInfo?.genesisHash && isShowBanner && (
             <div
               className='account-info-banner account-info-chain'
               data-field='chain'
@@ -141,12 +144,12 @@ function AccountInfo ({ address, className, genesisHash, name, parentName, showC
             </div>
           )}
           <div className='account-info-address-display'>
-            <div
+            {isShowAddress && <div
               className='account-info-full-address'
               data-field='address'
             >
               {_isAccountAll ? t<string>('All Accounts') : toShortAddress(formatted || address || t('<unknown>'), 10)}
-            </div>
+            </div>}
             {showCopyBtn && <CopyToClipboard text={(formatted && formatted) || ''}>
               <img
                 alt='copy'

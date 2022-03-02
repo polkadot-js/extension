@@ -238,5 +238,22 @@
   "There was a problem with your request. You can track its progress on the Transaction History page.": "",
   "There was a problem with your request.": "",
   "Resend": "",
-  "Get started": ""
+  "Get started": "",
+  "Drag and drop the file here": "",
+  "Please drag an drop the .json file you exported from Polkadot.js": "",
+  "Connect the SubWallet": "",
+  "Make sure you trust this site before connecting": "",
+  "Connect": "",
+  "Export": "",
+  "Forget": "",
+  "Update Metadata": "",
+  "Your metadata is out of date": "",
+  "Symbol": "",
+  "Decimals": "",
+  "Approve": "",
+  "IMPORT FROM POLKADOT.JS": "",
+  "Approve Request": "",
+  "You are approving a request with account": "",
+  "Hide Details": "",
+  "View Details": ""
 }

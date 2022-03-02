@@ -6,6 +6,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { NetWorkGroup, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { CrowdloanContributeValueType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
@@ -27,8 +28,8 @@ interface ContentProp {
 }
 
 const GroupDisplayNameMap: Record<string, string> = {
-  POLKADOT_PARACHAIN: 'Polkadot\'s parachain',
-  KUSAMA_PARACHAIN: 'Kusama\'s parachain'
+  POLKADOT_PARACHAIN: 'Polkadot parachain',
+  KUSAMA_PARACHAIN: 'Kusama parachain'
 };
 
 function getGroupDisplayName (groups: NetWorkGroup[]): string {
@@ -39,6 +40,10 @@ function getGroupDisplayName (groups: NetWorkGroup[]): string {
   }
 
   return '';
+}
+
+function getCrowdloanUrl (networkKey: string) {
+  return NETWORKS[networkKey].crowdloanUrl;
 }
 
 function getItem (
@@ -59,7 +64,8 @@ function getItem (
     networkKey,
     symbol,
     groupDisplayName,
-    paraState: contributeValueInfo.paraState
+    paraState: contributeValueInfo.paraState,
+    crowdloanUrl: getCrowdloanUrl(networkKey)
   };
 }
 

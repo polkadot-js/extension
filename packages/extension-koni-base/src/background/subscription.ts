@@ -30,19 +30,20 @@ export class KoniSubcription {
   }
 
   init () {
+    state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
     this.initChainRegistrySubscription();
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribleBalancesAndCrowdloans(address);
+        this.subscribeBalancesAndCrowdloans(address);
         this.subscribeStaking(address);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
-          this.subscribleBalancesAndCrowdloans(address);
+          this.subscribeBalancesAndCrowdloans(address);
           this.subscribeStaking(address);
         }
       });
@@ -62,9 +63,11 @@ export class KoniSubcription {
     });
   }
 
-  subscribleBalancesAndCrowdloans (address: string) {
+  subscribeBalancesAndCrowdloans (address: string) {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
+    state.resetBalanceMap();
+    state.resetCrowdloanMap();
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubBalances = this.initBalanceSubscription(addresses);
@@ -101,7 +104,7 @@ export class KoniSubcription {
   }
 
   initCrowdloanSubscription (addresses: string[]) {
-    const subscriptionPromise = subcribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
+    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 

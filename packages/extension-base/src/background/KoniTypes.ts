@@ -156,6 +156,7 @@ export interface ApiProps extends ApiState {
   isReady: Promise<ApiProps>;
   apiRetry?: number;
   recoverConnect?: () => void;
+  useEvmAddress?: boolean
 }
 
 export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
@@ -171,6 +172,7 @@ export interface NetWorkInfo {
   paraId?: number;
   isEthereum?: boolean;
   nativeToken?: string;
+  crowdloanUrl?: string;
   decimals?: number;
 }
 

@@ -24,7 +24,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
       <div className={`${className} ${requests.length === 1 ? 'lastRequest' : ''}`}>
         <Header
           showSubHeader
-          subHeaderName={t<string>('Authorize')}
+          subHeaderName={t<string>('Connect the SubWallet')}
         />
         {requests.map(({ id, request, url }, index): React.ReactNode => (
           <Request
@@ -44,16 +44,14 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
 export default styled(Authorize)`
   overflow-y: auto;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
-  &.lastRequest {
-    overflow: hidden;
-  }
+  // &.lastRequest {
+  //   overflow: hidden;
+  // }
 
   && {
     padding: 0;
-  }
-
-  .request {
-    padding: 0 24px;
   }
 `;

@@ -6,8 +6,8 @@ import { Subject } from 'rxjs';
 import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
-import { KoniSubcription } from '@polkadot/extension-koni-base/background/subcription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import { KoniSubcription } from '@polkadot/extension-koni-base/background/subscription';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, CRON_REFRESH_STAKING_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -83,7 +83,7 @@ export class KoniCron {
           apiProp.recoverConnect && apiProp.recoverConnect();
         }
       });
-      this.subscriptions?.subscribleBalancesAndCrowdloans && this.subscriptions.subscribleBalancesAndCrowdloans(address);
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
     });
   }
 

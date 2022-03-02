@@ -9,6 +9,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import Header from '@polkadot/extension-koni-ui/partials/Header';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, AccountInfoEl, ActionContext, Button, ButtonArea, InputFileWithLabel, InputWithLabel, Theme, Warning } from '../components';
@@ -145,7 +146,7 @@ function Upload ({ className }: Props): React.ReactElement {
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={isFileError}
-          label={t<string>('backup file')}
+          label={t<string>('IMPORT FROM POLKADOT.JS')}
           onChange={_onChangeFile}
           withLabel
         />
@@ -190,7 +191,7 @@ function Upload ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Upload)`
+export default styled(Upload)(({ theme }: ThemeProps) => `
   padding: 25px 15px 0;
   height: 100%;
   overflow-y: auto;
@@ -210,4 +211,11 @@ export default styled(Upload)`
   .restore-json-button-area {
     bottom: 0;
   }
-`;
+
+  .input-file__sub-label {
+    font-size: 15px;
+    line-height: 26px;
+    color: ${theme.textColor2};
+    padding: 13px 0;
+  }
+`);

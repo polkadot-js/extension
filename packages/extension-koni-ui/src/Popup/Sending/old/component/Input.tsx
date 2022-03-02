@@ -39,6 +39,7 @@ interface Props {
   onEscape?: () => void;
   onChange?: (value: string) => void;
   onBlur?: () => void;
+  onFocus?: () => void;
   onKeyDown?: (event: React.KeyboardEvent<Element>) => void;
   onKeyUp?: (event: React.KeyboardEvent<Element>) => void;
   onKeyPress?: (event: React.KeyboardEvent<Element>) => void;
@@ -92,7 +93,7 @@ const isSelectAll = (key: string, isPreKeyDown: boolean): boolean =>
 
 let counter = 0;
 
-function Input ({ autoFocus = false, children, className, defaultValue, help, icon, inputClassName, isAction = false, isDisabled = false, isDisabledError = false, isEditable = false, isError = false, isFull = false, isHidden = false, isInPlaceEditor = false, isReadOnly = false, isWarning = false, label, labelExtra, max, maxLength, min, name, onBlur, onChange, onEnter, onEscape, onKeyDown, onKeyUp, onPaste, placeholder, tabIndex, type = 'text', value, withEllipsis, withLabel }: Props): React.ReactElement<Props> {
+function Input ({ autoFocus = false, children, className, defaultValue, help, icon, inputClassName, isAction = false, isDisabled = false, isDisabledError = false, isEditable = false, isError = false, isFull = false, isHidden = false, isInPlaceEditor = false, isReadOnly = false, isWarning = false, label, labelExtra, max, maxLength, min, name, onBlur, onChange, onEnter, onEscape, onFocus, onKeyDown, onKeyUp, onPaste, placeholder, tabIndex, type = 'text', value, withEllipsis, withLabel }: Props): React.ReactElement<Props> {
   const [stateName] = useState(() => `in_${counter++}_at_${Date.now()}`);
 
   const _onBlur = useCallback(
@@ -197,6 +198,7 @@ function Input ({ autoFocus = false, children, className, defaultValue, help, ic
           }
           autoCorrect='off'
           data-testid={label}
+          onFocus={onFocus}
           onPaste={_onPaste}
           spellCheck={false}
         />

@@ -76,7 +76,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://acala-polkadot.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2000,
-    nativeToken: 'ACA'
+    nativeToken: 'ACA',
+    crowdloanUrl: 'https://distribution.acala.network/'
   },
   moonbeam: {
     chain: 'Moonbeam',
@@ -86,7 +87,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2004,
     isEthereum: true,
-    nativeToken: 'GLMR'
+    nativeToken: 'GLMR',
+    crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/'
   },
   astar: {
     chain: 'Astar',
@@ -96,6 +98,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2006,
     nativeToken: 'ASTR',
+    crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18
   },
   parallel: {
@@ -105,7 +108,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://parallel.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2012,
-    nativeToken: 'PARA'
+    nativeToken: 'PARA',
+    crowdloanUrl: 'https://crowdloan.parallel.fi/#/auction/contribute/polkadot/2012'
   },
   clover: {
     chain: 'Clover',
@@ -114,7 +118,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://clover.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2002,
-    nativeToken: 'CLV'
+    nativeToken: 'CLV',
+    crowdloanUrl: 'https://lucky.clover.finance/?type=support'
   },
   hydradx: {
     chain: 'HydraDX',
@@ -123,7 +128,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc-01.snakenet.hydradx.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2034,
-    nativeToken: 'HDX'
+    nativeToken: 'HDX',
+    crowdloanUrl: 'https://loan.hydradx.io/'
   },
   edgeware: {
     chain: 'Edgeware',
@@ -140,7 +146,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://fullnode.centrifuge.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2031,
-    nativeToken: 'CFG'
+    nativeToken: 'CFG',
+    crowdloanUrl: 'https://centrifuge.io/parachain/crowdloan/'
   },
   interlay: {
     chain: 'Interlay',
@@ -149,7 +156,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://api.interlay.io/parachain',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2032,
-    nativeToken: 'DOT'
+    nativeToken: 'DOT',
+    crowdloanUrl: 'https://crowdloan.interlay.io/'
   },
   equilibrium: {
     chain: 'Equilibrium',
@@ -158,7 +166,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://node.equilibrium.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2011,
-    nativeToken: 'EQ'
+    nativeToken: 'EQ',
+    crowdloanUrl: 'https://equilibrium.io/en/crowdloan#bid'
   },
   nodle: {
     chain: 'Nodle',
@@ -167,7 +176,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://main3.nodleprotocol.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2026,
-    nativeToken: 'NODL'
+    nativeToken: 'NODL',
+    crowdloanUrl: 'https://parachain.nodle.com/'
   },
   darwinia: {
     chain: 'Darwinia',
@@ -176,7 +186,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.darwinia.network',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2003,
-    nativeToken: 'RING'
+    nativeToken: 'RING',
+    crowdloanUrl: 'https://darwinia.network/plo_contribute'
   },
   manta: {
     chain: 'Manta',
@@ -185,7 +196,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://pectinata.manta.systems',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2015,
-    nativeToken: 'MANTA'
+    nativeToken: 'MANTA',
+    crowdloanUrl: 'https://crowdloan.manta.network/'
   },
   'sora-substrate': {
     chain: 'SORA',
@@ -193,7 +205,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 69,
     provider: 'wss://sora.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
-    nativeToken: 'XOR'
+    nativeToken: 'XOR',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   subgame: {
     chain: 'SubGame',
@@ -202,7 +215,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://mainnet.subgame.org',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2017,
-    nativeToken: 'SGB'
+    nativeToken: 'SGB',
+    crowdloanUrl: 'https://www.subgame.org/#/crowdloan'
   },
   odyssey: {
     chain: 'Ares Odyssey',
@@ -211,7 +225,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://wss.odyssey.aresprotocol.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2028,
-    nativeToken: 'AMAS'
+    nativeToken: 'AMAS',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   polkadex: {
     chain: 'Polkadex',
@@ -220,7 +235,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://mainnet.polkadex.trade',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2036,
-    nativeToken: 'PDEX'
+    nativeToken: 'PDEX',
+    crowdloanUrl: 'https://www.polkadex.trade/crowdloans'
   },
   aleph: {
     chain: 'Aleph Zero',
@@ -228,7 +244,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://ws.azero.dev/',
     groups: ['MAIN_NET'],
-    nativeToken: 'AZERO'
+    nativeToken: 'AZERO',
+    crowdloanUrl: 'https://contribute.alephzero.org/'
   },
   alephTest: {
     chain: 'Aleph Zero Testnet',
@@ -246,7 +263,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['TEST_NET'],
     nativeToken: 'OPL'
   },
-  moonbaseAlpha: {
+  moonbase: {
     chain: 'Moonbase Alpha',
     genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
     ss58Format: 1287,
@@ -262,7 +279,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2021,
-    nativeToken: 'EFI'
+    nativeToken: 'EFI',
+    crowdloanUrl: 'https://enjin.io/efinity-crowdloan'
   },
   composableFinance: {
     chain: 'Composable Finance',
@@ -271,7 +289,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2019,
-    nativeToken: 'LAYR'
+    nativeToken: 'LAYR',
+    crowdloanUrl: 'https://crowdloan.composable.finance/'
   },
   litentry: {
     chain: 'Litentry',
@@ -280,7 +299,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2013,
-    nativeToken: 'LIT'
+    nativeToken: 'LIT',
+    crowdloanUrl: 'https://crowdloan.litentry.com/'
   },
   phala: {
     chain: 'Phala Network',
@@ -289,7 +309,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2035,
-    nativeToken: 'PHA'
+    nativeToken: 'PHA',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   crust: {
     chain: 'Crust Network',
@@ -298,7 +319,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.crust.network',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2008,
-    nativeToken: 'CRU'
+    nativeToken: 'CRU',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   coinversation: {
     chain: 'Coinversation',
@@ -307,7 +329,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2027,
-    nativeToken: 'CTO'
+    nativeToken: 'CTO',
+    crowdloanUrl: 'https://www.coinversation.io/joinus'
   },
   statemine: {
     chain: 'Statemine',
@@ -326,7 +349,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://karura.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2000,
-    nativeToken: 'KAR'
+    nativeToken: 'KAR',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   moonriver: {
     chain: 'Moonriver',
@@ -336,7 +360,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2023,
     isEthereum: true,
-    nativeToken: 'MOVR'
+    nativeToken: 'MOVR',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   shiden: {
     chain: 'Shiden',
@@ -345,7 +370,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://shiden.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2007,
-    nativeToken: 'SDN'
+    nativeToken: 'SDN',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   khala: {
     chain: 'Khala',
@@ -354,7 +380,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://khala.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2004,
-    nativeToken: 'PHA'
+    nativeToken: 'PHA',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   bifrost: {
     chain: 'Bifrost',
@@ -363,7 +390,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://bifrost-parachain.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2001,
-    nativeToken: 'BNC'
+    nativeToken: 'BNC',
+    crowdloanUrl: 'https://bifrost.app/vcrowdloan'
   },
   kilt: {
     chain: 'KILT Spiritnet',
@@ -372,7 +400,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://spiritnet.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2086,
-    nativeToken: 'KILT'
+    nativeToken: 'KILT',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   calamari: {
     chain: 'Calamari Parachain',
@@ -381,7 +410,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://calamari.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2084,
-    nativeToken: 'KMA'
+    nativeToken: 'KMA',
+    crowdloanUrl: 'https://calamari.network/'
   },
   basilisk: {
     chain: 'Basilisk',
@@ -390,7 +420,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://basilisk.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2090,
-    nativeToken: 'BSX'
+    nativeToken: 'BSX',
+    crowdloanUrl: 'https://loan.bsx.fi/'
   },
   altair: {
     chain: 'Altair',
@@ -399,7 +430,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://altair.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2088,
-    nativeToken: 'AIR'
+    nativeToken: 'AIR',
+    crowdloanUrl: 'https://centrifuge.io/altair/crowdloan/'
   },
   heiko: {
     chain: 'Heiko',
@@ -408,7 +440,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://parallel-heiko.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2085,
-    nativeToken: 'HKO'
+    nativeToken: 'HKO',
+    crowdloanUrl: 'https://crowdloan.parallel.fi/#/auction/contribute/kusama/2085'
   },
   kintsugi: {
     chain: 'Kintsugi',
@@ -417,7 +450,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://kintsugi.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2092,
-    nativeToken: 'KINT'
+    nativeToken: 'KINT',
+    crowdloanUrl: 'https://kintsugi.interlay.io/'
   },
   picasso: {
     chain: 'Picasso',
@@ -426,7 +460,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://picasso-rpc.composable.finance',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2087,
-    nativeToken: 'PICA'
+    nativeToken: 'PICA',
+    crowdloanUrl: 'https://crowdloan.composable.finance/'
   },
   pioneer: {
     chain: 'Pioneer Network',
@@ -435,7 +470,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://pioneer.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2096,
-    nativeToken: 'NEER'
+    nativeToken: 'NEER',
+    crowdloanUrl: 'https://ksmcrowdloan.bit.country/'
   },
   quartz: {
     chain: 'QUARTZ by UNIQUE',
@@ -444,7 +480,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://quartz.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2095,
-    nativeToken: 'QTZ'
+    nativeToken: 'QTZ',
+    crowdloanUrl: 'https://unique.network/quartz/crowdloan/'
   },
   genshiro: {
     chain: 'Genshiro',
@@ -453,7 +490,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://node.genshiro.io',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2024,
-    nativeToken: 'GENS'
+    nativeToken: 'GENS',
+    crowdloanUrl: 'https://genshiro.equilibrium.io/en'
   },
   subsocial: {
     chain: 'Subsocial',
@@ -462,7 +500,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc.subsocial.network',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2100,
-    nativeToken: 'SUB'
+    nativeToken: 'SUB',
+    crowdloanUrl: 'https://app.subsocial.network/crowdloan'
   },
   zeitgeist: {
     chain: 'Zeitgeist',
@@ -471,7 +510,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc-0.zeitgeist.pm',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2101,
-    nativeToken: 'ZTG'
+    nativeToken: 'ZTG',
+    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
   },
   sakura: {
     chain: 'Sakura',
@@ -480,7 +520,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'PROVIDER',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2016,
-    nativeToken: 'SKU'
+    nativeToken: 'SKU',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   shadow: {
     chain: 'Crust Shadow',
@@ -489,7 +530,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://rpc-shadow.crust.network/',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2012,
-    nativeToken: 'CSM'
+    nativeToken: 'CSM',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   uniqueNft: {
     chain: 'Unique TestNet 2.0',
@@ -507,7 +549,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://kusama.rpc.robonomics.network',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2048,
-    nativeToken: 'XRT'
+    nativeToken: 'XRT',
+    crowdloanUrl: 'https://robonomics.network/kusama-slot/'
   },
   integritee: {
     chain: 'Integritee Network',
@@ -516,7 +559,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://api.solo.integritee.io',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2015,
-    nativeToken: 'TEER'
+    nativeToken: 'TEER',
+    crowdloanUrl: 'https://crowdloan.integritee.network/'
   },
   crab: {
     chain: 'Darwinia Crab',
@@ -525,7 +569,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://crab-rpc.darwinia.network',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2105,
-    nativeToken: 'CRAB'
+    nativeToken: 'CRAB',
+    crowdloanUrl: 'https://crab.network/plo'
   },
   pichiu: {
     chain: 'Pichiu',
@@ -534,7 +579,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://kusama.kylin-node.co.uk',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2102,
-    nativeToken: 'PCHU'
+    nativeToken: 'PCHU',
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   }
 };
 

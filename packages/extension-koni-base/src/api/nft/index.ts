@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftJson } from '@polkadot/extension-base/background/KoniTypes';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
@@ -9,6 +10,7 @@ import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
+import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
 
 const NFT_TIMEOUT = 20000;
 
@@ -22,25 +24,28 @@ enum SUPPORTED_NFT_NETWORKS {
 }
 
 function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
+  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
+  const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+
   switch (chain) {
     case SUPPORTED_NFT_NETWORKS.karura:
-      return new KaruraNftApi(api, addresses, chain);
+      return new KaruraNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.acala:
-      return new AcalaNftApi(api, addresses, chain);
+      return new AcalaNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.rmrk:
       // eslint-disable-next-line no-case-declarations
       const rmrkNftApi = new RmrkNftApi();
 
       rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
-      rmrkNftApi.setAddresses(addresses);
+      rmrkNftApi.setAddresses(useAddresses);
 
       return rmrkNftApi;
     case SUPPORTED_NFT_NETWORKS.statemine:
-      return new StatemineNftApi(api, addresses, chain);
+      return new StatemineNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.uniqueNft:
-      return new UniqueNftApi(api, addresses, chain);
+      return new UniqueNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.quartz:
-      return new QuartzNftApi(api, addresses, chain);
+      return new QuartzNftApi(api, useAddresses, chain);
   }
 
   return null;
@@ -63,9 +68,12 @@ export class NftHandler {
 
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
+    const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
     for (const handler of this.handlers) {
-      handler.setAddresses(addresses);
+      const useAddresses = ethereumChains.indexOf(handler.chain as string) > -1 ? evmAddresses : substrateAddresses;
+
+      handler.setAddresses(useAddresses);
     }
   }
 
@@ -75,12 +83,16 @@ export class NftHandler {
         await handler.connect();
       }));
     } else {
+      const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
+
       await Promise.all(this.apiPromises.map(async ({ api: apiPromise, chain }) => {
+        const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
+
         if (apiPromise) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
           const parentApi: ApiProps = await apiPromise.isReady;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const handler = createNftApi(chain, parentApi, this.addresses);
+          const handler = createNftApi(chain, parentApi, useAddresses);
 
           if (handler && !this.handlers.includes(handler)) this.handlers.push(handler);
         }

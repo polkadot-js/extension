@@ -4,7 +4,6 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import Name from '@polkadot/extension-koni-ui/partials/Name';
 import Password from '@polkadot/extension-koni-ui/partials/Password';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
@@ -13,18 +12,16 @@ import { AccountInfoEl, ButtonArea, NextStepButton } from '../components';
 interface Props {
   buttonLabel?: string;
   isBusy: boolean;
-  onBackClick?: () => void;
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
-  onNameChange?: (name: string) => void;
   className?: string;
   children?: any;
   address?: string | null;
   genesis?: string | null;
   onPasswordChange?: (password: string) => void;
+  name: string
 }
 
-function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, onBackClick, onCreate, onNameChange }: Props): React.ReactElement<Props> {
-  const [name, setName] = useState<string | null>(null);
+function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, name, onCreate }: Props): React.ReactElement<Props> {
   const [password, setPassword] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
@@ -32,14 +29,6 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
       name && password && onCreate(name, password);
     },
     [name, password, onCreate]
-  );
-
-  const _onNameChange = useCallback(
-    (name: string | null) => {
-      onNameChange && onNameChange(name || '');
-      setName(name);
-    },
-    [onNameChange]
   );
 
   return (
@@ -55,10 +44,6 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
             <div className={ children ? 'children-wrapper' : ''}>
               {children}
             </div>
-            <Name
-              isFocused
-              onChange={_onNameChange}
-            />
             <Password onChange={setPassword} />
           </div>
         </div>

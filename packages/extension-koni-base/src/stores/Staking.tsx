@@ -3,7 +3,7 @@
 
 import { StakingJson } from '@polkadot/extension-base/background/KoniTypes';
 import { EXTENSION_PREFIX } from '@polkadot/extension-base/defaults';
-import SubscribableStore from '@polkadot/extension-koni-base/stores/SubcribableStore';
+import SubscribableStore from '@polkadot/extension-koni-base/stores/SubscribableStore';
 
 export default class StakingStore extends SubscribableStore<StakingJson> {
   constructor () {

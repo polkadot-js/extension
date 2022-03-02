@@ -31,7 +31,8 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [name, setName] = useState<string | null>(null);
+  const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
+  const name = `Account ${accountsWithoutAll.length + 1}`;
   const [step1, setStep1] = useState(true);
   const [type, setType] = useState(DEFAULT_TYPE);
   const chain = useMetadata(account && account.genesis, true);
@@ -101,9 +102,8 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             className='koni-import-seed-content'
             genesis={account?.genesis}
             isBusy={isBusy}
-            onBackClick={_onBackClick}
+            name={name}
             onCreate={_onCreate}
-            onNameChange={setName}
           />
         )
       }

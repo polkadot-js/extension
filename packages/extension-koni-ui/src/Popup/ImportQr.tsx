@@ -7,7 +7,7 @@ import styled, { ThemeContext } from 'styled-components';
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { ActionContext, Theme } from '../components';
+import { AccountContext, ActionContext, Theme } from '../components';
 import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
@@ -24,8 +24,11 @@ function ImportQr (): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<QrAccount | null>(null);
+  const { accounts } = useContext(AccountContext);
+  const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
+  const defaultName = `Account ${accountsWithoutAll.length + 1}`;
   const [address, setAddress] = useState<string | null>(null);
-  const [name, setName] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(defaultName);
   const [password, setPassword] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -101,8 +104,8 @@ function ImportQr (): React.ReactElement {
               <AccountNamePasswordCreation
                 buttonLabel={t<string>('Add the account with identified address')}
                 isBusy={false}
+                name={defaultName}
                 onCreate={_onCreate}
-                onNameChange={setName}
                 onPasswordChange={setPassword}
               />
             )

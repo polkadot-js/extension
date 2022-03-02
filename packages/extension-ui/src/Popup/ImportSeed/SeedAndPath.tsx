@@ -21,10 +21,17 @@ interface Props {
   className?: string;
   onNextStep: () => void;
   onAccountChange: (account: AccountInfo | null) => void;
+  onTypeChange: (type: KeypairType) => void;
   type: KeypairType;
 }
 
-function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): React.ReactElement {
+const keypairTypes = ['ed25519', 'sr25519', 'ecdsa'];
+
+function isKeypairType (value: string): value is KeypairType {
+  return keypairTypes.includes(value);
+}
+
+function SeedAndPath ({ className, onAccountChange, onNextStep, onTypeChange, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const genesisOptions = useGenesisHashOptions();
   const [address, setAddress] = useState('');
@@ -33,6 +40,11 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
+
+  const keypairTypeOptions = keypairTypes.map((name: string) => ({
+    text: name,
+    value: name
+  }));
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -66,6 +78,14 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
   const _onToggleAdvanced = useCallback(() => {
     setAdvances(!advanced);
   }, [advanced]);
+
+  const _onTypeChange = (value: string) => {
+    if (isKeypairType(value)) {
+      onTypeChange(value);
+    } else {
+      setError('');
+    }
+  };
 
   return (
     <>
@@ -109,6 +129,15 @@ function SeedAndPath ({ className, onAccountChange, onNextStep, type }: Props): 
             label={t<string>('derivation path')}
             onChange={setPath}
             value={path || ''}
+          />
+        )}
+        { advanced && (
+          <Dropdown
+            className='cryptoTypeSelection'
+            label={t<string>('crypto type')}
+            onChange={_onTypeChange}
+            options={keypairTypeOptions}
+            value={type}
           />
         )}
         {!!error && !!seed && (

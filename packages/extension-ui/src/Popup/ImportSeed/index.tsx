@@ -83,6 +83,7 @@ function ImportSeed (): React.ReactElement {
           <SeedAndPath
             onAccountChange={setAccount}
             onNextStep={_onNextStep}
+            onTypeChange={setType}
             type={type}
           />
         )

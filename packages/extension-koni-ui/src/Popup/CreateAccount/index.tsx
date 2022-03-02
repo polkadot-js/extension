@@ -127,8 +127,8 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                   buttonLabel={t<string>('Add the account with the generated seed')}
                   genesis={genesisHash}
                   isBusy={isBusy}
-                  onCreate={_onCreate}
                   name={name}
+                  onCreate={_onCreate}
                 >
                   <Dropdown
                     className='create-account-network-select'

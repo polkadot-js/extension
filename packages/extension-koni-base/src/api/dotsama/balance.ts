@@ -3,9 +3,9 @@
 
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { APIItemState, ApiProps, BalanceItem, BalanceRPCResponse } from '@polkadot/extension-base/background/KoniTypes';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { BN } from '@polkadot/util';
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 
 function subscribeWithDerive (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
   const freeMap: Record<string, BN> = {};
@@ -89,6 +89,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     }
 
     if (networkKey === 'kintsugi') {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       return subscribeWithDerive(useAddresses, networkKey, networkAPI, callback);
     } else {
       return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);

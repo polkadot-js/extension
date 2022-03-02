@@ -3,12 +3,7 @@
 
 import BigN from 'bignumber.js';
 
-import {
-  CrowdloanParaState,
-  NftCollection,
-  StakingItem,
-  StakingRewardItem
-} from '@polkadot/extension-base/background/KoniTypes';
+import { CrowdloanParaState, NftCollection, StakingItem, StakingRewardItem } from '@polkadot/extension-base/background/KoniTypes';
 import { BalanceValueType } from '@polkadot/extension-koni-ui/util';
 import { BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 

@@ -132,6 +132,7 @@ function Settings ({ className }: Props): React.ReactElement {
         <MenuItem className='setting'>
           <ActionText
             className='manage-website-access'
+            // @ts-ignore
             icon={faList}
             onClick={_goToAuthList}
             text={t<string>('Manage Website Access')}
@@ -141,7 +142,9 @@ function Settings ({ className }: Props): React.ReactElement {
           <MenuItem className='setting'>
             <ActionText
               className='setting__action-text'
+              // @ts-ignore
               icon={faExpand}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={_onWindowOpen}
               text={t<string>('Open extension in new window')}
             />

@@ -155,6 +155,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
       <MenuItem className='setting'>
         <ActionText
           className='manageWebsiteAccess'
+          // @ts-ignore
           icon={faTasks}
           onClick={_goToAuthList}
           text={t<string>('Manage Website Access')}
@@ -164,7 +165,9 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
         <MenuItem className='setting'>
           <ActionText
             className='openWindow'
+            // @ts-ignore
             icon={faExpand}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onClick={_onWindowOpen}
             text={t<string>('Open extension in new window')}
           />

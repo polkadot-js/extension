@@ -97,6 +97,7 @@ function Request ({ account: { isExternal, isHardware }, buttonText, className, 
                 address={json.address}
                 cmd={CMD_MORTAL}
                 genesisHash={json.genesisHash}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onSignature={_onSignature}
                 payload={payload}
               />

@@ -14,6 +14,7 @@ function Icon ({ className = '', icon, onClick }: Props): React.ReactElement<Pro
   return (
     <div
       className={`${className} icon`}
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onClick={onClick}
     >
       {icon}

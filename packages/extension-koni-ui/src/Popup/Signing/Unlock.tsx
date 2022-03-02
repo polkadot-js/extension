@@ -35,6 +35,7 @@ function Unlock ({ className, error, isBusy, onSign, password, setError, setPass
         isFocused
         label={t<string>('Password for this account')}
         onChange={_onChangePassword}
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onEnter={onSign}
         type='password'
         value={password}

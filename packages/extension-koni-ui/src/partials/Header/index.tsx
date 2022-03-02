@@ -13,7 +13,7 @@ import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniType
 import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import { Link } from '@polkadot/extension-koni-ui/components';
+import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -24,7 +24,7 @@ import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMen
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
-import { accountAllRecoded, isAccountAll } from '@polkadot/extension-koni-ui/util';
+import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
@@ -65,10 +65,10 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
-  const genesisOptions = useGenesisHashOptions();
   const chain = useMetadata(currentAccount?.genesisHash, true);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const { accounts } = useContext(AccountContext);
   const popupTheme = themeContext.id;
   const setRef = useRef(null);
   const actionsRef = useRef(null);
@@ -80,6 +80,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     []
   );
 
+  const genesisOptions = getGenesisOptionsByAddressType(currentAccount?.address, accounts, useGenesisHashOptions());
   const _isAccountAll = currentAccount && isAccountAll(currentAccount.address);
 
   useEffect((): void => {
@@ -341,6 +342,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
           {isNetworkSelectOpen && (
             <NetworkMenu
               currentNetwork={localGenesisHash}
+              genesisOptions={genesisOptions}
               reference={netRef}
               selectNetwork={_onChangeGenesis}
             />

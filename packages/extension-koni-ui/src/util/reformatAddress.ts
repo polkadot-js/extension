@@ -5,11 +5,11 @@ import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
 
 export default function reformatAddress (address: string, networkPrefix: number, isEthereum = false): string {
-  if (isEthereumAddress(address)) {
+  if (isAccountAll(address)) {
     return address;
   }
 
-  if (isAccountAll(address)) {
+  if (isEthereumAddress(address)) {
     return address;
   }
 

@@ -10,7 +10,7 @@ import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
-import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import useGenesisHashOptions, { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
@@ -21,13 +21,13 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   currentNetwork?: string;
+  genesisOptions: networkSelectOption[];
   selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkKey: string) => void;
   isNotHaveAccount?: boolean;
 }
 
-function NetworkMenu ({ className, currentNetwork, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
+function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  let genesisOptions = useGenesisHashOptions();
   const [filteredGenesisOptions, setFilteredGenesisOption] = useState(genesisOptions);
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');

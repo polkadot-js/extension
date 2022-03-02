@@ -5,10 +5,11 @@ import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
+import { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import { Recoded } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 export * from './common';
@@ -44,6 +45,74 @@ export function recodeAddress (address: string, accounts: AccountWithChildren[],
     prefix,
     isEthereum
   };
+}
+
+function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
+  let substrateCounter = 0;
+  let etherumCounter = 0;
+
+  if (!accounts.length) {
+    return [false, false];
+  }
+
+  accounts.forEach((a) => {
+    if (isAccountAll(a.address)) {
+      return;
+    }
+
+    if (isEthereumAddress(a.address)) {
+      etherumCounter++;
+    } else {
+      substrateCounter++;
+    }
+  });
+
+  return [
+    etherumCounter === 0 && substrateCounter > 0,
+    etherumCounter > 0 && substrateCounter === 0
+  ];
+}
+
+export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: networkSelectOption[]): networkSelectOption[] {
+  if (!address || !accounts.length) {
+    return genesisOptions.filter((o) => !o.isEthereum);
+  }
+
+  const result: networkSelectOption[] = [];
+
+  if (isAccountAll(address)) {
+    const [isContainOnlySubstrate, isContainOnlyEtherum] = analysisAccounts(accounts);
+
+    if (isContainOnlySubstrate) {
+      genesisOptions.forEach((o) => {
+        if (!o.isEthereum) {
+          result.push(o);
+        }
+      });
+    } else if (isContainOnlyEtherum) {
+      genesisOptions.forEach((o) => {
+        if (o.isEthereum || o.networkKey === 'all') {
+          result.push(o);
+        }
+      });
+    } else {
+      return genesisOptions;
+    }
+  } else if (isEthereumAddress(address)) {
+    genesisOptions.forEach((o) => {
+      if (o.isEthereum || o.networkKey === 'all') {
+        result.push(o);
+      }
+    });
+  } else {
+    genesisOptions.forEach((o) => {
+      if (!o.isEthereum) {
+        result.push(o);
+      }
+    });
+  }
+
+  return result;
 }
 
 export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };

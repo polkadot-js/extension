@@ -160,8 +160,10 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
     iconTheme,
     showExportButton: true
   });
+  const { accounts } = useContext(AccountContext);
+  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 
-  const showedNetworks = useShowedNetworks(networkKey);
+  const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
   useSetupTransactionHistory(address, showedNetworks);
@@ -184,7 +186,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
   const { crowdloanContributeMap,
     networkBalanceMaps,
     totalBalanceValue } = useAccountBalance(networkKey, showedNetworks, crowdloanNetworks);
-  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
 
   const _toggleZeroBalances = useCallback(() => {
     setShowZeroBalances((v) => {

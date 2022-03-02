@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
+import { getGenesisOptionsByAddressType } from '@polkadot/extension-koni-ui/util';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
@@ -31,7 +32,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const { accounts } = useContext(AccountContext);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
-  const options = useGenesisHashOptions();
+  const options = getGenesisOptionsByAddressType(null, accounts, useGenesisHashOptions());
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
   const networkRef = useRef(null);

@@ -274,6 +274,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
           <div className='koni-header-right-content'>
             {isPopup && (<div
               className={'kn-l-expand-btn'}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={_onWindowOpen}
             >
               <img
@@ -296,6 +297,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               </div>
               <FontAwesomeIcon
                 className='network-select-item__icon'
+                // @ts-ignore
                 icon={faChevronDown}
                 size='sm'
               />
@@ -360,6 +362,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
             formatted={formattedAddress}
             isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
             toggleVisibility={_toggleVisibility}
             toggleZeroBalances={_toggleZeroBalances}
           />

@@ -34,6 +34,7 @@ function HeaderWithSteps ({ className, isBusy, onBackClick, step, text }: Props)
           {step === 2 && (
             <FontAwesomeIcon
               className={`back-button-icon ${isBusy ? 'disabled-button' : ''}`}
+              // @ts-ignore
               icon={faArrowLeft}
               onClick={onBackClick}
             />

@@ -77,6 +77,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
             isBusy={isBusy || ledgerLoading}
             onClick={_onRefresh}
           >
+            {/* @ts-ignore */}
             <FontAwesomeIcon icon={faSync} />
             {t<string>('Refresh')}
           </Button>

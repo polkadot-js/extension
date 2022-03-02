@@ -46,6 +46,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
       {withReset && !!value && (
         <FontAwesomeIcon
           className='input-filter__reset-icon'
+          // @ts-ignore
           icon={faTimes}
           onClick={onResetFilter}
         />

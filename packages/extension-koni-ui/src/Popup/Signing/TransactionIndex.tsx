@@ -41,6 +41,7 @@ function TransactionIndex ({ className, index, name, onNextClick, onPreviousClic
         <div className='step-arrow-left'>
           <FontAwesomeIcon
             className={`arrowLeft ${previousClickActive ? 'active' : ''}`}
+            // @ts-ignore
             icon={faArrowLeft}
             onClick={prevClick}
             size='sm'
@@ -56,6 +57,7 @@ function TransactionIndex ({ className, index, name, onNextClick, onPreviousClic
         <div className='step-arrow-right'>
           <FontAwesomeIcon
             className={`stepArrow arrowRight ${nextClickActive ? 'active' : ''}`}
+            // @ts-ignore
             icon={faArrowRight}
             onClick={nextClick}
             size='sm'

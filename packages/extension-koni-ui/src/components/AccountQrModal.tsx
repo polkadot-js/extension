@@ -85,6 +85,7 @@ function AccountQrModal ({ accountName, address, className,
         <div className='account-qr-modal__header'>
           <FontAwesomeIcon
             className='account-qr-modal__icon'
+            // @ts-ignore
             icon={faTimes}
             onClick={closeModal}
           />

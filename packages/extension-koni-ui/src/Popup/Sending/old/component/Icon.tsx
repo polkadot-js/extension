@@ -21,6 +21,7 @@ interface Props {
 }
 
 // one-time init of FA libraries
+// @ts-ignore
 library.add(fas);
 
 function Icon ({ className = '', color = 'normal', icon, isPadded, isSpinning, onClick, size = '1x', tooltip }: Props): React.ReactElement<Props> {

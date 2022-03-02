@@ -31,6 +31,7 @@ function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, s
           >
             <FontAwesomeIcon
               className={`arrowLeftIcon ${isBusy ? 'disabled-btn' : ''}`}
+              // @ts-ignore
               icon={faArrowLeft}
             />
           </Link>

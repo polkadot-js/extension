@@ -64,6 +64,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
         >
           <FontAwesomeIcon
             className='derivation-path__lock-icon'
+            // @ts-ignore
             icon={isDisabled ? faLock : faLockOpen}
           />
         </Button>

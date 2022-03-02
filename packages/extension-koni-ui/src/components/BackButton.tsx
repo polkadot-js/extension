@@ -22,6 +22,7 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
     >
       <FontAwesomeIcon
         className='back-button__arrow-left-icon'
+        // @ts-ignore
         icon={faArrowLeft}
         size='sm'
       />

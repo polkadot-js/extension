@@ -112,6 +112,7 @@ function SeedAndPath ({ account, className, name, onAccountChange, onNextStep, t
           >
             <FontAwesomeIcon
               color='#888888'
+              // @ts-ignore
               icon={advanced ? faChevronDown : faChevronRight}
             />
             <span>{t<string>('advanced')}</span>

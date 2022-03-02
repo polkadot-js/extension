@@ -109,6 +109,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               onClick={isPopup && (isFirefox || isLinux) ? _openCreateAccount : undefined}
               to={isPopup && (isFirefox || isLinux) ? undefined : createAccountPath}
             >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faPlusCircle} />
               <span>{ t('Create new account')}</span>
             </Link>
@@ -119,6 +120,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
                 className='account-menu-settings__menu-item-text'
                 to={`/account/derive/${master.address}`}
               >
+                {/* @ts-ignore */}
                 <FontAwesomeIcon icon={faCodeBranch} />
                 <span>{t('Derive from an account')}</span>
               </Link>
@@ -132,6 +134,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               className='account-menu-settings__menu-item-text'
               to={'/account/export-all'}
             >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faFileExport} />
               <span>{t<string>('Export all accounts')}</span>
             </Link>
@@ -141,6 +144,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               className='account-menu-settings__menu-item-text'
               to='/account/import-seed'
             >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
               <span>{t<string>('Import account from pre-existing seed')}</span>
             </Link>
@@ -151,6 +155,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
               to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faFileUpload} />
               <span>{t<string>('Restore account from backup JSON file')}</span>
             </Link>
@@ -168,6 +173,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               }
               to='/account/import-qr'
             >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faQrcode} />
               <span>{t<string>('Attach external QR-signer account')}</span>
             </Link>
@@ -180,6 +186,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             className='account-menu-settings__menu-item-text'
             to={'/account/settings'}
           >
+            {/* @ts-ignore */}
             <FontAwesomeIcon icon={faCog} />
             <span>{ t('Settings')}</span>
           </Link>

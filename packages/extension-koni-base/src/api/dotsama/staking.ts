@@ -5,7 +5,9 @@ import axios from 'axios';
 
 import { APIItemState, ApiProps, NetWorkInfo, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { toUnit } from '@polkadot/extension-koni-base/utils/utils';
+import { categoryAddresses, toUnit } from '@polkadot/extension-koni-base/utils/utils';
+
+import { ethereumChains } from './api-helper';
 
 interface LedgerData {
   active: string,
@@ -31,6 +33,7 @@ export const DEFAULT_STAKING_NETWORKS = {
 export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: Record<string, any>[] = [];
   const apis: Record<string, any>[] = [];
+  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
     allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
@@ -44,8 +47,10 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
     apis.push({ chain, api });
   }));
   const unsubPromises = apis.map(({ api: parentApi, chain }) => {
+    const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return
-    return parentApi.api.query.staking?.ledger.multi(addresses, (ledgers: any[]) => {
+    return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
       let totalBalance = 0;
       let unit = '';
       let stakingItem: StakingItem;

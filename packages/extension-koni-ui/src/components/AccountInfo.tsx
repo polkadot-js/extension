@@ -111,6 +111,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
                 <div className='account-info-derive-name'>
                   <FontAwesomeIcon
                     className='account-info-derive-icon'
+                    // @ts-ignore
                     icon={faCodeBranch}
                   />
                   <div

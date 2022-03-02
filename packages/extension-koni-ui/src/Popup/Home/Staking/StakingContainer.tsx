@@ -16,9 +16,10 @@ interface Props extends ThemeProps {
   className?: string;
   data: StakingDataType[];
   loading: boolean;
+  priceMap: Record<string, number>;
 }
 
-function StakingContainer ({ className, data, loading }: Props): React.ReactElement<Props> {
+function StakingContainer ({ className, data, loading, priceMap }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <div className={'staking-container'}>
@@ -38,6 +39,7 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
 
             const name = item?.chainId;
             const icon = LogosMap[name] || LogosMap.default;
+            const price = priceMap[name];
 
             return <StakingRow
               amount={item.balance}
@@ -45,8 +47,8 @@ function StakingContainer ({ className, data, loading }: Props): React.ReactElem
               index={index}
               key={index}
               logo={icon}
+              price={price}
               reward={reward}
-              symbol={item.nativeToken}
               unit={item.unit}
             />;
           })

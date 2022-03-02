@@ -8,8 +8,10 @@ import { StakingDataType, StakingType } from '@polkadot/extension-koni-ui/hooks/
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 export default function useFetchStaking (): StakingType {
-  const { staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
+  const { price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
+  const { priceMap } = priceReducer;
+  const parsedPriceMap: Record<string, number> = {};
   const stakingItemMap = stakingReducer.details;
   const stakingRewardList = stakingRewardReducer.details;
   const readyStakingItems: StakingItem[] = [];
@@ -23,6 +25,7 @@ export default function useFetchStaking (): StakingType {
       loading = false;
 
       if (stakingItem.balance !== '0') {
+        parsedPriceMap[stakingItem.chainId] = priceMap[stakingItem.chainId];
         readyStakingItems.push(stakingItem);
       }
     }
@@ -42,6 +45,7 @@ export default function useFetchStaking (): StakingType {
 
   return {
     loading,
-    data: stakingData
+    data: stakingData,
+    priceMap: parsedPriceMap
   } as StakingType;
 }

@@ -31,5 +31,5 @@ export default React.memo(styled(Spinner)`
   right: 0;
   margin: auto;
   position: absolute;
-  z-index: 100;
+  z-index: 1;
 `);

@@ -2,7 +2,7 @@
       82	Nam Phạm                      	fix bug nft and staking when switch account
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
-      57	AnhMTV                        	change moonbaseAlpha name and remove not use console.log
+      58	AnhMTV                        	Release version 0.2.6 (koni)
       50	leewong                       	# update condition to display correct message on send fund screen
       18	Dominhquangdev                	Add Donate feature in SubWallet
       18	lw                            	

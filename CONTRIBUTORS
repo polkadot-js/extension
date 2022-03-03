@@ -1,12 +1,12 @@
      465	Jaco                          	0.42.5 (#969)
+      82	Nam Phạm                      	fix bug nft and staking when switch account
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
-      58	Nam Phạm                      	fix es-lint quartz nft
-      55	AnhMTV                        	Release version 0.2.5
+      57	AnhMTV                        	change moonbaseAlpha name and remove not use console.log
       50	leewong                       	# update condition to display correct message on send fund screen
-      16	lw                            	
+      18	Dominhquangdev                	Add Donate feature in SubWallet
+      18	lw                            	
       12	Hieu Dao                      	Update README.md
-      11	Dominhquangdev                	Update style Signing screen
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        5	Minh Le                       	refactor code quartz_nft

@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "0.2.6-0",
+  "version": "0.2.6-1",
   "workspaces": [
     "packages/*"
   ],

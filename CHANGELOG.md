@@ -1,6 +1,13 @@
 # CHANGELOG
 
-## 0.2.5 (Koni) Feb 22, 2022
+## 0.2.6 (Koni) Feb 25, 2022
+Changes:
+- Separate support network depends on type of accounts address types
+- Add donate feature
+- Fix bugs
+- ...
+
+## 0.2.5 (Koni) Feb 25, 2022
 Changes:
 - Add crowdloan funds status
 - Support SubSquid Graphql

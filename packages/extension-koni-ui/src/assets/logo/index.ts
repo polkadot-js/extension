@@ -120,6 +120,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   moonbaseAlpha: require('./moonbaseAlpha.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ukraine: require('./ukraine.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

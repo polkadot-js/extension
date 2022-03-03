@@ -16,7 +16,9 @@ export interface Props extends ThemeProps {
   className?: string;
   txResult: TxResult;
   networkKey: string;
-  onResend: () => void
+  onResend: () => void;
+  successResultText?: string;
+  failResultText?: string;
 }
 
 function getErrorMessage (txError?: Error | null): string | null {
@@ -31,7 +33,7 @@ function getErrorMessage (txError?: Error | null): string | null {
   return null;
 }
 
-function SendFundResult ({ className = '', networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
+function SendFundResult ({ className = '', failResultText = 'Send Fund Fail', networkKey, onResend, successResultText = 'Send Fund Successful', txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useContext(ActionContext);
   const _backToHome = useCallback(
@@ -74,7 +76,7 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
             className='kn-status-img'
             src={successStatus}
           />
-          <div className='kn-stt-text'>{t<string>('Send Fund Successful')}</div>
+          <div className='kn-stt-text'>{t<string>(successResultText)}</div>
           <div
             className='kn-stt-subtext'
           >{t<string>('Your request has been confirmed. You can track its progress on the Transaction History page.')}</div>
@@ -93,7 +95,7 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
             className='kn-status-img'
             src={failStatus}
           />
-          <div className='kn-stt-text'>{t<string>('Send Fund Fail')}</div>
+          <div className='kn-stt-text'>{t<string>(failResultText)}</div>
           <div className='kn-stt-subtext'>
             {extrinsicHash
               ? (t<string>('There was a problem with your request. You can track its progress on the Transaction History page.'))

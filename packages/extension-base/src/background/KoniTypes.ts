@@ -176,6 +176,14 @@ export interface NetWorkInfo {
   decimals?: number;
 }
 
+export interface DonateInfo {
+  key: string;
+  name: string;
+  value: string;
+  icon: string;
+  link: string;
+}
+
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkKey: string;
   groups: NetWorkGroup[];

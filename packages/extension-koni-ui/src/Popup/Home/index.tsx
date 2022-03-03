@@ -38,8 +38,9 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 import buyIcon from '../../assets/buy-icon.svg';
+import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
-import swapIcon from '../../assets/swap-icon.svg';
+// import swapIcon from '../../assets/swap-icon.svg';
 import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
@@ -264,12 +265,15 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
               />
             </Link>
 
-            <div className='action-button-wrapper'>
+            <Link
+              className={'action-button-wrapper'}
+              to={'/account/donate'}
+            >
               <ActionButton
-                iconSrc={swapIcon}
-                tooltipContent={t<string>('Swap')}
+                iconSrc={donateIcon}
+                tooltipContent={t<string>('Donate')}
               />
-            </div>
+            </Link>
           </div>
         )}
 
@@ -293,9 +297,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
 
             <div className='action-button-wrapper'>
               <ActionButton
-                iconSrc={swapIcon}
+                iconSrc={donateIcon}
                 isDisabled
-                tooltipContent={t<string>('Swap')}
+                tooltipContent={t<string>('Donate')}
               />
             </div>
           </div>

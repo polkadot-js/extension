@@ -10,7 +10,7 @@ import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
-import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
+import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 
 const NFT_TIMEOUT = 20000;
 
@@ -55,6 +55,7 @@ export class NftHandler {
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
+  prevAddresses: string[] = []; // handle change account
   total = 0;
   data: NftCollection[] = [];
 
@@ -68,6 +69,8 @@ export class NftHandler {
 
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
+    if (this.prevAddresses.length === 0) this.prevAddresses = addresses;
+
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
     for (const handler of this.handlers) {
@@ -114,7 +117,7 @@ export class NftHandler {
 
   public async handleNfts () {
     await this.connect();
-    console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
+    // console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
 
     let total = 0;
     let data: NftCollection[] = [];
@@ -135,9 +138,17 @@ export class NftHandler {
       .finally(() => clearTimeout(timer));
 
     this.total = total;
-    this.data = this.sortData(data);
 
-    console.log(`done fetching ${total} nft from rpc`);
+    if (isAddressesEqual(this.addresses, this.prevAddresses)) {
+      // console.log('nft address no change');
+      this.data = this.sortData(data);
+    } else {
+      // console.log('nft address change');
+      this.data = data;
+      this.prevAddresses = this.addresses;
+    }
+
+    // console.log(`done fetching ${total} nft from rpc`);
   }
 
   public getTotal () {

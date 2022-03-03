@@ -110,8 +110,11 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
             />
             : <video
               autoPlay
+              className={'item-img'}
               height='416'
               loop={true}
+              muted
+              onClick={handleOnClick}
               onError={handleVideoError}
               width='100%'
             >

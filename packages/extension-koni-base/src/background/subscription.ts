@@ -127,6 +127,17 @@ export class KoniSubcription {
   }
 
   initNftSubscription (addresses: string[]) {
+    // if (addresses.length === 1) {
+    //   if (addresses.includes('5CUsg6iUJ3KauUdxs6g63YatR7zCt1juqp1jY15wfMyGVZJB')) {
+    //     addresses = ['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb'];
+    //   }
+    //   else if (addresses.includes('5Dd66ycJMoeYpq8oDRM5B4ETFJDDFTYrZJDo5UkFeNqfLa6G')) {
+    //     addresses = ['5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
+    //   }
+    // }
+    // else {
+    //   addresses = ['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
+    // }
     nftHandler.setAddresses(addresses);
     nftHandler.handleNfts()
       .then((r) => {
@@ -138,6 +149,7 @@ export class KoniSubcription {
 
   subscribeStaking (address: string) {
     this.unsubStaking && this.unsubStaking();
+    state.resetStakingMap();
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubStaking = this.initStakingSubscription(addresses);
@@ -146,6 +158,18 @@ export class KoniSubcription {
   }
 
   initStakingSubscription (addresses: string[]) {
+    // if (addresses.length === 1) {
+    //   if (addresses.includes('5CUsg6iUJ3KauUdxs6g63YatR7zCt1juqp1jY15wfMyGVZJB')) {
+    //     addresses = ['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m'];
+    //   }
+    //   else if (addresses.includes('5Dd66ycJMoeYpq8oDRM5B4ETFJDDFTYrZJDo5UkFeNqfLa6G')) {
+    //     addresses = ['7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'];
+    //   }
+    // }
+    // else {
+    //   addresses = TEST_STAKING_ADDRESSES;
+    // }
+
     const subscriptionPromises = subscribeStaking(addresses, dotSamaAPIMap, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
       console.log('set new staking item', rs);
@@ -154,23 +178,33 @@ export class KoniSubcription {
     return () => {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      subscriptionPromises.forEach((subProm) => {
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        subProm.then((unsub) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      subscriptionPromises
+        .then((unsub) => {
           unsub && unsub();
-        }).catch(console.error);
-      });
+        })
+        .catch(console.error);
     };
   }
 
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 
+    // if (addresses.length === 1) {
+    //   if (addresses.includes('5CUsg6iUJ3KauUdxs6g63YatR7zCt1juqp1jY15wfMyGVZJB')) {
+    //     addresses = ['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m'];
+    //   }
+    //   else if (addresses.includes('5Dd66ycJMoeYpq8oDRM5B4ETFJDDFTYrZJDo5UkFeNqfLa6G')) {
+    //     addresses = ['7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'];
+    //   }
+    // }
+    // else {
+    //   addresses = TEST_STAKING_ADDRESSES;
+    // }
+
     await getSubqueryStakingReward(addresses)
       .then((result) => {
         state.setStakingReward(result);
+        console.log('set staking reward state', result.details);
       })
       .catch(console.error);
   }

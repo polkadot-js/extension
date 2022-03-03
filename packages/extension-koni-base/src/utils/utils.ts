@@ -187,3 +187,13 @@ export const convertFundStatus = (status: string) => {
     return undefined;
   }
 };
+
+export const isAddressesEqual = (addresses: string[], prevAddresses: string[]) => {
+  if (addresses.length !== prevAddresses.length) return false;
+
+  for (const address of addresses) {
+    if (!prevAddresses.includes(address)) return false;
+  }
+
+  return true;
+};

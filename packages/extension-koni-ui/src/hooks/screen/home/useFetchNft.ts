@@ -18,7 +18,7 @@ export default function useFetchNft (page: number): NftType {
   return {
     nftList: nftList.slice(from, to),
     totalItems: nftReducer.total,
-    totalCollection: nftReducer?.nftList.length,
+    totalCollection: nftList.length,
     loading: !nftReducer.ready // ready = not loading
   } as NftType;
 }

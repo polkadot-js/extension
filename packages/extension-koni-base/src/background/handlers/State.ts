@@ -196,6 +196,13 @@ export default class KoniState extends State {
     this.balanceSubject.next(this.getBalance());
   }
 
+  public resetStakingMap () {
+    Object.values(this.stakingMap).forEach((staking) => {
+      staking.state = APIItemState.PENDING;
+    });
+    this.stakingSubject.next(this.getStaking());
+  }
+
   public resetCrowdloanMap () {
     Object.values(this.crowdloanMap).forEach((item) => {
       item.state = APIItemState.PENDING;

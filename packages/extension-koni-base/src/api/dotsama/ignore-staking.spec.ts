@@ -8,7 +8,7 @@ import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 jest.setTimeout(50000);
 
 describe('test staking api', () => {
-  const testAddress = ['Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ'];
+  const testAddress = ['26AeiFcdfBtzaBYRjatTpPPJqRzCWyjR5r6wpqykZmXFSnh9'];
 
   test('test get staking', async () => {
     const dotSamaAPIMap = connectDotSamaApis();
@@ -23,16 +23,16 @@ describe('test staking api', () => {
   });
 
   test('test staking manually', async () => {
-    const provider = NETWORKS.polkadot.provider;
+    const provider = NETWORKS.acala.provider;
     const apiProps = initApi(provider);
     const parentApi = await apiProps.isReady;
     const ledgers = await parentApi.api.query.staking?.ledger.multi(testAddress);
 
     console.log('ledgers', ledgers);
 
-    for (const ledger of ledgers) {
-      console.log(ledger.toHuman());
-    }
+    // for (const ledger of ledgers) {
+    //   console.log(ledger.toHuman());
+    // }
   });
 
   test('subquery get reward', async () => {

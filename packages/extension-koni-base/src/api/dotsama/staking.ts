@@ -26,13 +26,19 @@ export const DEFAULT_STAKING_NETWORKS = {
   polkadot: NETWORKS.polkadot,
   kusama: NETWORKS.kusama,
   hydradx: NETWORKS.hydradx,
-  astar: NETWORKS.astar
+  astar: NETWORKS.astar,
+  acala: NETWORKS.acala
   // moonbeam: NETWORKS.moonbeam
 };
 
+interface StakingApis {
+  api: ApiProps,
+  chain: string
+}
+
 export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: Record<string, any>[] = [];
-  const apis: Record<string, any>[] = [];
+  const apis: StakingApis[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
@@ -46,8 +52,9 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     apis.push({ chain, api });
   }));
+
   const unsubPromises = apis.map(({ api: parentApi, chain }) => {
-    const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
+    const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return
     return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
@@ -72,26 +79,26 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
 
         if (totalBalance > 0) {
           stakingItem = {
-            name: NETWORKS[chain as string].chain,
-            chainId: chain as string,
+            name: NETWORKS[chain].chain,
+            chainId: chain,
             balance: totalBalance.toString(),
-            nativeToken: NETWORKS[chain as string].nativeToken,
-            unit: unit || NETWORKS[chain as string].nativeToken,
+            nativeToken: NETWORKS[chain].nativeToken,
+            unit: unit || NETWORKS[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         } else {
           stakingItem = {
-            name: NETWORKS[chain as string].chain,
-            chainId: chain as string,
+            name: NETWORKS[chain].chain,
+            chainId: chain,
             balance: totalBalance.toString(),
-            nativeToken: NETWORKS[chain as string].nativeToken,
-            unit: unit || NETWORKS[chain as string].nativeToken,
+            nativeToken: NETWORKS[chain].nativeToken,
+            unit: unit || NETWORKS[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         }
 
         // eslint-disable-next-line node/no-callback-literal
-        callback(chain as string, stakingItem);
+        callback(chain, stakingItem);
       }
     });
   });
@@ -100,7 +107,6 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
     const unsubs = await Promise.all(unsubPromises);
 
     unsubs.forEach((unsub) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       unsub && unsub();
     });
   };

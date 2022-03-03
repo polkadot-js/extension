@@ -3,7 +3,7 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { NftCollection as _NftCollection } from '@polkadot/extension-base/background/KoniTypes';
@@ -34,6 +34,12 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
     setChosenCollection(data);
   }, []);
 
+  useEffect(() => {
+    if (loading) {
+      setPage(1);
+    }
+  }, [loading, setPage]);
+
   const handleHideCollectionDetail = useCallback(() => {
     setShowCollectionDetail(false);
   }, []);
@@ -46,9 +52,9 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
 
   const onNextClick = useCallback(() => {
     const nextPage = page + 1;
-    const from = (nextPage - 1) * NFT_GRID_SIZE;
+    // const from = (nextPage - 1) * NFT_GRID_SIZE;
 
-    if (from > totalCollection) return;
+    if (page >= Math.ceil(totalCollection / NFT_GRID_SIZE)) return;
 
     setPage(nextPage);
   }, [page, setPage, totalCollection]);
@@ -101,7 +107,7 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
 
       {
         // @ts-ignore
-        !loading && !showCollectionDetail && totalItems > NFT_GRID_SIZE &&
+        !loading && !showCollectionDetail && totalCollection > NFT_GRID_SIZE &&
         <div className={'pagination'}>
           <div
             className={'nav-item'}

@@ -21,14 +21,15 @@ import { createSubscription, unsubscribe } from './subscriptions';
 
 type CachedUnlocks = Record<string, number>;
 
-const SEED_DEFAULT_LENGTH = 12;
-const SEED_LENGTHS = [12, 15, 18, 21, 24];
-const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
+export const SEED_DEFAULT_LENGTH = 12;
+export const SEED_LENGTHS = [12, 15, 18, 21, 24];
+
+export const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 
 // a global registry to use internally
 const registry = new TypeRegistry();
 
-function getSuri (seed: string, type?: KeypairType): string {
+export function getSuri (seed: string, type?: KeypairType): string {
   return type === 'ethereum'
     ? `${seed}${ETH_DERIVE_DEFAULT}`
     : seed;

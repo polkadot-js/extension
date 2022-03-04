@@ -9,7 +9,7 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, ResponseAccountCreateSuriV2, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -55,9 +55,9 @@ port.onMessage.addListener((data: Message['data']): void => {
   }
 });
 
-function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithNullRequest> (message: TMessageType): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
+function sendMessage<TMessageType extends MessageTypesWithSubscriptions> (message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
   return new Promise((resolve, reject): void => {
     const id = getId();
@@ -136,12 +136,16 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createAccountSuriV2 (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: string): Promise<boolean> {
-  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, type });
+export async function createAccountSuriV2 (name: string, password: string, suri: string, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
+  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types });
 }
 
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
   return sendMessage('pri(seed.create)', { length, seed, type });
+}
+
+export async function createSeedV2 (length?: SeedLengths, seed?: string, types?: Array<KeypairType>): Promise<ResponseSeedCreateV2> {
+  return sendMessage('pri(seed.createV2)', { length, seed, types });
 }
 
 export async function getAllMetatdata (): Promise<MetadataDef[]> {
@@ -223,6 +227,10 @@ export async function subscribeSigningRequests (cb: (accounts: SigningRequest[])
 
 export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {
   return sendMessage('pri(seed.validate)', { suri, type });
+}
+
+export async function validateSeedV2 (suri: string, types: Array<KeypairType>): Promise<ResponseSeedValidateV2> {
+  return sendMessage('pri(seed.validateV2)', { suri, types });
 }
 
 export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {

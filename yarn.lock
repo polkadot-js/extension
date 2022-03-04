@@ -1566,12 +1566,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bifrost-finance/type-definitions@npm:1.3.21":
-  version: 1.3.21
-  resolution: "@bifrost-finance/type-definitions@npm:1.3.21"
+"@bifrost-finance/type-definitions@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@bifrost-finance/type-definitions@npm:1.4.0"
   dependencies:
-    "@open-web3/orml-type-definitions": ^0.9.4-7
-  checksum: c591c92a386a2966138a5b90bff46b8885bdeb75686c443e76f67f8e6f757920df0297093cb23f79928ed00ba34f45dc11cdc810bf33bf9a1e7d8e2fca264d32
+    "@open-web3/orml-type-definitions": ^0.9.4-38
+  checksum: 11f1918bbf425def8650a9b80e17f7dcae83fa3abf4e9f1f499dbfb18b8e43e5f1cbffc5f751aee4d285ee947ef46ae5863934025347cbd45a0cb99467fa36a3
   languageName: node
   linkType: hard
 
@@ -1787,10 +1787,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@equilab/definitions@npm:1.4.9":
-  version: 1.4.9
-  resolution: "@equilab/definitions@npm:1.4.9"
-  checksum: 03c9dcec4f9638f40c4501e3ccba9ca8bd173449cf8c633678c73a4f7bf6a26a1be71eb2ed9a0a6870fe6a4c8dc2c144e7ac7fa75c2d41128afb4a57bca90133
+"@equilab/definitions@npm:1.4.10":
+  version: 1.4.10
+  resolution: "@equilab/definitions@npm:1.4.10"
+  checksum: a3d062a11ec0c444976641e62fb9fd4687088590e25d9deedda27babf306e953cc08a29b98d250ab00f4256f6f1c9868a6b792d282c7573066f4201f0a6fddc6
   languageName: node
   linkType: hard
 
@@ -2990,7 +2990,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@open-web3/orml-type-definitions@npm:^0.9.4-35, @open-web3/orml-type-definitions@npm:^0.9.4-7":
+"@open-web3/orml-type-definitions@npm:^0.9.4-35, @open-web3/orml-type-definitions@npm:^0.9.4-38":
   version: 0.9.4-38
   resolution: "@open-web3/orml-type-definitions@npm:0.9.4-38"
   dependencies:
@@ -3008,12 +3008,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@parallel-finance/type-definitions@npm:1.5.1":
-  version: 1.5.1
-  resolution: "@parallel-finance/type-definitions@npm:1.5.1"
+"@parallel-finance/type-definitions@npm:1.5.2":
+  version: 1.5.2
+  resolution: "@parallel-finance/type-definitions@npm:1.5.2"
   dependencies:
     "@open-web3/orml-type-definitions": ^1.0.2-3
-  checksum: bea1cb95e485b69fdef1b08ad486e7e547c8df53e71708d02243744a35942d90589f22109cbf4c225b6e3491350b67954dde8962b40baad9fc85f62798b201ff
+  checksum: 3b9b75bdb0c840652051cc3c5e798d655f5f86081cc7dde24235432d21174b4c582892e21fc70b2915a70262b677cda4dcd1688dc6664f4c6416261abf663c99
   languageName: node
   linkType: hard
 
@@ -3052,7 +3052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/api-contract@npm:^7.8.1":
+"@polkadot/api-contract@npm:^7.10.1":
   version: 7.10.1
   resolution: "@polkadot/api-contract@npm:7.10.1"
   dependencies:
@@ -3086,7 +3086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/api@npm:^7.8.1":
+"@polkadot/api@npm:^7.10.1":
   version: 7.10.1
   resolution: "@polkadot/api@npm:7.10.1"
   dependencies:
@@ -3296,18 +3296,18 @@ __metadata:
     "@acala-network/type-definitions": ^3.0.2-4
     "@apollo/client": ^3.5.9
     "@babel/runtime": ^7.16.7
-    "@bifrost-finance/type-definitions": 1.3.21
+    "@bifrost-finance/type-definitions": 1.4.0
     "@crustio/type-definitions": 1.2.0
     "@darwinia/types": 2.7.2
     "@digitalnative/type-definitions": 1.1.27
     "@docknetwork/node-types": 0.6.0
     "@edgeware/node-types": 3.6.2-wako
-    "@equilab/definitions": 1.4.9
+    "@equilab/definitions": 1.4.10
     "@interlay/interbtc-types": 1.5.10
     "@kiltprotocol/type-definitions": 0.1.23
     "@laminar/type-definitions": 0.3.1
     "@metaverse-network-sdk/type-definitions": ^0.0.1-6
-    "@parallel-finance/type-definitions": 1.5.1
+    "@parallel-finance/type-definitions": 1.5.2
     "@phala/typedefs": 0.2.30
     "@polkadot/api": ^7.8.1
     "@polkadot/api-derive": ^7.8.1
@@ -3327,10 +3327,10 @@ __metadata:
     "@polkadot/util-crypto": ^8.3.1
     "@polymathnetwork/polymesh-types": 0.0.2
     "@snowfork/snowbridge-types": 0.2.7
-    "@sora-substrate/type-definitions": 1.7.32
+    "@sora-substrate/type-definitions": 1.7.46
     "@subsocial/types": 0.6.5
     "@unique-nft/types": 0.2.0
-    "@zeitgeistpm/type-defs": 0.4.0
+    "@zeitgeistpm/type-defs": 0.4.5
     "@zeroio/type-definitions": 0.0.14
     axios: ^0.24.0
     cross-fetch: ^3.1.5
@@ -3769,7 +3769,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/types@npm:^7.8.1":
+"@polkadot/types@npm:^7.10.1":
   version: 7.10.1
   resolution: "@polkadot/types@npm:7.10.1"
   dependencies:
@@ -4290,12 +4290,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sora-substrate/type-definitions@npm:1.7.32":
-  version: 1.7.32
-  resolution: "@sora-substrate/type-definitions@npm:1.7.32"
+"@sora-substrate/type-definitions@npm:1.7.46":
+  version: 1.7.46
+  resolution: "@sora-substrate/type-definitions@npm:1.7.46"
   dependencies:
     "@open-web3/orml-type-definitions": ^0.9.4-35
-  checksum: 4271fdc7c972cf631f7d569054cf61b50878bd56639d763bee3e81e752cd662d3fdd5d145befe27f661d197c1fd7f4b7dbc105d877c5b5a7705e1a2c6c983530
+  checksum: c14c3e88d6d542d2321a560e4e493809f5b9d54ed6768c531a4cc8b16e96639381f29ae6176c55eae6d2d90e6629df5b41aaab7e7af2a1b7dd3af527a0291c1c
   languageName: node
   linkType: hard
 
@@ -5352,10 +5352,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zeitgeistpm/type-defs@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@zeitgeistpm/type-defs@npm:0.4.0"
-  checksum: bb331c18f0aa934a02083b8d3fc6a9a411b32ad825e2b0331ce47ea3f66f84a2b002b223931f39a2e36846814fb638d0cf8f9a30f7dd58dbf03111e7177576fe
+"@zeitgeistpm/type-defs@npm:0.4.5":
+  version: 0.4.5
+  resolution: "@zeitgeistpm/type-defs@npm:0.4.5"
+  checksum: f74806db265ba52430fa8023818b30e88a05cca79026e85e4fde0392e70b0736126735cad8a37e0a7e51712093599bd782b7a0fbb6c77f20c1e749fa67707bdb
   languageName: node
   linkType: hard
 

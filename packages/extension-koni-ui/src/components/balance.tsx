@@ -28,9 +28,11 @@ export const BalanceVal = ({ startWithSymbol = false, symbol, value, withComma =
 
   const symbolView = prefix && <span className='balance-val__symbol'>{symbol}</span>;
 
+  const formatPrefix = new Intl.NumberFormat().format(Number(prefix));
+
   return (
     <span className='balance-val'>
-      {startWithSymbol && withSymbol && symbolView}<span className='balance-val__prefix'>{withComma ? new Intl.NumberFormat().format(Number(prefix)) : prefix}</span>
+      {startWithSymbol && withSymbol && symbolView}<span className='balance-val__prefix'>{withComma ? formatPrefix.replace(/[. ]+/g, ',') : prefix}</span>
 
       .<span className='balance-val__postfix'>
         {isString ? postfixValue.slice(0, -1) : postfixValue}

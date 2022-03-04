@@ -1,8 +1,8 @@
 {
   "author": "Koni Studio",
-  "description": "Web3 Extension Wallet for Polkadot & Kusama Ecosystem",
-  "homepage_url": "https://github.com/Koniverse/Subwallet-V2",
-  "name": "SubWallet",
+  "description": "Web3 Multiverse Gateway for Polkadot & Kusama Ecosystem",
+  "homepage_url": "https://subwallet.app/",
+  "name": "SubWallet - Polkadot Extension Wallet",
   "short_name": "SubWallet",
   "manifest_version": 2,
   "permissions": [

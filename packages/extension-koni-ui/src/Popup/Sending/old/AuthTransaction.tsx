@@ -300,6 +300,7 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border: 1px solid ${theme.extensionBorder};
   }
 
   .kn-l-header {

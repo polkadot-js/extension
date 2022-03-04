@@ -7,13 +7,13 @@ import styled from 'styled-components';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
 import { getGenesisOptionsByAddressType } from '@polkadot/extension-koni-ui/util';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
-import { createAccountSuriV2, createSeed, validateSeed } from '../../messaging';
-import { DEFAULT_TYPE } from '../../util/defaultType';
+import { createAccountSuriV2, createSeedV2, validateSeedV2 } from '../../messaging';
 import Mnemonic from './Mnemonic';
 
 interface Props {
@@ -21,14 +21,18 @@ interface Props {
   defaultClassName?: string;
 }
 
+export const SUBSTRATE_ACCOUNT_TYPE: KeypairType = 'sr25519';
+export const EVM_ACCOUNT_TYPE: KeypairType = 'ethereum';
+
 function CreateAccount ({ className, defaultClassName }: Props): React.ReactElement {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
+  const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const [address, setAddress] = useState<null | string>(null);
+  const [evmAddress, setEvmAddress] = useState<null | string>(null);
   const [seed, setSeed] = useState<null | string>(null);
-  const [type, setType] = useState(DEFAULT_TYPE);
   const { accounts } = useContext(AccountContext);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
@@ -44,36 +48,34 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   }
 
   useEffect((): void => {
-    createSeed(undefined)
-      .then(({ address, seed }): void => {
-        setAddress(address);
-        setSeed(seed);
+    createSeedV2(undefined, undefined, keyTypes)
+      .then((response): void => {
+        // @ts-ignore
+        setAddress(response.addressMap[SUBSTRATE_ACCOUNT_TYPE]);
+        setEvmAddress(response.addressMap[EVM_ACCOUNT_TYPE]);
+        setSeed(response.seed);
       })
       .catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {
     if (seed) {
-      const type = chain && chain.definition.chainType === 'ethereum'
-        ? 'ethereum'
-        : DEFAULT_TYPE;
-
-      setType(type);
-      validateSeed(seed, type)
-        .then(({ address }) => setAddress(address))
+      validateSeedV2(seed, keyTypes)
+        .then(({ addressMap, seed }) => {
+          setAddress(addressMap[SUBSTRATE_ACCOUNT_TYPE]);
+          setEvmAddress(addressMap[EVM_ACCOUNT_TYPE]);
+        })
         .catch(console.error);
     }
-  }, [seed, chain]);
+  }, [seed]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
       // this should always be the case
       if (name && password && seed) {
         setIsBusy(true);
-
-        createAccountSuriV2(name, password, seed, type, genesisHash)
-          .then(() => {
+        createAccountSuriV2(name, password, seed, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE], genesisHash)
+          .then((response) => {
             window.localStorage.setItem('popupNavigation', '/');
             onAction('/');
           })
@@ -83,7 +85,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
           });
       }
     },
-    [genesisHash, onAction, seed, type]
+    [genesisHash, onAction, seed]
   );
 
   const _onNextStep = useCallback(
@@ -115,6 +117,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
             ? (
               <Mnemonic
                 address={address}
+                evmAddress={evmAddress}
                 genesisHash={genesisHash}
                 name={name}
                 onNextStep={_onNextStep}

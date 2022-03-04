@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Extension from '@polkadot/extension-base/background/handlers/Extension';
+import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestApi, RequestTransactionHistoryAdd, RequestTransactionHistoryGet, RequestTransactionHistoryGetByMultiNetworks, StakingJson, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestAccountCreateSuriV2, RequestApi, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransactionHistoryGet, RequestTransactionHistoryGetByMultiNetworks, ResponseAccountCreateSuriV2, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -14,13 +14,13 @@ import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyri
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { hexToU8a, isHex, u8aToString } from '@polkadot/util';
-import { base64Decode, jsonDecrypt } from '@polkadot/util-crypto';
+import { assert, hexToU8a, isHex, u8aToString } from '@polkadot/util';
+import { base64Decode, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
 const bWindow = window as unknown as BackgroundWindow;
 
-const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
+const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
 function getSuri (seed: string, type?: KeypairType): string {
   return type === 'ethereum'
@@ -238,15 +238,52 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, type }: RequestAccountCreateSuri): boolean {
-    const suri = getSuri(_suri, type);
-    const address = keyring.createFromUri(suri, {}, type).address;
+  private accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): ResponseAccountCreateSuriV2 {
+    const addressDict = {} as Record<KeypairType, string>;
 
-    this._saveCurrentAccountAddress(address, () => {
-      keyring.addUri(suri, password, { genesisHash, name }, type);
+    types?.forEach((type) => {
+      const suri = getSuri(_suri, type);
+      const address = keyring.createFromUri(suri, {}, type).address;
+
+      addressDict[type] = address;
+
+      this._saveCurrentAccountAddress(address, () => {
+        keyring.addUri(suri, password, { genesisHash, name }, type);
+      });
     });
 
-    return true;
+    return addressDict;
+  }
+
+  private seedCreateV2 ({ length = SEED_DEFAULT_LENGTH, seed: _seed, types }: RequestSeedCreateV2): ResponseSeedCreateV2 {
+    const seed = _seed || mnemonicGenerate(length);
+    const rs = { seed: seed, addressMap: {} } as ResponseSeedCreateV2;
+
+    types?.forEach((type) => {
+      rs.addressMap[type] = keyring.createFromUri(getSuri(seed, type), {}, type).address;
+    });
+
+    return rs;
+  }
+
+  private seedValidateV2 ({ suri, types }: RequestSeedValidateV2): ResponseSeedValidateV2 {
+    const { phrase } = keyExtractSuri(suri);
+
+    if (isHex(phrase)) {
+      assert(isHex(phrase, 256), 'Hex seed needs to be 256-bits');
+    } else {
+      // sadly isHex detects as string, so we need a cast here
+      assert(SEED_LENGTHS.includes((phrase).split(' ').length), `Mnemonic needs to contain ${SEED_LENGTHS.join(', ')} words`);
+      assert(mnemonicValidate(phrase), 'Not a valid mnemonic seed');
+    }
+
+    const rs = { seed: suri, addressMap: {} } as ResponseSeedValidateV2;
+
+    types && types.forEach((type) => {
+      rs.addressMap[type] = keyring.createFromUri(getSuri(suri, type), {}, type).address;
+    });
+
+    return rs;
   }
 
   private deriveV2 (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
@@ -478,6 +515,10 @@ export default class KoniExtension extends Extension {
         return this.apiInit(request as RequestApi);
       case 'pri(accounts.create.suriV2)':
         return this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
+      case 'pri(seed.createV2)':
+        return this.seedCreateV2(request as RequestSeedCreateV2);
+      case 'pri(seed.validateV2)':
+        return this.seedValidateV2(request as RequestSeedValidateV2);
       case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
       case 'pri(accounts.triggerSubscription)':

@@ -14,6 +14,8 @@ import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import SeedAndPath from './SeedAndPath';
+import { KeypairType } from '@polkadot/util-crypto/types';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 
 export interface AccountInfo {
   address: string;
@@ -31,6 +33,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
+  const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const [step1, setStep1] = useState(true);
@@ -41,20 +44,12 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     !accounts.length && onAction();
   }, [accounts, onAction]);
 
-  useEffect((): void => {
-    setType(
-      chain && chain.definition.chainType === 'ethereum'
-        ? 'ethereum'
-        : DEFAULT_TYPE
-    );
-  }, [chain]);
-
   const _onCreate = useCallback((name: string, password: string): void => {
     // this should always be the case
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, type, account.genesis)
+      createAccountSuriV2(name, password, account.suri, keyTypes)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -64,7 +59,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           console.error(error);
         });
     }
-  }, [account, onAction, type]);
+  }, [account, onAction, keyTypes]);
 
   const _onNextStep = useCallback(
     () => setStep1(false),

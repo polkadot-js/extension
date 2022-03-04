@@ -15,6 +15,7 @@ interface Props extends ThemeProps {
   onNextStep: () => void;
   seed: string;
   address?: string;
+  evmAddress?: string,
   genesisHash?: string;
   name?: string;
   className?: string;
@@ -31,7 +32,7 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: Props): React.ReactElement<Props> {
+function Mnemonic ({ address, className, evmAddress, genesisHash, name, onNextStep, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const { show } = useToast();
@@ -53,11 +54,14 @@ function Mnemonic ({ address, className, genesisHash, name, onNextStep, seed }: 
       <div className={className}>
         <div className='account-info-wrapper'>
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfoEl
+            {address && <AccountInfoEl
               address={address}
-              genesisHash={genesisHash}
               name={name}
-            />
+            />}
+            {evmAddress && <AccountInfoEl
+              address={evmAddress}
+              name={name}
+            />}
             <MnemonicSeed
               backupMnemonicSeed={_backupMnemonicSeed}
               isShowDownloadButton

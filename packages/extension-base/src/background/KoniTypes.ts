@@ -3,11 +3,12 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { AccountJson, RequestAccountSubscribe, RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
+import { AccountJson, RequestAccountSubscribe, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, SeedLengths } from '@polkadot/extension-base/background/types';
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 export enum ApiInitStatus {
   SUCCESS,
@@ -254,6 +255,32 @@ export interface RequestApi {
   networkKey: string;
 }
 
+export interface RequestSeedCreateV2 {
+  length?: SeedLengths;
+  seed?: string;
+  types?: Array<KeypairType>;
+}
+
+export interface RequestSeedValidateV2 {
+  suri: string;
+  types?: Array<KeypairType>;
+}
+
+export interface RequestAccountCreateSuriV2 {
+  name: string;
+  genesisHash?: string | null;
+  password: string;
+  suri: string;
+  types?: Array<KeypairType>
+}
+
+export interface ResponseSeedCreateV2 {
+  seed: string,
+  addressMap: Record<KeypairType, string>
+}
+export type ResponseSeedValidateV2 = ResponseSeedCreateV2
+export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
+
 export type RequestPrice = null
 export type RequestSubscribePrice = null
 export type RequestBalance = null
@@ -266,25 +293,31 @@ export type RequestSubscribeStakingReward = null
 
 export interface KoniRequestSignatures {
   'pri(api.init)': [RequestApi, ApiInitStatus];
-  'pri(staking.getStaking)': [null, StakingJson]
-  'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson]
-  'pri(stakingReward.getStakingReward)': [null, StakingRewardJson]
-  'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson]
-  'pri(nft.getNft)': [null, NftJson],
-  'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson]
-  'pri(price.getPrice)': [RequestPrice, PriceJson]
-  'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson],
-  'pri(balance.getBalance)': [RequestBalance, BalanceJson],
-  'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson],
-  'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson],
-  'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson],
+  'pri(staking.getStaking)': [null, StakingJson];
+  'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson];
+  'pri(stakingReward.getStakingReward)': [null, StakingRewardJson];
+  'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson];
+  'pri(nft.getNft)': [null, NftJson];
+  'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
+  'pri(price.getPrice)': [RequestPrice, PriceJson];
+  'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson];
+  'pri(balance.getBalance)': [RequestBalance, BalanceJson];
+  'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
+  'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
+  'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
+  'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
+  'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
+  'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
+  'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
+  'pri(json.restoreV2)': [RequestJsonRestore, void];
+  'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];
-  'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]],
-  'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>],
+  'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];
+  'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.get)': [RequestTransactionHistoryGet, boolean, TransactionHistoryItemType[]];
   'pri(transaction.history.getByMultiNetwork)': [RequestTransactionHistoryGetByMultiNetworks, boolean, TransactionHistoryItemType[]];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
-  'pub(utils.getRandom)': [RandomTestRequest, number]
+  'pub(utils.getRandom)': [RandomTestRequest, number];
 }

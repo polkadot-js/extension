@@ -99,7 +99,6 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];
-  'pri(accounts.create.suriV2)': [RequestAccountCreateSuri, boolean];
   'pri(accounts.edit)': [RequestAccountEdit, boolean];
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
@@ -115,13 +114,10 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.toggle)': [string, ResponseAuthorizeList];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
-  'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];
   'pri(json.batchRestore)': [RequestBatchRestore, void];
-  'pri(json.validate.password)': []
-  'pri(json.restoreV2)': [RequestJsonRestore, void];
-  'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
+  'pri(json.validate.password)': [];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];

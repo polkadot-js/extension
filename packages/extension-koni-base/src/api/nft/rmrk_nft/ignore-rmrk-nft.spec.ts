@@ -13,9 +13,11 @@ describe('test rmrk nft api', () => {
     testNftApi.setAddresses(TEST_NFT_ADDRESSES);
     await testNftApi.connect();
     await testNftApi.handleNfts();
-    const result = testNftApi.getData();
+    // const result = testNftApi.getData();
 
-    for (const collection of result) {
+    console.log(testNftApi.getData());
+
+    for (const collection of testNftApi.getData()) {
       console.log(collection.nftItems);
     }
 

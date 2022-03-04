@@ -1,16 +1,32 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import styled from 'styled-components';
 
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import {NftItem as _NftItem} from "@polkadot/extension-base/background/KoniTypes";
+import {isValidAddress} from "@polkadot/extension-koni-base/utils/utils";
 
 interface Props extends ThemeProps {
   className?: string;
+  setShowTransfer: () => void;
+  nftItem: _NftItem;
 }
 
-function TransferNftContainer ({ className }: Props): React.ReactElement<Props> {
+function TransferNftContainer ({ className, nftItem, setShowTransfer }: Props): React.ReactElement<Props> {
+  const [recipientAddress, setRecipientAddress] = useState('');
+  const [addressError, setAddressError] = useState(false);
+
+  const handleChangeRecipient = useCallback((e: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const address = e.target.value;
+
+    setRecipientAddress(address as string);
+    if (!isValidAddress(address as string) || address === '') setAddressError(true);
+    else setAddressError(false);
+  }, []);
+
   return (
     <div className={className}>
       <div className={'header'}>
@@ -20,23 +36,37 @@ function TransferNftContainer ({ className }: Props): React.ReactElement<Props> 
         >
           Transfer NFT
         </div>
-        <div className={'close-button'}>x</div>
+        <div
+          className={'close-button'}
+          onClick={setShowTransfer}
+        >
+          x
+        </div>
       </div>
 
       <div className={'field-container'}>
         <div className={'field-title'}>Recipient</div>
-        <input className={'input-value'} />
-        <div className={'address-warning'}>Recipient address is not valid</div>
+        <input
+          className={'input-value'}
+          onChange={handleChangeRecipient}
+          value={recipientAddress}
+        />
+        {
+          addressError &&
+          <div className={'address-warning'}>Recipient address is not valid</div>
+        }
       </div>
 
       <div className={'transfer-meta'}>
         <div className={'meta-title'}>
           <div>NFT</div>
-          <div>Flexible fee</div>
+          <div>Chain</div>
+          <div>Estimated fee</div>
         </div>
 
         <div className={'meta-value'}>
-          <div>Acala Crowdloan Contributor 2021</div>
+          <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
+          <div>Acala</div>
           <div>0 ACA</div>
         </div>
       </div>
@@ -48,7 +78,6 @@ function TransferNftContainer ({ className }: Props): React.ReactElement<Props> 
 
 export default React.memo(styled(TransferNftContainer)(({ theme }: Props) => `
   width: 100%;
-  padding: 0 25px;
 
   .send-button {
     margin-top: 40px;

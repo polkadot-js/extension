@@ -126,6 +126,8 @@ export default class QuartzNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
+    const start = performance.now();
+
     const collectionCount = await this.getCreatedCollectionCount();
     const collectionPropertiesMap: Record<number, any> = {};
     const collectionIds: number[] = [];
@@ -133,10 +135,6 @@ export default class QuartzNftApi extends BaseNftApi {
     for (let i = 0; i < collectionCount; i++) {
       collectionIds.push(i);
     }
-
-    await Promise.all(collectionIds.map(async (id) => {
-      collectionPropertiesMap[id] = await this.getCollectionProperties(id);
-    }));
 
     const data: NftIdList[] = [];
     const addressTokenDict: any[] = [];
@@ -147,7 +145,11 @@ export default class QuartzNftApi extends BaseNftApi {
       }
     }
 
-    await Promise.all(addressTokenDict.map(async (item: Record<string | number, string | number>) => {
+    const _handleCollectionPropertiesMap = Promise.all(collectionIds.map(async (id) => {
+      collectionPropertiesMap[id] = await this.getCollectionProperties(id);
+    }));
+
+    const _handleAddressTokenDict = Promise.all(addressTokenDict.map(async (item: Record<string | number, string | number>) => {
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const rs = await this.getAddressTokens(item.i as number, item.account as string);
@@ -159,8 +161,12 @@ export default class QuartzNftApi extends BaseNftApi {
       }
     }));
 
-    const allCollections: NftCollection[] = [];
+    await Promise.all([
+      _handleCollectionPropertiesMap,
+      _handleAddressTokenDict
+    ]);
 
+    const allCollections: NftCollection[] = [];
     let total = 0;
 
     for (let j = 0; j < data.length; j++) {
@@ -174,7 +180,7 @@ export default class QuartzNftApi extends BaseNftApi {
       total += nfts.length;
 
       if (collectionProperties) {
-        for (let i = 0; i < nfts.length; i++) {
+        await Promise.all(nfts.map(async (nft, i) => {
           const tokenId = nfts[i];
           const nftData = await this.getNftData(collectionProperties, collectionId, tokenId);
 
@@ -193,7 +199,7 @@ export default class QuartzNftApi extends BaseNftApi {
 
             nftItems.push(tokenDetail);
           }
-        }
+        }));
 
         allCollections.push({
           collectionId: collectionId.toString(),
@@ -204,7 +210,11 @@ export default class QuartzNftApi extends BaseNftApi {
       }
     }
 
+    console.log(`quartz took ${performance.now() - start}ms`);
+
     this.total = total;
     this.data = allCollections;
+
+    console.log(`Fetched ${total} nfts from quartz`);
   }
 }

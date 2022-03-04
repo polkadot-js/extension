@@ -117,7 +117,7 @@ export class NftHandler {
 
   public async handleNfts () {
     await this.connect();
-    // console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
+    console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
 
     let total = 0;
     let data: NftCollection[] = [];
@@ -148,7 +148,7 @@ export class NftHandler {
       this.prevAddresses = this.addresses;
     }
 
-    // console.log(`done fetching ${total} nft from rpc`);
+    console.log(`done fetching ${total} nft from rpc`);
   }
 
   public getTotal () {
@@ -165,5 +165,11 @@ export class NftHandler {
       total: this.total,
       nftList: this.data
     } as NftJson;
+  }
+
+  public parseAssetId (id: string) {
+    const numberId = parseInt(id);
+
+    return numberId.toString();
   }
 }

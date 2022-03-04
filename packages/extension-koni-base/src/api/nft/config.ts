@@ -18,8 +18,11 @@ export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 export const TEST_NFT_ADDRESSES = [
   // '5EZKPCdzFcvtpAJ9EqULWp1QCLZZUJFcyiPZh1U3BeWbGC4M',
   // 'EDgjFr48CckNaoykyaZXuYxySra3g26MHQNbvMrUC8BLHZj',
-  // '13uagLBtkuQY5KsMGUzzcrm5EvaMpE9EYhvpeKaKxo9E6ykW'
-  // '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'
+  // '13uagLBtkuQY5KsMGUzzcrm5EvaMpE9EYhvpeKaKxo9E6ykW',
+  // '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W',
+  // '5HRRU6LUDYUowbneh4iH6X3iVThRBpKTRCYLhYWbvxsxrwxT',
+
+  // 'Hw38QgLquVjhFc6TmXKzUQie3yezV8dsaP66CnZQm6Tc75M'
 
   'seAJwjS9prpF7BLXK2DoyuYWZcScrtayEN5kwsjsXmXQxrp',
   '5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb',

@@ -6,6 +6,7 @@ import { take } from 'rxjs';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -138,7 +139,7 @@ export class KoniSubcription {
     // else {
     //   addresses = ['5GedyoC1nULnjzk3m8qjZznsAtpnJPUQREVLDcXcgD1yLwrb', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
     // }
-    nftHandler.setAddresses(addresses);
+    nftHandler.setAddresses(TEST_NFT_ADDRESSES);
     nftHandler.handleNfts()
       .then((r) => {
         state.setNft(nftHandler.getNftJson());

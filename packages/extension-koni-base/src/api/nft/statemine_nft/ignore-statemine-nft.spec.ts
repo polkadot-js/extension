@@ -16,6 +16,8 @@ describe('test statemine nft api', () => {
     await testNftApi.connect();
     await testNftApi.handleNfts();
 
+    console.log(testNftApi.getTotal());
+
     expect(testNftApi.getTotal()).toBeGreaterThanOrEqual(0);
   });
 });

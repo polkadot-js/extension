@@ -53,6 +53,7 @@ const mountComponent = (isBusy = false): ReactWrapper => mount(
   <AccountNamePasswordCreation
     buttonLabel={buttonLabel}
     isBusy={isBusy}
+    keyTypes={[]}
     name={account.name}
     onCreate={onCreate}
   />

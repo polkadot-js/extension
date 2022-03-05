@@ -92,6 +92,8 @@ export default class KoniState extends State {
   private nftSubject = new Subject<NftJson>();
   private stakingSubject = new Subject<StakingJson>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
+  private historyMap: Record<string, TransactionHistoryItemType[]> = {};
+  private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -162,6 +164,12 @@ export default class KoniState extends State {
 
   public subscribeStakingReward () {
     return this.stakingRewardSubject;
+  }
+
+  public setHistory (historyMap: Record<string, TransactionHistoryItemType[]>) {
+    this.historyMap = historyMap;
+
+    this.historySubject.next(this.historyMap);
   }
 
   public getCurrentAccount (update: (value: CurrentAccountInfo) => void): void {
@@ -289,6 +297,14 @@ export default class KoniState extends State {
         update(items);
       }
     });
+  }
+
+  public subscribeHistory () {
+    return this.historySubject;
+  }
+
+  public getHistoryMap (): Record<string, TransactionHistoryItemType[]> {
+    return this.historyMap;
   }
 
   public setTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback?: (items: TransactionHistoryItemType[]) => void): void {

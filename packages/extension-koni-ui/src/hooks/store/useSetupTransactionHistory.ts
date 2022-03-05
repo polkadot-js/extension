@@ -6,20 +6,19 @@
 import { useEffect } from 'react';
 
 import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import { getTransactionHistoryByMultiNetworks } from '@polkadot/extension-koni-ui/messaging';
+import { subscribeHistory } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
-function updateTransactionHistory (items: TransactionHistoryItemType[]): void {
-  store.dispatch({ type: 'transactionHistory/update', payload: items });
+function updateTransactionHistory (historyMap: Record<string, TransactionHistoryItemType[]>): void {
+  store.dispatch({ type: 'transactionHistory/update', payload: historyMap });
 }
 
-export default function useSetupTransactionHistory (address: string, networkKeys: string[]): void {
-  const dep = networkKeys.toString();
-
+export default function useSetupTransactionHistory (): void {
   useEffect((): void => {
     console.log('--- Setup redux: transactionHistory');
 
-    getTransactionHistoryByMultiNetworks(address, networkKeys, updateTransactionHistory)
-      .catch((e) => console.log('Error when get Transaction History', e));
-  }, [address, dep]);
+    subscribeHistory(updateTransactionHistory)
+      .then(updateTransactionHistory)
+      .catch(console.error);
+  }, []);
 }

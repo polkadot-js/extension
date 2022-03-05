@@ -25,7 +25,6 @@ import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/
 import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNft';
 import useFetchStaking from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
-import useSetupTransactionHistory from '@polkadot/extension-koni-ui/hooks/store/useSetupTransactionHistory';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
@@ -55,7 +54,7 @@ interface Props {
   currentAccount: AccountJson;
   network: CurrentNetworkInfo;
   chainRegistryMap: Record<string, ChainRegistry>;
-  transactionHistoryItems: TransactionHistoryItemType[];
+  historyMap: Record<string, TransactionHistoryItemType[]>;
 }
 
 function getTabHeaderItems (address: string, t: TFunction): TabHeaderItemType[] {
@@ -113,7 +112,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account: currentAccount },
     currentNetwork,
-    transactionHistory: { items: transactionHistoryItems } } = useSelector((state: RootState) => state);
+    transactionHistory: { historyMap } } = useSelector((state: RootState) => state);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
@@ -128,13 +127,13 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
       chainRegistryMap={chainRegistryMap}
       className={className}
       currentAccount={currentAccount}
+      historyMap={historyMap}
       network={currentNetwork}
-      transactionHistoryItems={transactionHistoryItems}
     />
   );
 }
 
-function Home ({ chainRegistryMap, className = '', currentAccount, network, transactionHistoryItems }: Props): React.ReactElement {
+function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
     networkPrefix } = network;
@@ -166,8 +165,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
 
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
-
-  useSetupTransactionHistory(address, showedNetworks);
 
   const [nftPage, setNftPage] = useState(1);
 
@@ -349,7 +346,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, network, tran
 
         {activatedTab === 5 && (
           <TransactionHistory
-            items={transactionHistoryItems}
+            historyMap={historyMap}
+            networkKey={networkKey}
             registryMap={chainRegistryMap}
           />
         )}

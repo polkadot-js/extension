@@ -14,7 +14,8 @@ import TransactionHistoryItem from './TransactionHistoryItem';
 interface Props extends ThemeProps {
   className?: string;
   registryMap: Record<string, ChainRegistry>;
-  items: TransactionHistoryItemType[];
+  networkKey: string;
+  historyMap: Record<string, TransactionHistoryItemType[]>;
 }
 
 interface ContentProp {
@@ -40,8 +41,27 @@ function getReadyNetwork (registryMap: Record<string, ChainRegistry>): string[] 
   return result;
 }
 
-function Wrapper ({ className, items, registryMap }: Props): React.ReactElement<Props> {
+function getItems (networkKey: string, historyMap: Record<string, TransactionHistoryItemType[]>): TransactionHistoryItemType[] {
+  const result: TransactionHistoryItemType[] = [];
+
+  if (networkKey === 'all') {
+    Object.values(historyMap).forEach((items) => {
+      result.push(...items);
+    });
+  } else {
+    if (!historyMap[networkKey]) {
+      return [];
+    }
+
+    result.push(...historyMap[networkKey]);
+  }
+
+  return result.sort((a, b) => b.time - a.time);
+}
+
+function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): React.ReactElement<Props> {
   const readyNetworks = getReadyNetwork(registryMap);
+  const items = getItems(networkKey, historyMap);
   const readyItems = items.filter((i) => readyNetworks.includes(i.networkKey));
 
   if (!readyItems.length) {

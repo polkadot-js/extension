@@ -9,5 +9,5 @@ export type CurrentAccountType = {
 }
 
 export type TransactionHistoryReducerType = {
-  items: TransactionHistoryItemType[]
+  historyMap: Record<string, TransactionHistoryItemType[]>
 }

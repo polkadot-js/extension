@@ -305,12 +305,8 @@ export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
   return sendMessage('pri(networkMetadata.list)');
 }
 
-export async function getTransactionHistory (address: string, networkKey: string, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
-  return sendMessage('pri(transaction.history.get)', { address, networkKey }, callback);
-}
-
-export async function getTransactionHistoryByMultiNetworks (address: string, networkKeys: string[], callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {
-  return sendMessage('pri(transaction.history.getByMultiNetwork)', { address, networkKeys }, callback);
+export async function subscribeHistory (callback: (historyMap: Record<string, TransactionHistoryItemType[]>) => void): Promise<Record<string, TransactionHistoryItemType[]>> {
+  return sendMessage('pri(transaction.history.getSubscription)', null, callback);
 }
 
 export async function updateTransactionHistory (address: string, networkKey: string, item: TransactionHistoryItemType, callback: (items: TransactionHistoryItemType[]) => void): Promise<boolean> {

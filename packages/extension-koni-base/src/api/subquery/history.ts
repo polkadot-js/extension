@@ -17,7 +17,25 @@ import { isAccountAll, reformatAddress } from '@polkadot/extension-koni-base/uti
 export const HistoryApiMap: Record<string, string> = {
   polkadot: 'https://api.subquery.network/sq/nova-wallet/nova-westend',
   kusama: 'https://api.subquery.network/sq/nova-wallet/nova-kusama',
-  westend: 'https://api.subquery.network/sq/nova-wallet/nova-westend'
+  westend: 'https://api.subquery.network/sq/nova-wallet/nova-westend',
+  picasso: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-picasso',
+  calamari: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-calamari',
+  khala: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-khala',
+  parallel: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-parallel',
+  bifrost: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-bifrost',
+  clover: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-clover',
+  basilisk: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-basilisk',
+  acala: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-acala',
+  astar: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-astar',
+  karura: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-karura',
+  altair: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-altair',
+  kilt: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-kilt',
+  robonomics: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-robonomics',
+  statemint: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-statemint',
+  quartz: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-quartz',
+  zeigeist: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-zeitgeist',
+  shiden: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-shiden',
+  statemine: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-statemine'
 };
 
 function getApolloClient (networkKey: string) {

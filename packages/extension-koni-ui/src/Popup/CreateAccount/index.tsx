@@ -29,6 +29,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
+  // @ts-ignore
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const [address, setAddress] = useState<null | string>(null);
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
@@ -38,6 +39,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const options = getGenesisOptionsByAddressType(null, accounts, useGenesisHashOptions());
   const [genesisHash, setGenesis] = useState('');
+  // @ts-ignore
   const chain = useMetadata(genesisHash, true);
   const networkRef = useRef(null);
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';

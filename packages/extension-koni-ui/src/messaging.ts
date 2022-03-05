@@ -88,6 +88,10 @@ export async function exportAccount (address: string, password: string): Promise
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
+export async function exportAccountPrivateKey (address: string, password: string): Promise<{ privateKey: string }> {
+  return sendMessage('pri(accounts.exportPrivateKey)', { address, password });
+}
+
 export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
   return sendMessage('pri(accounts.batchExport)', { addresses, password });
 }

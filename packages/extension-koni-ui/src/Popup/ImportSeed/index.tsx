@@ -33,11 +33,14 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
+  // @ts-ignore
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const [step1, setStep1] = useState(true);
+  // @ts-ignore
   const [type, setType] = useState(DEFAULT_TYPE);
+  // @ts-ignore
   const chain = useMetadata(account && account.genesis, true);
 
   useEffect((): void => {

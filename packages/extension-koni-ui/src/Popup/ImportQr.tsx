@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import { SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { QrScanAddress } from '@polkadot/react-qr';
 
 import { AccountContext, ActionContext, Theme } from '../components';
@@ -104,6 +105,7 @@ function ImportQr (): React.ReactElement {
               <AccountNamePasswordCreation
                 buttonLabel={t<string>('Add the account with identified address')}
                 isBusy={false}
+                keyTypes={[SUBSTRATE_ACCOUNT_TYPE]}
                 name={defaultName}
                 onCreate={_onCreate}
                 onPasswordChange={setPassword}

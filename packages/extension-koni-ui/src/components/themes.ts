@@ -65,7 +65,7 @@ const darkTheme = {
   overlayBackground: '#00072D',
   popupBackground: '#181E42',
   accountHoverBackground: 'rgba(255, 255, 255, 0.05)',
-  primaryColor: '#FF7D01',
+  primaryColor: colors.primary2,
   readonlyInputBackground: '#1A1B20',
   warningBackgroundColor: 'rgba(231, 185, 23, 0.2)',
   dangerBackgroundColor: 'rgba(175, 17, 17, 0.25)',

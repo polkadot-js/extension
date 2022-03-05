@@ -19,9 +19,10 @@ interface Props {
   className?: string;
   isShowDownloadButton?: boolean;
   backupMnemonicSeed?: MouseEventHandler<HTMLDivElement>;
+  tooltipContent?: string;
 }
 
-function MnemonicSeed ({ backupMnemonicSeed, className, isShowDownloadButton, onCopy, seed }: Props): React.ReactElement<Props> {
+function MnemonicSeed ({ backupMnemonicSeed, className, isShowDownloadButton, onCopy, seed, tooltipContent }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   return (
@@ -30,6 +31,8 @@ function MnemonicSeed ({ backupMnemonicSeed, className, isShowDownloadButton, on
         className={`mnemonic-seed__display ${isShowDownloadButton ? 'mnemonic-display-download-btn' : ''}`}
         isReadOnly
         label={t<string>('Generated 12-word mnemonic seed:')}
+        showWarningIcon={true}
+        tooltipContent={tooltipContent}
         value={seed}
       />
       {isShowDownloadButton && <div

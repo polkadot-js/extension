@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -11,7 +13,6 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
-import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2, createSeedV2, validateSeedV2 } from '../../messaging';
 import Mnemonic from './Mnemonic';
@@ -29,18 +30,17 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [step, setStep] = useState(1);
-  // @ts-ignore
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
+  const dep = keyTypes.toString();
   const [address, setAddress] = useState<null | string>(null);
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
   const [seed, setSeed] = useState<null | string>(null);
   const { accounts } = useContext(AccountContext);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
+  const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
   const options = getGenesisOptionsByAddressType(null, accounts, useGenesisHashOptions());
   const [genesisHash, setGenesis] = useState('');
-  // @ts-ignore
-  const chain = useMetadata(genesisHash, true);
   const networkRef = useRef(null);
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
@@ -58,7 +58,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         setSeed(response.seed);
       })
       .catch(console.error);
-  }, [keyTypes]);
+  }, []);
 
   useEffect((): void => {
     if (seed) {
@@ -69,14 +69,14 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         })
         .catch(console.error);
     }
-  }, [keyTypes, seed]);
+  }, [seed]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
       // this should always be the case
       if (name && password && seed) {
         setIsBusy(true);
-        createAccountSuriV2(name, password, seed, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE], genesisHash)
+        createAccountSuriV2(name, password, seed, keyTypes, genesisHash)
           .then((response) => {
             window.localStorage.setItem('popupNavigation', '/');
             onAction('/');
@@ -87,7 +87,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
           });
       }
     },
-    [genesisHash, onAction, seed]
+    [genesisHash, onAction, seed, dep]
   );
 
   const _onNextStep = useCallback(
@@ -120,9 +120,11 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
               <Mnemonic
                 address={address}
                 evmAddress={evmAddress}
+                evmName={evmName}
                 genesisHash={genesisHash}
                 name={name}
                 onNextStep={_onNextStep}
+                onSelectAccountCreated={setKeyTypes}
                 seed={seed}
               />
             )
@@ -131,8 +133,11 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                 <AccountNamePasswordCreation
                   address={address}
                   buttonLabel={t<string>('Add the account with the generated seed')}
+                  evmAddress={evmAddress}
+                  evmName={evmName}
                   genesis={genesisHash}
                   isBusy={isBusy}
+                  keyTypes={keyTypes}
                   name={name}
                   onCreate={_onCreate}
                 >

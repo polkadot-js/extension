@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import styled, { ThemeContext } from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
+import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 
 import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, InputWithLabel, Label, NextStepButton, Theme, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
@@ -63,7 +64,7 @@ function SelectParent ({ className, isBusy, isLocked, onDerivationConfirmed, par
   const allAddresses = useMemo(
     () => hierarchy
       .filter(({ isExternal }) => !isExternal)
-      .filter(({ type }) => canDerive(type))
+      .filter(({ type }) => canDerive(type) && type !== EVM_ACCOUNT_TYPE)
       .map(({ address, genesisHash }): [string, string | null] => [address, genesisHash || null]),
     [hierarchy]
   );

@@ -15,9 +15,11 @@ interface Props {
   label: string;
   onChange?: (value: string) => void;
   value?: string;
+  showWarningIcon?: boolean
+  tooltipContent?: string
 }
 
-export default function KoniTextAreaWithLabel ({ className, isError, isFocused, isReadOnly, label, onChange, rowsCount, value }: Props): React.ReactElement<Props> {
+export default function KoniTextAreaWithLabel ({ className, isError, isFocused, isReadOnly, label, onChange, rowsCount, showWarningIcon, tooltipContent, value }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>): void => {
       onChange && onChange(value);
@@ -29,6 +31,8 @@ export default function KoniTextAreaWithLabel ({ className, isError, isFocused, 
     <Label
       className={className}
       label={label}
+      showWarningIcon={showWarningIcon}
+      tooltipContent={tooltipContent}
     >
       <TextArea
         autoCapitalize='off'

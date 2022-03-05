@@ -180,7 +180,8 @@ export const subscanByNetworkKey: Record<string, string> = {
   // 'zeitgeist': 'https://zeitgeist.subscan.io',
   westend: 'https://westend.subscan.io',
   rococo: 'https://rococo.subscan.io',
-  robonomics: 'https://robonomics.subscan.io'
+  robonomics: 'https://robonomics.subscan.io',
+  moonbase: 'https://moonbase.subscan.io/'
 
 };
 

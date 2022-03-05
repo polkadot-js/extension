@@ -13,6 +13,7 @@ import Link from '@polkadot/extension-koni-ui/components/Link';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import MenuDivider from '@polkadot/extension-koni-ui/components/MenuDivider';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
@@ -47,6 +48,7 @@ function AccountAction ({ className, isShowZeroBalances, reference, toggleEdit, 
           {!currentAccount?.isExternal && canDerive(currentAccount?.type) && (
             <Link
               className='account-action__menu-item'
+              isDisabled={currentAccount.type === EVM_ACCOUNT_TYPE}
               to={`/account/derive/${currentAccount?.address}/locked`}
             >
               {t<string>('Derive New Account')}

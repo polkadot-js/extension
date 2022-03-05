@@ -204,7 +204,7 @@ export default styled(Request)(({ theme }: Props) => `
     flex-direction: column;
     align-items: center;
     margin-bottom: 8px;
-    padding-top: 55px;
+    padding-top: 30px;
   }
 
   .request-info {

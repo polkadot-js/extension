@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -11,7 +13,6 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
-import useMetadata from '../../hooks/useMetadata';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
@@ -33,15 +34,14 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  // @ts-ignore
+  const [evmAccount, setEvmAccount] = useState<AccountInfo | null>(null);
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
+  const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
+  const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
   const [step1, setStep1] = useState(true);
-  // @ts-ignore
-  const [type, setType] = useState(DEFAULT_TYPE);
-  // @ts-ignore
-  const chain = useMetadata(account && account.genesis, true);
+  const type = DEFAULT_TYPE;
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -62,7 +62,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           console.error(error);
         });
     }
-  }, [account, onAction, keyTypes]);
+  }, [account, onAction, dep]);
 
   const _onNextStep = useCallback(
     () => setStep1(false),
@@ -87,9 +87,13 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           <SeedAndPath
             account={account}
             className='import-seed-content-wrapper'
+            evmName={evmName}
+            keyTypes={keyTypes}
             name={name}
             onAccountChange={setAccount}
+            onEvmAccountChange={setEvmAccount}
             onNextStep={_onNextStep}
+            onSelectAccountImported={setKeyTypes}
             type={type}
           />
         )
@@ -98,8 +102,11 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             address={account?.address}
             buttonLabel={t<string>('Add the account with the supplied seed')}
             className='koni-import-seed-content'
+            evmAddress={evmAccount?.address}
+            evmName={evmName}
             genesis={account?.genesis}
             isBusy={isBusy}
+            keyTypes={keyTypes}
             name={name}
             onCreate={_onCreate}
           />

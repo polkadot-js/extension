@@ -5,7 +5,9 @@ import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import Password from '@polkadot/extension-koni-ui/partials/Password';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountInfoEl, ButtonArea, NextStepButton } from '../components';
 
@@ -15,13 +17,16 @@ interface Props {
   onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   className?: string;
   children?: any;
+  evmAddress?: string | null;
   address?: string | null;
   genesis?: string | null;
   onPasswordChange?: (password: string) => void;
-  name: string
+  name: string;
+  evmName?: string;
+  keyTypes: KeypairType[];
 }
 
-function AccountNamePasswordCreation ({ address, buttonLabel, children, className, genesis, isBusy, name, onCreate }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address, buttonLabel, children, className, evmAddress, evmName, genesis, isBusy, keyTypes, name, onCreate }: Props): React.ReactElement<Props> {
   const [password, setPassword] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
@@ -36,11 +41,22 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
       <div className={className}>
         <div className='account-info-wrapper'>
           <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} account-name-and-password-creation-wrapper`}>
-            <AccountInfoEl
-              address={address}
-              genesisHash={genesis}
-              name={name}
-            />
+            {keyTypes.includes(SUBSTRATE_ACCOUNT_TYPE) &&
+              <AccountInfoEl
+                address={address}
+                genesisHash={genesis}
+                name={name}
+              />
+            }
+
+            {keyTypes.includes(EVM_ACCOUNT_TYPE) &&
+              <AccountInfoEl
+                address={evmAddress}
+                genesisHash={genesis}
+                name={evmName}
+                type={EVM_ACCOUNT_TYPE}
+              />
+            }
             <div className={ children ? 'children-wrapper' : ''}>
               {children}
             </div>

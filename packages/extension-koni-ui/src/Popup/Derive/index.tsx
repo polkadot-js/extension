@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 import styled from 'styled-components';
 
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
@@ -34,12 +35,21 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts } = useContext(AccountContext);
-  const { address: parentAddress } = useParams<AddressState>();
+  const { address } = useParams<AddressState>();
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<null | PathState>(null);
   const [parentPassword, setParentPassword] = useState<string | null>(null);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
+  const accountsWithoutEtheriumType = accountsWithoutAll.filter((acc) => acc.type !== EVM_ACCOUNT_TYPE);
   const name = `Account ${accountsWithoutAll.length + 1}`;
+  const parentAccount = accounts.find((a) => a.address === address);
+  let parentAddress: string;
+
+  if (parentAccount && parentAccount.type === EVM_ACCOUNT_TYPE) {
+    parentAddress = accountsWithoutEtheriumType[0].address;
+  } else {
+    parentAddress = address;
+  }
 
   const parentGenesis = useMemo(
     () => accounts.find((a) => a.address === parentAddress)?.genesisHash || null,
@@ -98,6 +108,7 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
             className='koni-import-seed-content'
             genesis={parentGenesis}
             isBusy={isBusy}
+            keyTypes={[SUBSTRATE_ACCOUNT_TYPE]}
             name={name}
             onCreate={_onCreate}
           />

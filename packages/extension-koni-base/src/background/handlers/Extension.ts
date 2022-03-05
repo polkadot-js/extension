@@ -14,12 +14,12 @@ import {
   NftJson,
   PriceJson,
   RequestAccountCreateSuriV2,
-  RequestApi,
+ RequestApi,
   RequestSeedCreateV2,
   RequestSeedValidateV2,
   RequestTransactionHistoryAdd,
   ResponseAccountCreateSuriV2,
-  ResponseSeedCreateV2,
+ ResponseAccountExportPrivateKey, ResponseSeedCreateV2,
   ResponseSeedValidateV2,
   StakingJson,
   StakingRewardJson,
@@ -31,11 +31,12 @@ import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { createPair } from '@polkadot/keyring';
+import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, hexToU8a, isHex, u8aToString } from '@polkadot/util';
+import { assert, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -70,6 +71,15 @@ export default class KoniExtension extends Extension {
   public encodeAddress = (key: string | Uint8Array, ss58Format?: Prefix): string => {
     return keyring.encodeAddress(key, ss58Format);
   };
+
+  private accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+    const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
+    const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
+
+    return {
+      privateKey: u8aToHex(decoded.secretKey)
+    };
+  }
 
   private accountsGetAllWithCurrentAddress (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribeWithCurrentAddress)'>(id, port);
@@ -529,6 +539,8 @@ export default class KoniExtension extends Extension {
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(seed.validateV2)':
         return this.seedValidateV2(request as RequestSeedValidateV2);
+      case 'pri(accounts.exportPrivateKey)':
+        return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
       case 'pri(accounts.triggerSubscription)':

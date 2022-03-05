@@ -44,15 +44,17 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   return (
     <div className={className}>
       <div className='request-info-wrapper'>
-        <div className='request-info-connected-app'>
-          <img
-            alt={`${hostname}`}
-            className='request-info__connected-app-logo'
-            src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
-          />
-          <div className='request-info-connected-app__text'>
-            {origin}
-          </div>
+        <img
+          alt={`${hostname}`}
+          className='request-info__connected-app-logo'
+          src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
+        />
+        <div className='request-info-connected-app__text'>
+          {origin}
+        </div>
+
+        <div className='request-info-connected-app__title'>
+          {t<string>('Connect the SubWallet')}
         </div>
         <a
           className='request-info-url'
@@ -105,31 +107,30 @@ export default styled(Request)(({ theme }: Props) => `
   flex-direction: column;
   padding: 25px 22px 22px;
 
-  .request-info-connected-app {
-    border-radius: 5px;
-    padding: 8px;
-    background-color: ${theme.backgroundAccountAddress};
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-item: center;
-  }
-
   .request-info-url {
     text-align: center;
     padding-top: 10px;
     padding-bottom: 60px;
   }
 
+  .request-info-connected-app__title {
+    font-size: 24px;
+    line-height: 36px;
+    font-weight: 500;
+    text-align: center;
+  }
+
   .request-info-connected-app__text {
     font-size: 14px;
     // line-height: 24px;
     color: ${theme.textColor2};
+    padding-top: 8px;
+    padding-bottom: 13px;
   }
 
   .request-info__connected-app-logo {
-    height: 28px;
-    min-width: 28px;
+    height: 56px;
+    min-width: 56px;
     padding-right: 9px;
   }
 

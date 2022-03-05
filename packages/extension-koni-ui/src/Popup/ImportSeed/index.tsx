@@ -5,7 +5,9 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, ActionContext } from '../../components';
 import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
@@ -14,8 +16,6 @@ import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
 import SeedAndPath from './SeedAndPath';
-import { KeypairType } from '@polkadot/util-crypto/types';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 
 export interface AccountInfo {
   address: string;
@@ -33,11 +33,14 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
+  // @ts-ignore
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const [step1, setStep1] = useState(true);
+  // @ts-ignore
   const [type, setType] = useState(DEFAULT_TYPE);
+  // @ts-ignore
   const chain = useMetadata(account && account.genesis, true);
 
   useEffect((): void => {

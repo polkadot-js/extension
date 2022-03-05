@@ -5,15 +5,18 @@ import type { Theme, ThemeProps } from '../types';
 
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
+import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
 
-import { AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Warning } from '../components';
+import { AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Label, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
-import { exportAccount } from '../messaging';
+import { exportAccount, exportAccountPrivateKey } from '../messaging';
 
 const MIN_LENGTH = 6;
 
@@ -26,6 +29,8 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
+  const [privateKey, setPrivateKey] = useState<string | undefined>(undefined);
+  const { show } = useToast();
   const [error, setError] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _isAllAccount = isAccountAll(address);
@@ -67,6 +72,28 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
     [address, onAction, pass]
   );
 
+  const _onExportPrivateButtonClick = useCallback(
+    (): void => {
+      setIsBusy(true);
+      exportAccountPrivateKey(address, pass)
+        .then(({ privateKey }) => {
+          setPrivateKey(privateKey);
+          setIsBusy(false);
+        })
+        .catch((error: Error) => {
+          console.error(error);
+          setError(error.message);
+          setIsBusy(false);
+        });
+    },
+    [address, pass]
+  );
+
+  const _onCopyPrivateKey = useCallback(
+    () => show(t('Copied')),
+    [show, t]
+  );
+
   return (
     <>
       <Header
@@ -93,10 +120,10 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
           : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
             <AccountInfoEl address={address} />
             <Warning className='export-warning'>
-              {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
+              {t<string>('You are exporting your account. Keep it safe and don\'t share it with anyone.')}
             </Warning>
 
-            <div className='export__password-area'>
+            {!privateKey && <div className='export__password-area'>
               <InputWithLabel
                 className='export__input-label'
                 data-export-password
@@ -114,7 +141,25 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                   {error}
                 </Warning>
               )}
-            </div>
+            </div>}
+
+            {privateKey && <div className='export__private-key-area'>
+              <Label label={t<string>('Private Key')}>
+                <div className='private-key'>
+                  <span className='key'>
+                    {toShort(privateKey, 18, 18)}
+                  </span>
+                  <CopyToClipboard text={(privateKey && privateKey) || ''}>
+                    <img
+                      alt='copy'
+                      className='private-key-copy-icon'
+                      onClick={_onCopyPrivateKey}
+                      src={cloneLogo}
+                    />
+                  </CopyToClipboard>
+                </div>
+              </Label>
+            </div>}
 
             <div className='export__action-area'>
               <Button
@@ -124,6 +169,15 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
               >
                 <span>{t<string>('Cancel')}</span>
               </Button>
+              {!privateKey && <Button
+                className='export-button'
+                data-export-button
+                isBusy={isBusy}
+                isDisabled={pass.length === 0 || !!error}
+                onClick={_onExportPrivateButtonClick}
+              >
+                {t<string>('Private Key')}
+              </Button>}
               <Button
                 className='export-button'
                 data-export-button
@@ -131,7 +185,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
                 isDisabled={pass.length === 0 || !!error}
                 onClick={_onExportButtonClick}
               >
-                {t<string>('Export')}
+                {t<string>('JSON')}
               </Button>
             </div>
           </div>
@@ -149,6 +203,20 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   .export__password-area {
     padding-top: 13px;
   }
+  
+  .export__private-key-area {
+    padding-top: 22px;
+    padding-bottom: 5px;
+  }
+  
+  .export__private-key-area .private-key {
+    display: flex;
+    position: relative;
+  }
+  
+  .export__private-key-area .private-key .key {
+    flex: 1;
+  }
 
   .disabled-btn {
     cursor: not-allowed;
@@ -161,6 +229,7 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
     justify-content: center;
     align-items: center;
     padding-top: 10px;
+    padding-bottom: 7px;
   }
 
   .export-account-wrapper {

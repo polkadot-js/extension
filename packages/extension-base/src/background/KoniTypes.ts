@@ -255,6 +255,15 @@ export interface RequestApi {
   networkKey: string;
 }
 
+export interface RequestAccountExportPrivateKey {
+  address: string;
+  password: string;
+}
+
+export interface ResponseAccountExportPrivateKey {
+  privateKey: string;
+}
+
 export interface RequestSeedCreateV2 {
   length?: SeedLengths;
   seed?: string;
@@ -311,6 +320,7 @@ export interface KoniRequestSignatures {
   'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
   'pri(json.restoreV2)': [RequestJsonRestore, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
+  'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean];

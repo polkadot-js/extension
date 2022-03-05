@@ -87,7 +87,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2004,
     isEthereum: true,
-    nativeToken: 'GLMR',
+    nativeToken: 'DEV',
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/'
   },
   astar: {

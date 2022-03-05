@@ -43,6 +43,8 @@ export class RmrkNftApi extends BaseNftApi {
   override parseUrl (input: string): string | undefined {
     if (!input || input.length === 0) return undefined;
 
+    if (isUrl(input) || input.includes('https://') || input.includes('http')) return undefined;
+
     if (!input.includes('ipfs://ipfs/')) { return PINATA_SERVER + input; }
 
     return PINATA_SERVER + input.split('ipfs://ipfs/')[1];
@@ -63,79 +65,60 @@ export class RmrkNftApi extends BaseNftApi {
       .then((res) => res.json()) as NFTMetadata;
   }
 
-  private async getSingularByAccount (account: string) {
-    const url = SINGULAR_ENDPOINT + account;
-    const data = await fetch(url, {
-      method: 'GET',
-      headers
-    })
-      .then((res) => res.json()) as Record<number | string, number | string>[];
+  private async getAllByAccount (account: string) {
+    const fetchUrls = [
+      { url: KANARIA_ENDPOINT + 'account-birds/' + account, source: 'bird_kanaria' },
+      { url: KANARIA_ENDPOINT + 'account-items/' + account, source: 'kanaria' },
+      { url: SINGULAR_ENDPOINT + account, source: 'singular' }
+    ];
 
-    const nfts: Record<string | number, any>[] = [];
+    let data: Record<number | string, number | string>[] = [];
 
-    await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
-      const resp = await this.getMetadata(item.metadata as string);
+    await Promise.all(fetchUrls.map(async ({ source, url }) => {
+      let _data = await fetch(url, {
+        method: 'GET',
+        headers
+      })
+        .then((res) => res.json()) as Record<number | string, number | string>[];
 
-      nfts.push({
-        ...item,
-        metadata: {
-          description: resp?.description,
-          name: resp?.name,
-          attributes: resp?.attributes,
-          animation_url: this.parseUrl(resp?.animation_url as string),
-          image: this.parseUrl(resp?.image as string)
-        },
-        external_url: SINGULAR_EXTERNAL_SERVER + item.id.toString()
-      });
+      _data = _data.map((item) => { return { ...item, source }; });
+
+      data = data.concat(_data);
     }));
-
-    return nfts;
-  }
-
-  private async getItemsKanariaByAccount (account: string) {
-    const url = KANARIA_ENDPOINT + 'account-items/' + account;
-    const data = await fetch(url, {
-      method: 'GET',
-      headers
-    })
-      .then((res) => res.json()) as Record<number | string, number | string>[];
 
     const nfts: Record<string | number, any>[] = [];
 
     await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
       const result = await this.getMetadata(item.metadata as string);
 
-      nfts.push({
-        ...item,
-        metadata: {
-          ...result,
-          image: this.parseUrl(result?.image as string),
+      if (item.source === 'bird_kanaria') {
+        nfts.push({
+          ...item,
+          metadata: result,
           external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
-        }
-      });
-    }));
-
-    return nfts;
-  }
-
-  private async getBirdsKanariaByAccount (account: string) {
-    const url = KANARIA_ENDPOINT + 'account-birds/' + account;
-    const data = await fetch(url, {
-      method: 'GET',
-      headers
-    })
-      .then((res) => res.json()) as Record<number | string, number | string>[];
-
-    const nfts: Record<string | number, any>[] = [];
-
-    await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
-      const result = await this.getMetadata(item.metadata as string);
-
-      nfts.push({
-        ...item,
-        metadata: result,
-        external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
-      });
+        });
+      } else if (item.source === 'kanaria') {
+        nfts.push({
+          ...item,
+          metadata: {
+            ...result,
+            image: this.parseUrl(result?.image as string),
+            external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
+          }
+        });
+      } else if (item.source === 'singular') {
+        nfts.push({
+          ...item,
+          metadata: {
+            description: result?.description,
+            name: result?.name,
+            attributes: result?.attributes,
+            animation_url: this.parseUrl(result?.animation_url as string),
+            image: this.parseUrl(result?.image as string)
+          },
+          external_url: SINGULAR_EXTERNAL_SERVER + item.id.toString()
+        });
+      }
     }));
 
     return nfts;
@@ -143,17 +126,16 @@ export class RmrkNftApi extends BaseNftApi {
 
   public async handleNfts () {
     try {
+      const start = performance.now();
+
       let allNfts: Record<string | number, any>[] = [];
 
       await Promise.all(this.addresses.map(async (address) => {
-        const [singular, birds, items] = await Promise.all([
-          this.getSingularByAccount(address),
-          this.getBirdsKanariaByAccount(address),
-          this.getItemsKanariaByAccount(address)
-        ]);
+        const nfts = await this.getAllByAccount(address);
 
-        allNfts = allNfts.concat([...singular, ...birds, ...items]);
+        allNfts = allNfts.concat(nfts);
       }));
+
       let allCollections: NftCollection[] = [];
       const collectionInfoUrl: string[] = [];
 
@@ -169,8 +151,8 @@ export class RmrkNftApi extends BaseNftApi {
 
       const allCollectionMetaUrl: Record<string, any>[] = [];
       const collectionInfo = await Promise.all(collectionInfoUrl.map(async (url) => {
-        const resp = await fetch(url);
-        const data = await resp.json() as Record<string | number, string | number>[];
+        const data = await fetch(url)
+          .then((resp) => resp.json()) as Record<string | number, string | number>[];
         const result = data[0];
 
         if (result && 'metadata' in result) {
@@ -187,8 +169,12 @@ export class RmrkNftApi extends BaseNftApi {
       const allCollectionMeta: Record<string | number, any> = {};
 
       await Promise.all(allCollectionMetaUrl.map(async (item) => {
-        const resp = await fetch(item?.url as string);
-        const data = await resp.json() as Record<string, any>;
+        let data: Record<string, any> = {};
+
+        if (item.url) {
+          data = await fetch(item?.url as string)
+            .then((resp) => resp.json()) as Record<string, any>;
+        }
 
         // @ts-ignore
         allCollectionMeta[item?.id as string] = { ...data };
@@ -237,6 +223,12 @@ export class RmrkNftApi extends BaseNftApi {
 
       this.total = allNfts.length;
       this.data = allCollections;
+
+      const end = performance.now();
+
+      console.log(`rmrk took ${end - start}ms`);
+
+      console.log(`Fetched ${allNfts.length} nfts from rmrk`);
     } catch (e) {
       console.error('Failed to fetch nft', e);
       throw e;

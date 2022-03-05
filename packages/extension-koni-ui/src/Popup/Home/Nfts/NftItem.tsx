@@ -8,6 +8,7 @@ import styled from 'styled-components';
 
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/TransferNftContainer';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import logo from '../../../assets/sub-wallet-logo.svg';
@@ -23,6 +24,8 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  // @ts-ignore
+  const [showTransfer, setShowTransfer] = useState(false);
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
@@ -35,6 +38,11 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
       </div>
     );
   };
+
+  const handleClickTransfer = useCallback(() => {
+    console.log('coming soon');
+    // setShowTransfer(!showTransfer);
+  }, []);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -66,101 +74,116 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
     else if (collectionImage) return collectionImage;
 
     return logo;
-  }, [collectionImage, data.image, imageError]);
+  }, [collectionImage, data, imageError]);
 
   return (
     <div className={className}>
-      <div className={'header'}>
-        <div
-          className={'back-icon'}
-          onClick={handleClickBack}
-        >
-          <FontAwesomeIcon
-            className='arrowLeftIcon'
-            // @ts-ignore
-            icon={faArrowLeft}
-          />
-        </div>
-        <div
-          className={'header-title'}
-          title={data.name ? data.name : '#' + data.id}
-        >
-          <div className={'collection-name'}>
-            {data.name ? data.name : '#' + data.id}
-          </div>
-        </div>
-        <div></div>
-      </div>
-
-      <div className={'detail-container'}>
-        {
-          loading &&
-          <Spinner className={'img-spinner'} />
-        }
-        {
-          showImage
-            ? <img
-              alt={'item-img'}
-              className={'item-img'}
-              onClick={handleOnClick}
-              onError={handleImageError}
-              onLoad={handleOnLoad}
-              src={getItemImage()}
-              style={{ borderRadius: '5px' }}
-            />
-            : <video
-              autoPlay
-              className={'item-img'}
-              height='416'
-              loop={true}
-              muted
-              onClick={handleOnClick}
-              onError={handleVideoError}
-              width='100%'
+      {
+        !showTransfer &&
+        <div>
+          <div className={'header'}>
+            <div
+              className={'back-icon'}
+              onClick={handleClickBack}
             >
-              <source
-                src={getItemImage()}
-                type='video/mp4'
+              <FontAwesomeIcon
+                className='arrowLeftIcon'
+                // @ts-ignore
+                icon={faArrowLeft}
               />
-            </video>
-        }
-        <div className={'send-button'}>Send</div>
-        {
-          data.description &&
-            <div>
-              <div className={'att-title'}>Description</div>
-              <div className={'att-value'}><pre>{data?.description}</pre></div>
             </div>
-        }
-        {
-          data.rarity &&
-          <div>
-            <div className={'att-title'}>Rarity</div>
-            <div className={'att-value'}>{data?.rarity}</div>
-          </div>
-        }
-        {
-          data.properties &&
-            <div>
-              <div className={'att-title'}>Properties</div>
-              <div className={'prop-container'}>
-                {
-                  Object.keys(data?.properties).map((key, index) => {
-                    // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                    // @ts-ignore
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                    return propDetail(key, data?.properties[key]?.value, index);
-                    // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                  })
-                }
-
-                {/* {data?.properties.map((item: any) => { */}
-                {/*  return propDetail(item) */}
-                {/* })} */}
+            <div
+              className={'header-title'}
+              title={data.name ? data.name : '#' + data.id}
+            >
+              <div className={'collection-name'}>
+                {data.name ? data.name : '#' + data.id}
               </div>
             </div>
-        }
-      </div>
+            <div></div>
+          </div>
+
+          <div className={'detail-container'}>
+            {
+              loading &&
+              <Spinner className={'img-spinner'} />
+            }
+            {
+              showImage
+                ? <img
+                  alt={'item-img'}
+                  className={'item-img'}
+                  onClick={handleOnClick}
+                  onError={handleImageError}
+                  onLoad={handleOnLoad}
+                  src={getItemImage()}
+                  style={{ borderRadius: '5px' }}
+                />
+                : <video
+                  autoPlay
+                  height='416'
+                  loop={true}
+                  onError={handleVideoError}
+                  width='100%'
+                >
+                  <source
+                    src={getItemImage()}
+                    type='video/mp4'
+                  />
+                </video>
+            }
+            <div
+              className={'send-button'}
+              onClick={handleClickTransfer}
+            >
+              Send
+            </div>
+            {
+              data.description &&
+              <div>
+                <div className={'att-title'}>Description</div>
+                <div className={'att-value'}><pre>{data?.description}</pre></div>
+              </div>
+            }
+            {
+              data.rarity &&
+              <div>
+                <div className={'att-title'}>Rarity</div>
+                <div className={'att-value'}>{data?.rarity}</div>
+              </div>
+            }
+            {
+              data.properties &&
+              <div>
+                <div className={'att-title'}>Properties</div>
+                <div className={'prop-container'}>
+                  {
+                    Object.keys(data?.properties).map((key, index) => {
+                      // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                      // @ts-ignore
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                      return propDetail(key, data?.properties[key]?.value, index);
+                      // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    })
+                  }
+
+                  {/* {data?.properties.map((item: any) => { */}
+                  {/*  return propDetail(item) */}
+                  {/* })} */}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      {
+        showTransfer &&
+        <TransferNftContainer
+          nftItem={data}
+          setShowTransfer={handleClickTransfer}
+        />
+      }
     </div>
   );
 }

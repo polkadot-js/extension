@@ -20,9 +20,9 @@ interface Collection {
 }
 
 interface Token {
-  metadata: string | undefined,
-  owner: string,
-  data: Record<string, any>
+  metadata?: string | undefined,
+  owner?: string,
+  data?: Record<string, any>
   name?: string,
   description?: string,
   image?: string
@@ -93,6 +93,8 @@ export class KaruraNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
+    const start = performance.now();
+
     const allCollections: NftCollection[] = [];
     const assetIds = await this.getNfts(this.addresses);
 
@@ -103,35 +105,43 @@ export class KaruraNftApi extends BaseNftApi {
       return;
     }
 
-    for (const asset of assetIds) {
+    assetIds.forEach((asset) => {
+      const parsedClassId = this.parseTokenId(asset.classId.toString());
       const newCollection = {
-        collectionId: asset.classId.toString(),
+        collectionId: parsedClassId,
         nftItems: []
       } as NftCollection;
 
-      if (!allCollections.some((collection) => collection.collectionId === asset.classId.toString())) { allCollections.push(newCollection); }
-    }
+      if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) { allCollections.push(newCollection); }
+    });
 
     const allItems: NftItem[] = [];
     const collectionMetaDict: Record<any, any> = {};
 
     await Promise.all(assetIds.map(async (assetId) => {
-      const tokenInfo = await this.getTokenDetails(assetId);
+      let tokenInfo: Token = {};
       let collectionMeta: any;
+      const parsedClassId = this.parseTokenId(assetId.classId as string);
+      const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
 
-      if (!(assetId.classId in collectionMetaDict)) {
-        collectionMeta = await this.getCollectionDetails(assetId.classId as number);
+      if (!(parsedClassId in collectionMetaDict)) {
+        const [_tokenInfo, collectionMeta] = await Promise.all([
+          this.getTokenDetails(assetId),
+          this.getCollectionDetails(parseInt(parsedClassId))
+        ]);
+
+        tokenInfo = _tokenInfo as Token;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        collectionMetaDict[assetId.classId] = collectionMeta;
+        collectionMetaDict[parsedClassId] = collectionMeta;
       }
 
       const parsedNft = {
-        id: assetId.tokenId.toString(),
+        id: parsedTokenId,
         name: tokenInfo?.name,
         description: tokenInfo?.description,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
-        collectionId: assetId.classId.toString()
+        collectionId: parsedClassId
       } as NftItem;
 
       allItems.push(parsedNft);
@@ -157,6 +167,12 @@ export class KaruraNftApi extends BaseNftApi {
 
     this.total = assetIds.length;
     this.data = allCollections;
+
+    const end = performance.now();
+
+    console.log(`karura took ${end - start}ms`);
+
+    console.log(`Fetched ${assetIds.length} nfts from karura`);
   }
 }
 

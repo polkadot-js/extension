@@ -3,28 +3,7 @@
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import {
-  AccountsWithCurrentAddress,
-  ApiInitStatus,
-  BackgroundWindow,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanJson,
-  NetWorkMetadataDef,
-  NftJson,
-  PriceJson,
-  RequestAccountCreateSuriV2,
- RequestApi,
-  RequestSeedCreateV2,
-  RequestSeedValidateV2,
-  RequestTransactionHistoryAdd,
-  ResponseAccountCreateSuriV2,
- ResponseAccountExportPrivateKey, ResponseSeedCreateV2,
-  ResponseSeedValidateV2,
-  StakingJson,
-  StakingRewardJson,
-  TransactionHistoryItemType
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -73,7 +52,9 @@ export default class KoniExtension extends Extension {
   };
 
   private accountExportPrivateKey ({ address, password }: RequestAccountExportPrivateKey): ResponseAccountExportPrivateKey {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const exportedJson = keyring.backupAccount(keyring.getPair(address), password);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const decoded = decodePair(password, base64Decode(exportedJson.encoded), exportedJson.encoding.type);
 
     return {
@@ -540,6 +521,7 @@ export default class KoniExtension extends Extension {
       case 'pri(seed.validateV2)':
         return this.seedValidateV2(request as RequestSeedValidateV2);
       case 'pri(accounts.exportPrivateKey)':
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);

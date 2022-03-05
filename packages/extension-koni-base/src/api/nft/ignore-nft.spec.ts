@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama';
-import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import { NftHandler } from '@polkadot/extension-koni-base/api/nft/index';
+import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/test_config';
 
 jest.setTimeout(5000000);
 

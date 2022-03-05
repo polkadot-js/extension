@@ -3,8 +3,8 @@
 
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft/index';
+import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/test_config';
 
 jest.setTimeout(60000);
 

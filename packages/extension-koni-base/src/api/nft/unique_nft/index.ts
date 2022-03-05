@@ -21,11 +21,6 @@ interface Token {
   Owner: string
 }
 
-interface NftIdList {
-  collectionId: number,
-  nfts: string[]
-}
-
 export default class UniqueNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor (api: ApiProps, addresses: string[], chain?: string) {
@@ -125,13 +120,14 @@ export default class UniqueNftApi extends BaseNftApi {
     const start = performance.now();
 
     const collectionCount = await this.getCollectionCount();
-    const data: NftIdList[] = [];
     const allCollections: NftCollection[] = [];
     const addressTokenDict: any[] = [];
     let allNftId: string[] = [];
     const nftMap: Record<string, number> = {};
-    const collectionMeta: Record<string, Collection> = {};
+    const collectionMap: Record<string, Collection> = {};
     const allCollectionId: number[] = [];
+    const collectionMeta: Record<string, any> = {};
+    const allNft: Record<string, NftItem[]> = {};
 
     for (let i = 0; i < collectionCount; i++) {
       for (const address of this.addresses) {
@@ -141,15 +137,14 @@ export default class UniqueNftApi extends BaseNftApi {
 
     await Promise.all(addressTokenDict.map(async (item: Record<string, string | number>) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const rs = await this.getAddressTokens(item.i as number, item.account as string);
+      const nftIds = await this.getAddressTokens(item.i as number, item.account as string);
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (rs && rs.length > 0) {
-        data.push({ collectionId: item.i as number, nfts: rs as string[] });
-        allNftId = allNftId.concat(rs as string[]);
+      if (nftIds && nftIds.length > 0) {
+        allNftId = allNftId.concat(nftIds as string[]);
         if (!allCollectionId.includes(item.i as number)) allCollectionId.push(item.i as number);
 
-        for (const nftId of rs) {
+        for (const nftId of nftIds) {
           nftMap[nftId as string] = item.i as number;
         }
       }
@@ -157,62 +152,69 @@ export default class UniqueNftApi extends BaseNftApi {
 
     await Promise.all(allCollectionId.map(async (collectionId) => {
       // @ts-ignore
-      collectionMeta[collectionId.toString()] = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
+      collectionMap[collectionId.toString()] = (await this.dotSamaApi.api.query.nft.collectionById(collectionId)).toJSON() as unknown as Collection;
     }));
+
+    let total = 0;
 
     await Promise.all(allNftId.map(async (nft) => {
       const collectionId = nftMap[nft];
       const tokenId = nft;
+      const _collection = collectionMap[collectionId];
+      const imageUrl = this.getNftImageUrl(_collection, tokenId);
 
-      const [imageUrl, tokenData] = await Promise.all([
-        this.getNftImageUrl(collectionMeta[collectionId], tokenId),
-        this.getNftData(collectionMeta[collectionId], tokenId, 'en', collectionId)
-      ]);
-
-      console.log(imageUrl);
-      console.log(tokenData);
+      const tokenData = await this.getNftData(_collection, tokenId, 'en', collectionId);
 
       if (tokenData && imageUrl) {
-        const collectionName = tokenData.collectionName;
-        const collectionImage = parseIpfsLink(tokenData.image);
-        const tokenDetail: NftItem = {
-          id: tokenId,
-          name: tokenData.prefix + '#' + tokenId,
-          image: parseIpfsLink(imageUrl),
-          external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
-          collectionId: collectionId.toString(),
-          properties: tokenData.properties,
-          rarity: ''
-        };
+        if (!(collectionId in collectionMeta)) {
+          collectionMeta[collectionId] = {
+            collectionName: tokenData.collectionName,
+            collectionImage: parseIpfsLink(tokenData.image)
+          };
+        }
+
+        total += 1;
+
+        if (collectionId in allNft) {
+          allNft[collectionId].push({
+            id: tokenId,
+            name: tokenData.prefix + '#' + tokenId,
+            image: parseIpfsLink(imageUrl),
+            external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
+            collectionId: collectionId.toString(),
+            properties: tokenData.properties,
+            rarity: ''
+          } as NftItem);
+        } else {
+          allNft[collectionId] = [{
+            id: tokenId,
+            name: tokenData.prefix + '#' + tokenId,
+            image: parseIpfsLink(imageUrl),
+            external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
+            collectionId: collectionId.toString(),
+            properties: tokenData.properties,
+            rarity: ''
+          } as NftItem];
+        }
       }
     }));
 
-    // let total = 0;
+    Object.keys(collectionMap).forEach((collectionId) => {
+      const collectionMetadata = collectionMeta[collectionId] as Record<string, string>;
 
-    // for (let j = 0; j < data.length; j++) {
-    //   const nftItems: NftItem[] = [];
-    //   const collectionId = data[j].collectionId;
-    //   const nfts = data[j].nfts;
-    //   let collectionName = '';
-    //   let collectionImage = '';
-    //
-    //   total += nfts.length;
-    //
-    //
-    //
-    //   allCollections.push({
-    //     collectionId: collectionId.toString(),
-    //     collectionName: collectionName,
-    //     image: collectionImage,
-    //     nftItems: nftItems
-    //   } as NftCollection);
-    // }
+      allCollections.push({
+        collectionId: collectionId,
+        collectionName: collectionMetadata.collectionName,
+        image: collectionMetadata.collectionImage,
+        nftItems: allNft[collectionId]
+      } as NftCollection);
+    });
 
-    // this.total = total;
-    // this.data = allCollections;
+    this.total = total;
+    this.data = allCollections;
 
     console.log(`unique took ${performance.now() - start}ms`);
 
-    // console.log(`Fetched ${total} nfts from unique`);
+    console.log(`Fetched ${total} nfts from unique`);
   }
 }

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
+// @ts-ignore
+import LazyLoad from 'react-lazyload';
 import styled from 'styled-components';
 
 import { NftCollection } from '@polkadot/extension-base/background/KoniTypes';
@@ -38,13 +40,15 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
             loading &&
             <Spinner className={'img-spinner'} />
           }
-          <img
-            alt={'collection-thumbnail'}
-            className={'collection-thumbnail'}
-            onLoad={handleOnLoad}
-            src={data.image ? data?.image : logo}
-            style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
-          />
+          <LazyLoad>
+            <img
+              alt={'collection-thumbnail'}
+              className={'collection-thumbnail'}
+              onLoad={handleOnLoad}
+              src={data.image ? data?.image : logo}
+              style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
+            />
+          </LazyLoad>
         </div>
 
         <div className={'collection-title'}>

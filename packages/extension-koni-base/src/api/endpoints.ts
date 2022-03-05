@@ -541,7 +541,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['TEST_NET'],
     paraId: 2012,
     nativeToken: 'UNQ'
-  },
+  }
   // robonomics: {
   //   chain: 'Robonomics',
   //   genesisHash: '0x631ccc82a078481584041656af292834e1ae6daab61d2875b4dd0c14bb9b17bc',

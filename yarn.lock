@@ -3394,6 +3394,7 @@ __metadata:
     react-dropzone: ^11.5.1
     react-i18next: ^11.15.3
     react-is: ^17.0.2
+    react-lazyload: ^3.2.0
     react-loading-skeleton: ^3.0.2
     react-qr-code: ^2.0.3
     react-redux: ^7.2.6
@@ -16987,6 +16988,16 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
+  languageName: node
+  linkType: hard
+
+"react-lazyload@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "react-lazyload@npm:3.2.0"
+  peerDependencies:
+    react: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    react-dom: ^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 871a88c698a80c53ead85c293b493ac67c94e5980590094128c371e3f1e3d5bc17841ead1e7830771c87ece7fe677a6c9c323f3e6ce392a5f6f0328a36c38fe7
   languageName: node
   linkType: hard
 

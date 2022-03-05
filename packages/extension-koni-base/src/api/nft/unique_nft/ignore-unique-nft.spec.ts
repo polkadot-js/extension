@@ -3,7 +3,7 @@
 
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
+import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/test_config';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft/index';
 
 jest.setTimeout(50000);

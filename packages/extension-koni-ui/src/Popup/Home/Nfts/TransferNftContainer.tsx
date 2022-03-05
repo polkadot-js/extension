@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, {useCallback, useState} from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
+import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import {NftItem as _NftItem} from "@polkadot/extension-base/background/KoniTypes";
-import {isValidAddress} from "@polkadot/extension-koni-base/utils/utils";
 
 interface Props extends ThemeProps {
   className?: string;

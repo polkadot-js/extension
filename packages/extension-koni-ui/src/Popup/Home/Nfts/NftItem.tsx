@@ -24,6 +24,7 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
+  // @ts-ignore
   const [showTransfer, setShowTransfer] = useState(false);
 
   const propDetail = (title: string, value: string, key: number) => {
@@ -39,8 +40,9 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
   };
 
   const handleClickTransfer = useCallback(() => {
-    setShowTransfer(!showTransfer);
-  }, [showTransfer]);
+    console.log('coming soon');
+    // setShowTransfer(!showTransfer);
+  }, []);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

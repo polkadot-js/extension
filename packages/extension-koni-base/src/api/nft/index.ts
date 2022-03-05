@@ -116,8 +116,13 @@ export class NftHandler {
   }
 
   public async handleNfts () {
+    const startConnect = performance.now();
+
     await this.connect();
+    console.log(`connect took ${performance.now() - startConnect}ms`);
+
     console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
+    const start = performance.now();
 
     let total = 0;
     let data: NftCollection[] = [];
@@ -147,6 +152,8 @@ export class NftHandler {
       this.data = data;
       this.prevAddresses = this.addresses;
     }
+
+    console.log(`all nft took ${performance.now() - start}ms`);
 
     console.log(`done fetching ${total} nft from rpc`);
   }

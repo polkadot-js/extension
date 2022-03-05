@@ -3,8 +3,8 @@
 
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft/index';
+import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/test_config';
 
 jest.setTimeout(600000);
 
@@ -15,7 +15,13 @@ describe('test quartz nft api', () => {
 
     await testNftApi.connect();
     await testNftApi.handleNfts();
-    console.log(testNftApi.getTotal());
+
+    const collections = testNftApi.getData();
+
+    for (const collection of collections) {
+      console.log(collection.nftItems);
+    }
+
     expect(testNftApi.getTotal()).toBeGreaterThanOrEqual(0);
   });
 });

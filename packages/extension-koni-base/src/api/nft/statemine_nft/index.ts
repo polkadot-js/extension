@@ -119,7 +119,7 @@ export default class StatemineNftApi extends BaseNftApi {
     }
 
     for (const asset of assetIds) {
-      const parsedClassId = this.parseTokenId(asset.classId as string)
+      const parsedClassId = this.parseTokenId(asset.classId as string);
       const newCollection = {
         collectionId: parsedClassId,
         nftItems: []

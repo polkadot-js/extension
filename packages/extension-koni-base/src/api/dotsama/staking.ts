@@ -283,5 +283,3 @@ export const getSubqueryStakingReward = async (accounts: string[]): Promise<Stak
     details: rewardList
   } as StakingRewardJson;
 };
-
-// '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM'

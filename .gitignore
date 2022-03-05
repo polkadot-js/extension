@@ -25,3 +25,12 @@ _book
 docs/html
 .idea
 /yarn.lock
+packages/extension-koni-base/src/api/nft/test_config.ts
+packages/extension-koni-base/src/api/nft/statemine_nft/ignore-statemine-nft.spec.ts
+packages/extension-koni-base/src/api/nft/unique_nft/ignore-unique-nft.spec.ts
+packages/extension-koni-base/src/api/nft/rmrk_nft/ignore-rmrk-nft.spec.ts
+packages/extension-koni-base/src/api/nft/quartz_nft/ignore-component-test.spec.ts
+packages/extension-koni-base/src/api/nft/quartz_nft/ignore-quartz-nft.spec.ts
+packages/extension-koni-base/src/api/nft/karura_nft/ignore-karura-nft.spec.ts
+packages/extension-koni-base/src/api/nft/acala_nft/ignore-acala-nft.spec.ts
+packages/extension-koni-base/src/api/dotsama/ignore-staking.spec.ts

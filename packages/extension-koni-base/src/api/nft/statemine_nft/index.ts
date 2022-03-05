@@ -87,7 +87,7 @@ export default class StatemineNftApi extends BaseNftApi {
     if (!this.dotSamaApi) return null;
 
     const { classId, tokenId } = assetId;
-    const metadataNft = (await this.dotSamaApi.api.query.uniques.instanceMetadataOf(classId, tokenId)).toHuman() as MetadataResponse;
+    const metadataNft = (await this.dotSamaApi.api.query.uniques.instanceMetadataOf(this.parseTokenId(classId as string), this.parseTokenId(tokenId as string))).toHuman() as MetadataResponse;
 
     if (!metadataNft?.data) return null;
 
@@ -106,6 +106,8 @@ export default class StatemineNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
+    const start = performance.now();
+
     const assetIds = await this.getNfts(this.addresses);
     const allCollections: NftCollection[] = [];
 
@@ -117,12 +119,13 @@ export default class StatemineNftApi extends BaseNftApi {
     }
 
     for (const asset of assetIds) {
+      const parsedClassId = this.parseTokenId(asset.classId as string);
       const newCollection = {
-        collectionId: asset.classId.toString(),
+        collectionId: parsedClassId,
         nftItems: []
       } as NftCollection;
 
-      if (!allCollections.some((collection) => collection.collectionId === asset.classId.toString())) {
+      if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) {
         allCollections.push(newCollection);
       }
     }
@@ -131,20 +134,28 @@ export default class StatemineNftApi extends BaseNftApi {
     const collectionMetaDict: Record<string | number, CollectionDetail | null> = {};
 
     await Promise.all(assetIds.map(async (assetId) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const tokenInfo = await this.getTokenDetails(assetId);
+      let tokenInfo: Record<any, any> = {};
+      const parsedClassId = this.parseTokenId(assetId.classId as string);
+      const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
 
-      if (!(assetId.classId in collectionMetaDict)) {
+      if (!(parsedClassId in collectionMetaDict)) {
+        const [_tokenInfo, _collectionMeta] = await Promise.all([
+          this.getTokenDetails(assetId),
+          this.getCollectionDetail(parseInt(parsedClassId))
+        ]);
+
+        tokenInfo = _tokenInfo as Record<any, any>;
+
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        collectionMetaDict[assetId.classId] = await this.getCollectionDetail(assetId.classId as number);
+        collectionMetaDict[parsedClassId] = _collectionMeta;
       }
 
       const parsedNft = {
-        id: assetId.tokenId.toString(),
-        name: tokenInfo?.name,
-        description: tokenInfo?.description,
-        image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : undefined,
-        collectionId: assetId.classId.toString()
+        id: parsedTokenId,
+        name: tokenInfo?.name as string,
+        description: tokenInfo?.description as string,
+        image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image as string) : undefined,
+        collectionId: this.parseTokenId(parsedClassId)
       } as NftItem;
 
       allItems.push(parsedNft);
@@ -168,5 +179,11 @@ export default class StatemineNftApi extends BaseNftApi {
 
     this.total = assetIds.length;
     this.data = allCollections;
+
+    const end = performance.now();
+
+    console.log(`statemine took ${end - start}ms`);
+
+    console.log(`Fetched ${assetIds.length} nfts from statemine`);
   }
 }

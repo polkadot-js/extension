@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/config';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft/index';
+import { TEST_NFT_ADDRESSES } from '@polkadot/extension-koni-base/api/nft/test_config';
 
 jest.setTimeout(60000);
 
@@ -13,9 +13,11 @@ describe('test rmrk nft api', () => {
     testNftApi.setAddresses(TEST_NFT_ADDRESSES);
     await testNftApi.connect();
     await testNftApi.handleNfts();
-    const result = testNftApi.getData();
+    // const result = testNftApi.getData();
 
-    for (const collection of result) {
+    console.log(testNftApi.getData());
+
+    for (const collection of testNftApi.getData()) {
       console.log(collection.nftItems);
     }
 

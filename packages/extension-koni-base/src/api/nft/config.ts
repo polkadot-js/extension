@@ -14,12 +14,3 @@ export const SINGULAR_EXTERNAL_SERVER = 'https://singular.rmrk.app/collectibles/
 export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
-
-export const TEST_NFT_ADDRESSES = [
-];
-
-export const TEST_STAKING_ADDRESSES = [
-];
-
-export const TEST_STAKING_REWARD_ADDRESSES = [
-];

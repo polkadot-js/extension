@@ -56,7 +56,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         setSeed(response.seed);
       })
       .catch(console.error);
-  }, []);
+  }, [keyTypes]);
 
   useEffect((): void => {
     if (seed) {
@@ -67,7 +67,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         })
         .catch(console.error);
     }
-  }, [seed]);
+  }, [keyTypes, seed]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {

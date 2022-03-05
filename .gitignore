@@ -25,6 +25,7 @@ _book
 docs/html
 .idea
 /yarn.lock
+packages/extension-koni-base/src/api/nft/ignore-nft.spec.ts
 packages/extension-koni-base/src/api/nft/test_config.ts
 packages/extension-koni-base/src/api/nft/statemine_nft/ignore-statemine-nft.spec.ts
 packages/extension-koni-base/src/api/nft/unique_nft/ignore-unique-nft.spec.ts

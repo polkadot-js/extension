@@ -36,37 +36,32 @@ function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddresses: st
   };
 }
 
-export const subcribleAcalaContributeInterval = (networkKey: string, polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
+export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
-    let contribute = new BN(0);
-    const rs0: CrowdloanItem = {
-      state: polkadotAddresses.length === 0 ? APIItemState.READY : APIItemState.PENDING,
-      contribute: contribute.toString()
-    };
+    Promise.all(polkadotAddresses.map((polkadotAddress) => {
+      return axios.get(`${acalaContributionApi}${polkadotAddress}`);
+    })).then((resList) => {
+      let contribute = new BN(0);
 
-    callback(rs0);
+      resList.forEach((res) => {
+        if (res.status !== 200) {
+          console.warn('Failed to get Acala, Karura crowdloan contribute');
+        }
 
-    polkadotAddresses.forEach((polkadotAddress) => {
-      axios.get(`${acalaContributionApi}${polkadotAddress}`)
-        .then((response) => {
-          if (response.status !== 200) {
-            console.warn('Failed to get Acala crowdloan contribute');
-          }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+        contribute = contribute.add(new BN(res.data.data?.acala?.[0]?.detail?.lcAmount || '0'));
+      });
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-          contribute = contribute.add(new BN(response.data.data?.[networkKey]?.[0]?.detail?.lcAmount || '0'));
+      const rs: CrowdloanItem = {
+        state: APIItemState.READY,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+        contribute: contribute.toString()
+      };
 
-          const rs: CrowdloanItem = {
-            state: APIItemState.READY,
-            contribute: contribute.toString()
-          };
-
-          callback(rs);
-        })
-        .catch(console.error);
-    });
+      callback(rs);
+    }).catch(console.error);
   };
 
   getContributeInfo();
@@ -98,8 +93,8 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
       return;
     }
 
-    if (networkKey === 'acala' || networkKey === 'karura') {
-      unsubMap.acala = subcribleAcalaContributeInterval(networkKey, substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
+    if (networkKey === 'acala') {
+      unsubMap.acala = subcribleAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
     } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
       unsubMap[networkKey] = getRPCCrowndloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
     } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {

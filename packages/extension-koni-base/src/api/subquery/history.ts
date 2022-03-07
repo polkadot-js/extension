@@ -114,8 +114,6 @@ export const fetchDotSamaHistory = (address: string, callBack: (historyMap: Reco
       rs?.data?.historyElements?.nodes.filter((n) => !!n).forEach((n) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (!n?.transfer || !n.extrinsicHash) {
-          console.log(`Can not get history item of ${networkKey}`, n);
-
           return;
         }
 

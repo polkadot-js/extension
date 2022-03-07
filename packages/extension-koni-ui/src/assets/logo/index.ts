@@ -122,6 +122,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   ukraine: require('./ukraine.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bitcountry: require('./bitcountry.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

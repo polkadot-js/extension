@@ -36,7 +36,7 @@ function getRPCCrowndloan (parentAPI: ApiProps, paraId: number, hexAddresses: st
   };
 }
 
-export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
+export const subcribleAcalaContributeInterval = (networkKey: string, polkadotAddresses: string[], callback: (rs: CrowdloanItem) => void) => {
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
@@ -50,13 +50,10 @@ export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], ca
           }
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-          const amount = new BN(response.data.data?.acala?.[0]?.detail?.lcAmount || '0');
-
-          contribute = contribute.add(amount);
+          contribute = contribute.add(new BN(response.data.data?.[networkKey]?.[0]?.detail?.lcAmount || '0'));
 
           const rs: CrowdloanItem = {
             state: APIItemState.READY,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
             contribute: contribute.toString()
           };
 
@@ -95,8 +92,8 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
       return;
     }
 
-    if (networkKey === 'acala') {
-      unsubMap.acala = subcribleAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
+    if (networkKey === 'acala' || networkKey === 'karura') {
+      unsubMap.acala = subcribleAcalaContributeInterval(networkKey, substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
     } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
       unsubMap[networkKey] = getRPCCrowndloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
     } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {

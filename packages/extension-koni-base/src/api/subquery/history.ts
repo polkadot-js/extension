@@ -35,7 +35,10 @@ export const HistoryApiMap: Record<string, string> = {
   quartz: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-quartz',
   zeigeist: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-zeitgeist',
   shiden: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-shiden',
-  statemine: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-statemine'
+  statemine: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-statemine',
+  moonbeam: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-moonbeam',
+  moonriver: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-moonriver',
+  pioneer: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-bit-country'
 };
 
 function getApolloClient (networkKey: string) {

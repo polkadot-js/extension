@@ -4,11 +4,10 @@
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
 import { SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { QrScanAddress } from '@polkadot/react-qr';
 
-import { AccountContext, ActionContext, Theme } from '../components';
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme } from '../components';
 import AccountNamePasswordCreation from '../components/AccountNamePasswordCreation';
 import useTranslation from '../hooks/useTranslation';
 import { createAccountExternal, createAccountSuri, createSeed } from '../messaging';
@@ -21,7 +20,11 @@ interface QrAccount {
   name?: string;
 }
 
-function ImportQr (): React.ReactElement {
+interface Props {
+  className?: string;
+}
+
+function ImportQr ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [account, setAccount] = useState<QrAccount | null>(null);
@@ -73,50 +76,83 @@ function ImportQr (): React.ReactElement {
   );
 
   return (
-    <>
+    <div className={className}>
       <Header
         showBackArrow
         showSubHeader
         subHeaderName={t<string>('Scan Address Qr')}
       />
-      {!account && (
-        <div>
-          <QrScanAddress onScan={_setAccount} />
-        </div>
-      )}
-      {account && (
-        <>
-          {account.isAddress && (<div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
-            <AccountInfo
-              {...account}
-              address={address}
-              name={name}
-            />
-          </div>)}
-          {account.isAddress
-            ? (
-              <Name
-                isFocused
-                onChange={setName}
-                value={name || ''}
+      <div className={account && account.isAddress ? 'import-qr-content -with-padding' : 'import-qr-content'}>
+        {!account && (
+          <div>
+            <QrScanAddress onScan={_setAccount} />
+          </div>
+        )}
+        {account && (
+          <>
+            {account.isAddress && (<div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
+              <AccountInfoEl
+                address={address}
+                name={name}
               />
-            )
-            : (
-              <AccountNamePasswordCreation
-                buttonLabel={t<string>('Add the account with identified address')}
-                isBusy={false}
-                keyTypes={[SUBSTRATE_ACCOUNT_TYPE]}
-                name={defaultName}
-                onCreate={_onCreate}
-                onPasswordChange={setPassword}
-              />
-            )
-          }
-        </>
-      )}
-    </>
+            </div>)}
+            {account.isAddress
+              ? (
+                <Name
+                  isFocused
+                  onChange={setName}
+                  value={name || ''}
+                />
+              )
+              : (
+                <AccountNamePasswordCreation
+                  address={address}
+                  buttonLabel={t<string>('Add the account with identified address')}
+                  isBusy={false}
+                  keyTypes={[SUBSTRATE_ACCOUNT_TYPE]}
+                  name={defaultName}
+                  onCreate={_onCreate}
+                  onPasswordChange={setPassword}
+                />
+              )
+            }
+            {
+              account.isAddress && <ButtonArea>
+                <NextStepButton
+                  className='next-step-btn'
+                  isDisabled={!name || (!account.isAddress && !password)}
+                  onClick={_onCreate}
+                >
+                  {t<string>('Add the account with identified address')}
+                </NextStepButton>
+              </ButtonArea>
+            }
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
 export default styled(ImportQr)`
+
+  .import-qr-content {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .import-qr-content.-with-padding {
+    padding: 25px 15px 15px;
+  }
+
+
+
+  .next-step-btn {
+    > .children {
+      display: flex;
+      align-items: center;
+      position: relative;
+      justify-content: center;
+    }
+  }
 `;

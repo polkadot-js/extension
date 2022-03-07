@@ -19,7 +19,6 @@ interface Props extends ThemeProps {
   address?: string;
   evmAddress?: string,
   evmName?: string,
-  genesisHash?: string;
   name?: string;
   className?: string;
   onSelectAccountCreated?: (keyTypes: KeypairType[]) => void
@@ -36,7 +35,7 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-function Mnemonic ({ address, className, evmAddress, evmName, genesisHash, name, onNextStep, onSelectAccountCreated, seed }: Props): React.ReactElement<Props> {
+function Mnemonic ({ address, className, evmAddress, evmName, name, onNextStep, onSelectAccountCreated, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);

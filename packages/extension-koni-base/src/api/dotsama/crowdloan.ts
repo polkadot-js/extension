@@ -41,6 +41,12 @@ export const subcribleAcalaContributeInterval = (networkKey: string, polkadotAdd
 
   const getContributeInfo = () => {
     let contribute = new BN(0);
+    const rs0: CrowdloanItem = {
+      state: polkadotAddresses.length === 0 ? APIItemState.READY : APIItemState.PENDING,
+      contribute: contribute.toString()
+    };
+
+    callback(rs0);
 
     polkadotAddresses.forEach((polkadotAddress) => {
       axios.get(`${acalaContributionApi}${polkadotAddress}`)

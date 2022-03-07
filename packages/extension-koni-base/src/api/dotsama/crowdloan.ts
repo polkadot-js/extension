@@ -40,28 +40,30 @@ export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], ca
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
-    Promise.all(polkadotAddresses.map((polkadotAddress) => {
-      return axios.get(`${acalaContributionApi}${polkadotAddress}`);
-    })).then((resList) => {
-      let contribute = 0;
+    const contribute = new BN(0);
 
-      resList.forEach((res) => {
-        if (res.status !== 200) {
-          console.warn('Failed to get Acala crowdloan contribute');
-        }
+    polkadotAddresses.forEach((polkadotAddress) => {
+      axios.get(`${acalaContributionApi}${polkadotAddress}`)
+        .then((response) => {
+          if (response.status !== 200) {
+            console.warn('Failed to get Acala crowdloan contribute');
+          }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-        contribute += parseInt(res.data.data?.acala?.[0]?.detail?.lcAmount || '0');
-      });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+          const amount = new BN(response.data.data?.acala?.[0]?.detail?.lcAmount || '0');
 
-      const rs: CrowdloanItem = {
-        state: APIItemState.READY,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-        contribute: contribute.toString()
-      };
+          contribute.add(amount);
+        })
+        .catch(console.error);
+    });
 
-      callback(rs);
-    }).catch(console.error);
+    const rs: CrowdloanItem = {
+      state: APIItemState.READY,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+      contribute: contribute.toString()
+    };
+
+    callback(rs);
   };
 
   getContributeInfo();
@@ -94,7 +96,7 @@ export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Re
     }
 
     if (networkKey === 'acala') {
-      unsubMap.acala = subcribleAcalaContributeInterval(addresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
+      unsubMap.acala = subcribleAcalaContributeInterval(substrateAddresses.map((address) => reformatAddress(address, networkInfo.ss58Format, networkInfo.isEthereum)), crowdloanCb);
     } else if (networkInfo.groups.includes('POLKADOT_PARACHAIN')) {
       unsubMap[networkKey] = getRPCCrowndloan(polkadotAPI, networkInfo.paraId, hexAddresses, crowdloanCb);
     } else if (networkInfo.groups.includes('KUSAMA_PARACHAIN')) {

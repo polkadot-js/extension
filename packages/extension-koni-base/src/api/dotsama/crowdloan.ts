@@ -40,7 +40,7 @@ export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], ca
   const acalaContributionApi = 'https://api.polkawallet.io/acala-distribution-v2/crowdloan?account=';
 
   const getContributeInfo = () => {
-    const contribute = new BN(0);
+    let contribute = new BN(0);
 
     polkadotAddresses.forEach((polkadotAddress) => {
       axios.get(`${acalaContributionApi}${polkadotAddress}`)
@@ -52,18 +52,18 @@ export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], ca
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
           const amount = new BN(response.data.data?.acala?.[0]?.detail?.lcAmount || '0');
 
-          contribute.add(amount);
+          contribute = contribute.add(amount);
+
+          const rs: CrowdloanItem = {
+            state: APIItemState.READY,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            contribute: contribute.toString()
+          };
+
+          callback(rs);
         })
         .catch(console.error);
     });
-
-    const rs: CrowdloanItem = {
-      state: APIItemState.READY,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-      contribute: contribute.toString()
-    };
-
-    callback(rs);
   };
 
   getContributeInfo();

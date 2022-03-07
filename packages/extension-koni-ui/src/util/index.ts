@@ -139,15 +139,15 @@ export const subscanByNetworkKey: Record<string, string> = {
   // 'basilisk': 'https://basilisk.subscan.io',
   bifrost: 'https://bifrost.subscan.io',
   calamari: 'https://calamari.subscan.io',
-  centrifuge: 'https://centrifuge.subscan.io/',
+  centrifuge: 'https://centrifuge.subscan.io',
   clover: 'https://clover.subscan.io',
   // 'coinversation': 'https://coinversation.subscan.io',
   // 'composableFinance': 'https://composableFinance.subscan.io',
   crust: 'https://crust.subscan.io',
   darwinia: 'https://darwinia.subscan.io',
-  edgeware: 'https://edgeware.subscan.io/',
+  edgeware: 'https://edgeware.subscan.io',
   // 'efinity': 'https://efinity.subscan.io/',
-  equilibrium: 'https://equilibrium.subscan.io/',
+  equilibrium: 'https://equilibrium.subscan.io',
   // 'genshiro': 'https://genshiro.subscan.io',
   heiko: 'https://parallel-heiko.subscan.io',
   hydradx: 'https://hydradx.subscan.io',
@@ -181,7 +181,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   westend: 'https://westend.subscan.io',
   rococo: 'https://rococo.subscan.io',
   robonomics: 'https://robonomics.subscan.io',
-  moonbase: 'https://moonbase.subscan.io/'
+  moonbase: 'https://moonbase.subscan.io'
 
 };
 

@@ -104,7 +104,6 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             className='koni-import-seed-content'
             evmAddress={evmAccount?.address}
             evmName={evmName}
-            genesis={account?.genesis}
             isBusy={isBusy}
             keyTypes={keyTypes}
             name={name}

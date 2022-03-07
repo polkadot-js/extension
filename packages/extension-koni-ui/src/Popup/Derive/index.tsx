@@ -106,7 +106,6 @@ function Derive ({ className, isLocked }: Props): React.ReactElement<Props> {
             address={account?.address}
             buttonLabel={t<string>('Create derived account')}
             className='koni-import-seed-content'
-            genesis={parentGenesis}
             isBusy={isBusy}
             keyTypes={[SUBSTRATE_ACCOUNT_TYPE]}
             name={name}

@@ -1,11 +1,11 @@
      465	Jaco                          	0.42.5 (#969)
-      82	Nam Phạm                      	fix bug nft and staking when switch account
+      87	Nam Phạm                      	fix nft loading performance
       82	Thibaut Sardan                	Add account filtering feature (#832)
+      68	AnhMTV                        	Rename 'Bit.Country - Testnet' => 'Bit.Country - Testnet'
       60	quangdo                       	Update AccountQrModal, Tooltip style
-      58	AnhMTV                        	Release version 0.2.6 (koni)
       50	leewong                       	# update condition to display correct message on send fund screen
-      18	Dominhquangdev                	Add Donate feature in SubWallet
-      18	lw                            	
+      26	lw                            	# update network support getting history from API
+      23	Dominhquangdev                	Update UI ImportQr, update MoonBase Alpha url, update AccountNameAndPasswordCreation screen
       12	Hieu Dao                      	Update README.md
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
@@ -33,6 +33,7 @@
        1	Marcel Jackisch               	Minor changes to readme (#376)
        1	Michael Healy                 	Small typo (#932)
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
+       1	MinhLe                        	hotfix: remove test address
        1	murat onur                    	tr language support added (#681)
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
        1	Stéphane P                    	README Fix typo (#700)

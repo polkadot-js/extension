@@ -289,6 +289,8 @@ export interface ResponseSeedCreateV2 {
 }
 export type ResponseSeedValidateV2 = ResponseSeedCreateV2
 export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
+export type AccountRef = Array<string>
+export type AccountRefMap = Record<string, AccountRef>
 
 export type RequestPrice = null
 export type RequestSubscribePrice = null

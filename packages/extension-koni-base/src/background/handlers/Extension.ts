@@ -4,7 +4,7 @@
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
 import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
+import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
@@ -250,7 +250,7 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): ResponseAccountCreateSuriV2 {
+  private async accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
     const addressDict = {} as Record<KeypairType, string>;
 
     types?.forEach((type) => {
@@ -258,13 +258,31 @@ export default class KoniExtension extends Extension {
       const address = keyring.createFromUri(suri, {}, type).address;
 
       addressDict[type] = address;
+      const newAccountName = type === 'ethereum' ? `${name} - EVM` : name;
 
       this._saveCurrentAccountAddress(address, () => {
-        keyring.addUri(suri, password, { genesisHash, name }, type);
+        keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
+      });
+    });
+
+    await new Promise<void>((resolve) => {
+      state.addAccountRef(Object.values(addressDict), () => {
+        resolve();
       });
     });
 
     return addressDict;
+  }
+
+  private async accountsForgetOverride ({ address }: RequestAccountForget): Promise<boolean> {
+    keyring.forgetAccount(address);
+    await new Promise<void>((resolve) => {
+      state.removeAccountRef(address, () => {
+        resolve();
+      });
+    });
+
+    return true;
   }
 
   private seedCreateV2 ({ length = SEED_DEFAULT_LENGTH, seed: _seed, types }: RequestSeedCreateV2): ResponseSeedCreateV2 {
@@ -273,6 +291,12 @@ export default class KoniExtension extends Extension {
 
     types?.forEach((type) => {
       rs.addressMap[type] = keyring.createFromUri(getSuri(seed, type), {}, type).address;
+    });
+
+    console.log('linkMapOK');
+
+    state.getAccountRefMap((map) => {
+      console.log('linkMap', map);
     });
 
     return rs;
@@ -515,13 +539,14 @@ export default class KoniExtension extends Extension {
       case 'pri(api.init)':
         return this.apiInit(request as RequestApi);
       case 'pri(accounts.create.suriV2)':
-        return this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
+        return await this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
+      case 'pri(accounts.forget)':
+        return await this.accountsForgetOverride(request as RequestAccountForget);
       case 'pri(seed.createV2)':
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(seed.validateV2)':
         return this.seedValidateV2(request as RequestSeedValidateV2);
       case 'pri(accounts.exportPrivateKey)':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);

@@ -10,7 +10,7 @@ import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
+import ChainBalanceDetail from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
@@ -47,8 +47,12 @@ function ChainBalanceItem ({ accountInfo,
     show(t('Copied'));
   }, [show, t]);
 
-  const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    setToggleDetail((toggleDetail) => !toggleDetail);
+  const _onOpenDetail = useCallback(() => {
+    setToggleDetail(true);
+  }, []);
+
+  const _onCloseDetail = useCallback(() => {
+    setToggleDetail(false);
   }, []);
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -65,11 +69,11 @@ function ChainBalanceItem ({ accountInfo,
   const _isAccountAll = isAccountAll(address);
 
   return (
-    <div
-      className={`${className || ''} ${toggleDetail ? '-show-detail' : ''}`}
-      onClick={_onToggleDetail}
-    >
-      <div className='chain-balance-item__main-area'>
+    <div className={`${className || ''}`}>
+      <div
+        className='chain-balance-item__main-area'
+        onClick={_onOpenDetail}
+      >
         <div className='chain-balance-item__main-area-part-1'>
           <img
             alt={'Logo'}
@@ -137,41 +141,17 @@ function ChainBalanceItem ({ accountInfo,
                 value={balanceInfo.convertedBalanceValue}
               />
             </div>
-
-            {(!!balanceInfo.detailBalances.length || !!balanceInfo.childrenBalances.length) && (
-              <div className='chain-balance-item__toggle' />
-            )}
           </div>
         )}
       </div>
 
-      {!isLoading && toggleDetail && !!balanceInfo.detailBalances.length && (
-        <>
-          <div className='chain-balance-item__separator' />
-          <div className='chain-balance-item__detail-area'>
-            {balanceInfo.detailBalances.map((d) => (
-              <ChainBalanceItemRow
-                item={d}
-                key={d.key}
-              />
-            ))}
-          </div>
-        </>
+      {!isLoading && toggleDetail && (
+        <ChainBalanceDetail
+          balanceInfo={balanceInfo}
+          onCancel={_onCloseDetail}
+        />
       )}
 
-      {!isLoading && toggleDetail && !!balanceInfo.childrenBalances.length && (
-        <>
-          <div className='chain-balance-item__separator' />
-          <div className='chain-balance-item__detail-area'>
-            {balanceInfo.childrenBalances.map((c) => (
-              <ChainBalanceItemRow
-                item={c}
-                key={c.key}
-              />
-            ))}
-          </div>
-        </>
-      )}
       <div className='chain-balance-item__separator' />
     </div>
   );
@@ -212,7 +192,7 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
 
   .chain-balance-item__main-area-part-2 {
     position: relative;
-    padding-right: 48px;
+    padding-right: 25px;
     text-align: right;
     cursor: pointer;
     min-width: 80px;
@@ -247,6 +227,10 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
   .chain-balance-item__chain-name {
     font-weight: 500;
     font-size: 16px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 250px;
   }
 
   .chain-balance-item__bottom-area {
@@ -279,17 +263,6 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
     cursor: pointer;
   }
 
-  .chain-balance-item__toggle {
-    position: absolute;
-    border-style: solid;
-    border-width: 0 2px 2px 0;
-    display: inline-block;
-    padding: 3.5px;
-    transform: rotate(45deg);
-    top: 7px;
-    right: 25px;
-  }
-
   .chain-balance-item__chain-name,
   .balance-val__symbol,
   .balance-val__prefix {
@@ -312,8 +285,4 @@ export default React.memo(styled(ChainBalanceItem)(({ theme }: Props) => `
     }
   }
 
-  &.-show-detail .chain-balance-item__toggle {
-    top: 9px;
-    transform: rotate(-135deg);
-  }
 `));

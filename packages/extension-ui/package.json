@@ -14,7 +14,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.2.7-0",
+  "version": "0.2.7-1",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
@@ -22,10 +22,10 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.4",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
-    "@polkadot/extension-base": "^0.2.7-0",
-    "@polkadot/extension-chains": "^0.2.7-0",
-    "@polkadot/extension-dapp": "^0.2.7-0",
-    "@polkadot/extension-inject": "^0.2.7-0",
+    "@polkadot/extension-base": "^0.2.7-1",
+    "@polkadot/extension-chains": "^0.2.7-1",
+    "@polkadot/extension-dapp": "^0.2.7-1",
+    "@polkadot/extension-inject": "^0.2.7-1",
     "@polkadot/hw-ledger": "^8.3.1",
     "@polkadot/keyring": "^8.3.1",
     "@polkadot/networks": "^8.3.1",
@@ -49,7 +49,7 @@
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "^0.2.7-0",
+    "@polkadot/extension-mocks": "^0.2.7-1",
     "@types/bn.js": "^4.11.6",
     "@types/enzyme": "^3.10.11",
     "@types/enzyme-adapter-react-16": "^1.0.6",

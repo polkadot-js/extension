@@ -42,15 +42,6 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['RELAY_CHAIN', 'TEST_NET'],
     nativeToken: 'ROC'
   },
-  koni: {
-    chain: 'Koni test',
-    genesisHash: '0x7a48390870728092c951aaf4e1632c849a74489d9cee0bf51d3527b33983fc0a',
-    icon: 'polkadot',
-    ss58Format: 42,
-    provider: 'wss://rpc.koniverse.com',
-    groups: ['TEST_NET'],
-    nativeToken: 'DOT'
-  },
   rmrk: {
     chain: 'RMRK test',
     genesisHash: '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1',

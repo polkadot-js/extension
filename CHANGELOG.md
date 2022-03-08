@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.2.7 (Koni)
+Build date: Mar 07, 2022. Complete internal security audit
+
+Update:
+- Support H160 address only: $GLMR, $MOVR
+- Shows balance amount in multiple formats
+- Update Transactions history screen using SubQuery data
+- Update export Private key for Metamask
+- Improve NFT display performance
+- Add Bit.Country Testnet
+
+Bug Fixed:
+- Fix request access UI
+- Fix Scan Address Qr UI
+- Fix RMRK's NFT display error by wrong metadata
+
+---
+
 ## 0.2.6 (Koni)
 Build date: Mar 03, 2022. Complete internal security audit
 

@@ -1,52 +1,137 @@
 # CHANGELOG
 
-## 0.2.6 (Koni) Feb 25, 2022
-Changes:
-- Separate support network depends on type of accounts address types
-- Add donate feature
-- Fix bugs
-- ...
+## 0.2.6 (Koni)
+Build date: Mar 03, 2022. Complete internal security audit
 
-## 0.2.5 (Koni) Feb 25, 2022
-Changes:
-- Add crowdloan funds status
-- Support SubSquid Graphql
-- Update style Authorize, Metadata, Signing, Export All, Export, Forget screen
-- ...
+Update:
+- Update Crowdloan Status
+- Update Crowdloan Link
+- Add Donate button
+- Add Moonbase Alpha Testnet
+- Update Sign and Request access screen
+- Some small UI update
+- Improve performance for Staking tab
+- Remove require enter account name when creating an account
 
-## 0.2.2 (Koni) Feb 22, 2022
-Changes:
-- Improve stabling
-- Fix eslint and test issues
-- ...
+Bug Fixed:
+- Karura's NFT display error
 
-## 0.2.1 (Koni) Feb 20, 2022
-Changes:
-- Fix performance bugs
-- ...
+---
 
-## 0.2.0 (Koni) Feb 18, 2022
-Changes:
-- Add support staking
-- Fix bugs
-- ...
+## 0.2.4 (Koni)
+Build date: Feb 22, 2022. Complete internal security audit
 
-## 0.1.0 (Koni) Jan 28, 2022
-Changes:
-- Update UI
-- Add support get account balances in USD
-- Add support get crowdloan balances in USD
-- Add support NFT
-- Add support send funds
-- ...
+Update:
+- Run Yarn test for all features
+- Update Eslint for all features
 
-## 0.0.1 (Koni) Jan 17, 2022
-Changes:
-- Start folk and custom polkadot extension with packages extension-koni, extension-koni-base, extension-koni-ui
-- Add support redux in extension-koni-ui
-- Add subscribable store
-- Add api get price from coingecko
-- ...
+Bug Fixed:
+- Can't show Kint Balance
+
+
+---
+
+## 0.2.3 (Koni)
+Build date: Feb 21, 2022. Complete internal security audit
+
+Update:
+- Add Rococo explorer with Subscan
+- Add ParaID for Polkadex to view Polkadot crowdloan contributed
+
+---
+
+## 0.2.2 (Koni)
+Build date: Feb 19, 2022. Complete internal security audit
+
+Update:
+- Added the feature to track the balances of multiple accounts in one wallet
+- Integration Quartz Network's NFT 
+- Integration Layer 1 blockchain built on Substrate Aleph Zero
+- Displays Staking information of some networks in the Polkadot and Kusama ecosystem
+
+Bugs Fixed:
+- Extension Crash due to memory overflow when loading NFT data
+- Unstable NFT data display when switching between multiple accounts
+
+---
+
+## 0.2.1 (Koni)
+
+Build date: Feb 10, 2022. Complete internal security audit
+
+Update:
+- Update new architecture
+- Update new layout
+- Integration RMRK's NFT display feature
+- Integration Unique's NFT display feature
+- Integration Acala's NFT display feature
+- Add Polkadot and Kusama staking display feature
+
+---
+
+## 0.1.0 (Koni)
+
+Build date: Jan 25, 2022. Complete internal security audit
+
+Update:
+- Packaged according to the standards of Firefox Extension
+- Add loading screen with SubWallet logo
+- Add mechanism to update Crowdloan data every second
+
+Bugs Fixed:
+- No warning when entering the wrong password when restoring from JSON file
+
+---
+
+## 0.0.3 (Koni) 
+
+Build date: Jan 16, 2022. Complete internal security audi
+
+Update
+- Crowdloan Balance Management
+- Add Rococo Relaychain Testnet
+- Add another network in supported networks
+- Supported Brave, MS Edge, and Firefox
+
+---
+
+## 0.0.2 (Koni)
+Build date: Jan 10, 2022. Complete internal security audit
+
+Update
+- Add option: Show zero balance when choosing to Allow use on any chain
+- Add screen: Transactions result when Send Fund
+- Add button view transaction on Subscan.io on Transactions result
+- Add Westend Relaychain Test Network
+- Add searchable for choose network input when creating new account
+- Add tooltip for send, receive and swap in the homepage
+- Update the wallet address format in the chain list
+- Update new style and Logo
+- Improved text color contrast
+- And some small change
+
+Bugs Fixed
+- Do not automatically jump to the new account screen after restoring from the JSON file
+- No drop down to the selection screen when clicking input title in the send fund screen
+- Missing icon corner and border corner
+- Wrong slider state displayed in the screen manage Website Access
+- Logical error when searching for a network that has not combined both filter conditions.
+- Can't use the feature: Transfer the full account balance, reap the sender
+- And some UI bugs
+
+---
+
+## 0.0.1 (Koni) 
+Build date: Jan 05, 2022 with basic features
+
+Update:
+- Create an account
+- Restore and import account
+- Receive and send fund
+- Manage an account balance
+- And much more
+
+--- 
 
 ## 0.42.5 Jan 10, 2022
 

@@ -466,10 +466,12 @@ export default class KoniExtension extends Extension {
 
     // eslint-disable-next-line no-prototype-builtins
     if (!rpcsMap.hasOwnProperty(networkKey) || !rpcsMap[networkKey]) {
+      console.log('not support');
       return ApiInitStatus.NOT_SUPPORT;
     }
 
     if (apisMap[networkKey]) {
+      console.log('existed');
       return ApiInitStatus.ALREADY_EXIST;
     }
 

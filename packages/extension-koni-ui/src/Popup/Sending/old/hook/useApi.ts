@@ -76,7 +76,7 @@ export default function useApi (networkKey: string): ApiProps {
 
         return;
       }
-
+      console.log('running 2');
       await apiInfo.isReady;
 
       if (isSync) {

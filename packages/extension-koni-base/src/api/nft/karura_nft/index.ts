@@ -141,7 +141,8 @@ export class KaruraNftApi extends BaseNftApi {
         description: tokenInfo?.description,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
-        collectionId: parsedClassId
+        collectionId: parsedClassId,
+        chain: 'karura'
       } as NftItem;
 
       allItems.push(parsedNft);

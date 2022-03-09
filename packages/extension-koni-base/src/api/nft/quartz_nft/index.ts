@@ -196,7 +196,8 @@ export default class QuartzNftApi extends BaseNftApi {
             external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
             collectionId: collectionId.toString(),
             properties: nftData.properties,
-            rarity: ''
+            rarity: '',
+            chain: 'quartz'
           } as NftItem);
         } else {
           allNft[collectionId] = [{
@@ -206,7 +207,8 @@ export default class QuartzNftApi extends BaseNftApi {
             external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
             collectionId: collectionId.toString(),
             properties: nftData.properties,
-            rarity: ''
+            rarity: '',
+            chain: 'quartz'
           } as NftItem];
         }
       }

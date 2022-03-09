@@ -2,11 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
+import { LoadingContainer } from '@polkadot/extension-koni-ui/components';
+import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
+import TransferConfirm from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/TransferConfirm';
+import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -16,62 +24,109 @@ interface Props extends ThemeProps {
 
 function TransferNftContainer ({ className, nftItem, setShowTransfer }: Props): React.ReactElement<Props> {
   const [recipientAddress, setRecipientAddress] = useState('');
-  const [addressError, setAddressError] = useState(false);
+  const [addressError, setAddressError] = useState(true);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { currentAccount: account } = useSelector((state: RootState) => state);
+  const networkKey = nftItem.chain;
+  const { api, isApiReady, isNotSupport } = useApi(networkKey as string);
+  const [txInfo, setTxInfo] = useState<RuntimeDispatchInfo | null>(null);
+  const [extrinsic, setExtrinsic] = useState<SubmittableExtrinsic<'promise'> | null>(null);
 
   const handleChangeRecipient = useCallback((e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const address = e.target.value;
 
     setRecipientAddress(address as string);
-    if (!isValidAddress(address as string) || address === '') setAddressError(true);
+    if (!isValidAddress(address as string)) setAddressError(true);
     else setAddressError(false);
   }, []);
 
+  const handleSend = useCallback(async () => {
+    if (addressError || !isApiReady || !networkKey || isNotSupport) return;
+
+    // @ts-ignore
+    const senderAddress = account.account.address;
+    const collectionId = nftItem.collectionId;
+    const itemId = nftItem.id;
+
+    const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress, { collectionId, itemId });
+
+    if (transferMeta) {
+      setExtrinsic(transferMeta.extrinsic || null);
+      setTxInfo(transferMeta.info || null);
+      setShowConfirm(true);
+    }
+  }, [account, addressError, api, isApiReady, isNotSupport, networkKey, nftItem, recipientAddress]);
+
+  const handleShowConfirm = useCallback(() => {
+    if (!addressError && isApiReady && networkKey) setShowConfirm(!showConfirm);
+  }, [addressError, isApiReady, networkKey, showConfirm]);
+
   return (
     <div className={className}>
-      <div className={'header'}>
-        <div />
-        <div
-          className={'header-title'}
-        >
-          Transfer NFT
-        </div>
-        <div
-          className={'close-button'}
-          onClick={setShowTransfer}
-        >
-          x
-        </div>
-      </div>
+      {
+        !showConfirm && isApiReady &&
+          <div>
+            <div className={'header'}>
+              <div />
+              <div
+                className={'header-title'}
+              >
+                Transfer NFT
+              </div>
+              <div
+                className={'close-button'}
+                onClick={setShowTransfer}
+              >
+                x
+              </div>
+            </div>
 
-      <div className={'field-container'}>
-        <div className={'field-title'}>Recipient</div>
-        <input
-          className={'input-value'}
-          onChange={handleChangeRecipient}
-          value={recipientAddress}
-        />
-        {
-          addressError &&
-          <div className={'address-warning'}>Recipient address is not valid</div>
-        }
-      </div>
+            <div className={'field-container'}>
+              <div className={'field-title'}>Recipient</div>
+              <input
+                className={'input-value'}
+                onChange={handleChangeRecipient}
+                value={recipientAddress}
+              />
+            </div>
 
-      <div className={'transfer-meta'}>
-        <div className={'meta-title'}>
-          <div>NFT</div>
-          <div>Chain</div>
-          <div>Estimated fee</div>
-        </div>
+            <div className={'transfer-meta'}>
+              <div className={'meta-title'}>
+                <div>NFT</div>
+                <div>Chain</div>
+              </div>
 
-        <div className={'meta-value'}>
-          <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
-          <div>Acala</div>
-          <div>0 ACA</div>
-        </div>
-      </div>
+              <div className={'meta-value'}>
+                <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
+                <div style={{ textTransform: 'uppercase' }}>{nftItem?.chain}</div>
+              </div>
+            </div>
 
-      <div className={'send-button'}>Send</div>
+            <div
+              className={'send-button-default ' + (addressError ? 'inactive-button' : 'active-button')}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onClick={handleSend}
+            >
+              Send
+            </div>
+          </div>
+      }
+
+      {
+        showConfirm && isApiReady &&
+          <TransferConfirm
+            extrinsic={extrinsic}
+            senderAccount={account?.account}
+            setShowConfirm={handleShowConfirm}
+            txInfo={txInfo}
+          />
+      }
+
+      {
+        !isApiReady &&
+          <LoadingContainer />
+      }
     </div>
   );
 }
@@ -79,7 +134,15 @@ function TransferNftContainer ({ className, nftItem, setShowTransfer }: Props): 
 export default React.memo(styled(TransferNftContainer)(({ theme }: Props) => `
   width: 100%;
 
-  .send-button {
+  .inactive-button {
+    opacity: 0.5;
+  }
+
+  .active-button {
+    cursor: pointer;
+  }
+
+  .send-button-default {
     margin-top: 40px;
     background: #004BFF;
     border-radius: 8px;
@@ -88,10 +151,6 @@ export default React.memo(styled(TransferNftContainer)(({ theme }: Props) => `
     align-items: center;
     padding: 10px;
     color: #FFFFFF;
-  }
-
-  .send-button:hover {
-    cursor: pointer;
   }
 
   .address-warning {

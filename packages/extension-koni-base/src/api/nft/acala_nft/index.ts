@@ -145,7 +145,8 @@ export class AcalaNftApi extends BaseNftApi {
         external_url: acalaExternalBaseUrl + parsedClassId,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
         image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
-        collectionId: parsedClassId
+        collectionId: parsedClassId,
+        chain: 'acala'
       } as NftItem;
 
       allItems.push(parsedNft);

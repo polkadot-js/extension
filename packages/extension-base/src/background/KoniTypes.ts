@@ -71,6 +71,7 @@ export interface NftItem {
   collectionId?: string;
   description?: string;
   properties?: Record<any, any> | null;
+  chain?: string;
 }
 
 export interface NftCollection {

@@ -183,7 +183,8 @@ export default class UniqueNftApi extends BaseNftApi {
             external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
             collectionId: collectionId.toString(),
             properties: tokenData.properties,
-            rarity: ''
+            rarity: '',
+            chain: 'uniqueNft'
           } as NftItem);
         } else {
           allNft[collectionId] = [{
@@ -193,7 +194,8 @@ export default class UniqueNftApi extends BaseNftApi {
             external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
             collectionId: collectionId.toString(),
             properties: tokenData.properties,
-            rarity: ''
+            rarity: '',
+            chain: 'uniqueNft'
           } as NftItem];
         }
       }

@@ -8,12 +8,12 @@ import styled from 'styled-components';
 
 import { NftCollection as _NftCollection } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/EmptyList';
-import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftCollection';
+import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/EmptyList';
+import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/NftCollection';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_GRID_SIZE } from '@polkadot/extension-koni-ui/util';
 
-import NftCollectionPreview from './NftCollectionPreview';
+import NftCollectionPreview from './component/NftCollectionPreview';
 
 interface Props extends ThemeProps {
   className?: string;

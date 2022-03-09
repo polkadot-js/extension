@@ -12,6 +12,8 @@ import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/Tr
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import logo from '../../../assets/sub-wallet-logo.svg';
+import {useSelector} from "react-redux";
+import {RootState} from "@polkadot/extension-koni-ui/stores";
 
 interface Props {
   className?: string;
@@ -24,8 +26,9 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
-  // @ts-ignore
   const [showTransfer, setShowTransfer] = useState(false);
+  const [sendError, setSendError] = useState(false);
+  const { currentNetwork } = useSelector((state: RootState) => state);
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
@@ -40,9 +43,13 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
   };
 
   const handleClickTransfer = useCallback(() => {
-    console.log('coming soon');
-    // setShowTransfer(!showTransfer);
-  }, []);
+    if (data.chain && data?.chain === currentNetwork.networkKey) {
+      setShowTransfer(!showTransfer);
+      setSendError(false);
+    } else {
+      setSendError(true);
+    }
+  }, [currentNetwork, data, showTransfer]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -132,11 +139,17 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
                   />
                 </video>
             }
-            <div
-              className={'send-button'}
-              onClick={handleClickTransfer}
-            >
-              Send
+            <div className={'send-container'}>
+              {
+                sendError &&
+                <div className={'send-error'}>Please change to {data?.chain} network!</div>
+              }
+              <div
+                className={'send-button'}
+                onClick={handleClickTransfer}
+              >
+                Send
+              </div>
             </div>
             {
               data.description &&
@@ -227,8 +240,18 @@ export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
     text-overflow: ellipsis;
   }
 
-  .send-button {
+  .send-container {
     margin-top: 20px;
+  }
+
+  .send-error {
+    color: red;
+    font-size: 14px;
+    text-transform: uppercase;
+  }
+
+  .send-button {
+    margin-top: 5px;
     background: #004BFF;
     border-radius: 8px;
     display: flex;

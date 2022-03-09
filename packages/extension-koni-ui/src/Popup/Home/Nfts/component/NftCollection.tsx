@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
-import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItemPreview';
+import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/NftItemPreview';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {

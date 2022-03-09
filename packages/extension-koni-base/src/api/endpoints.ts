@@ -73,7 +73,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Acala',
     genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
     ss58Format: 10,
-    provider: 'wss://acala-polkadot.api.onfinality.io/public-ws',
+    // provider: 'wss://acala-polkadot.api.onfinality.io/public-ws',
+    provider: 'wss://node-6870830370282213376.rz.onfinality.io/ws?apikey=0f273197-e4d5-45e2-b23e-03b015cb7000', // test nft
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2000,
     nativeToken: 'ACA',

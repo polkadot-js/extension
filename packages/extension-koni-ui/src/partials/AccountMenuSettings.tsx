@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { faCodeBranch, faCog, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -43,7 +43,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
     )
     : hierarchy;
 
-  const { master } = useContext(AccountContext);
+  // const { master } = useContext(AccountContext);
   const networkMap = useMemo(() => getNetworkMap(), []);
   const mediaAllowed = useContext(MediaContext);
   const isPopup = useIsPopup();
@@ -114,18 +114,18 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               <span>{ t('Create new account')}</span>
             </Link>
           </MenuSettingItem>
-          {!!master && (
-            <MenuSettingItem className='account-menu-settings__menu-item'>
-              <Link
-                className='account-menu-settings__menu-item-text'
-                to={`/account/derive/${master.address}`}
-              >
-                {/* @ts-ignore */}
-                <FontAwesomeIcon icon={faCodeBranch} />
-                <span>{t('Derive from an account')}</span>
-              </Link>
-            </MenuSettingItem>
-          )}
+          {/* {!!master && ( */}
+          {/*  <MenuSettingItem className='account-menu-settings__menu-item'> */}
+          {/*    <Link */}
+          {/*      className='account-menu-settings__menu-item-text' */}
+          {/*      to={`/account/derive/${master.address}`} */}
+          {/*    > */}
+          {/*      /!* @ts-ignore *!/ */}
+          {/*      <FontAwesomeIcon icon={faCodeBranch} /> */}
+          {/*      <span>{t('Derive from an account')}</span> */}
+          {/*    </Link> */}
+          {/*  </MenuSettingItem> */}
+          {/* )} */}
         </div>
 
         <div className='account-menu-settings-items-wrapper'>
@@ -145,8 +145,18 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               to='/account/import-seed'
             >
               {/* @ts-ignore */}
+              <FontAwesomeIcon icon={faSeedling} />
+              <span>{t<string>('Import account from Seed Phase')}</span>
+            </Link>
+          </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              to='/account/import-metamask-private-key'
+            >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
-              <span>{t<string>('Import account from pre-existing seed')}</span>
+              <span>{t<string>('Import private key from Metamask')}</span>
             </Link>
           </MenuSettingItem>
           <MenuSettingItem className='account-menu-settings__menu-item'>
@@ -157,11 +167,10 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faFileUpload} />
-              <span>{t<string>('Restore account from backup JSON file')}</span>
+              <span>{t<string>('Restore account from Polkadot{.js}')}</span>
             </Link>
           </MenuSettingItem>
         </div>
-
         <div className='account-menu-settings-items-wrapper'>
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link

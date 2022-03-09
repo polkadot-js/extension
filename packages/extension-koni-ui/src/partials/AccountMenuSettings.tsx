@@ -144,6 +144,16 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               to='/account/import-seed'
             >
               {/* @ts-ignore */}
+              <FontAwesomeIcon icon={faSeedling} />
+              <span>{t<string>('Import account from Seed Phase')}</span>
+            </Link>
+          </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              to='/account/import-metamask-private-key'
+            >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
               <span>{t<string>('Import private key from Metamask')}</span>
             </Link>

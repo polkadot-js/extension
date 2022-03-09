@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
@@ -12,10 +12,13 @@ import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
+import ChainBalanceDetail from '../ChainBalances/ChainBalanceDetail/ChainBalanceDetail';
+
 interface Props extends ThemeProps {
   address: string;
   className?: string;
   currentNetworkKey: string;
+  isShowBalanceDetail: boolean;
   isShowZeroBalances: boolean;
   networkKeys: string[];
   networkBalanceMaps: Record<string, BalanceInfo>;
@@ -27,6 +30,7 @@ interface Props extends ThemeProps {
     iconTheme: string,
     showExportButton: boolean
   }) => void;
+  setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
 }
 
 function isAllowToShow (
@@ -76,15 +80,25 @@ function getAccountInfoByNetworkMap (
 function ChainBalances ({ address,
   className,
   currentNetworkKey,
+  isShowBalanceDetail,
   isShowZeroBalances,
   networkBalanceMaps,
   networkKeys,
   networkMetadataMap,
   setQrModalOpen,
-  setQrModalProps }: Props): React.ReactElement<Props> {
+  setQrModalProps,
+  setShowBalanceDetail }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> =
     getAccountInfoByNetworkMap(address, networkKeys, networkMetadataMap);
+  const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
+  const selectedInfo = accountInfoByNetworkMap[selectedNetworkKey];
+  const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
+
+  const _openBalanceDetail = useCallback((networkKey: string) => {
+    setSelectedNetworkKey(networkKey);
+    setShowBalanceDetail(true);
+  }, [setShowBalanceDetail]);
 
   const renderChainBalanceItem = (networkKey: string) => {
     const info = accountInfoByNetworkMap[networkKey];
@@ -107,27 +121,45 @@ function ChainBalances ({ address,
         key={info.key}
         setQrModalOpen={setQrModalOpen}
         setQrModalProps={setQrModalProps}
+        showBalanceDetail={_openBalanceDetail}
       />
     );
   };
 
   return (
     <div className={`chain-balances-container ${className || ''}`}>
-      <div className='chain-balances-container__body'>
-        {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
-      </div>
-      <div className='chain-balances-container__footer'>
-        <div>
-          <div className='chain-balances-container__footer-row-1'>
-            {t<string>("Don't see your token?")}
-          </div>
-          <div className='chain-balances-container__footer-row-2'>
-            <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div>
-            <span>&nbsp;{t<string>('or')}&nbsp;</span>
-            <div className='chain-balances-container__footer-action'>{t<string>('import tokens')}</div>
-          </div>
-        </div>
-      </div>
+      {!isShowBalanceDetail || !selectedNetworkKey || !selectedInfo || !selectedBalanceInfo
+        ? (
+          <>
+            <div className='chain-balances-container__body'>
+              {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
+            </div>
+            <div className='chain-balances-container__footer'>
+              <div>
+                <div className='chain-balances-container__footer-row-1'>
+                  {t<string>("Don't see your token?")}
+                </div>
+                <div className='chain-balances-container__footer-row-2'>
+                  <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div>
+                  <span>&nbsp;{t<string>('or')}&nbsp;</span>
+                  <div className='chain-balances-container__footer-action'>{t<string>('import tokens')}</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )
+        : (
+          <>
+            <ChainBalanceDetail
+              accountInfo={selectedInfo}
+              balanceInfo={selectedBalanceInfo}
+              setQrModalOpen={setQrModalOpen}
+              setQrModalProps={setQrModalProps}
+            />
+          </>
+        )
+      }
+
     </div>
   );
 }

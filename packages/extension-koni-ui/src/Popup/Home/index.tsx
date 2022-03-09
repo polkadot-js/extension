@@ -139,12 +139,16 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     networkPrefix } = network;
   const { t } = useTranslation();
   const { address } = currentAccount;
-
+  const [isShowBalanceDetail, setShowBalanceDetail] = useState<boolean>(false);
   const backupTabId = window.localStorage.getItem('homeActiveTab') || '1';
   const [activatedTab, setActivatedTab] = useState<number>(Number(backupTabId));
   const _setActiveTab = useCallback((tabId: number) => {
     window.localStorage.setItem('homeActiveTab', `${tabId}`);
     setActivatedTab(tabId);
+
+    if (tabId === 1) {
+      setShowBalanceDetail(false);
+    }
   }, []);
   const [isShowZeroBalances, setShowZeroBalances] = useState<boolean>(
     window.localStorage.getItem('show_zero_balances') === '1'
@@ -308,12 +312,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           <ChainBalances
             address={address}
             currentNetworkKey={networkKey}
+            isShowBalanceDetail={isShowBalanceDetail}
             isShowZeroBalances={isShowZeroBalances}
             networkBalanceMaps={networkBalanceMaps}
             networkKeys={showedNetworks}
             networkMetadataMap={networkMetadataMap}
             setQrModalOpen={setQrModalOpen}
             setQrModalProps={setQrModalProps}
+            setShowBalanceDetail={setShowBalanceDetail}
           />
         )}
 

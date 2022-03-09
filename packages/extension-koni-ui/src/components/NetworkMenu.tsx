@@ -125,6 +125,7 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       <div className='network-item-list-header'>
         <span>{t<string>('Network')}</span>
         <InputFilter
+          className='network-item-list__input-filter'
           onChange={_onChangeFilter}
           placeholder={t<string>('Search network...')}
           value={filteredNetwork}
@@ -202,6 +203,10 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     display: flex;
     padding: 10px;
     justify-content: space-between;
+  }
+
+  .network-item-list__input-filter {
+    width: 218px;
   }
 
   .network-filter-item__text {

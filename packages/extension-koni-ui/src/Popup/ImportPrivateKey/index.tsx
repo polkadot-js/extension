@@ -15,7 +15,7 @@ import { AccountContext, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
-import MetamaskPrivateKeyImport from '../ImportMetamaskPrivateKey/MetamaskPrivateKeyImport';
+import SeedAndPath from './SeedAndPath';
 
 export interface AccountInfo {
   address: string;
@@ -27,7 +27,7 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElement {
+function ImportPrivateKey ({ className = '' }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
@@ -68,7 +68,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
         showSubHeader
         subHeaderName={t<string>('Import Private Key')}
       />
-      <MetamaskPrivateKeyImport
+      <SeedAndPath
         account={account}
         className='import-seed-content-wrapper'
         keyTypes={keyTypes}
@@ -82,5 +82,5 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
   );
 }
 
-export default styled(ImportMetamaskPrivateKey)`
+export default styled(ImportPrivateKey)`
 `;

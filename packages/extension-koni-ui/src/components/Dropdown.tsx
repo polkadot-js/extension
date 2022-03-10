@@ -43,7 +43,9 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' })
+    noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' }),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    menuList: (base: any) => ({ ...base, maxHeight: '150px' })
   };
 
   return (
@@ -56,7 +58,9 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
           className='dropdown-wrapper'
           classNamePrefix='dropdown'
           isSearchable
+          menuPlacement={'auto'}
           menuPortalTarget={document.body}
+          menuPosition='fixed'
           onChange={handleChange}
           options={transformOptions}
           placeholder=''

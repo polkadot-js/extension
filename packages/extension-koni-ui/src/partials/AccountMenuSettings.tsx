@@ -47,8 +47,6 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
 
-  console.log('hierarchy', hierarchy);
-
   const _openJson = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', jsonPath);

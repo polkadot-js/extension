@@ -29,7 +29,7 @@ interface Props {
   name: string;
 }
 
-function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
+function SeedAndPath ({ account, className, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
@@ -120,14 +120,14 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
           isDisabled={!address || !!error || !seed}
           onClick={_onCreate}
         >
-          {t<string>('Add the account with the supplied private key')}
+          {t<string>('Add the account with the private key')}
         </NextStepButton>
       </ButtonArea>
     </div>
   );
 }
 
-export default styled(MetamaskPrivateKeyImport)(({ theme }: ThemeProps) => `
+export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   padding: 25px 15px 15px;
   flex: 1;
   overflow-y: auto;

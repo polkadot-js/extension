@@ -21,7 +21,57 @@ async function acalaTransferHandler (api: ApiPromise, senderAddress: string, rec
     api.tx.nft.transfer(recipientAddress, [collectionId, itemId])
   ]);
 
-  console.log('fee', info.partialFee.toHuman());
+  return {
+    info,
+    extrinsic
+  } as TransferResponse;
+}
+
+// async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+//   const nft = params.nft as NFT;
+//
+//   if (!nft) return {};
+//
+//   const [info, extrinsic] = await Promise.all([
+//     api.tx.system.remark(nft.send(recipientAddress)).paymentInfo(senderAddress),
+//     api.tx.system.remark(nft.send(recipientAddress))
+//   ]);
+//
+//   return {
+//     info,
+//     extrinsic
+//   } as TransferResponse;
+// }
+
+async function uniqueTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  if (!params.collectionId || !params.itemId) return {};
+
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
+
+  const [info, extrinsic] = await Promise.all([
+    api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress), // 1 is amount
+    api.tx.nft.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1)
+  ]);
+
+  return {
+    info,
+    extrinsic
+  } as TransferResponse;
+}
+
+async function quartzTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  if (!params.collectionId || !params.itemId) return {};
+
+  console.log('handling quartz');
+
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
+
+  const [info, extrinsic] = await Promise.all([
+    api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1).paymentInfo(senderAddress),
+    api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1)
+  ]);
 
   return {
     info,
@@ -33,6 +83,14 @@ export default async function transferHandler (api: ApiPromise, networkKey: stri
   switch (networkKey) {
     case 'acala':
       return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
+    // case 'rmrk':
+    //   return await rmrkTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'uniqueNft':
+      return await uniqueTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'quartz':
+      return await quartzTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'opal':
+      return await quartzTransferHandler(api, senderAddress, recipientAddress, params);
   }
 
   return null;

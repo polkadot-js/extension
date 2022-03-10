@@ -56,7 +56,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1',
     icon: 'polkadot',
     ss58Format: 0,
-    provider: 'wss://staging.node.rmrk.app',
+    // provider: 'wss://staging.node.rmrk.app',
+    provider: 'wss://westend.api.onfinality.io/public-ws', // test nft
     groups: ['TEST_NET']
   },
   statemint: {
@@ -478,7 +479,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'QUARTZ by UNIQUE',
     genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554',
     ss58Format: 255,
-    provider: 'wss://quartz.api.onfinality.io/public-ws',
+    // provider: 'wss://quartz.api.onfinality.io/public-ws',
+    provider: 'wss://ws-opal.unique.network', // test nft
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2095,
     nativeToken: 'QTZ',

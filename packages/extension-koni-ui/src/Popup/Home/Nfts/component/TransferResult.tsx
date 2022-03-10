@@ -4,19 +4,22 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import failStatus from '@polkadot/extension-koni-ui/assets/fail-status.svg';
+import successStatus from '@polkadot/extension-koni-ui/assets/success-status.svg';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import failStatus from "@polkadot/extension-koni-ui/assets/fail-status.svg";
-import successStatus from "@polkadot/extension-koni-ui/assets/success-status.svg";
+import { getScanExplorerTransactionHistoryUrl } from '@polkadot/extension-koni-ui/util';
 
 interface Props extends ThemeProps {
   className?: string;
   isTxSuccess: boolean;
   onResend: () => void;
   txError: string;
-  networkKey?: string;
+  networkKey: string;
+  extrinsicHash: string;
+  backToHome: () => void;
 }
 
-function TransferResult ({ className, isTxSuccess, networkKey, onResend, txError }: Props): React.ReactElement<Props> {
+function TransferResult ({ backToHome, className, extrinsicHash, isTxSuccess, networkKey, onResend, txError }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {
@@ -30,18 +33,21 @@ function TransferResult ({ className, isTxSuccess, networkKey, onResend, txError
 
             <div className={'result-title'}>Transfer NFT successfully!</div>
 
-            <div className={'result-subtext'}>All good.</div>
+            <div className={'result-subtext'}>Your transfer request has been confirmed. It might take a minute to see changes in your wallet.</div>
 
             <div className={'action-container'}>
-              <div
+              <a
                 className={'history-button'}
+                href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+                rel='noreferrer'
+                target={'_blank'}
               >
-                View history
-              </div>
+                View in explorer
+              </a>
 
               <div
                 className={'resend-button'}
-                onClick={onResend}
+                onClick={backToHome}
               >
                 Go back
               </div>
@@ -56,20 +62,23 @@ function TransferResult ({ className, isTxSuccess, networkKey, onResend, txError
 
             <div className={'result-title'}>Transfer NFT failed!</div>
 
-            <div className={'result-subtext'}>Something went wrong.</div>
+            <div className={'result-subtext'}>Your transfer request encountered a problem. You can see the detail or try again.</div>
 
             <div className={'action-container'}>
-              <div
+              <a
                 className={'history-button'}
+                href={getScanExplorerTransactionHistoryUrl(networkKey, extrinsicHash)}
+                rel='noreferrer'
+                target={'_blank'}
               >
-                View history
-              </div>
+                View in explorer
+              </a>
 
               <div
                 className={'resend-button'}
                 onClick={onResend}
               >
-                Resend
+                Retry
               </div>
             </div>
           </div>

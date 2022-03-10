@@ -33,6 +33,14 @@ export default pkgs.map((pkg) => {
     entries: {
       ...entries,
       ...(override.entries || {})
+    },
+    resolve: {
+      fallback: {
+        "url": false,
+        "zlib": false,
+        "https": false,
+        "http": false,
+      }
     }
   });
 });

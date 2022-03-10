@@ -199,7 +199,8 @@ export class RmrkNftApi extends BaseNftApi {
           collectionId: item?.collectionId as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           properties: item?.metadata?.properties as Record<any, any>,
-          chain: 'rmrk'
+          chain: 'rmrk',
+          rmrk_transferable: item?.transferable as number
         } as NftItem;
 
         if (item.collectionId in nftDict) {

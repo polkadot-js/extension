@@ -11,7 +11,7 @@ import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes'
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import cloneIconLight from '@polkadot/extension-koni-ui/assets/clone--color-2.svg';
 import cloneIconDark from '@polkadot/extension-koni-ui/assets/clone--color-3.svg';
-import { Identicon } from '@polkadot/extension-koni-ui/components';
+import { Identicon, Spinner } from '@polkadot/extension-koni-ui/components';
 import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/TransferResult';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -26,7 +26,11 @@ interface Props extends ThemeProps {
   senderAccount: AccountJson;
   recipientAddress: string;
   txInfo?: RuntimeDispatchInfo;
-  extrinsic: SubmittableExtrinsic<'promise'>
+  extrinsic: SubmittableExtrinsic<'promise'>,
+  networkKey: string,
+  showResult: boolean,
+  setShowResult: (val: boolean) => void;
+  goBack: () => void;
 }
 
 function unlockAccount (signAddress: string, signPassword: string): boolean {
@@ -53,16 +57,16 @@ function unlockAccount (signAddress: string, signPassword: string): boolean {
   }
 }
 
-function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccount, setShowConfirm, txInfo }: Props): React.ReactElement<Props> {
+function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientAddress, senderAccount, setShowConfirm, setShowResult, showResult, txInfo }: Props): React.ReactElement<Props> {
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const theme = themeContext.id;
   const { currentNetwork } = useSelector((state: RootState) => state);
   const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState(true);
+  const [passwordError, setPasswordError] = useState(false);
   const [callHash, setCallHash] = useState<string | null>(null);
-  const [showResult, setShowResult] = useState(false);
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChangePassword = useCallback((e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -73,20 +77,20 @@ function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccoun
 
   const unlock = useCallback(() => {
     const senderAddress = senderAccount.address;
+
     const unlock = unlockAccount(senderAddress, password);
 
     setPasswordError(!unlock);
+
+    return unlock;
   }, [password, senderAccount]);
 
   const handleResend = useCallback(() => {
-    console.log('resend');
-  }, []);
+    setShowResult(false);
+  }, [setShowResult]);
 
-  const handleSignAndSubmit = useCallback(async () => {
-    unlock();
-    console.log('passwordError', passwordError);
-
-    if (!passwordError) {
+  const onSend = useCallback(async () => {
+    if (unlock()) {
       const pair = keyring.getPair(senderAccount.address);
 
       const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
@@ -94,41 +98,49 @@ function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccoun
           return;
         }
 
-        console.log('status', result.status);
-
         if (result.status.isInBlock || result.status.isFinalized) {
+          console.log('in block');
           result.events
             .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event }): void => {
-              console.log('event', event);
-              // if (method === 'ExtrinsicFailed') {
-              //   console.log('extrinsic failed');
-              //   // setIsTxSuccess(false);
-              //   // setTxError('error');
-              // } else if (method === 'ExtrinsicSuccess') {
-              //   console.log('extrinsic ok');
-              //   // setIsTxSuccess(true);
-              // }
+            .forEach(({ event: { method } }): void => {
+              if (method === 'ExtrinsicFailed') {
+                setShowResult(true);
+                setIsTxSuccess(false);
+                setTxError(method);
+              } else if (method === 'ExtrinsicSuccess') {
+                setShowResult(true);
+                setIsTxSuccess(true);
+              }
             });
         } else if (result.isError) {
-          console.log('result is error');
-          setShowResult(true);
-          setIsTxSuccess(false);
-          setTxError('error');
+          console.log('tx error');
+          setLoading(false);
         }
 
         if (result.isCompleted) {
-          console.log('result completed');
-          setShowResult(true);
-          setIsTxSuccess(true);
+          console.log('tx completed');
+          setLoading(false);
           unsubscribe();
         }
       });
-    } else console.log('cant unlock');
-  }, [extrinsic, passwordError, senderAccount.address, unlock]);
+    } else {
+      setLoading(false);
+      setPasswordError(true);
+    }
+  }, [extrinsic, senderAccount, setShowResult, unlock]);
+
+  const handleSignAndSubmit = useCallback(() => {
+    setLoading(true);
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(async () => {
+      await onSend();
+    }, 1);
+  }, [onSend]);
 
   useEffect((): void => {
-    setPasswordError(true);
+    setPassword('');
+    setPasswordError(false);
   }, [extrinsic, recipientAddress, senderAccount]);
 
   useEffect((): void => {
@@ -178,7 +190,14 @@ function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccoun
             </div>
 
             <div className={'field-container-confirm'}>
-              <div className={'field-title-confirm'}>Password</div>
+              <div className={'password-title-container'}>
+                <div className={'field-title-confirm'}>Password</div>
+
+                {
+                  passwordError && <div className={'password-error'}>Invalid password</div>
+                }
+              </div>
+
               <input
                 className={'input-value-confirm'}
                 onChange={handleChangePassword}
@@ -223,7 +242,11 @@ function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccoun
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
             >
-              Sign and Submit
+              {
+                !loading
+                  ? 'Sign and Submit'
+                  : <Spinner className={'spinner-loading'} />
+              }
             </div>
           </div>
       }
@@ -231,7 +254,10 @@ function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccoun
       {
         showResult &&
           <TransferResult
+            backToHome={goBack}
+            extrinsicHash={callHash}
             isTxSuccess={isTxSuccess}
+            networkKey={networkKey}
             onResend={handleResend}
             txError={txError}
           />
@@ -241,7 +267,25 @@ function TransferConfirm ({ className, extrinsic, recipientAddress, senderAccoun
 }
 
 export default React.memo(styled(TransferConfirm)(({ theme }: Props) => `
+  .spinner-loading {
+    position: relative;
+    height: 26px;
+    width: 26px;
+  }
+
+  .password-error {
+    font-size: 12px;
+    color: red;
+    text-transform: uppercase;
+  }
+
+  .password-title-container {
+    display: flex;
+    justify-content: space-between;
+  }
+
   .submit-btn {
+    position: relative;
     margin-top: 40px;
     background: #004BFF;
     border-radius: 8px;

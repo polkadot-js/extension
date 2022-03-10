@@ -72,6 +72,7 @@ export interface NftItem {
   description?: string;
   properties?: Record<any, any> | null;
   chain?: string;
+  rmrk_transferable?: number;
 }
 
 export interface NftCollection {

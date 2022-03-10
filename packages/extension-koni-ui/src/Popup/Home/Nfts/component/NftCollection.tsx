@@ -7,8 +7,8 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
 import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/NftItemPreview';
+import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
@@ -33,6 +33,11 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
   const handleHideItemDetail = useCallback(() => {
     setShowItemDetail(false);
   }, []);
+
+  const goHome = useCallback(() => {
+    setShowItemDetail(false);
+    onClickBack();
+  }, [onClickBack]);
 
   return (
     <div className={className}>
@@ -86,6 +91,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
         <NftItem
           collectionImage={data?.image}
           data={chosenItem}
+          goHome={goHome}
           onClickBack={handleHideItemDetail}
         />
       }

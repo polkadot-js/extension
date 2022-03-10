@@ -3450,7 +3450,7 @@ __metadata:
     react-tooltip: ^4.2.21
     redux: ^4.1.2
     redux-toolkit: ^1.1.2
-    rmrk-tools: ^2.0.55
+    rmrk-tools: ^2.0.54
     semantic-ui-react: ^2.0.4
     sinon-chrome: ^3.0.1
     styled-components: ^5.3.3
@@ -18087,7 +18087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rmrk-tools@npm:^2.0.55":
+"rmrk-tools@npm:^2.0.54":
   version: 2.0.55
   resolution: "rmrk-tools@npm:2.0.55"
   dependencies:

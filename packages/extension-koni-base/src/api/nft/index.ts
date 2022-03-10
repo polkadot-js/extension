@@ -142,16 +142,17 @@ export class NftHandler {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       .finally(() => clearTimeout(timer));
 
-    this.total = total;
-
     if (isAddressesEqual(this.addresses, this.prevAddresses)) {
       // console.log('nft address no change');
-      this.data = this.sortData(data);
+      if (total < this.total) this.data = data;
+      else this.data = this.sortData(data);
     } else {
       // console.log('nft address change');
       this.data = data;
       this.prevAddresses = this.addresses;
     }
+
+    this.total = total;
 
     console.log(`all nft took ${performance.now() - start}ms`);
 

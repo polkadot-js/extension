@@ -4,31 +4,42 @@
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/TransferNftContainer';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import logo from '../../../assets/sub-wallet-logo.svg';
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
 
 interface Props {
   className?: string;
   data: _NftItem;
   onClickBack: () => void;
   collectionImage?: string;
+  goHome: () => void;
 }
 
-function NftItem ({ className, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
+function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [showTransfer, setShowTransfer] = useState(false);
   const [sendError, setSendError] = useState(false);
   const { currentNetwork } = useSelector((state: RootState) => state);
+
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showTransferResult, setShowTransferResult] = useState(false);
+
+  const goBack = useCallback(() => {
+    setShowTransferResult(false);
+    setShowConfirm(false);
+    setShowTransfer(false);
+    goHome();
+  }, [goHome]);
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
@@ -43,7 +54,9 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
   };
 
   const handleClickTransfer = useCallback(() => {
-    if (data.chain && data?.chain === currentNetwork.networkKey) {
+    // if (data.chain && data?.chain === currentNetwork.networkKey) {\
+    console.log(currentNetwork.networkKey);
+    if (data.chain) {
       setShowTransfer(!showTransfer);
       setSendError(false);
     } else {
@@ -193,8 +206,13 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
       {
         showTransfer &&
         <TransferNftContainer
+          goBack={goBack}
           nftItem={data}
+          setShowConfirm={setShowConfirm}
           setShowTransfer={handleClickTransfer}
+          setShowTransferResult={setShowTransferResult}
+          showConfirm={showConfirm}
+          showTransferResult={showTransferResult}
         />
       }
     </div>

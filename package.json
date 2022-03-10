@@ -3,7 +3,7 @@
   "bugs": "https://github.com/polkadot-js/extension/issues",
   "homepage": "https://github.com/polkadot-js/extension#readme",
   "license": "Apache-2.0",
-  "packageManager": "yarn@3.0.1",
+  "packageManager": "yarn@3.2.0",
   "private": true,
   "repository": {
     "type": "git",
@@ -34,19 +34,19 @@
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
-    "@polkadot/dev": "^0.65.85",
+    "@polkadot/dev": "^0.65.87",
     "@types/jest": "^27.4.1",
     "i18next-scanner": "^3.1.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^7.6.1",
-    "@polkadot/keyring": "^8.3.3",
-    "@polkadot/networks": "^8.3.3",
-    "@polkadot/types": "^7.6.1",
-    "@polkadot/util": "^8.3.3",
-    "@polkadot/util-crypto": "^8.3.3",
-    "@polkadot/x-fetch": "^8.3.3",
+    "@polkadot/api": "^7.11.2-1",
+    "@polkadot/keyring": "^8.4.1",
+    "@polkadot/networks": "^8.4.1",
+    "@polkadot/types": "^7.11.2-1",
+    "@polkadot/util": "^8.4.1",
+    "@polkadot/util-crypto": "^8.4.1",
+    "@polkadot/x-fetch": "^8.4.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.6.2"

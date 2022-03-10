@@ -1,11 +1,11 @@
      465	Jaco                          	0.42.5 (#969)
       87	Nam Phạm                      	fix nft loading performance
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      70	AnhMTV                        	Release version 0.2.7 (Koni)
+      78	AnhMTV                        	Resolve eslint error
       60	quangdo                       	Update AccountQrModal, Tooltip style
       50	leewong                       	# update condition to display correct message on send fund screen
-      26	lw                            	# update network support getting history from API
-      23	Dominhquangdev                	Update UI ImportQr, update MoonBase Alpha url, update AccountNameAndPasswordCreation screen
+      27	lw                            	# update lib
+      26	Dominhquangdev                	Update Seach Account in AccountMenuSettings
       12	Hieu Dao                      	Update README.md
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)

@@ -260,5 +260,13 @@
   "Select a contact or paste the address you want to donate to.": "",
   "Donate to address": "",
   "Private Key": "",
-  "JSON": ""
+  "JSON": "",
+  "Import account from Seed Phase": "",
+  "Import private key from Metamask": "",
+  "Restore account from Polkadot{.js}": "",
+  "Import account from Metamask private key": "",
+  "Add the account with the supplied private key": "",
+  "Invalid private key": "",
+  "Metamask private key": "",
+  "Private key needs to start with 0x and 64 keys": ""
 }

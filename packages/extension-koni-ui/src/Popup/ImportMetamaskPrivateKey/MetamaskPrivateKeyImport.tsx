@@ -7,38 +7,37 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
+import { Password } from '@polkadot/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { objectSpread } from '@polkadot/util';
 
-import { AccountInfoEl, ButtonArea, Dropdown, InputWithLabel, NextStepButton, Warning } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import { AccountInfoEl, ButtonArea, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
 
 interface Props {
   className?: string;
-  onNextStep: () => void;
+  onCreate: (name: string, password: string) => void | Promise<void | boolean>;
   onAccountChange: (account: AccountInfo | null) => void;
+  keyTypes: KeypairType[];
   type: KeypairType;
   account: AccountInfo | null;
-  name: string | null;
+  name: string;
 }
 
-function MetamaskPrivateKeyImport ({ account, className, name, onAccountChange, onNextStep, type }: Props): React.ReactElement {
+function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const genesisOptions = useGenesisHashOptions().filter((network) => {
-    return ethereumChains.indexOf(network.networkKey) > -1 || network.networkKey === 'all';
-  });
   const [address, setAddress] = useState('');
   const [seed, setSeed] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [genesis, setGenesis] = useState('');
+  const genesis = '';
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const dep = keyTypes.toString();
+  const [password, setPassword] = useState<string | null>(null);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -51,43 +50,49 @@ function MetamaskPrivateKeyImport ({ account, className, name, onAccountChange, 
 
     const suri = `${seed || ''}`;
 
-    validateSeedV2(seed, [EVM_ACCOUNT_TYPE])
+    validateSeedV2(seed, keyTypes)
       .then(({ addressMap, seed }) => {
         const address = addressMap[EVM_ACCOUNT_TYPE];
 
         setAddress(address);
         setError('');
         onAccountChange(
-          objectSpread<AccountInfo>({}, { address, suri, genesis, type })
+          objectSpread<AccountInfo>({}, { address, suri, genesis, EVM_ACCOUNT_TYPE })
         );
       })
       .catch(() => {
         setAddress('');
         onAccountChange(null);
-        setError(t<string>('Invalid private key')
-        );
+        setError(t<string>('Invalid mnemonic seed'));
       });
-  }, [t, genesis, seed, onAccountChange, type]);
+  }, [t, genesis, seed, onAccountChange, type, dep]);
+
+  const _onCreate = useCallback(
+    () => {
+      name && password && onCreate(name, password);
+    },
+    [name, password, onCreate]
+  );
 
   return (
     <div className={className}>
       <div className='account-info-wrapper'>
         <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
-          <div className='account-info-item'>
-            <AccountInfoEl
-              address={address}
-              className='account-info'
-              genesisHash={account?.genesis}
-              name={name}
-            />
-          </div>
+          <AccountInfoEl
+            address={address}
+            className='account-info'
+            genesisHash={account?.genesis}
+            name={`${name} - EVM`}
+            type={EVM_ACCOUNT_TYPE}
+          />
 
-          <InputWithLabel
+          <TextAreaWithLabel
             className='seed-and-path__seed-input'
             isError={!!error}
             isFocused
-            label={t<string>('Metamask private key')}
+            label={t<string>('existing 12 or 24-word private key')}
             onChange={setSeed}
+            rowsCount={2}
             value={seed || ''}
           />
           {!!error && !seed && (
@@ -96,16 +101,9 @@ function MetamaskPrivateKeyImport ({ account, className, name, onAccountChange, 
               isBelowInput
               isDanger
             >
-              {t<string>('Private key needs to start with 0x and 64 keys')}
+              {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
             </Warning>
           )}
-          <Dropdown
-            className='seed-and-path__genesis-selection'
-            label={t<string>('Network')}
-            onChange={setGenesis}
-            options={genesisOptions}
-            value={genesis}
-          />
           {!!error && !!seed && (
             <Warning
               isDanger
@@ -113,15 +111,16 @@ function MetamaskPrivateKeyImport ({ account, className, name, onAccountChange, 
               {error}
             </Warning>
           )}
+          <Password onChange={setPassword} />
         </div>
       </div>
       <ButtonArea>
         <NextStepButton
           className='next-step-btn'
-          isDisabled={(!address) || !!error || !seed}
-          onClick={onNextStep}
+          isDisabled={!address || !!error || !seed}
+          onClick={_onCreate}
         >
-          {t<string>('Next Step')}
+          {t<string>('Add the account with the supplied private key')}
         </NextStepButton>
       </ButtonArea>
     </div>
@@ -179,6 +178,10 @@ export default styled(MetamaskPrivateKeyImport)(({ theme }: ThemeProps) => `
       height: 80px;
       margin-top: 4px;
     }
+  }
+
+  .account-info-item__radio-btn {
+    padding-right: 10px;
   }
 
   .seed-and-path__error {

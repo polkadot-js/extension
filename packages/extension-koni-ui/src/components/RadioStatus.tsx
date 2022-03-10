@@ -8,13 +8,17 @@ import styled from 'styled-components';
 
 interface Props {
   checked: boolean;
+  onChange?: () => void;
   className?: string;
 }
 
-function RadioStatus ({ checked, className }: Props): React.ReactElement<Props> {
+function RadioStatus ({ checked, className, onChange }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
-      <div className='radio-status'>
+      <div
+        className='radio-status'
+        onClick={onChange}
+      >
         {checked && (
           <div className='radio-status__dot' />
         )}
@@ -25,8 +29,8 @@ function RadioStatus ({ checked, className }: Props): React.ReactElement<Props> 
 
 export default styled(RadioStatus)(({ theme }: ThemeProps) => `
   .radio-status {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
     border: 1px solid ${theme.checkboxBorderColor};
     background-color: ${theme.checkboxColor};
@@ -35,8 +39,8 @@ export default styled(RadioStatus)(({ theme }: ThemeProps) => `
     align-items: center;
 
     &__dot {
-      width: 10px;
-      height: 10px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background-color: ${theme.checkDotColor};
     }

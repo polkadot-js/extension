@@ -6,15 +6,16 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-import MetamaskPrivateKeyImport from '@polkadot/extension-koni-ui/Popup/ImportMetamaskPrivateKey/MetamaskPrivateKeyImport';
+import { Header } from '@polkadot/extension-koni-ui/partials';
+import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, ActionContext } from '../../components';
-import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
+import { DEFAULT_TYPE } from '../../util/defaultType';
+import MetamaskPrivateKeyImport from '../ImportMetamaskPrivateKey/MetamaskPrivateKeyImport';
 
 export interface AccountInfo {
   address: string;
@@ -26,18 +27,17 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-const importMetamaskTypes: Array<KeypairType> = ['ethereum'];
-
 function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
+  const keyTypes: KeypairType[] = [EVM_ACCOUNT_TYPE];
+  const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
-  const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
-  const [step1, setStep1] = useState(true);
+  const type = DEFAULT_TYPE;
 
   useEffect((): void => {
     !accounts.length && onAction();
@@ -48,7 +48,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, importMetamaskTypes, account.genesis)
+      createAccountSuriV2(name, password, account.suri, keyTypes)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -58,50 +58,26 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
           console.error(error);
         });
     }
-  }, [account, onAction]);
-
-  const _onNextStep = useCallback(
-    () => setStep1(false),
-    []
-  );
-
-  const _onBackClick = useCallback(
-    () => setStep1(true),
-    []
-  );
+  }, [account, onAction, dep]);
 
   return (
     <>
-      <HeaderWithSteps
+      <Header
         isBusy={isBusy}
-        onBackClick={_onBackClick}
-        step={step1 ? 1 : 2}
-        text={t<string>('Import account from Metamask private key')}
+        showCancelButton
+        showSubHeader
+        subHeaderName={t<string>('Import Private Key')}
       />
-      {step1
-        ? (
-          <MetamaskPrivateKeyImport
-            account={account}
-            className='import-seed-content-wrapper'
-            name={evmName}
-            onAccountChange={setAccount}
-            onNextStep={_onNextStep}
-            type={importMetamaskTypes[0]}
-          />
-        )
-        : (
-          <AccountNamePasswordCreation
-            buttonLabel={t<string>('Add the account with the supplied private key')}
-            className='koni-import-seed-content'
-            evmAddress={account?.address}
-            evmName={evmName}
-            isBusy={isBusy}
-            keyTypes={['ethereum']}
-            name={name}
-            onCreate={_onCreate}
-          />
-        )
-      }
+      <MetamaskPrivateKeyImport
+        account={account}
+        className='import-seed-content-wrapper'
+        keyTypes={keyTypes}
+        name={name}
+        onAccountChange={setAccount}
+        onCreate={_onCreate}
+        type={type}
+      />
+
     </>
   );
 }

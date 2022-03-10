@@ -103,12 +103,12 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             buttonLabel={t<string>('Add the account with the supplied seed')}
             className='koni-import-seed-content'
             evmAddress={evmAccount?.address}
-            evmName={evmName}
             isBusy={isBusy}
             keyTypes={keyTypes}
             name={name}
             onCreate={_onCreate}
           />
+
         )
       }
     </>

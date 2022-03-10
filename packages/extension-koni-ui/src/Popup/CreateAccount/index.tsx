@@ -37,9 +37,9 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
-  const genesisHash = '';
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  const genesisHash = '';
 
   if (isFirefox || isLinux) {
     window.localStorage.setItem('popupNavigation', '');
@@ -124,7 +124,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                   address={address}
                   buttonLabel={t<string>('Add the account with the generated seed')}
                   evmAddress={evmAddress}
-                  evmName={evmName}
                   isBusy={isBusy}
                   keyTypes={keyTypes}
                   name={name}

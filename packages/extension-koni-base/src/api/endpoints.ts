@@ -384,6 +384,14 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan'
   },
+  bifrost_testnet: {
+    chain: 'Bifrost Testnet',
+    genesisHash: '0x8b290fa39a8808f29d7309ea99442c95bf964838aef14be5a6449ae48f8a5f1f',
+    ss58Format: 6,
+    provider: 'wss://bifrost-rpc.testnet.liebi.com/ws',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'BNC'
+  },
   kilt: {
     chain: 'KILT Spiritnet',
     genesisHash: '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21',

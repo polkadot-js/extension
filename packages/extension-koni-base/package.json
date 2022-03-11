@@ -17,7 +17,7 @@
   "version": "0.2.8-0",
   "main": "index.js",
   "dependencies": {
-    "@acala-network/api": "beta",
+    "@acala-network/api": "4.0.2-20",
     "@acala-network/type-definitions": "^3.0.2-4",
     "@apollo/client": "^3.5.9",
     "@babel/runtime": "^7.16.7",

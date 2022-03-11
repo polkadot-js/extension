@@ -16,7 +16,7 @@ describe('test DotSama APIs', () => {
     const networkList = ['moonbase'];
 
     const promList = networkList.map((networkKey) => {
-      return initApi(NETWORKS[networkKey].provider).isReady;
+      return initApi(networkKey, NETWORKS[networkKey].provider).isReady;
     });
 
     const apiPropsList = await Promise.all(promList);

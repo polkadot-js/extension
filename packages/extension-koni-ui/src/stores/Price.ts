@@ -8,6 +8,7 @@ import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
 const initialState = {
   currency: 'usd',
   priceMap: {},
+  tokenPriceMap: {},
   ready: false
 } as PriceJson;
 
@@ -20,6 +21,7 @@ const priceSlice = createSlice({
 
       state.currency = payload.currency;
       state.priceMap = payload.priceMap;
+      state.tokenPriceMap = payload.tokenPriceMap;
       state.ready = true;
     }
   }

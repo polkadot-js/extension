@@ -52,6 +52,7 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
 }
 
 export class NftHandler {
+  count: number = 0;
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
@@ -138,7 +139,7 @@ export class NftHandler {
       await Promise.race([
         handler.handleNfts(),
         timeout
-      ]);
+      ]).then((e) => console.log('nft race', e));
 
       console.log(`total ${handler.getChain() as string}`, handler.getTotal());
 

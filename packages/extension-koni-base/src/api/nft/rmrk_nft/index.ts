@@ -232,6 +232,7 @@ export class RmrkNftApi extends BaseNftApi {
     this.data = allCollections;
 
     const end = performance.now();
+
     console.log(`Fetched ${allNfts.length} nfts from rmrk`);
 
     console.log(`rmrk took ${end - start}ms`);

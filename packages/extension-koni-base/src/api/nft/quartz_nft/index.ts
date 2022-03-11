@@ -127,104 +127,109 @@ export default class QuartzNftApi extends BaseNftApi {
     const collectionPropertiesMap: Record<number, any> = {};
     const collectionIds: number[] = [];
 
-    for (let i = 0; i < collectionCount; i++) {
-      collectionIds.push(i);
-    }
-
     const addressTokenDict: any[] = [];
     let allNftId: string[] = [];
     const nftMap: Record<string, string> = {};
     const collectionMeta: Record<string, any> = {};
     const allNft: Record<string, NftItem[]> = {};
-
-    for (let i = 0; i < collectionCount; i++) {
-      for (const address of this.addresses) {
-        if (collectionPropertiesMap[i] !== null) addressTokenDict.push({ i, account: address });
-      }
-    }
-
-    const _handleCollectionPropertiesMap = Promise.all(collectionIds.map(async (id) => {
-      collectionPropertiesMap[id] = await this.getCollectionProperties(id);
-    }));
-
-    const _handleAddressTokenDict = Promise.all(addressTokenDict.map(async (item: Record<string | number, string | number>) => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const nftIds = await this.getAddressTokens(item.i as number, item.account as string);
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (nftIds && nftIds.length > 0) {
-          allNftId = allNftId.concat(nftIds as string[]);
-
-          for (const nftId of nftIds) {
-            nftMap[nftId as string] = item.i as string;
-          }
-        }
-      } catch (e) {
-        console.log(`error at ${item.i} ${item.account}`);
-      }
-    }));
-
-    await Promise.all([
-      _handleCollectionPropertiesMap,
-      _handleAddressTokenDict
-    ]);
-
+    const allCollections: NftCollection[] = [];
     let total = 0;
 
-    await Promise.all(allNftId.map(async (tokenId) => {
-      const collectionId = nftMap[tokenId];
-      const collectionProperties = collectionPropertiesMap[parseInt(collectionId)] as CollectionProperties;
+    try {
+      for (let i = 0; i < collectionCount; i++) {
+        collectionIds.push(i);
+      }
 
-      const nftData = await this.getNftData(collectionProperties, parseInt(collectionId), parseInt(tokenId));
-
-      if (nftData) {
-        if (!(collectionId in collectionMeta)) {
-          collectionMeta[collectionId] = {
-            collectionName: nftData.collectionName,
-            collectionImage: parseIpfsLink(nftData.image)
-          };
-        }
-
-        total += 1;
-
-        if (collectionId in allNft) {
-          allNft[collectionId].push({
-            id: tokenId.toString(),
-            name: nftData.prefix + '#' + tokenId.toString(),
-            image: this.parseUrl(nftData.image),
-            external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
-            collectionId: collectionId.toString(),
-            properties: nftData.properties,
-            rarity: '',
-            chain: 'quartz'
-          } as NftItem);
-        } else {
-          allNft[collectionId] = [{
-            id: tokenId.toString(),
-            name: nftData.prefix + '#' + tokenId.toString(),
-            image: this.parseUrl(nftData.image),
-            external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
-            collectionId: collectionId.toString(),
-            properties: nftData.properties,
-            rarity: '',
-            chain: 'quartz'
-          } as NftItem];
+      for (let i = 0; i < collectionCount; i++) {
+        for (const address of this.addresses) {
+          if (collectionPropertiesMap[i] !== null) addressTokenDict.push({ i, account: address });
         }
       }
-    }));
-    const allCollections: NftCollection[] = [];
 
-    Object.keys(collectionMeta).forEach((collectionId) => {
-      const collectionMetadata = collectionMeta[collectionId] as Record<string, string>;
+      const _handleCollectionPropertiesMap = Promise.all(collectionIds.map(async (id) => {
+        collectionPropertiesMap[id] = await this.getCollectionProperties(id);
+      }));
 
-      allCollections.push({
-        collectionId: collectionId,
-        collectionName: collectionMetadata.collectionName,
-        image: collectionMetadata.collectionImage,
-        nftItems: allNft[collectionId]
-      } as NftCollection);
-    });
+      const _handleAddressTokenDict = Promise.all(addressTokenDict.map(async (item: Record<string | number, string | number>) => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const nftIds = await this.getAddressTokens(item.i as number, item.account as string);
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (nftIds && nftIds.length > 0) {
+            allNftId = allNftId.concat(nftIds as string[]);
+
+            for (const nftId of nftIds) {
+              nftMap[nftId as string] = item.i as string;
+            }
+          }
+        } catch (e) {
+          console.log(`error at ${item.i} ${item.account}`);
+        }
+      }));
+
+      await Promise.all([
+        _handleCollectionPropertiesMap,
+        _handleAddressTokenDict
+      ]);
+
+      await Promise.all(allNftId.map(async (tokenId) => {
+        const collectionId = nftMap[tokenId];
+        const collectionProperties = collectionPropertiesMap[parseInt(collectionId)] as CollectionProperties;
+
+        const nftData = await this.getNftData(collectionProperties, parseInt(collectionId), parseInt(tokenId));
+
+        if (nftData) {
+          if (!(collectionId in collectionMeta)) {
+            collectionMeta[collectionId] = {
+              collectionName: nftData.collectionName,
+              collectionImage: parseIpfsLink(nftData.image)
+            };
+          }
+
+          total += 1;
+
+          if (collectionId in allNft) {
+            allNft[collectionId].push({
+              id: tokenId.toString(),
+              name: nftData.prefix + '#' + tokenId.toString(),
+              image: this.parseUrl(nftData.image),
+              external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
+              collectionId: collectionId.toString(),
+              properties: nftData.properties,
+              rarity: '',
+              chain: 'quartz'
+            } as NftItem);
+          } else {
+            allNft[collectionId] = [{
+              id: tokenId.toString(),
+              name: nftData.prefix + '#' + tokenId.toString(),
+              image: this.parseUrl(nftData.image),
+              external_url: `https://scan-quartz.unique.network/QUARTZ/tokens/${collectionId}/${tokenId}`,
+              collectionId: collectionId.toString(),
+              properties: nftData.properties,
+              rarity: '',
+              chain: 'quartz'
+            } as NftItem];
+          }
+        }
+      }));
+
+      Object.keys(collectionMeta).forEach((collectionId) => {
+        const collectionMetadata = collectionMeta[collectionId] as Record<string, string>;
+
+        allCollections.push({
+          collectionId: collectionId,
+          collectionName: collectionMetadata.collectionName,
+          image: collectionMetadata.collectionImage,
+          nftItems: allNft[collectionId]
+        } as NftCollection);
+      });
+    } catch (e) {
+      console.log('Failed to fetch quartz nft', e);
+
+      return;
+    }
 
     this.total = total;
     this.data = allCollections;

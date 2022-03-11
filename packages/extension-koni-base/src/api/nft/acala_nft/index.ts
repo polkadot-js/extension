@@ -99,75 +99,80 @@ export class AcalaNftApi extends BaseNftApi {
 
     const allCollections: NftCollection[] = [];
     const assetIds = await this.getNfts(this.addresses);
-
-    if (!assetIds || assetIds.length === 0) {
-      this.total = 0;
-      this.data = allCollections;
-
-      return;
-    }
-
-    assetIds.forEach((asset) => {
-      const parsedClassId = this.parseTokenId(asset.classId.toString());
-      const newCollection = {
-        collectionId: parsedClassId,
-        nftItems: []
-      } as NftCollection;
-
-      if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) { allCollections.push(newCollection); }
-    });
-
     const allItems: NftItem[] = [];
     const collectionMetaDict: Record<any, any> = {};
 
-    await Promise.all(assetIds.map(async (assetId) => {
-      let tokenInfo: Token = {};
-      let collectionMeta: any;
-      const parsedClassId = this.parseTokenId(assetId.classId as string);
-      const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
+    try {
+      if (!assetIds || assetIds.length === 0) {
+        this.total = 0;
+        this.data = allCollections;
 
-      if (!(parsedClassId in collectionMetaDict)) {
-        const [_tokenInfo, collectionMeta] = await Promise.all([
-          this.getTokenDetails(assetId),
-          this.getCollectionDetails(parseInt(parsedClassId))
-        ]);
-
-        tokenInfo = _tokenInfo as Token;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        collectionMetaDict[parsedClassId] = collectionMeta;
+        return;
       }
 
-      const parsedNft = {
-        id: parsedTokenId,
-        name: tokenInfo?.name,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-        description: tokenInfo && tokenInfo.description ? tokenInfo.description : collectionMeta?.description,
-        external_url: acalaExternalBaseUrl + parsedClassId,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-        image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
-        collectionId: parsedClassId,
-        chain: 'acala'
-      } as NftItem;
+      assetIds.forEach((asset) => {
+        const parsedClassId = this.parseTokenId(asset.classId.toString());
+        const newCollection = {
+          collectionId: parsedClassId,
+          nftItems: []
+        } as NftCollection;
 
-      allItems.push(parsedNft);
-    }));
+        if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) { allCollections.push(newCollection); }
+      });
 
-    for (const collection of allCollections) {
-      const collectionMeta = collectionMetaDict[collection.collectionId] as Record<string, any>;
+      await Promise.all(assetIds.map(async (assetId) => {
+        let tokenInfo: Token = {};
+        let collectionMeta: any;
+        const parsedClassId = this.parseTokenId(assetId.classId as string);
+        const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
 
-      if (collectionMeta) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        collection.collectionName = collectionMeta?.name;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        collection.image = collectionMeta.image;
-      }
+        if (!(parsedClassId in collectionMetaDict)) {
+          const [_tokenInfo, collectionMeta] = await Promise.all([
+            this.getTokenDetails(assetId),
+            this.getCollectionDetails(parseInt(parsedClassId))
+          ]);
 
-      for (const item of allItems) {
-        if (collection.collectionId === item.collectionId) {
-          // @ts-ignore
-          collection.nftItems.push(item);
+          tokenInfo = _tokenInfo as Token;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          collectionMetaDict[parsedClassId] = collectionMeta;
+        }
+
+        const parsedNft = {
+          id: parsedTokenId,
+          name: tokenInfo?.name,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+          description: tokenInfo && tokenInfo.description ? tokenInfo.description : collectionMeta?.description,
+          external_url: acalaExternalBaseUrl + parsedClassId,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+          image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : collectionMeta?.image,
+          collectionId: parsedClassId,
+          chain: 'acala'
+        } as NftItem;
+
+        allItems.push(parsedNft);
+      }));
+
+      for (const collection of allCollections) {
+        const collectionMeta = collectionMetaDict[collection.collectionId] as Record<string, any>;
+
+        if (collectionMeta) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          collection.collectionName = collectionMeta?.name;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          collection.image = collectionMeta.image;
+        }
+
+        for (const item of allItems) {
+          if (collection.collectionId === item.collectionId) {
+            // @ts-ignore
+            collection.nftItems.push(item);
+          }
         }
       }
+    } catch (e) {
+      console.log('Failed to fetch acala nft', e);
+
+      return;
     }
 
     this.total = assetIds.length;

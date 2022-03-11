@@ -42,6 +42,16 @@ function uniqueParser (nftItem: NftItem) {
   };
 }
 
+function statemineParser (nftItem: NftItem) {
+  const collectionId = parseInt(nftItem.collectionId as string);
+  const itemId = parseInt(nftItem.id);
+
+  return {
+    collectionId,
+    itemId
+  };
+}
+
 export default function paramsHandler (nftItem: NftItem, networkKey: string) {
   switch (networkKey) {
     case 'acala':
@@ -56,6 +66,10 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string) {
       return uniqueParser(nftItem);
     case 'opal':
       return uniqueParser(nftItem);
+    case 'statemine':
+      return statemineParser(nftItem);
+    case 'statemint':
+      return statemineParser(nftItem);
   }
 
   return {};

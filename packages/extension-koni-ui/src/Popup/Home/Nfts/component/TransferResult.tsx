@@ -139,5 +139,6 @@ export default React.memo(styled(TransferResult)(({ theme }: Props) => `
     background-color: #004BFF;
     border-radius: 8px;
     cursor: pointer;
+    color: #FFFFFF;
   }
 `));

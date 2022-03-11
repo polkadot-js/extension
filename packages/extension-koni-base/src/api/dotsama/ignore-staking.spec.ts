@@ -4,7 +4,7 @@
 import connectDotSamaApis, { initApi } from '@polkadot/extension-koni-base/api/dotsama/index';
 import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import {RmrkNftApi} from "@polkadot/extension-koni-base/api/nft/rmrk_nft";
+import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 
 jest.setTimeout(50000);
 
@@ -43,12 +43,33 @@ describe('test staking api', () => {
   });
 
   test('nft', async () => {
-    const testApiNft = new RmrkNftApi();
-    testApiNft.setAddresses(['CmNYnM3pStTCKgXq67Cp8rURA6GTfdfseJx7posbg2vJVHQ']);
-    await testApiNft.handleNfts();
+    // Will resolve after 200ms
+    const promiseA = new Promise((resolve, reject) => {
+      const wait = setTimeout(() => {
+        clearTimeout(wait);
+        reject('Promise A win!');
+      }, 20);
+    });
 
-    for (const item of  testApiNft.getData()) {
-      console.log(item.nftItems);
-    }
+    const testApiNft = new RmrkNftApi();
+    testApiNft.setAddresses(['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m']);
+
+    // Will resolve after 400ms
+    const promiseB = new Promise((resolve, reject) => {
+      const wait = setTimeout(() => {
+        clearTimeout(wait);
+        resolve('Promise B win!');
+      }, 40000000);
+    });
+
+    await Promise.all([
+      Promise.race([
+        promiseA,
+        testApiNft.handleNfts()
+      ]),
+      promiseB
+    ]).then((res) => console.log('here', res));
+
+    // await race.then((res) => console.log(res)); // -> Promise A win!
   });
 });

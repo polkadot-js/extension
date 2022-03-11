@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
+import { Spinner } from '@polkadot/extension-koni-ui/components';
 import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import TransferConfirm from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/TransferConfirm';
@@ -35,6 +36,7 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
   const { api, isApiReady, isNotSupport } = useApi(networkKey);
   const [txInfo, setTxInfo] = useState<RuntimeDispatchInfo | null>(null);
   const [extrinsic, setExtrinsic] = useState<SubmittableExtrinsic<'promise'> | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChangeRecipient = useCallback((e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -47,6 +49,8 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
 
   const handleSend = useCallback(async () => {
     if (addressError || !isApiReady || !networkKey || isNotSupport) return;
+
+    setLoading(true);
     // @ts-ignore
     const senderAddress = account.account.address;
     const params = paramsHandler(nftItem, networkKey);
@@ -57,6 +61,8 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
       setTxInfo(transferMeta.info || null);
       setShowConfirm(true);
     }
+
+    setLoading(false);
   }, [account, addressError, api, isApiReady, isNotSupport, networkKey, nftItem, recipientAddress, setShowConfirm]);
 
   const handleShowConfirm = useCallback(() => {
@@ -109,7 +115,11 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSend}
             >
-              Send
+              {
+                !loading
+                  ? 'Send'
+                  : <Spinner className={'spinner-loading'} />
+              }
             </div>
           </div>
       }
@@ -133,6 +143,12 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
 
 export default React.memo(styled(TransferNftContainer)(({ theme }: Props) => `
   width: 100%;
+
+  .spinner-loading {
+    position: relative;
+    height: 26px;
+    width: 26px;
+  }
 
   .inactive-button {
     opacity: 0.5;

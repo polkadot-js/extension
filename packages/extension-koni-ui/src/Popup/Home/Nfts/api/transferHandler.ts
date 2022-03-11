@@ -79,6 +79,23 @@ async function quartzTransferHandler (api: ApiPromise, senderAddress: string, re
   } as TransferResponse;
 }
 
+async function statemineTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  if (!params.collectionId || !params.itemId) return {};
+
+  const itemId = params.itemId as number;
+  const collectionId = params.collectionId as number;
+
+  const [info, extrinsic] = await Promise.all([
+    api.tx.uniques.transfer(collectionId, itemId, recipientAddress).paymentInfo(senderAddress),
+    api.tx.uniques.transfer(collectionId, itemId, recipientAddress)
+  ]);
+
+  return {
+    info,
+    extrinsic
+  } as TransferResponse;
+}
+
 export default async function transferHandler (api: ApiPromise, networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>): Promise<TransferResponse | null> {
   switch (networkKey) {
     case 'acala':
@@ -93,6 +110,10 @@ export default async function transferHandler (api: ApiPromise, networkKey: stri
       return await quartzTransferHandler(api, senderAddress, recipientAddress, params);
     case 'opal':
       return await quartzTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'statemine':
+      return await statemineTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'statemint':
+      return await statemineTransferHandler(api, senderAddress, recipientAddress, params);
   }
 
   return null;

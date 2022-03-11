@@ -111,71 +111,77 @@ export default class StatemineNftApi extends BaseNftApi {
     const assetIds = await this.getNfts(this.addresses);
     const allCollections: NftCollection[] = [];
 
-    if (!assetIds || assetIds.length === 0) {
-      this.total = 0;
-      this.data = allCollections;
+    try {
+      if (!assetIds || assetIds.length === 0) {
+        this.total = 0;
+        this.data = allCollections;
 
-      return;
-    }
-
-    for (const asset of assetIds) {
-      const parsedClassId = this.parseTokenId(asset.classId as string);
-      const newCollection = {
-        collectionId: parsedClassId,
-        nftItems: []
-      } as NftCollection;
-
-      if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) {
-        allCollections.push(newCollection);
-      }
-    }
-
-    const allItems: NftItem[] = [];
-    const collectionMetaDict: Record<string | number, CollectionDetail | null> = {};
-
-    await Promise.all(assetIds.map(async (assetId) => {
-      let tokenInfo: Record<any, any> = {};
-      const parsedClassId = this.parseTokenId(assetId.classId as string);
-      const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
-
-      if (!(parsedClassId in collectionMetaDict)) {
-        const [_tokenInfo, _collectionMeta] = await Promise.all([
-          this.getTokenDetails(assetId),
-          this.getCollectionDetail(parseInt(parsedClassId))
-        ]);
-
-        tokenInfo = _tokenInfo as Record<any, any>;
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        collectionMetaDict[parsedClassId] = _collectionMeta;
+        return;
       }
 
-      const parsedNft = {
-        id: parsedTokenId,
-        name: tokenInfo?.name as string,
-        description: tokenInfo?.description as string,
-        image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image as string) : undefined,
-        collectionId: this.parseTokenId(parsedClassId),
-        chain: 'statemine'
-      } as NftItem;
+      for (const asset of assetIds) {
+        const parsedClassId = this.parseTokenId(asset.classId as string);
+        const newCollection = {
+          collectionId: parsedClassId,
+          nftItems: []
+        } as NftCollection;
 
-      allItems.push(parsedNft);
-    }));
-
-    for (const collection of allCollections) {
-      const collectionMeta = collectionMetaDict[collection.collectionId];
-
-      if (collectionMeta) {
-        collection.collectionName = collectionMeta?.name;
-        collection.image = collectionMeta.image ? this.parseUrl(collectionMeta?.image) : undefined;
-      }
-
-      for (const item of allItems) {
-        if (collection.collectionId === item.collectionId) {
-          // @ts-ignore
-          collection.nftItems.push(item);
+        if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) {
+          allCollections.push(newCollection);
         }
       }
+
+      const allItems: NftItem[] = [];
+      const collectionMetaDict: Record<string | number, CollectionDetail | null> = {};
+
+      await Promise.all(assetIds.map(async (assetId) => {
+        let tokenInfo: Record<any, any> = {};
+        const parsedClassId = this.parseTokenId(assetId.classId as string);
+        const parsedTokenId = this.parseTokenId(assetId.tokenId as string);
+
+        if (!(parsedClassId in collectionMetaDict)) {
+          const [_tokenInfo, _collectionMeta] = await Promise.all([
+            this.getTokenDetails(assetId),
+            this.getCollectionDetail(parseInt(parsedClassId))
+          ]);
+
+          tokenInfo = _tokenInfo as Record<any, any>;
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          collectionMetaDict[parsedClassId] = _collectionMeta;
+        }
+
+        const parsedNft = {
+          id: parsedTokenId,
+          name: tokenInfo?.name as string,
+          description: tokenInfo?.description as string,
+          image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image as string) : undefined,
+          collectionId: this.parseTokenId(parsedClassId),
+          chain: 'statemine'
+        } as NftItem;
+
+        allItems.push(parsedNft);
+      }));
+
+      for (const collection of allCollections) {
+        const collectionMeta = collectionMetaDict[collection.collectionId];
+
+        if (collectionMeta) {
+          collection.collectionName = collectionMeta?.name;
+          collection.image = collectionMeta.image ? this.parseUrl(collectionMeta?.image) : undefined;
+        }
+
+        for (const item of allItems) {
+          if (collection.collectionId === item.collectionId) {
+            // @ts-ignore
+            collection.nftItems.push(item);
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Failed to fetch statemine nft', e);
+
+      return;
     }
 
     this.total = assetIds.length;

@@ -125,18 +125,18 @@ export class RmrkNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
+    const start = performance.now();
+
+    let allNfts: Record<string | number, any>[] = [];
+    let allCollections: NftCollection[] = [];
+
     try {
-      const start = performance.now();
-
-      let allNfts: Record<string | number, any>[] = [];
-
       await Promise.all(this.addresses.map(async (address) => {
         const nfts = await this.getAllByAccount(address);
 
         allNfts = allNfts.concat(nfts);
       }));
 
-      let allCollections: NftCollection[] = [];
       const collectionInfoUrl: string[] = [];
 
       for (const item of allNfts) {
@@ -222,18 +222,18 @@ export class RmrkNftApi extends BaseNftApi {
           nftItems: nftDict[item.collectionId] as NftItem[]
         } as NftCollection;
       });
-
-      this.total = allNfts.length;
-      this.data = allCollections;
-
-      const end = performance.now();
-
-      console.log(`rmrk took ${end - start}ms`);
-
-      console.log(`Fetched ${allNfts.length} nfts from rmrk`);
     } catch (e) {
-      console.error('Failed to fetch nft', e);
-      throw e;
+      console.log('Failed to fetch rmrk nft', e);
+
+      return;
     }
+
+    this.total = allNfts.length;
+    this.data = allCollections;
+
+    const end = performance.now();
+    console.log(`Fetched ${allNfts.length} nfts from rmrk`);
+
+    console.log(`rmrk took ${end - start}ms`);
   }
 }

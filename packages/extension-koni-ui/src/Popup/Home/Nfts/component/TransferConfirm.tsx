@@ -64,9 +64,11 @@ function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientA
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [callHash, setCallHash] = useState<string | null>(null);
+  const [extrinsicHash, setExtrinsicHash] = useState('');
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [balanceError, setBalanceError] = useState(false);
 
   const handleChangePassword = useCallback((e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -93,34 +95,41 @@ function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientA
     if (unlock()) {
       const pair = keyring.getPair(senderAccount.address);
 
-      const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-        if (!result || !result.status) {
-          return;
-        }
+      try {
+        const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
+          if (!result || !result.status) {
+            return;
+          }
 
-        if (result.status.isInBlock || result.status.isFinalized) {
-          console.log('in block');
-          result.events
-            .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method } }): void => {
-              if (method === 'ExtrinsicFailed') {
-                setShowResult(true);
-                setIsTxSuccess(false);
-                setTxError(method);
-              } else if (method === 'ExtrinsicSuccess') {
-                setShowResult(true);
-                setIsTxSuccess(true);
-              }
-            });
-        } else if (result.isError) {
-          setLoading(false);
-        }
+          if (result.status.isInBlock || result.status.isFinalized) {
+            console.log('in block');
+            result.events
+              .filter(({ event: { section } }) => section === 'system')
+              .forEach(({ event: { method } }): void => {
+                setExtrinsicHash(extrinsic.hash.toHex());
 
-        if (result.isCompleted) {
-          setLoading(false);
-          unsubscribe();
-        }
-      });
+                if (method === 'ExtrinsicFailed') {
+                  setShowResult(true);
+                  setIsTxSuccess(false);
+                  setTxError(method);
+                } else if (method === 'ExtrinsicSuccess') {
+                  setShowResult(true);
+                  setIsTxSuccess(true);
+                }
+              });
+          } else if (result.isError) {
+            setLoading(false);
+          }
+
+          if (result.isCompleted) {
+            setLoading(false);
+            unsubscribe();
+          }
+        });
+      } catch (e) {
+        setBalanceError(true);
+        setLoading(false);
+      }
     } else {
       setLoading(false);
       setPasswordError(true);
@@ -235,10 +244,21 @@ function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientA
               </div>
             </div>
 
+            {
+              balanceError &&
+              <div
+                className={'password-error'}
+                style={{ marginTop: balanceError ? '40px' : '0' }}
+              >
+                Your balance is too low to cover fees.
+              </div>
+            }
+
             <div
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
+              style={{ marginTop: !balanceError ? '40px' : '0' }}
             >
               {
                 !loading
@@ -253,7 +273,7 @@ function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientA
         showResult &&
           <TransferResult
             backToHome={goBack}
-            extrinsicHash={callHash}
+            extrinsicHash={extrinsicHash}
             isTxSuccess={isTxSuccess}
             networkKey={networkKey}
             onResend={handleResend}
@@ -284,7 +304,6 @@ export default React.memo(styled(TransferConfirm)(({ theme }: Props) => `
 
   .submit-btn {
     position: relative;
-    margin-top: 40px;
     background: #004BFF;
     border-radius: 8px;
     display: flex;

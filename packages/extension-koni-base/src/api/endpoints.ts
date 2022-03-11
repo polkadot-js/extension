@@ -339,7 +339,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
     icon: 'polkadot',
     ss58Format: 2,
-    provider: 'wss://statemine.api.onfinality.io/public-ws',
+    // provider: 'wss://statemine.api.onfinality.io/public-ws',
+    provider: 'wss://westmint-rpc.polkadot.io/',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 1000,
     nativeToken: 'KSM'
@@ -479,8 +480,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'QUARTZ by UNIQUE',
     genesisHash: '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554',
     ss58Format: 255,
-    // provider: 'wss://quartz.api.onfinality.io/public-ws',
-    provider: 'wss://ws-opal.unique.network', // test nft
+    provider: 'wss://quartz.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2095,
     nativeToken: 'QTZ',

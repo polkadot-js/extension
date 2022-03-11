@@ -12,7 +12,7 @@ import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 
-const NFT_TIMEOUT = 20000;
+const NFT_TIMEOUT = 10000;
 
 enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -119,28 +119,32 @@ export class NftHandler {
     const startConnect = performance.now();
 
     await this.connect();
-    console.log(`connect took ${performance.now() - startConnect}ms`);
+    console.log(`nft connect took ${performance.now() - startConnect}ms`);
 
     console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
     const start = performance.now();
 
     let total = 0;
     let data: NftCollection[] = [];
-    let timer: any;
 
-    const allPromises = await Promise.all(this.handlers.map(async (handler) => {
-      // eslint-disable-next-line @typescript-eslint/await-thenable
-      await handler.handleNfts();
+    await Promise.all(this.handlers.map(async (handler) => {
+      const timeout = new Promise((resolve, reject) => {
+        const id = setTimeout(() => {
+          clearTimeout(id);
+          resolve('Timed out.');
+        }, NFT_TIMEOUT);
+      });
+
+      await Promise.race([
+        handler.handleNfts(),
+        timeout
+      ]);
+
+      console.log(`total ${handler.getChain() as string}`, handler.getTotal());
+
       total += handler.getTotal();
       data = [...data, ...handler.getData()];
     }));
-
-    // Set timeout for all requests
-    await Promise
-      // eslint-disable-next-line no-return-assign
-      .race([allPromises, new Promise((resolve, reject) => timer = setTimeout(reject, NFT_TIMEOUT))])
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      .finally(() => clearTimeout(timer));
 
     if (isAddressesEqual(this.addresses, this.prevAddresses)) {
       // console.log('nft address no change');

@@ -98,19 +98,16 @@ function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientA
           return;
         }
 
-        console.log('result', result);
-
         if (result.status.isInBlock || result.status.isFinalized) {
           console.log('in block');
           result.events
             .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event }): void => {
-              console.log(event);
-              if (event.method === 'ExtrinsicFailed') {
+            .forEach(({ event: { method } }): void => {
+              if (method === 'ExtrinsicFailed') {
                 setShowResult(true);
                 setIsTxSuccess(false);
-                setTxError('ExtrinsicFailed');
-              } else if (event.method === 'ExtrinsicSuccess') {
+                setTxError(method);
+              } else if (method === 'ExtrinsicSuccess') {
                 setShowResult(true);
                 setIsTxSuccess(true);
               }

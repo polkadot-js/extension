@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
   backToHome: () => void;
 }
 
-function TransferResult ({ backToHome, className, extrinsicHash, isTxSuccess, networkKey, onResend, txError }: Props): React.ReactElement<Props> {
+function TransferResult ({ backToHome, className, extrinsicHash, isTxSuccess, networkKey }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       {
@@ -76,9 +76,9 @@ function TransferResult ({ backToHome, className, extrinsicHash, isTxSuccess, ne
 
               <div
                 className={'resend-button'}
-                onClick={onResend}
+                onClick={backToHome}
               >
-                Retry
+                Go back
               </div>
             </div>
           </div>

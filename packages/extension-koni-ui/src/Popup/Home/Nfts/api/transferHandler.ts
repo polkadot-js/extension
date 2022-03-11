@@ -30,10 +30,7 @@ async function acalaTransferHandler (api: ApiPromise, senderAddress: string, rec
 }
 
 async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  console.log('handling rmrk');
   const nft = params.nft as NFT;
-
-  console.log('params', params.nft);
 
   if (!nft) return {};
 
@@ -85,6 +82,8 @@ async function quartzTransferHandler (api: ApiPromise, senderAddress: string, re
 export default async function transferHandler (api: ApiPromise, networkKey: string, senderAddress: string, recipientAddress: string, params: Record<string, any>): Promise<TransferResponse | null> {
   switch (networkKey) {
     case 'acala':
+      return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'karura':
       return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
     case 'rmrk':
       return await rmrkTransferHandler(api, senderAddress, recipientAddress, params);

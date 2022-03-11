@@ -46,6 +46,8 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string) {
   switch (networkKey) {
     case 'acala':
       return acalaParser(nftItem);
+    case 'karura':
+      return acalaParser(nftItem);
     case 'rmrk':
       return rmrkParser(nftItem);
     case 'uniqueNft':

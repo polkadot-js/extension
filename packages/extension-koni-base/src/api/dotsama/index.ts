@@ -30,7 +30,7 @@ export function connectDotSamaApis (networks = NETWORKS): Record<string, ApiProp
       return;
     }
 
-    apisMap[networkKey] = initApi(network.provider);
+    apisMap[networkKey] = initApi(networkKey, network.provider);
   });
 
   return apisMap;

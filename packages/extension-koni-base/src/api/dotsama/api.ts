@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { options } from '@acala-network/api';
+
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
@@ -89,7 +91,7 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
-export function initApi (apiUrl: string | string[]): ApiProps {
+export function initApi (networkKey: string, apiUrl: string | string[]): ApiProps {
   const registry = new TypeRegistry();
 
   const provider = new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
@@ -101,7 +103,13 @@ export function initApi (apiUrl: string | string[]): ApiProps {
     apiOption.registry = registry;
   }
 
-  const api = new ApiPromise(apiOption);
+  let api: ApiPromise;
+
+  if (networkKey === 'acala') {
+    api = new ApiPromise(options({ provider }));
+  } else {
+    api = new ApiPromise(apiOption);
+  }
 
   const result: ApiProps = ({
     api,

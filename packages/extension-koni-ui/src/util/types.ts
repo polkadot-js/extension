@@ -3,6 +3,7 @@
 
 import BigN from 'bignumber.js';
 
+import { BalanceItem } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountId, AccountIndex, Address } from '@polkadot/types/interfaces';
 
 export type AccountIdIsh = AccountId | AccountIndex | Address | string | Uint8Array | null;
@@ -17,8 +18,8 @@ export type AccountInfoByChain = {
 export type AccountInfoItem = {
   networkKey: string;
   tokenDecimals: number[];
-  tokenSymbol: string[];
-  info: Record<string, AccountInfoByChain>;
+  tokenSymbols: string[];
+  balanceItem: BalanceItem;
 }
 
 export type Info = {

@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ApiPromise } from '@polkadot/api';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { APIItemState, ApiProps, BalanceItem, BalanceRPCResponse } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, BalanceRPCResponse } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
+import { ACALA_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { BN } from '@polkadot/util';
 
@@ -42,9 +44,84 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
+async function getTokenBalance (address: string, api: ApiPromise, option: any) {
+  return await api.query.tokens.accounts(address, option);
+}
+
+function getBalanceChildItem (rawBalanceItems: any[], decimals: number): BalanceChildItem {
+  const storeObj = {
+    reserved: new BN(0),
+    frozen: new BN(0),
+    free: new BN(0)
+  };
+
+  rawBalanceItems.forEach((b) => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    storeObj.free = storeObj.free.add(b?.free?.toBn() || new BN(0));
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    storeObj.frozen = storeObj.frozen.add(b?.frozen?.toBn() || new BN(0));
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    storeObj.reserved = storeObj.reserved.add(b?.reserved?.toBn() || new BN(0));
+  });
+
+  return ({
+    reserved: storeObj.reserved.toString(),
+    frozen: storeObj.frozen.toString(),
+    free: storeObj.free.toString(),
+    decimals
+  });
+}
+
+function subcribleAcalaTokenBalanceInterval (addresses: string[], api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
+  const getTokenBalances = () => {
+    (async () => {
+      const [dotBalances, ldotBalances, ausdBalances, lcdotBalances] = await Promise.all(['DOT', 'LDOT', 'AUSD', 'LCDOT'].map((token) => {
+        if (token === 'LCDOT') {
+          return Promise.all(addresses.map((address) => getTokenBalance(address, api, {
+            LiquidCrowdloan: 13
+          })));
+        }
+
+        return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
+      }));
+
+      originBalanceItem.children = {
+        DOT: getBalanceChildItem(dotBalances, 10),
+        LDOT: getBalanceChildItem(ldotBalances, 10),
+        AUSD: getBalanceChildItem(ausdBalances, 12),
+        LCDOT: getBalanceChildItem(lcdotBalances, 10)
+      };
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback('acala', originBalanceItem);
+    })().catch((e) => {
+      console.log('There is problem when fetching Acaca token balance', e);
+    });
+  };
+
+  getTokenBalances();
+  const interval = setInterval(getTokenBalances, ACALA_REFRESH_BALANCE_INTERVAL);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
 function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
+  const balanceItem: BalanceItem = {
+    state: APIItemState.PENDING,
+    free: '0',
+    reserved: '0',
+    miscFrozen: '0',
+    feeFrozen: '0',
+    children: undefined
+  };
+
   // @ts-ignore
-  return networkAPI.api.query.system.account.multi(addresses, (balances: BalanceRPCResponse[]) => {
+  const unsub = networkAPI.api.query.system.account.multi(addresses, (balances: BalanceRPCResponse[]) => {
     let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
 
     balances.forEach((balance: BalanceRPCResponse) => {
@@ -54,16 +131,25 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
       feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
     });
 
-    const balanceItem = {
-      state: APIItemState.READY,
-      free: free.toString(),
-      reserved: reserved.toString(),
-      miscFrozen: miscFrozen.toString(),
-      feeFrozen: feeFrozen.toString()
-    } as BalanceItem;
+    balanceItem.state = APIItemState.READY;
+    balanceItem.free = free.toString();
+    balanceItem.reserved = reserved.toString();
+    balanceItem.miscFrozen = miscFrozen.toString();
+    balanceItem.feeFrozen = feeFrozen.toString();
 
     callback(networkKey, balanceItem);
   });
+
+  let unsubAcala: () => void;
+
+  if (networkKey === 'acala') {
+    unsubAcala = subcribleAcalaTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
+  }
+
+  return async () => {
+    await unsub;
+    unsubAcala && unsubAcala();
+  };
 }
 
 export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: BalanceItem) => void) {

@@ -46,7 +46,7 @@ export default function useAccountBalance (currentNetworkKey: string,
 
   const balanceMap = balanceReducer.details;
   const crowdLoanMap = crowdloanReducer.details;
-  const { priceMap } = priceReducer;
+  const { priceMap, tokenPriceMap } = priceReducer;
 
   let totalBalanceValue = new BigN(0);
   const networkBalanceMaps: Record<string, BalanceInfo> = {};
@@ -76,22 +76,21 @@ export default function useAccountBalance (currentNetworkKey: string,
       return;
     }
 
-    const balanceInfo = parseBalancesInfo(priceMap, {
+    const balanceInfo = parseBalancesInfo(priceMap, tokenPriceMap, {
       networkKey,
       tokenDecimals: registry.chainDecimals,
-      tokenSymbol: registry.chainTokens,
-      info: {
-        [registry.chainTokens[0]]: {
-          freeBalance: balanceItem.free || '0',
-          frozenFee: balanceItem.feeFrozen || '0',
-          reservedBalance: balanceItem.reserved || '0',
-          frozenMisc: balanceItem.miscFrozen || '0'
-        }
-      }
+      tokenSymbols: registry.chainTokens,
+      balanceItem
     });
 
     networkBalanceMaps[networkKey] = balanceInfo;
     totalBalanceValue = totalBalanceValue.plus(balanceInfo.convertedBalanceValue);
+
+    if (balanceInfo.childrenBalances && balanceInfo.childrenBalances.length) {
+      balanceInfo.childrenBalances.forEach((c) => {
+        totalBalanceValue = totalBalanceValue.plus(c.convertedBalanceValue);
+      });
+    }
   });
 
   crowdloanNetworks.forEach((networkKey) => {

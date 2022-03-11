@@ -147,7 +147,7 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
   }
 
   return async () => {
-    await unsub;
+    (await unsub)();
     unsubAcala && unsubAcala();
   };
 }

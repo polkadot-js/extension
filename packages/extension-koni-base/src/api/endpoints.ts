@@ -203,7 +203,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'SubGame',
     genesisHash: '0xe6343cef9167c43305c6f197bbd90d55bf93efc561b3d698845398cd864f6eb3',
     ss58Format: 27,
-    provider: 'wss://mainnet.subgame.org',
+    provider: 'wss://gamma.subgame.org/',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2017,
     nativeToken: 'SGB',

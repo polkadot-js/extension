@@ -196,7 +196,7 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMa
 
       childrenBalances.push({
         key: token,
-        label: token,
+        label: '',
         symbol: token,
         convertedBalanceValue,
         balanceValue

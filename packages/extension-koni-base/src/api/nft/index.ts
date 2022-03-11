@@ -52,7 +52,7 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
 }
 
 export class NftHandler {
-  count: number = 0;
+  count = 0;
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];

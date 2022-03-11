@@ -5,7 +5,7 @@ import type { RequestSignatures, TransportRequestMessage } from '@polkadot/exten
 import type { Message } from '@polkadot/extension-base/types';
 
 import { MESSAGE_ORIGIN_CONTENT } from '@polkadot/extension-base/defaults';
-import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
+import { enable, handleResponse } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 
 function inject () {
@@ -33,11 +33,4 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 });
 
-redirectIfPhishing().then((gotRedirected) => {
-  if (!gotRedirected) {
-    inject();
-  }
-}).catch((e) => {
-  console.warn(`Unable to determine if the site is in the phishing list: ${(e as Error).message}`);
-  inject();
-});
+inject();

@@ -42,15 +42,6 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['RELAY_CHAIN', 'TEST_NET'],
     nativeToken: 'ROC'
   },
-  koni: {
-    chain: 'Koni test',
-    genesisHash: '0x7a48390870728092c951aaf4e1632c849a74489d9cee0bf51d3527b33983fc0a',
-    icon: 'polkadot',
-    ss58Format: 42,
-    provider: 'wss://rpc.koniverse.com',
-    groups: ['TEST_NET'],
-    nativeToken: 'DOT'
-  },
   rmrk: {
     chain: 'RMRK test',
     genesisHash: '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1',
@@ -396,6 +387,14 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan'
   },
+  bifrost_testnet: {
+    chain: 'Bifrost Testnet',
+    genesisHash: '0x8b290fa39a8808f29d7309ea99442c95bf964838aef14be5a6449ae48f8a5f1f',
+    ss58Format: 6,
+    provider: 'wss://bifrost-rpc.testnet.liebi.com/ws',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'BNC'
+  },
   kilt: {
     chain: 'KILT Spiritnet',
     genesisHash: '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21',
@@ -584,6 +583,14 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2102,
     nativeToken: 'PCHU',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
+  },
+  bitcountry: {
+    chain: 'Bit.Country - Testnet',
+    genesisHash: '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5',
+    ss58Format: 42,
+    provider: 'wss://tewai-rpc.bit.country',
+    groups: ['TEST_NET'],
+    nativeToken: 'NUUM'
   }
 };
 

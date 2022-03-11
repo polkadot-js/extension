@@ -4,7 +4,7 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -12,6 +12,7 @@ import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
+import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -62,6 +63,7 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
+  private readonly accountRefStore = new AccountRefStore();
   // private readonly nftStore = new NftStore();
   // private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
@@ -156,6 +158,50 @@ export default class KoniState extends State {
     }
 
     this.stakingRewardSubject.next(stakingRewardData);
+  }
+
+  public getAccountRefMap (callback: (refMap: Record<string, Array<string>>) => void) {
+    const refMap: AccountRefMap = {};
+
+    this.accountRefStore.get('refList', (refList) => {
+      if (refList) {
+        refList.forEach((accRef) => {
+          accRef.forEach((acc) => {
+            refMap[acc] = [...accRef].filter((r) => !(r === acc));
+          });
+        });
+      }
+
+      callback(refMap);
+    });
+  }
+
+  public addAccountRef (addresses: string[], callback: () => void) {
+    this.accountRefStore.get('refList', (refList) => {
+      const newList = refList ? [...refList] : [];
+
+      newList.push(addresses);
+
+      this.accountRefStore.set('refList', newList, callback);
+    });
+  }
+
+  public removeAccountRef (address: string, callback: () => void) {
+    this.accountRefStore.get('refList', (refList) => {
+      refList.forEach((accRef) => {
+        if (accRef.indexOf(address) > -1) {
+          accRef.splice(accRef.indexOf(address), 1);
+        }
+
+        if (accRef.length < 2) {
+          refList.splice(refList.indexOf(accRef), 1);
+        }
+      });
+
+      this.accountRefStore.set('refList', refList, () => {
+        callback();
+      });
+    });
   }
 
   public getStakingReward (update: (value: StakingRewardJson) => void): void {

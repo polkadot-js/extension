@@ -33,6 +33,7 @@ import Export from './Export';
 import ExportAll from './ExportAll';
 import Forget from './Forget';
 import Home from './Home';
+import ImportMetamaskPrivateKey from './ImportMetamaskPrivateKey';
 import ImportQr from './ImportQr';
 import ImportSeed from './ImportSeed';
 import Metadata from './Metadata';
@@ -201,6 +202,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route>
                           <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
                           <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
+                          <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>
                           <Route path='/account/restore-json'>{wrapWithErrorBoundary(<RestoreJson />, 'restore-json')}</Route>
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>

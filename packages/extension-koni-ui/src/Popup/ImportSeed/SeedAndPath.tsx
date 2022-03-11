@@ -9,14 +9,16 @@ import type { AccountInfo } from '.';
 
 import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
+import RadioStatus from '@polkadot/extension-koni-ui/components/RadioStatus';
 import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
+import { getGenesisOptionsByAddressType } from '@polkadot/extension-koni-ui/util';
 import { objectSpread } from '@polkadot/util';
 
-import { AccountInfoEl, ButtonArea, Checkbox, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
+import { AccountContext, AccountInfoEl, ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
@@ -36,9 +38,11 @@ interface Props {
 
 function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountChange, onEvmAccountChange, onNextStep, onSelectAccountImported, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const genesisOptions = useGenesisHashOptions();
+  const { accounts } = useContext(AccountContext);
   const [address, setAddress] = useState('');
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
+  const options = getGenesisOptionsByAddressType(null, accounts, useGenesisHashOptions());
+  const evmOptions = getGenesisOptionsByAddressType(evmAddress, accounts, useGenesisHashOptions());
   const [seed, setSeed] = useState<string | null>(null);
   const [path, setPath] = useState<string | null>(null);
   const [advanced, setAdvances] = useState(false);
@@ -47,7 +51,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);
   const [isEvmAccountSelected, setEvmAccountSelected] = useState(false);
-  const dep = keyTypes.toString();
+  const networkRef = useRef(null);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -66,7 +70,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
         const evmAddress = addressMap[EVM_ACCOUNT_TYPE];
 
         setAddress(address);
-        setEvmAddress(addressMap[EVM_ACCOUNT_TYPE]);
+        setEvmAddress(evmAddress);
         setError('');
         onAccountChange(
           objectSpread<AccountInfo>({}, { address, suri, genesis, type })
@@ -85,42 +89,28 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
           : t<string>('Invalid mnemonic seed')
         );
       });
-  }, [t, genesis, seed, path, onAccountChange, type, dep]);
+  }, [t, genesis, seed, path, onAccountChange, type]);
 
   const _onSelectNormalAccount = useCallback(() => {
     if (!isNormalAccountSelected) {
-      if (isEvmAccountSelected) {
-        onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
-      } else {
-        onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
-      }
+      onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
+      setNormalAccountSelected(true);
+      setEvmAccountSelected(false);
     } else {
-      if (isEvmAccountSelected) {
-        onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
-      } else {
-        onSelectAccountImported && onSelectAccountImported([]);
-      }
+      onSelectAccountImported && onSelectAccountImported([]);
+      setNormalAccountSelected(false);
     }
-
-    setNormalAccountSelected(!isNormalAccountSelected);
   }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
 
   const _onSelectEvmAccount = useCallback(() => {
     if (!isEvmAccountSelected) {
-      if (isNormalAccountSelected) {
-        onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
-      } else {
-        onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
-      }
+      onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
+      setNormalAccountSelected(false);
+      setEvmAccountSelected(true);
     } else {
-      if (isNormalAccountSelected) {
-        onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
-      } else {
-        onSelectAccountImported && onSelectAccountImported([]);
-      }
+      onSelectAccountImported && onSelectAccountImported([]);
+      setEvmAccountSelected(false);
     }
-
-    setEvmAccountSelected(!isEvmAccountSelected);
   }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
 
   const _onToggleAdvanced = useCallback(() => {
@@ -132,9 +122,9 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
       <div className='account-info-wrapper'>
         <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
           <div className='account-info-item'>
-            <Checkbox
+            <RadioStatus
               checked={isNormalAccountSelected}
-              label={''}
+              className='account-info-item__radio-btn'
               onChange={_onSelectNormalAccount}
             />
             <AccountInfoEl
@@ -146,9 +136,9 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
           </div>
 
           <div className='account-info-item'>
-            <Checkbox
+            <RadioStatus
               checked={isEvmAccountSelected}
-              label={''}
+              className='account-info-item__radio-btn'
               onChange={_onSelectEvmAccount}
             />
             <AccountInfoEl
@@ -156,6 +146,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
               className='account-info'
               genesisHash={account?.genesis}
               name={evmName}
+              type={EVM_ACCOUNT_TYPE}
             />
           </div>
 
@@ -177,13 +168,16 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
               {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
             </Warning>
           )}
-          <Dropdown
-            className='seed-and-path__genesis-selection'
-            label={t<string>('Network')}
-            onChange={setGenesis}
-            options={genesisOptions}
-            value={genesis}
-          />
+          {(isNormalAccountSelected || isEvmAccountSelected) &&
+            <Dropdown
+              className='seed-and-path__genesis-selection'
+              label={t<string>('Network')}
+              onChange={setGenesis}
+              options={isNormalAccountSelected ? options : evmOptions}
+              reference={networkRef}
+              value={genesis}
+            />
+          }
           <div
             className='seed-and-path__advanced-toggle'
             onClick={_onToggleAdvanced}
@@ -277,6 +271,10 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
       height: 80px;
       margin-top: 4px;
     }
+  }
+
+  .account-info-item__radio-btn {
+    padding-right: 10px;
   }
 
   .seed-and-path__error {

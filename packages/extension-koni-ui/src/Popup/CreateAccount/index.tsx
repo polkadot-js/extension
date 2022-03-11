@@ -3,16 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-import { getGenesisOptionsByAddressType } from '@polkadot/extension-koni-ui/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountContext, AccountNamePasswordCreation, ActionContext, Dropdown } from '../../components';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
+import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2, createSeedV2, validateSeedV2 } from '../../messaging';
 import Mnemonic from './Mnemonic';
@@ -39,11 +37,9 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
   const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
-  const options = getGenesisOptionsByAddressType(null, accounts, useGenesisHashOptions());
-  const [genesisHash, setGenesis] = useState('');
-  const networkRef = useRef(null);
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  const genesisHash = '';
 
   if (isFirefox || isLinux) {
     window.localStorage.setItem('popupNavigation', '');
@@ -100,11 +96,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
     []
   );
 
-  const _onChangeNetwork = useCallback(
-    (newGenesisHash: string) => setGenesis(newGenesisHash),
-    []
-  );
-
   return (
     <>
       <HeaderWithSteps
@@ -121,7 +112,6 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                 address={address}
                 evmAddress={evmAddress}
                 evmName={evmName}
-                genesisHash={genesisHash}
                 name={name}
                 onNextStep={_onNextStep}
                 onSelectAccountCreated={setKeyTypes}
@@ -134,22 +124,11 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                   address={address}
                   buttonLabel={t<string>('Add the account with the generated seed')}
                   evmAddress={evmAddress}
-                  evmName={evmName}
-                  genesis={genesisHash}
                   isBusy={isBusy}
                   keyTypes={keyTypes}
                   name={name}
                   onCreate={_onCreate}
-                >
-                  <Dropdown
-                    className='create-account-network-select'
-                    label={t<string>('Network')}
-                    onChange={_onChangeNetwork}
-                    options={options}
-                    reference={networkRef}
-                    value={genesisHash}
-                  />
-                </AccountNamePasswordCreation>
+                />
               </>
             )
         )}
@@ -158,18 +137,4 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   );
 }
 
-export default styled(CreateAccount)`
-  margin-bottom: 16px;
-
-  .create-account-network-select {
-    font-weight: 500;
-  }
-
-  .create-account-network-dropdown {
-    margin-bottom: 10px;
-  }
-
-  label::after {
-    right: 36px;
-  }
-`;
+export default styled(CreateAccount)``;

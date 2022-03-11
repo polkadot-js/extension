@@ -6,17 +6,16 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
+import { Header } from '@polkadot/extension-koni-ui/partials';
+import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, ActionContext } from '../../components';
-import AccountNamePasswordCreation from '../../components/AccountNamePasswordCreation';
 import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuriV2 } from '../../messaging';
 import { DEFAULT_TYPE } from '../../util/defaultType';
-import SeedAndPath from './SeedAndPath';
+import MetamaskPrivateKeyImport from '../ImportMetamaskPrivateKey/MetamaskPrivateKeyImport';
 
 export interface AccountInfo {
   address: string;
@@ -28,19 +27,16 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-function ImportSeed ({ className = '' }: Props): React.ReactElement {
+function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
-  const [evmAccount, setEvmAccount] = useState<AccountInfo | null>(null);
-  const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
+  const keyTypes: KeypairType[] = [EVM_ACCOUNT_TYPE];
   const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
-  const evmName = `Account ${accountsWithoutAll.length + 1} - EVM`;
-  const [step1, setStep1] = useState(true);
   const type = DEFAULT_TYPE;
 
   useEffect((): void => {
@@ -64,56 +60,27 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     }
   }, [account, onAction, dep]);
 
-  const _onNextStep = useCallback(
-    () => setStep1(false),
-    []
-  );
-
-  const _onBackClick = useCallback(
-    () => setStep1(true),
-    []
-  );
-
   return (
     <>
-      <HeaderWithSteps
+      <Header
         isBusy={isBusy}
-        onBackClick={_onBackClick}
-        step={step1 ? 1 : 2}
-        text={t<string>('Import account')}
+        showCancelButton
+        showSubHeader
+        subHeaderName={t<string>('Import Private Key')}
       />
-      {step1
-        ? (
-          <SeedAndPath
-            account={account}
-            className='import-seed-content-wrapper'
-            evmName={evmName}
-            keyTypes={keyTypes}
-            name={name}
-            onAccountChange={setAccount}
-            onEvmAccountChange={setEvmAccount}
-            onNextStep={_onNextStep}
-            onSelectAccountImported={setKeyTypes}
-            type={type}
-          />
-        )
-        : (
-          <AccountNamePasswordCreation
-            address={account?.address}
-            buttonLabel={t<string>('Add the account with the supplied seed')}
-            className='koni-import-seed-content'
-            evmAddress={evmAccount?.address}
-            isBusy={isBusy}
-            keyTypes={keyTypes}
-            name={name}
-            onCreate={_onCreate}
-          />
+      <MetamaskPrivateKeyImport
+        account={account}
+        className='import-seed-content-wrapper'
+        keyTypes={keyTypes}
+        name={name}
+        onAccountChange={setAccount}
+        onCreate={_onCreate}
+        type={type}
+      />
 
-        )
-      }
     </>
   );
 }
 
-export default styled(ImportSeed)`
+export default styled(ImportMetamaskPrivateKey)`
 `;

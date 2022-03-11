@@ -35,7 +35,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
         autoCapitalize='off'
         autoCorrect='off'
         autoFocus
-        className='input-filter'
+        className={withReset && !!value ? 'input-filter -with-padding' : 'input-filter' }
         onChange={onChangeFilter}
         placeholder={placeholder}
         ref={inputRef}
@@ -60,6 +60,10 @@ export default styled(InputFilter)(({ theme }: Props) => `
 
   .input-filter {
     margin-top: 0;
+    width: 218px;
+  }
+
+  .input-filter.-with-padding {
     padding-right: 2rem;
   }
 

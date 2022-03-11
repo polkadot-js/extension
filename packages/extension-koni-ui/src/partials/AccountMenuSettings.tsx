@@ -3,9 +3,9 @@
 
 import type { ThemeProps } from '../types';
 
-import { faCodeBranch, faCog, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
@@ -16,7 +16,6 @@ import MenuSettingItem from '@polkadot/extension-koni-ui/components/MenuSettingI
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import AccountsTree from '@polkadot/extension-koni-ui/Popup/Accounts/AccountsTree';
-import getNetworkMap from '@polkadot/extension-koni-ui/util/getNetworkMap';
 
 import { AccountContext, MediaContext, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';
@@ -38,13 +37,11 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
   const { hierarchy } = useContext(AccountContext);
   const filteredAccount = filter
     ? hierarchy.filter((account) =>
-      account.name?.toLowerCase().includes(filter) ||
-    (account.genesisHash && networkMap.get(account.genesisHash)?.toLowerCase().includes(filter))
+      account.name?.toLowerCase().includes(filter.toLowerCase())
     )
     : hierarchy;
 
-  const { master } = useContext(AccountContext);
-  const networkMap = useMemo(() => getNetworkMap(), []);
+  // const { master } = useContext(AccountContext);
   const mediaAllowed = useContext(MediaContext);
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
@@ -114,18 +111,18 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               <span>{ t('Create new account')}</span>
             </Link>
           </MenuSettingItem>
-          {!!master && (
-            <MenuSettingItem className='account-menu-settings__menu-item'>
-              <Link
-                className='account-menu-settings__menu-item-text'
-                to={`/account/derive/${master.address}`}
-              >
-                {/* @ts-ignore */}
-                <FontAwesomeIcon icon={faCodeBranch} />
-                <span>{t('Derive from an account')}</span>
-              </Link>
-            </MenuSettingItem>
-          )}
+          {/* {!!master && ( */}
+          {/*  <MenuSettingItem className='account-menu-settings__menu-item'> */}
+          {/*    <Link */}
+          {/*      className='account-menu-settings__menu-item-text' */}
+          {/*      to={`/account/derive/${master.address}`} */}
+          {/*    > */}
+          {/*      /!* @ts-ignore *!/ */}
+          {/*      <FontAwesomeIcon icon={faCodeBranch} /> */}
+          {/*      <span>{t('Derive from an account')}</span> */}
+          {/*    </Link> */}
+          {/*  </MenuSettingItem> */}
+          {/* )} */}
         </div>
 
         <div className='account-menu-settings-items-wrapper'>
@@ -145,8 +142,18 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               to='/account/import-seed'
             >
               {/* @ts-ignore */}
+              <FontAwesomeIcon icon={faSeedling} />
+              <span>{t<string>('Import account from Seed Phase')}</span>
+            </Link>
+          </MenuSettingItem>
+          <MenuSettingItem className='account-menu-settings__menu-item'>
+            <Link
+              className='account-menu-settings__menu-item-text'
+              to='/account/import-metamask-private-key'
+            >
+              {/* @ts-ignore */}
               <FontAwesomeIcon icon={faKey} />
-              <span>{t<string>('Import account from pre-existing seed')}</span>
+              <span>{t<string>('Import private key from Metamask')}</span>
             </Link>
           </MenuSettingItem>
           <MenuSettingItem className='account-menu-settings__menu-item'>
@@ -157,7 +164,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faFileUpload} />
-              <span>{t<string>('Restore account from backup JSON file')}</span>
+              <span>{t<string>('Restore account from Polkadot{.js}')}</span>
             </Link>
           </MenuSettingItem>
         </div>
@@ -335,7 +342,7 @@ export default React.memo(styled(AccountMenuSettings)(({ theme }: Props) => `
   }
 
   .account-menu-settings__input-filter {
-    width: 100%;
+    width: 218px;
   }
 
   .account-menu-settings__input-filter > input {

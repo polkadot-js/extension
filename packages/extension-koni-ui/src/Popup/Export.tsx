@@ -6,12 +6,14 @@ import type { Theme, ThemeProps } from '../types';
 import { saveAs } from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
 
 import { AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Label, Warning } from '../components';
@@ -34,6 +36,9 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const [error, setError] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _isAllAccount = isAccountAll(address);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount);
+
+  console.log(currentAccount);
 
   const _goHome = useCallback(
     () => {
@@ -118,7 +123,10 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
             </ActionBar>
           </div>
           : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} export-account-wrapper`}>
-            <AccountInfoEl address={address} />
+            <AccountInfoEl
+              address={address}
+              type={currentAccount.account?.type}
+            />
             <Warning className='export-warning'>
               {t<string>('You are exporting your account. Keep it safe and don\'t share it with anyone.')}
             </Warning>
@@ -203,17 +211,17 @@ export default withRouter(styled(ExportAccount)(({ theme }: Props) => `
   .export__password-area {
     padding-top: 13px;
   }
-  
+
   .export__private-key-area {
     padding-top: 22px;
     padding-bottom: 5px;
   }
-  
+
   .export__private-key-area .private-key {
     display: flex;
     position: relative;
   }
-  
+
   .export__private-key-area .private-key .key {
     flex: 1;
   }

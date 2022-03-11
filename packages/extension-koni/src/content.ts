@@ -4,6 +4,7 @@
 import type { Message } from '@polkadot/extension-base/types';
 
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@polkadot/extension-base/defaults';
+import { redirectIfPhishing } from '@polkadot/extension-base/page';
 import { chrome } from '@polkadot/extension-inject/chrome';
 
 // connect to the extension
@@ -37,3 +38,11 @@ script.onload = (): void => {
 };
 
 (document.head || document.documentElement).appendChild(script);
+
+redirectIfPhishing().then((gotRedirected) => {
+  if (!gotRedirected) {
+    console.log('Check phishing by URL: Passed.');
+  }
+}).catch((e) => {
+  console.warn(`Unable to determine if the site is in the phishing list: ${(e as Error).message}`);
+});

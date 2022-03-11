@@ -19,14 +19,12 @@ interface Props {
   children?: any;
   evmAddress?: string | null;
   address?: string | null;
-  genesis?: string | null;
   onPasswordChange?: (password: string) => void;
   name: string;
-  evmName?: string;
   keyTypes: KeypairType[];
 }
 
-function AccountNamePasswordCreation ({ address, buttonLabel, children, className, evmAddress, evmName, genesis, isBusy, keyTypes, name, onCreate }: Props): React.ReactElement<Props> {
+function AccountNamePasswordCreation ({ address, buttonLabel, children, className, evmAddress, isBusy, keyTypes, name, onCreate }: Props): React.ReactElement<Props> {
   const [password, setPassword] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const _onCreate = useCallback(
@@ -44,7 +42,6 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
             {keyTypes.includes(SUBSTRATE_ACCOUNT_TYPE) &&
               <AccountInfoEl
                 address={address}
-                genesisHash={genesis}
                 name={name}
               />
             }
@@ -52,8 +49,7 @@ function AccountNamePasswordCreation ({ address, buttonLabel, children, classNam
             {keyTypes.includes(EVM_ACCOUNT_TYPE) &&
               <AccountInfoEl
                 address={evmAddress}
-                genesisHash={genesis}
-                name={evmName}
+                name={`${name} - EVM`}
                 type={EVM_ACCOUNT_TYPE}
               />
             }

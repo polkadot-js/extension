@@ -90,7 +90,7 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
             className='seed-and-path__seed-input'
             isError={!!error}
             isFocused
-            label={t<string>('existing 12 or 24-word private key')}
+            label={t<string>('private key')}
             onChange={setSeed}
             rowsCount={2}
             value={seed || ''}

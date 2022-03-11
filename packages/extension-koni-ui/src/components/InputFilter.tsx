@@ -60,7 +60,6 @@ export default styled(InputFilter)(({ theme }: Props) => `
 
   .input-filter {
     margin-top: 0;
-    width: 218px;
   }
 
   .input-filter.-with-padding {

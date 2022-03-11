@@ -184,8 +184,6 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMa
 
   const childrenBalances: BalanceSubInfo[] = [];
 
-  console.log('tokenPriceMap', tokenPriceMap);
-
   if (balanceChildren) {
     Object.keys(balanceChildren).forEach((token) => {
       const item = balanceChildren[token];

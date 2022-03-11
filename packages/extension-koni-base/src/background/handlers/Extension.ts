@@ -501,7 +501,7 @@ export default class KoniExtension extends Extension {
       return ApiInitStatus.ALREADY_EXIST;
     }
 
-    apisMap[networkKey] = initApi(rpcsMap[networkKey]);
+    apisMap[networkKey] = initApi(networkKey, rpcsMap[networkKey]);
 
     return ApiInitStatus.SUCCESS;
   }

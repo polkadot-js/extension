@@ -98,27 +98,28 @@ function TransferConfirm ({ className, extrinsic, goBack, networkKey, recipientA
           return;
         }
 
+        console.log('result', result);
+
         if (result.status.isInBlock || result.status.isFinalized) {
           console.log('in block');
           result.events
             .filter(({ event: { section } }) => section === 'system')
-            .forEach(({ event: { method } }): void => {
-              if (method === 'ExtrinsicFailed') {
+            .forEach(({ event }): void => {
+              console.log(event);
+              if (event.method === 'ExtrinsicFailed') {
                 setShowResult(true);
                 setIsTxSuccess(false);
-                setTxError(method);
-              } else if (method === 'ExtrinsicSuccess') {
+                setTxError('ExtrinsicFailed');
+              } else if (event.method === 'ExtrinsicSuccess') {
                 setShowResult(true);
                 setIsTxSuccess(true);
               }
             });
         } else if (result.isError) {
-          console.log('tx error');
           setLoading(false);
         }
 
         if (result.isCompleted) {
-          console.log('tx completed');
           setLoading(false);
           unsubscribe();
         }

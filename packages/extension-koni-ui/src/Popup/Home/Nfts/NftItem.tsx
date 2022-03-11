@@ -28,7 +28,7 @@ function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Pro
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [sendError, setSendError] = useState(false);
-  const { currentNetwork } = useSelector((state: RootState) => state);
+  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
   const [showTransfer, setShowTransfer] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -54,15 +54,15 @@ function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Pro
   };
 
   const handleClickTransfer = useCallback(() => {
-    // if (data.chain && data?.chain === currentNetwork.networkKey) {\
-    console.log(currentNetwork.networkKey);
-    if (data.chain) {
+    if (!account.account || account.account.address === 'ALL') return;
+
+    if (data.chain && data.chain === currentNetwork.networkKey) {
       setShowTransfer(!showTransfer);
       setSendError(false);
     } else {
       setSendError(true);
     }
-  }, [currentNetwork, data, showTransfer]);
+  }, [account, currentNetwork, data, showTransfer]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -152,18 +152,24 @@ function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Pro
                   />
                 </video>
             }
-            <div className={'send-container'}>
-              {
-                sendError &&
-                <div className={'send-error'}>Please change to {data?.chain} network!</div>
-              }
-              <div
-                className={'send-button'}
-                onClick={handleClickTransfer}
-              >
-                Send
+
+            {
+              // @ts-ignore
+              account.account.address !== 'ALL' &&
+              <div className={'send-container'}>
+                {
+                  sendError &&
+                  <div className={'send-error'}>Please change to {data?.chain} network!</div>
+                }
+                <div
+                  className={'send-button'}
+                  onClick={handleClickTransfer}
+                >
+                  Send
+                </div>
               </div>
-            </div>
+            }
+
             {
               data.description &&
               <div>

@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NFT } from 'rmrk-tools';
+
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
@@ -27,21 +29,24 @@ async function acalaTransferHandler (api: ApiPromise, senderAddress: string, rec
   } as TransferResponse;
 }
 
-// async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-//   const nft = params.nft as NFT;
-//
-//   if (!nft) return {};
-//
-//   const [info, extrinsic] = await Promise.all([
-//     api.tx.system.remark(nft.send(recipientAddress)).paymentInfo(senderAddress),
-//     api.tx.system.remark(nft.send(recipientAddress))
-//   ]);
-//
-//   return {
-//     info,
-//     extrinsic
-//   } as TransferResponse;
-// }
+async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+  console.log('handling rmrk');
+  const nft = params.nft as NFT;
+
+  console.log('params', params.nft);
+
+  if (!nft) return {};
+
+  const [info, extrinsic] = await Promise.all([
+    api.tx.system.remark(nft.send(recipientAddress)).paymentInfo(senderAddress),
+    api.tx.system.remark(nft.send(recipientAddress))
+  ]);
+
+  return {
+    info,
+    extrinsic
+  } as TransferResponse;
+}
 
 async function uniqueTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   if (!params.collectionId || !params.itemId) return {};
@@ -63,8 +68,6 @@ async function uniqueTransferHandler (api: ApiPromise, senderAddress: string, re
 async function quartzTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   if (!params.collectionId || !params.itemId) return {};
 
-  console.log('handling quartz');
-
   const itemId = params.itemId as number;
   const collectionId = params.collectionId as number;
 
@@ -83,8 +86,8 @@ export default async function transferHandler (api: ApiPromise, networkKey: stri
   switch (networkKey) {
     case 'acala':
       return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
-    // case 'rmrk':
-    //   return await rmrkTransferHandler(api, senderAddress, recipientAddress, params);
+    case 'rmrk':
+      return await rmrkTransferHandler(api, senderAddress, recipientAddress, params);
     case 'uniqueNft':
       return await uniqueTransferHandler(api, senderAddress, recipientAddress, params);
     case 'quartz':

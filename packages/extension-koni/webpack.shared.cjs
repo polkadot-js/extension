@@ -99,7 +99,15 @@ module.exports = (entry, alias = {}) => ({
     fallback: {
       crypto: require.resolve('crypto-browserify'),
       path: require.resolve('path-browserify'),
-      stream: require.resolve('stream-browserify')
+      stream: require.resolve('stream-browserify'),
+      zlib: false,
+      https: false,
+      http: false,
+      url: false
+      // zlib: require.resolve("browserify-zlib"),
+      // https: require.resolve("https-browserify"),
+      // http: require.resolve("stream-http"),
+      // url: require.resolve("url/")
     }
   },
   watch: false

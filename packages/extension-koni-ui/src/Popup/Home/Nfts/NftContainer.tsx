@@ -29,8 +29,6 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
   const [chosenCollection, setChosenCollection] = useState<_NftCollection>();
   const [showCollectionDetail, setShowCollectionDetail] = useState<boolean>(false);
 
-  console.log(nftList);
-
   const handleShowCollectionDetail = useCallback((data: _NftCollection) => {
     setShowCollectionDetail(true);
     setChosenCollection(data);

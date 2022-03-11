@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import {NftItem, NftItem as _NftItem} from '@polkadot/extension-base/background/KoniTypes';
+import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
@@ -31,15 +31,10 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
   const [recipientAddress, setRecipientAddress] = useState('');
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account } = useSelector((state: RootState) => state);
-  const networkKey = 'quartz';
+  const networkKey = nftItem.chain as string;
   const { api, isApiReady, isNotSupport } = useApi(networkKey);
   const [txInfo, setTxInfo] = useState<RuntimeDispatchInfo | null>(null);
   const [extrinsic, setExtrinsic] = useState<SubmittableExtrinsic<'promise'> | null>(null);
-  const testNft = {
-    collectionId: '1802',
-    id: '5',
-    chain: 'quartz'
-  } as NftItem;
 
   const handleChangeRecipient = useCallback((e: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -51,15 +46,10 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
   }, []);
 
   const handleSend = useCallback(async () => {
-    console.log('sending');
     if (addressError || !isApiReady || !networkKey || isNotSupport) return;
-
-
-
     // @ts-ignore
     const senderAddress = account.account.address;
-    const params = paramsHandler(testNft, networkKey);
-    console.log('params', params);
+    const params = paramsHandler(nftItem, networkKey);
     const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress, params);
 
     if (transferMeta) {

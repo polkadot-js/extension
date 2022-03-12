@@ -499,7 +499,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Subsocial',
     genesisHash: '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8',
     ss58Format: 28,
-    provider: 'wss://rpc.subsocial.network',
+    provider: 'wss://para.subsocial.network',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2100,
     nativeToken: 'SUB',

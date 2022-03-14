@@ -41,6 +41,7 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
+import TransferNftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/TransferNftContainer";
 
 const startSettings = uiSettings.get();
 
@@ -209,6 +210,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
+                          <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

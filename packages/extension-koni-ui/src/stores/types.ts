@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 
 export type CurrentAccountType = {
@@ -10,4 +10,8 @@ export type CurrentAccountType = {
 
 export type TransactionHistoryReducerType = {
   historyMap: Record<string, TransactionHistoryItemType[]>
+}
+
+export type TransferNft = {
+  nftItem: NftItem;
 }

@@ -110,7 +110,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
 
     if (_isAccountAll) {
       let networkSelected;
-
+      // console.log('genesisOption', genesisOptions);
       const accountAllNetworkGenesisHash = window.localStorage.getItem('accountAllNetworkGenesisHash');
 
       if (!accountAllNetworkGenesisHash) {
@@ -125,6 +125,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
       }
 
       if (networkSelected) {
+        // console.log('networkSelected')
         updateCurrentNetwork({
           networkPrefix: networkSelected.networkPrefix,
           icon: networkSelected.icon,
@@ -154,6 +155,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
       }
 
       if (isSync && networkSelected) {
+        // console.log('networkSelected && isSync', networkSelected)
         updateCurrentNetwork({
           networkPrefix: networkSelected.networkPrefix,
           icon: networkSelected.icon,

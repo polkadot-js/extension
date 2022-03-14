@@ -5,12 +5,13 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/TransferNftContainer';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { TransferNft } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import logo from '../../../assets/sub-wallet-logo.svg';
@@ -20,26 +21,32 @@ interface Props {
   data: _NftItem;
   onClickBack: () => void;
   collectionImage?: string;
-  goHome: () => void;
 }
 
-function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Props): React.ReactElement<Props> {
+function updateTransferNft (nftItem: _NftItem) {
+  store.dispatch({ type: 'transferNft/update', payload: { nftItem } as TransferNft });
+}
+
+// function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
+//   const newState = {
+//     networkPrefix: networkMetadata.ss58Format,
+//     icon: networkMetadata.icon,
+//     genesisHash: networkMetadata.genesisHash,
+//     networkKey: networkMetadata.networkKey,
+//     isEthereum: networkMetadata.isEthereum
+//   } as CurrentNetworkInfo;
+//
+//   store.dispatch({ type: 'currentNetwork/update', payload: newState });
+// }
+
+function NftItem ({ className, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [sendError, setSendError] = useState(false);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
-  const [showTransfer, setShowTransfer] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showTransferResult, setShowTransferResult] = useState(false);
-
-  const goBack = useCallback(() => {
-    setShowTransferResult(false);
-    setShowConfirm(false);
-    setShowTransfer(false);
-    goHome();
-  }, [goHome]);
+  const history = useHistory();
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
@@ -57,12 +64,13 @@ function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Pro
     if (!account.account || account.account.address === 'ALL') return;
 
     if (data.chain && data.chain === currentNetwork.networkKey) {
-      setShowTransfer(!showTransfer);
+      updateTransferNft(data);
       setSendError(false);
+      history.push('/account/send-nft');
     } else {
       setSendError(true);
     }
-  }, [account, currentNetwork, data, showTransfer]);
+  }, [account.account, currentNetwork.networkKey, data, history]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -98,129 +106,109 @@ function NftItem ({ className, collectionImage, data, goHome, onClickBack }: Pro
 
   return (
     <div className={className}>
-      {
-        !showTransfer &&
-        <div>
-          <div className={'header'}>
-            <div
-              className={'back-icon'}
-              onClick={handleClickBack}
-            >
-              <FontAwesomeIcon
-                className='arrowLeftIcon'
-                // @ts-ignore
-                icon={faArrowLeft}
-              />
-            </div>
-            <div
-              className={'header-title'}
-              title={data.name ? data.name : '#' + data.id}
-            >
-              <div className={'collection-name'}>
-                {data.name ? data.name : '#' + data.id}
-              </div>
-            </div>
-            <div></div>
-          </div>
-
-          <div className={'detail-container'}>
-            {
-              loading &&
-              <Spinner className={'img-spinner'} />
-            }
-            {
-              showImage
-                ? <img
-                  alt={'item-img'}
-                  className={'item-img'}
-                  onClick={handleOnClick}
-                  onError={handleImageError}
-                  onLoad={handleOnLoad}
-                  src={getItemImage()}
-                  style={{ borderRadius: '5px' }}
-                />
-                : <video
-                  autoPlay
-                  height='416'
-                  loop={true}
-                  onError={handleVideoError}
-                  width='100%'
-                >
-                  <source
-                    src={getItemImage()}
-                    type='video/mp4'
-                  />
-                </video>
-            }
-
-            {
+      <div>
+        <div className={'header'}>
+          <div
+            className={'back-icon'}
+            onClick={handleClickBack}
+          >
+            <FontAwesomeIcon
+              className='arrowLeftIcon'
               // @ts-ignore
-              account.account.address !== 'ALL' &&
-              <div className={'send-container'}>
-                {
-                  sendError &&
-                  <div className={'send-error'}>Please change to {data?.chain} network!</div>
-                }
-                <div
-                  className={'send-button'}
-                  onClick={handleClickTransfer}
-                >
-                  Send
-                </div>
-              </div>
-            }
-
-            {
-              data.description &&
-              <div>
-                <div className={'att-title'}>Description</div>
-                <div className={'att-value'}><pre>{data?.description}</pre></div>
-              </div>
-            }
-            {
-              data.rarity &&
-              <div>
-                <div className={'att-title'}>Rarity</div>
-                <div className={'att-value'}>{data?.rarity}</div>
-              </div>
-            }
-            {
-              data.properties &&
-              <div>
-                <div className={'att-title'}>Properties</div>
-                <div className={'prop-container'}>
-                  {
-                    Object.keys(data?.properties).map((key, index) => {
-                      // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                      // @ts-ignore
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                      return propDetail(key, data?.properties[key]?.value, index);
-                      // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                    })
-                  }
-
-                  {/* {data?.properties.map((item: any) => { */}
-                  {/*  return propDetail(item) */}
-                  {/* })} */}
-                </div>
-              </div>
-            }
+              icon={faArrowLeft}
+            />
           </div>
+          <div
+            className={'header-title'}
+            title={data.name ? data.name : '#' + data.id}
+          >
+            <div className={'collection-name'}>
+              {data.name ? data.name : '#' + data.id}
+            </div>
+          </div>
+          <div></div>
         </div>
-      }
 
-      {
-        showTransfer &&
-        <TransferNftContainer
-          goBack={goBack}
-          nftItem={data}
-          setShowConfirm={setShowConfirm}
-          setShowTransfer={handleClickTransfer}
-          setShowTransferResult={setShowTransferResult}
-          showConfirm={showConfirm}
-          showTransferResult={showTransferResult}
-        />
-      }
+        <div className={'detail-container'}>
+          {
+            loading &&
+            <Spinner className={'img-spinner'} />
+          }
+          {
+            showImage
+              ? <img
+                alt={'item-img'}
+                className={'item-img'}
+                onClick={handleOnClick}
+                onError={handleImageError}
+                onLoad={handleOnLoad}
+                src={getItemImage()}
+                style={{ borderRadius: '5px' }}
+              />
+              : <video
+                autoPlay
+                height='416'
+                loop={true}
+                onError={handleVideoError}
+                width='100%'
+              >
+                <source
+                  src={getItemImage()}
+                  type='video/mp4'
+                />
+              </video>
+          }
+
+          {
+            // @ts-ignore
+            account.account.address !== 'ALL' &&
+            <div className={'send-container'}>
+              {
+                sendError &&
+                <div className={'send-error'}>Please change to {data.chain} network</div>
+              }
+              <div
+                className={'send-button'}
+                onClick={handleClickTransfer}
+              >
+                Send
+              </div>
+            </div>
+          }
+
+          {
+            data.description &&
+            <div>
+              <div className={'att-title'}>Description</div>
+              <div className={'att-value'}><pre>{data?.description}</pre></div>
+            </div>
+          }
+          {
+            data.rarity &&
+            <div>
+              <div className={'att-title'}>Rarity</div>
+              <div className={'att-value'}>{data?.rarity}</div>
+            </div>
+          }
+          {
+            data.properties &&
+            <div>
+              <div className={'att-title'}>Properties</div>
+              <div className={'prop-container'}>
+                {
+                  Object.keys(data?.properties).map((key, index) => {
+                    // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    // @ts-ignore
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    return propDetail(key, data?.properties[key]?.value, index);
+                    // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                  })
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
     </div>
   );
 }

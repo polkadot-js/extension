@@ -14,8 +14,10 @@ import PriceReducer from './Price';
 import StakingReducer from './Staking';
 import StakingRewardReducer from './StakingReward';
 import TransactionHistoryReducer from './TransactionHistory';
+import TransferNftReducer from './TransferNft';
 
 const reducers = {
+  transferNft: TransferNftReducer,
   stakingReward: StakingRewardReducer,
   staking: StakingReducer,
   nft: NftReducer,

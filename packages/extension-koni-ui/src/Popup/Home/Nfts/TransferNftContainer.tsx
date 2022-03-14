@@ -1,17 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import { Header } from '@polkadot/extension-koni-ui/partials';
 import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
-import TransferConfirm from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/TransferConfirm';
+import AuthTransfer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/AuthTransfer';
+import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/TransferResult';
+import InputAddress from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress';
 import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -19,42 +25,86 @@ import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
 
 interface Props extends ThemeProps {
   className?: string;
-  setShowTransfer: () => void;
-  nftItem: _NftItem;
-  showConfirm: boolean;
-  showTransferResult: boolean;
-  setShowConfirm: (val: boolean) => void;
-  setShowTransferResult: (val: boolean) => void;
-  goBack: () => void;
 }
 
-function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, setShowTransfer, setShowTransferResult, showConfirm, showTransferResult }: Props): React.ReactElement<Props> {
-  const [recipientAddress, setRecipientAddress] = useState('');
+interface ContentProps {
+  className?: string;
+  nftItem: _NftItem;
+  api: ApiPromise;
+  isApiReady: boolean;
+}
+
+function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
+  const { currentNetwork, transferNft } = useSelector((state: RootState) => state);
+  const { api, isApiReady } = useApi(currentNetwork.networkKey);
+
+  console.log('ready', isApiReady);
+
+  return (
+    <div className={className}>
+      <Header
+        showAdd
+        showCancelButton
+        showSearch
+        showSettings
+        showSubHeader
+        subHeaderName={'Send NFT'}
+      />
+
+      {
+        isApiReady
+          ? (
+            <TransferNftContainer
+              api={api}
+              isApiReady={isApiReady}
+              nftItem={transferNft.nftItem}
+            />
+          )
+          : (
+            <LoadingContainer />
+          )
+      }
+    </div>
+  );
+}
+
+function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentProps): React.ReactElement<ContentProps> {
+  const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account } = useSelector((state: RootState) => state);
   const networkKey = nftItem.chain as string;
-  const { api, isApiReady, isNotSupport } = useApi(networkKey);
   const [txInfo, setTxInfo] = useState<RuntimeDispatchInfo | null>(null);
   const [extrinsic, setExtrinsic] = useState<SubmittableExtrinsic<'promise'> | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChangeRecipient = useCallback((e: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-    const address = e.target.value;
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showTransferResult, setShowTransferResult] = useState(false);
 
-    setRecipientAddress(address as string);
-    if (!isValidAddress(address as string)) setAddressError(true);
-    else setAddressError(false);
-  }, []);
+  const [extrinsicHash, setExtrinsicHash] = useState('');
+  const [isTxSuccess, setIsTxSuccess] = useState(false);
+  const [txError, setTxError] = useState('');
+
+  console.log(`${extrinsicHash} ${isTxSuccess ? 'ok' : 'ko'} ${txError}`);
+
+  const history = useHistory();
+
+  const goBack = useCallback(() => {
+    console.log('back');
+    history.push('/');
+  }, [history]);
+
+  useEffect(() => {
+    setAddressError(!isValidAddress(recipientAddress as string));
+  }, [recipientAddress]);
 
   const handleSend = useCallback(async () => {
-    if (addressError || !isApiReady || !networkKey || isNotSupport) return;
+    if (addressError || !isApiReady || !networkKey) return;
 
     setLoading(true);
     // @ts-ignore
     const senderAddress = account.account.address;
     const params = paramsHandler(nftItem, networkKey);
-    const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress, params);
+    const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress as string, params);
 
     if (transferMeta) {
       setExtrinsic(transferMeta.extrinsic || null);
@@ -63,86 +113,98 @@ function TransferNftContainer ({ className, goBack, nftItem, setShowConfirm, set
     }
 
     setLoading(false);
-  }, [account, addressError, api, isApiReady, isNotSupport, networkKey, nftItem, recipientAddress, setShowConfirm]);
+  }, [account, addressError, api, isApiReady, networkKey, nftItem, recipientAddress, setShowConfirm]);
 
   const handleShowConfirm = useCallback(() => {
     if (!addressError && isApiReady && networkKey) setShowConfirm(!showConfirm);
   }, [addressError, isApiReady, networkKey, setShowConfirm, showConfirm]);
 
   return (
-    <div className={className}>
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    <div className={`${className} transfer-container`}>
       {
-        !showConfirm && isApiReady &&
-          <div>
-            <div className={'header'}>
-              <div />
-              <div
-                className={'header-title'}
-              >
-                Transfer NFT
-              </div>
-              <div
-                className={'close-button'}
-                onClick={setShowTransfer}
-              >
-                x
-              </div>
+        !showTransferResult &&
+        <div>
+          <InputAddress
+            autoPrefill={false}
+            className={'kn-field -field-2'}
+            help={'Select a contact or paste the address you want to send nft to.'}
+            label={'Send to address'}
+            // isDisabled={!!propRecipientId}
+            onChange={setRecipientAddress}
+            type='allPlus'
+            withEllipsis
+          />
+
+          <div className={'transfer-meta'}>
+            <div className={'meta-title'}>
+              <div>NFT</div>
+              <div>Chain</div>
             </div>
 
-            <div className={'field-container'}>
-              <div className={'field-title'}>Recipient</div>
-              <input
-                className={'input-value'}
-                onChange={handleChangeRecipient}
-                value={recipientAddress}
-              />
-            </div>
-
-            <div className={'transfer-meta'}>
-              <div className={'meta-title'}>
-                <div>NFT</div>
-                <div>Chain</div>
-              </div>
-
-              <div className={'meta-value'}>
-                <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
-                <div style={{ textTransform: 'uppercase' }}>{nftItem?.chain}</div>
-              </div>
-            </div>
-
-            <div
-              className={'send-button-default ' + (addressError ? 'inactive-button' : 'active-button')}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={handleSend}
-            >
-              {
-                !loading
-                  ? 'Send'
-                  : <Spinner className={'spinner-loading'} />
-              }
+            <div className={'meta-value'}>
+              <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
+              <div style={{ textTransform: 'uppercase' }}>{nftItem?.chain}</div>
             </div>
           </div>
+
+          <div
+            className={'send-button-default ' + (addressError ? 'inactive-button' : 'active-button')}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onClick={handleSend}
+          >
+            {
+              !loading
+                ? 'Send'
+                : <Spinner className={'spinner-loading'} />
+            }
+          </div>
+        </div>
       }
 
       {
-        showConfirm && isApiReady &&
-          <TransferConfirm
+        showConfirm && isApiReady && extrinsic &&
+          <AuthTransfer
             extrinsic={extrinsic}
-            goBack={goBack}
-            networkKey={networkKey}
             senderAccount={account?.account}
+            setExtrinsicHash={setExtrinsicHash}
+            setIsTxSuccess={setIsTxSuccess}
             setShowConfirm={handleShowConfirm}
             setShowResult={setShowTransferResult}
+            setTxError={setTxError}
             showResult={showTransferResult}
             txInfo={txInfo}
           />
+      }
+
+      {
+        showTransferResult && extrinsicHash &&
+        <TransferResult
+          backToHome={goBack}
+          extrinsicHash={extrinsicHash}
+          isTxSuccess={isTxSuccess}
+          networkKey={networkKey}
+          txError={txError}
+        />
       }
     </div>
   );
 }
 
-export default React.memo(styled(TransferNftContainer)(({ theme }: Props) => `
+export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
+
+  .transfer-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    padding-top: 25px;
+  }
+
 
   .spinner-loading {
     position: relative;

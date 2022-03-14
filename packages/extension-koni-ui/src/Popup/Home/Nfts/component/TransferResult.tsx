@@ -12,7 +12,6 @@ import { getScanExplorerTransactionHistoryUrl } from '@polkadot/extension-koni-u
 interface Props extends ThemeProps {
   className?: string;
   isTxSuccess: boolean;
-  onResend: () => void;
   txError: string;
   networkKey: string;
   extrinsicHash: string;

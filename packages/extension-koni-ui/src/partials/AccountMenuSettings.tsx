@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
-import { faCog, faFileExport, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
@@ -126,16 +126,16 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
         </div>
 
         <div className='account-menu-settings-items-wrapper'>
-          <MenuSettingItem className='account-menu-settings__menu-item'>
-            <Link
-              className='account-menu-settings__menu-item-text'
-              to={'/account/export-all'}
-            >
-              {/* @ts-ignore */}
-              <FontAwesomeIcon icon={faFileExport} />
-              <span>{t<string>('Export all accounts')}</span>
-            </Link>
-          </MenuSettingItem>
+          {/* <MenuSettingItem className='account-menu-settings__menu-item'> */}
+          {/*  <Link */}
+          {/*    className='account-menu-settings__menu-item-text' */}
+          {/*    to={'/account/export-all'} */}
+          {/*  > */}
+          {/*    /!* @ts-ignore *!/ */}
+          {/*    <FontAwesomeIcon icon={faFileExport} /> */}
+          {/*    <span>{t<string>('Export all accounts')}</span> */}
+          {/*  </Link> */}
+          {/* </MenuSettingItem> */}
           <MenuSettingItem className='account-menu-settings__menu-item'>
             <Link
               className='account-menu-settings__menu-item-text'

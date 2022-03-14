@@ -1,11 +1,14 @@
 # CHANGELOG
 
-## master
+## 0.43.8 Mar 14, 2022
+
+**Important** Not published to the stores, aligns with latest released packages.
 
 Changes:
 
 - Adjust for bundlers where `import.meta.url` is undefined
-- Bump `@polkadot/api` to 7.5.1
+- Bump `@polkadot/api` to 7.12.1
+- Bump `@polkadot/util` to 8.5.1
 
 
 ## 0.42.7 Jan 23, 2022

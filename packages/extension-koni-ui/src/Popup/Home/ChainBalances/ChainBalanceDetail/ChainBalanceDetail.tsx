@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
-// import ChainBalanceChildrenItem from '../ChainBalanceDetail/ChainBalanceChildrenItem';
+import ChainBalanceChildrenItem from '../ChainBalanceDetail/ChainBalanceChildrenItem';
 import ChainBalanceDetailItem from '../ChainBalanceDetail/ChainBalanceDetailItem';
 
 interface Props extends ThemeProps {
@@ -34,9 +34,14 @@ function ChainBalanceDetail ({ accountInfo, balanceInfo, className, setQrModalOp
         setQrModalProps={setQrModalProps}
       />
 
-      {/* <ChainBalanceChildrenItem */}
-
-      {/* /> */}
+      {balanceInfo && balanceInfo.childrenBalances.length && balanceInfo.childrenBalances.map((child) => (
+        <ChainBalanceChildrenItem
+          accountInfo={accountInfo}
+          balanceInfo={child}
+          isLoading={!child}
+          key={child.key}
+        />
+      ))}
     </div>
   );
 }

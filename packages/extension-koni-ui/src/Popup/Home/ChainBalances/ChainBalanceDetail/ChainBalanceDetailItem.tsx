@@ -153,20 +153,6 @@ function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoadin
           </div>
         </>
       )}
-
-      {!isLoading && toggleDetail && !!balanceInfo.childrenBalances.length && (
-        <>
-          <div className='chain-balance-item__separator' />
-          <div className='chain-balance-item__detail-area'>
-            {balanceInfo.childrenBalances.map((c) => (
-              <ChainBalanceItemRow
-                item={c}
-                key={c.key}
-              />
-            ))}
-          </div>
-        </>
-      )}
       <div className='chain-balance-item__separator' />
     </div>
   );

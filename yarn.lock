@@ -14104,7 +14104,7 @@ __metadata:
 "json-stream-stringify@git+https://github.com/Yuripetusko/json-stream-stringify.git#build":
   version: 2.0.3
   resolution: "json-stream-stringify@https://github.com/Yuripetusko/json-stream-stringify.git#commit=ed3d32a6b5c085e6486f49e0dd2458facdec1b76"
-  checksum: 38baa7c5be703ac6b440ae4a70de4db321e00477a796b90b0e264b70aea7f3a71d5ba727a3bd0f233070c51b57e926f2329e4d5e1e2ace6e2c7624ed65f42500
+  checksum: 576442a84fd5e1a85c902312c8f07a7fa719b9194be6a36cba4deb120c43d4cacc55846beb5bc8727720a9b030674db25f7c7ccc04fabe399dc2cca58346913f
   languageName: node
   linkType: hard
 

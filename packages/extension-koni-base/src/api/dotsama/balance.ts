@@ -110,6 +110,60 @@ function subcribleAcalaTokenBalanceInterval (addresses: string[], api: ApiPromis
   };
 }
 
+function subcribleKaruraTokenBalanceInterval (addresses: string[], api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
+  const getTokenBalances = () => {
+    (async () => {
+      const [
+        kusdBalances,
+        ksmBalances,
+        lksmBalances,
+        bncBalances,
+        vsksmBalances,
+        phaBalances,
+        kintBalances,
+        kbtcBalances,
+        taiBalances
+      ] = await Promise.all([
+        'KUSD',
+        'KSM',
+        'LKSM',
+        'BNC',
+        'VSKSM',
+        'PHA',
+        'KINT',
+        'KBTC',
+        'TAI'
+      ].map((token) => {
+        return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
+      }));
+
+      originBalanceItem.children = {
+        KUSD: getBalanceChildItem(kusdBalances, 12),
+        KSM: getBalanceChildItem(ksmBalances, 12),
+        LKSM: getBalanceChildItem(lksmBalances, 12),
+        BNC: getBalanceChildItem(bncBalances, 12),
+        VSKSM: getBalanceChildItem(vsksmBalances, 12),
+        PHA: getBalanceChildItem(phaBalances, 12),
+        KINT: getBalanceChildItem(kintBalances, 12),
+        KBTC: getBalanceChildItem(kbtcBalances, 8),
+        TAI: getBalanceChildItem(taiBalances, 12)
+      };
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback('karura', originBalanceItem);
+    })().catch((e) => {
+      console.log('There is problem when fetching Karura token balance', e);
+    });
+  };
+
+  getTokenBalances();
+  const interval = setInterval(getTokenBalances, ACALA_REFRESH_BALANCE_INTERVAL);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
 function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
@@ -140,15 +194,17 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
     callback(networkKey, balanceItem);
   });
 
-  let unsubAcala: () => void;
+  let unsub2: () => void;
 
   if (networkKey === 'acala') {
-    unsubAcala = subcribleAcalaTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
+    unsub2 = subcribleAcalaTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
+  } else if (networkKey === 'karura') {
+    unsub2 = subcribleKaruraTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
   }
 
   return async () => {
     (await unsub)();
-    unsubAcala && unsubAcala();
+    unsub2 && unsub2();
   };
 }
 

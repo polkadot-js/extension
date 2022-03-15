@@ -185,6 +185,8 @@ function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProp
     const toId = recipientId as string;
     let isSync = true;
 
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (balances && balances.accountId.eq(fromId) && fromId && toId && isFunction(api.rpc.payment?.queryInfo)) {
       setTimeout((): void => {
         try {

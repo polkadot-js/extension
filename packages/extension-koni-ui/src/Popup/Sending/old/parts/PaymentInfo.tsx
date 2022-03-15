@@ -35,6 +35,8 @@ function PaymentInfo ({ accountId, api, apiUrl, className = '', extrinsic, isBus
   const mountedRef = useIsMountedRef();
 
   useEffect((): void => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     accountId && extrinsic && isFunction(extrinsic.paymentInfo) && isFunction(api.rpc.payment?.queryInfo) &&
       setTimeout((): void => {
         try {

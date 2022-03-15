@@ -44,7 +44,7 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS
       }
     });
 
-    finalChains.push('ausd');
+    finalChains.push(...['ausd', 'tai', 'kolibri-usd']);
 
     const chainsStr = finalChains.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${chainsStr}`);

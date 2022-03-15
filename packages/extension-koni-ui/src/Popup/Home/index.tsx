@@ -22,6 +22,7 @@ import transfers from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfer
 import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
 import { AccountContext, AccountQrModal, Link } from '@polkadot/extension-koni-ui/components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -46,7 +47,6 @@ import ChainBalances from './ChainBalances/ChainBalances';
 import Crowdloans from './Crowdloans/Crowdloans';
 import TransactionHistory from './TransactionHistory/TransactionHistory';
 import ActionButton from './ActionButton';
-import Tooltip from "@polkadot/extension-koni-ui/components/Tooltip";
 
 interface WrapperProps extends ThemeProps {
   className?: string;

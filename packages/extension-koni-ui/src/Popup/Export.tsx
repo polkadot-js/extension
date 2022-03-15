@@ -38,8 +38,6 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const _isAllAccount = isAccountAll(address);
   const currentAccount = useSelector((state: RootState) => state.currentAccount);
 
-  console.log(currentAccount);
-
   const _goHome = useCallback(
     () => {
       window.localStorage.setItem('popupNavigation', '/');

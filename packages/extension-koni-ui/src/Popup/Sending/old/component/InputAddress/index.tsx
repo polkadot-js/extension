@@ -44,6 +44,7 @@ interface Props {
   value?: string | Uint8Array | string[] | null;
   withEllipsis?: boolean;
   withLabel?: boolean;
+  isEtherium?: boolean;
 }
 
 type ExportedType = React.ComponentType<Props> & {
@@ -223,11 +224,21 @@ class InputAddress extends React.PureComponent<Props, State> {
   }
 
   private getFiltered (): Option[] {
-    const { filter, optionsAll, type = DEFAULT_TYPE } = this.props;
+    const { filter, optionsAll, isEtherium, type = DEFAULT_TYPE } = this.props;
+
+    let options: Option[] = [];
+
+    if (optionsAll) {
+      if (isEtherium) {
+        options = optionsAll[type].filter((opt) => opt.key && (opt.key.includes('0x') || opt.key === 'header-accounts'));
+      } else {
+        options = optionsAll[type].filter((opt) => opt.key && (!opt.key.includes('0x') || opt.key === 'header-accounts'));
+      }
+    }
 
     return !optionsAll
       ? []
-      : dedupe(optionsAll[type]).filter(({ value }) => !filter || (!!value && filter.includes(value)));
+      : dedupe(options).filter(({ value }) => !filter || (!!value && filter.includes(value)));
   }
 
   private onChange = (address: string): void => {

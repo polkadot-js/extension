@@ -4,11 +4,12 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
 import { AccountJson } from '@polkadot/extension-base/background/types';
-import { store } from '@polkadot/extension-koni-ui/stores';
+import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 import { AccountContext, AccountInfoEl, ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
@@ -32,6 +33,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const { accounts } = useContext(AccountContext);
   const _isAllAccount = isAccountAll(address);
+  const currentAccount = useSelector((state: RootState) => state.currentAccount);
 
   const _goHome = useCallback(
     () => {
@@ -93,7 +95,10 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
             </ActionBar>
           </div>
           : <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} forget-account-wrapper`}>
-            <AccountInfoEl address={address} />
+            <AccountInfoEl
+              address={address}
+              type={currentAccount.account?.type}
+            />
             <Warning className='forget-account__warning'>
               {t<string>('You are about to remove the account. This means that you will not be able to access it via this extension anymore. If you wish to recover it, you would need to use the seed.')}
             </Warning>

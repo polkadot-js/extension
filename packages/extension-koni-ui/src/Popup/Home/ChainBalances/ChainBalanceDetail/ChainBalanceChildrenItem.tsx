@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceSubInfo } from '@polkadot/extension-koni-ui/util/types';
 
 import { Loading } from '../../../../components';
@@ -34,7 +35,7 @@ function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoad
           <img
             alt={'Logo'}
             className='chain-balance--children-item__logo'
-            src={accountInfo.networkLogo}
+            src={getLogoByNetworkKey(balanceInfo.key.toLowerCase())}
           />
 
           <div className='chain-balance--children-item__meta-wrapper'>
@@ -134,7 +135,6 @@ export default React.memo(styled(ChainBalanceChildrenItem)(({ theme }: Props) =>
     margin-right: 12px;
     background-color: #fff;
     border: 1px solid #fff;
-    margin-top:10px;
   }
 
   .chain-balance--children-item__meta-wrapper {

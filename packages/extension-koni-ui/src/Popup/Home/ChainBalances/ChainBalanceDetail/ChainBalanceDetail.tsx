@@ -34,14 +34,17 @@ function ChainBalanceDetail ({ accountInfo, balanceInfo, className, setQrModalOp
         setQrModalProps={setQrModalProps}
       />
 
-      {balanceInfo && balanceInfo.childrenBalances.length && balanceInfo.childrenBalances.map((child) => (
-        <ChainBalanceChildrenItem
-          accountInfo={accountInfo}
-          balanceInfo={child}
-          isLoading={!child}
-          key={child.key}
-        />
-      ))}
+      {balanceInfo && balanceInfo.childrenBalances.length
+        ? balanceInfo.childrenBalances.map((child) => (
+          <ChainBalanceChildrenItem
+            accountInfo={accountInfo}
+            balanceInfo={child}
+            isLoading={!child}
+            key={child.key}
+          />
+        ))
+        : ''
+      }
     </div>
   );
 }

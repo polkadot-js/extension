@@ -116,6 +116,7 @@ function subcribleKaruraTokenBalanceInterval (addresses: string[], api: ApiPromi
       const [
         kusdBalances,
         ksmBalances,
+        rmrkBalances,
         lksmBalances,
         bncBalances,
         vsksmBalances,
@@ -126,6 +127,7 @@ function subcribleKaruraTokenBalanceInterval (addresses: string[], api: ApiPromi
       ] = await Promise.all([
         'KUSD',
         'KSM',
+        'RMRK',
         'LKSM',
         'BNC',
         'VSKSM',
@@ -134,12 +136,17 @@ function subcribleKaruraTokenBalanceInterval (addresses: string[], api: ApiPromi
         'KBTC',
         'TAI'
       ].map((token) => {
+        if (token === 'RMRK') {
+          return Promise.all(addresses.map((address) => getTokenBalance(address, api, { ForeignAsset: 0 })));
+        }
+
         return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
       }));
 
       originBalanceItem.children = {
         KUSD: getBalanceChildItem(kusdBalances, 12),
         KSM: getBalanceChildItem(ksmBalances, 12),
+        RMRK: getBalanceChildItem(rmrkBalances, 10),
         LKSM: getBalanceChildItem(lksmBalances, 12),
         BNC: getBalanceChildItem(bncBalances, 12),
         VSKSM: getBalanceChildItem(vsksmBalances, 12),

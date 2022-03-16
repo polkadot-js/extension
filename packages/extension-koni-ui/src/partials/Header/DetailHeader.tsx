@@ -33,6 +33,7 @@ interface Props extends ThemeProps {
   toggleZeroBalances: () => void,
   formatted: string | null,
   isShowZeroBalances?: boolean,
+  setImgSelected: (imgSelected: string) => void;
 }
 
 interface EditState {
@@ -47,6 +48,7 @@ function DetailHeader ({ className = '',
   formatted,
   isShowZeroBalances,
   popupTheme,
+  setImgSelected,
   toggleVisibility,
   toggleZeroBalances }: Props): React.ReactElement {
   const actionsRef = useRef(null);
@@ -200,6 +202,7 @@ function DetailHeader ({ className = '',
         <AccountAction
           isShowZeroBalances={isShowZeroBalances}
           reference={actionsRef}
+          setImgSelected={setImgSelected}
           toggleEdit={_toggleEdit}
           toggleZeroBalances={_toggleZeroBalances}
         />

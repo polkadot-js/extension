@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
-import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
+import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
@@ -64,7 +64,9 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
+  const allAccountLogo = localStorage.getItem('allAccountLogo');
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
+  const [imgSelected, setImgSelected] = useState<string | null>(allAccountLogo);
   const chain = useMetadata(currentAccount?.genesisHash, true);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -74,7 +76,6 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const actionsRef = useRef(null);
   const netRef = useRef(null);
   const isPopup = useIsPopup();
-
   const _onWindowOpen = useCallback(
     () => windowOpen('/').catch(console.error),
     []
@@ -311,11 +312,17 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               >
                 {!!currentAccount && !!currentAccount.address
                   ? _isAccountAll
-                    ? <img
-                      alt='all-account-icon'
-                      className='header__all-account-icon'
-                      src={allAccountLogo}
-                    />
+                    ? imgSelected
+                      ? <img
+                        alt='all-account-icon'
+                        className='header__all-account-icon'
+                        src={imgSelected}
+                      />
+                      : <img
+                        alt='all-account-icon'
+                        className='header__all-account-icon'
+                        src={allAccountLogoDefault}
+                      />
                     : (
                       <Identicon
                         className='identityIcon'
@@ -364,6 +371,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
             formatted={formattedAddress}
             isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}
+            setImgSelected={setImgSelected}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             toggleVisibility={_toggleVisibility}
             toggleZeroBalances={_toggleZeroBalances}

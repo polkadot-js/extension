@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -20,6 +22,7 @@ import transfers from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfer
 import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
 import { AccountContext, AccountQrModal, Link } from '@polkadot/extension-koni-ui/components';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
+import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -133,6 +136,8 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   );
 }
 
+let tooltipId = 0;
+
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
@@ -154,6 +159,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
+  const [isShowBalances, setShowBalances] = useState<boolean>(false);
+  const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
     { iconTheme: qrModalIconTheme,
       networkKey: qrModalNetworkKey,
@@ -226,6 +233,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     return getTabHeaderItems(address, t);
   }, [address, t]);
 
+  const _toggleBalances = useCallback(() => {
+    setShowBalances(!isShowBalances);
+  }, [isShowBalances]);
+
+  const _backToHome = useCallback(() => {
+    setShowBalanceDetail(false);
+  }, [setShowBalanceDetail]);
+
   // const onChangeAccount = useCallback((address: string) => {
   //   if (isAccountAll(address)) {
   //     _setActiveTab(1);
@@ -247,11 +262,21 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       <div className={'home-action-block'}>
         <div className='account-total-balance'>
-          <BalanceVal
-            startWithSymbol
-            symbol={'$'}
-            value={totalBalanceValue}
-          />
+          <div
+            className={'account-total-btn'}
+            data-for={trigger}
+            data-tip={true}
+            onClick={_toggleBalances}
+          >
+            {isShowBalances
+              ? <BalanceVal
+                startWithSymbol
+                symbol={'$'}
+                value={totalBalanceValue}
+              />
+              : <span>*********</span>
+            }
+          </div>
         </div>
 
         {!_isAccountAll && (
@@ -314,6 +339,20 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           </div>
         )}
       </div>
+
+      {isShowBalanceDetail &&
+        <div
+          className='home__back-btn'
+          onClick={_backToHome}
+        >
+          <FontAwesomeIcon
+            className='home__back-icon'
+            // @ts-ignore
+            icon={faArrowLeft}
+          />
+          <span>{t<string>('Back to home')}</span>
+        </div>
+      }
 
       <div className={'home-tab-contents'}>
         {activatedTab === 1 && (
@@ -398,6 +437,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           showExportButton={qrModalShowExportButton}
         />
       )}
+
+      <Tooltip
+        offset={{ top: 8 }}
+        text={isShowBalances ? 'Hide balance' : 'Show balance'}
+        trigger={trigger}
+      />
     </div>
   );
 }
@@ -424,6 +469,11 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
     line-height: 44px;
   }
 
+  .account-total-btn {
+    width: fit-content;
+    cursor: pointer;
+  }
+
   .home-account-button-container {
     display: flex;
   }
@@ -439,6 +489,21 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
 
   .home__account-qr-modal .subwallet-modal {
     max-width: 460px;
+  }
+
+
+  .home__back-btn {
+    color: ${theme.buttonTextColor2};
+    font-size: 15px;
+    line-height: 26px;
+    font-weight: 500;
+    margin-left: 25px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+
+  .home__back-icon {
+    padding-right: 7px;
   }
 
 `));

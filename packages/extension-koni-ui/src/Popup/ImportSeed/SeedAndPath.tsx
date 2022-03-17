@@ -7,8 +7,6 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import { faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -18,7 +16,7 @@ import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-ko
 import { getGenesisOptionsByAddressType } from '@polkadot/extension-koni-ui/util';
 import { objectSpread } from '@polkadot/util';
 
-import { AccountContext, AccountInfoEl, ButtonArea, Dropdown, InputWithLabel, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
+import { AccountContext, AccountInfoEl, ButtonArea, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
@@ -41,17 +39,17 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
   const { accounts } = useContext(AccountContext);
   const [address, setAddress] = useState('');
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
-  const options = getGenesisOptionsByAddressType(null, accounts, useGenesisHashOptions());
-  const evmOptions = getGenesisOptionsByAddressType(evmAddress, accounts, useGenesisHashOptions());
+  const options = useGenesisHashOptions();
+  const [genesisHashOption, setGenesisHashOption] = useState(options);
   const [seed, setSeed] = useState<string | null>(null);
-  const [path, setPath] = useState<string | null>(null);
-  const [advanced, setAdvances] = useState(false);
+  // const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);
   const [isEvmAccountSelected, setEvmAccountSelected] = useState(false);
   const networkRef = useRef(null);
+  const dep = keyTypes.toString();
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -62,12 +60,18 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
       return;
     }
 
-    const suri = `${seed || ''}${path || ''}`;
+    const suri = `${seed || ''}`;
 
     validateSeedV2(seed, keyTypes)
       .then(({ addressMap, seed }) => {
         const address = addressMap[SUBSTRATE_ACCOUNT_TYPE];
         const evmAddress = addressMap[EVM_ACCOUNT_TYPE];
+
+        if (evmAddress) {
+          setGenesisHashOption(getGenesisOptionsByAddressType(evmAddress, accounts, options));
+        } else {
+          setGenesisHashOption(getGenesisOptionsByAddressType(null, accounts, options));
+        }
 
         setAddress(address);
         setEvmAddress(evmAddress);
@@ -84,15 +88,13 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
         setAddress('');
         setEvmAddress('');
         onAccountChange(null);
-        setError(path
-          ? t<string>('Invalid mnemonic seed or derivation path')
-          : t<string>('Invalid mnemonic seed')
-        );
+        setError(t<string>('Invalid mnemonic seed'));
       });
-  }, [t, genesis, seed, path, onAccountChange, type]);
+  }, [t, genesis, seed, onAccountChange, type, dep]);
 
   const _onSelectNormalAccount = useCallback(() => {
     if (!isNormalAccountSelected) {
+      setGenesisHashOption(getGenesisOptionsByAddressType(null, accounts, options));
       onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
       setNormalAccountSelected(true);
       setEvmAccountSelected(false);
@@ -104,6 +106,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
 
   const _onSelectEvmAccount = useCallback(() => {
     if (!isEvmAccountSelected) {
+      setGenesisHashOption(getGenesisOptionsByAddressType(evmAddress, accounts, options));
       onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
       setNormalAccountSelected(false);
       setEvmAccountSelected(true);
@@ -113,9 +116,9 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
     }
   }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
 
-  const _onToggleAdvanced = useCallback(() => {
-    setAdvances(!advanced);
-  }, [advanced]);
+  // const _onToggleAdvanced = useCallback(() => {
+  //   setAdvances(!advanced);
+  // }, [advanced]);
 
   return (
     <div className={className}>
@@ -168,36 +171,36 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
               {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
             </Warning>
           )}
-          {(isNormalAccountSelected || isEvmAccountSelected) &&
+          {(isNormalAccountSelected || isEvmAccountSelected) && seed &&
             <Dropdown
               className='seed-and-path__genesis-selection'
               label={t<string>('Network')}
               onChange={setGenesis}
-              options={isNormalAccountSelected ? options : evmOptions}
+              options={genesisHashOption}
               reference={networkRef}
               value={genesis}
             />
           }
-          <div
-            className='seed-and-path__advanced-toggle'
-            onClick={_onToggleAdvanced}
-          >
-            <FontAwesomeIcon
-              color='#888888'
-              // @ts-ignore
-              icon={advanced ? faChevronDown : faChevronRight}
-            />
-            <span>{t<string>('advanced')}</span>
-          </div>
-          { advanced && (
-            <InputWithLabel
-              className='derivationPath'
-              isError={!!path && !!error}
-              label={t<string>('derivation path')}
-              onChange={setPath}
-              value={path || ''}
-            />
-          )}
+          {/* <div */}
+          {/*  className='seed-and-path__advanced-toggle' */}
+          {/*  onClick={_onToggleAdvanced} */}
+          {/* > */}
+          {/*  <FontAwesomeIcon */}
+          {/*    color='#888888' */}
+          {/*    // @ts-ignore */}
+          {/*    icon={advanced ? faChevronDown : faChevronRight} */}
+          {/*  /> */}
+          {/*  <span>{t<string>('advanced')}</span> */}
+          {/* </div> */}
+          {/* { advanced && ( */}
+          {/*  <InputWithLabel */}
+          {/*    className='derivationPath' */}
+          {/*    isError={!!path && !!error} */}
+          {/*    label={t<string>('derivation path')} */}
+          {/*    onChange={setPath} */}
+          {/*    value={path || ''} */}
+          {/*  /> */}
+          {/* )} */}
           {!!error && !!seed && (
             <Warning
               isDanger

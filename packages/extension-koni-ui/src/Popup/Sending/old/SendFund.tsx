@@ -163,7 +163,7 @@ function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProp
   const { t } = useTranslation();
 
   const { currentAccount: { account: currentAccount },
-    currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
+    currentNetwork: { isEthereum, networkKey } } = useSelector((state: RootState) => state);
   const propSenderId = currentAccount?.address;
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const [hasAvailable] = useState(true);
@@ -185,6 +185,8 @@ function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProp
     const toId = recipientId as string;
     let isSync = true;
 
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (balances && balances.accountId.eq(fromId) && fromId && toId && isFunction(api.rpc.payment?.queryInfo)) {
       setTimeout((): void => {
         try {
@@ -351,8 +353,9 @@ function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProp
             className={'kn-field -field-1'}
             defaultValue={propSenderId}
             help={t<string>('The account you will send funds from.')}
-            label={t<string>('Send from account')}
+            isEtherium={isEthereum}
             // isDisabled={!!propSenderId}
+            label={t<string>('Send from account')}
             labelExtra={
               <Available
                 api={api}
@@ -370,6 +373,7 @@ function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProp
             className={'kn-field -field-2'}
             help={t<string>('Select a contact or paste the address you want to send funds to.')}
             label={t<string>('Send to address')}
+            isEtherium={isEthereum}
             // isDisabled={!!propRecipientId}
             labelExtra={
               <Available

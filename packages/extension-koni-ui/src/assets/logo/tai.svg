@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="301px" height="300px" viewBox="0 0 301 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>TAI</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="TAI" transform="translate(0.500000, 0.000000)" fill-rule="nonzero">
+            <circle id="椭圆形" fill="#B026CF" cx="150" cy="150" r="150"></circle>
+            <g id="编组" transform="translate(50.000000, 59.000000)" fill="#FFFFFF">
+                <path d="M99.9,27.1 C99.9,27.1 86,56.2 19.1,115.8 L99.9,27.1 Z" id="路径"></path>
+                <path d="M99.9,54.1 C99.9,54.1 88.3,92.1 12.7,127.2 L99.9,54.1 Z" id="路径"></path>
+                <path d="M99.9,81.2 C99.9,81.2 90.6,121.1 6.4,138.6 L99.9,81.2 Z" id="路径"></path>
+                <path d="M99.9,108.2 C99.9,108.2 92.8,150 0,150 L99.9,108.2 Z" id="路径"></path>
+                <path d="M99.9,0 C99.9,0 83.7,34.3 25.5,104.4 L100.1,0 C100.1,0 116.3,34.3 174.5,104.4 L99.9,0 Z" id="路径"></path>
+                <path d="M100.1,27.1 C100.1,27.1 114,56.2 180.9,115.8 L100.1,27.1 Z" id="路径"></path>
+                <path d="M100.1,54.1 C100.1,54.1 111.7,92.1 187.3,127.2 L100.1,54.1 Z" id="路径"></path>
+                <path d="M100.1,81.2 C100.1,81.2 109.4,121.1 193.6,138.6 L100.1,81.2 Z" id="路径"></path>
+                <path d="M100.1,108.2 C100.1,108.2 107.2,150 200,150 L100.1,108.2 Z" id="路径"></path>
+            </g>
+        </g>
+    </g>
+</svg>

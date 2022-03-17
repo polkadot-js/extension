@@ -4,7 +4,8 @@
 import axios from 'axios';
 import BigN from 'bignumber.js';
 
-import { isEmptyArray } from './common';
+import { isEmptyArray } from '@polkadot/extension-koni-ui/util/common';
+
 import { AccountInfoItem, BalanceInfo, BalanceSubInfo } from './types';
 
 export const priceParamByNetworkKeyMap: Record<string, string> = {
@@ -130,18 +131,21 @@ export const getBalances = ({ balance,
   };
 };
 
-export const parseBalancesInfo = (priceMap: Record<string, number>, balanceInfo: AccountInfoItem): BalanceInfo => {
-  const { info, networkKey, tokenDecimals, tokenSymbol } = balanceInfo;
+function getTokenPrice (tokenPriceMap: Record<string, number>, token: string): number {
+  if (token === 'LCDOT') {
+    return (tokenPriceMap.dot || 0) * 0.6925;
+  }
+
+  return tokenPriceMap[token.toLowerCase()] || 0;
+}
+
+export const parseBalancesInfo = (priceMap: Record<string, number>, tokenPriceMap: Record<string, number>, balanceInfo: AccountInfoItem): BalanceInfo => {
+  const { balanceItem, networkKey, tokenDecimals, tokenSymbols } = balanceInfo;
 
   const decimals = tokenDecimals && !isEmptyArray(tokenDecimals) ? tokenDecimals[0] : 0;
-  const symbol = tokenSymbol && !isEmptyArray(tokenSymbol) ? tokenSymbol[0] : '';
+  const symbol = tokenSymbols && !isEmptyArray(tokenSymbols) ? tokenSymbols[0] : '';
 
-  // todo: handle case that decimals is 0
-  // if (!decimals) {
-  //   return null;
-  // }
-
-  const { freeBalance, frozenFee, frozenMisc, reservedBalance } = info[symbol];
+  const { children: balanceChildren, feeFrozen: frozenFee, free: freeBalance, miscFrozen: frozenMisc, reserved: reservedBalance } = balanceItem;
   const transferableBalance = new BigN(freeBalance).minus(new BigN(frozenMisc)).toString();
 
   const accountData = [
@@ -178,8 +182,27 @@ export const parseBalancesInfo = (priceMap: Record<string, number>, balanceInfo:
     });
   });
 
-  // todo: need to find a way to get childrenBalance from APIs, like sub.id
   const childrenBalances: BalanceSubInfo[] = [];
+
+  if (balanceChildren) {
+    Object.keys(balanceChildren).forEach((token) => {
+      const item = balanceChildren[token];
+      const { balanceValue, convertedBalanceValue } = getBalances({
+        balance: item.free,
+        decimals: item.decimals,
+        symbol: token,
+        price: getTokenPrice(tokenPriceMap, token)
+      });
+
+      childrenBalances.push({
+        key: token,
+        label: '',
+        symbol: token,
+        convertedBalanceValue,
+        balanceValue
+      });
+    });
+  }
 
   return {
     symbol,

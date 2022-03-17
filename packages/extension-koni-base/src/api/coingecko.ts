@@ -25,7 +25,8 @@ const alternativeNameMap: Record<string, string> = {
 interface GeckoItem {
   id: string,
   name: string,
-  current_price: number
+  current_price: number,
+  symbol: string
 }
 
 export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS), currency = 'usd'): Promise<PriceJson> => {
@@ -42,6 +43,9 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS
         return chain;
       }
     });
+
+    finalChains.push(...['ausd', 'tai', 'kolibri-usd']);
+
     const chainsStr = finalChains.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${chainsStr}`);
 
@@ -51,6 +55,7 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS
 
     const responseData = res.data as Array<GeckoItem>;
     const priceMap: Record<string, number> = {};
+    const tokenPriceMap: Record<string, number> = {};
 
     responseData.forEach((val) => {
       if (inverseMap[val.id]) {
@@ -59,11 +64,14 @@ export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS
       } else {
         priceMap[val.id] = val.current_price;
       }
+
+      tokenPriceMap[val.symbol] = val.current_price;
     });
 
     return {
-      currency: currency,
-      priceMap: priceMap
+      currency,
+      priceMap,
+      tokenPriceMap
     } as PriceJson;
   } catch (err) {
     console.error('Failed to get token price', err);

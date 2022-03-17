@@ -45,7 +45,8 @@ export interface StakingJson {
 export interface PriceJson {
   ready?: boolean,
   currency: string,
-  priceMap: Record<string, number>
+  priceMap: Record<string, number>,
+  tokenPriceMap: Record<string, number>
 }
 
 export enum APIItemState {
@@ -99,12 +100,20 @@ export interface NftJson {
   nftList: Array<NftCollection>;
 }
 
+export interface BalanceChildItem {
+  reserved: string,
+  frozen: string,
+  free: string,
+  decimals: number
+}
+
 export interface BalanceItem {
   state: APIItemState,
   free: string,
   reserved: string,
   miscFrozen: string,
-  feeFrozen: string
+  feeFrozen: string,
+  children?: Record<string, BalanceChildItem>
 }
 
 export interface BalanceJson {

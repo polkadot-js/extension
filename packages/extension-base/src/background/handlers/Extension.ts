@@ -6,7 +6,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestAuthorizeApprove, RequestAuthorizeReject, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, ResponseAccountExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { TypeRegistry } from '@polkadot/types';
@@ -24,7 +24,7 @@ type CachedUnlocks = Record<string, number>;
 export const SEED_DEFAULT_LENGTH = 12;
 export const SEED_LENGTHS = [12, 15, 18, 21, 24];
 
-export const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
+export const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
 // a global registry to use internally
 const registry = new TypeRegistry();
@@ -109,11 +109,11 @@ export default class Extension {
     return { exportedJson: keyring.backupAccount(keyring.getPair(address), password) };
   }
 
-  private async accountsBatchExport ({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountsExport> {
-    return {
-      exportedJson: await keyring.backupAccounts(addresses, password)
-    };
-  }
+  // private async accountsBatchExport ({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountsExport> {
+  //   return {
+  //     exportedJson: await keyring.backupAccounts(addresses, password)
+  //   };
+  // }
 
   private accountsForget ({ address }: RequestAccountForget): boolean {
     keyring.forgetAccount(address);
@@ -543,7 +543,9 @@ export default class Extension {
         return this.accountsExport(request as RequestAccountExport);
 
       case 'pri(accounts.batchExport)':
-        return this.accountsBatchExport(request as RequestAccountBatchExport);
+        // return this.accountsBatchExport(request as RequestAccountBatchExport);
+        // Disable export all util use master password
+        return null;
 
       case 'pri(accounts.forget)':
         return this.accountsForget(request as RequestAccountForget);

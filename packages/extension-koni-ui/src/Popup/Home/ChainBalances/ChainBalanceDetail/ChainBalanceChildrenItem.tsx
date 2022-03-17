@@ -1,22 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BigN from 'bignumber.js';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
-import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
+import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
+import { AccountInfoByNetwork, BalanceSubInfo } from '@polkadot/extension-koni-ui/util/types';
 
-import acala from '../../../../assets/logo/acala.svg';
 import { Loading } from '../../../../components';
 
 interface Props extends ThemeProps {
   className?: string;
   accountInfo: AccountInfoByNetwork;
-  balanceInfo: BalanceInfo;
+  balanceInfo: BalanceSubInfo;
   isLoading: boolean;
 }
 
@@ -26,13 +24,6 @@ function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoad
   const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setToggleDetail((toggleDetail) => !toggleDetail);
   }, []);
-
-  const mockDetailData = [
-    { key: 'free', label: 'Transferable', symbol: 'DOT', convertedBalanceValue: new BigN('0'), balanceValue: new BigN('0') },
-    { key: 'reserved', label: 'Reserved balance', symbol: 'DOT', convertedBalanceValue: new BigN('0'), balanceValue: new BigN('0') },
-    { key: 'locked', label: 'Locked balance', symbol: 'DOT', convertedBalanceValue: new BigN('0'), balanceValue: new BigN('0') },
-    { key: 'frozen', label: 'Frozen fee', symbol: 'DOT', convertedBalanceValue: new BigN('0'), balanceValue: new BigN('0') }
-  ];
 
   return (
     <div
@@ -44,11 +35,11 @@ function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoad
           <img
             alt={'Logo'}
             className='chain-balance--children-item__logo'
-            src={acala}
+            src={getLogoByNetworkKey(balanceInfo.key.toLowerCase())}
           />
 
           <div className='chain-balance--children-item__meta-wrapper'>
-            <div className='chain-balance--children-item__chain-name'>{'Acala Demo'}</div>
+            <div className='chain-balance--children-item__chain-name'>{balanceInfo.key}</div>
           </div>
         </div>
 
@@ -62,39 +53,25 @@ function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoad
           <div className='chain-balance--children-item__main-area-part-2'>
             <div className='chain-balance--children-item__balance'>
               <BalanceVal
-                symbol={'ACA'}
-                value={new BigN('0')}
+                symbol={balanceInfo.symbol}
+                value={balanceInfo.balanceValue}
               />
             </div>
             <div className='chain-balance--children-item__value'>
               <BalanceVal
                 startWithSymbol
                 symbol={'$'}
-                value={new BigN('0')}
+                value={balanceInfo.convertedBalanceValue}
               />
             </div>
 
-            {(!!mockDetailData.length || !!mockDetailData.length) && (
-              <div className='chain-balance--children-item__toggle' />
-            )}
+            {/* {(!!mockDetailData.length || !!mockDetailData.length) && ( */}
+            {/*  <div className='chain-balance--children-item__toggle' /> */}
+            {/* )} */}
           </div>
         )}
       </div>
 
-      {!isLoading && toggleDetail && !!mockDetailData.length && (
-        <>
-          <div className='chain-balance--children-item__separator' />
-          <div className='chain-balance--children-item__detail-area'>
-            {mockDetailData.map((d) => (
-              <ChainBalanceItemRow
-                item={d}
-                key={d.key}
-              />
-            ))}
-
-          </div>
-        </>
-      )}
       <div className='chain-balance--children-item__separator' />
     </div>
   );
@@ -158,7 +135,6 @@ export default React.memo(styled(ChainBalanceChildrenItem)(({ theme }: Props) =>
     margin-right: 12px;
     background-color: #fff;
     border: 1px solid #fff;
-    margin-top:10px;
   }
 
   .chain-balance--children-item__meta-wrapper {

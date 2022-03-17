@@ -25,7 +25,7 @@ describe('test staking api', () => {
 
   test('test staking manually', async () => {
     const provider = NETWORKS.acala.provider;
-    const apiProps = initApi(provider);
+    const apiProps = initApi('acala', provider);
     const parentApi = await apiProps.isReady;
     const ledgers = await parentApi.api.query.staking?.ledger.multi(testAddress);
 

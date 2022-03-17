@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { options } from '@acala-network/api';
+
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
@@ -23,12 +25,18 @@ interface ChainData {
 }
 
 async function retrieve (registry: Registry, api: ApiPromise): Promise<ChainData> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [systemChain, systemChainType, systemName, systemVersion] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     api.rpc.system.chain(),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     api.rpc.system.chainType
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       ? api.rpc.system.chainType()
       : Promise.resolve(registry.createType('ChainType', 'Live')),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     api.rpc.system.name(),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     api.rpc.system.version()
   ]);
 
@@ -36,10 +44,14 @@ async function retrieve (registry: Registry, api: ApiPromise): Promise<ChainData
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     properties: registry.createType('ChainProperties', { ss58Format: api.registry.chainSS58, tokenDecimals: api.registry.chainDecimals, tokenSymbol: api.registry.chainTokens }),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     systemChain: (systemChain || '<unknown>').toString(),
     // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     systemChainType,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     systemName: systemName.toString(),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     systemVersion: systemVersion.toString()
   };
 }
@@ -89,7 +101,7 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
-export function initApi (apiUrl: string | string[]): ApiProps {
+export function initApi (networkKey: string, apiUrl: string | string[]): ApiProps {
   const registry = new TypeRegistry();
 
   const provider = new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
@@ -101,7 +113,13 @@ export function initApi (apiUrl: string | string[]): ApiProps {
     apiOption.registry = registry;
   }
 
-  const api = new ApiPromise(apiOption);
+  let api: ApiPromise;
+
+  if (['acala', 'karura'].includes(networkKey)) {
+    api = new ApiPromise(options({ provider }));
+  } else {
+    api = new ApiPromise(apiOption);
+  }
 
   const result: ApiProps = ({
     api,

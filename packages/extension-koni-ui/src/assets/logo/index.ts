@@ -5,6 +5,14 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   acala: require('./acala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ausd: require('./ausd.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  dot: require('./dot.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ldot: require('./ldot.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  lcdot: require('./lcdot.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   altair: require('./altair.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astar: require('./astar.png'),
@@ -125,6 +133,24 @@ const LogosMap: Record<string, string> = {
   ukraine: require('./ukraine.jpg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bitcountry: require('./bitcountry.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pha: require('./phala.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bnc: require('./bnc.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kbtc: require('./kbtc.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kint: require('./kint.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kusd: require('./kusd.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  lksm: require('./lksm.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  tai: require('./tai.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  vsksm: require('./vsksm.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  ksm: require('./kusama.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

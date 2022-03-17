@@ -268,5 +268,8 @@
   "Add the account with the supplied private key": "",
   "Invalid private key": "",
   "Metamask private key": "",
-  "Private key needs to start with 0x and 64 keys": ""
+  "Private key needs to start with 0x and 64 keys": "",
+  "Import Private Key": "",
+  "existing 12 or 24-word private key": "",
+  "private key": ""
 }

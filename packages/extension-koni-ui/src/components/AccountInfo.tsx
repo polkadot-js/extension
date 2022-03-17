@@ -11,7 +11,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-import allAccountLogo from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
+import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@polkadot/extension-koni-ui/util';
@@ -87,16 +87,23 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
   };
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
+  const imgSelected = localStorage.getItem('allAccountLogo');
 
   return (
     <div className={className}>
       <div className='account-info-row'>
         {_isAccountAll
-          ? <img
-            alt='all-account-icon'
-            className='account-info__all-account-icon'
-            src={allAccountLogo}
-          />
+          ? imgSelected
+            ? <img
+              alt='all-account-icon'
+              className='account-info__all-account-icon'
+              src={imgSelected}
+            />
+            : <img
+              alt='all-account-icon'
+              className='account-info__all-account-icon'
+              src={allAccountLogoDefault}
+            />
           : <Identicon
             className='account-info-identity-icon'
             iconTheme={iconTheme}

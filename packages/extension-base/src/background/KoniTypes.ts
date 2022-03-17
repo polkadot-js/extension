@@ -321,6 +321,7 @@ export type RequestNftForceUpdate = {
 }
 
 export interface KoniRequestSignatures {
+  'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
   'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
   'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];

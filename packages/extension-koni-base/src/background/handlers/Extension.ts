@@ -561,6 +561,12 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private setNftTransfer (request: NftTransferExtra): boolean {
+    state.setNftTransfer(request);
+
+    return true;
+  }
+
   private forceUpdateNftState (request: RequestNftForceUpdate): boolean {
     let selectedNftCollection: NftCollection = { collectionId: '' };
     const nftJson = state.getNft();
@@ -614,13 +620,6 @@ export default class KoniExtension extends Extension {
     });
 
     console.log('force update nft state done');
-
-    // nftHandler.handleNfts()
-    //   .then((r) => {
-    //     state.setNft(nftHandler.getNftJson());
-    //     console.log('force update nft state done');
-    //   })
-    //   .catch(console.log);
 
     return true;
   }
@@ -690,6 +689,8 @@ export default class KoniExtension extends Extension {
         return this.getNftTransfer();
       case 'pri(nftTransfer.getSubscription)':
         return this.subscribeNftTransfer(id, port);
+      case 'pri(nftTransfer.setNftTransfer)':
+        return this.setNftTransfer(request as NftTransferExtra);
       default:
         return super.handle(id, type, request, port);
     }

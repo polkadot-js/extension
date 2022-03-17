@@ -147,7 +147,7 @@ function AuthTransfer ({ className, collectionId, extrinsic, nftItem, recipientA
       console.log('unlock account failed');
       setLoading(false);
     }
-  }, [collectionId, extrinsic, nftItem, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
+  }, [account?.account?.address, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) return;
@@ -167,8 +167,8 @@ function AuthTransfer ({ className, collectionId, extrinsic, nftItem, recipientA
   }, [extrinsic]);
 
   const hideConfirm = useCallback(() => {
-    setShowConfirm(false);
-  }, [setShowConfirm]);
+    if (!loading) setShowConfirm(false);
+  }, [loading, setShowConfirm]);
 
   return (
     <div className={className}>

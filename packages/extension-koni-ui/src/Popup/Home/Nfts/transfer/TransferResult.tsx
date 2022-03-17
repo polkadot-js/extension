@@ -34,7 +34,7 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
               src={successStatus}
             />
 
-            <div className={'result-title'}>Transfer NFT successfully</div>
+            <div className={'result-title'}>Transfer NFT Successfully</div>
 
             <div className={'result-subtext'}>Your transfer request has been confirmed. It might take a minute to see changes in your wallet.</div>
 
@@ -62,7 +62,7 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
               src={failStatus}
             />
 
-            <div className={'result-title'}>Transfer NFT failed</div>
+            <div className={'result-title'}>Transfer NFT Failed</div>
 
             <div className={'result-subtext'}>There was a problem with your request. You can try again.</div>
 
@@ -89,14 +89,20 @@ function TransferResult ({ backToHome, className, extrinsicHash, handleResend, i
 }
 
 export default React.memo(styled(TransferResult)(({ theme }: Props) => `
+  padding-left: 45px;
+  padding-right: 45px;
+
   .history-button {
     width: 100%;
     padding: 10px;
     text-align: center;
-    background-color: #181E42;
-    color: #42C59A;
+    background-color: ${theme.buttonBackground2};
+    color: ${theme.buttonTextColor3};
     border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 26px;
   }
 
   .action-container {
@@ -149,5 +155,6 @@ export default React.memo(styled(TransferResult)(({ theme }: Props) => `
     border-radius: 8px;
     cursor: pointer;
     color: #FFFFFF;
+    font-weight: 500;
   }
 `));

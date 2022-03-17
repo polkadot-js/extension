@@ -108,7 +108,9 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   }, [recipientAddress]);
 
   const handleSend = useCallback(async () => {
-    if (addressError || !isApiReady || !networkKey) return;
+    if (addressError || !isApiReady || !networkKey) {
+      return;
+    }
 
     setLoading(true);
     // @ts-ignore
@@ -124,13 +126,6 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
 
     setLoading(false);
   }, [account, addressError, api, isApiReady, networkKey, nftItem, recipientAddress, setShowConfirm]);
-
-  const handleOnClick = useCallback(() => {
-    if (nftItem.external_url) {
-      // eslint-disable-next-line no-void
-      void chrome.tabs.create({ url: nftItem?.external_url, active: true }).then(() => console.log('redirecting'));
-    }
-  }, [nftItem]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);
@@ -161,7 +156,6 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
                 ? <img
                   alt={'item-img'}
                   className={'item-img'}
-                  onClick={handleOnClick}
                   onError={handleImageError}
                   src={getItemImage()}
                   style={{ borderRadius: '5px' }}
@@ -264,7 +258,6 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     height: 130px;
     width: 130px;
     border-radius: 5px;
-    cursor: pointer;
     text-align: center;
   }
 

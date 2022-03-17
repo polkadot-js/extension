@@ -188,11 +188,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, []);
 
   useEffect(() => {
-    setShowNftCollectionDetail(false);
-    setShowNftItemDetail(false);
-  }, [currentAccount]);
-
-  useEffect(() => {
     if (isAccountAll(address) && activatedTab === 5) {
       _setActiveTab(1);
     }

@@ -122,6 +122,15 @@ export class KoniSubcription {
   subscribeNft (address: string) {
     this.detectAddresses(address)
       .then((addresses) => {
+        // let parsedAddress: string[] = [];
+        //
+        // if (addresses.length === 1) {
+        //   if (addresses.includes('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG')) parsedAddress = ['5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
+        //   else if (addresses.includes('5D2aJpauWeZwKQAjWQSgKXfrQyguUr2p42SW638sWkfCZXiL')) parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d'];
+        // } else {
+        //   parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
+        // }
+        // console.log('nft addresses', parsedAddress);
         this.initNftSubscription(addresses);
       })
       .catch(console.error);

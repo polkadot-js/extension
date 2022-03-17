@@ -11,8 +11,6 @@ export interface TransferResponse {
 }
 
 async function acalaTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  if (!params.collectionId || !params.itemId) return {};
-
   const itemId = params.itemId as number;
   const collectionId = params.collectionId as number;
 
@@ -49,8 +47,6 @@ async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, reci
 }
 
 async function uniqueTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  if (!params.collectionId || !params.itemId) return {};
-
   const itemId = params.itemId as number;
   const collectionId = params.collectionId as number;
 
@@ -66,8 +62,6 @@ async function uniqueTransferHandler (api: ApiPromise, senderAddress: string, re
 }
 
 async function quartzTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  if (!params.collectionId || !params.itemId) return {};
-
   const itemId = params.itemId as number;
   const collectionId = params.collectionId as number;
 
@@ -83,8 +77,6 @@ async function quartzTransferHandler (api: ApiPromise, senderAddress: string, re
 }
 
 async function statemineTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  if (!params.collectionId || !params.itemId) return {};
-
   const itemId = params.itemId as number;
   const collectionId = params.collectionId as number;
 

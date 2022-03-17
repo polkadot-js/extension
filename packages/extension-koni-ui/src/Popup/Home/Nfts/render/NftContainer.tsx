@@ -68,7 +68,7 @@ function NftContainer (
   }, [setChosenCollection, setShowCollectionDetail]);
 
   useEffect(() => {
-    if (!showTransferredCollection && selectedNftCollection) {
+    if (!showTransferredCollection && selectedNftCollection) { // show collection after transfer
       setChosenCollection(selectedNftCollection);
       setShowCollectionDetail(true);
       setShowTransferredCollection(true);
@@ -78,8 +78,10 @@ function NftContainer (
   useEffect(() => {
     if (loading) {
       setPage(1);
+      setShowItemDetail(false);
+      setShowCollectionDetail(false);
     }
-  }, [loading, setPage]);
+  }, [loading, setPage, setShowCollectionDetail, setShowItemDetail]);
 
   const handleHideCollectionDetail = useCallback(() => {
     setShowCollectionDetail(false);

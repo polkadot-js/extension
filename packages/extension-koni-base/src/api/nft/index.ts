@@ -156,16 +156,21 @@ export class NftHandler {
     }));
 
     if (isAddressesEqual(this.addresses, this.prevAddresses)) {
-      // console.log('nft address no change');
-      if (total < this.total) this.data = data;
-      else this.data = this.sortData(data);
+      console.log('nft address no change');
+
+      if (total < this.total) {
+        this.total = total;
+        this.data = data;
+      } else {
+        this.total = total;
+        this.data = this.sortData(data);
+      }
     } else {
-      // console.log('nft address change');
+      console.log('nft address change');
+      this.total = total;
       this.data = data;
       this.prevAddresses = this.addresses;
     }
-
-    this.total = total;
 
     console.log(`all nft took ${performance.now() - start}ms`);
 

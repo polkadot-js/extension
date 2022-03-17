@@ -3,15 +3,22 @@
 
 import fetch from 'cross-fetch';
 
-import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { NftCollection, NftItem, RMRK_VER } from '@polkadot/extension-base/background/KoniTypes';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { isUrl, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_COLLECTION_ENDPOINT, SINGULAR_ENDPOINT, SINGULAR_EXTERNAL_SERVER } from '../config';
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
 
 const headers = {
   'Content-Type': 'application/json'
 };
+
+enum RMRK_SOURCE {
+  BIRD_KANARIA = 'bird_kanaria',
+  KANARIA = 'kanaria',
+  SINGULAR_V1 = 'singular_v1',
+  SINGULAR_V2 = 'singular_v2'
+}
 
 interface NFTMetadata {
   animation_url?: string,
@@ -19,6 +26,8 @@ interface NFTMetadata {
   description?: string,
   image?: string,
   name?: string
+  properties?: Record<string, any>
+  mediaUri?: string,
 }
 
 export class RmrkNftApi extends BaseNftApi {
@@ -67,9 +76,10 @@ export class RmrkNftApi extends BaseNftApi {
 
   private async getAllByAccount (account: string) {
     const fetchUrls = [
-      { url: KANARIA_ENDPOINT + 'account-birds/' + account, source: 'bird_kanaria' },
-      { url: KANARIA_ENDPOINT + 'account-items/' + account, source: 'kanaria' },
-      { url: SINGULAR_ENDPOINT + account, source: 'singular' }
+      { url: KANARIA_ENDPOINT + 'account-birds/' + account, source: RMRK_SOURCE.BIRD_KANARIA },
+      { url: KANARIA_ENDPOINT + 'account-items/' + account, source: RMRK_SOURCE.KANARIA },
+      { url: SINGULAR_V1_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V1 },
+      { url: SINGULAR_V2_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V2 }
     ];
 
     let data: Record<number | string, number | string>[] = [];
@@ -106,7 +116,7 @@ export class RmrkNftApi extends BaseNftApi {
             external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
           }
         });
-      } else if (item.source === 'singular') {
+      } else if (item.source === 'singular_v1') {
         nfts.push({
           ...item,
           metadata: {
@@ -116,8 +126,25 @@ export class RmrkNftApi extends BaseNftApi {
             animation_url: this.parseUrl(result?.animation_url as string),
             image: this.parseUrl(result?.image as string)
           },
-          external_url: SINGULAR_EXTERNAL_SERVER + item.id.toString()
+          external_url: SINGULAR_V1_EXTERNAL_SERVER + item.id.toString()
         });
+      } else if (item.source === 'singular_v2') {
+        const id = item.id as string;
+
+        if (!id.toLowerCase().includes('kanbird')) { // excludes kanaria bird, already handled above
+          nfts.push({
+            ...item,
+            metadata: {
+              description: result?.description,
+              name: result?.name,
+              attributes: result?.attributes,
+              properties: result?.properties,
+              animation_url: this.parseUrl(result?.animation_url as string),
+              image: this.parseUrl(result?.mediaUri as string)
+            },
+            external_url: SINGULAR_V2_EXTERNAL_SERVER + item.id.toString()
+          });
+        }
       }
     }));
 
@@ -125,7 +152,7 @@ export class RmrkNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
-    const start = performance.now();
+    // const start = performance.now();
 
     let allNfts: Record<string | number, any>[] = [];
     let allCollections: NftCollection[] = [];
@@ -140,17 +167,24 @@ export class RmrkNftApi extends BaseNftApi {
       const collectionInfoUrl: string[] = [];
 
       for (const item of allNfts) {
-        const url = SINGULAR_COLLECTION_ENDPOINT + (item.collectionId as string);
+        let url = '';
+
+        if (item.source === RMRK_SOURCE.SINGULAR_V1) {
+          url = SINGULAR_V1_COLLECTION_ENDPOINT + (item.collectionId as string);
+        } else {
+          url = SINGULAR_V2_COLLECTION_ENDPOINT + (item.collectionId as string);
+        }
 
         if (!collectionInfoUrl.includes(url)) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           allCollections.push({ collectionId: item.collectionId });
-          collectionInfoUrl.push(url);
+          collectionInfoUrl.push(url.replace(' ', '%20'));
         }
       }
 
       const allCollectionMetaUrl: Record<string, any>[] = [];
-      const collectionInfo = await Promise.all(collectionInfoUrl.map(async (url) => {
+
+      await Promise.all(collectionInfoUrl.map(async (url) => {
         const data = await fetch(url)
           .then((resp) => resp.json()) as Record<string | number, string | number>[];
         const result = data[0];
@@ -176,12 +210,17 @@ export class RmrkNftApi extends BaseNftApi {
             .then((resp) => resp.json()) as Record<string, any>;
         }
 
-        // @ts-ignore
-        allCollectionMeta[item?.id as string] = { ...data };
+        if ('mediaUri' in data) { // rmrk v2.0
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          allCollectionMeta[item?.id as string] = { ...data, image: data.mediaUri };
+        } else {
+          allCollectionMeta[item?.id as string] = { ...data };
+        }
       }));
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
+      // const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
       const nftDict: Record<string | number, any> = {};
 
       for (const item of allNfts) {
@@ -191,7 +230,7 @@ export class RmrkNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           name: item?.metadata?.name as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-          image: item.metadata.image ? item.metadata.image : item.metadata.animation_url as string,
+          image: item.metadata.image ? item.metadata.image : item.image ? item.image : item.metadata.animation_url as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           description: item?.metadata?.description as string,
           external_url: item?.external_url as string,
@@ -199,8 +238,8 @@ export class RmrkNftApi extends BaseNftApi {
           collectionId: item?.collectionId as string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           properties: item?.metadata?.properties as Record<any, any>,
-          chain: 'rmrk',
-          rmrk_transferable: item?.transferable as number
+          chain: 'kusama',
+          rmrk_ver: item.source && item.source === RMRK_SOURCE.SINGULAR_V1 ? RMRK_VER.VER_1 : RMRK_VER.VER_2
         } as NftItem;
 
         if (item.collectionId in nftDict) {
@@ -215,7 +254,7 @@ export class RmrkNftApi extends BaseNftApi {
         return {
           collectionId: item.collectionId,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          collectionName: collectionInfoDict[item.collectionId] ? collectionInfoDict[item.collectionId] as string : null,
+          collectionName: allCollectionMeta[item.collectionId] ? allCollectionMeta[item.collectionId].name as string : null,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image as string) : null,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -231,10 +270,10 @@ export class RmrkNftApi extends BaseNftApi {
     this.total = allNfts.length;
     this.data = allCollections;
 
-    const end = performance.now();
-
-    console.log(`Fetched ${allNfts.length} nfts from rmrk`);
-
-    console.log(`rmrk took ${end - start}ms`);
+    // const end = performance.now();
+    //
+    // console.log(`Fetched ${allNfts.length} nfts from rmrk`);
+    //
+    // console.log(`rmrk took ${end - start}ms`);
   }
 }

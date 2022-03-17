@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NFT } from 'rmrk-tools';
-
 import { NftItem } from '@polkadot/extension-base/background/KoniTypes';
+
+const RMRK_PREFIX = 'RMRK';
+const RMRK_OP_TYPE = 'SEND';
 
 function acalaParser (nftItem: NftItem) {
   const collectionId = parseInt(nftItem.collectionId as string);
@@ -16,20 +17,11 @@ function acalaParser (nftItem: NftItem) {
 }
 
 function rmrkParser (nftItem: NftItem) {
-  const metaSplit = nftItem.id.split('-');
-  const block = parseInt(metaSplit[0]);
-  const sn = metaSplit[metaSplit.length - 1];
-  const symbol = metaSplit[metaSplit.length - 2];
+  if (!nftItem.rmrk_ver) return {};
 
-  const nft = new NFT({
-    block,
-    collection: nftItem.collectionId as string,
-    symbol,
-    transferable: nftItem?.rmrk_transferable as number,
-    sn
-  });
+  const remark = `${RMRK_PREFIX}::${RMRK_OP_TYPE}::${nftItem.rmrk_ver}::${nftItem.id}::`;
 
-  return { nft };
+  return { remark };
 }
 
 function uniqueParser (nftItem: NftItem) {
@@ -58,7 +50,7 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string) {
       return acalaParser(nftItem);
     case 'karura':
       return acalaParser(nftItem);
-    case 'rmrk':
+    case 'kusama':
       return rmrkParser(nftItem);
     case 'uniqueNft':
       return uniqueParser(nftItem);

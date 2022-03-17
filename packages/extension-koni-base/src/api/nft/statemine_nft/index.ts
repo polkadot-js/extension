@@ -106,7 +106,7 @@ export default class StatemineNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
-    const start = performance.now();
+    // const start = performance.now();
 
     const assetIds = await this.getNfts(this.addresses);
     const allCollections: NftCollection[] = [];
@@ -187,10 +187,10 @@ export default class StatemineNftApi extends BaseNftApi {
     this.total = assetIds.length;
     this.data = allCollections;
 
-    const end = performance.now();
-
-    console.log(`statemine took ${end - start}ms`);
-
-    console.log(`Fetched ${assetIds.length} nfts from statemine`);
+    // const end = performance.now();
+    //
+    // console.log(`statemine took ${end - start}ms`);
+    //
+    // console.log(`Fetched ${assetIds.length} nfts from statemine`);
   }
 }

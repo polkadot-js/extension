@@ -155,7 +155,6 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
       }
 
       if (isSync && networkSelected) {
-        // console.log('networkSelected && isSync', networkSelected)
         updateCurrentNetwork({
           networkPrefix: networkSelected.networkPrefix,
           icon: networkSelected.icon,

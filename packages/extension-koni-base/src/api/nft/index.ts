@@ -12,7 +12,7 @@ import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 
-const NFT_TIMEOUT = 10000;
+const NFT_TIMEOUT = 5000;
 
 enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -94,25 +94,33 @@ export class NftHandler {
   }
 
   private async connect () {
-    if (this.handlers.length > 0) {
-      await Promise.all(this.handlers.map(async (handler) => {
-        await handler.connect();
-      }));
-    } else {
-      const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
+    try {
+      if (this.handlers.length > 0) {
+        await Promise.all(this.handlers.map(async (handler) => {
+          await handler.connect();
+          console.log(`${handler.getChain() as string} nft connected`);
+        }));
+      } else {
+        const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
 
-      await Promise.all(this.apiPromises.map(async ({ api: apiPromise, chain }) => {
-        const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
+        await Promise.all(this.apiPromises.map(async ({ api: apiPromise, chain }) => {
+          const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
 
-        if (apiPromise) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-          const parentApi: ApiProps = await apiPromise.isReady;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const handler = createNftApi(chain, parentApi, useAddresses);
+          if (apiPromise) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+            const parentApi: ApiProps = await apiPromise.isReady;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            const handler = createNftApi(chain, parentApi, useAddresses);
 
-          if (handler && !this.handlers.includes(handler)) this.handlers.push(handler);
-        }
-      }));
+            if (handler && !this.handlers.includes(handler)) {
+              console.log(`${handler.getChain() as string} nft connected`);
+              this.handlers.push(handler);
+            }
+          }
+        }));
+      }
+    } catch (e) {
+      console.log('error connecting for nft', e);
     }
   }
 
@@ -139,9 +147,9 @@ export class NftHandler {
       await Promise.race([
         handler.handleNfts(),
         timeout
-      ]).then((e) => console.log('nft race', e));
+      ]);
 
-      console.log(`total ${handler.getChain() as string}`, handler.getTotal());
+      // console.log(`total ${handler.getChain() as string}`, handler.getTotal());
 
       total += handler.getTotal();
       data = [...data, ...handler.getData()];

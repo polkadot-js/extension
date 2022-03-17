@@ -3,17 +3,18 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { NftCollection as _NftCollection } from '@polkadot/extension-base/background/KoniTypes';
+import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/EmptyList';
-import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/NftCollection';
+import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
+import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
+import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_GRID_SIZE } from '@polkadot/extension-koni-ui/util';
 
-import NftCollectionPreview from './component/NftCollectionPreview';
+import NftCollectionPreview from './NftCollectionPreview';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -23,16 +24,56 @@ interface Props extends ThemeProps {
   loading: boolean;
   page: number;
   setPage: (newPage: number) => void;
+
+  showTransferredCollection: boolean;
+  setShowTransferredCollection: (val: boolean) => void;
+
+  chosenCollection: _NftCollection;
+  setChosenCollection: (val: _NftCollection) => void;
+
+  showCollectionDetail: boolean;
+  setShowCollectionDetail: (val: boolean) => void;
+
+  chosenItem: _NftItem;
+  setChosenItem: (val: _NftItem) => void;
+
+  showItemDetail: boolean;
+  setShowItemDetail: (val: boolean) => void;
 }
 
-function NftContainer ({ className, loading, nftList, page, setPage, totalCollection, totalItems }: Props): React.ReactElement<Props> {
-  const [chosenCollection, setChosenCollection] = useState<_NftCollection>();
-  const [showCollectionDetail, setShowCollectionDetail] = useState<boolean>(false);
+function NftContainer (
+  { chosenCollection,
+    chosenItem,
+    className,
+    loading,
+    nftList,
+    page,
+    setChosenCollection,
+    setChosenItem,
+    setPage,
+    setShowCollectionDetail,
+    setShowItemDetail,
+    setShowTransferredCollection,
+    showCollectionDetail,
+    showItemDetail,
+    showTransferredCollection,
+    totalCollection,
+    totalItems }: Props
+): React.ReactElement<Props> {
+  const selectedNftCollection = useFetchNftExtra(showTransferredCollection);
 
   const handleShowCollectionDetail = useCallback((data: _NftCollection) => {
     setShowCollectionDetail(true);
     setChosenCollection(data);
-  }, []);
+  }, [setChosenCollection, setShowCollectionDetail]);
+
+  useEffect(() => {
+    if (!showTransferredCollection && selectedNftCollection) {
+      setChosenCollection(selectedNftCollection);
+      setShowCollectionDetail(true);
+      setShowTransferredCollection(true);
+    }
+  }, [selectedNftCollection, setChosenCollection, setShowCollectionDetail, setShowTransferredCollection, showTransferredCollection]);
 
   useEffect(() => {
     if (loading) {
@@ -42,7 +83,7 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
 
   const handleHideCollectionDetail = useCallback(() => {
     setShowCollectionDetail(false);
-  }, []);
+  }, [setShowCollectionDetail]);
 
   const onPreviousClick = useCallback(() => {
     if (page === 1) return;
@@ -66,7 +107,7 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
       </div>}
 
       {/* @ts-ignore */}
-      {totalItems === 0 && !loading &&
+      {totalItems === 0 && !loading && !showCollectionDetail &&
         <EmptyList />
       }
 
@@ -100,8 +141,12 @@ function NftContainer ({ className, loading, nftList, page, setPage, totalCollec
       {
         showCollectionDetail &&
           <NftCollection
+            chosenItem={chosenItem}
             data={chosenCollection}
             onClickBack={handleHideCollectionDetail}
+            setChosenItem={setChosenItem}
+            setShowItemDetail={setShowItemDetail}
+            showItemDetail={showItemDetail}
           />
       }
 

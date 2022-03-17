@@ -41,7 +41,7 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import TransferNftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/TransferNftContainer";
+import TransferNftContainer from "@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer";
 
 const startSettings = uiSettings.get();
 

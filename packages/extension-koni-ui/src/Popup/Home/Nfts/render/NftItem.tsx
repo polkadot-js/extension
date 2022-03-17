@@ -3,50 +3,52 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { CurrentNetworkInfo, NetWorkMetadataDef, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import { tieAccount } from '@polkadot/extension-koni-ui/messaging';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
-import { TransferNft } from '@polkadot/extension-koni-ui/stores/types';
+import { TransferNftParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
-import logo from '../../../assets/sub-wallet-logo.svg';
+import logo from '../../../../assets/sub-wallet-logo.svg';
 
 interface Props {
   className?: string;
   data: _NftItem;
   onClickBack: () => void;
   collectionImage?: string;
+  collectionId: string;
 }
 
-function updateTransferNft (nftItem: _NftItem) {
-  store.dispatch({ type: 'transferNft/update', payload: { nftItem } as TransferNft });
+function updateTransferNftParams (nftItem: _NftItem, collectionImage: string | undefined, collectionId: string) {
+  store.dispatch({ type: 'transferNftParams/update', payload: { nftItem, collectionImage, collectionId } as TransferNftParams });
 }
 
-// function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
-//   const newState = {
-//     networkPrefix: networkMetadata.ss58Format,
-//     icon: networkMetadata.icon,
-//     genesisHash: networkMetadata.genesisHash,
-//     networkKey: networkMetadata.networkKey,
-//     isEthereum: networkMetadata.isEthereum
-//   } as CurrentNetworkInfo;
-//
-//   store.dispatch({ type: 'currentNetwork/update', payload: newState });
-// }
+function updateCurrentNetwork (networkMetadata: NetWorkMetadataDef) {
+  const newState = {
+    networkPrefix: networkMetadata.ss58Format,
+    icon: networkMetadata.icon,
+    genesisHash: networkMetadata.genesisHash,
+    networkKey: networkMetadata.networkKey,
+    isEthereum: networkMetadata.isEthereum
+  } as CurrentNetworkInfo;
 
-function NftItem ({ className, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
+  store.dispatch({ type: 'currentNetwork/update', payload: newState });
+}
+
+function NftItem ({ className, collectionId, collectionImage, data, onClickBack }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const [sendError, setSendError] = useState(false);
-  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const { currentAccount: account, currentNetwork, networkMetadata } = useSelector((state: RootState) => state);
 
-  const history = useHistory();
+  const navigate = useContext(ActionContext);
 
   const propDetail = (title: string, value: string, key: number) => {
     return (
@@ -60,17 +62,24 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
     );
   };
 
-  const handleClickTransfer = useCallback(() => {
-    if (!account.account || account.account.address === 'ALL') return;
+  const handleClickTransfer = useCallback(async () => {
+    if (!account.account || account.account.address === 'ALL' || !data.chain) return;
 
-    if (data.chain && data.chain === currentNetwork.networkKey) {
-      updateTransferNft(data);
-      setSendError(false);
-      history.push('/account/send-nft');
-    } else {
-      setSendError(true);
+    if (data.chain !== currentNetwork.networkKey) {
+      const targetNetwork = networkMetadata[data?.chain];
+
+      if (!isAccountAll(account.account.address)) {
+        await tieAccount(account.account.address, targetNetwork.genesisHash);
+      } else {
+        window.localStorage.setItem('accountAllNetworkGenesisHash', targetNetwork.genesisHash);
+      }
+
+      updateCurrentNetwork(targetNetwork);
     }
-  }, [account.account, currentNetwork.networkKey, data, history]);
+
+    updateTransferNftParams(data, collectionImage, collectionId);
+    navigate('/account/send-nft');
+  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkMetadata]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -163,12 +172,9 @@ function NftItem ({ className, collectionImage, data, onClickBack }: Props): Rea
             // @ts-ignore
             account.account.address !== 'ALL' &&
             <div className={'send-container'}>
-              {
-                sendError &&
-                <div className={'send-error'}>Please change to {data.chain} network</div>
-              }
               <div
                 className={'send-button'}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 onClick={handleClickTransfer}
               >
                 Send

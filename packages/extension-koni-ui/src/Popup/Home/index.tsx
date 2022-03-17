@@ -6,7 +6,7 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ChainRegistry, CurrentNetworkInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -28,7 +28,7 @@ import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/use
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
-import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftContainer';
+import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
 import StakingContainer from '@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
@@ -172,12 +172,25 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const [nftPage, setNftPage] = useState(1);
 
+  const [chosenNftCollection, setChosenNftCollection] = useState<_NftCollection>();
+  const [showNftCollectionDetail, setShowNftCollectionDetail] = useState<boolean>(false);
+
+  const [chosenNftItem, setChosenNftItem] = useState<_NftItem>();
+  const [showNftItemDetail, setShowNftItemDetail] = useState<boolean>(false);
+
+  const [showTransferredCollection, setShowTransferredCollection] = useState(false);
+  const [showForcedCollection, setShowForcedCollection] = useState(false);
   const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage);
   const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking();
 
   const handleNftPage = useCallback((page: number) => {
     setNftPage(page);
   }, []);
+
+  useEffect(() => {
+    setShowNftCollectionDetail(false);
+    setShowNftItemDetail(false);
+  }, [currentAccount]);
 
   useEffect(() => {
     if (isAccountAll(address) && activatedTab === 5) {
@@ -325,10 +338,22 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
         {activatedTab === 2 && (
           <NftContainer
+            chosenCollection={chosenNftCollection}
+            chosenItem={chosenNftItem}
             loading={loadingNft}
             nftList={nftList}
             page={nftPage}
+            setChosenCollection={setChosenNftCollection}
+            setChosenItem={setChosenNftItem}
             setPage={handleNftPage}
+            setShowCollectionDetail={setShowNftCollectionDetail}
+            setShowForcedCollection={setShowForcedCollection}
+            setShowItemDetail={setShowNftItemDetail}
+            setShowTransferredCollection={setShowTransferredCollection}
+            showCollectionDetail={showNftCollectionDetail}
+            showForcedCollection={showForcedCollection}
+            showItemDetail={showNftItemDetail}
+            showTransferredCollection={showTransferredCollection}
             totalCollection={totalCollection}
             totalItems={totalItems}
           />

@@ -4,7 +4,7 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, NftTransferExtra, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -82,6 +82,12 @@ export default class KoniState extends State {
     nftList: []
   } as NftJson;
 
+  // Only for rendering nft after transfer
+  private nftTransferState: NftTransferExtra = {
+    cronUpdate: false,
+    forceUpdate: false
+  };
+
   private stakingMap: Record<string, StakingItem> = generateDefaultStakingMap();
   private stakingRewardState: StakingRewardJson = {
     details: []
@@ -91,6 +97,7 @@ export default class KoniState extends State {
   private crowdloanFundmap: Record<string, DotSamaCrowdloan_crowdloans_nodes> = {};
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
+  private nftTransferSubject = new Subject<NftTransferExtra>();
   private nftSubject = new Subject<NftJson>();
   private stakingSubject = new Subject<StakingJson>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
@@ -132,6 +139,28 @@ export default class KoniState extends State {
     });
   }
 
+  public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
+    this.nftTransferState = data;
+
+    if (callback) {
+      callback(data);
+    }
+
+    this.nftTransferSubject.next(data);
+  }
+
+  public getNftTransfer (): NftTransferExtra {
+    return this.nftTransferState;
+  }
+
+  public getNftTransferSubscription (update: (value: NftTransferExtra) => void): void {
+    update(this.nftTransferState);
+  }
+
+  public subscribeNftTransfer () {
+    return this.nftTransferSubject;
+  }
+
   public setNft (nftData: NftJson, callback?: (nftData: NftJson) => void): void {
     this.nftState = nftData;
 
@@ -142,7 +171,11 @@ export default class KoniState extends State {
     this.nftSubject.next(nftData);
   }
 
-  public getNft (update: (value: NftJson) => void): void {
+  public getNft () {
+    return this.nftState;
+  }
+
+  public getNftSubscription (update: (value: NftJson) => void): void {
     update(this.nftState);
   }
 

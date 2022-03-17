@@ -56,10 +56,21 @@ export enum APIItemState {
   NOT_SUPPORT = 'not_support'
 }
 
+export enum RMRK_VER {
+  VER_1 = '1.0.0',
+  VER_2 = '2.0.0'
+}
+
 export enum CrowdloanParaState {
   ONGOING = 'ongoing',
   COMPLETED = 'completed',
   FAILED = 'failed'
+}
+
+export interface NftTransferExtra {
+  cronUpdate: boolean;
+  forceUpdate: boolean;
+  selectedNftCollection?: NftCollection; // for rendering
 }
 
 export interface NftItem {
@@ -72,7 +83,7 @@ export interface NftItem {
   description?: string;
   properties?: Record<any, any> | null;
   chain?: string;
-  rmrk_transferable?: number;
+  rmrk_ver?: RMRK_VER;
 }
 
 export interface NftCollection {
@@ -303,8 +314,16 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
+export type RequestNftForceUpdate = {
+  collectionId: string,
+  nft: NftItem,
+  isSendingSelf: boolean
+}
 
 export interface KoniRequestSignatures {
+  'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
+  'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];
+  'pri(nft.forceUpdate)': [RequestNftForceUpdate, boolean];
   'pri(api.init)': [RequestApi, ApiInitStatus];
   'pri(staking.getStaking)': [null, StakingJson];
   'pri(staking.getSubscription)': [RequestSubscribeStaking, StakingJson, StakingJson];

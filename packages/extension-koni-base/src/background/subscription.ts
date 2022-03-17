@@ -3,6 +3,7 @@
 
 import { take } from 'rxjs';
 
+import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
@@ -127,13 +128,29 @@ export class KoniSubcription {
   }
 
   initNftSubscription (addresses: string[]) {
-    nftHandler.setAddresses(addresses);
-    nftHandler.handleNfts()
-      .then((r) => {
-        state.setNft(nftHandler.getNftJson());
-        console.log('set nft state done for address', addresses);
-      })
-      .catch(console.log);
+    const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
+
+    if (forceUpdate && !cronUpdate) {
+      console.log('skipping set nft state due to transfer');
+      state.setNftTransfer({
+        cronUpdate: true,
+        forceUpdate: true,
+        selectedNftCollection
+      } as NftTransferExtra);
+    } else { // after skipping 1 time of cron update
+      state.setNftTransfer({
+        cronUpdate: false,
+        forceUpdate: false,
+        selectedNftCollection
+      } as NftTransferExtra);
+      nftHandler.setAddresses(addresses);
+      nftHandler.handleNfts()
+        .then((r) => {
+          state.setNft(nftHandler.getNftJson());
+          // console.log('set nft state done for address', addresses);
+        })
+        .catch(console.log);
+    }
   }
 
   subscribeStaking (address: string) {

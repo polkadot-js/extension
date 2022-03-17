@@ -95,7 +95,7 @@ export class AcalaNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
-    const start = performance.now();
+    // const start = performance.now();
 
     const allCollections: NftCollection[] = [];
     const assetIds = await this.getNfts(this.addresses);
@@ -178,11 +178,11 @@ export class AcalaNftApi extends BaseNftApi {
     this.total = assetIds.length;
     this.data = allCollections;
 
-    const end = performance.now();
+    // const end = performance.now();
 
-    console.log(`acala took ${end - start}ms`);
-
-    console.log(`Fetched ${assetIds.length} nfts from acala`);
+    // console.log(`acala took ${end - start}ms`);
+    //
+    // console.log(`Fetched ${assetIds.length} nfts from acala`);
   }
 }
 

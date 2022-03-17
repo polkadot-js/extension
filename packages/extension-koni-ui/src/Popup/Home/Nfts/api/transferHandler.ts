@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NFT } from 'rmrk-tools';
-
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
@@ -30,13 +28,18 @@ async function acalaTransferHandler (api: ApiPromise, senderAddress: string, rec
 }
 
 async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  const nft = params.nft as NFT;
+  const remark = params.remark as string;
 
-  if (!nft) return {};
+  if (!remark) return {};
+
+  const parsedRemark = remark.concat(recipientAddress.replace(
+    /\\s/g,
+    ''
+  ));
 
   const [info, extrinsic] = await Promise.all([
-    api.tx.system.remark(nft.send(recipientAddress)).paymentInfo(senderAddress),
-    api.tx.system.remark(nft.send(recipientAddress))
+    api.tx.system.remark(parsedRemark).paymentInfo(senderAddress),
+    api.tx.system.remark(parsedRemark)
   ]);
 
   return {
@@ -102,7 +105,7 @@ export default async function transferHandler (api: ApiPromise, networkKey: stri
       return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
     case 'karura':
       return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
-    case 'rmrk':
+    case 'kusama':
       return await rmrkTransferHandler(api, senderAddress, recipientAddress, params);
     case 'uniqueNft':
       return await uniqueTransferHandler(api, senderAddress, recipientAddress, params);

@@ -2,17 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
+import { BackgroundWindow, NftItem as _NftItem, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
+import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import Output from '@polkadot/extension-koni-ui/components/Output';
+import { nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
 import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
 import { AddressProxy } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
 import { cacheUnlock } from '@polkadot/extension-koni-ui/Popup/Sending/old/util';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
 
@@ -21,7 +25,7 @@ const { keyring } = bWindow.pdotApi;
 
 interface Props extends ThemeProps {
   className?: string;
-  setShowConfirm: () => void;
+  setShowConfirm: (val: boolean) => void;
   senderAccount: AccountJson;
   txInfo?: RuntimeDispatchInfo;
   extrinsic: SubmittableExtrinsic<'promise'>;
@@ -29,6 +33,9 @@ interface Props extends ThemeProps {
   setExtrinsicHash: (val: string) => void;
   setIsTxSuccess: (val: boolean) => void;
   setTxError: (val: string) => void;
+  nftItem: _NftItem;
+  collectionId: string;
+  recipientAddress: string;
 }
 
 function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressProxy): string | null {
@@ -56,13 +63,19 @@ function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressPr
   return null;
 }
 
-function AuthTransfer ({ className, extrinsic, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, txInfo }: Props): React.ReactElement<Props> {
+function isRecipientSelf (currentAddress: string, recipientAddress: string) {
+  return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
+}
+
+function AuthTransfer ({ className, collectionId, extrinsic, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, txInfo }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [balanceError, setBalanceError] = useState(false);
   const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
+
+  const { currentAccount: account } = useSelector((state: RootState) => state);
 
   useEffect((): void => {
     setPasswordError(null);
@@ -76,7 +89,7 @@ function AuthTransfer ({ className, extrinsic, senderAccount, setExtrinsicHash, 
     }
 
     setPasswordError(passwordError);
-    console.log('error', passwordError);
+
     return passwordError;
   }, [senderInfo]);
 
@@ -85,28 +98,35 @@ function AuthTransfer ({ className, extrinsic, senderAccount, setExtrinsicHash, 
       const pair = keyring.getPair(senderAccount.address);
 
       try {
+        const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
         const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          console.log('running');
+          console.log('sending tx');
+
           if (!result || !result.status) {
             return;
           }
 
           if (result.status.isInBlock || result.status.isFinalized) {
-            console.log('in block');
+            console.log('tx in block');
             result.events
               .filter(({ event: { section } }) => section === 'system')
               .forEach(({ event: { method } }): void => {
                 setExtrinsicHash(extrinsic.hash.toHex());
 
                 if (method === 'ExtrinsicFailed') {
-                  setShowResult(true);
+                  console.log('tx fail');
                   setIsTxSuccess(false);
-                  setShowConfirm();
                   setTxError(method);
-                } else if (method === 'ExtrinsicSuccess') {
+                  setShowConfirm(false);
                   setShowResult(true);
-                  setShowConfirm();
+                } else if (method === 'ExtrinsicSuccess') {
+                  console.log('tx success');
                   setIsTxSuccess(true);
+                  setShowConfirm(false);
+                  setShowResult(true);
+
+                  nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf } as RequestNftForceUpdate)
+                    .catch(console.error);
                 }
               });
           } else if (result.isError) {
@@ -119,29 +139,36 @@ function AuthTransfer ({ className, extrinsic, senderAccount, setExtrinsicHash, 
           }
         });
       } catch (e) {
+        console.log('error submitting tx', e);
         setBalanceError(true);
         setLoading(false);
       }
     } else {
-      console.log('unlock failed');
+      console.log('unlock account failed');
       setLoading(false);
     }
-  }, [extrinsic, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
+  }, [collectionId, extrinsic, nftItem, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
 
   const handleSignAndSubmit = useCallback(() => {
+    if (loading) return;
+
     setLoading(true);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
       await onSend();
     }, 1);
-  }, [onSend]);
+  }, [loading, onSend]);
 
   useEffect((): void => {
     const method = extrinsic.method;
 
     setCallHash((method && method.hash.toHex()) || null);
   }, [extrinsic]);
+
+  const hideConfirm = useCallback(() => {
+    setShowConfirm(false);
+  }, [setShowConfirm]);
 
   return (
     <div className={className}>
@@ -156,7 +183,7 @@ function AuthTransfer ({ className, extrinsic, senderAccount, setExtrinsicHash, 
             </div>
             <div
               className={'close-button-confirm'}
-              onClick={setShowConfirm}
+              onClick={hideConfirm}
             >
               x
             </div>
@@ -198,7 +225,7 @@ function AuthTransfer ({ className, extrinsic, senderAccount, setExtrinsicHash, 
               className={'submit-btn'}
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onClick={handleSignAndSubmit}
-              style={{ marginTop: !balanceError ? '40px' : '0' }}
+              style={{ marginTop: !balanceError ? '40px' : '0', background: loading ? 'rgba(0, 75, 255, 0.25)' : '#004BFF', cursor: loading ? 'default' : 'pointer' }}
             >
               {
                 !loading
@@ -239,6 +266,7 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
     position: relative;
     height: 26px;
     width: 26px;
+    opacity: 1;
   }
 
   .password-error {
@@ -249,7 +277,6 @@ export default React.memo(styled(AuthTransfer)(({ theme }: Props) => `
 
   .submit-btn {
     position: relative;
-    background: #004BFF;
     border-radius: 8px;
     display: flex;
     justify-content: center;

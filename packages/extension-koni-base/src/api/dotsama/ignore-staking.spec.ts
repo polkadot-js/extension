@@ -42,33 +42,14 @@ describe('test staking api', () => {
   });
 
   // test('nft', async () => {
-  //   // Will resolve after 200ms
-  //   const promiseA = new Promise((resolve, reject) => {
-  //     const wait = setTimeout(() => {
-  //       clearTimeout(wait);
-  //       reject('Promise A win!');
-  //     }, 20);
-  //   });
+  //   const dotSamaAPIMap = connectDotSamaApis();
+  //   const testApiNft = new NftHandler(dotSamaAPIMap, ['FPPQEu3zakZCz6MyJf76mqc7PgmWoaqHvxoAtxySwPg38ov']);
   //
-  //   const testApiNft = new RmrkNftApi();
-  //   testApiNft.setAddresses(['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m']);
+  //   await testApiNft.handleNfts();
   //
-  //   // Will resolve after 400ms
-  //   const promiseB = new Promise((resolve, reject) => {
-  //     const wait = setTimeout(() => {
-  //       clearTimeout(wait);
-  //       resolve('Promise B win!');
-  //     }, 40000000);
-  //   });
-  //
-  //   await Promise.all([
-  //     Promise.race([
-  //       promiseA,
-  //       testApiNft.handleNfts()
-  //     ]),
-  //     promiseB
-  //   ]).then((res) => console.log('here', res));
-  //
-  //   // await race.then((res) => console.log(res)); // -> Promise A win!
+  //   for (const item of testApiNft.getNftJson().nftList) {
+  //     console.log(item);
+  //     console.log(item.nftItems);
+  //   }
   // });
 });

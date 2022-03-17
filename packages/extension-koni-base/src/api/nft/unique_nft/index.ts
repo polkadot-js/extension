@@ -117,7 +117,7 @@ export default class UniqueNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
-    const start = performance.now();
+    // const start = performance.now();
 
     const collectionCount = await this.getCollectionCount();
     const allCollections: NftCollection[] = [];
@@ -220,8 +220,8 @@ export default class UniqueNftApi extends BaseNftApi {
     this.total = total;
     this.data = allCollections;
 
-    console.log(`unique took ${performance.now() - start}ms`);
+    // console.log(`unique took ${performance.now() - start}ms`);
 
-    console.log(`Fetched ${total} nfts from unique`);
+    // console.log(`Fetched ${total} nfts from unique`);
   }
 }

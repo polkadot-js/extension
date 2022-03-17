@@ -121,7 +121,7 @@ export default class QuartzNftApi extends BaseNftApi {
   }
 
   public async handleNfts () {
-    const start = performance.now();
+    // const start = performance.now();
 
     const collectionCount = await this.getCreatedCollectionCount();
     const collectionPropertiesMap: Record<number, any> = {};
@@ -234,8 +234,8 @@ export default class QuartzNftApi extends BaseNftApi {
     this.total = total;
     this.data = allCollections;
 
-    console.log(`quartz took ${performance.now() - start}ms`);
-
-    console.log(`Fetched ${total} nfts from quartz`);
+    // console.log(`quartz took ${performance.now() - start}ms`);
+    //
+    // console.log(`Fetched ${total} nfts from quartz`);
   }
 }

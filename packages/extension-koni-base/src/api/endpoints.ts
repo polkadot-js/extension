@@ -47,8 +47,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1',
     icon: 'polkadot',
     ss58Format: 0,
-    // provider: 'wss://staging.node.rmrk.app',
-    provider: 'wss://westend.api.onfinality.io/public-ws', // test nft
+    provider: 'wss://staging.node.rmrk.app',
     groups: ['TEST_NET']
   },
   statemint: {
@@ -65,8 +64,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Acala',
     genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
     ss58Format: 10,
-    // provider: 'wss://acala-polkadot.api.onfinality.io/public-ws',
-    provider: 'wss://node-6870830370282213376.rz.onfinality.io/ws?apikey=0f273197-e4d5-45e2-b23e-03b015cb7000', // test nft
+    provider: 'wss://acala-polkadot.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2000,
     nativeToken: 'ACA',
@@ -330,8 +328,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     genesisHash: '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
     icon: 'polkadot',
     ss58Format: 2,
-    // provider: 'wss://statemine.api.onfinality.io/public-ws',
-    provider: 'wss://westmint-rpc.polkadot.io/',
+    provider: 'wss://statemine.api.onfinality.io/public-ws',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 1000,
     nativeToken: 'KSM'

@@ -3,28 +3,31 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/NftItemPreview';
-import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/NftItem';
+import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItem';
+import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
   data: _NftCollection | undefined;
   onClickBack: () => void;
+
+  chosenItem: _NftItem;
+  setChosenItem: (val: _NftItem) => void;
+
+  showItemDetail: boolean;
+  setShowItemDetail: (val: boolean) => void;
 }
 
-function NftCollection ({ className, data, onClickBack }: Props): React.ReactElement<Props> {
-  const [chosenItem, setChosenItem] = useState<_NftItem>({ id: 'init' });
-  const [showItemDetail, setShowItemDetail] = useState<boolean>(false);
-
+function NftCollection ({ chosenItem, className, data, onClickBack, setChosenItem, setShowItemDetail, showItemDetail }: Props): React.ReactElement<Props> {
   const handleShowItem = useCallback((data: _NftItem) => {
     setChosenItem(data);
     setShowItemDetail(true);
-  }, []);
+  }, [setChosenItem, setShowItemDetail]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -32,12 +35,12 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
 
   const handleHideItemDetail = useCallback(() => {
     setShowItemDetail(false);
-  }, []);
+  }, [setShowItemDetail]);
 
   const goHome = useCallback(() => {
     setShowItemDetail(false);
     onClickBack();
-  }, [onClickBack]);
+  }, [onClickBack, setShowItemDetail]);
 
   return (
     <div className={className}>
@@ -89,6 +92,7 @@ function NftCollection ({ className, data, onClickBack }: Props): React.ReactEle
       {
         showItemDetail &&
         <NftItem
+          collectionId={data?.collectionId}
           collectionImage={data?.image}
           data={chosenItem}
           goHome={goHome}

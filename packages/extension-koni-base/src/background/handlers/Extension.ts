@@ -3,7 +3,7 @@
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -387,9 +387,33 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  private getNftTransfer (): Promise<NftTransferExtra> {
+    return new Promise<NftTransferExtra>((resolve, reject) => {
+      state.getNftTransferSubscription((rs: NftTransferExtra) => {
+        resolve(rs);
+      });
+    });
+  }
+
+  private async subscribeNftTransfer (id: string, port: chrome.runtime.Port): Promise<NftTransferExtra> {
+    const cb = createSubscription<'pri(nftTransfer.getSubscription)'>(id, port);
+    const nftTransferSubscription = state.subscribeNftTransfer().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      nftTransferSubscription.unsubscribe();
+    });
+
+    return this.getNftTransfer();
+  }
+
   private getNft (): Promise<NftJson> {
     return new Promise<NftJson>((resolve, reject) => {
-      state.getNft((rs: NftJson) => {
+      state.getNftSubscription((rs: NftJson) => {
         resolve(rs);
       });
     });
@@ -537,6 +561,70 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private forceUpdateNftState (request: RequestNftForceUpdate): boolean {
+    let selectedNftCollection: NftCollection = { collectionId: '' };
+    const nftJson = state.getNft();
+    const oldTotal = nftJson.total;
+    const newNftList: NftCollection[] = [];
+
+    if (!request.isSendingSelf) {
+      for (const collection of nftJson.nftList) {
+        if (collection.collectionId === request.collectionId) {
+          // @ts-ignore
+          // eslint-disable-next-line array-callback-return
+          const filtered: NftItem[] = [];
+
+          collection.nftItems?.forEach((item) => {
+            if (item.id !== request.nft.id) {
+              filtered.push(item);
+            }
+          });
+
+          selectedNftCollection = {
+            collectionId: collection.collectionId,
+            collectionName: collection.collectionName,
+            image: collection.image,
+            nftItems: filtered
+          } as NftCollection;
+
+          if (filtered.length > 0) {
+            newNftList.push(selectedNftCollection);
+          }
+        } else { newNftList.push(collection); }
+      }
+
+      state.setNft({
+        ready: true,
+        total: oldTotal - 1,
+        nftList: newNftList
+      } as NftJson);
+    } else {
+      for (const collection of nftJson.nftList) {
+        if (collection.collectionId === request.collectionId) {
+          selectedNftCollection = collection;
+          break;
+        }
+      }
+    }
+
+    state.setNftTransfer({
+      cronUpdate: false,
+      forceUpdate: true,
+      selectedNftCollection
+    });
+
+    console.log('force update nft state done');
+
+    // nftHandler.handleNfts()
+    //   .then((r) => {
+    //     state.setNft(nftHandler.getNftJson());
+    //     console.log('force update nft state done');
+    //   })
+    //   .catch(console.log);
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -596,6 +684,12 @@ export default class KoniExtension extends Extension {
         return this.updateTransactionHistory(request as RequestTransactionHistoryAdd, id, port);
       case 'pri(transaction.history.getSubscription)':
         return this.subscribeHistory(id, port);
+      case 'pri(nft.forceUpdate)':
+        return this.forceUpdateNftState(request as RequestNftForceUpdate);
+      case 'pri(nftTransfer.getNftTransfer)':
+        return this.getNftTransfer();
+      case 'pri(nftTransfer.getSubscription)':
+        return this.subscribeNftTransfer(id, port);
       default:
         return super.handle(id, type, request, port);
     }

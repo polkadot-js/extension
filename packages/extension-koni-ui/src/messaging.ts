@@ -9,7 +9,29 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, PriceJson, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, ResponseAccountCreateSuriV2, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  ApiInitStatus,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  NetWorkMetadataDef,
+  NftJson, NftTransferExtra,
+  PriceJson,
+  RequestNftForceUpdate,
+  RequestSubscribeBalance,
+  RequestSubscribeCrowdloan,
+  RequestSubscribeNft,
+  RequestSubscribePrice,
+  RequestSubscribeStaking,
+  RequestSubscribeStakingReward,
+  ResponseAccountCreateSuriV2,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  StakingJson,
+  StakingRewardJson,
+  TransactionHistoryItemType
+} from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -345,4 +367,16 @@ export async function getStakingReward (): Promise<StakingRewardJson> {
 
 export async function subscribeStakingReward (request: RequestSubscribeStakingReward, callback: (stakingRewardData: StakingRewardJson) => void): Promise<StakingRewardJson> {
   return sendMessage('pri(stakingReward.getSubscription)', request, callback);
+}
+
+export async function nftForceUpdate (request: RequestNftForceUpdate): Promise<boolean> {
+  return sendMessage('pri(nft.forceUpdate)', request);
+}
+
+export async function getNftTransfer (): Promise<NftTransferExtra> {
+  return sendMessage('pri(nftTransfer.getNftTransfer)', null);
+}
+
+export async function subscribeNftTransfer (callback: (data: NftTransferExtra) => void): Promise<NftTransferExtra> {
+  return sendMessage('pri(nftTransfer.getSubscription)', null, callback);
 }

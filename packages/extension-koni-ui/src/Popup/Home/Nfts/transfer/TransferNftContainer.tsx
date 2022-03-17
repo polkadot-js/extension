@@ -1,22 +1,22 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
-import { Spinner } from '@polkadot/extension-koni-ui/components';
+import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
+import { ActionContext, Spinner } from '@polkadot/extension-koni-ui/components';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
-import AuthTransfer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/AuthTransfer';
-import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/component/TransferResult';
+import AuthTransfer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
+import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
 import InputAddress from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress';
 import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -32,13 +32,13 @@ interface ContentProps {
   nftItem: _NftItem;
   api: ApiPromise;
   isApiReady: boolean;
+  collectionImage?: string;
+  collectionId: string;
 }
 
 function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
-  const { currentNetwork, transferNft } = useSelector((state: RootState) => state);
+  const { currentNetwork, transferNftParams } = useSelector((state: RootState) => state);
   const { api, isApiReady } = useApi(currentNetwork.networkKey);
-
-  console.log('ready', isApiReady);
 
   return (
     <div className={className}>
@@ -56,8 +56,10 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
           ? (
             <TransferNftContainer
               api={api}
+              collectionId={transferNftParams.collectionId}
+              collectionImage={transferNftParams.collectionImage}
               isApiReady={isApiReady}
-              nftItem={transferNft.nftItem}
+              nftItem={transferNftParams.nftItem}
             />
           )
           : (
@@ -68,7 +70,7 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
   );
 }
 
-function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentProps): React.ReactElement<ContentProps> {
+function TransferNftContainer ({ api, className, collectionId, collectionImage, isApiReady, nftItem }: ContentProps): React.ReactElement<ContentProps> {
   const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account } = useSelector((state: RootState) => state);
@@ -84,14 +86,22 @@ function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentP
   const [isTxSuccess, setIsTxSuccess] = useState(false);
   const [txError, setTxError] = useState('');
 
-  console.log(`${extrinsicHash} ${isTxSuccess ? 'ok' : 'ko'} ${txError}`);
+  const [showImage, setShowImage] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
-  const history = useHistory();
+  const navigate = useContext(ActionContext);
+
+  const handleResend = useCallback(() => {
+    setExtrinsicHash('');
+    setIsTxSuccess(false);
+    setTxError('');
+    setShowTransferResult(false);
+    setShowConfirm(true);
+  }, []);
 
   const goBack = useCallback(() => {
-    console.log('back');
-    history.push('/');
-  }, [history]);
+    navigate('/');
+  }, [navigate]);
 
   useEffect(() => {
     setAddressError(!isValidAddress(recipientAddress as string));
@@ -115,9 +125,29 @@ function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentP
     setLoading(false);
   }, [account, addressError, api, isApiReady, networkKey, nftItem, recipientAddress, setShowConfirm]);
 
-  const handleShowConfirm = useCallback(() => {
-    if (!addressError && isApiReady && networkKey) setShowConfirm(!showConfirm);
-  }, [addressError, isApiReady, networkKey, setShowConfirm, showConfirm]);
+  const handleOnClick = useCallback(() => {
+    if (nftItem.external_url) {
+      // eslint-disable-next-line no-void
+      void chrome.tabs.create({ url: nftItem?.external_url, active: true }).then(() => console.log('redirecting'));
+    }
+  }, [nftItem]);
+
+  const handleImageError = useCallback(() => {
+    setLoading(false);
+    setShowImage(false);
+  }, []);
+
+  const getItemImage = useCallback(() => {
+    if (nftItem.image && !imageError) return nftItem.image;
+    else if (collectionImage) return collectionImage;
+
+    return logo;
+  }, [collectionImage, nftItem, imageError]);
+
+  const handleVideoError = useCallback(() => {
+    setImageError(true);
+    setShowImage(true);
+  }, []);
 
   return (
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -125,6 +155,32 @@ function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentP
       {
         !showTransferResult &&
         <div>
+          <div className={'img-container'}>
+            {
+              showImage
+                ? <img
+                  alt={'item-img'}
+                  className={'item-img'}
+                  onClick={handleOnClick}
+                  onError={handleImageError}
+                  src={getItemImage()}
+                  style={{ borderRadius: '5px' }}
+                />
+                : <video
+                  autoPlay
+                  height='416'
+                  loop={true}
+                  onError={handleVideoError}
+                  width='100%'
+                >
+                  <source
+                    src={getItemImage()}
+                    type='video/mp4'
+                  />
+                </video>
+            }
+          </div>
+
           <InputAddress
             autoPrefill={false}
             className={'kn-field -field-2'}
@@ -165,11 +221,14 @@ function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentP
       {
         showConfirm && isApiReady && extrinsic &&
           <AuthTransfer
+            collectionId={collectionId}
             extrinsic={extrinsic}
+            nftItem={nftItem}
+            recipientAddress={recipientAddress}
             senderAccount={account?.account}
             setExtrinsicHash={setExtrinsicHash}
             setIsTxSuccess={setIsTxSuccess}
-            setShowConfirm={handleShowConfirm}
+            setShowConfirm={setShowConfirm}
             setShowResult={setShowTransferResult}
             setTxError={setTxError}
             showResult={showTransferResult}
@@ -178,10 +237,11 @@ function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentP
       }
 
       {
-        showTransferResult && extrinsicHash &&
+        showTransferResult && extrinsicHash !== '' &&
         <TransferResult
           backToHome={goBack}
           extrinsicHash={extrinsicHash}
+          handleResend={handleResend}
           isTxSuccess={isTxSuccess}
           networkKey={networkKey}
           txError={txError}
@@ -192,6 +252,22 @@ function TransferNftContainer ({ api, className, isApiReady, nftItem }: ContentP
 }
 
 export default React.memo(styled(Wrapper)(({ theme }: Props) => `
+  .img-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .item-img {
+    display: block;
+    height: 130px;
+    width: 130px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -204,7 +280,6 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     padding-bottom: 15px;
     padding-top: 25px;
   }
-
 
   .spinner-loading {
     position: relative;

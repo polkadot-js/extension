@@ -1,118 +1,18 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// [object Object]
 // SPDX-License-Identifier: Apache-2.0
 
 import axios from 'axios';
 
-import { APIItemState, ApiProps, NetWorkInfo, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { categoryAddresses, toUnit } from '@polkadot/extension-koni-base/utils/utils';
-
-import { ethereumChains } from './api-helper';
-
-interface LedgerData {
-  active: string,
-  claimedRewards: string[],
-  stash: string,
-  total: string,
-  unlocking: string[]
-}
+import { toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 interface StakingResponseItem {
   id: string,
   amount: string
 }
 
-export const DEFAULT_STAKING_NETWORKS = {
-  polkadot: NETWORKS.polkadot,
-  kusama: NETWORKS.kusama,
-  hydradx: NETWORKS.hydradx,
-  astar: NETWORKS.astar,
-  acala: NETWORKS.acala
-  // moonbeam: NETWORKS.moonbeam
-};
-
-interface StakingApis {
-  api: ApiProps,
-  chain: string
-}
-
-export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
-  const allApiPromise: Record<string, any>[] = [];
-  const apis: StakingApis[] = [];
-  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-
-  Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
-  });
-
-  await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-    const api = await apiPromise.isReady;
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    apis.push({ chain, api });
-  }));
-
-  const unsubPromises = apis.map(({ api: parentApi, chain }) => {
-    const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-return
-    return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
-      let totalBalance = 0;
-      let unit = '';
-      let stakingItem: StakingItem;
-
-      if (ledgers) {
-        for (const ledger of ledgers) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          const data = ledger.toHuman() as unknown as LedgerData;
-
-          // const currentAddress = addresses[index];
-          if (data && data.active) {
-            const balance = data.active;
-            const amount = balance ? balance.split(' ')[0] : '';
-
-            unit = balance ? balance.split(' ')[1] : '';
-            totalBalance += parseFloat(amount);
-          }
-        }
-
-        if (totalBalance > 0) {
-          stakingItem = {
-            name: NETWORKS[chain].chain,
-            chainId: chain,
-            balance: totalBalance.toString(),
-            nativeToken: NETWORKS[chain].nativeToken,
-            unit: unit || NETWORKS[chain].nativeToken,
-            state: APIItemState.READY
-          } as StakingItem;
-        } else {
-          stakingItem = {
-            name: NETWORKS[chain].chain,
-            chainId: chain,
-            balance: totalBalance.toString(),
-            nativeToken: NETWORKS[chain].nativeToken,
-            unit: unit || NETWORKS[chain].nativeToken,
-            state: APIItemState.READY
-          } as StakingItem;
-        }
-
-        // eslint-disable-next-line node/no-callback-literal
-        callback(chain, stakingItem);
-      }
-    });
-  });
-
-  return async () => {
-    const unsubs = await Promise.all(unsubPromises);
-
-    unsubs.forEach((unsub) => {
-      unsub && unsub();
-    });
-  };
-}
-
-export const getSubqueryKusamaStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+const getSubqueryKusamaStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
   const amounts = await Promise.all(accounts.map(async (account) => {
     const resp = await axios({
       url: 'https://api.subquery.network/sq/nova-wallet/nova-kusama',
@@ -164,7 +64,7 @@ export const getSubqueryKusamaStakingReward = async (accounts: string[]): Promis
   } as StakingRewardItem;
 };
 
-export const getSubqueryPolkadotStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+const getSubqueryPolkadotStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
   const amounts = await Promise.all(accounts.map(async (account) => {
     const resp = await axios({
       url: 'https://api.subquery.network/sq/nova-wallet/nova-polkadot',
@@ -216,7 +116,7 @@ export const getSubqueryPolkadotStakingReward = async (accounts: string[]): Prom
   } as StakingRewardItem;
 };
 
-export const getSubqueryAstarStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+const getSubqueryAstarStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
   const amounts = await Promise.all(accounts.map(async (account) => {
     const resp = await axios({
       url: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-astar',

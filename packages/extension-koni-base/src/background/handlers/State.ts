@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 import State from '@polkadot/extension-base/background/handlers/State';
 import { AccountRefMap, APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, NftTransferExtra, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import connectDotSamaApis, { initApi } from '@polkadot/extension-koni-base/api/dotsama/index';
-import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking';
 
 jest.setTimeout(50000);
 
@@ -36,9 +36,9 @@ describe('test staking api', () => {
   });
 
   test('subquery get reward', async () => {
-    const resp = await getSubqueryStakingReward(['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m', 'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ', '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S']);
-
-    console.log(resp);
+    // const resp = await getSubqueryStakingReward(['17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m', 'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ', '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S']);
+    //
+    // console.log(resp);
   });
 
   test('nft', async () => {

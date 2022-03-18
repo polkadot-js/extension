@@ -12,7 +12,8 @@ import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 
-const NFT_TIMEOUT = 5000;
+const NFT_FETCHING_TIMEOUT = 5000;
+const NFT_CONNECTION_TIMEOUT = 15000;
 
 enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -101,19 +102,33 @@ export class NftHandler {
           const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
 
           if (apiPromise) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-            const parentApi: ApiProps = await apiPromise.isReady;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            const handler = createNftApi(chain, parentApi, useAddresses);
+            const timeout = new Promise((resolve, reject) => {
+              const id = setTimeout(() => {
+                clearTimeout(id);
+                resolve(null);
+              }, NFT_CONNECTION_TIMEOUT);
+            });
 
-            if (handler && !this.handlers.includes(handler)) {
-              console.log(`${handler.getChain() as string} nft connected`);
-              this.handlers.push(handler);
-            }
+            await Promise.race([
+              timeout,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+              apiPromise.isReady
+            ]).then((res) => {
+              if (res !== null) {
+                const parentApi: ApiProps = res as ApiProps;
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                const handler = createNftApi(chain, parentApi, useAddresses);
+
+                if (handler && !this.handlers.includes(handler)) {
+                  console.log(`${handler.getChain() as string} nft connected`);
+                  this.handlers.push(handler);
+                }
+              } else { console.log(`${chain as string} nft connection timeout`); }
+            });
           }
         }));
 
-        console.log(`nft connection setup done, took ${performance.now() - start}ms`);
+        console.log(`nft connection setup took ${performance.now() - start}ms`);
       } else { console.log('nft connection already setup.'); }
     } catch (e) {
       console.log('error connecting for nft', e);
@@ -142,19 +157,18 @@ export class NftHandler {
 
     await Promise.all(this.handlers.map(async (handler) => {
       const currentChain = handler.getChain() as string;
-      // console.log(`${handler.getChain() as string} nft connected`);
       const timeout = new Promise((resolve, reject) => {
         const id = setTimeout(() => {
           clearTimeout(id);
           resolve(0);
-        }, NFT_TIMEOUT);
+        }, NFT_FETCHING_TIMEOUT);
       });
 
       await Promise.race([
         handler.fetchNfts(),
         timeout
-      ]).then((e) => {
-        if (e === 1) {
+      ]).then((res) => {
+        if (res === 1) {
           total += handler.getTotal();
           dataMap[currentChain] = handler.getData();
         } else {

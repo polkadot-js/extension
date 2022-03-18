@@ -6,11 +6,12 @@ import { take } from 'rxjs';
 import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
+import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import {getSubqueryStakingReward} from "@polkadot/extension-koni-base/api/staking/subqueryStaking";
 
 export class KoniSubcription {
   private subscriptionMap: Record<string, any> = {};
@@ -122,16 +123,16 @@ export class KoniSubcription {
   subscribeNft (address: string) {
     this.detectAddresses(address)
       .then((addresses) => {
-        // let parsedAddress: string[] = [];
-        //
-        // if (addresses.length === 1) {
-        //   if (addresses.includes('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG')) parsedAddress = ['5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
-        //   else if (addresses.includes('5D2aJpauWeZwKQAjWQSgKXfrQyguUr2p42SW638sWkfCZXiL')) parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d'];
-        // } else {
-        //   parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
-        // }
-        // console.log('nft addresses', parsedAddress);
-        this.initNftSubscription(addresses);
+        let parsedAddress: string[] = [];
+
+        if (addresses.length === 1) {
+          if (addresses.includes('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG')) parsedAddress = ['5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
+          else if (addresses.includes('5D2aJpauWeZwKQAjWQSgKXfrQyguUr2p42SW638sWkfCZXiL')) parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d'];
+        } else {
+          parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
+        }
+        console.log('nft addresses', parsedAddress);
+        this.initNftSubscription(parsedAddress);
       })
       .catch(console.error);
   }

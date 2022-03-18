@@ -4,7 +4,7 @@
 
 import type { ThemeProps } from '../types';
 
-import React, {useCallback, useRef} from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -17,8 +17,6 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
-import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -31,41 +29,8 @@ interface Props extends ThemeProps {
 
 function AccountAction ({ className, isShowZeroBalances, reference, setImgSelected, toggleEdit, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const inputRef: React.RefObject<HTMLInputElement> | null = useRef(null);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const isPopup = useIsPopup();
   const currentNetwork = useSelector((state: RootState) => state.currentNetwork);
-  const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
-  const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getBase64 = (file: Blob) => {
-    const reader = new FileReader();
-
-    reader.readAsDataURL(file);
-
-    reader.onload = function () {
-      setImgSelected && setImgSelected(reader.result as string);
-      localStorage.setItem('allAccountLogo', reader.result as string);
-    };
-
-    reader.onerror = function (error) {
-      console.log('Error: ', error);
-    };
-  };
-
-  const fileSelectedChange = useCallback(
-    (event: any): void => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      getBase64(event.target.files[0]);
-    }, [getBase64]);
-
-  const onSelectImg = useCallback(() => {
-    if (isPopup && (isFirefox || isLinux)) {
-      windowOpen('/').catch(console.error)
-    }
-
-    inputRef.current && inputRef.current.click();
-  }, []);
 
   return (
     <Menu
@@ -114,25 +79,6 @@ function AccountAction ({ className, isShowZeroBalances, reference, setImgSelect
         </div>
       </div>
       }
-
-      { currentAccount && isAccountAll(currentAccount.address) &&
-      <div className='actions-wrapper'>
-        <div
-          className='account-action__menu-item'
-          onClick={onSelectImg}
-        >
-          <input
-            accept='.jpg, .jpeg, .png, .svg'
-            onChange={fileSelectedChange}
-            ref={inputRef}
-            style={{display: 'none'}}
-            type='file'
-          />
-          <span>{t<string>('Change All Account Avatar')}</span>
-        </div>
-      </div>
-      }
-
 
       {(currentNetwork.networkKey === 'all') && !!toggleZeroBalances && (
         <>

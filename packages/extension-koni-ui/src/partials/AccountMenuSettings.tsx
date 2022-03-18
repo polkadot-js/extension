@@ -26,12 +26,14 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   changeAccountCallback?: (address: string) => void;
+  imgSelected: string | null;
+  setImgSelected?: (imgSelected: string | null) => void;
 }
 
 const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
 
-function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
+function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, imgSelected, onFilter, reference, setImgSelected }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
   const { hierarchy } = useContext(AccountContext);
@@ -93,7 +95,9 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             closeSetting={closeSetting}
             {...json}
             changeAccountCallback={changeAccountCallback}
+            imgSelected={imgSelected}
             key={`${index}:${json.address}`}
+            setImgSelected={setImgSelected}
           />
         ))}
       </div>

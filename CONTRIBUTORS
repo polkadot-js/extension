@@ -1,11 +1,11 @@
      465	Jaco                          	0.42.5 (#969)
-      87	Nam Phạm                      	fix nft loading performance
+     107	Nam Phạm                      	fix es-lint
+      85	AnhMTV                        	Fix yarn install issue with github actions
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      78	AnhMTV                        	Resolve eslint error
       60	quangdo                       	Update AccountQrModal, Tooltip style
       50	leewong                       	# update condition to display correct message on send fund screen
-      27	lw                            	# update lib
-      26	Dominhquangdev                	Update Seach Account in AccountMenuSettings
+      39	lw                            	# fix eslint issue
+      33	Dominhquangdev                	Add Change All Account Avatar feature
       12	Hieu Dao                      	Update README.md
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)

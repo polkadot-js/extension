@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.2.8 (Koni)
+Build date: Mar 18, 2022. Complete internal security audit
+Update:
+- Support child balance.
+- Show Karura, RMRK, Acala tokens balances. 
+
+---
+
 ## 0.2.7 (Koni)
 Build date: Mar 07, 2022. Complete internal security audit
 

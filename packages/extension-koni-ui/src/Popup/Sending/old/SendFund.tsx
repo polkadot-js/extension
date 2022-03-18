@@ -372,8 +372,8 @@ function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProp
             autoPrefill={false}
             className={'kn-field -field-2'}
             help={t<string>('Select a contact or paste the address you want to send funds to.')}
-            label={t<string>('Send to address')}
             isEtherium={isEthereum}
+            label={t<string>('Send to address')}
             // isDisabled={!!propRecipientId}
             labelExtra={
               <Available

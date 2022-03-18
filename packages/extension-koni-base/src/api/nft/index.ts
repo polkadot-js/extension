@@ -81,27 +81,21 @@ export class NftHandler {
     }
   }
 
-  private sortData (data: NftCollection[]) {
-    const sortedData = this.data;
-
-    for (const collection of data) {
-      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.image === collection.image && e.collectionId === collection.collectionId)) {
-        sortedData.push(collection);
+  public refreshApi () {
+    this.handlers.forEach((handler) => {
+      if (handler.getNeedRefresh()) {
+        handler.recoverConnection();
+        console.log(`recovered nft connection for ${handler.getChain() as string}`);
+        handler.setNeedRefresh(false);
       }
-    }
-
-    return sortedData;
+    });
   }
 
-  private async connect () {
+  private async setupApi () {
     try {
-      if (this.handlers.length > 0) {
-        await Promise.all(this.handlers.map(async (handler) => {
-          await handler.connect();
-          console.log(`${handler.getChain() as string} nft connected`);
-        }));
-      } else {
+      if (this.handlers.length <= 0) { // setup connections for first time use
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
+        const start = performance.now();
 
         await Promise.all(this.apiPromises.map(async ({ api: apiPromise, chain }) => {
           const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
@@ -118,45 +112,67 @@ export class NftHandler {
             }
           }
         }));
-      }
+
+        console.log(`nft connection setup done, took ${performance.now() - start}ms`);
+      } else { console.log('nft connection already setup.'); }
     } catch (e) {
       console.log('error connecting for nft', e);
     }
   }
 
+  private sortData (data: NftCollection[]) {
+    const sortedData = this.data;
+
+    for (const collection of data) {
+      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.image === collection.image && e.collectionId === collection.collectionId)) {
+        sortedData.push(collection);
+      }
+    }
+
+    return sortedData;
+  }
+
   public async handleNfts () {
-    const startConnect = performance.now();
-
-    await this.connect();
-    console.log(`nft connect took ${performance.now() - startConnect}ms`);
-
-    console.log(`fetching nft from ${this.handlers.length} chains`, this.addresses);
     const start = performance.now();
 
     let total = 0;
-    let data: NftCollection[] = [];
+    const dataMap: Record<string, NftCollection[]> = {};
+
+    await this.setupApi();
 
     await Promise.all(this.handlers.map(async (handler) => {
+      const currentChain = handler.getChain() as string;
+      // console.log(`${handler.getChain() as string} nft connected`);
       const timeout = new Promise((resolve, reject) => {
         const id = setTimeout(() => {
           clearTimeout(id);
-          resolve('Timed out.');
+          resolve(0);
         }, NFT_TIMEOUT);
       });
 
       await Promise.race([
-        handler.handleNfts(),
+        handler.fetchNfts(),
         timeout
-      ]);
-
-      // console.log(`total ${handler.getChain() as string}`, handler.getTotal());
-
-      total += handler.getTotal();
-      data = [...data, ...handler.getData()];
+      ]).then((e) => {
+        if (e === 1) {
+          total += handler.getTotal();
+          dataMap[currentChain] = handler.getData();
+        } else {
+          console.log(`nft connection for ${currentChain} needs refresh`);
+          handler.setNeedRefresh(true);
+        }
+      });
     }));
 
+    console.log('nft dataMap', dataMap);
+    let data: NftCollection[] = [];
+
+    Object.values(dataMap).forEach((collection) => {
+      data = [...data, ...collection];
+    });
+
     if (isAddressesEqual(this.addresses, this.prevAddresses)) {
-      console.log('nft address no change');
+      // console.log('nft address no change');
 
       if (total < this.total) {
         this.total = total;
@@ -166,7 +182,7 @@ export class NftHandler {
         this.data = this.sortData(data);
       }
     } else {
-      console.log('nft address change');
+      // console.log('nft address change');
       this.total = total;
       this.data = data;
       this.prevAddresses = this.addresses;

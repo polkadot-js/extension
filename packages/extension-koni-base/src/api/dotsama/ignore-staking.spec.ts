@@ -4,7 +4,6 @@
 import connectDotSamaApis, { initApi } from '@polkadot/extension-koni-base/api/dotsama/index';
 import { getSubqueryStakingReward, subscribeStaking } from '@polkadot/extension-koni-base/api/dotsama/staking';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 
 jest.setTimeout(50000);
 
@@ -43,9 +42,10 @@ describe('test staking api', () => {
   });
 
   test('nft', async () => {
-    const testApiNft = new RmrkNftApi();
-
-    await testApiNft.handleNfts();
+    // const dotSamaAPIMap = connectDotSamaApis();
+    // const testApiNft = new NftHandler(dotSamaAPIMap, ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W']);
+    //
+    // await testApiNft.handleNfts();
 
     // for (const item of testApiNft.getNftJson().nftList) {
     //   console.log(item);

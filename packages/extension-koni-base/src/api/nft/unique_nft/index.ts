@@ -224,4 +224,17 @@ export default class UniqueNftApi extends BaseNftApi {
 
     // console.log(`Fetched ${total} nfts from unique`);
   }
+
+  public async fetchNfts (): Promise<number> {
+    try {
+      await this.connect();
+      await this.handleNfts();
+    } catch (e) {
+      console.log(`error fetching nft from ${this.getChain() as string}`);
+
+      return 0;
+    }
+
+    return 1;
+  }
 }

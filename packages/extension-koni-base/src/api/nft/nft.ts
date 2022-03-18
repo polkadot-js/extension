@@ -11,6 +11,7 @@ export abstract class BaseNftApi {
   data: NftCollection[] = [];
   total = 0;
   addresses: string[] = [];
+  needRefresh = false;
 
   protected constructor (api?: ApiProps, addresses?: string[], chain?: string) {
     if (api) this.dotSamaApi = api;
@@ -20,6 +21,18 @@ export abstract class BaseNftApi {
 
   async connect () {
     await this.dotSamaApi?.isReady;
+  }
+
+  recoverConnection () {
+    this.dotSamaApi?.recoverConnect && this.dotSamaApi.recoverConnect();
+  }
+
+  getNeedRefresh () {
+    return this.needRefresh;
+  }
+
+  setNeedRefresh (val: boolean) {
+    this.needRefresh = val;
   }
 
   getChain () {
@@ -66,4 +79,6 @@ export abstract class BaseNftApi {
 
   // Sub-class implements this function to parse data into prop result
   abstract handleNfts(): void;
+
+  abstract fetchNfts(): Promise<number>;
 }

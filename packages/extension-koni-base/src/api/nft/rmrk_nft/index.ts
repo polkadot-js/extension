@@ -276,4 +276,16 @@ export class RmrkNftApi extends BaseNftApi {
     //
     // console.log(`rmrk took ${end - start}ms`);
   }
+
+  public async fetchNfts (): Promise<number> {
+    try {
+      await this.handleNfts();
+    } catch (e) {
+      console.log(`error fetching nft from ${this.getChain() as string}`);
+
+      return 0;
+    }
+
+    return 1;
+  }
 }

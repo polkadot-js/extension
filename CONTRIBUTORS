@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
      107	Nam Phạm                      	fix es-lint
-      85	AnhMTV                        	Fix yarn install issue with github actions
+      86	AnhMTV                        	Release version 0.2.8 (Koni)
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
       50	leewong                       	# update condition to display correct message on send fund screen

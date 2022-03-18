@@ -327,6 +327,17 @@ export default class State {
     return this.#authUrls;
   }
 
+  public removeAuthorization(url: string): AuthUrls {
+    const entry = this.#authUrls[url];
+
+    assert(entry, `The source ${url} is not known`);
+
+    delete this.#authUrls[url];
+    this.saveCurrentAuthList();
+
+    return this.#authUrls;
+  }
+
   private updateIconAuth (shouldClose?: boolean): void {
     this.authSubject.next(this.allAuthRequests);
     this.updateIcon(shouldClose);

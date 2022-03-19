@@ -6,8 +6,5 @@ const createConfig = require('./webpack.shared.cjs');
 module.exports = createConfig(
   {
     extension: './src/extension.ts'
-  },
-  {
-    '@polkadot/wasm-crypto-wasm/data.js': require.resolve('@polkadot/wasm-crypto-wasm/empty')
   }
 );

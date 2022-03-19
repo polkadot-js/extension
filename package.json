@@ -33,20 +33,20 @@
     "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.7",
-    "@polkadot/dev": "^0.65.94",
+    "@babel/core": "^7.17.8",
+    "@polkadot/dev": "^0.65.97",
     "@types/jest": "^27.4.1",
     "i18next-scanner": "^3.1.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^7.12.1",
-    "@polkadot/keyring": "^8.5.1",
-    "@polkadot/networks": "^8.5.1",
-    "@polkadot/types": "^7.12.1",
-    "@polkadot/util": "^8.5.1",
-    "@polkadot/util-crypto": "^8.5.1",
-    "@polkadot/x-fetch": "^8.5.1",
+    "@polkadot/api": "^7.13.1",
+    "@polkadot/keyring": "^8.6.1",
+    "@polkadot/networks": "^8.6.1",
+    "@polkadot/types": "^7.13.1",
+    "@polkadot/util": "^8.6.1",
+    "@polkadot/util-crypto": "^8.6.1",
+    "@polkadot/x-fetch": "^8.6.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.6.2"

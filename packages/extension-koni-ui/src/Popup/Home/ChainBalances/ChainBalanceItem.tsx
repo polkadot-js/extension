@@ -48,8 +48,8 @@ function ChainBalanceItem ({ accountInfo,
   }, [show, t]);
 
   const _onOpenDetail = useCallback(() => {
-    showBalanceDetail(accountInfo.key);
-  }, [accountInfo.key, showBalanceDetail]);
+    !isLoading && showBalanceDetail(accountInfo.key);
+  }, [accountInfo.key, isLoading, showBalanceDetail]);
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();

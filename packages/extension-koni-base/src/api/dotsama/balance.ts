@@ -95,7 +95,7 @@ function subcribleAcalaTokenBalanceInterval (addresses: string[], api: ApiPromis
       originBalanceItem.children = {
         DOT: getBalanceChildItem(dotBalances, 10),
         LDOT: getBalanceChildItem(ldotBalances, 10),
-        AUSD: getBalanceChildItem(ausdBalances, 12),
+        aUSD: getBalanceChildItem(ausdBalances, 12),
         LCDOT: getBalanceChildItem(lcdotBalances, 10)
       };
 
@@ -148,12 +148,12 @@ function subcribleKaruraTokenBalanceInterval (addresses: string[], api: ApiPromi
       }));
 
       originBalanceItem.children = {
-        KUSD: getBalanceChildItem(kusdBalances, 12),
+        kUSD: getBalanceChildItem(kusdBalances, 12),
         KSM: getBalanceChildItem(ksmBalances, 12),
         RMRK: getBalanceChildItem(rmrkBalances, 10),
         LKSM: getBalanceChildItem(lksmBalances, 12),
         BNC: getBalanceChildItem(bncBalances, 12),
-        VSKSM: getBalanceChildItem(vsksmBalances, 12),
+        vsKSM: getBalanceChildItem(vsksmBalances, 12),
         PHA: getBalanceChildItem(phaBalances, 12),
         KINT: getBalanceChildItem(kintBalances, 12),
         KBTC: getBalanceChildItem(kbtcBalances, 8),
@@ -254,7 +254,7 @@ function subcribleBifrostTokenBalanceInterval (addresses: string[], api: ApiProm
         DOT: getBalanceChildItem(dotBalances, 10),
         KAR: getBalanceChildItem(karBalances, 12),
         KSM: getBalanceChildItem(ksmBalances, 12),
-        KUSD: getBalanceChildItem(kusdBalances, 12),
+        kUSD: getBalanceChildItem(kusdBalances, 12),
         PHA: getBalanceChildItem(phaBalances, 12),
         RMRK: getBalanceChildItem(rmrkBalances, 10),
         ZLK: getBalanceChildItem(zlkBalances, 18)

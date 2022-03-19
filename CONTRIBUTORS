@@ -1,11 +1,11 @@
      465	Jaco                          	0.42.5 (#969)
      107	Nam Phạm                      	fix es-lint
-      86	AnhMTV                        	Release version 0.2.8 (Koni)
+      92	AnhMTV                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
       50	leewong                       	# update condition to display correct message on send fund screen
       39	lw                            	# fix eslint issue
-      33	Dominhquangdev                	Add Change All Account Avatar feature
+      35	Dominhquangdev                	Update Change Avatar All Account
       12	Hieu Dao                      	Update README.md
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)

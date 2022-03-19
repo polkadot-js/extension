@@ -272,5 +272,8 @@
   "Import Private Key": "",
   "existing 12 or 24-word private key": "",
   "private key": "",
-  "Change All Account Avatar": ""
+  "Change All Account Avatar": "",
+  "File is too large (limited 3.5MB)": "",
+  "Change Avatar": "",
+  "The private key must be a string of 0x and 64 characters. If it doesn't start with 0x, please add it manually.": ""
 }

@@ -192,7 +192,7 @@ function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api
         }));
 
         free = sumBN(bals.map((bal) => new BN(bal || 0)));
-        console.log('TokenBals', symbol, addresses, bals, free);
+        // console.log('TokenBals', symbol, addresses, bals, free);
 
         tokenBalanceMap[symbol] = {
           reserved: '0',

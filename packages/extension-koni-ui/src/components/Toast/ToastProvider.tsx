@@ -15,6 +15,7 @@ const TOAST_TIMEOUT = 1500;
 const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<ToastProviderProps> => {
   const [content, setContent] = useState('');
   const [visible, setVisible] = useState(false);
+  const [isError, setError] = useState(false);
 
   const show = useCallback((message: string): () => void => {
     const timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
@@ -25,11 +26,16 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
     return (): void => clearTimeout(timerId);
   }, []);
 
+  const setToastError = useCallback((isError: boolean) => {
+    setError(isError);
+  }, []);
+
   return (
-    <ToastContext.Provider value={{ show }}>
+    <ToastContext.Provider value={{ show, setToastError }}>
       {children}
       <Toast
         content={content}
+        isError={isError}
         visible={visible}
       />
     </ToastContext.Provider>

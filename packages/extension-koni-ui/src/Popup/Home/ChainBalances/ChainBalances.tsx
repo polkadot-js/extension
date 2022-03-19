@@ -33,6 +33,20 @@ interface Props extends ThemeProps {
   setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
 }
 
+function hasAnyChildTokenBalance (balanceInfo: BalanceInfo): boolean {
+  if (!balanceInfo.childrenBalances || !balanceInfo.childrenBalances.length) {
+    return false;
+  }
+
+  for (const item of balanceInfo.childrenBalances) {
+    if (item.balanceValue.gt(BN_ZERO)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function isAllowToShow (
   isShowZeroBalances: boolean,
   currentNetworkKey: string,
@@ -43,7 +57,8 @@ function isAllowToShow (
   }
 
   return isShowZeroBalances ||
-    !!(balanceInfo && balanceInfo.balanceValue.gt(BN_ZERO));
+    !!(balanceInfo &&
+      (balanceInfo.balanceValue.gt(BN_ZERO) || hasAnyChildTokenBalance(balanceInfo)));
 }
 
 function getAccountInfoByNetwork (

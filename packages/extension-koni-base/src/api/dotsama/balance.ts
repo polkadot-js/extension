@@ -224,6 +224,57 @@ function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api
   };
 }
 
+function subcribleBifrostTokenBalanceInterval (addresses: string[], api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
+  const getTokenBalances = () => {
+    (async () => {
+      const [
+        bncBalances,
+        dotBalances,
+        karBalances,
+        ksmBalances,
+        kusdBalances,
+        phaBalances,
+        rmrkBalances,
+        zlkBalances
+      ] = await Promise.all([
+        'BNC',
+        'DOT',
+        'KAR',
+        'KSM',
+        'KUSD',
+        'PHA',
+        'RMRK',
+        'ZLK'
+      ].map((token) => {
+        return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
+      }));
+
+      originBalanceItem.children = {
+        BNC: getBalanceChildItem(bncBalances, 12),
+        DOT: getBalanceChildItem(dotBalances, 10),
+        KAR: getBalanceChildItem(karBalances, 12),
+        KSM: getBalanceChildItem(ksmBalances, 12),
+        KUSD: getBalanceChildItem(kusdBalances, 12),
+        PHA: getBalanceChildItem(phaBalances, 12),
+        RMRK: getBalanceChildItem(rmrkBalances, 10),
+        ZLK: getBalanceChildItem(zlkBalances, 18)
+      };
+
+      // eslint-disable-next-line node/no-callback-literal
+      callback('bifrost', originBalanceItem);
+    })().catch((e) => {
+      console.log('There is problem when fetching Karura token balance', e);
+    });
+  };
+
+  getTokenBalances();
+  const interval = setInterval(getTokenBalances, ACALA_REFRESH_BALANCE_INTERVAL);
+
+  return () => {
+    clearInterval(interval);
+  };
+}
+
 function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
@@ -260,6 +311,8 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
     unsub2 = subcribleAcalaTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
   } else if (networkKey === 'karura') {
     unsub2 = subcribleKaruraTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
+  } else if (networkKey === 'bifrost') {
+    unsub2 = subcribleBifrostTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
   } else if (ethereumChains.indexOf(networkKey) > -1) {
     unsub2 = subscribeMoonbeamInterval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }

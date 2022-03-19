@@ -97,7 +97,6 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   shiden: require('./shiden.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   'sora-substrate': require('./sora-substrate.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   statemine: require('./statemine.svg'),
@@ -151,6 +150,10 @@ const LogosMap: Record<string, string> = {
   vsksm: require('./vsksm.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   ksm: require('./kusama.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kar: require('./karura.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  zlk: require('./zenlink.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

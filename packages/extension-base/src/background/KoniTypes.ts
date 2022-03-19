@@ -182,7 +182,7 @@ export interface ApiProps extends ApiState {
   useEvmAddress?: boolean
 }
 
-export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN'| 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
+export type NetWorkGroup = 'RELAY_CHAIN' | 'POLKADOT_PARACHAIN' | 'KUSAMA_PARACHAIN' | 'MAIN_NET' | 'TEST_NET' | 'UNKNOWN';
 
 export interface NetWorkInfo {
   chain: string;
@@ -257,6 +257,15 @@ export interface TransactionHistoryItemType {
   extrinsicHash: string
 }
 
+export interface MoonAsset {
+  deposit: number,
+  name: string,
+  symbol: string,
+  decimals: number,
+  isFrozen: boolean,
+  address: string
+}
+
 export interface RequestTransactionHistoryGet {
   address: string;
   networkKey: string;
@@ -309,6 +318,7 @@ export interface ResponseSeedCreateV2 {
   seed: string,
   addressMap: Record<KeypairType, string>
 }
+
 export type ResponseSeedValidateV2 = ResponseSeedCreateV2
 export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
 export type AccountRef = Array<string>

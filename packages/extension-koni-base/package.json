@@ -63,7 +63,8 @@
     "moonbeam-types-bundle": "2.0.3",
     "pontem-types-bundle": "1.0.15",
     "protobufjs": "^6.11.2",
-    "rxjs": "^7.5.1"
+    "rxjs": "^7.5.1",
+    "web3": "^1.7.1"
   },
   "devDependencies": {
     "@polkadot/extension-mocks": "^0.2.8-1"

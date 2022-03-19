@@ -16,7 +16,7 @@
   "type": "module",
   "version": "0.42.10-0",
   "dependencies": {
-    "@babel/runtime": "^7.17.7",
+    "@babel/runtime": "^7.17.8",
     "@polkadot/extension-base": "^0.42.10-0",
     "@polkadot/extension-inject": "^0.42.10-0",
     "@polkadot/extension-ui": "^0.42.10-0"

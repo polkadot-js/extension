@@ -58,7 +58,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.1.0, @babel/core@npm:^7.12.3, @babel/core@npm:^7.17.7, @babel/core@npm:^7.17.8, @babel/core@npm:^7.7.2, @babel/core@npm:^7.8.0":
+"@babel/core@npm:^7.1.0, @babel/core@npm:^7.12.3, @babel/core@npm:^7.17.8, @babel/core@npm:^7.7.2, @babel/core@npm:^7.8.0":
   version: 7.17.8
   resolution: "@babel/core@npm:7.17.8"
   dependencies:
@@ -1386,7 +1386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.17.2, @babel/runtime@npm:^7.17.7, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.8.4":
+"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.14.5, @babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.17.2, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.8.4":
   version: 7.17.8
   resolution: "@babel/runtime@npm:7.17.8"
   dependencies:
@@ -2515,7 +2515,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@polkadot/api": ^7.13.1
     "@polkadot/extension-chains": ^0.42.10-0
     "@polkadot/extension-dapp": ^0.42.10-0
@@ -2539,7 +2539,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@polkadot/extension-inject": ^0.42.10-0
     "@polkadot/networks": ^8.6.1
     "@polkadot/util": ^8.6.1
@@ -2554,7 +2554,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-compat-metamask@workspace:packages/extension-compat-metamask"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/extension-inject": ^0.42.10-0
     "@polkadot/types": ^7.13.1
@@ -2569,7 +2569,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@polkadot/extension-inject": ^0.42.10-0
     "@polkadot/util": ^8.6.1
     "@polkadot/util-crypto": ^8.6.1
@@ -2584,7 +2584,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@polkadot/rpc-provider": ^7.13.1
     "@polkadot/types": ^7.13.1
     "@polkadot/util": ^8.6.1
@@ -2601,7 +2601,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     sinon-chrome: ^3.0.1
   languageName: unknown
   linkType: soft
@@ -2610,7 +2610,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@fortawesome/fontawesome-svg-core": ^6.1.0
     "@fortawesome/free-brands-svg-icons": ^6.1.0
     "@fortawesome/free-regular-svg-icons": ^6.1.0
@@ -2636,7 +2636,7 @@ __metadata:
     "@types/enzyme-adapter-react-16": ^1.0.6
     "@types/file-saver": ^2.0.5
     "@types/react-copy-to-clipboard": ^5.0.2
-    "@types/react-dom": ^17.0.13
+    "@types/react-dom": ^17.0.14
     "@types/react-router": ^5.1.18
     "@types/react-router-dom": ^5.3.3
     "@types/sinon-chrome": ^2.2.11
@@ -2649,7 +2649,7 @@ __metadata:
     react: ^17.0.2
     react-dom: ^17.0.2
     react-dropzone: ^11.7.1
-    react-i18next: ^11.15.7
+    react-i18next: ^11.16.1
     react-is: ^17.0.2
     react-router: ^5.2.1
     react-router-dom: ^5.3.0
@@ -2662,7 +2662,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
-    "@babel/runtime": ^7.17.7
+    "@babel/runtime": ^7.17.8
     "@polkadot/dev": ^0.65.97
     "@polkadot/extension-base": ^0.42.10-0
     "@polkadot/extension-inject": ^0.42.10-0
@@ -3618,12 +3618,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^17.0.13":
-  version: 17.0.13
-  resolution: "@types/react-dom@npm:17.0.13"
+"@types/react-dom@npm:^17.0.14":
+  version: 17.0.14
+  resolution: "@types/react-dom@npm:17.0.14"
   dependencies:
     "@types/react": "*"
-  checksum: 62c42a54ac8961c23a0e74b9cdd8b0a78563757e462b1ab665b2aa365bfd8b86a73d3f6eafc09a4a80fb08659321db168f012aa597c41c0df36f645a94e9266b
+  checksum: b54cd0ef573236b3d87fe7493e6d1c36d8b4ca37a3b46364272a5c91ac178e3296b68ea1aeb299ce68f12ad663c5720ee890d0539b14881c6754bdcbdb0befa0
   languageName: node
   linkType: hard
 
@@ -13641,9 +13641,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^11.15.7":
-  version: 11.15.7
-  resolution: "react-i18next@npm:11.15.7"
+"react-i18next@npm:^11.16.1":
+  version: 11.16.1
+  resolution: "react-i18next@npm:11.16.1"
   dependencies:
     "@babel/runtime": ^7.14.5
     html-escaper: ^2.0.2
@@ -13656,7 +13656,7 @@ __metadata:
       optional: true
     react-native:
       optional: true
-  checksum: 9898fc0dd6bc68b93402556d50b5e8ac3a027e36f5f5575e706dc7c7f42c2704dc6ab12e07802497473454f735560a2ed1e4a4d4cd6f4eec544b5b47961907e1
+  checksum: 2c7b7f0a3dfbd89c841d7e5e5f7d679a75930cbb1c15f10ee82accef2e5f8721fdc4bc3545846b320c66cca68c89d216f4cada76feab059f03fe21b7eddf8097
   languageName: node
   linkType: hard
 
@@ -14312,7 +14312,7 @@ resolve@^2.0.0-next.3:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@babel/core": ^7.17.7
+    "@babel/core": ^7.17.8
     "@polkadot/dev": ^0.65.97
     "@types/jest": ^27.4.1
     i18next-scanner: ^3.1.0

@@ -361,8 +361,8 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               changeAccountCallback={changeAccountCallback}
               className='account-menu-setting'
               closeSetting={_toggleSettings}
-              reference={setRef}
               imgSelected={imgSelected}
+              reference={setRef}
               setImgSelected={setImgSelected}
             />
           )}

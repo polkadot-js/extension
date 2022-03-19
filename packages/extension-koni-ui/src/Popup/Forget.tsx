@@ -30,6 +30,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
+  const [buttonId, setButtonId] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const { accounts } = useContext(AccountContext);
   const _isAllAccount = isAccountAll(address);
@@ -37,6 +38,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
 
   const _goHome = useCallback(
     () => {
+      setButtonId('cancel');
       window.localStorage.setItem('popupNavigation', '/');
       onAction('/');
     },
@@ -46,6 +48,7 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
   const _onClick = useCallback(
     (): void => {
       setIsBusy(true);
+      setButtonId('forget');
       forgetAccount(address)
         .then(() => {
           const accountAll = accounts.find((acc) => isAccountAll(acc.address));
@@ -62,15 +65,15 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
             console.error('Can not find account All', accounts);
           }
 
-          setIsBusy(false);
-          _goHome();
+          window.localStorage.setItem('popupNavigation', '/');
+          onAction('/');
         })
         .catch((error: Error) => {
           setIsBusy(false);
           console.error(error);
         });
     },
-    [_goHome, accounts, address]
+    [accounts, address, onAction]
   );
 
   return (
@@ -105,15 +108,17 @@ function Forget ({ className, match: { params: { address } } }: Props): React.Re
             <div className='forget-account__action-area'>
               <Button
                 className='forget-account-btn'
-                isBusy={isBusy}
+                isBusy={isBusy && buttonId === 'cancel'}
+                isDisabled={isBusy}
                 onClick={_goHome}
               >
                 <span>{t<string>('Cancel')}</span>
               </Button>
               <Button
                 className='forget-account-btn'
-                isBusy={isBusy}
+                isBusy={isBusy && buttonId === 'forget'}
                 isDanger
+                isDisabled={isBusy}
                 onClick={_onClick}
               >
                 {t<string>('Forget')}

@@ -12,6 +12,7 @@ import changeAvatar from '@polkadot/extension-koni-ui/assets/icon/camera.svg';
 import changeAvatarHover from '@polkadot/extension-koni-ui/assets/icon/camera-hover.svg';
 import { AccountContext, AccountInfoEl, ActionContext } from '@polkadot/extension-koni-ui/components';
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { saveCurrentAccountAddress, triggerAccountsSubscription, windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -38,6 +39,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
+  const { setToastError, show } = useToast();
 
   useEffect((): void => {
     if (currentAccount?.address === address) {
@@ -92,9 +94,17 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
   const fileSelectedChange = useCallback(
     (event: any): void => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-      getBase64(event.target.files[0]);
-    }, [getBase64]);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      const size = event.target.files[0].size;
+
+      if (size < 3670016) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+        getBase64(event.target.files[0]);
+      } else {
+        setToastError(true);
+        show(t('File is too large (limited 3.5MB)'));
+      }
+    }, [getBase64, setToastError, show, t]);
 
   const onSelectImg = useCallback(() => {
     if (isPopup && (isFirefox || isLinux)) {
@@ -138,7 +148,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
           onClick={onSelectImg}
         >
           <input
-            accept='.jpg, .jpeg, .png, .svg'
+            accept='.jpg, .jpeg, .png'
             onChange={fileSelectedChange}
             ref={inputRef}
             style={{ display: 'none' }}

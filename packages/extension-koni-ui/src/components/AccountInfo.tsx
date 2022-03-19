@@ -34,9 +34,10 @@ export interface Props {
   isShowAddress?: boolean;
   isShowBanner?: boolean;
   iconSize?: number;
+  imgSelected?: string | null;
 }
 
-function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, className, genesisHash, iconSize = 32, imgSelected, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -48,8 +49,14 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
+  const avatarSaved = localStorage.getItem('allAccountLogo');
+  const [avatarSelected, setAvatarSelected] = useState(avatarSaved);
 
   const _isAccountAll = address && isAccountAll(address);
+
+  useEffect(() => {
+    imgSelected && setAvatarSelected(imgSelected);
+  }, [imgSelected]);
 
   useEffect((): void => {
     if (!address) {
@@ -87,17 +94,16 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
   };
 
   const parentNameSuri = getParentNameSuri(parentName, suri);
-  const imgSelected = localStorage.getItem('allAccountLogo');
 
   return (
     <div className={className}>
       <div className='account-info-row'>
         {_isAccountAll
-          ? imgSelected
+          ? avatarSelected
             ? <img
               alt='all-account-icon'
               className='account-info__all-account-icon'
-              src={imgSelected}
+              src={avatarSelected}
             />
             : <img
               alt='all-account-icon'

@@ -361,7 +361,9 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               changeAccountCallback={changeAccountCallback}
               className='account-menu-setting'
               closeSetting={_toggleSettings}
+              imgSelected={imgSelected}
               reference={setRef}
+              setImgSelected={setImgSelected}
             />
           )}
         </div>
@@ -372,7 +374,6 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
             formatted={formattedAddress}
             isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}
-            setImgSelected={setImgSelected}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             toggleVisibility={_toggleVisibility}
             toggleZeroBalances={_toggleZeroBalances}

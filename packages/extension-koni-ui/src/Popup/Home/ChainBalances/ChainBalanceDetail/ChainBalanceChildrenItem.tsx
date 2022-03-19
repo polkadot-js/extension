@@ -35,7 +35,7 @@ function ChainBalanceChildrenItem ({ accountInfo, balanceInfo, className, isLoad
           <img
             alt={'Logo'}
             className='chain-balance--children-item__logo'
-            src={getLogoByNetworkKey(balanceInfo.key.toLowerCase())}
+            src={getLogoByNetworkKey(balanceInfo.key.toLowerCase(), accountInfo.networkKey)}
           />
 
           <div className='chain-balance--children-item__meta-wrapper'>

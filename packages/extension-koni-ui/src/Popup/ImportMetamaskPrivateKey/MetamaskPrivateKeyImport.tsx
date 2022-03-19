@@ -63,7 +63,7 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
       .catch(() => {
         setAddress('');
         onAccountChange(null);
-        setError(t<string>('Invalid mnemonic seed'));
+        setError(t<string>('The private key must be a string of 0x and 64 characters. If it doesn\'t start with 0x, please add it manually.'));
       });
   }, [t, genesis, seed, onAccountChange, type, dep]);
 

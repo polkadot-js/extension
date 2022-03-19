@@ -73,8 +73,14 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
           setGenesisHashOption(getGenesisOptionsByAddressType(null, accounts, options));
         }
 
-        setAddress(address);
-        setEvmAddress(evmAddress);
+        if (address) {
+          setAddress(address);
+        }
+
+        if (evmAddress) {
+          setEvmAddress(evmAddress);
+        }
+
         setError('');
         onAccountChange(
           objectSpread<AccountInfo>({}, { address, suri, genesis, type })
@@ -181,26 +187,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
               value={genesis}
             />
           }
-          {/* <div */}
-          {/*  className='seed-and-path__advanced-toggle' */}
-          {/*  onClick={_onToggleAdvanced} */}
-          {/* > */}
-          {/*  <FontAwesomeIcon */}
-          {/*    color='#888888' */}
-          {/*    // @ts-ignore */}
-          {/*    icon={advanced ? faChevronDown : faChevronRight} */}
-          {/*  /> */}
-          {/*  <span>{t<string>('advanced')}</span> */}
-          {/* </div> */}
-          {/* { advanced && ( */}
-          {/*  <InputWithLabel */}
-          {/*    className='derivationPath' */}
-          {/*    isError={!!path && !!error} */}
-          {/*    label={t<string>('derivation path')} */}
-          {/*    onChange={setPath} */}
-          {/*    value={path || ''} */}
-          {/*  /> */}
-          {/* )} */}
+
           {!!error && !!seed && (
             <Warning
               isDanger

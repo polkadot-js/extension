@@ -28,9 +28,11 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [error, setError] = useState('');
+  const [buttonId, setButtonId] = useState('');
 
   const _goHome = useCallback(
     () => {
+      setButtonId('cancel');
       window.localStorage.setItem('popupNavigation', '/');
       onAction('/');
     },
@@ -47,7 +49,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
   const _onExportAllButtonClick = useCallback(
     (): void => {
       setIsBusy(true);
-
+      setButtonId('exportAll');
       exportAccounts(accounts.filter((acc) => acc.address !== ALL_ACCOUNT_KEY).map((account) => account.address), pass)
         .then(({ exportedJson }) => {
           const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
@@ -95,7 +97,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
           <div className='export-button-wrapper'>
             <Button
               className='export-btn'
-              isBusy={isBusy}
+              isBusy={isBusy && buttonId === 'cancel'}
               onClick={_goHome}
             >
               <span>{t<string>('Cancel')}</span>
@@ -103,7 +105,7 @@ function ExportAll ({ className }: Props): React.ReactElement<Props> {
             <Button
               className='export-btn'
               data-export-button
-              isBusy={isBusy}
+              isBusy={isBusy && buttonId === 'exportAll'}
               isDisabled={pass.length === 0 || !!error}
               onClick={_onExportAllButtonClick}
             >

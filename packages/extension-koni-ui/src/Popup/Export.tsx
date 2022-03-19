@@ -32,6 +32,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const [isBusy, setIsBusy] = useState(false);
   const [pass, setPass] = useState('');
   const [privateKey, setPrivateKey] = useState<string | undefined>(undefined);
+  const [buttonId, setButtonId] = useState('');
   const { show } = useToast();
   const [error, setError] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -40,6 +41,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
 
   const _goHome = useCallback(
     () => {
+      setButtonId('cancel');
       window.localStorage.setItem('popupNavigation', '/');
       onAction('/');
     },
@@ -56,7 +58,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const _onExportButtonClick = useCallback(
     (): void => {
       setIsBusy(true);
-
+      setButtonId('export');
       exportAccount(address, pass)
         .then(({ exportedJson }) => {
           const blob = new Blob([JSON.stringify(exportedJson)], { type: 'application/json; charset=utf-8' });
@@ -78,6 +80,7 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
   const _onExportPrivateButtonClick = useCallback(
     (): void => {
       setIsBusy(true);
+      setButtonId('exportPrivate');
       exportAccountPrivateKey(address, pass)
         .then(({ privateKey }) => {
           setPrivateKey(privateKey);
@@ -170,7 +173,8 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
             <div className='export__action-area'>
               <Button
                 className='export-button'
-                isBusy={isBusy}
+                isBusy={isBusy && buttonId === 'cancel'}
+                isDisabled={isBusy}
                 onClick={_goHome}
               >
                 <span>{t<string>('Cancel')}</span>
@@ -178,8 +182,8 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
               {!privateKey && <Button
                 className='export-button'
                 data-export-button
-                isBusy={isBusy}
-                isDisabled={pass.length === 0 || !!error}
+                isBusy={isBusy && buttonId === 'exportPrivate'}
+                isDisabled={pass.length === 0 || !!error || isBusy}
                 onClick={_onExportPrivateButtonClick}
               >
                 {t<string>('Private Key')}
@@ -187,8 +191,8 @@ function ExportAccount ({ className, match: { params: { address } } }: Props): R
               <Button
                 className='export-button'
                 data-export-button
-                isBusy={isBusy}
-                isDisabled={pass.length === 0 || !!error}
+                isBusy={isBusy && buttonId === 'export'}
+                isDisabled={pass.length === 0 || !!error || isBusy}
                 onClick={_onExportButtonClick}
               >
                 {t<string>('JSON')}

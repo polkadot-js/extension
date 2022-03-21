@@ -15,6 +15,7 @@
        1	Andrei Eres                   	Add extension prefix (#891)
        1	Caio                          	Implement signRaw (#196)
        1	Chakrarin Sarnt               	Add Thai language (#788)
+       1	CustomBlink                   	Add authorized URL removal  (#1029)
        1	David Hawig                   	Update README.md (#403)
        1	f00                           	fix(authorize): long urls pushes the cta down (#1005)
        1	Forrest                       	Add Web3AccountsOptions to web3FromAddress function (#617)

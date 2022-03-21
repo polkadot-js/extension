@@ -7,23 +7,28 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
-import { Switch } from '@polkadot/extension-ui/components';
+import { RemoveAuth, Switch } from '@polkadot/extension-ui/components';
 
 import useTranslation from '../../hooks/useTranslation';
 
 interface Props extends ThemeProps {
   className?: string;
   info: AuthUrlInfo;
-  toggleAuth: (url: string) => void
+  toggleAuth: (url: string) => void;
+  removeAuth: (url: string) => void;
   url: string;
 }
 
-function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.ReactElement<Props> {
+function WebsiteEntry ({ className = '', info, removeAuth, toggleAuth, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const switchAccess = useCallback(() => {
     toggleAuth(url);
   }, [toggleAuth, url]);
+
+  const _removeAuth = useCallback(() => {
+    removeAuth(url);
+  }, [removeAuth, url]);
 
   return (
     <div className={`${className} ${info.isAllowed ? 'allowed' : 'denied'}`}>
@@ -37,6 +42,13 @@ function WebsiteEntry ({ className = '', info, toggleAuth, url }: Props): React.
         onChange={switchAccess}
         uncheckedLabel={t<string>('denied')}
       />
+
+      <div
+        className='removeAuth'
+        onClick={_removeAuth}
+      >
+        <RemoveAuth />
+      </div>
     </div>
   );
 }

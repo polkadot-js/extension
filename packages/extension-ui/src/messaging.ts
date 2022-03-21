@@ -196,6 +196,10 @@ export async function toggleAuthorization (url: string): Promise<ResponseAuthori
   return sendMessage('pri(authorize.toggle)', url);
 }
 
+export async function removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
+  return sendMessage('pri(authorize.remove)', url);
+}
+
 export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(metadata.requests)', null, cb);
 }

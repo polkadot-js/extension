@@ -100,13 +100,15 @@ module.exports = (entry, alias = {}) => ({
       crypto: require.resolve('crypto-browserify'),
       path: require.resolve('path-browserify'),
       stream: require.resolve('stream-browserify'),
+      os: require.resolve('os-browserify/browser'),
+      http: require.resolve('stream-http'),
+      assert: require.resolve('assert'),
       zlib: false,
-      https: false,
-      http: false,
-      url: false
+      url: false,
+      https: false
+      // http: false,
       // zlib: require.resolve("browserify-zlib"),
       // https: require.resolve("https-browserify"),
-      // http: require.resolve("stream-http"),
       // url: require.resolve("url/")
     }
   },

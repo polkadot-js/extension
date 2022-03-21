@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 
 const NETWORKS: Record<string, NetWorkInfo> = {
   polkadot: {
@@ -591,4 +592,11 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   }
 };
 
+export const EVM_NETWORKS = ethereumChains.reduce((previousValue, currentValue) => {
+  if (NETWORKS[currentValue]) {
+    previousValue[currentValue] = NETWORKS[currentValue];
+  }
+
+  return previousValue;
+}, {} as Record<string, NetWorkInfo>);
 export default NETWORKS;

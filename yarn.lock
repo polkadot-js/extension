@@ -3406,16 +3406,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@^0.2.8-0, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@^0.2.9-1, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/api": ^7.3.1
-    "@polkadot/extension-chains": ^0.2.8-0
-    "@polkadot/extension-dapp": ^0.2.8-0
-    "@polkadot/extension-inject": ^0.2.8-0
-    "@polkadot/extension-mocks": ^0.2.8-0
+    "@polkadot/extension-chains": ^0.2.9-1
+    "@polkadot/extension-dapp": ^0.2.9-1
+    "@polkadot/extension-inject": ^0.2.9-1
+    "@polkadot/extension-mocks": ^0.2.9-1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
     "@polkadot/phishing": ^0.8.7
@@ -3430,12 +3430,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-chains@^0.2.8-0, @polkadot/extension-chains@workspace:packages/extension-chains":
+"@polkadot/extension-chains@^0.2.9-1, @polkadot/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
     "@babel/runtime": ^7.16.7
-    "@polkadot/extension-inject": ^0.2.8-0
+    "@polkadot/extension-inject": ^0.2.9-1
     "@polkadot/networks": ^8.3.1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
@@ -3451,7 +3451,7 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@metamask/detect-provider": ^1.2.0
-    "@polkadot/extension-inject": ^0.2.8-0
+    "@polkadot/extension-inject": ^0.2.9-1
     "@polkadot/types": ^7.3.1
     "@polkadot/util": ^8.3.1
     web3: ^1.6.1
@@ -3460,12 +3460,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@^0.2.8-0, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-dapp@^0.2.9-1, @polkadot/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.16.7
-    "@polkadot/extension-inject": ^0.2.8-0
+    "@polkadot/extension-inject": ^0.2.9-1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
   peerDependencies:
@@ -3475,7 +3475,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@^0.2.8-0, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@^0.2.9-1, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -3492,7 +3492,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-koni-base@^0.2.8-0, @polkadot/extension-koni-base@workspace:packages/extension-koni-base":
+"@polkadot/extension-koni-base@^0.2.9-1, @polkadot/extension-koni-base@workspace:packages/extension-koni-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-koni-base@workspace:packages/extension-koni-base"
   dependencies:
@@ -3515,11 +3515,11 @@ __metadata:
     "@phala/typedefs": 0.2.30
     "@polkadot/api": ^7.11.1
     "@polkadot/api-derive": ^7.8.1
-    "@polkadot/extension-base": ^0.2.8-0
-    "@polkadot/extension-chains": ^0.2.8-0
-    "@polkadot/extension-dapp": ^0.2.8-0
-    "@polkadot/extension-inject": ^0.2.8-0
-    "@polkadot/extension-mocks": ^0.2.8-0
+    "@polkadot/extension-base": ^0.2.9-1
+    "@polkadot/extension-chains": ^0.2.9-1
+    "@polkadot/extension-dapp": ^0.2.9-1
+    "@polkadot/extension-inject": ^0.2.9-1
+    "@polkadot/extension-mocks": ^0.2.9-1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
     "@polkadot/phishing": ^0.8.7
@@ -3544,10 +3544,12 @@ __metadata:
     pontem-types-bundle: 1.0.15
     protobufjs: ^6.11.2
     rxjs: ^7.5.1
+    web3: ^1.7.1
+    web3-eth-contract: ^1.7.1
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-koni-ui@^0.2.8-0, @polkadot/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@polkadot/extension-koni-ui@^0.2.9-1, @polkadot/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -3558,12 +3560,12 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": ^5.15.4
     "@fortawesome/react-fontawesome": ^0.1.16
     "@polkadot/api-contract": ^7.0.2
-    "@polkadot/extension-base": ^0.2.8-0
-    "@polkadot/extension-chains": ^0.2.8-0
-    "@polkadot/extension-dapp": ^0.2.8-0
-    "@polkadot/extension-inject": ^0.2.8-0
-    "@polkadot/extension-koni-base": ^0.2.8-0
-    "@polkadot/extension-mocks": ^0.2.8-0
+    "@polkadot/extension-base": ^0.2.9-1
+    "@polkadot/extension-chains": ^0.2.9-1
+    "@polkadot/extension-dapp": ^0.2.9-1
+    "@polkadot/extension-inject": ^0.2.9-1
+    "@polkadot/extension-koni-base": ^0.2.9-1
+    "@polkadot/extension-mocks": ^0.2.9-1
     "@polkadot/hw-ledger": ^8.3.1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
@@ -3620,10 +3622,11 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/dev": ^0.65.23
-    "@polkadot/extension-base": ^0.2.8-0
-    "@polkadot/extension-inject": ^0.2.8-0
-    "@polkadot/extension-koni-base": ^0.2.8-0
-    "@polkadot/extension-koni-ui": ^0.2.8-0
+    "@polkadot/extension-base": ^0.2.9-1
+    "@polkadot/extension-inject": ^0.2.9-1
+    "@polkadot/extension-koni-base": ^0.2.9-1
+    "@polkadot/extension-koni-ui": ^0.2.9-1
+    assert: ^2.0.0
     babel-loader: ^8.2.3
     browser-resolve: ^2.0.0
     buffer: ^6.0.3
@@ -3632,9 +3635,11 @@ __metadata:
     extract-loader: ^5.1.0
     file-loader: ^6.2.0
     html-loader: ^3.1.0
+    os-browserify: ^0.3.0
     path-browserify: ^1.0.1
     process: ^0.11.10
     stream-browserify: ^3.0.0
+    stream-http: ^3.2.0
     thread-loader: ^3.0.4
     url-loader: ^4.1.1
     webpack: ^5.65.0
@@ -3643,7 +3648,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-mocks@^0.2.8-0, @polkadot/extension-mocks@workspace:packages/extension-mocks":
+"@polkadot/extension-mocks@^0.2.9-1, @polkadot/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -3652,7 +3657,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@^0.2.8-0, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@^0.2.9-1, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -3662,11 +3667,11 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": ^5.15.4
     "@fortawesome/free-solid-svg-icons": ^5.15.4
     "@fortawesome/react-fontawesome": ^0.1.16
-    "@polkadot/extension-base": ^0.2.8-0
-    "@polkadot/extension-chains": ^0.2.8-0
-    "@polkadot/extension-dapp": ^0.2.8-0
-    "@polkadot/extension-inject": ^0.2.8-0
-    "@polkadot/extension-mocks": ^0.2.8-0
+    "@polkadot/extension-base": ^0.2.9-1
+    "@polkadot/extension-chains": ^0.2.9-1
+    "@polkadot/extension-dapp": ^0.2.9-1
+    "@polkadot/extension-inject": ^0.2.9-1
+    "@polkadot/extension-mocks": ^0.2.9-1
     "@polkadot/hw-ledger": ^8.3.1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
@@ -3711,9 +3716,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.16.7
     "@polkadot/dev": ^0.65.23
-    "@polkadot/extension-base": ^0.2.8-0
-    "@polkadot/extension-inject": ^0.2.8-0
-    "@polkadot/extension-ui": ^0.2.8-0
+    "@polkadot/extension-base": ^0.2.9-1
+    "@polkadot/extension-inject": ^0.2.9-1
+    "@polkadot/extension-ui": ^0.2.9-1
     babel-loader: ^8.2.3
     browser-resolve: ^2.0.0
     buffer: ^6.0.3
@@ -6680,6 +6685,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"assert@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "assert@npm:2.0.0"
+  dependencies:
+    es6-object-assign: ^1.1.0
+    is-nan: ^1.2.1
+    object-is: ^1.0.1
+    util: ^0.12.0
+  checksum: bb91f181a86d10588ee16c5e09c280f9811373974c29974cbe401987ea34e966699d7989a812b0e19377b511ea0bc627f5905647ce569311824848ede382cae8
+  languageName: node
+  linkType: hard
+
 "ast-module-types@npm:^2.7.1":
   version: 2.7.1
   resolution: "ast-module-types@npm:2.7.1"
@@ -8005,6 +8022,13 @@ __metadata:
   version: 3.2.0
   resolution: "builtin-modules@npm:3.2.0"
   checksum: 0265aa1ba78e1a16f4e18668d815cb43fb364e6a6b8aa9189c6f44c7b894a551a43b323c40206959d2d4b2568c1f2805607ad6c88adc306a776ce6904cca6715
+  languageName: node
+  linkType: hard
+
+"builtin-status-codes@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "builtin-status-codes@npm:3.0.0"
+  checksum: 1119429cf4b0d57bf76b248ad6f529167d343156ebbcc4d4e4ad600484f6bc63002595cbb61b67ad03ce55cd1d3c4711c03bbf198bf24653b8392420482f3773
   languageName: node
   linkType: hard
 
@@ -10152,6 +10176,13 @@ __metadata:
     es5-ext: ^0.10.35
     es6-symbol: ^3.1.1
   checksum: 6e48b1c2d962c21dee604b3d9f0bc3889f11ed5a8b33689155a2065d20e3107e2a69cc63a71bd125aeee3a589182f8bbcb5c8a05b6a8f38fa4205671b6d09697
+  languageName: node
+  linkType: hard
+
+"es6-object-assign@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "es6-object-assign@npm:1.1.0"
+  checksum: 8d4fdf63484d78b5c64cacc2c2e1165bc7b6a64b739d2a9db6a4dc8641d99cc9efb433cdd4dc3d3d6b00bfa6ce959694e4665e3255190339945c5f33b692b5d8
   languageName: node
   linkType: hard
 
@@ -13077,6 +13108,16 @@ __metadata:
   version: 1.0.0
   resolution: "is-module@npm:1.0.0"
   checksum: 8cd5390730c7976fb4e8546dd0b38865ee6f7bacfa08dfbb2cc07219606755f0b01709d9361e01f13009bbbd8099fa2927a8ed665118a6105d66e40f1b838c3f
+  languageName: node
+  linkType: hard
+
+"is-nan@npm:^1.2.1":
+  version: 1.3.2
+  resolution: "is-nan@npm:1.3.2"
+  dependencies:
+    call-bind: ^1.0.0
+    define-properties: ^1.1.3
+  checksum: 5dfadcef6ad12d3029d43643d9800adbba21cf3ce2ec849f734b0e14ee8da4070d82b15fdb35138716d02587c6578225b9a22779cab34888a139cc43e4e3610a
   languageName: node
   linkType: hard
 
@@ -16127,7 +16168,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-is@npm:^1.0.2, object-is@npm:^1.1.2":
+"object-is@npm:^1.0.1, object-is@npm:^1.0.2, object-is@npm:^1.1.2":
   version: 1.1.5
   resolution: "object-is@npm:1.1.5"
   dependencies:
@@ -16349,6 +16390,13 @@ __metadata:
   dependencies:
     readable-stream: ^2.0.1
   checksum: 7558ac1acd649164524be715d25e38a1aba0f34df9dfb8ce281f9d14589ac3506bfe66e6609fa8c9cf0d7835e11da33f3f5445336cf3eb783f81da09a1bc5fe8
+  languageName: node
+  linkType: hard
+
+"os-browserify@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "os-browserify@npm:0.3.0"
+  checksum: 16e37ba3c0e6a4c63443c7b55799ce4066d59104143cb637ecb9fce586d5da319cdca786ba1c867abbe3890d2cbf37953f2d51eea85e20dd6c4570d6c54bfebf
   languageName: node
   linkType: hard
 
@@ -19199,6 +19247,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stream-http@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "stream-http@npm:3.2.0"
+  dependencies:
+    builtin-status-codes: ^3.0.0
+    inherits: ^2.0.4
+    readable-stream: ^3.6.0
+    xtend: ^4.0.2
+  checksum: c9b78453aeb0c84fcc59555518ac62bacab9fa98e323e7b7666e5f9f58af8f3155e34481078509b02929bd1268427f664d186604cdccee95abc446099b339f83
+  languageName: node
+  linkType: hard
+
 "stream-shift@npm:^1.0.0":
   version: 1.0.1
   resolution: "stream-shift@npm:1.0.1"
@@ -20889,6 +20949,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-bzz@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-bzz@npm:1.7.1"
+  dependencies:
+    "@types/node": ^12.12.6
+    got: 9.6.0
+    swarm-js: ^0.1.40
+  checksum: 8b8f92a061bb98f97f8f1f8512e652f96ef6b6c904da92dd580a963a6338b6287595a3883c34f1bca452886599b0e21e13b3057d8161f589fb5d5c80080b1302
+  languageName: node
+  linkType: hard
+
 "web3-core-helpers@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-core-helpers@npm:1.7.0"
@@ -20896,6 +20967,16 @@ __metadata:
     web3-eth-iban: 1.7.0
     web3-utils: 1.7.0
   checksum: ca1a14a3c39a9c7acea94ed6e65c2ee7a233b8928ab0c1a1a5ebe2cf9ab6db768a5896a6b44be1c2c0a2f96ddfc81c9716d89c49b5f944dadc5dcf5d329ddaca
+  languageName: node
+  linkType: hard
+
+"web3-core-helpers@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-core-helpers@npm:1.7.1"
+  dependencies:
+    web3-eth-iban: 1.7.1
+    web3-utils: 1.7.1
+  checksum: 6a2db114720f64ab04077310c5849ea6090155fd161625191c7450649974a14d683a48d3a308c1fb769cdd341cf4e6733bcc1527295d6368b1e85b600f4d12d4
   languageName: node
   linkType: hard
 
@@ -20912,12 +20993,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-core-method@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-core-method@npm:1.7.1"
+  dependencies:
+    "@ethersproject/transactions": ^5.0.0-beta.135
+    web3-core-helpers: 1.7.1
+    web3-core-promievent: 1.7.1
+    web3-core-subscriptions: 1.7.1
+    web3-utils: 1.7.1
+  checksum: c27867de7e61376d8ca46a24b9093036549ecbc38dd8db80f79becffee40bbbe5fb66a9814862d35465f529e034bc2e90c6ab04aeedfe470bbe5af686798787c
+  languageName: node
+  linkType: hard
+
 "web3-core-promievent@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-core-promievent@npm:1.7.0"
   dependencies:
     eventemitter3: 4.0.4
   checksum: 93774b2b954b7b60cd60ebd3bc299cfef1080c5460ddad7c0ed3ca9262ecce374253202500a63eb27a83323c0d0b7275ca7ceaa76a9c560652d0bc5fb34173ff
+  languageName: node
+  linkType: hard
+
+"web3-core-promievent@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-core-promievent@npm:1.7.1"
+  dependencies:
+    eventemitter3: 4.0.4
+  checksum: 965756aa7eff1ca30fabeb4adcda8525f2a36d0ad45bdbdd1ccadb0a1383a7ee40a51b5bb479b23c7e565c9440cf4e0e895220448b5e894ab4303ef6ac7da1dc
   languageName: node
   linkType: hard
 
@@ -20934,6 +21037,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-core-requestmanager@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-core-requestmanager@npm:1.7.1"
+  dependencies:
+    util: ^0.12.0
+    web3-core-helpers: 1.7.1
+    web3-providers-http: 1.7.1
+    web3-providers-ipc: 1.7.1
+    web3-providers-ws: 1.7.1
+  checksum: 5384909b5d97629f2b86850f404e885168926e921742828053e79e864748d11b2ee743813bff2909d0d9961b06cb29b33a7865d55c740702d4cad5b3fc9a4a87
+  languageName: node
+  linkType: hard
+
 "web3-core-subscriptions@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-core-subscriptions@npm:1.7.0"
@@ -20941,6 +21057,16 @@ __metadata:
     eventemitter3: 4.0.4
     web3-core-helpers: 1.7.0
   checksum: 1f092c73f3e4255f486c21105243298f4f0dc8dce51fc6e87fa8b18bb75fb2396a2dc99795cae8f3be82ab17c3041c933ad48852211f741ee5e9fe4b59b1647b
+  languageName: node
+  linkType: hard
+
+"web3-core-subscriptions@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-core-subscriptions@npm:1.7.1"
+  dependencies:
+    eventemitter3: 4.0.4
+    web3-core-helpers: 1.7.1
+  checksum: a4317e5c00def9927baa3ebbd793013a50ef55922b401a25618a1ae5d1ebbf870f964061a8cb72638fbf59c830eea680f085f316c091cafd490731ee87edb348
   languageName: node
   linkType: hard
 
@@ -20959,6 +21085,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-core@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-core@npm:1.7.1"
+  dependencies:
+    "@types/bn.js": ^4.11.5
+    "@types/node": ^12.12.6
+    bignumber.js: ^9.0.0
+    web3-core-helpers: 1.7.1
+    web3-core-method: 1.7.1
+    web3-core-requestmanager: 1.7.1
+    web3-utils: 1.7.1
+  checksum: 700f439f5a2f2a3dd2b09ad8e78c8e56f8a3f06da33a1c06ff6e85f936c412f427852710dbe2f5b1f9b1a03cf0a6522f9463639496e19271124fafc847aab055
+  languageName: node
+  linkType: hard
+
 "web3-eth-abi@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-eth-abi@npm:1.7.0"
@@ -20966,6 +21107,16 @@ __metadata:
     "@ethersproject/abi": 5.0.7
     web3-utils: 1.7.0
   checksum: 1ff34dbf23844d90e7f669c28915fc709631948afe09dbcd00d061616db526899938d5c2704afd6c7c037d3822aeb9cdafb5a2ad3ad827e38fd22c45a21eace0
+  languageName: node
+  linkType: hard
+
+"web3-eth-abi@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth-abi@npm:1.7.1"
+  dependencies:
+    "@ethersproject/abi": 5.0.7
+    web3-utils: 1.7.1
+  checksum: da7992a2a7952ba3f0bf63f711d162056ee836491563a2080f02e01aec80029b60b06f916c262800a0d8a009ce87d092c7dab2ea2417797097457efc75ffef7c
   languageName: node
   linkType: hard
 
@@ -20988,6 +21139,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-eth-accounts@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth-accounts@npm:1.7.1"
+  dependencies:
+    "@ethereumjs/common": ^2.5.0
+    "@ethereumjs/tx": ^3.3.2
+    crypto-browserify: 3.12.0
+    eth-lib: 0.2.8
+    ethereumjs-util: ^7.0.10
+    scrypt-js: ^3.0.1
+    uuid: 3.3.2
+    web3-core: 1.7.1
+    web3-core-helpers: 1.7.1
+    web3-core-method: 1.7.1
+    web3-utils: 1.7.1
+  checksum: ef99ab6de929cd9a91df74eb7a41a998b7fd2070c45b9f9085cdbb35c1e08565172e7fe62f6e0661250f520938fba3dfa39362fb4e4ab4dee67b4cb146952afd
+  languageName: node
+  linkType: hard
+
 "web3-eth-contract@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-eth-contract@npm:1.7.0"
@@ -21001,6 +21171,22 @@ __metadata:
     web3-eth-abi: 1.7.0
     web3-utils: 1.7.0
   checksum: a74b1e7be38734d82579c035043512276e53f8e990de7e6903730479b22a3e17bf5fd5d91299655752487f821697f61219b8d221e7ffee33b7d33a6cf2dfef32
+  languageName: node
+  linkType: hard
+
+"web3-eth-contract@npm:1.7.1, web3-eth-contract@npm:^1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth-contract@npm:1.7.1"
+  dependencies:
+    "@types/bn.js": ^4.11.5
+    web3-core: 1.7.1
+    web3-core-helpers: 1.7.1
+    web3-core-method: 1.7.1
+    web3-core-promievent: 1.7.1
+    web3-core-subscriptions: 1.7.1
+    web3-eth-abi: 1.7.1
+    web3-utils: 1.7.1
+  checksum: aa6e24350bd03e3bd7859a9e92fd6d1ebaaa186a30233747ef40bb5004dcbeb44f102ab57b402d6995a5d715ddedf2d8c78d2acac3c290028531b18794a72a13
   languageName: node
   linkType: hard
 
@@ -21020,6 +21206,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-eth-ens@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth-ens@npm:1.7.1"
+  dependencies:
+    content-hash: ^2.5.2
+    eth-ens-namehash: 2.0.8
+    web3-core: 1.7.1
+    web3-core-helpers: 1.7.1
+    web3-core-promievent: 1.7.1
+    web3-eth-abi: 1.7.1
+    web3-eth-contract: 1.7.1
+    web3-utils: 1.7.1
+  checksum: 691d703ded9d95d3a73f51ad95849ebf81fd53e699023bb3b84705601cf9e93605cbfb4c99f2f78a97265ea8b049bd271b6d7ea90b6b208d7a2ec3f53e849242
+  languageName: node
+  linkType: hard
+
 "web3-eth-iban@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-eth-iban@npm:1.7.0"
@@ -21027,6 +21229,16 @@ __metadata:
     bn.js: ^4.11.9
     web3-utils: 1.7.0
   checksum: 5a11fd27e50497608382109b7a77098ed11653307c4739736c0073eb1e863727ba64a932875c83980412362279094ed234001fcf0f72dd6f3c0e9d9e9ff5e79c
+  languageName: node
+  linkType: hard
+
+"web3-eth-iban@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth-iban@npm:1.7.1"
+  dependencies:
+    bn.js: ^4.11.9
+    web3-utils: 1.7.1
+  checksum: 406f91e0fc369d56b7fb56435a4b227ff21be74ffad113c30da9a4bf3a9413c27b23a0742588db39f0c09fe1fd4a4a6308634823b90cd2708b55837e0a3d753a
   languageName: node
   linkType: hard
 
@@ -21041,6 +21253,20 @@ __metadata:
     web3-net: 1.7.0
     web3-utils: 1.7.0
   checksum: 013e21652fb42541623e8d1cdca1504770746defc2a4e7b973e34dc71170fdeeb4fde2a3c3394f8c010399897d92fca289acf184d2c56ce17a28eb073bdecdae
+  languageName: node
+  linkType: hard
+
+"web3-eth-personal@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth-personal@npm:1.7.1"
+  dependencies:
+    "@types/node": ^12.12.6
+    web3-core: 1.7.1
+    web3-core-helpers: 1.7.1
+    web3-core-method: 1.7.1
+    web3-net: 1.7.1
+    web3-utils: 1.7.1
+  checksum: d7e19f0e4f1d835eecd291e9e9940fdce3226fa89774f1be255c1cd57f218f8f52162f5b29835a34141753fab221a10a44ca640f3e7cc04321fcdaba3234f198
   languageName: node
   linkType: hard
 
@@ -21064,6 +21290,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-eth@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-eth@npm:1.7.1"
+  dependencies:
+    web3-core: 1.7.1
+    web3-core-helpers: 1.7.1
+    web3-core-method: 1.7.1
+    web3-core-subscriptions: 1.7.1
+    web3-eth-abi: 1.7.1
+    web3-eth-accounts: 1.7.1
+    web3-eth-contract: 1.7.1
+    web3-eth-ens: 1.7.1
+    web3-eth-iban: 1.7.1
+    web3-eth-personal: 1.7.1
+    web3-net: 1.7.1
+    web3-utils: 1.7.1
+  checksum: 04be6a825b33e10407e60284b7169eda9e95faada765903b1bb8d53e626d07eb29bac0549ff5e8055509eda9de6bb16767920004a19afcc1b75eba34f197722d
+  languageName: node
+  linkType: hard
+
 "web3-net@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-net@npm:1.7.0"
@@ -21072,6 +21318,17 @@ __metadata:
     web3-core-method: 1.7.0
     web3-utils: 1.7.0
   checksum: 896d54ed14e211c64c8a67081a479068bbac427196a8f1d7f5f12960ef404438aff9739c8d0860316dc5e7c98d55910cdfc6bedc38464cb986e845fa97176f15
+  languageName: node
+  linkType: hard
+
+"web3-net@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-net@npm:1.7.1"
+  dependencies:
+    web3-core: 1.7.1
+    web3-core-method: 1.7.1
+    web3-utils: 1.7.1
+  checksum: 9dd2e8aa2f665cac61c78c21129a57005b2c87e0b9448c7bca3707bc3acb105f81775bdefc41859eed5f53d1abce58af556eb8bff96ffcd5c85843236e52426d
   languageName: node
   linkType: hard
 
@@ -21085,6 +21342,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-providers-http@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-providers-http@npm:1.7.1"
+  dependencies:
+    web3-core-helpers: 1.7.1
+    xhr2-cookies: 1.1.0
+  checksum: b56228fe1b99dc356ed6ce54b8b7aff009193d896e9fbbce67c1de15f073c6c55632ddf70ef1ac46196d30193b46757222bc9df24b6f80eaf966ba957c78ea1a
+  languageName: node
+  linkType: hard
+
 "web3-providers-ipc@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-providers-ipc@npm:1.7.0"
@@ -21092,6 +21359,16 @@ __metadata:
     oboe: 2.1.5
     web3-core-helpers: 1.7.0
   checksum: dde6f6cb56e2a41f793d83ac9962754d6123edbd899cde5fb74d936f6b0c823930979a063acf4cfb3958cae92731b8c00ba972151367d8d652602de1b7ac2b2a
+  languageName: node
+  linkType: hard
+
+"web3-providers-ipc@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-providers-ipc@npm:1.7.1"
+  dependencies:
+    oboe: 2.1.5
+    web3-core-helpers: 1.7.1
+  checksum: 659f727fffe2d530b8d2a2d305de491ab3f42b481d2a5771a0b7c7edcf74ba1033b0f0f95843851ba36baf3336f77e7e7bebd658780bb73e8188ce265b8b9c8e
   languageName: node
   linkType: hard
 
@@ -21106,6 +21383,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-providers-ws@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-providers-ws@npm:1.7.1"
+  dependencies:
+    eventemitter3: 4.0.4
+    web3-core-helpers: 1.7.1
+    websocket: ^1.0.32
+  checksum: 40c2a130f5f59f1afa7da1b9ac879e6706034c6e503655d9b701446dc9aa79474b0915c090b7b8e4a6e8e1cebfc086d4b4995b56ce7b0a9e90b365061858c76d
+  languageName: node
+  linkType: hard
+
 "web3-shh@npm:1.7.0":
   version: 1.7.0
   resolution: "web3-shh@npm:1.7.0"
@@ -21115,6 +21403,18 @@ __metadata:
     web3-core-subscriptions: 1.7.0
     web3-net: 1.7.0
   checksum: 771c5b5c5676b041729caa0390a7ee2121f1781d36a00eb4a02c6f63fcd8bfac9e11252aa849d2ad070bb0021e0071fec673f235b6babfd00c3db553678d899e
+  languageName: node
+  linkType: hard
+
+"web3-shh@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-shh@npm:1.7.1"
+  dependencies:
+    web3-core: 1.7.1
+    web3-core-method: 1.7.1
+    web3-core-subscriptions: 1.7.1
+    web3-net: 1.7.1
+  checksum: 06972f181ee947f2f084631626ff82fe23a8b33f39c0c0f69e89c321454b7b50e7c747a01badb8d3b1c90760f0642c9d4d264fedbafa23895934df1ddfd0fba2
   languageName: node
   linkType: hard
 
@@ -21133,6 +21433,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"web3-utils@npm:1.7.1":
+  version: 1.7.1
+  resolution: "web3-utils@npm:1.7.1"
+  dependencies:
+    bn.js: ^4.11.9
+    ethereum-bloom-filters: ^1.0.6
+    ethereumjs-util: ^7.1.0
+    ethjs-unit: 0.1.6
+    number-to-bn: 1.7.0
+    randombytes: ^2.1.0
+    utf8: 3.0.0
+  checksum: b35bccec3cd5f579ac4fe705a302015106290ec37a0f7fa47003b993b5f82faba9dafbec7d496c6621d5d2936d821206ffd32a034155370338dc88442baad549
+  languageName: node
+  linkType: hard
+
 "web3@npm:^1.6.1":
   version: 1.7.0
   resolution: "web3@npm:1.7.0"
@@ -21145,6 +21460,21 @@ __metadata:
     web3-shh: 1.7.0
     web3-utils: 1.7.0
   checksum: 0a9e24ff02a5b914e6528e72a9aefe78944ec026fefc96130a39f51d9e07c00f528e5dff25cfada7917774298cbccd629c611672212db58835f2c0a6dadf173e
+  languageName: node
+  linkType: hard
+
+"web3@npm:^1.7.1":
+  version: 1.7.1
+  resolution: "web3@npm:1.7.1"
+  dependencies:
+    web3-bzz: 1.7.1
+    web3-core: 1.7.1
+    web3-eth: 1.7.1
+    web3-eth-personal: 1.7.1
+    web3-net: 1.7.1
+    web3-shh: 1.7.1
+    web3-utils: 1.7.1
+  checksum: 3b97b83f09ac3bfd3e5e2a4b1168b10852c8b4a3ba58f8d9d8e8003b64a5bb1255f23846aeabe91f515f117f16cb250fe59f26c2a9c6ce023c178f678023c9fa
   languageName: node
   linkType: hard
 
@@ -21593,7 +21923,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xtend@npm:^4.0.0, xtend@npm:~4.0.0, xtend@npm:~4.0.1":
+"xtend@npm:^4.0.0, xtend@npm:^4.0.2, xtend@npm:~4.0.0, xtend@npm:~4.0.1":
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: ac5dfa738b21f6e7f0dd6e65e1b3155036d68104e67e5d5d1bde74892e327d7e5636a076f625599dc394330a731861e87343ff184b0047fef1360a7ec0a5a36a

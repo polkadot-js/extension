@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
@@ -29,22 +29,22 @@ interface Props extends ThemeProps {
     iconTheme: string,
     showExportButton: boolean
   }) => void;
+  isShowDetail?: boolean,
+  toggleBalanceDetail?: (networkKey: string) => void
 }
 
-function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoading, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
+function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoading, isShowDetail, setQrModalOpen, setQrModalProps, toggleBalanceDetail }: Props): React.ReactElement<Props> {
   const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
-  const [toggleDetail, setToggleDetail] = useState(false);
   const { show } = useToast();
   const { t } = useTranslation();
-
   const _onCopy = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     show(t('Copied'));
   }, [show, t]);
 
   const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    setToggleDetail((toggleDetail) => !toggleDetail);
-  }, []);
+    toggleBalanceDetail && toggleBalanceDetail(accountInfo.networkKey);
+  }, [accountInfo.networkKey, toggleBalanceDetail]);
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -61,7 +61,7 @@ function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoadin
 
   return (
     <div
-      className={`${className || ''} ${toggleDetail ? '-show-detail' : ''}`}
+      className={`${className || ''} ${isShowDetail ? '-show-detail' : ''}`}
       onClick={_onToggleDetail}
     >
       <div className='chain-balance-item__main-area'>
@@ -140,7 +140,7 @@ function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoadin
         )}
       </div>
 
-      {!isLoading && toggleDetail && !!balanceInfo.detailBalances.length && (
+      {!isLoading && isShowDetail && !!balanceInfo.detailBalances.length && (
         <>
           <div className='chain-balance-item__separator' />
           <div className='chain-balance-item__detail-area'>

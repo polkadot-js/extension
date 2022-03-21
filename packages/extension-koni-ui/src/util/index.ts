@@ -128,8 +128,8 @@ export const accountAllRecoded: Recoded = {
   isEthereum: false
 };
 
-export function getLogoByNetworkKey (networkKey: string): string {
-  return LogosMap[networkKey] || LogosMap.default;
+export function getLogoByNetworkKey (networkKey: string, defaultLogo = 'default'): string {
+  return LogosMap[networkKey] || LogosMap[defaultLogo] || LogosMap.default;
 }
 
 export const subscanByNetworkKey: Record<string, string> = {

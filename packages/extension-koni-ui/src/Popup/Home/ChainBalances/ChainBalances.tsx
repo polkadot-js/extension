@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import ChainBalanceDetailItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem';
 import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
@@ -33,6 +34,20 @@ interface Props extends ThemeProps {
   setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
 }
 
+function hasAnyChildTokenBalance (balanceInfo: BalanceInfo): boolean {
+  if (!balanceInfo.childrenBalances || !balanceInfo.childrenBalances.length) {
+    return false;
+  }
+
+  for (const item of balanceInfo.childrenBalances) {
+    if (item.balanceValue.gt(BN_ZERO)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function isAllowToShow (
   isShowZeroBalances: boolean,
   currentNetworkKey: string,
@@ -43,7 +58,8 @@ function isAllowToShow (
   }
 
   return isShowZeroBalances ||
-    !!(balanceInfo && balanceInfo.balanceValue.gt(BN_ZERO));
+    !!(balanceInfo &&
+      (balanceInfo.balanceValue.gt(BN_ZERO) || hasAnyChildTokenBalance(balanceInfo)));
 }
 
 function getAccountInfoByNetwork (
@@ -100,6 +116,14 @@ function ChainBalances ({ address,
     setShowBalanceDetail(true);
   }, [setShowBalanceDetail]);
 
+  const toggleBalanceDetail = useCallback((networkKey: string) => {
+    if (networkKey === selectedNetworkKey) {
+      setSelectedNetworkKey('');
+    } else {
+      setSelectedNetworkKey(networkKey);
+    }
+  }, [selectedNetworkKey]);
+
   const renderChainBalanceItem = (networkKey: string) => {
     const info = accountInfoByNetworkMap[networkKey];
     const balanceInfo = networkBalanceMaps[networkKey];
@@ -111,6 +135,21 @@ function ChainBalances ({ address,
       balanceInfo
     )) {
       return (<Fragment key={info.key} />);
+    }
+
+    if (balanceInfo && balanceInfo.childrenBalances.length === 0) {
+      return (
+        <ChainBalanceDetailItem
+          accountInfo={info}
+          balanceInfo={balanceInfo}
+          isLoading={!balanceInfo}
+          isShowDetail={info.networkKey === selectedNetworkKey}
+          key={info.key}
+          setQrModalOpen={setQrModalOpen}
+          setQrModalProps={setQrModalProps}
+          toggleBalanceDetail={toggleBalanceDetail}
+        />
+      );
     }
 
     return (

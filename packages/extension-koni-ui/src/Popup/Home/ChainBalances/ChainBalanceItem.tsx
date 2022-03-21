@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import BigN from 'bignumber.js';
 import React, { useCallback } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
@@ -28,7 +29,20 @@ interface Props extends ThemeProps {
     iconTheme: string,
     showExportButton: boolean
   }) => void;
-  showBalanceDetail: (networkKey: string) => void
+  showBalanceDetail: (networkKey: string) => void,
+  setSelectedNetworkBalance?: (networkBalance: BigN) => void;
+}
+
+function getTotalConvertedBalanceValue (balanceInfo: BalanceInfo): BigN {
+  let result = new BigN(balanceInfo.convertedBalanceValue);
+
+  if (balanceInfo.childrenBalances && balanceInfo.childrenBalances.length) {
+    balanceInfo.childrenBalances.forEach((i) => {
+      result = result.plus(i.convertedBalanceValue);
+    });
+  }
+
+  return result;
 }
 
 function ChainBalanceItem ({ accountInfo,
@@ -37,6 +51,7 @@ function ChainBalanceItem ({ accountInfo,
   isLoading,
   setQrModalOpen,
   setQrModalProps,
+  setSelectedNetworkBalance,
   showBalanceDetail }: Props): React.ReactElement<Props> {
   const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const { show } = useToast();
@@ -48,8 +63,13 @@ function ChainBalanceItem ({ accountInfo,
   }, [show, t]);
 
   const _onOpenDetail = useCallback(() => {
-    !isLoading && showBalanceDetail(accountInfo.key);
-  }, [accountInfo.key, isLoading, showBalanceDetail]);
+    if (!isLoading) {
+      showBalanceDetail(accountInfo.key);
+      const networkBalance = getTotalConvertedBalanceValue(balanceInfo);
+
+      setSelectedNetworkBalance && setSelectedNetworkBalance(networkBalance);
+    }
+  }, [accountInfo.key, balanceInfo, isLoading, setSelectedNetworkBalance, showBalanceDetail]);
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();

@@ -3,6 +3,7 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -37,7 +38,7 @@ import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+import { BN_ZERO, isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 import buyIcon from '../../assets/buy-icon.svg';
 import donateIcon from '../../assets/donate-icon.svg';
@@ -150,16 +151,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const _setActiveTab = useCallback((tabId: number) => {
     window.localStorage.setItem('homeActiveTab', `${tabId}`);
     setActivatedTab(tabId);
-
-    if (tabId === 1) {
-      setShowBalanceDetail(false);
-    }
+    setShowBalanceDetail(false);
   }, []);
   const [isShowZeroBalances, setShowZeroBalances] = useState<boolean>(
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [isShowBalances, setShowBalances] = useState<boolean>(false);
+  const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
   const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
     { iconTheme: qrModalIconTheme,
@@ -272,7 +271,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
               ? <BalanceVal
                 startWithSymbol
                 symbol={'$'}
-                value={totalBalanceValue}
+                value={isShowBalanceDetail ? selectedNetworkBalance : totalBalanceValue}
               />
               : <span>*********</span>
             }
@@ -366,6 +365,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             networkMetadataMap={networkMetadataMap}
             setQrModalOpen={setQrModalOpen}
             setQrModalProps={setQrModalProps}
+            setSelectedNetworkBalance={setSelectedNetworkBalance}
             setShowBalanceDetail={setShowBalanceDetail}
           />
         )}

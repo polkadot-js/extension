@@ -14,6 +14,7 @@ import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 import ChainBalanceDetail from '../ChainBalances/ChainBalanceDetail/ChainBalanceDetail';
+import BigN from "bignumber.js";
 
 interface Props extends ThemeProps {
   address: string;
@@ -32,6 +33,7 @@ interface Props extends ThemeProps {
     showExportButton: boolean
   }) => void;
   setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
+  setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
 
 function hasAnyChildTokenBalance (balanceInfo: BalanceInfo): boolean {
@@ -103,6 +105,7 @@ function ChainBalances ({ address,
   networkMetadataMap,
   setQrModalOpen,
   setQrModalProps,
+  setSelectedNetworkBalance,
   setShowBalanceDetail }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> =
@@ -160,6 +163,7 @@ function ChainBalances ({ address,
         key={info.key}
         setQrModalOpen={setQrModalOpen}
         setQrModalProps={setQrModalProps}
+        setSelectedNetworkBalance={setSelectedNetworkBalance}
         showBalanceDetail={_openBalanceDetail}
       />
     );

@@ -30,11 +30,13 @@ interface Props {
   onSelectAccountImported?: (keyTypes: KeypairType[]) => void
   type: KeypairType;
   account: AccountInfo | null;
+  evmAccount: AccountInfo | null;
   name: string | null;
   evmName: string | null;
+  setSelectedGenesis: (genesis: string) => void;
 }
 
-function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountChange, onEvmAccountChange, onNextStep, onSelectAccountImported, type }: Props): React.ReactElement {
+function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name, onAccountChange, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [address, setAddress] = useState('');
@@ -45,10 +47,12 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
   // const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
+  const [evmGenesis, setEvmGenesis] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);
   const [isEvmAccountSelected, setEvmAccountSelected] = useState(false);
   const networkRef = useRef(null);
+  const evmNetworkRef = useRef(null);
   const dep = keyTypes.toString();
 
   useEffect(() => {
@@ -56,6 +60,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
     // we have a dedicated error for this
     if (!seed) {
       onAccountChange(null);
+      onEvmAccountChange(null);
 
       return;
     }
@@ -75,28 +80,30 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
 
         if (address) {
           setAddress(address);
+          onAccountChange(
+            objectSpread<AccountInfo>({}, { address, suri, genesis, type })
+          );
+          setSelectedGenesis(genesis);
         }
 
         if (evmAddress) {
           setEvmAddress(evmAddress);
+          onEvmAccountChange(
+            objectSpread<AccountInfo>({}, { address: evmAddress, suri, genesis: evmGenesis, type: EVM_ACCOUNT_TYPE })
+          );
+          setSelectedGenesis(evmGenesis);
         }
 
         setError('');
-        onAccountChange(
-          objectSpread<AccountInfo>({}, { address, suri, genesis, type })
-        );
-
-        onEvmAccountChange(
-          objectSpread<AccountInfo>({}, { address: evmAddress, suri, genesis, EVM_ACCOUNT_TYPE })
-        );
       })
       .catch(() => {
         setAddress('');
         setEvmAddress('');
         onAccountChange(null);
+        onEvmAccountChange(null);
         setError(t<string>('Invalid mnemonic seed'));
       });
-  }, [t, genesis, seed, onAccountChange, type, dep]);
+  }, [t, genesis, seed, onAccountChange, onEvmAccountChange, type, dep, evmGenesis]);
 
   const _onSelectNormalAccount = useCallback(() => {
     if (!isNormalAccountSelected) {
@@ -122,9 +129,15 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
     }
   }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
 
-  // const _onToggleAdvanced = useCallback(() => {
-  //   setAdvances(!advanced);
-  // }, [advanced]);
+  const onChangeAccountGenesis = useCallback((genesis: string) => {
+    setGenesis(genesis);
+    setSelectedGenesis(genesis);
+  }, [setSelectedGenesis]);
+
+  const onChangeEvmAccountGenesis = useCallback((genesis: string) => {
+    setEvmGenesis(genesis);
+    setSelectedGenesis(genesis);
+  }, [setSelectedGenesis]);
 
   return (
     <div className={className}>
@@ -153,7 +166,7 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
             <AccountInfoEl
               address={evmAddress}
               className='account-info'
-              genesisHash={account?.genesis}
+              genesisHash={evmAccount?.genesis}
               name={evmName}
               type={EVM_ACCOUNT_TYPE}
             />
@@ -177,15 +190,26 @@ function SeedAndPath ({ account, className, evmName, keyTypes, name, onAccountCh
               {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
             </Warning>
           )}
-          {(isNormalAccountSelected || isEvmAccountSelected) && seed &&
+          {isNormalAccountSelected && seed &&
             <Dropdown
               className='seed-and-path__genesis-selection'
               label={t<string>('Network')}
-              onChange={setGenesis}
+              onChange={onChangeAccountGenesis}
               options={genesisHashOption}
               reference={networkRef}
               value={genesis}
             />
+          }
+
+          {isEvmAccountSelected && seed &&
+          <Dropdown
+            className='seed-and-path__genesis-selection'
+            label={t<string>('Network')}
+            onChange={onChangeEvmAccountGenesis}
+            options={genesisHashOption}
+            reference={evmNetworkRef}
+            value={evmGenesis}
+          />
           }
 
           {!!error && !!seed && (
@@ -274,6 +298,11 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   .account-info-item {
     display: flex;
     align-items: center;
+    position: relative;
+
+    .account-info-banner.account-info-chain {
+      right: 0;
+    }
   }
 
   .account-info {

@@ -35,6 +35,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [evmAccount, setEvmAccount] = useState<AccountInfo | null>(null);
+  const [selectedGenesis, setSelectedGenesis] = useState<string>('');
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
@@ -52,7 +53,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, keyTypes)
+      createAccountSuriV2(name, password, account.suri, keyTypes, selectedGenesis)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -62,7 +63,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           console.error(error);
         });
     }
-  }, [account, onAction, dep]);
+  }, [account, selectedGenesis, onAction, dep]);
 
   const _onNextStep = useCallback(
     () => setStep1(false),
@@ -87,6 +88,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           <SeedAndPath
             account={account}
             className='import-seed-content-wrapper'
+            evmAccount={evmAccount}
             evmName={evmName}
             keyTypes={keyTypes}
             name={name}
@@ -94,6 +96,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             onEvmAccountChange={setEvmAccount}
             onNextStep={_onNextStep}
             onSelectAccountImported={setKeyTypes}
+            setSelectedGenesis={setSelectedGenesis}
             type={type}
           />
         )
@@ -107,6 +110,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             keyTypes={keyTypes}
             name={name}
             onCreate={_onCreate}
+            selectedGenesis={selectedGenesis}
           />
 
         )

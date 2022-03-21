@@ -11,8 +11,9 @@ import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { getTotalConvertedBalanceValue, hasAnyChildTokenBalance } from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/utils';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
+import { BN_ZERO, isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 import { Loading } from '../../../components';
@@ -31,18 +32,6 @@ interface Props extends ThemeProps {
   }) => void;
   showBalanceDetail: (networkKey: string) => void,
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
-}
-
-function getTotalConvertedBalanceValue (balanceInfo: BalanceInfo): BigN {
-  let result = new BigN(balanceInfo.convertedBalanceValue);
-
-  if (balanceInfo.childrenBalances && balanceInfo.childrenBalances.length) {
-    balanceInfo.childrenBalances.forEach((i) => {
-      result = result.plus(i.convertedBalanceValue);
-    });
-  }
-
-  return result;
 }
 
 function ChainBalanceItem ({ accountInfo,
@@ -83,6 +72,37 @@ function ChainBalanceItem ({ accountInfo,
   }, [networkIconTheme, networkKey, networkPrefix, setQrModalOpen, setQrModalProps]);
 
   const _isAccountAll = isAccountAll(address);
+
+  const renderTokenValue = (balanceInfo: BalanceInfo) => {
+    if (!hasAnyChildTokenBalance(balanceInfo)) {
+      return (
+        <BalanceVal
+          symbol={balanceInfo.symbol}
+          value={balanceInfo.balanceValue}
+        />
+      );
+    }
+
+    const showedTokens = [];
+
+    if (balanceInfo.balanceValue.gt(BN_ZERO)) {
+      showedTokens.push(balanceInfo.symbol);
+    }
+
+    for (const item of balanceInfo.childrenBalances) {
+      if (showedTokens.length > 1) {
+        showedTokens.push('...');
+
+        break;
+      }
+
+      if (item.balanceValue.gt(BN_ZERO)) {
+        showedTokens.push(item.symbol);
+      }
+    }
+
+    return (<span className={'balance-val balance-val__symbol'}>{showedTokens.join(', ')}</span>);
+  };
 
   return (
     <div className={`${className || ''}`}>
@@ -145,16 +165,13 @@ function ChainBalanceItem ({ accountInfo,
         {!isLoading && (
           <div className='chain-balance-item__main-area-part-2'>
             <div className='chain-balance-item__balance'>
-              <BalanceVal
-                symbol={balanceInfo.symbol}
-                value={balanceInfo.balanceValue}
-              />
+              {renderTokenValue(balanceInfo)}
             </div>
             <div className='chain-balance-item__value'>
               <BalanceVal
                 startWithSymbol
                 symbol={'$'}
-                value={balanceInfo.convertedBalanceValue}
+                value={getTotalConvertedBalanceValue(balanceInfo)}
               />
             </div>
 

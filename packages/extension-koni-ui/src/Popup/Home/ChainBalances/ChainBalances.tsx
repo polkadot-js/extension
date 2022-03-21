@@ -9,6 +9,7 @@ import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniType
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceDetailItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem';
 import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
+import { hasAnyChildTokenBalance } from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/utils';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
@@ -36,20 +37,6 @@ interface Props extends ThemeProps {
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
 }
 
-function hasAnyChildTokenBalance (balanceInfo: BalanceInfo): boolean {
-  if (!balanceInfo.childrenBalances || !balanceInfo.childrenBalances.length) {
-    return false;
-  }
-
-  for (const item of balanceInfo.childrenBalances) {
-    if (item.balanceValue.gt(BN_ZERO)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 function isAllowToShow (
   isShowZeroBalances: boolean,
   currentNetworkKey: string,
@@ -61,6 +48,7 @@ function isAllowToShow (
 
   return isShowZeroBalances ||
     !!(balanceInfo &&
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       (balanceInfo.balanceValue.gt(BN_ZERO) || hasAnyChildTokenBalance(balanceInfo)));
 }
 

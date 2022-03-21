@@ -60,13 +60,17 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const data = ledger.toHuman() as unknown as LedgerData;
 
+          console.log('staking item here', data);
+
           // const currentAddress = addresses[index];
           if (data && data.active) {
             const balance = data.active;
-            const amount = balance ? balance.split(' ')[0] : '';
+            let amount = balance ? balance.split(' ')[0] : '';
 
+            amount = amount.replaceAll(',', '');
             unit = balance ? balance.split(' ')[1] : '';
             totalBalance += parseFloat(amount);
+            console.log('staking item here', parseFloat(amount));
           }
         }
 

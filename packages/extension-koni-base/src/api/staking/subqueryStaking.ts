@@ -59,7 +59,7 @@ const getSubqueryKusamaStakingReward = async (accounts: string[]): Promise<Staki
   return {
     name: NETWORKS.kusama.chain,
     chainId: 'kusama',
-    accumulatedReward: parsedAmount.toString(),
+    totalReward: parsedAmount.toString(),
     state: APIItemState.READY
   } as StakingRewardItem;
 };
@@ -111,7 +111,7 @@ const getSubqueryPolkadotStakingReward = async (accounts: string[]): Promise<Sta
   return {
     name: NETWORKS.polkadot.chain,
     chainId: 'polkadot',
-    accumulatedReward: parsedAmount.toString(),
+    totalReward: parsedAmount.toString(),
     state: APIItemState.READY
   } as StakingRewardItem;
 };
@@ -163,7 +163,7 @@ const getSubqueryAstarStakingReward = async (accounts: string[]): Promise<Stakin
   return {
     name: NETWORKS.astar.chain,
     chainId: 'astar',
-    accumulatedReward: parsedAmount.toString(),
+    totalReward: parsedAmount.toString(),
     state: APIItemState.READY
   } as StakingRewardItem;
 };

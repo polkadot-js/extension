@@ -100,11 +100,26 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
               <div className={'reward-container'}>
                 <div className={'reward-title'}>Total reward</div>
                 <div className={'reward-amount'}>
-                  <div>{editBalance(reward?.accumulatedReward || '')}</div>
+                  <div>{editBalance(reward?.totalReward || '')}</div>
                   <div className={'chain-unit'}>{unit}</div>
                 </div>
               </div>
 
+              <div className={'reward-container'}>
+                <div className={'reward-title'}>Latest reward</div>
+                <div className={'reward-amount'}>
+                  <div>{editBalance(reward?.latestReward || '')}</div>
+                  <div className={'chain-unit'}>{unit}</div>
+                </div>
+              </div>
+
+              <div className={'reward-container'}>
+                <div className={'reward-title'}>Total slash</div>
+                <div className={'reward-amount'}>
+                  <div>{editBalance(reward?.totalSlash || '')}</div>
+                  <div className={'chain-unit'}>{unit}</div>
+                </div>
+              </div>
               {/* <div className={'reward-container'}> */}
               {/*  <div className={'reward-title'}>APR</div> */}
               {/*  <div className={'reward-amount'}> */}

@@ -3,7 +3,7 @@
 
 import { APIItemState, ApiProps, NetWorkInfo, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
+import { categoryAddresses, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 import { ethereumChains } from '../dotsama/api-helper';
 
@@ -60,8 +60,6 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           const data = ledger.toHuman() as unknown as LedgerData;
 
-          console.log('staking item here', data);
-
           // const currentAddress = addresses[index];
           if (data && data.active) {
             const balance = data.active;
@@ -70,15 +68,16 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
             amount = amount.replaceAll(',', '');
             unit = balance ? balance.split(' ')[1] : '';
             totalBalance += parseFloat(amount);
-            console.log('staking item here', parseFloat(amount));
           }
         }
+
+        const parsedTotal = toUnit(totalBalance, NETWORKS[chain].decimals as number);
 
         if (totalBalance > 0) {
           stakingItem = {
             name: NETWORKS[chain].chain,
             chainId: chain,
-            balance: totalBalance.toString(),
+            balance: parsedTotal.toString(),
             nativeToken: NETWORKS[chain].nativeToken,
             unit: unit || NETWORKS[chain].nativeToken,
             state: APIItemState.READY
@@ -87,7 +86,7 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
           stakingItem = {
             name: NETWORKS[chain].chain,
             chainId: chain,
-            balance: totalBalance.toString(),
+            balance: parsedTotal.toString(),
             nativeToken: NETWORKS[chain].nativeToken,
             unit: unit || NETWORKS[chain].nativeToken,
             state: APIItemState.READY

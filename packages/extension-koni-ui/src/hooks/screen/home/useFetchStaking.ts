@@ -24,7 +24,7 @@ export default function useFetchStaking (): StakingType {
     if (stakingItem.state === APIItemState.READY) {
       loading = false;
 
-      if (stakingItem.balance !== '0') {
+      if (stakingItem.balance !== '0' && (Math.round(parseFloat(stakingItem.balance as string) * 100) / 100) !== 0) {
         parsedPriceMap[stakingItem.chainId] = priceMap[stakingItem.chainId];
         readyStakingItems.push(stakingItem);
       }

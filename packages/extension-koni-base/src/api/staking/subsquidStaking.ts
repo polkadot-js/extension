@@ -433,8 +433,6 @@ export const getSubsquidStakingReward = async (accounts: string[]): Promise<Stak
 
   rewardList = rewardList.concat(rewardItems);
 
-  console.log('staking reward', rewardList);
-
   return {
     details: rewardList
   } as StakingRewardJson;

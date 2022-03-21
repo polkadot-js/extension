@@ -157,13 +157,9 @@ export const isValidAddress = (address: string) => {
 };
 
 export const toUnit = (balance: number, decimals: number) => {
-  const base = new BN(10).pow(new BN(decimals));
-  // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
-  const dm = new BN(balance).divmod(base);
+  if (balance === 0) return 0;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/restrict-plus-operands
-  return parseFloat(dm.div.toString() + '.' + dm.mod.toString());
+  return balance / 10 ** decimals;
 };
 
 export function sumBN (inputArr: BN[]) {

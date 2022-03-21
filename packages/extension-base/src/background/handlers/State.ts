@@ -327,7 +327,7 @@ export default class State {
     return this.#authUrls;
   }
 
-  public removeAuthorization(url: string): AuthUrls {
+  public removeAuthorization (url: string): AuthUrls {
     const entry = this.#authUrls[url];
 
     assert(entry, `The source ${url} is not known`);

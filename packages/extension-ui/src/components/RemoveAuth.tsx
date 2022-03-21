@@ -3,25 +3,18 @@
 
 import type { ThemeProps } from '../types';
 
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React from 'react';
 import styled from 'styled-components';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-
-
-interface Props {
-  className?: string;
-  url:  string;
-}
-
-function RemoveAuth ({ className, url }: Props): React.ReactElement<Props> {
-    
+function RemoveAuth (): React.ReactElement {
   return (
-      <FontAwesomeIcon
+    <FontAwesomeIcon
       className='trashIcon'
       icon={faTrash}
       size='lg'
-      />
+    />
   );
 }
 

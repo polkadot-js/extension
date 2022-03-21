@@ -80,19 +80,21 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
 
         if (address) {
           setAddress(address);
-          onAccountChange(
-            objectSpread<AccountInfo>({}, { address, suri, genesis, type })
-          );
           setSelectedGenesis(genesis);
         }
 
         if (evmAddress) {
           setEvmAddress(evmAddress);
-          onEvmAccountChange(
-            objectSpread<AccountInfo>({}, { address: evmAddress, suri, genesis: evmGenesis, type: EVM_ACCOUNT_TYPE })
-          );
           setSelectedGenesis(evmGenesis);
         }
+
+        onAccountChange(
+          objectSpread<AccountInfo>({}, { address, suri, genesis, type })
+        );
+
+        onEvmAccountChange(
+          objectSpread<AccountInfo>({}, { address: evmAddress, suri, genesis: evmGenesis, type: EVM_ACCOUNT_TYPE })
+        );
 
         setError('');
       })
@@ -111,9 +113,11 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
       onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
       setNormalAccountSelected(true);
       setEvmAccountSelected(false);
+      setEvmGenesis('');
     } else {
       onSelectAccountImported && onSelectAccountImported([]);
       setNormalAccountSelected(false);
+      setGenesis('');
     }
   }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
 
@@ -123,9 +127,11 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
       onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
       setNormalAccountSelected(false);
       setEvmAccountSelected(true);
+      setGenesis('');
     } else {
       onSelectAccountImported && onSelectAccountImported([]);
       setEvmAccountSelected(false);
+      setEvmGenesis('');
     }
   }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
 
@@ -202,14 +208,14 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
           }
 
           {isEvmAccountSelected && seed &&
-          <Dropdown
-            className='seed-and-path__genesis-selection'
-            label={t<string>('Network')}
-            onChange={onChangeEvmAccountGenesis}
-            options={genesisHashOption}
-            reference={evmNetworkRef}
-            value={evmGenesis}
-          />
+            <Dropdown
+              className='seed-and-path__genesis-selection'
+              label={t<string>('Network')}
+              onChange={onChangeEvmAccountGenesis}
+              options={genesisHashOption}
+              reference={evmNetworkRef}
+              value={evmGenesis}
+            />
           }
 
           {!!error && !!seed && (

@@ -101,13 +101,13 @@ export class RmrkNftApi extends BaseNftApi {
     await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
       const result = await this.getMetadata(item.metadata as string);
 
-      if (item.source === 'bird_kanaria') {
+      if (item.source === RMRK_SOURCE.BIRD_KANARIA) {
         nfts.push({
           ...item,
           metadata: result,
           external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
         });
-      } else if (item.source === 'kanaria') {
+      } else if (item.source === RMRK_SOURCE.KANARIA) {
         nfts.push({
           ...item,
           metadata: {
@@ -116,7 +116,7 @@ export class RmrkNftApi extends BaseNftApi {
             external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
           }
         });
-      } else if (item.source === 'singular_v1') {
+      } else if (item.source === RMRK_SOURCE.SINGULAR_V1) {
         nfts.push({
           ...item,
           metadata: {
@@ -128,7 +128,7 @@ export class RmrkNftApi extends BaseNftApi {
           },
           external_url: SINGULAR_V1_EXTERNAL_SERVER + item.id.toString()
         });
-      } else if (item.source === 'singular_v2') {
+      } else if (item.source === RMRK_SOURCE.SINGULAR_V2) {
         const id = item.id as string;
 
         if (!id.toLowerCase().includes('kanbird')) { // excludes kanaria bird, already handled above

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import BigN from 'bignumber.js';
 import React, { Fragment, useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -14,7 +15,6 @@ import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 import ChainBalanceDetail from '../ChainBalances/ChainBalanceDetail/ChainBalanceDetail';
-import BigN from "bignumber.js";
 
 interface Props extends ThemeProps {
   address: string;

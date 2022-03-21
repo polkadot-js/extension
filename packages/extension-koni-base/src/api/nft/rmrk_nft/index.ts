@@ -229,7 +229,7 @@ export class RmrkNftApi extends BaseNftApi {
           id: item?.id,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           name: item?.metadata?.name as string,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
           image: this.parseUrl(item.image ? item.image : item.metadata.image ? item.metadata.image : item.metadata.animation_url as string),
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           description: item?.metadata?.description as string,

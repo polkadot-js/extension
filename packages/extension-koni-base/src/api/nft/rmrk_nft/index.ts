@@ -122,9 +122,9 @@ export class RmrkNftApi extends BaseNftApi {
           ...item,
           metadata: {
             ...result,
-            image: this.parseUrl(result?.image as string),
-            external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
-          }
+            image: this.parseUrl(result?.image as string)
+          },
+          external_url: KANARIA_EXTERNAL_SERVER + item.id.toString()
         });
       } else if (item.source === RMRK_SOURCE.SINGULAR_V1) {
         nfts.push({

@@ -7,7 +7,7 @@ import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes'
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking';
-import { getSubsquidStakingReward } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
+import { getAllSubsquidStakingReward } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -184,7 +184,7 @@ export class KoniSubcription {
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 
-    await getSubsquidStakingReward(addresses)
+    await getAllSubsquidStakingReward(addresses)
       .then((result) => {
         state.setStakingReward(result);
       })

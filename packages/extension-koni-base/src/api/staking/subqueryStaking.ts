@@ -5,22 +5,24 @@ import axios from 'axios';
 
 import { APIItemState, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { toUnit } from '@polkadot/extension-koni-base/utils/utils';
+import { SUBQUERY_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@polkadot/extension-koni-base/api/staking/config';
+import { reformatAddress, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 interface StakingResponseItem {
   id: string,
   amount: string
 }
 
-const getSubqueryKusamaStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
+const getSubqueryStakingReward = async (accounts: string[], chain: string): Promise<StakingRewardItem> => {
   const amounts = await Promise.all(accounts.map(async (account) => {
+    const parsedAccount = reformatAddress(account, NETWORKS[chain].ss58Format);
     const resp = await axios({
-      url: 'https://api.subquery.network/sq/nova-wallet/nova-kusama',
+      url: SUBQUERY_ENDPOINTS[chain],
       method: 'post',
       data: {
         query: `
         query {
-          accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
+          accumulatedRewards (filter: {id: {equalTo: "${parsedAccount}"}}) {
             nodes {
               id
               amount
@@ -54,128 +56,22 @@ const getSubqueryKusamaStakingReward = async (accounts: string[]): Promise<Staki
   }
 
   // @ts-ignore
-  parsedAmount = toUnit(parsedAmount, NETWORKS.kusama.decimals);
+  parsedAmount = toUnit(parsedAmount, NETWORKS[chain].decimals);
 
   return {
-    name: NETWORKS.kusama.chain,
-    chainId: 'kusama',
+    name: NETWORKS[chain].chain,
+    chainId: chain,
     totalReward: parsedAmount.toString(),
     state: APIItemState.READY
   } as StakingRewardItem;
 };
 
-const getSubqueryPolkadotStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
-  const amounts = await Promise.all(accounts.map(async (account) => {
-    const resp = await axios({
-      url: 'https://api.subquery.network/sq/nova-wallet/nova-polkadot',
-      method: 'post',
-      data: {
-        query: `
-        query {
-          accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
-            nodes {
-              id
-              amount
-            }
-          }
-        }
-      `
-      }
-    });
-
-    if (resp.status === 200) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const respData = resp.data.data as Record<string, any>;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const rewardList = respData.accumulatedRewards.nodes as StakingResponseItem[];
-
-      if (rewardList.length > 0) {
-        return parseFloat(rewardList[0].amount);
-      }
-
-      return 0;
-    }
-
-    return 0;
-  }));
-
-  let parsedAmount = 0;
-
-  for (const amount of amounts) {
-    parsedAmount += amount;
-  }
-
-  // @ts-ignore
-  parsedAmount = toUnit(parsedAmount, NETWORKS.polkadot.decimals);
-
-  return {
-    name: NETWORKS.polkadot.chain,
-    chainId: 'polkadot',
-    totalReward: parsedAmount.toString(),
-    state: APIItemState.READY
-  } as StakingRewardItem;
-};
-
-const getSubqueryAstarStakingReward = async (accounts: string[]): Promise<StakingRewardItem> => {
-  const amounts = await Promise.all(accounts.map(async (account) => {
-    const resp = await axios({
-      url: 'https://api.subquery.network/sq/nova-wallet/nova-wallet-astar',
-      method: 'post',
-      data: {
-        query: `
-        query {
-          accumulatedRewards (filter: {id: {equalTo: "${account}"}}) {
-            nodes {
-              id
-              amount
-            }
-          }
-        }
-      `
-      }
-    });
-
-    if (resp.status === 200) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const respData = resp.data.data as Record<string, any>;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      const rewardList = respData.accumulatedRewards.nodes as StakingResponseItem[];
-
-      if (rewardList.length > 0) {
-        return parseFloat(rewardList[0].amount);
-      }
-
-      return 0;
-    }
-
-    return 0;
-  }));
-
-  let parsedAmount = 0;
-
-  for (const amount of amounts) {
-    parsedAmount += amount;
-  }
-
-  // @ts-ignore
-  parsedAmount = toUnit(parsedAmount, NETWORKS.astar.decimals);
-
-  return {
-    name: NETWORKS.astar.chain,
-    chainId: 'astar',
-    totalReward: parsedAmount.toString(),
-    state: APIItemState.READY
-  } as StakingRewardItem;
-};
-
-export const getSubqueryStakingReward = async (accounts: string[]): Promise<StakingRewardJson> => {
+export const getAllSubqueryStakingReward = async (accounts: string[]): Promise<StakingRewardJson> => {
   let rewardList: StakingRewardItem[] = [];
 
-  const rewardItems = await Promise.all([
-    getSubqueryKusamaStakingReward(accounts),
-    getSubqueryPolkadotStakingReward(accounts),
-    getSubqueryAstarStakingReward(accounts)
-  ]);
+  const rewardItems = await Promise.all(SUPPORTED_STAKING_CHAINS.map(async (chain) => {
+    return await getSubqueryStakingReward(accounts, chain);
+  }));
 
   rewardList = rewardList.concat(rewardItems);
 

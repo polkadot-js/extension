@@ -12,7 +12,7 @@ import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 
-const NFT_FETCHING_TIMEOUT = 5000;
+const NFT_FETCHING_TIMEOUT = 8000;
 const NFT_CONNECTION_TIMEOUT = 15000;
 
 enum SUPPORTED_NFT_NETWORKS {

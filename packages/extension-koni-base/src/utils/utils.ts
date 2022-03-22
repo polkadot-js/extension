@@ -159,7 +159,7 @@ export const isValidAddress = (address: string) => {
 export const toUnit = (balance: number, decimals: number) => {
   if (balance === 0) return 0;
 
-  return balance / 10 ** decimals;
+  return balance / (10 ** decimals);
 };
 
 export function sumBN (inputArr: BN[]) {

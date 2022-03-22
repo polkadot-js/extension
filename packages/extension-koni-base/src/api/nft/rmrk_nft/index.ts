@@ -90,7 +90,7 @@ export class RmrkNftApi extends BaseNftApi {
       { url: SINGULAR_V2_ENDPOINT + account, source: RMRK_SOURCE.SINGULAR_V2 }
     ];
 
-    let data: Record<number | string, number | string>[] = [];
+    let data: Record<number | string, number | string | NFTResource>[] = [];
 
     await Promise.all(fetchUrls.map(async ({ source, url }) => {
       let _data = await fetch(url, {

@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
      116	Nam Phạm                      	fix es-lint
-      93	AnhMTV                        	Remove unused log and add test to develop web3 api
+      94	AnhMTV                        	Release version 0.2.9
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
       50	leewong                       	# update condition to display correct message on send fund screen

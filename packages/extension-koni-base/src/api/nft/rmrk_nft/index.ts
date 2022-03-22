@@ -107,8 +107,8 @@ export class RmrkNftApi extends BaseNftApi {
     const nfts: Record<string | number, any>[] = [];
 
     await Promise.all(data.map(async (item: Record<number | string, number | string | NFTResource>) => {
-      const primaryResource = item.primaryResource ? item.primaryResource as NFTResource : null
-      const metadataUri = primaryResource && primaryResource.metadata  ? primaryResource.metadata : item.metadata
+      const primaryResource = item.primaryResource ? item.primaryResource as NFTResource : null;
+      const metadataUri = primaryResource && primaryResource.metadata ? primaryResource.metadata : item.metadata;
       const result = await this.getMetadata(metadataUri as string);
 
       if (item.source === RMRK_SOURCE.BIRD_KANARIA) {

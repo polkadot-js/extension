@@ -89,6 +89,7 @@ export default function useApi (networkKey: string): ApiProps {
 
     return () => {
       isSync = false;
+      setValue({ isApiReady: false } as ApiProps);
     };
   }, [networkKey]);
 

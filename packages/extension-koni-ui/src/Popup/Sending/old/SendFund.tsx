@@ -9,6 +9,7 @@ import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson } from '@polkadot/extension-base/background/types';
 import { Button, Warning } from '@polkadot/extension-koni-ui/components';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
@@ -40,6 +41,9 @@ interface ContentProps extends ThemeProps {
   setWrapperClass: (classname: string) => void;
   api: ApiPromise;
   apiUrl: string;
+  currentAccount?: AccountJson | null;
+  isEthereum: boolean;
+  networkKey: string;
 }
 
 function isRefcount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
@@ -97,8 +101,8 @@ type SupportType = 'NETWORK' | 'ACCOUNT';
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { currentAccount: { account },
-    currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
+  const { currentAccount: { account: currentAccount },
+    currentNetwork: { isEthereum, networkKey } } = useSelector((state: RootState) => state);
   const [wrapperClass, setWrapperClass] = useState<string>('');
   const { api, apiUrl, isApiReady, isNotSupport } = useApi(networkKey);
 
@@ -120,7 +124,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   };
 
   const renderContent = () => {
-    if (account && isAccountAll(account.address)) {
+    if (currentAccount && isAccountAll(currentAccount.address)) {
       return notSupportSendFund('ACCOUNT');
     }
 
@@ -132,6 +136,9 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
               api={api}
               apiUrl={apiUrl}
               className={'send-fund-container'}
+              currentAccount={currentAccount}
+              isEthereum={isEthereum}
+              networkKey={networkKey}
               setWrapperClass={setWrapperClass}
               theme={theme}
             />
@@ -159,11 +166,8 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   );
 }
 
-function SendFund ({ api, apiUrl, className = '', setWrapperClass }: ContentProps): React.ReactElement {
+function SendFund ({ api, apiUrl, className = '', currentAccount, isEthereum, networkKey, setWrapperClass }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
-
-  const { currentAccount: { account: currentAccount },
-    currentNetwork: { isEthereum, networkKey } } = useSelector((state: RootState) => state);
   const propSenderId = currentAccount?.address;
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const [hasAvailable] = useState(true);

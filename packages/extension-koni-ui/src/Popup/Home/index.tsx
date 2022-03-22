@@ -240,18 +240,18 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setShowBalanceDetail(false);
   }, [setShowBalanceDetail]);
 
-  // const onChangeAccount = useCallback((address: string) => {
-  //   if (isAccountAll(address)) {
-  //     _setActiveTab(1);
-  //   }
-  // }, [_setActiveTab]);
+  const onChangeAccount = useCallback((address: string) => {
+    setShowBalanceDetail(false);
+  }, []);
 
   return (
     <div className={`home-screen home ${className}`}>
       <Header
+        changeAccountCallback={onChangeAccount}
         className={'home-header'}
         isContainDetailHeader={true}
         isShowZeroBalances={isShowZeroBalances}
+        setShowBalanceDetail={setShowBalanceDetail}
         showAdd
         showSearch
         showSettings

@@ -77,7 +77,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
     }, [accounts, address, changeAccountCallback, closeSetting, onAction]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getBase64 = (file: Blob) => {
+  const updateAvatar = (file: Blob) => {
     const reader = new FileReader();
 
     reader.readAsDataURL(file);
@@ -99,12 +99,12 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
       if (size < 3670016) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-        getBase64(event.target.files[0]);
+        updateAvatar(event.target.files[0]);
       } else {
         setToastError(true);
         show(t('File is too large (limited 3.5MB)'));
       }
-    }, [getBase64, setToastError, show, t]);
+    }, [updateAvatar, setToastError, show, t]);
 
   const onSelectImg = useCallback(() => {
     if (isPopup && (isFirefox || isLinux)) {

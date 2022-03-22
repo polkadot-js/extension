@@ -52,13 +52,14 @@ interface Props extends ThemeProps {
   toggleZeroBalances?: () => void;
   changeAccountCallback?: (address: string) => void;
   isBusy?: boolean;
+  setShowBalanceDetail?: (isShowBalanceDetail: boolean) => void;
 }
 
 function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -222,9 +223,10 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
         setLocalGenesisHash(genesisHash);
       }
 
+      setShowBalanceDetail && setShowBalanceDetail(false);
       setShowNetworkSelect(false);
     },
-    [currentAccount]
+    [currentAccount, setShowBalanceDetail]
   );
 
   useOutsideClick(setRef, (): void => {
@@ -364,6 +366,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               imgSelected={imgSelected}
               reference={setRef}
               setImgSelected={setImgSelected}
+              setShowBalanceDetail={setShowBalanceDetail}
             />
           )}
         </div>

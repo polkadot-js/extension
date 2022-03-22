@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.2.9 (Koni)
+Build date: Mar 22, 2022. Complete internal security audit
+Update:
+- Support Moonriver, Moonbase token balances
+- Support Bifrost token Balance
+
+Bug Fixed:
+- Fix RMRK 2.0 nft error
+
 ## 0.2.8 (Koni)
 Build date: Mar 18, 2022. Complete internal security audit
 Update:

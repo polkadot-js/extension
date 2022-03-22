@@ -24,6 +24,7 @@ const connectWeb3Apis = (networks = EVM_NETWORKS): Record<string, Web3> => {
 export const web3Map = connectWeb3Apis();
 
 export const getERC20Contract = (networkKey: string, assetAddress: string, options = {}): Contract => {
+  // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
   return new web3Map[networkKey].eth.Contract(ERC20Contract.abi, assetAddress, options);
 };

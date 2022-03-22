@@ -75,12 +75,13 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Moonbeam',
     genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
     ss58Format: 1284,
-    provider: 'wss://moonbeam.api.onfinality.io/public-ws',
+    provider: 'wss://wss.api.moonbeam.network',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2004,
     isEthereum: true,
-    nativeToken: 'DEV',
-    crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/'
+    nativeToken: 'GLMR',
+    crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
+    decimals: 18
   },
   astar: {
     chain: 'Astar',
@@ -121,7 +122,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2034,
     nativeToken: 'HDX',
-    crowdloanUrl: 'https://loan.hydradx.io/'
+    crowdloanUrl: 'https://loan.hydradx.io/',
+    decimals: 12
   },
   edgeware: {
     chain: 'Edgeware',

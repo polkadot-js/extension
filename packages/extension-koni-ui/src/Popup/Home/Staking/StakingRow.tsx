@@ -1,11 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useContext, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import styled, { ThemeContext } from 'styled-components';
 
 import { StakingRewardItem } from '@polkadot/extension-base/background/KoniTypes';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import cloneIconLight from '@polkadot/extension-koni-ui/assets/clone--color-2.svg';
+import cloneIconDark from '@polkadot/extension-koni-ui/assets/clone--color-3.svg';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
+import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { formatLocaleNumber } from '@polkadot/extension-koni-ui/util/formatNumber';
 
 interface Props extends ThemeProps {
@@ -53,6 +58,18 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
 
     return editBalance(balance.toString());
   };
+
+  const { show } = useToast();
+  const { t } = useTranslation();
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
+  const theme = themeContext.id;
+
+  const _onCopy = useCallback(
+    () => {
+      show(t('Copied'));
+    },
+    [show, t]
+  );
 
   return (
     <div className={`${className || ''} ${showReward ? '-show-detail' : ''}`}>
@@ -120,6 +137,39 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
                   <div className={'chain-unit'}>{unit}</div>
                 </div>
               </div>
+
+              {
+                chainName === 'astar' &&
+                <div className={'reward-container'}>
+                  <div className={'reward-title'}>Smart contract</div>
+                  <div className={'smart-contract-field'}>
+                    <div className={'smart-contract-value'}>
+                      {reward?.smartContract?.slice(0, 6)}...{reward?.smartContract?.slice(-6)}
+                    </div>
+                    <CopyToClipboard text={(reward.smartContract && reward.smartContract) || ''}>
+                      <div
+                        className={'kn-copy-btn'}
+                        onClick={_onCopy}
+                      >
+                        {theme === 'dark'
+                          ? (
+                            <img
+                              alt='copy'
+                              src={cloneIconDark}
+                            />
+                          )
+                          : (
+                            <img
+                              alt='copy'
+                              src={cloneIconLight}
+                            />
+                          )
+                        }
+                      </div>
+                    </CopyToClipboard>
+                  </div>
+                </div>
+              }
               {/* <div className={'reward-container'}> */}
               {/*  <div className={'reward-title'}>APR</div> */}
               {/*  <div className={'reward-amount'}> */}
@@ -135,6 +185,28 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
 }
 
 export default React.memo(styled(StakingRow)(({ theme }: Props) => `
+  .kn-copy-btn {
+    width: 15px;
+    height: 15px;
+    margin-top: auto;
+    margin-bottom: auto;
+    cursor: pointer;
+    background-color: ${theme.buttonBackground1};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 40%;
+  }
+
+  .smart-contract-field {
+    display: flex;
+    gap: 10px;
+  }
+
+  .smart-contract-value {
+    font-size: 14px;
+  }
+
   .extra-container {
     width: 100%;
     display: flex;

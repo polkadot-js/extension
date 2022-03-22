@@ -1,15 +1,16 @@
      465	Jaco                          	0.42.5 (#969)
-     107	Nam Phạm                      	fix es-lint
+     116	Nam Phạm                      	fix es-lint
       93	AnhMTV                        	Remove unused log and add test to develop web3 api
       82	Thibaut Sardan                	Add account filtering feature (#832)
       60	quangdo                       	Update AccountQrModal, Tooltip style
       50	leewong                       	# update condition to display correct message on send fund screen
-      39	lw                            	# fix eslint issue
-      35	Dominhquangdev                	Update Change Avatar All Account
+      42	lw                            	# update balance display
+      41	Dominhquangdev                	Update SendFund screen, ChainBalances tab
       12	Hieu Dao                      	Update README.md
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
-       5	Minh Le                       	refactor code quartz_nft
+       7	Minh Le                       	refactor code rmrk_nft api
+       6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        3	Antoine Estienne              	Add eth test for extension signature (#909)
@@ -33,7 +34,6 @@
        1	Marcel Jackisch               	Minor changes to readme (#376)
        1	Michael Healy                 	Small typo (#932)
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
-       1	MinhLe                        	hotfix: remove test address
        1	murat onur                    	tr language support added (#681)
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
        1	Stéphane P                    	README Fix typo (#700)

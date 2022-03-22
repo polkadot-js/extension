@@ -30,6 +30,14 @@ interface NFTMetadata {
   mediaUri?: string,
 }
 
+interface NFTResource {
+  id?: string,
+  slot_id?: any[],
+  src?: string,
+  thumb?: string,
+  metadata?: string
+}
+
 export class RmrkNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor () {
@@ -89,7 +97,7 @@ export class RmrkNftApi extends BaseNftApi {
         method: 'GET',
         headers
       })
-        .then((res) => res.json()) as Record<number | string, number | string>[];
+        .then((res) => res.json()) as Record<number | string, number | string | NFTResource>[];
 
       _data = _data.map((item) => { return { ...item, source }; });
 
@@ -98,8 +106,10 @@ export class RmrkNftApi extends BaseNftApi {
 
     const nfts: Record<string | number, any>[] = [];
 
-    await Promise.all(data.map(async (item: Record<number | string, number | string>) => {
-      const result = await this.getMetadata(item.metadata as string);
+    await Promise.all(data.map(async (item: Record<number | string, number | string | NFTResource>) => {
+      const primaryResource = item.primaryResource ? item.primaryResource as NFTResource : null
+      const metadataUri = primaryResource && primaryResource.metadata  ? primaryResource.metadata : item.metadata
+      const result = await this.getMetadata(metadataUri as string);
 
       if (item.source === RMRK_SOURCE.BIRD_KANARIA) {
         nfts.push({

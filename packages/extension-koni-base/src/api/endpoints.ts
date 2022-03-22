@@ -80,7 +80,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2004,
     isEthereum: true,
     nativeToken: 'GLMR',
-    crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/'
+    crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
+    decimals: 18
   },
   astar: {
     chain: 'Astar',

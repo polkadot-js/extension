@@ -3,12 +3,13 @@
 
 import axios from 'axios';
 
-import { APIItemState, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@polkadot/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 interface RewardResponseItem {
+  smartContract: string;
   amount: string,
   blockNumber: string
 }
@@ -21,6 +22,7 @@ interface StakingResponseItem {
 }
 
 interface StakingAmount {
+  smartContract?: string;
   totalReward?: number,
   totalSlash?: number,
   totalStake?: number,
@@ -31,11 +33,10 @@ const getSubsquidQuery = (account: string, chain: string) => {
   if (chain === 'astar') {
     return `
     query MyQuery {
-      accounts(limit: 1, where: {id_eq: "${account}"}) {
+      accountById(id: "${account}") {
         totalReward
         totalStake
-        id
-        rewards(limit: 1, orderBy: blockNumber_DESC, where: {id_eq: "${account}"}) {
+        rewards(limit: 1, orderBy: blockNumber_DESC) {
           amount
           smartContract
         }
@@ -45,19 +46,18 @@ const getSubsquidQuery = (account: string, chain: string) => {
 
   return `
   query MyQuery {
-    accounts(limit: 1, where: {id_eq: "${account}"}) {
+    accountById(id: "${account}") {
       totalReward
       totalSlash
       totalStake
-      id
-      rewards(limit: 1, orderBy: blockNumber_DESC, where: {id_eq: "${account}"}) {
+      rewards(limit: 1, orderBy: blockNumber_DESC) {
         amount
       }
     }
   }`;
 };
 
-const getSubsquidStakingReward = async (accounts: string[], chain: string): Promise<StakingRewardItem> => {
+const getSubsquidStaking = async (accounts: string[], chain: string, callback: (networkKey: string, rs: StakingItem) => void): Promise<StakingRewardItem> => {
   try {
     const parsedResult: StakingAmount = {};
 
@@ -72,16 +72,16 @@ const getSubsquidStakingReward = async (accounts: string[], chain: string): Prom
       if (resp.status === 200) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const respData = resp.data.data as Record<string, any>;
-        const rewardList = respData.accounts as StakingResponseItem[];
+        const rewardItem = respData.accountById as StakingResponseItem;
 
-        if (rewardList.length > 0) {
-          const rewardItem = rewardList[0];
+        if (rewardItem) {
           const latestReward = rewardItem.rewards[0];
 
           if (rewardItem.totalReward) result.totalReward = parseFloat(rewardItem.totalReward);
           if (rewardItem.totalSlash) result.totalSlash = parseFloat(rewardItem.totalSlash);
           if (rewardItem.totalStake) result.totalStake = parseFloat(rewardItem.totalStake);
           if (latestReward && latestReward.amount) result.latestReward = parseFloat(latestReward.amount);
+          if (latestReward && latestReward.smartContract) result.smartContract = latestReward.smartContract;
         }
       }
 
@@ -89,6 +89,8 @@ const getSubsquidStakingReward = async (accounts: string[], chain: string): Prom
     }));
 
     for (const reward of rewards) {
+      if (reward.smartContract) parsedResult.smartContract = reward.smartContract;
+
       if (reward.totalReward) {
         if (parsedResult.totalReward) {
           parsedResult.totalReward += toUnit(reward.totalReward, NETWORKS[chain].decimals as number);
@@ -122,12 +124,22 @@ const getSubsquidStakingReward = async (accounts: string[], chain: string): Prom
       }
     }
 
+    callback(chain, {
+      name: NETWORKS[chain].chain,
+      chainId: chain,
+      balance: parsedResult.totalStake ? parsedResult.totalStake.toString() : '0',
+      nativeToken: NETWORKS[chain].nativeToken,
+      unit: NETWORKS[chain].nativeToken,
+      state: APIItemState.READY
+    } as StakingItem);
+
     return {
       name: NETWORKS[chain].chain,
       chainId: chain,
       totalReward: parsedResult.totalReward ? parsedResult.totalReward.toString() : '0',
       latestReward: parsedResult.latestReward ? parsedResult.latestReward.toString() : '0',
       totalSlash: parsedResult.totalSlash ? parsedResult.totalSlash.toString() : '0',
+      smartContract: parsedResult.smartContract,
       state: APIItemState.READY
     } as StakingRewardItem;
   } catch (e) {
@@ -144,11 +156,11 @@ const getSubsquidStakingReward = async (accounts: string[], chain: string): Prom
   }
 };
 
-export const getAllSubsquidStakingReward = async (accounts: string[]): Promise<StakingRewardJson> => {
+export const getAllSubsquidStakingReward = async (accounts: string[], callback: (networkKey: string, rs: StakingItem) => void): Promise<StakingRewardJson> => {
   let rewardList: StakingRewardItem[] = [];
 
   const rewardItems = await Promise.all(SUPPORTED_STAKING_CHAINS.map(async (network) => {
-    return await getSubsquidStakingReward(accounts, network);
+    return await getSubsquidStaking(accounts, network, callback);
   }));
 
   rewardList = rewardList.concat(rewardItems);

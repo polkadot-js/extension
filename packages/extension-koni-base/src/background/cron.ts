@@ -130,6 +130,7 @@ export class KoniCron {
   }
 
   resetStakingReward () {
+    state.resetStakingMap();
     state.setStakingReward({
       details: []
     } as StakingRewardJson);

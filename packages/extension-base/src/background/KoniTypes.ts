@@ -22,7 +22,8 @@ export interface StakingRewardItem {
   chainId: string,
   latestReward?: string,
   totalReward?: string,
-  totalSlash?: string
+  totalSlash?: string,
+  smartContract?: string
 }
 
 export interface StakingRewardJson {

@@ -6,7 +6,6 @@ import { take } from 'rxjs';
 import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import { subscribeStaking } from '@polkadot/extension-koni-base/api/staking';
 import { getAllSubsquidStakingReward } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
@@ -40,13 +39,11 @@ export class KoniSubcription {
         const { address } = currentAccountInfo;
 
         this.subscribeBalancesAndCrowdloans(address);
-        this.subscribeStaking(address);
       }
 
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.subscribeBalancesAndCrowdloans(address);
-          this.subscribeStaking(address);
         }
       });
     });
@@ -154,39 +151,43 @@ export class KoniSubcription {
     }
   }
 
-  subscribeStaking (address: string) {
-    this.unsubStaking && this.unsubStaking();
-    state.resetStakingMap();
-    this.detectAddresses(address)
-      .then((addresses) => {
-        this.unsubStaking = this.initStakingSubscription(addresses);
-      })
-      .catch(console.error);
-  }
-
-  initStakingSubscription (addresses: string[]) {
-    const subscriptionPromises = subscribeStaking(addresses, dotSamaAPIMap, (networkKey, rs) => {
-      state.setStakingItem(networkKey, rs);
-      console.log('set new staking item', rs);
-    });
-
-    return () => {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      subscriptionPromises
-        .then((unsub) => {
-          unsub && unsub();
-        })
-        .catch(console.error);
-    };
-  }
+  // subscribeStaking (address: string) {
+  //   this.unsubStaking && this.unsubStaking();
+  //   state.resetStakingMap();
+  //   this.detectAddresses(address)
+  //     .then((addresses) => {
+  //       this.unsubStaking = this.initStakingSubscription(addresses);
+  //     })
+  //     .catch(console.error);
+  // }
+  //
+  // initStakingSubscription (addresses: string[]) {
+  //   const subscriptionPromises = subscribeStaking(['5CCic55XtXUM2gWiHXfNeKxwcYugFifNGJXA962AU7jMrCJB'], dotSamaAPIMap, (networkKey, rs) => {
+  //     state.setStakingItem(networkKey, rs);
+  //     // console.log('set new staking item', rs);
+  //   });
+  //
+  //   return () => {
+  //     // @ts-ignore
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  //     subscriptionPromises
+  //       .then((unsub) => {
+  //         unsub && unsub();
+  //       })
+  //       .catch(console.error);
+  //   };
+  // }
 
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 
-    await getAllSubsquidStakingReward(addresses)
+    await getAllSubsquidStakingReward(addresses, (networkKey, rs) => {
+      state.setStakingItem(networkKey, rs);
+      console.log('set staking item', rs);
+    })
       .then((result) => {
         state.setStakingReward(result);
+        console.log('set staking reward state done', result);
       })
       .catch(console.error);
   }

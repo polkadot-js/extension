@@ -16,6 +16,8 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
   const nftList = nftReducer?.nftList;
   const filteredNfts: NftCollection[] = [];
   let totalItems = nftReducer.total;
+  let from = 0;
+  let to = 0;
 
   const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
 
@@ -30,8 +32,13 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
     });
   }
 
-  const from = (page - 1) * NFT_GRID_SIZE;
-  const to = from + NFT_GRID_SIZE;
+  if (!showAll && filteredNfts.length <= NFT_GRID_SIZE) {
+    from = 0;
+    to = filteredNfts.length;
+  } else {
+    from = (page - 1) * NFT_GRID_SIZE;
+    to = from + NFT_GRID_SIZE;
+  }
 
   return {
     nftList: showAll ? nftList.slice(from, to) : filteredNfts.slice(from, to),

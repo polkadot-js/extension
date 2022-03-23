@@ -100,7 +100,9 @@ function Upload ({ className }: Props): React.ReactElement {
       setIsBusy(true);
 
       (isKeyringPairs$Json(file) ? batchRestore(file, password) : jsonRestore(file, password))
-        .then(() => { onAction('/'); })
+        .then(() => {
+          onAction('/');
+        })
         .catch((e) => {
           console.error(e);
           setIsBusy(false);

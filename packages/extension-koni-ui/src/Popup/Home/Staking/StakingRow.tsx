@@ -33,7 +33,7 @@ function StakingRow ({ amount, chainName, className, index, logo, price, reward,
   }, [showReward]);
 
   const editBalance = (balance: string) => {
-    if (parseInt(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
+    if (parseFloat(balance) === 0) return <span className={'major-balance'}>{balance}</span>;
 
     const balanceSplit = balance.split('.');
 

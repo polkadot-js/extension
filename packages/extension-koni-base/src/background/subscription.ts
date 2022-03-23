@@ -162,7 +162,7 @@ export class KoniSubcription {
   // }
   //
   // initStakingSubscription (addresses: string[]) {
-  //   const subscriptionPromises = subscribeStaking(['5CCic55XtXUM2gWiHXfNeKxwcYugFifNGJXA962AU7jMrCJB'], dotSamaAPIMap, (networkKey, rs) => {
+  //   const subscriptionPromises = subscribeStaking(addresses, dotSamaAPIMap, (networkKey, rs) => {
   //     state.setStakingItem(networkKey, rs);
   //     // console.log('set new staking item', rs);
   //   });
@@ -181,7 +181,12 @@ export class KoniSubcription {
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 
-    await getAllSubsquidStakingReward(addresses, (networkKey, rs) => {
+    await getAllSubsquidStakingReward([
+      '17bR6rzVsVrzVJS1hM4dSJU43z2MUmz7ZDpPLh8y2fqVg7m',
+      '7Hja2uSzxdqcJv1TJi8saFYsBjurQZtJE49v4SXVC5Dbm8KM',
+      'Caa8SHQ8P1jtXeuZV7MJ3yJvdnG2M3mhXpvgx7FtKwgxkVJ',
+      '111B8CxcmnWbuDLyGvgUmRezDCK1brRZmvUuQ6SrFdMyc3S'
+    ], (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
       console.log('set staking item', rs);
     })

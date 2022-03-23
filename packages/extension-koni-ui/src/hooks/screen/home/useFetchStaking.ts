@@ -4,10 +4,11 @@
 import { useSelector } from 'react-redux';
 
 import { APIItemState, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { StakingDataType, StakingType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 
-export default function useFetchStaking (): StakingType {
+export default function useFetchStaking (networkKey: string): StakingType {
   const { price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);
 
   const { priceMap } = priceReducer;
@@ -18,10 +19,13 @@ export default function useFetchStaking (): StakingType {
   const stakingData: StakingDataType[] = [];
   let loading = true;
 
+  const showAll = networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase();
+
   Object.keys(stakingItemMap).forEach((key) => {
     const stakingItem = stakingItemMap[key];
 
     if (stakingItem.state === APIItemState.READY) {
+      console.log('staking', stakingItem.chainId);
       loading = false;
 
       if (stakingItem.balance !== '0' && (Math.round(parseFloat(stakingItem.balance as string) * 100) / 100) !== 0) {
@@ -31,16 +35,38 @@ export default function useFetchStaking (): StakingType {
     }
   });
 
-  for (const stakingItem of readyStakingItems) {
-    const stakingDataType = { staking: stakingItem } as StakingDataType;
+  if (!showAll) {
+    const filteredStakingItems: StakingItem[] = [];
 
-    for (const reward of stakingRewardList) {
-      if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
-        stakingDataType.reward = reward;
+    readyStakingItems.forEach((item) => {
+      if (item.chainId.toLowerCase() === networkKey.toLowerCase()) {
+        filteredStakingItems.push(item);
       }
-    }
+    });
 
-    stakingData.push(stakingDataType);
+    for (const stakingItem of filteredStakingItems) {
+      const stakingDataType = { staking: stakingItem } as StakingDataType;
+
+      for (const reward of stakingRewardList) {
+        if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
+          stakingDataType.reward = reward;
+        }
+      }
+
+      stakingData.push(stakingDataType);
+    }
+  } else {
+    for (const stakingItem of readyStakingItems) {
+      const stakingDataType = { staking: stakingItem } as StakingDataType;
+
+      for (const reward of stakingRewardList) {
+        if (stakingItem.chainId === reward.chainId && reward.state === APIItemState.READY) {
+          stakingDataType.reward = reward;
+        }
+      }
+
+      stakingData.push(stakingDataType);
+    }
   }
 
   return {

@@ -120,7 +120,7 @@ export class KoniSubcription {
   subscribeNft (address: string) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(['5HSy9AaxHHLkAKwjBM8Tw1mfvM1NqbU1TGY1drifwJsi2m3t']);
+        this.initNftSubscription(['0x5e35994dfb6b2494428d1919b15b7fd3a7de0c3a']);
       })
       .catch(console.error);
   }
@@ -145,7 +145,6 @@ export class KoniSubcription {
       nftHandler.handleNfts()
         .then((r) => {
           state.setNft(nftHandler.getNftJson());
-          // console.log('set nft state done for address', addresses);
         })
         .catch(console.log);
     }
@@ -181,9 +180,7 @@ export class KoniSubcription {
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 
-    await getAllSubsquidStakingReward([
-      '5HSy9AaxHHLkAKwjBM8Tw1mfvM1NqbU1TGY1drifwJsi2m3t'
-    ], (networkKey, rs) => {
+    await getAllSubsquidStakingReward(addresses, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
       console.log('set staking item', rs);
     })

@@ -68,6 +68,21 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "anonymous": true,
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "totalSupply",
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "anonymous": true,
     "inputs": [],
     "outputs": [

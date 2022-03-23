@@ -50,14 +50,16 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
   const navigate = useContext(ActionContext);
 
-  const propDetail = (title: string, value: string, key: number) => {
+  const propDetail = (title: string, value: string, rarity: number, key: number) => {
     return (
       <div
         className={'prop-detail'}
         key={key}
       >
         <div className={'prop-title'}>{title}</div>
-        <div className={'prop-value'}>{value}</div>
+        <div className={'prop-value'}>{value}
+          {/* {rarity && `(~${Math.round((rarity + Number.EPSILON) * 100) / 100}%)`} */}
+        </div>
       </div>
     );
   };
@@ -206,7 +208,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
                     // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
                     // @ts-ignore
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                    return propDetail(key, data?.properties[key]?.value, index);
+                    return propDetail(key, data?.properties[key]?.value, data?.properties[key]?.rarity, index);
                     // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
                   })
                 }

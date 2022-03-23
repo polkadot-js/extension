@@ -25,7 +25,6 @@ export default function useFetchStaking (networkKey: string): StakingType {
     const stakingItem = stakingItemMap[key];
 
     if (stakingItem.state === APIItemState.READY) {
-      console.log('staking', stakingItem.chainId);
       loading = false;
 
       if (stakingItem.balance !== '0' && (Math.round(parseFloat(stakingItem.balance as string) * 100) / 100) !== 0) {

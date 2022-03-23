@@ -11,6 +11,7 @@ import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
+import {MoonbeamNftApi} from "@polkadot/extension-koni-base/api/nft/moonbeam_nft";
 
 const NFT_FETCHING_TIMEOUT = 8000;
 const NFT_CONNECTION_TIMEOUT = 15000;
@@ -21,7 +22,8 @@ enum SUPPORTED_NFT_NETWORKS {
   rmrk = 'rmrk',
   statemine = 'statemine',
   uniqueNft = 'uniqueNft',
-  quartz = 'quartz'
+  quartz = 'quartz',
+  moonbeam = 'moonbeam'
 }
 
 function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
@@ -47,6 +49,8 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
       return new UniqueNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.quartz:
       return new QuartzNftApi(api, useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.moonbeam:
+      return new MoonbeamNftApi(['0x5e35994dfb6b2494428d1919b15b7fd3a7de0c3a'], chain);
   }
 
   return null;

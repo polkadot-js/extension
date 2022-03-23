@@ -217,10 +217,12 @@ export type CurrentNetworkInfo = {
 export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
   currentAddress?: string;
+  isShowBalance?: boolean;
 }
 
 export interface CurrentAccountInfo {
   address: string;
+  isShowBalance?: boolean;
 }
 
 export interface RandomTestRequest {

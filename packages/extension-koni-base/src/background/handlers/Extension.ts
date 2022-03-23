@@ -88,6 +88,7 @@ export default class KoniExtension extends Extension {
       state.getCurrentAccount((accountInfo) => {
         if (accountInfo) {
           accountsWithCurrentAddress.currentAddress = accountInfo.address;
+          accountsWithCurrentAddress.isShowBalance = accountInfo.isShowBalance;
         }
 
         cb(accountsWithCurrentAddress);
@@ -110,7 +111,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private _saveCurrentAccountAddress (address: string, callback?: () => void) {
+  private _saveCurrentAccountAddress (address: string, isShowBalance?: boolean, callback?: () => void) {
     state.getCurrentAccount((accountInfo) => {
       if (!accountInfo) {
         accountInfo = {
@@ -118,14 +119,15 @@ export default class KoniExtension extends Extension {
         };
       } else {
         accountInfo.address = address;
+        accountInfo.isShowBalance = !!isShowBalance;
       }
 
       state.setCurrentAccount(accountInfo, callback);
     });
   }
 
-  private saveCurrentAccountAddress ({ address }: RequestCurrentAccountAddress): boolean {
-    this._saveCurrentAccountAddress(address);
+  private saveCurrentAccountAddress ({ address, isShowBalance }: RequestCurrentAccountAddress): boolean {
+    this._saveCurrentAccountAddress(address, isShowBalance);
 
     return true;
   }
@@ -262,7 +264,7 @@ export default class KoniExtension extends Extension {
       addressDict[type] = address;
       const newAccountName = type === 'ethereum' ? `${name} - EVM` : name;
 
-      this._saveCurrentAccountAddress(address, () => {
+      this._saveCurrentAccountAddress(address, false, () => {
         keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
       });
     });
@@ -350,7 +352,7 @@ export default class KoniExtension extends Extension {
 
     const address = childPair.address;
 
-    this._saveCurrentAccountAddress(address, () => {
+    this._saveCurrentAccountAddress(address, false, () => {
       keyring.addPair(childPair, password);
     });
 
@@ -362,7 +364,7 @@ export default class KoniExtension extends Extension {
 
     if (isPasswordValidated) {
       try {
-        this._saveCurrentAccountAddress(address, () => {
+        this._saveCurrentAccountAddress(address, false, () => {
           keyring.restoreAccount(file, password);
         });
       } catch (error) {
@@ -378,7 +380,7 @@ export default class KoniExtension extends Extension {
 
     if (isPasswordValidated) {
       try {
-        this._saveCurrentAccountAddress(address, () => {
+        this._saveCurrentAccountAddress(address, false, () => {
           keyring.restoreAccounts(file, password);
         });
       } catch (error) {

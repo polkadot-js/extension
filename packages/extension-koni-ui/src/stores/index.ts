@@ -4,6 +4,7 @@
 import { configureStore } from '@reduxjs/toolkit/dist';
 
 import BalanceReducer from './Balance';
+import BalanceStatusReducer from './BalanceStatus';
 import ChainRegistryReducer from './ChainRegistry';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
@@ -30,7 +31,8 @@ const reducers = {
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
-  networkMetadata: NetworkMetadataReducer
+  networkMetadata: NetworkMetadataReducer,
+  balanceStatus: BalanceStatusReducer
 };
 
 export const store = configureStore({

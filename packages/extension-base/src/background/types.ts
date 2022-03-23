@@ -187,6 +187,7 @@ export interface RequestMetadataApprove {
 
 export interface RequestCurrentAccountAddress {
   address: string;
+  isShowBalance?: boolean;
 }
 
 export interface RequestMetadataReject {

@@ -76,8 +76,8 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
-export async function saveCurrentAccountAddress (address: string): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveAddress)', { address });
+export async function saveCurrentAccountAddress (address: string, isShowBalance?: boolean): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAddress)', { address, isShowBalance });
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {

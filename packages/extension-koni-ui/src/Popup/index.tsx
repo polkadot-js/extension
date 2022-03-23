@@ -77,6 +77,10 @@ function updateCurrentAccount (currentAcc: AccountJson): void {
   store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
+function updateBalanceStatus (isShowBalance: boolean): void {
+  store.dispatch({ type: 'balanceStatus/update', payload: { isShowBalance: isShowBalance } });
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -107,7 +111,9 @@ export default function Popup (): React.ReactElement {
 
   // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
-    const { accounts, currentAddress } = data;
+    const { accounts, currentAddress, isShowBalance } = data;
+
+    console.log('isShowBalance=====', isShowBalance);
 
     setAccounts(accounts);
 
@@ -125,6 +131,8 @@ export default function Popup (): React.ReactElement {
         updateCurrentAccount(selectedAcc);
       }
     }
+
+    updateBalanceStatus(!!isShowBalance);
   };
 
   useEffect((): void => {

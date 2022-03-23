@@ -30,6 +30,7 @@ import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchN
 import useFetchStaking from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
@@ -157,7 +158,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
-  const [isShowBalances, setShowBalances] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
   const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
@@ -171,8 +171,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
-
+  const { balanceStatus: { isShowBalance }, networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
@@ -233,8 +232,14 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, [address, t]);
 
   const _toggleBalances = useCallback(() => {
-    setShowBalances(!isShowBalances);
-  }, [isShowBalances]);
+    saveCurrentAccountAddress(address, !isShowBalance).then(() => {
+      triggerAccountsSubscription().catch((e) => {
+        console.error('There is a problem when trigger Accounts Subscription', e);
+      });
+    }).catch((e) => {
+      console.error('There is a problem when set Current Account', e);
+    });
+  }, [address, isShowBalance]);
 
   const _backToHome = useCallback(() => {
     setShowBalanceDetail(false);
@@ -267,7 +272,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             data-tip={true}
             onClick={_toggleBalances}
           >
-            {isShowBalances
+            {isShowBalance
               ? <BalanceVal
                 startWithSymbol
                 symbol={'$'}
@@ -440,7 +445,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       <Tooltip
         offset={{ top: 8 }}
-        text={isShowBalances ? 'Hide balance' : 'Show balance'}
+        text={isShowBalance ? 'Hide balance' : 'Show balance'}
         trigger={trigger}
       />
     </div>

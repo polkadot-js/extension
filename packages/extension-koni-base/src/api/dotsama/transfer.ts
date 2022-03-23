@@ -1,12 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SignedBlockWithJustifications } from '@acala-network/types/interfaces/runtime/types';
-
 import { ResponseTransfer, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { EventRecord } from '@polkadot/types/interfaces';
+import { EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
 export async function estimateFee (networkKey: string, fromKeypair: KeyringPair | undefined, to: string, value: string | undefined, transferAll: boolean): Promise<string | void> {

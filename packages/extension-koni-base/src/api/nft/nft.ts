@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Web3 from 'web3';
+
 import { ApiProps, NftCollection } from '@polkadot/extension-base/background/KoniTypes';
 import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
@@ -8,15 +10,17 @@ import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 export abstract class BaseNftApi {
   chain: string | null = null;
   dotSamaApi: ApiProps | null = null;
+  web3: Web3 | null = null;
   data: NftCollection[] = [];
   total = 0;
   addresses: string[] = [];
   needRefresh = false;
 
-  protected constructor (api?: ApiProps, addresses?: string[], chain?: string) {
+  protected constructor (api?: ApiProps, addresses?: string[], chain?: string, web3?: Web3) {
     if (api) this.dotSamaApi = api;
     if (addresses) this.addresses = addresses;
     if (chain) this.chain = chain;
+    if (web3) this.web3 = web3;
   }
 
   async connect () {

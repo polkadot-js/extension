@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Web3 from 'web3';
+
 import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 
@@ -12,12 +14,8 @@ const SUPPORTED_NFT_CONTRACTS = [
 
 export class MoonbeamNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps, addresses: string[], chain?: string) {
-    super(api, addresses, chain);
-  }
-
-  private getCollectionDetails (smartContract: string) {
-    console.log(smartContract);
+  constructor (web3: Web3, addresses: string[], chain?: string) {
+    super(undefined, addresses, chain, web3);
   }
 
   fetchNfts (): Promise<number> {
@@ -25,7 +23,7 @@ export class MoonbeamNftApi extends BaseNftApi {
   }
 
   async handleNfts (): Promise<void> {
-    await this.connect();
-    this.getCollectionDetails('ajunscoas');
+    if (!this.web3) return;
+    this.web3.eth.Contract()
   }
 }

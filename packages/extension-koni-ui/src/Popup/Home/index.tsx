@@ -186,7 +186,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const [showTransferredCollection, setShowTransferredCollection] = useState(false);
   const [showForcedCollection, setShowForcedCollection] = useState(false);
-  const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage);
+  const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey);
   const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking();
 
   const handleNftPage = useCallback((page: number) => {

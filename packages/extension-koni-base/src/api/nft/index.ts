@@ -178,7 +178,7 @@ export class NftHandler {
       });
     }));
 
-    console.log('nft dataMap', dataMap);
+    // console.log('nft dataMap', dataMap);
     let data: NftCollection[] = [];
 
     Object.values(dataMap).forEach((collection) => {

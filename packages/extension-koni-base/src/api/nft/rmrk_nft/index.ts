@@ -258,7 +258,8 @@ export class RmrkNftApi extends BaseNftApi {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image as string) : null,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          nftItems: nftDict[item.collectionId] as NftItem[]
+          nftItems: nftDict[item.collectionId] as NftItem[],
+          chain: 'kusama'
         } as NftCollection;
       });
     } catch (e) {

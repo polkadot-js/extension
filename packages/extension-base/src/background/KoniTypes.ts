@@ -94,6 +94,7 @@ export interface NftCollection {
   collectionName?: string;
   image?: string;
   nftItems?: Array<NftItem>;
+  chain?: string;
 }
 
 export interface NftJson {

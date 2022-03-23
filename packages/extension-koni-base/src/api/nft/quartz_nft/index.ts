@@ -222,7 +222,8 @@ export default class QuartzNftApi extends BaseNftApi {
           collectionId: collectionId,
           collectionName: collectionMetadata.collectionName,
           image: collectionMetadata.collectionImage,
-          nftItems: allNft[collectionId]
+          nftItems: allNft[collectionId],
+          chain: 'quartz'
         } as NftCollection);
       });
     } catch (e) {

@@ -114,7 +114,8 @@ export class AcalaNftApi extends BaseNftApi {
         const parsedClassId = this.parseTokenId(asset.classId.toString());
         const newCollection = {
           collectionId: parsedClassId,
-          nftItems: []
+          nftItems: [],
+          chain: 'acala'
         } as NftCollection;
 
         if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) { allCollections.push(newCollection); }

@@ -5,7 +5,6 @@ import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AccountJson, RequestAccountSubscribe, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, SeedLengths } from '@polkadot/extension-base/background/types';
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
-import { u128 } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -135,17 +134,6 @@ export interface CrowdloanJson {
 export interface ChainRegistry {
   chainDecimals: number[];
   chainTokens: string[];
-}
-
-export interface BalanceRPCItem {
-  free: u128,
-  reserved: u128,
-  miscFrozen: u128,
-  feeFrozen: u128
-}
-
-export interface BalanceRPCResponse {
-  data: BalanceRPCItem
 }
 
 export interface DefaultFormatBalance {
@@ -321,6 +309,18 @@ export interface ResponseSeedCreateV2 {
   addressMap: Record<KeypairType, string>
 }
 
+export interface RequestCheckTransfer {
+  networkKey: string,
+  from: string,
+  to: string,
+  value?: string,
+  transferAll?: boolean
+}
+
+export interface RequestTransfer extends RequestCheckTransfer {
+  password: string;
+}
+
 export type ResponseSeedValidateV2 = ResponseSeedCreateV2
 export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
 export type AccountRef = Array<string>
@@ -339,6 +339,45 @@ export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
   isSendingSelf: boolean
+}
+
+export enum TransferErrorCode {
+  INVALID_FROM_ADDRESS = 'invalidFromAccount',
+  INVALID_TO_ADDRESS = 'invalidToAccount',
+  NOT_ENOUGH_VALUE = 'notEnoughValue',
+  INVALID_VALUE = 'invalidValue',
+  KEYRING_ERROR = 'keyringError',
+  TRANSFER_ERROR = 'transferError',
+  TIMEOUT = 'timeout'
+}
+
+export type TransferError = {
+  code: TransferErrorCode,
+  data?: object,
+  message: string
+}
+
+export interface ResponseCheckTransfer {
+  errors?: Array<TransferError>,
+  fromAccountFree: string,
+  toAccountFree: string,
+  estimateFee?: string
+}
+
+export enum TransferStep {
+  READY = 'ready',
+  START = 'start',
+  PROCESSING = 'processing',
+  SUCCESS = 'success',
+  ERROR = 'error'
+}
+
+export interface ResponseTransfer {
+  step: TransferStep,
+  errors?: Array<TransferError>,
+  extrinsicHash?: string,
+  extrinsicStatus?: string,
+  data?: object
 }
 
 export interface KoniRequestSignatures {
@@ -362,6 +401,8 @@ export interface KoniRequestSignatures {
   'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
+  'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
+  'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
   'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
   'pri(json.restoreV2)': [RequestJsonRestore, void];
   'pri(json.batchRestoreV2)': [RequestBatchRestore, void];

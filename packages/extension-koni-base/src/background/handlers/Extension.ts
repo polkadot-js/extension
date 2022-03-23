@@ -3,9 +3,11 @@
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollection, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestCheckTransfer, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
+import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
+import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
@@ -15,7 +17,7 @@ import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyri
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
-import { assert, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { assert, BN, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
@@ -596,7 +598,9 @@ export default class KoniExtension extends Extension {
           if (filtered.length > 0) {
             newNftList.push(selectedNftCollection);
           }
-        } else { newNftList.push(collection); }
+        } else {
+          newNftList.push(collection);
+        }
       }
 
       state.setNft({
@@ -622,6 +626,104 @@ export default class KoniExtension extends Extension {
     console.log('force update nft state done');
 
     return true;
+  }
+
+  private validateTransfer (from: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): [Array<TransferError>, KeyringPair | undefined, BN | undefined] {
+    const errors = [] as Array<TransferError>;
+    let keypair: KeyringPair | undefined;
+    let transferValue;
+
+    if (!transferAll) {
+      try {
+        if (value === undefined) {
+          errors.push({
+            code: TransferErrorCode.INVALID_VALUE,
+            message: 'Require transfer value'
+          });
+        }
+
+        if (value) {
+          transferValue = new BN(value);
+        }
+      } catch (e) {
+        errors.push({
+          code: TransferErrorCode.INVALID_VALUE,
+          // @ts-ignore
+          message: String(e.message)
+        });
+      }
+    }
+
+    try {
+      keypair = keyring.getPair(from);
+
+      if (password) {
+        keypair.unlock(password);
+      }
+    } catch (e) {
+      errors.push({
+        code: TransferErrorCode.KEYRING_ERROR,
+        // @ts-ignore
+        message: String(e.message)
+      });
+    }
+
+    return [errors, keypair, transferValue];
+  }
+
+  private async checkTransfer ({ from, networkKey, to, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
+    const [errors, fromKeyPair, valueNumber] = this.validateTransfer(from, undefined, value, transferAll);
+
+    const [fee, fromAccountFree, toAccountFree] = await Promise.all(
+      [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+    );
+
+    const fromAccountFreeNumber = new BN(fromAccountFree);
+    const feeNumber = fee ? new BN(fee) : undefined;
+
+    if (!transferAll && value && feeNumber && valueNumber) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (fromAccountFreeNumber.lt(feeNumber.add(valueNumber))) {
+        errors.push({
+          code: TransferErrorCode.NOT_ENOUGH_VALUE,
+          message: 'Not enough balance free to make transfer'
+        });
+      }
+    }
+
+    return {
+      errors,
+      fromAccountFree: fromAccountFree,
+      toAccountFree: toAccountFree,
+      estimateFee: fee
+    } as ResponseCheckTransfer;
+  }
+
+  private makeTransfer (id: string, port: chrome.runtime.Port, { from, networkKey, password, to, transferAll, value }: RequestTransfer): Array<TransferError> {
+    const callback = createSubscription<'pri(accounts.transfer)'>(id, port);
+    const [errors, fromKeyPair] = this.validateTransfer(from, password, value, transferAll);
+
+    if (fromKeyPair && errors.length === 0) {
+      makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, callback)
+        .then(() => {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
+        })
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
+          callback({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
+          console.error('Transfer error', e);
+          setTimeout(() => {
+            unsubscribe(id);
+          }, 500);
+        });
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return errors;
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -691,6 +793,10 @@ export default class KoniExtension extends Extension {
         return this.subscribeNftTransfer(id, port);
       case 'pri(nftTransfer.setNftTransfer)':
         return this.setNftTransfer(request as NftTransferExtra);
+      case 'pri(accounts.checkTransfer)':
+        return await this.checkTransfer(request as RequestCheckTransfer);
+      case 'pri(accounts.transfer)':
+        return this.makeTransfer(id, port, request as RequestTransfer);
       default:
         return super.handle(id, type, request, port);
     }

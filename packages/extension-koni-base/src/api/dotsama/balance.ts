@@ -5,12 +5,14 @@ import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, BalanceRPCResponse, MoonAsset } from '@polkadot/extension-base/background/KoniTypes';
+import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, MoonAsset } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { getMoonAssets } from '@polkadot/extension-koni-base/api/dotsama/moonAssets';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
 import { ACALA_REFRESH_BALANCE_INTERVAL, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
+import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
 function subscribeWithDerive (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
@@ -286,10 +288,10 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
   };
 
   // @ts-ignore
-  const unsub = networkAPI.api.query.system.account.multi(addresses, (balances: BalanceRPCResponse[]) => {
+  const unsub = networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
     let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
 
-    balances.forEach((balance: BalanceRPCResponse) => {
+    balances.forEach((balance: AccountInfo) => {
       free = free.add(balance.data?.free?.toBn() || new BN(0));
       reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
       miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || new BN(0));
@@ -352,4 +354,19 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
       return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
     }
   });
+}
+
+export async function getFreeBalance (networkKey: string, address: string) {
+  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  if (networkKey === 'kintsugi') {
+    const balance = await api.derive.balances?.all(address) as DeriveBalancesAll;
+
+    return balance.freeBalance?.toString() || '0';
+  } else {
+    const balance = await api.query.system.account(address) as AccountInfo;
+
+    return balance.data?.free?.toString() || '0';
+  }
 }

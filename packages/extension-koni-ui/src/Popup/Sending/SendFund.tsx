@@ -32,8 +32,9 @@ function SendFund ({ className }: Props): React.ReactElement {
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const _onSend = useCallback(() => {
-    setShowTxModal(true);
-  }, []);
+    // setShowTxModal(true);
+    console.log(senderId, recipientId, networkKey);
+  }, [senderId, recipientId, networkKey]);
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const _onTxSuccess = useCallback(() => {

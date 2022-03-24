@@ -163,9 +163,7 @@ export default class QuartzNftApi extends BaseNftApi {
               nftMap[nftId as string] = item.i as string;
             }
           }
-        } catch (e) {
-          console.log(`error at ${item.i} ${item.account}`);
-        }
+        } catch (e) {}
       }));
 
       await Promise.all([
@@ -222,7 +220,8 @@ export default class QuartzNftApi extends BaseNftApi {
           collectionId: collectionId,
           collectionName: collectionMetadata.collectionName,
           image: collectionMetadata.collectionImage,
-          nftItems: allNft[collectionId]
+          nftItems: allNft[collectionId],
+          chain: 'quartz'
         } as NftCollection);
       });
     } catch (e) {

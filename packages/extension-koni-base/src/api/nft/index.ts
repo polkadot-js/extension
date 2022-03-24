@@ -5,6 +5,7 @@ import { ApiProps, NftCollection, NftJson } from '@polkadot/extension-base/backg
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
+import { MoonbeamNftApi } from '@polkadot/extension-koni-base/api/nft/moonbeam_nft';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
@@ -21,7 +22,8 @@ enum SUPPORTED_NFT_NETWORKS {
   rmrk = 'rmrk',
   statemine = 'statemine',
   uniqueNft = 'uniqueNft',
-  quartz = 'quartz'
+  quartz = 'quartz',
+  moonbeam = 'moonbeam'
 }
 
 function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
@@ -47,6 +49,8 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
       return new UniqueNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.quartz:
       return new QuartzNftApi(api, useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.moonbeam:
+      return new MoonbeamNftApi(useAddresses, chain);
   }
 
   return null;
@@ -120,8 +124,8 @@ export class NftHandler {
                 const handler = createNftApi(chain, parentApi, useAddresses);
 
                 if (handler && !this.handlers.includes(handler)) {
-                  console.log(`${handler.getChain() as string} nft connected`);
                   this.handlers.push(handler);
+                  console.log(`${handler.getChain() as string} nft connected`);
                 }
               } else { console.log(`${chain as string} nft connection timeout`); }
             });
@@ -139,7 +143,7 @@ export class NftHandler {
     const sortedData = this.data;
 
     for (const collection of data) {
-      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.image === collection.image && e.collectionId === collection.collectionId)) {
+      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
         sortedData.push(collection);
       }
     }
@@ -178,7 +182,7 @@ export class NftHandler {
       });
     }));
 
-    console.log('nft dataMap', dataMap);
+    // console.log('nft dataMap', dataMap);
     let data: NftCollection[] = [];
 
     Object.values(dataMap).forEach((collection) => {

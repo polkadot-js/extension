@@ -112,7 +112,8 @@ export class KaruraNftApi extends BaseNftApi {
         const parsedClassId = this.parseTokenId(asset.classId.toString());
         const newCollection = {
           collectionId: parsedClassId,
-          nftItems: []
+          nftItems: [],
+          chain: 'karura'
         } as NftCollection;
 
         if (!allCollections.some((collection) => collection.collectionId === parsedClassId)) { allCollections.push(newCollection); }

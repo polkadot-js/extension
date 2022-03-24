@@ -208,7 +208,8 @@ export default class UniqueNftApi extends BaseNftApi {
           collectionId: collectionId,
           collectionName: collectionMetadata.collectionName,
           image: collectionMetadata.collectionImage,
-          nftItems: allNft[collectionId]
+          nftItems: allNft[collectionId],
+          chain: 'uniqueNft'
         } as NftCollection);
       });
     } catch (e) {

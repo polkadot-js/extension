@@ -103,7 +103,7 @@ function NftContainer (
   }, [page, setPage, totalCollection]);
 
   return (
-    <div className={className}>
+    <div className={`${className as string} scroll-container`}>
       {loading && <div className={'loading-container'}>
         <Spinner size={'large'} />
       </div>}

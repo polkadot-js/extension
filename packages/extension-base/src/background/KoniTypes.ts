@@ -76,7 +76,7 @@ export interface NftTransferExtra {
 }
 
 export interface NftItem {
-  id: string;
+  id?: string;
   name?: string;
   image?: string;
   external_url?: string;
@@ -93,6 +93,7 @@ export interface NftCollection {
   collectionName?: string;
   image?: string;
   nftItems?: Array<NftItem>;
+  chain?: string;
 }
 
 export interface NftJson {

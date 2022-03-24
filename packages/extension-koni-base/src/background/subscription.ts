@@ -120,7 +120,7 @@ export class KoniSubcription {
   subscribeNft (address: string) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses);
+        this.initNftSubscription(['DMkCuik9UA1nKDZzC683Hr6GMermD8Tcqq9HvyCtkfF5QRW']);
       })
       .catch(console.error);
   }
@@ -145,7 +145,6 @@ export class KoniSubcription {
       nftHandler.handleNfts()
         .then((r) => {
           state.setNft(nftHandler.getNftJson());
-          // console.log('set nft state done for address', addresses);
         })
         .catch(console.log);
     }
@@ -162,7 +161,7 @@ export class KoniSubcription {
   // }
   //
   // initStakingSubscription (addresses: string[]) {
-  //   const subscriptionPromises = subscribeStaking(['5CCic55XtXUM2gWiHXfNeKxwcYugFifNGJXA962AU7jMrCJB'], dotSamaAPIMap, (networkKey, rs) => {
+  //   const subscriptionPromises = subscribeStaking(addresses, dotSamaAPIMap, (networkKey, rs) => {
   //     state.setStakingItem(networkKey, rs);
   //     // console.log('set new staking item', rs);
   //   });

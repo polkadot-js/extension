@@ -131,9 +131,11 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
           </div>
           <div
             className={'header-title'}
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             title={data.name ? data.name : '#' + data.id}
           >
             <div className={'collection-name'}>
+              {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
               {data.name ? data.name : '#' + data.id}
             </div>
           </div>
@@ -291,6 +293,7 @@ export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
     width: 100%;
     border-radius: 5px;
     cursor: pointer;
+    object-fit: contain;
   }
 
   .att-title {

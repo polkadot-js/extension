@@ -23,8 +23,4 @@ describe('test web3 APIs', () => {
 
     console.log(rs);
   });
-
-  test('moonbeam nft', async () => {
-
-  });
 });

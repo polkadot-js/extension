@@ -218,11 +218,13 @@ export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
   currentAddress?: string;
   isShowBalance?: boolean;
+  allAccountLogo?: string;
 }
 
 export interface CurrentAccountInfo {
   address: string;
   isShowBalance?: boolean;
+  allAccountLogo?: string;
 }
 
 export interface RandomTestRequest {

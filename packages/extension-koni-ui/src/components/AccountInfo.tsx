@@ -9,11 +9,13 @@ import { faCodeBranch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@polkadot/extension-koni-ui/util';
 import getNetworkInfoByGenesisHash from '@polkadot/extension-koni-ui/util/getNetworkInfoByGenesisHash';
 
@@ -34,10 +36,9 @@ export interface Props {
   isShowAddress?: boolean;
   isShowBanner?: boolean;
   iconSize?: number;
-  imgSelected?: string | null;
 }
 
-function AccountInfo ({ address, className, genesisHash, iconSize = 32, imgSelected, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -49,14 +50,9 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, imgSelec
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
-  const avatarSaved = localStorage.getItem('allAccountLogo');
-  const [avatarSelected, setAvatarSelected] = useState(avatarSaved);
+  const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
 
   const _isAccountAll = address && isAccountAll(address);
-
-  useEffect(() => {
-    imgSelected && setAvatarSelected(imgSelected);
-  }, [imgSelected]);
 
   useEffect((): void => {
     if (!address) {
@@ -99,11 +95,11 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, imgSelec
     <div className={className}>
       <div className='account-info-row'>
         {_isAccountAll
-          ? avatarSelected
+          ? allAccountLogo
             ? <img
               alt='all-account-icon'
               className='account-info__all-account-icon'
-              src={avatarSelected}
+              src={allAccountLogo}
             />
             : <img
               alt='all-account-icon'

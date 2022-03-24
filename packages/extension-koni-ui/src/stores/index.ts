@@ -3,6 +3,7 @@
 
 import { configureStore } from '@reduxjs/toolkit/dist';
 
+import AllAccountReducer from './AllAccount';
 import BalanceReducer from './Balance';
 import BalanceStatusReducer from './BalanceStatus';
 import ChainRegistryReducer from './ChainRegistry';
@@ -32,7 +33,8 @@ const reducers = {
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
   networkMetadata: NetworkMetadataReducer,
-  balanceStatus: BalanceStatusReducer
+  balanceStatus: BalanceStatusReducer,
+  allAccount: AllAccountReducer
 };
 
 export const store = configureStore({

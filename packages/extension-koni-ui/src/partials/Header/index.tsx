@@ -65,9 +65,8 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
-  const allAccountLogo = localStorage.getItem('allAccountLogo');
+  const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
-  const [imgSelected, setImgSelected] = useState<string | null>(allAccountLogo);
   const chain = useMetadata(currentAccount?.genesisHash, true);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -315,11 +314,11 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               >
                 {!!currentAccount && !!currentAccount.address
                   ? _isAccountAll
-                    ? imgSelected
+                    ? allAccountLogo
                       ? <img
                         alt='all-account-icon'
                         className='header__all-account-icon'
-                        src={imgSelected}
+                        src={allAccountLogo}
                       />
                       : <img
                         alt='all-account-icon'
@@ -363,9 +362,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               changeAccountCallback={changeAccountCallback}
               className='account-menu-setting'
               closeSetting={_toggleSettings}
-              imgSelected={imgSelected}
               reference={setRef}
-              setImgSelected={setImgSelected}
               setShowBalanceDetail={setShowBalanceDetail}
             />
           )}

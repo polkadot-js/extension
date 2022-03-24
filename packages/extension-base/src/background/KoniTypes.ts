@@ -77,7 +77,7 @@ export interface NftTransferExtra {
 }
 
 export interface NftItem {
-  id: string;
+  id?: string;
   name?: string;
   image?: string;
   external_url?: string;

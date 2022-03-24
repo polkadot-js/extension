@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection } from '@polkadot/extension-base/background/KoniTypes';
-import { PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
+import { RMRK_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
 export abstract class BaseNftApi {
@@ -71,10 +71,10 @@ export abstract class BaseNftApi {
     if (isUrl(input)) return input;
 
     if (!input.includes('ipfs://')) {
-      return PINATA_SERVER + input;
+      return RMRK_PINATA_SERVER + input;
     }
 
-    return PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
 
   // Sub-class implements this function to parse data into prop result

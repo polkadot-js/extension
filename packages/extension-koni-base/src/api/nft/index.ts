@@ -5,13 +5,13 @@ import { ApiProps, NftCollection, NftJson } from '@polkadot/extension-base/backg
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
+import { MoonbeamNftApi } from '@polkadot/extension-koni-base/api/nft/moonbeam_nft';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
-import {MoonbeamNftApi} from "@polkadot/extension-koni-base/api/nft/moonbeam_nft";
 
 const NFT_FETCHING_TIMEOUT = 8000;
 const NFT_CONNECTION_TIMEOUT = 15000;
@@ -50,7 +50,7 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
     case SUPPORTED_NFT_NETWORKS.quartz:
       return new QuartzNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonbeam:
-      return new MoonbeamNftApi(['0x5e35994dfb6b2494428d1919b15b7fd3a7de0c3a'], chain);
+      return new MoonbeamNftApi(useAddresses, chain);
   }
 
   return null;
@@ -124,8 +124,8 @@ export class NftHandler {
                 const handler = createNftApi(chain, parentApi, useAddresses);
 
                 if (handler && !this.handlers.includes(handler)) {
-                  console.log(`${handler.getChain() as string} nft connected`);
                   this.handlers.push(handler);
+                  console.log(`${handler.getChain() as string} nft connected`);
                 }
               } else { console.log(`${chain as string} nft connection timeout`); }
             });
@@ -143,7 +143,7 @@ export class NftHandler {
     const sortedData = this.data;
 
     for (const collection of data) {
-      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.image === collection.image && e.collectionId === collection.collectionId)) {
+      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
         sortedData.push(collection);
       }
     }

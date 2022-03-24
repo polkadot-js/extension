@@ -7,7 +7,7 @@ import { NftCollection, NftItem, RMRK_VER } from '@polkadot/extension-base/backg
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { isUrl, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
+import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, RMRK_PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
 
 const headers = {
   'Content-Type': 'application/json'
@@ -54,9 +54,9 @@ export class RmrkNftApi extends BaseNftApi {
 
     if (isUrl(input) || input.includes('https://') || input.includes('http')) return input;
 
-    if (!input.includes('ipfs://ipfs/')) { return PINATA_SERVER + input; }
+    if (!input.includes('ipfs://ipfs/')) { return RMRK_PINATA_SERVER + input; }
 
-    return PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
 
   private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {

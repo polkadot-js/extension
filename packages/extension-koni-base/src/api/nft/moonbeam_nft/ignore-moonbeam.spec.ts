@@ -3,12 +3,18 @@
 
 import { MoonbeamNftApi } from '@polkadot/extension-koni-base/api/nft/moonbeam_nft/index';
 
-jest.setTimeout(50000);
+jest.setTimeout(500000000);
 
 describe('test moonbeam nft', () => {
   test('test get nft', async () => {
-    const nftApi = new MoonbeamNftApi(['0x5e35994dfb6b2494428d1919b15b7fd3a7de0c3a'], 'moonbeam');
+    const nftApi = new MoonbeamNftApi([
+      '0x369270de55e0062e21537020ea309900699e6d7b'
+    ], 'moonbeam');
 
-    await nftApi.fetchNfts();
+    for (let i = 0; i < 1; i++) {
+      await nftApi.fetchNfts();
+      console.log(`${i}---------------------`);
+      console.log(nftApi.getTotal());
+    }
   });
 });

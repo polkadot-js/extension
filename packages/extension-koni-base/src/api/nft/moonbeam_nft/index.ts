@@ -2,71 +2,71 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import fetch from 'cross-fetch';
+import Web3 from 'web3';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { MOONBEAM_CHAIN_NAME, PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
+import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
+import { MOONBEAM_CHAIN_NAME, RMRK_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/moonbeam_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import { getERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { convertToEvmAddress, isUrl } from '@polkadot/extension-koni-base/utils/utils';
+import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export class MoonbeamNftApi extends BaseNftApi {
-  // TODO: refresh connection
-  // TODO: parse metadata generically
-  // TODO: check data on each collection
-  // TODO: check function call exist on each collection
+  web3: Web3 | null = null;
+
   constructor (addresses: string[], chain: string) {
-    const evmAddresses = [];
-
-    for (const address of addresses) {
-      const evmAddress = convertToEvmAddress(address);
-
-      evmAddresses.push(evmAddress);
-    }
-
     super(undefined, addresses, chain);
+    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS.moonbeam.provider));
   }
 
-  override setAddresses (addresses: string[]) {
-    super.setAddresses(addresses);
-    const evmAddresses = [];
-
-    for (const address of this.addresses) {
-      const evmAddress = convertToEvmAddress(address);
-
-      evmAddresses.push(evmAddress);
-    }
-
-    this.addresses = evmAddresses;
+  override recoverConnection () {
+    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS.moonbeam.provider));
   }
 
   override parseUrl (input: string): string | undefined {
+    if (!input) return undefined;
+
     if (isUrl(input)) return input;
 
     if (input.includes('ipfs://')) {
-      return PINATA_SERVER + input.split('ipfs://')[1];
+      return RMRK_PINATA_SERVER + input.split('ipfs://')[1];
     }
 
-    return PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
 
-  private parseMetadata (data: Record<string, any>, itemTotal: number): NftItem {
-    const traitList = data.traits as Record<string, any>[];
+  private parseMetadata (data: Record<string, any>): NftItem {
+    const traitList = data.traits ? data.traits as Record<string, any>[] : data.attributes as Record<string, any>[];
     const propertiesMap: Record<string, any> = {};
 
     if (traitList) {
       traitList.forEach((traitMap) => {
         propertiesMap[traitMap.trait_type as string] = {
-          value: traitMap.value as string,
-          rarity: traitMap.trait_count / itemTotal
+          value: traitMap.value as string
+          // rarity: traitMap.trait_count / itemTotal
         };
       });
     }
 
+    // extra fields
+    if (data.dna) {
+      propertiesMap.dna = {
+        value: data.dna as string
+      };
+    }
+
+    if (data.compiler) {
+      propertiesMap.compiler = {
+        value: data.compiler as string
+      };
+    }
+
     return {
-      id: data.token_id as string,
+      id: data.token_id ? data.token_id as string : data.edition as string,
       name: data.name as string | undefined,
-      image: this.parseUrl(data.image_url as string),
+      image: data.image_url ? this.parseUrl(data.image_url as string) : this.parseUrl(data.image as string),
       description: data.description as string | undefined,
       properties: propertiesMap,
       external_url: data.external_url as string | undefined,
@@ -75,22 +75,31 @@ export class MoonbeamNftApi extends BaseNftApi {
   }
 
   private async getItemsByCollection (smartContract: string, collectionName: string) {
-    const contract = getERC721Contract('moonbeam', smartContract);
+    if (!this.web3) {
+      return {
+        totalItems: 0,
+        nftCollection: {} as NftCollection
+      };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
     const allItems: NftItem[] = [];
     let total = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    const totalSupply = await contract.methods.totalSupply().call() as number;
+
     let collectionImage: string | undefined;
 
     await Promise.all(this.addresses.map(async (address) => {
+      if (!isEthereumAddress(address)) return;
+
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
-      total += balance;
-      console.log(total);
+      if (Number(balance) === 0) return;
+
       const itemIndexes: number[] = [];
 
-      for (let i = 0; i < balance; i++) {
+      for (let i = 0; i < Number(balance); i++) {
         itemIndexes.push(i);
       }
 
@@ -104,13 +113,19 @@ export class MoonbeamNftApi extends BaseNftApi {
         const detailUrl = this.parseUrl(tokenURI);
 
         if (detailUrl) {
-          const itemDetail = await fetch(detailUrl)
-            .then((resp) => resp.json()) as Record<string, any>;
+          try {
+            const itemDetail = await fetch(detailUrl)
+              .then((resp) => resp.json()) as Record<string, any>;
+            const parsedItem = this.parseMetadata(itemDetail);
 
-          const parsedItem = this.parseMetadata(itemDetail, totalSupply);
-
-          if (parsedItem.image) collectionImage = parsedItem.image;
-          allItems.push(parsedItem);
+            if (parsedItem) {
+              if (parsedItem.image) collectionImage = parsedItem.image;
+              allItems.push(parsedItem);
+              total += 1;
+            }
+          } catch (e) {
+            console.log('error parsing item for moonbeam nft', e);
+          }
         }
       }));
     }));
@@ -125,7 +140,7 @@ export class MoonbeamNftApi extends BaseNftApi {
 
     return {
       totalItems: total,
-      nftCollection
+      nftCollection: allItems.length > 0 ? nftCollection : undefined
     };
   }
 
@@ -137,8 +152,10 @@ export class MoonbeamNftApi extends BaseNftApi {
     let total = 0;
 
     allData.forEach((collection) => {
-      nftCollections.push(collection.nftCollection);
-      total += collection.totalItems;
+      if (collection.nftCollection) {
+        nftCollections.push(collection.nftCollection);
+        total += collection.totalItems;
+      }
     });
 
     this.data = nftCollections;

@@ -117,7 +117,7 @@ export default React.memo(styled(NftItemPreview)(({ theme }: ThemeProps) => `
       display: block;
       height: 124px;
       width: 124px;
-      object-fit: cover;
+      object-fit: contain;
     }
 
     .collection-name {

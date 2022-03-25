@@ -260,6 +260,7 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     width: 130px;
     border-radius: 5px;
     text-align: center;
+    object-fit: contain;
   }
 
   width: 100%;

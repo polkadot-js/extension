@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { CurrentNetworkInfo, NetWorkMetadataDef, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@polkadot/extension-koni-ui/messaging';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { TransferNftParams } from '@polkadot/extension-koni-ui/stores/types';
@@ -25,6 +26,17 @@ interface Props {
   collectionImage?: string;
   collectionId: string;
 }
+
+const SUPPORTED_TRANSFER_CHAIN = [
+  'statemine',
+  'acala',
+  'karura',
+  'kusama',
+  'uniqueNft',
+  'quartz',
+  'opal',
+  'statemint'
+];
 
 function updateTransferNftParams (nftItem: _NftItem, collectionImage: string | undefined, collectionId: string) {
   store.dispatch({ type: 'transferNftParams/update', payload: { nftItem, collectionImage, collectionId } as TransferNftParams });
@@ -49,6 +61,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const { currentAccount: account, currentNetwork, networkMetadata } = useSelector((state: RootState) => state);
 
   const navigate = useContext(ActionContext);
+  const { show } = useToast();
 
   const propDetail = (title: string, value: string, rarity: number, key: number) => {
     return (
@@ -65,7 +78,17 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   };
 
   const handleClickTransfer = useCallback(async () => {
-    if (!account.account || account.account.address === 'ALL' || !data.chain) return;
+    if (!account.account || account.account.address === 'ALL' || !data.chain) {
+      show('An error has occurred.');
+
+      return;
+    }
+
+    if (SUPPORTED_TRANSFER_CHAIN.indexOf(data.chain) <= -1) {
+      show(`Transferring is not supported for ${data.chain.toUpperCase()} network`);
+
+      return;
+    }
 
     if (data.chain !== currentNetwork.networkKey) {
       const targetNetwork = networkMetadata[data?.chain];
@@ -81,7 +104,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
     updateTransferNftParams(data, collectionImage, collectionId);
     navigate('/account/send-nft');
-  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkMetadata]);
+  }, [account.account, collectionId, collectionImage, currentNetwork.networkKey, data, navigate, networkMetadata, show]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

@@ -8,7 +8,7 @@ const RMRK_OP_TYPE = 'SEND';
 
 function acalaParser (nftItem: NftItem) {
   const collectionId = parseInt(nftItem.collectionId as string);
-  const itemId = parseInt(nftItem.id);
+  const itemId = parseInt(nftItem.id as string);
 
   return {
     collectionId,
@@ -27,7 +27,7 @@ function rmrkParser (nftItem: NftItem) {
 
 function uniqueParser (nftItem: NftItem) {
   const collectionId = parseInt(nftItem.collectionId as string);
-  const itemId = parseInt(nftItem.id);
+  const itemId = parseInt(nftItem.id as string);
 
   return {
     collectionId,
@@ -37,7 +37,7 @@ function uniqueParser (nftItem: NftItem) {
 
 function statemineParser (nftItem: NftItem) {
   const collectionId = parseInt(nftItem.collectionId as string);
-  const itemId = parseInt(nftItem.id);
+  const itemId = parseInt(nftItem.id as string);
 
   return {
     collectionId,

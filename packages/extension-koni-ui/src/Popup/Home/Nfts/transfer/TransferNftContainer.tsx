@@ -193,6 +193,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
             </div>
 
             <div className={'meta-value'}>
+              {/* eslint-disable-next-line @typescript-eslint/restrict-plus-operands */}
               <div>{nftItem.name ? nftItem.name : '#' + nftItem.id}</div>
               <div style={{ textTransform: 'uppercase' }}>{nftItem?.chain}</div>
             </div>

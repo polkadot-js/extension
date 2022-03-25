@@ -117,8 +117,6 @@ export class Web3NftApi extends BaseNftApi {
 
         const detailUrl = this.parseUrl(tokenURI);
 
-        console.log(detailUrl);
-
         if (detailUrl) {
           try {
             const itemDetail = await fetch(detailUrl)
@@ -128,11 +126,10 @@ export class Web3NftApi extends BaseNftApi {
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               allItems.push(parsedItem);
-              console.log(parsedItem);
               total += 1;
             }
           } catch (e) {
-            console.log('error parsing item for moonbeam nft', e);
+            console.log(`error parsing item for ${this.chain as string} nft`, e);
           }
         }
       }));

@@ -4,8 +4,9 @@
 import { ApiProps, NftCollection, NftJson } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
+import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
+import { Web3NftApi } from '@polkadot/extension-koni-base/api/nft/eth_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
-import { MoonbeamNftApi } from '@polkadot/extension-koni-base/api/nft/moonbeam_nft';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
@@ -15,16 +16,6 @@ import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-ba
 
 const NFT_FETCHING_TIMEOUT = 8000;
 const NFT_CONNECTION_TIMEOUT = 15000;
-
-enum SUPPORTED_NFT_NETWORKS {
-  karura = 'karura',
-  acala = 'acala',
-  rmrk = 'rmrk',
-  statemine = 'statemine',
-  uniqueNft = 'uniqueNft',
-  quartz = 'quartz',
-  moonbeam = 'moonbeam'
-}
 
 function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
@@ -50,7 +41,11 @@ function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseN
     case SUPPORTED_NFT_NETWORKS.quartz:
       return new QuartzNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonbeam:
-      return new MoonbeamNftApi(useAddresses, chain);
+      return new Web3NftApi(useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.moonriver:
+      return new Web3NftApi(useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.astar:
+      return new Web3NftApi(useAddresses, chain);
   }
 
   return null;

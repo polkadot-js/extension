@@ -92,7 +92,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2006,
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
-    decimals: 18
+    decimals: 18,
   },
   parallel: {
     chain: 'Parallel',

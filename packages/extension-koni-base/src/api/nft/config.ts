@@ -21,16 +21,14 @@ export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
-export const MOONBEAM_CHAIN_NAME = 'moonbeam';
-
-export const RMRK_CHAIN_NAME = 'kusama';
-
-export const UNIQUE_CHAIN_NAME = 'uniqueNft';
-
-export const STATEMINE_CHAIN_NAME = 'statemine';
-
-export const QUARTZ_CHAIN_NAME = 'quartz';
-
-export const KARURA_CHAIN_NAME = 'karura';
-
-export const ACALA_CHAIN_NAME = 'acala';
+export enum SUPPORTED_NFT_NETWORKS {
+  karura = 'karura',
+  acala = 'acala',
+  rmrk = 'rmrk',
+  statemine = 'statemine',
+  uniqueNft = 'uniqueNft',
+  quartz = 'quartz',
+  moonbeam = 'moonbeam',
+  moonriver = 'moonriver',
+  astar = 'astar'
+}

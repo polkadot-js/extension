@@ -6,23 +6,28 @@ import Web3 from 'web3';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
-import { MOONBEAM_CHAIN_NAME, RMRK_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
-import { SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/moonbeam_nft/utils';
+import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
+import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export class MoonbeamNftApi extends BaseNftApi {
+export class Web3NftApi extends BaseNftApi {
   web3: Web3 | null = null;
+  targetContracts: ContractInfo[] | undefined;
 
   constructor (addresses: string[], chain: string) {
     super(undefined, addresses, chain);
-    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS.moonbeam.provider));
+    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[chain].provider));
+
+    if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
+    else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
+    else if (chain === SUPPORTED_NFT_NETWORKS.astar) this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
   }
 
   override recoverConnection () {
-    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS.moonbeam.provider));
+    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
   }
 
   override parseUrl (input: string): string | undefined {
@@ -70,7 +75,7 @@ export class MoonbeamNftApi extends BaseNftApi {
       description: data.description as string | undefined,
       properties: propertiesMap,
       external_url: data.external_url as string | undefined,
-      chain: MOONBEAM_CHAIN_NAME
+      chain: this.chain
     } as NftItem;
   }
 
@@ -112,6 +117,8 @@ export class MoonbeamNftApi extends BaseNftApi {
 
         const detailUrl = this.parseUrl(tokenURI);
 
+        console.log(detailUrl);
+
         if (detailUrl) {
           try {
             const itemDetail = await fetch(detailUrl)
@@ -121,6 +128,7 @@ export class MoonbeamNftApi extends BaseNftApi {
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               allItems.push(parsedItem);
+              console.log(parsedItem);
               total += 1;
             }
           } catch (e) {
@@ -135,7 +143,7 @@ export class MoonbeamNftApi extends BaseNftApi {
       collectionName,
       image: collectionImage || undefined,
       nftItems: allItems,
-      chain: MOONBEAM_CHAIN_NAME
+      chain: this.chain
     } as NftCollection;
 
     return {
@@ -145,9 +153,12 @@ export class MoonbeamNftApi extends BaseNftApi {
   }
 
   async handleNfts (): Promise<void> {
-    const allData = await Promise.all(SUPPORTED_NFT_CONTRACTS.map(async ({ name, smartContract }) => {
+    if (!this.targetContracts) return;
+
+    const allData = await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
       return await this.getItemsByCollection(smartContract, name);
     }));
+
     const nftCollections: NftCollection[] = [];
     let total = 0;
 

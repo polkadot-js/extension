@@ -22,6 +22,7 @@ export async function getMoonAssets (api: ApiPromise) {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
     const info = { deposit: parseInt(valueData.deposit || ' 0'), name: valueData.name, symbol: valueData.symbol, decimals: parseInt(valueData.decimals || ' 0'), isFrozen: valueData.isFrozen, address: address } as MoonAsset;
+
     console.log('eth', info);
     assetRecord[info.symbol] = info;
   });

@@ -120,7 +120,7 @@ export class KoniSubcription {
   subscribeNft (address: string) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(['0x063929266E27C3a22869f8222AA17c0545EC760d']);
+        this.initNftSubscription(addresses);
       })
       .catch(console.error);
   }

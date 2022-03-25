@@ -126,6 +126,7 @@ export class Web3NftApi extends BaseNftApi {
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               allItems.push(parsedItem);
+              console.log(parsedItem);
               total += 1;
             }
           } catch (e) {

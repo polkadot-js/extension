@@ -20,7 +20,7 @@ describe('test DotSama APIs', () => {
   });
 
   test('moon', async () => {
-    const nftApi = new Web3NftApi([''], 'astar');
+    const nftApi = new Web3NftApi(['0x681f24168264dac010bed8b79cfb7c6bf4970a79'], 'moonbeam');
 
     await nftApi.fetchNfts();
 

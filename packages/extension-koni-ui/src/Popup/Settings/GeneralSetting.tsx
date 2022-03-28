@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../../types';
 
 import { faExpand, faList } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -13,9 +13,9 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { Theme } from '../types';
+import { ActionContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
+import { Theme } from '../../types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -24,7 +24,7 @@ interface Props extends ThemeProps {
 const notificationOptions = ['Extension', 'PopUp', 'Window']
   .map((item) => ({ text: item, value: item.toLowerCase() }));
 
-function Settings ({ className }: Props): React.ReactElement {
+function GeneralSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [notification, updateNotification] = useState(settings.notification);
@@ -77,7 +77,7 @@ function Settings ({ className }: Props): React.ReactElement {
         <Header
           showBackArrow
           showSubHeader
-          subHeaderName={t<string>('Settings')}
+          subHeaderName={t<string>('General Setting')}
         />
         <MenuItem
           className='setting'
@@ -155,7 +155,7 @@ function Settings ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Settings)(({ theme }: Props) => `
+export default styled(GeneralSetting)(({ theme }: Props) => `
   margin-top: -25px;
   padding-top: 25px;
 

@@ -10,10 +10,8 @@ import { AccountJson } from '@polkadot/extension-base/background/types';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import moreButtonDark from '@polkadot/extension-koni-ui/assets/dots-three-vertical-dark.svg';
 import moreButtonLight from '@polkadot/extension-koni-ui/assets/dots-three-vertical-light.svg';
-import EyeDarkIcon from '@polkadot/extension-koni-ui/assets/icon/eye-dark.svg';
-import EyeLightIcon from '@polkadot/extension-koni-ui/assets/icon/eye-light.svg';
-import EyeSlashDarkIcon from '@polkadot/extension-koni-ui/assets/icon/eye-slash-dark.svg';
-import EyeSlashLightIcon from '@polkadot/extension-koni-ui/assets/icon/eye-slash-light.svg';
+import EyeIcon from '@polkadot/extension-koni-ui/assets/icon/eye.svg';
+import EyeSlashIcon from '@polkadot/extension-koni-ui/assets/icon/eye-slash.svg';
 import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
@@ -125,14 +123,14 @@ function DetailHeader ({ className = '',
               <img
                 alt='Connect Icon'
                 className='detail-header-connect-status-btn__icon'
-                src={popupTheme === 'dark' ? EyeSlashDarkIcon : EyeSlashLightIcon}
+                src={EyeSlashIcon}
               />
             )
             : (
               <img
                 alt='Connect Icon'
                 className='detail-header-connect-status-btn__icon'
-                src={popupTheme === 'dark' ? EyeDarkIcon : EyeLightIcon}
+                src={EyeIcon}
               />
             )}
           <Tooltip

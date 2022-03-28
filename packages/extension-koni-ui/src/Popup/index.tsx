@@ -18,6 +18,9 @@ import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/tr
 import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
+import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
+import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit';
+import Networks from '@polkadot/extension-koni-ui/Popup/Settings/Networks';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';
@@ -116,8 +119,6 @@ export default function Popup (): React.ReactElement {
   // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
     const { accounts, allAccountLogo, currentAddress, isShowBalance } = data;
-
-    console.log('allAccountLogo', allAccountLogo);
 
     setAccounts(accounts);
 
@@ -221,6 +222,9 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/derive/:address/locked'>{wrapWithErrorBoundary(<Derive isLocked />, 'derived-address-locked')}</Route>
                           <Route path='/account/derive/:address'>{wrapWithErrorBoundary(<Derive />, 'derive-address')}</Route>
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
+                          <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
+                          <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
+                          <Route path='/account/network-edit'>{wrapWithErrorBoundary(<NetworkEdit />, 'account-network-edit')}</Route>
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>

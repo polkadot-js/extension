@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { IconDefinition } from '@fortawesome/fontawesome-common-types';
+
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AccountJson, RequestAccountSubscribe, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, SeedLengths } from '@polkadot/extension-base/background/types';
@@ -383,6 +385,14 @@ export interface ResponseTransfer {
   extrinsicHash?: string,
   extrinsicStatus?: string,
   data?: object
+}
+
+export interface SettingItem {
+  name: string,
+  icon: IconDefinition,
+  route?: string,
+  href?: string
+  isDisabled?: boolean
 }
 
 export interface KoniRequestSignatures {

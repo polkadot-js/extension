@@ -6,7 +6,7 @@
       50	leewong                       	# update condition to display correct message on send fund screen
       42	lw                            	# update balance display
       41	Dominhquangdev                	Update SendFund screen, ChainBalances tab
-      12	Hieu Dao                      	Update README.md
+      13	Hieu Dao                      	Update issue templates
       10	Trang Trịnh                   	api get karura and acala nfts
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        7	Minh Le                       	refactor code rmrk_nft api

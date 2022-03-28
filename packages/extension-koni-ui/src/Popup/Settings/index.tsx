@@ -79,6 +79,7 @@ function Settings ({ className }: Props): React.ReactElement {
           target='_blank'
         >
           {/* @ts-ignore */}
+          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
           <FontAwesomeIcon icon={item.icon} />
           <div className='menu-setting-item__text'>{t<string>(item.name)}</div>
           {/* @ts-ignore */}
@@ -94,6 +95,7 @@ function Settings ({ className }: Props): React.ReactElement {
         to={item.route}
       >
         {/* @ts-ignore */}
+        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
         <FontAwesomeIcon icon={item.icon} />
         <div className='menu-setting-item__text'>{t<string>(item.name)}</div>
         {/* @ts-ignore */}

@@ -50,6 +50,7 @@ const networks = [
 
 function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const toggleFund = useCallback(() => {}, []);
 
   const _onChangeFilter = useCallback(() => {

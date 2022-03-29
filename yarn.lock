@@ -3545,6 +3545,7 @@ __metadata:
     protobufjs: ^6.11.2
     rxjs: ^7.5.1
     web3: ^1.7.1
+    web3-core: ^1.7.1
     web3-eth-contract: ^1.7.1
   languageName: unknown
   linkType: soft
@@ -21085,7 +21086,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web3-core@npm:1.7.1":
+"web3-core@npm:1.7.1, web3-core@npm:^1.7.1":
   version: 1.7.1
   resolution: "web3-core@npm:1.7.1"
   dependencies:

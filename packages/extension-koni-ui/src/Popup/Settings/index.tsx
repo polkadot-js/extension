@@ -18,9 +18,21 @@ interface Props extends ThemeProps {
 
 const settingList: SettingItem[] = [
   {
+    name: 'About',
+    icon: faInfoCircle,
+    route: '',
+    href: 'https://linktr.ee/subwallet.app'
+  },
+  {
     name: 'General',
     icon: faCog,
     route: '/account/general-setting'
+  },
+  {
+    name: 'Networks',
+    icon: faPlug,
+    route: '/account/networks',
+    isDisabled: true
   },
   {
     name: 'Advanced',
@@ -47,22 +59,10 @@ const settingList: SettingItem[] = [
     isDisabled: true
   },
   {
-    name: 'Networks',
-    icon: faPlug,
-    route: '/account/networks',
-    isDisabled: true
-  },
-  {
     name: 'Experimental',
     icon: faFlask,
     route: '',
     isDisabled: true
-  },
-  {
-    name: 'About',
-    icon: faInfoCircle,
-    route: '',
-    href: 'https://linktr.ee/subwallet.app'
   }
 ];
 

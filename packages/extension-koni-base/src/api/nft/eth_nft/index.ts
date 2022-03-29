@@ -83,6 +83,7 @@ export class Web3NftApi extends BaseNftApi {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
+    let ownItem = false;
 
     let collectionImage: string | undefined;
 
@@ -118,6 +119,7 @@ export class Web3NftApi extends BaseNftApi {
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               updateItem(parsedItem);
+              ownItem = true;
             }
           } catch (e) {
             console.log(`error parsing item for ${this.chain as string} nft`, e);
@@ -126,14 +128,16 @@ export class Web3NftApi extends BaseNftApi {
       }));
     }));
 
-    const nftCollection = {
-      collectionId: smartContract,
-      collectionName,
-      image: collectionImage || undefined,
-      chain: this.chain
-    } as NftCollection;
+    if (ownItem) {
+      const nftCollection = {
+        collectionId: smartContract,
+        collectionName,
+        image: collectionImage || undefined,
+        chain: this.chain
+      } as NftCollection;
 
-    updateCollection(nftCollection);
+      updateCollection(nftCollection);
+    }
   }
 
   async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<void> {

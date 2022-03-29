@@ -93,6 +93,7 @@ export interface NftCollection {
   collectionName?: string;
   image?: string;
   chain?: string;
+  itemCount?: number;
 }
 
 export interface NftJson {

@@ -4,15 +4,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { NftCollection } from '@polkadot/extension-base/background/KoniTypes';
+import { NftCollectionType } from '@polkadot/extension-koni-ui/stores/types';
 
-const initialState: NftCollection[] = [];
+const initialState = {
+  nftCollection: []
+} as NftCollectionType;
 
 const nftCollectionSlice = createSlice({
   initialState,
   name: 'nftCollection',
   reducers: {
     update (state, action: PayloadAction<NftCollection[]>) {
-      state = action.payload;
+      state.nftCollection = action.payload;
     }
   }
 });

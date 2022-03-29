@@ -57,7 +57,8 @@ export class NftHandler {
   addresses: string[] = [];
   prevAddresses: string[] = []; // handle change account
   total = 0;
-  data: NftCollection[] = [];
+  allCollections: NftCollection[] = [];
+  allItems: NftItem[] = [];
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
     if (addresses) this.addresses = addresses;
@@ -104,10 +105,10 @@ export class NftHandler {
   }
 
   private sortData (data: NftCollection[]) {
-    const sortedData = this.data;
+    const sortedData = this.allCollections;
 
     for (const collection of data) {
-      if (!this.data.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
+      if (!this.allCollections.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
         sortedData.push(collection);
       }
     }
@@ -115,9 +116,22 @@ export class NftHandler {
     return sortedData;
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
-    const start = performance.now();
+  private existCollection (newCollection: NftCollection) {
+    return this.allCollections.some((collection) =>
+      collection.chain === newCollection.chain &&
+      collection.collectionId === newCollection.collectionId &&
+      collection.collectionName === newCollection.collectionName);
+  }
 
+  private existItem (newItem: NftItem) {
+    return this.allItems.some((item) =>
+      item.chain === newItem.chain &&
+      item.id === newItem.id &&
+      item.collectionId === newItem.collectionId &&
+      item.name === newItem.name);
+  }
+
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
     let total = 0;
     const dataMap: Record<string, NftCollection[]> = {};
 
@@ -134,7 +148,19 @@ export class NftHandler {
       });
 
       await Promise.race([
-        handler.fetchNfts(updateItem, updateCollection),
+        handler.fetchNfts(
+          (data: NftItem) => {
+            if (!this.existItem(data)) {
+              this.allItems.push(data);
+              updateItem(data);
+            }
+          },
+          (data: NftCollection) => {
+            if (!this.existCollection(data)) {
+              this.allCollections.push(data);
+              updateCollection(data);
+            }
+          }),
         timeout
       ]).then((res) => {
         if (res === 1) {
@@ -146,7 +172,6 @@ export class NftHandler {
       });
     }));
 
-    // console.log('nft dataMap', dataMap);
     let data: NftCollection[] = [];
 
     Object.values(dataMap).forEach((collection) => {
@@ -160,21 +185,17 @@ export class NftHandler {
 
       if (total < this.total) {
         this.total = total;
-        this.data = data;
+        this.allCollections = data;
       } else {
         this.total = total;
-        this.data = this.sortData(data);
+        this.allCollections = this.sortData(data);
       }
     } else {
       // console.log('nft address change');
       this.total = total;
-      this.data = data;
+      this.allCollections = data;
       this.prevAddresses = this.addresses;
     }
-
-    console.log(`all nft took ${performance.now() - start}ms`);
-
-    console.log(`done fetching ${total} nft from rpc`);
   }
 
   public getTotal () {
@@ -182,14 +203,14 @@ export class NftHandler {
   }
 
   public getNfts () {
-    return this.data;
+    return this.allCollections;
   }
 
   public getNftJson () {
     return {
       ready: true,
       total: this.total,
-      nftList: this.data
+      nftList: this.allCollections
     } as NftJson;
   }
 

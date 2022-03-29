@@ -7,6 +7,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import changeAvatar from '@polkadot/extension-koni-ui/assets/icon/camera.svg';
 import changeAvatarHover from '@polkadot/extension-koni-ui/assets/icon/camera-hover.svg';
@@ -55,7 +56,11 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
         const accountByAddress = findAccountByAddress(accounts, address);
 
         if (accountByAddress) {
-          saveCurrentAccountAddress(address).then(() => {
+          const accountInfo = {
+            address: address
+          } as CurrentAccountInfo;
+
+          saveCurrentAccountAddress(accountInfo, () => {
             window.localStorage.removeItem('accountAllNetworkGenesisHash');
             triggerAccountsSubscription().catch((e) => {
               console.error('There is a problem when trigger Accounts Subscription', e);
@@ -75,15 +80,31 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
     }, [accounts, address, changeAccountCallback, closeSetting, onAction]);
 
   const updateAvatar = useCallback((file: Blob) => {
-    if (currentAccount && currentAccount.address) {
-      saveCurrentAccountAddress(currentAccount.address, false, URL.createObjectURL(file)).then(() => {
-        triggerAccountsSubscription().catch((e) => {
-          console.error('There is a problem when trigger Accounts Subscription', e);
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+
+    reader.onload = function () {
+      if (currentAccount) {
+        const accountInfo = {
+          address: currentAccount.address,
+          isShowBalance: false,
+          allAccountLogo: reader.result as string
+        } as CurrentAccountInfo;
+
+        saveCurrentAccountAddress(accountInfo, () => {
+          triggerAccountsSubscription().catch((e: any) => {
+            console.error('There is a problem when trigger Accounts Subscription', e);
+          });
+        }).catch((e) => {
+          console.error('There is a problem when set Current Account', e);
         });
-      }).catch((e) => {
-        console.error('There is a problem when set Current Account', e);
-      });
-    }
+      }
+    };
+
+    reader.onerror = function (error) {
+      console.log('Error: ', error);
+    };
   }, [currentAccount]);
 
   const fileSelectedChange = useCallback(

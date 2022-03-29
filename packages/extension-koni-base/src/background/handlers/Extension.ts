@@ -132,9 +132,16 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private saveCurrentAccountAddress ({ address, allAccountLogo, isShowBalance }: RequestCurrentAccountAddress): boolean {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this._saveCurrentAccountAddress(address, isShowBalance, allAccountLogo);
+  private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
+
+    this._saveCurrentAccountAddress(data.address, data.isShowBalance, data.allAccountLogo, () => {
+      cb(data);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
 
     return true;
   }
@@ -783,7 +790,7 @@ export default class KoniExtension extends Extension {
       case 'pri(accounts.triggerSubscription)':
         return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
-        return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
+        return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
       case 'pri(price.getPrice)':
         return await this.getPrice();
       case 'pri(price.getSubscription)':

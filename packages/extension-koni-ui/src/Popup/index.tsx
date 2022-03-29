@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
-import { AccountsWithCurrentAddress } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
@@ -127,7 +127,11 @@ export default function Popup (): React.ReactElement {
 
       if (!selectedAcc) {
         selectedAcc = accounts[0];
-        saveCurrentAccountAddress(selectedAcc.address).then(() => {
+        const accountInfo = {
+          address: selectedAcc.address
+        } as CurrentAccountInfo;
+
+        saveCurrentAccountAddress(accountInfo, () => {
           updateCurrentAccount(selectedAcc as AccountJson);
         }).catch((e) => {
           console.error('There is a problem when set Current Account', e);

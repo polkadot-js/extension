@@ -256,8 +256,6 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     [isNetworkSelectOpen]
   );
 
-  console.log('currentAccount?.isHidden', currentAccount?.isHidden);
-
   const closeModal = useCallback(
     () => setShowModal(false),
     []

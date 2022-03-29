@@ -9,7 +9,7 @@ import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, CurrentAccountInfo, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -232,7 +232,12 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   }, [address, t]);
 
   const _toggleBalances = useCallback(() => {
-    saveCurrentAccountAddress(address, !isShowBalance).then(() => {
+    const accountInfo = {
+      address: address,
+      isShowBalance: !isShowBalance
+    } as CurrentAccountInfo;
+
+    saveCurrentAccountAddress(accountInfo, () => {
       triggerAccountsSubscription().catch((e) => {
         console.error('There is a problem when trigger Accounts Subscription', e);
       });

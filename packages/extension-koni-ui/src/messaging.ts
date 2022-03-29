@@ -9,7 +9,36 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  ApiInitStatus,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  NetWorkMetadataDef,
+  NftCollection,
+  NftJson,
+  NftTransferExtra,
+  PriceJson,
+  RequestCheckTransfer,
+  RequestNftForceUpdate,
+  RequestSubscribeBalance,
+  RequestSubscribeCrowdloan,
+  RequestSubscribeNft,
+  RequestSubscribePrice,
+  RequestSubscribeStaking,
+  RequestSubscribeStakingReward,
+  RequestTransfer,
+  ResponseAccountCreateSuriV2,
+  ResponseCheckTransfer,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseTransfer,
+  StakingJson,
+  StakingRewardJson,
+  TransactionHistoryItemType,
+  TransferError
+} from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -328,6 +357,10 @@ export async function getNft (account: string): Promise<NftJson> {
 
 export async function subscribeNft (request: RequestSubscribeNft, callback: (nftData: NftJson) => void): Promise<NftJson> {
   return sendMessage('pri(nft.getSubscription)', request, callback);
+}
+
+export async function subscribeNftCollection (callback: (data: NftCollection[]) => void): Promise<NftCollection[]> {
+  return sendMessage('pri(nftCollection.getSubscription)', null, callback);
 }
 
 export async function getStaking (account: string): Promise<StakingJson> {

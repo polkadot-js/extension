@@ -19,14 +19,13 @@ export class Web3NftApi extends BaseNftApi {
 
   constructor (addresses: string[], chain: string) {
     super(undefined, addresses, chain);
-    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[chain].provider));
 
     if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
     else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
     else if (chain === SUPPORTED_NFT_NETWORKS.astar) this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
   }
 
-  override recoverConnection () {
+  connectWeb3 () {
     this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
   }
 
@@ -79,18 +78,11 @@ export class Web3NftApi extends BaseNftApi {
     } as NftItem;
   }
 
-  private async getItemsByCollection (smartContract: string, collectionName: string) {
-    if (!this.web3) {
-      return {
-        totalItems: 0,
-        nftCollection: {} as NftCollection
-      };
-    }
+  private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+    if (!this.web3) return;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
-    const allItems: NftItem[] = [];
-    let total = 0;
 
     let collectionImage: string | undefined;
 
@@ -125,9 +117,7 @@ export class Web3NftApi extends BaseNftApi {
 
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
-              allItems.push(parsedItem);
-              console.log(parsedItem);
-              total += 1;
+              updateItem(parsedItem);
             }
           } catch (e) {
             console.log(`error parsing item for ${this.chain as string} nft`, e);
@@ -140,40 +130,24 @@ export class Web3NftApi extends BaseNftApi {
       collectionId: smartContract,
       collectionName,
       image: collectionImage || undefined,
-      nftItems: allItems,
       chain: this.chain
     } as NftCollection;
 
-    return {
-      totalItems: total,
-      nftCollection: allItems.length > 0 ? nftCollection : undefined
-    };
+    updateCollection(nftCollection);
   }
 
-  async handleNfts (): Promise<void> {
+  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<void> {
     if (!this.targetContracts) return;
 
-    const allData = await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
-      return await this.getItemsByCollection(smartContract, name);
+    await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
+      return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection);
     }));
-
-    const nftCollections: NftCollection[] = [];
-    let total = 0;
-
-    allData.forEach((collection) => {
-      if (collection.nftCollection) {
-        nftCollections.push(collection.nftCollection);
-        total += collection.totalItems;
-      }
-    });
-
-    this.data = nftCollections;
-    this.total = total;
   }
 
-  public async fetchNfts (): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
     try {
-      await this.handleNfts();
+      this.connectWeb3();
+      await this.handleNfts(updateItem, updateCollection);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`, e);
 

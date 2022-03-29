@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { hexToStr, hexToUTF16, parseIpfsLink, utf16ToString } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -23,7 +24,7 @@ interface Token {
 
 export default class UniqueNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps, addresses: string[], chain?: string) {
+  constructor (api: ApiProps | null, addresses: string[], chain?: string) {
     super(api, addresses, chain);
   }
 
@@ -116,19 +117,15 @@ export default class UniqueNftApi extends BaseNftApi {
     };
   }
 
-  public async handleNfts () {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
     // const start = performance.now();
 
     const collectionCount = await this.getCollectionCount();
-    const allCollections: NftCollection[] = [];
     const addressTokenDict: any[] = [];
     let allNftId: string[] = [];
     const nftMap: Record<string, number> = {};
     const collectionMap: Record<string, Collection> = {};
     const allCollectionId: number[] = [];
-    const collectionMeta: Record<string, any> = {};
-    const allNft: Record<string, NftItem[]> = {};
-    let total = 0;
 
     try {
       for (let i = 0; i < collectionCount; i++) {
@@ -166,70 +163,42 @@ export default class UniqueNftApi extends BaseNftApi {
         const tokenData = await this.getNftData(_collection, tokenId, 'en', collectionId);
 
         if (tokenData && imageUrl) {
-          if (!(collectionId in collectionMeta)) {
-            collectionMeta[collectionId] = {
-              collectionName: tokenData.collectionName,
-              collectionImage: parseIpfsLink(tokenData.image)
-            };
-          }
+          const parsedItem = {
+            id: tokenId,
+            name: tokenData.prefix + '#' + tokenId,
+            image: parseIpfsLink(imageUrl),
+            external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
+            collectionId: collectionId.toString(),
+            properties: tokenData.properties,
+            rarity: '',
+            chain: SUPPORTED_NFT_NETWORKS.uniqueNft
+          } as NftItem;
 
-          total += 1;
+          updateItem(parsedItem);
 
-          if (collectionId in allNft) {
-            allNft[collectionId].push({
-              id: tokenId,
-              name: tokenData.prefix + '#' + tokenId,
-              image: parseIpfsLink(imageUrl),
-              external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
-              collectionId: collectionId.toString(),
-              properties: tokenData.properties,
-              rarity: '',
-              chain: 'uniqueNft'
-            } as NftItem);
-          } else {
-            allNft[collectionId] = [{
-              id: tokenId,
-              name: tokenData.prefix + '#' + tokenId,
-              image: parseIpfsLink(imageUrl),
-              external_url: `https://unqnft.io/#/market/token-details?collectionId=${collectionId}&tokenId=${tokenId}`,
-              collectionId: collectionId.toString(),
-              properties: tokenData.properties,
-              rarity: '',
-              chain: 'uniqueNft'
-            } as NftItem];
-          }
+          const parsedCollection = {
+            collectionId: collectionId.toString(),
+            collectionName: tokenData.collectionName,
+            image: parseIpfsLink(tokenData.image),
+            chain: SUPPORTED_NFT_NETWORKS.uniqueNft
+          } as NftCollection;
+
+          updateCollection(parsedCollection);
         }
       }));
-
-      Object.keys(collectionMap).forEach((collectionId) => {
-        const collectionMetadata = collectionMeta[collectionId] as Record<string, string>;
-
-        allCollections.push({
-          collectionId: collectionId,
-          collectionName: collectionMetadata.collectionName,
-          image: collectionMetadata.collectionImage,
-          nftItems: allNft[collectionId],
-          chain: 'uniqueNft'
-        } as NftCollection);
-      });
     } catch (e) {
       console.log('Failed to fetch unique nft', e);
-
-      return;
     }
-
-    this.total = total;
-    this.data = allCollections;
 
     // console.log(`unique took ${performance.now() - start}ms`);
 
     // console.log(`Fetched ${total} nfts from unique`);
   }
 
-  public async fetchNfts (): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts();
+      await this.handleNfts(updateItem, updateCollection);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`);
 

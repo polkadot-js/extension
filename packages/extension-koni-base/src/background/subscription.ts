@@ -120,7 +120,9 @@ export class KoniSubcription {
   subscribeNft (address: string) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(['0x681f24168264dac010bed8b79cfb7c6bf4970a79']);
+        this.initNftSubscription([
+          '0xf601560c21E7E4Eb45606b5F2955d03d5A2be4B8'
+        ]);
       })
       .catch(console.error);
   }
@@ -142,9 +144,17 @@ export class KoniSubcription {
         selectedNftCollection
       } as NftTransferExtra);
       nftHandler.setAddresses(addresses);
-      nftHandler.handleNfts()
-        .then((r) => {
-          state.setNft(nftHandler.getNftJson());
+      nftHandler.handleNfts(
+        (data) => {
+          state.setNft(data);
+          console.log('nft state got new update', data);
+        },
+        (data) => {
+          state.setNftCollection(data);
+          console.log('nft collection state got new update', data);
+        })
+        .then(() => {
+          console.log('nft state updated');
         })
         .catch(console.log);
     }

@@ -4,7 +4,25 @@
 import { Subject } from 'rxjs';
 
 import State from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftJson, NftTransferExtra, PriceJson, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountRefMap,
+  APIItemState,
+  BalanceItem,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  NftCollection,
+  NftItem,
+  NftJson,
+  NftTransferExtra,
+  PriceJson,
+  StakingItem,
+  StakingJson,
+  StakingRewardJson,
+  TransactionHistoryItemType
+} from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
@@ -82,6 +100,8 @@ export default class KoniState extends State {
     nftList: []
   } as NftJson;
 
+  private nftCollectionState: NftCollection[] = [];
+
   // Only for rendering nft after transfer
   private nftTransferState: NftTransferExtra = {
     cronUpdate: false,
@@ -99,6 +119,7 @@ export default class KoniState extends State {
   private crowdloanSubject = new Subject<CrowdloanJson>();
   private nftTransferSubject = new Subject<NftTransferExtra>();
   private nftSubject = new Subject<NftJson>();
+  private nftCollectionSubject = new Subject<NftCollection[]>();
   private stakingSubject = new Subject<StakingJson>();
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
@@ -161,14 +182,36 @@ export default class KoniState extends State {
     return this.nftTransferSubject;
   }
 
-  public setNft (nftData: NftJson, callback?: (nftData: NftJson) => void): void {
-    this.nftState = nftData;
+  public setNftCollection (data: NftCollection, callback?: (data: NftCollection) => void): void {
+    this.nftCollectionState.push(data);
+
+    if (callback) {
+      callback(data);
+    }
+
+    this.nftCollectionSubject.next(this.nftCollectionState);
+  }
+
+  public getNftCollection () {
+    return this.nftCollectionState;
+  }
+
+  public getNftCollectionSubscription (update: (value: NftCollection[]) => void): void {
+    update(this.nftCollectionState);
+  }
+
+  public subscribeNftCollection () {
+    return this.nftCollectionSubject;
+  }
+
+  public setNft (nftData: NftItem, callback?: (nftData: NftItem) => void): void {
+    this.nftState.nftList.push(nftData);
 
     if (callback) {
       callback(nftData);
     }
 
-    this.nftSubject.next(nftData);
+    this.nftSubject.next(this.nftState);
   }
 
   public getNft () {

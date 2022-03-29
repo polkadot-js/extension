@@ -12,6 +12,7 @@ import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import NetworkMetadataReducer from './NetworkMetadata';
 import NftReducer from './Nft';
+import NftCollectionReducer from './NftCollection';
 import PriceReducer from './Price';
 import StakingReducer from './Staking';
 import StakingRewardReducer from './StakingReward';
@@ -24,6 +25,7 @@ const reducers = {
   transferNftParams: TransferNftParamsReducer,
   stakingReward: StakingRewardReducer,
   staking: StakingReducer,
+  nftCollection: NftCollectionReducer,
   nft: NftReducer,
   price: PriceReducer,
   balance: BalanceReducer,

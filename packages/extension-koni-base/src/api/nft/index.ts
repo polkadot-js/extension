@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftJson } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiProps, NftCollection, NftItem, NftJson } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
 import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
@@ -14,10 +14,9 @@ import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 
-const NFT_FETCHING_TIMEOUT = 8000;
-const NFT_CONNECTION_TIMEOUT = 15000;
+const NFT_FETCHING_TIMEOUT = 20000;
 
-function createNftApi (chain: string, api: ApiProps, addresses: string[]): BaseNftApi | null {
+function createNftApi (chain: string, api: ApiProps | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
   const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
 
@@ -81,56 +80,26 @@ export class NftHandler {
     }
   }
 
-  public refreshApi () {
-    this.handlers.forEach((handler) => {
-      if (handler.getNeedRefresh()) {
-        handler.recoverConnection();
-        console.log(`recovered nft connection for ${handler.getChain() as string}`);
-        handler.setNeedRefresh(false);
-      }
-    });
-  }
-
-  private async setupApi () {
+  private setupApi () {
     try {
       if (this.handlers.length <= 0) { // setup connections for first time use
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
-        const start = performance.now();
 
-        await Promise.all(this.apiPromises.map(async ({ api: apiPromise, chain }) => {
+        this.apiPromises.forEach(({ api: apiPromise, chain }) => {
           const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
 
-          if (apiPromise) {
-            const timeout = new Promise((resolve, reject) => {
-              const id = setTimeout(() => {
-                clearTimeout(id);
-                resolve(null);
-              }, NFT_CONNECTION_TIMEOUT);
-            });
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          const handler = createNftApi(chain, apiPromise as ApiProps, useAddresses);
 
-            await Promise.race([
-              timeout,
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-              apiPromise.isReady
-            ]).then((res) => {
-              if (res !== null) {
-                const parentApi: ApiProps = res as ApiProps;
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                const handler = createNftApi(chain, parentApi, useAddresses);
-
-                if (handler && !this.handlers.includes(handler)) {
-                  this.handlers.push(handler);
-                  console.log(`${handler.getChain() as string} nft connected`);
-                }
-              } else { console.log(`${chain as string} nft connection timeout`); }
-            });
+          if (handler && !this.handlers.includes(handler)) {
+            this.handlers.push(handler);
           }
-        }));
+        });
 
-        console.log(`nft connection setup took ${performance.now() - start}ms`);
-      } else { console.log('nft connection already setup.'); }
+        console.log(`${this.handlers.length} nft handlers setup done`);
+      } else { console.log('nft handlers already setup.'); }
     } catch (e) {
-      console.log('error connecting for nft', e);
+      console.log('error setting up nft handlers', e);
     }
   }
 
@@ -146,16 +115,17 @@ export class NftHandler {
     return sortedData;
   }
 
-  public async handleNfts () {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
     const start = performance.now();
 
     let total = 0;
     const dataMap: Record<string, NftCollection[]> = {};
 
-    await this.setupApi();
+    this.setupApi();
 
     await Promise.all(this.handlers.map(async (handler) => {
       const currentChain = handler.getChain() as string;
+
       const timeout = new Promise((resolve, reject) => {
         const id = setTimeout(() => {
           clearTimeout(id);
@@ -164,15 +134,14 @@ export class NftHandler {
       });
 
       await Promise.race([
-        handler.fetchNfts(),
+        handler.fetchNfts(updateItem, updateCollection),
         timeout
       ]).then((res) => {
         if (res === 1) {
           total += handler.getTotal();
           dataMap[currentChain] = handler.getData();
         } else {
-          console.log(`nft connection for ${currentChain} needs refresh`);
-          handler.setNeedRefresh(true);
+          console.log(`nft fetching for ${currentChain} failed`);
         }
       });
     }));
@@ -183,6 +152,8 @@ export class NftHandler {
     Object.values(dataMap).forEach((collection) => {
       data = [...data, ...collection];
     });
+
+    // TODO: clear outdated item
 
     if (isAddressesEqual(this.addresses, this.prevAddresses)) {
       // console.log('nft address no change');

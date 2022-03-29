@@ -420,8 +420,32 @@ export default class KoniExtension extends Extension {
     return this.getNftTransfer();
   }
 
+  private getNftCollection (): Promise<NftCollection[]> {
+    return new Promise<NftCollection[]>((resolve) => {
+      state.getNftCollectionSubscription((rs: NftCollection[]) => {
+        resolve(rs);
+      });
+    });
+  }
+
+  private subscribeNftCollection (id: string, port: chrome.runtime.Port): Promise<NftCollection[] | null> {
+    const cb = createSubscription<'pri(nftCollection.getSubscription)'>(id, port);
+    const nftCollectionSubscription = state.subscribeNftCollection().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      nftCollectionSubscription.unsubscribe();
+    });
+
+    return this.getNftCollection();
+  }
+
   private getNft (): Promise<NftJson> {
-    return new Promise<NftJson>((resolve, reject) => {
+    return new Promise<NftJson>((resolve) => {
       state.getNftSubscription((rs: NftJson) => {
         resolve(rs);
       });
@@ -582,47 +606,47 @@ export default class KoniExtension extends Extension {
     const oldTotal = nftJson.total;
     const newNftList: NftCollection[] = [];
 
-    if (!request.isSendingSelf) {
-      for (const collection of nftJson.nftList) {
-        if (collection.collectionId === request.collectionId) {
-          // @ts-ignore
-          // eslint-disable-next-line array-callback-return
-          const filtered: NftItem[] = [];
-
-          collection.nftItems?.forEach((item) => {
-            if (item.id !== request.nft.id) {
-              filtered.push(item);
-            }
-          });
-
-          selectedNftCollection = {
-            collectionId: collection.collectionId,
-            collectionName: collection.collectionName,
-            image: collection.image,
-            nftItems: filtered
-          } as NftCollection;
-
-          if (filtered.length > 0) {
-            newNftList.push(selectedNftCollection);
-          }
-        } else {
-          newNftList.push(collection);
-        }
-      }
-
-      state.setNft({
-        ready: true,
-        total: oldTotal - 1,
-        nftList: newNftList
-      } as NftJson);
-    } else {
-      for (const collection of nftJson.nftList) {
-        if (collection.collectionId === request.collectionId) {
-          selectedNftCollection = collection;
-          break;
-        }
-      }
-    }
+    // if (!request.isSendingSelf) {
+    //   for (const collection of nftJson.nftList) {
+    //     if (collection.collectionId === request.collectionId) {
+    //       // @ts-ignore
+    //       // eslint-disable-next-line array-callback-return
+    //       const filtered: NftItem[] = [];
+    //
+    //       collection.nftItems?.forEach((item) => {
+    //         if (item.id !== request.nft.id) {
+    //           filtered.push(item);
+    //         }
+    //       });
+    //
+    //       selectedNftCollection = {
+    //         collectionId: collection.collectionId,
+    //         collectionName: collection.collectionName,
+    //         image: collection.image,
+    //         nftItems: filtered
+    //       } as NftCollection;
+    //
+    //       if (filtered.length > 0) {
+    //         newNftList.push(selectedNftCollection);
+    //       }
+    //     } else {
+    //       newNftList.push(collection);
+    //     }
+    //   }
+    //
+    //   state.setNft({
+    //     ready: true,
+    //     total: oldTotal - 1,
+    //     nftList: newNftList
+    //   } as NftJson);
+    // } else {
+    //   for (const collection of nftJson.nftList) {
+    //     if (collection.collectionId === request.collectionId) {
+    //       selectedNftCollection = collection;
+    //       break;
+    //     }
+    //   }
+    // }
 
     state.setNftTransfer({
       cronUpdate: false,
@@ -780,6 +804,10 @@ export default class KoniExtension extends Extension {
         return await this.getNft();
       case 'pri(nft.getSubscription)':
         return await this.subscribeNft(id, port);
+      case 'pri(nftCollection.getNftCollection)':
+        return await this.getNftCollection();
+      case 'pri(nftCollection.getSubscription)':
+        return await this.subscribeNftCollection(id, port);
       case 'pri(staking.getStaking)':
         return this.getStaking();
       case 'pri(staking.getSubscription)':

@@ -161,11 +161,11 @@ export class RmrkNftApi extends BaseNftApi {
     return nfts;
   }
 
-  public async handleNfts () {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
     // const start = performance.now();
 
     let allNfts: Record<string | number, any>[] = [];
-    let allCollections: NftCollection[] = [];
+    const allCollections: NftCollection[] = [];
 
     try {
       await Promise.all(this.addresses.map(async (address) => {
@@ -177,6 +177,26 @@ export class RmrkNftApi extends BaseNftApi {
       const collectionInfoUrl: string[] = [];
 
       for (const item of allNfts) {
+        const parsedItem = {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          id: item?.id,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          name: item?.metadata?.name as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
+          image: this.parseUrl(item.image ? item.image : item.metadata.image ? item.metadata.image : item.metadata.animation_url as string),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          description: item?.metadata?.description as string,
+          external_url: item?.external_url as string,
+          rarity: item?.metadata_rarity as string,
+          collectionId: item?.collectionId as string,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          properties: item?.metadata?.properties as Record<any, any>,
+          chain: 'kusama',
+          rmrk_ver: item.source && item.source === RMRK_SOURCE.SINGULAR_V1 ? RMRK_VER.VER_1 : RMRK_VER.VER_2
+        } as NftItem;
+
+        updateItem(parsedItem);
+
         let url = '';
 
         if (item.source === RMRK_SOURCE.SINGULAR_V1) {
@@ -229,57 +249,21 @@ export class RmrkNftApi extends BaseNftApi {
         }
       }));
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      // const collectionInfoDict = Object.assign({}, ...collectionInfo.map((item) => ({ [item.id]: item.name })));
-      const nftDict: Record<string | number, any> = {};
-
-      for (const item of allNfts) {
-        const parsedItem = {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          id: item?.id,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          name: item?.metadata?.name as string,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-argument
-          image: this.parseUrl(item.image ? item.image : item.metadata.image ? item.metadata.image : item.metadata.animation_url as string),
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          description: item?.metadata?.description as string,
-          external_url: item?.external_url as string,
-          rarity: item?.metadata_rarity as string,
-          collectionId: item?.collectionId as string,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          properties: item?.metadata?.properties as Record<any, any>,
-          chain: 'kusama',
-          rmrk_ver: item.source && item.source === RMRK_SOURCE.SINGULAR_V1 ? RMRK_VER.VER_1 : RMRK_VER.VER_2
-        } as NftItem;
-
-        if (item.collectionId in nftDict) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          nftDict[item.collectionId as string] = [...nftDict[item.collectionId as string], parsedItem];
-        } else {
-          nftDict[item.collectionId as string] = [parsedItem];
-        }
-      }
-
-      allCollections = allCollections.map((item) => {
-        return {
+      allCollections.forEach((item) => {
+        const parsedCollection = {
           collectionId: item.collectionId,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           collectionName: allCollectionMeta[item.collectionId] ? allCollectionMeta[item.collectionId].name as string : null,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           image: allCollectionMeta[item.collectionId] ? this.parseUrl(allCollectionMeta[item.collectionId].image as string) : null,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          nftItems: nftDict[item.collectionId] as NftItem[],
           chain: 'kusama'
         } as NftCollection;
+
+        updateCollection(parsedCollection);
       });
     } catch (e) {
       console.log('Failed to fetch rmrk nft', e);
-
-      return;
     }
-
-    this.total = allNfts.length;
-    this.data = allCollections;
 
     // const end = performance.now();
     //
@@ -288,9 +272,9 @@ export class RmrkNftApi extends BaseNftApi {
     // console.log(`rmrk took ${end - start}ms`);
   }
 
-  public async fetchNfts (): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
     try {
-      await this.handleNfts();
+      await this.handleNfts(updateItem, updateCollection);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`);
 

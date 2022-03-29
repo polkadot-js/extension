@@ -92,14 +92,13 @@ export interface NftCollection {
   collectionId: string;
   collectionName?: string;
   image?: string;
-  nftItems?: Array<NftItem>;
   chain?: string;
 }
 
 export interface NftJson {
   ready?: boolean;
   total: number;
-  nftList: Array<NftCollection>;
+  nftList: Array<NftItem>;
 }
 
 export interface BalanceChildItem {
@@ -397,6 +396,8 @@ export interface KoniRequestSignatures {
   'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson];
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
+  'pri(nftCollection.getNftCollection)': [null, NftCollection[]];
+  'pri(nftCollection.getSubscription)': [null, NftCollection[], NftCollection[]];
   'pri(price.getPrice)': [RequestPrice, PriceJson];
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson];
   'pri(balance.getBalance)': [RequestBalance, BalanceJson];

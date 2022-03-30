@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faBell, faCog, faFlask, faIdBadge, faInfoCircle, faLock, faPlug, faSlidersH } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faCog, faExpand, faIdBadge, faInfoCircle, faList, faLock, faPlug, faSlidersH } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { SettingItem } from '@polkadot/extension-base/background/KoniTypes';
 import { Link } from '@polkadot/extension-koni-ui/components';
+import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
@@ -16,93 +17,13 @@ interface Props extends ThemeProps {
   className?: string;
 }
 
-const settingList: SettingItem[] = [
-  {
-    name: 'About',
-    icon: faInfoCircle,
-    route: '',
-    href: 'https://linktr.ee/subwallet.app'
-  },
-  {
-    name: 'General',
-    icon: faCog,
-    route: '/account/general-setting'
-  },
-  {
-    name: 'Networks',
-    icon: faPlug,
-    route: '/account/networks',
-    isDisabled: true
-  },
-  {
-    name: 'Advanced',
-    icon: faSlidersH,
-    route: '',
-    isDisabled: true
-  },
-  {
-    name: 'Contacts',
-    icon: faIdBadge,
-    route: '',
-    isDisabled: true
-  },
-  {
-    name: 'Security & Privacy',
-    icon: faLock,
-    route: '',
-    isDisabled: true
-  },
-  {
-    name: 'Alerts',
-    icon: faBell,
-    route: '',
-    isDisabled: true
-  },
-  {
-    name: 'Experimental',
-    icon: faFlask,
-    route: '',
-    isDisabled: true
-  }
-];
-
 function Settings ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
-
-  const renderSettingItem = (item: SettingItem) => {
-    if (item && item.href) {
-      return (
-        <a
-          className='menu-setting-item'
-          href={item.href}
-          rel='noreferrer'
-          target='_blank'
-        >
-          {/* @ts-ignore */}
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-          <FontAwesomeIcon icon={item.icon} />
-          <div className='menu-setting-item__text'>{t<string>(item.name)}</div>
-          {/* @ts-ignore */}
-          <div className='menu-setting-item__toggle' />
-        </a>
-      );
-    }
-
-    return (
-      <Link
-        className='menu-setting-item'
-        isDisabled={item.isDisabled}
-        to={item.route}
-      >
-        {/* @ts-ignore */}
-        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-        <FontAwesomeIcon icon={item.icon} />
-        <div className='menu-setting-item__text'>{t<string>(item.name)}</div>
-        {/* @ts-ignore */}
-        <div className='menu-setting-item__toggle' />
-      </Link>
-    );
-  };
+  const isPopup = useIsPopup();
+  const _onWindowOpen = useCallback(
+    () => windowOpen('/').catch(console.error),
+    []
+  );
 
   return (
     <div className={className}>
@@ -112,7 +33,109 @@ function Settings ({ className }: Props): React.ReactElement {
         subHeaderName={t<string>('Settings')}
       />
       <div className='menu-setting-item-list'>
-        {settingList.map((item) => renderSettingItem(item))}
+        <a
+          className='menu-setting-item'
+          href='https://linktr.ee/subwallet.app'
+          rel='noreferrer'
+          target='_blank'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faInfoCircle} />
+          <div className='menu-setting-item__text'>{t<string>('About')}</div>
+          {/* @ts-ignore */}
+          <div className='menu-setting-item__toggle' />
+        </a>
+
+        <Link
+          className='menu-setting-item'
+          to='/account/general-setting'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faCog} />
+          <div className='menu-setting-item__text'>{t<string>('General')}</div>
+          {/* @ts-ignore */}
+          <div className='menu-setting-item__toggle' />
+        </Link>
+
+        <Link
+          className='menu-setting-item'
+          isDisabled
+          to='/account/networks'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faPlug} />
+          <div className='menu-setting-item__text'>{t<string>('Networks')}</div>
+          <div className='menu-setting-item__toggle' />
+        </Link>
+
+        <Link
+          className='menu-setting-item'
+          to='/auth-list'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faList} />
+          <div className='menu-setting-item__text'>{t<string>('Manage Website Access')}</div>
+          {/* @ts-ignore */}
+          <div className='menu-setting-item__toggle' />
+        </Link>
+
+        {isPopup && <div
+          className='menu-setting-item'
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          onClick={_onWindowOpen}
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faExpand} />
+          <div className='menu-setting-item__text'>{t<string>('Open extension in new window')}</div>
+          {/* @ts-ignore */}
+          <div className='menu-setting-item__toggle' />
+        </div>
+        }
+
+        <Link
+          className='menu-setting-item'
+          isDisabled
+          to=''
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faSlidersH} />
+          <div className='menu-setting-item__text'>{t<string>('Advanced')}</div>
+          <div className='menu-setting-item__toggle' />
+        </Link>
+
+        <Link
+          className='menu-setting-item'
+          isDisabled
+          to=''
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faIdBadge} />
+          <div className='menu-setting-item__text'>{t<string>('Contacts')}</div>
+          <div className='menu-setting-item__toggle' />
+        </Link>
+
+        <a
+          className='menu-setting-item'
+          href='https://docs.subwallet.app/privacy-and-security/privacy-policy'
+          rel='noreferrer'
+          target='_blank'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faLock} />
+          <div className='menu-setting-item__text'>{t<string>('Security & Privacy')}</div>
+          <div className='menu-setting-item__toggle' />
+        </a>
+
+        <Link
+          className='menu-setting-item'
+          isDisabled
+          to=''
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faBell} />
+          <div className='menu-setting-item__text'>{t<string>('Alerts')}</div>
+          <div className='menu-setting-item__toggle' />
+        </Link>
       </div>
 
     </div>
@@ -120,8 +143,14 @@ function Settings ({ className }: Props): React.ReactElement {
 }
 
 export default styled(Settings)(({ theme }: Props) => `
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   .menu-setting-item-list {
     padding: 25px 22px;
+    flex: 1;
+    overflow: auto;
   }
 
   .menu-setting-item {
@@ -153,8 +182,8 @@ export default styled(Settings)(({ theme }: Props) => `
   }
 
   .menu-setting-item__text {
-    font-size: 15px;
-    line-height: 26px;
+    font-size: 18px;
+    line-height: 30px;
     font-weight: 500;
     color: ${theme.textColor2};
   }

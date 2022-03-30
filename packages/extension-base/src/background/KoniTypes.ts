@@ -385,14 +385,6 @@ export interface ResponseTransfer {
   data?: object
 }
 
-export interface SettingItem {
-  name: string,
-  icon: any,
-  route?: string,
-  href?: string
-  isDisabled?: boolean
-}
-
 export interface KoniRequestSignatures {
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];

@@ -3,17 +3,15 @@
 
 import type { ThemeProps } from '../../types';
 
-import { faExpand, faList } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
-import { setNotification, windowOpen } from '@polkadot/extension-koni-ui/messaging';
+import { setNotification } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../../components';
+import { Checkbox, HorizontalLabelToggle, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
 
@@ -30,9 +28,7 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
   const [notification, updateNotification] = useState(settings.notification);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const setTheme = useContext(ThemeSwitchContext);
-  const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
-  const onAction = useContext(ActionContext);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -53,22 +49,11 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
     [setTheme]
   );
 
-  const _onWindowOpen = useCallback(
-    () => windowOpen('/').catch(console.error),
-    []
-  );
-
   const _onChangeLang = useCallback(
     (value: string): void => {
       settings.set({ i18nLang: value });
     },
     []
-  );
-
-  const _goToAuthList = useCallback(
-    () => {
-      onAction('auth-list');
-    }, [onAction]
   );
 
   return (
@@ -78,6 +63,7 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
           showBackArrow
           showSubHeader
           subHeaderName={t<string>('General Setting')}
+          to='/account/settings'
         />
         <MenuItem
           className='setting'
@@ -128,28 +114,6 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
             onChange={setCamera}
           />
         </MenuItem>
-        <MenuDivider className='settings-menu-divider' />
-        <MenuItem className='setting'>
-          <ActionText
-            className='manage-website-access'
-            // @ts-ignore
-            icon={faList}
-            onClick={_goToAuthList}
-            text={t<string>('Manage Website Access')}
-          />
-        </MenuItem>
-        {isPopup && (
-          <MenuItem className='setting'>
-            <ActionText
-              className='setting__action-text'
-              // @ts-ignore
-              icon={faExpand}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={_onWindowOpen}
-              text={t<string>('Open extension in new window')}
-            />
-          </MenuItem>
-        )}
       </div>
     </>
   );

@@ -7,11 +7,12 @@ import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { CurrentNetworkInfo, NetWorkMetadataDef, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { CurrentNetworkInfo, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@polkadot/extension-koni-ui/messaging';
+import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { TransferNftParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';

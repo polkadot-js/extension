@@ -7,7 +7,6 @@ import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@polkadot/extension-koni-ui/components';
@@ -17,6 +16,7 @@ import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/param
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import AuthTransfer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
 import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
+import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import InputAddress from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress';
 import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -216,6 +216,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       {
         showConfirm && isApiReady && extrinsic &&
           <AuthTransfer
+            chain={nftItem.chain}
             collectionId={collectionId}
             extrinsic={extrinsic}
             nftItem={nftItem}

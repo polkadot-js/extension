@@ -189,7 +189,7 @@ export default class QuartzNftApi extends BaseNftApi {
           updateItem(parsedItem);
 
           const parsedCollection = {
-            collectionId: collectionId,
+            collectionId: collectionId.toString(),
             collectionName: nftData.collectionName,
             image: parseIpfsLink(nftData.image),
             chain: SUPPORTED_NFT_NETWORKS.quartz

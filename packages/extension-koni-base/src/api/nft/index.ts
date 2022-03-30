@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem, NftJson } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
 import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
@@ -13,6 +13,7 @@ import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 
 const NFT_FETCHING_TIMEOUT = 20000;
 
@@ -117,21 +118,21 @@ export class NftHandler {
   }
 
   private existCollection (newCollection: NftCollection) {
-    return this.allCollections.some((collection) =>
+    return state.getNftCollection().nftCollectionList.some((collection) =>
       collection.chain === newCollection.chain &&
       collection.collectionId === newCollection.collectionId &&
       collection.collectionName === newCollection.collectionName);
   }
 
   private existItem (newItem: NftItem) {
-    return this.allItems.some((item) =>
+    return state.getNft().nftList.some((item) =>
       item.chain === newItem.chain &&
       item.id === newItem.id &&
       item.collectionId === newItem.collectionId &&
       item.name === newItem.name);
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection | null, ready: boolean) => void) {
     let total = 0;
     const dataMap: Record<string, NftCollection[]> = {};
 
@@ -140,7 +141,7 @@ export class NftHandler {
     await Promise.all(this.handlers.map(async (handler) => {
       const currentChain = handler.getChain() as string;
 
-      const timeout = new Promise((resolve, reject) => {
+      const timeout = new Promise((resolve) => {
         const id = setTimeout(() => {
           clearTimeout(id);
           resolve(0);
@@ -158,7 +159,9 @@ export class NftHandler {
           (data: NftCollection) => {
             if (!this.existCollection(data)) {
               this.allCollections.push(data);
-              updateCollection(data);
+              updateCollection(data, true);
+            } else {
+              updateCollection(null, true);
             }
           }),
         timeout
@@ -204,14 +207,6 @@ export class NftHandler {
 
   public getNfts () {
     return this.allCollections;
-  }
-
-  public getNftJson () {
-    return {
-      ready: true,
-      total: this.total,
-      nftList: this.allCollections
-    } as NftJson;
   }
 
   public parseAssetId (id: string) {

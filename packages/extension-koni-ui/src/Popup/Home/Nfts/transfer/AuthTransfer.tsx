@@ -6,13 +6,14 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { BackgroundWindow, NftItem as _NftItem, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
+import { BackgroundWindow, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import Output from '@polkadot/extension-koni-ui/components/Output';
 import { nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
+import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
 import { AddressProxy } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
 import { cacheUnlock } from '@polkadot/extension-koni-ui/Popup/Sending/old/util';
@@ -36,6 +37,7 @@ interface Props extends ThemeProps {
   nftItem: _NftItem;
   collectionId: string;
   recipientAddress: string;
+  chain: string;
 }
 
 function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressProxy): string | null {
@@ -67,7 +69,7 @@ function isRecipientSelf (currentAddress: string, recipientAddress: string) {
   return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
 }
 
-function AuthTransfer ({ className, collectionId, extrinsic, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, txInfo }: Props): React.ReactElement<Props> {
+function AuthTransfer ({ chain, className, collectionId, extrinsic, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, txInfo }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
 
@@ -125,7 +127,7 @@ function AuthTransfer ({ className, collectionId, extrinsic, nftItem, recipientA
                   setShowConfirm(false);
                   setShowResult(true);
 
-                  nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf } as RequestNftForceUpdate)
+                  nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf, chain } as RequestNftForceUpdate)
                     .catch(console.error);
                 }
               });
@@ -147,7 +149,7 @@ function AuthTransfer ({ className, collectionId, extrinsic, nftItem, recipientA
       console.log('unlock account failed');
       setLoading(false);
     }
-  }, [account?.account?.address, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
+  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) return;

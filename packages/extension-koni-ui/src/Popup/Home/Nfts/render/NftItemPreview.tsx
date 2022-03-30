@@ -4,14 +4,14 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {
   className?: string;
-  data: NftItem;
+  data: _NftItem;
   onClick: (data: any) => void;
   collectionImage?: string;
 }

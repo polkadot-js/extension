@@ -73,6 +73,7 @@ export interface NftTransferExtra {
   cronUpdate: boolean;
   forceUpdate: boolean;
   selectedNftCollection?: NftCollection; // for rendering
+  nftItems?: NftItem[]; // for rendering, remaining nfts
 }
 
 export interface NftItem {
@@ -97,9 +98,13 @@ export interface NftCollection {
 }
 
 export interface NftJson {
-  ready?: boolean;
   total: number;
   nftList: Array<NftItem>;
+}
+
+export interface NftCollectionJson {
+  ready: boolean;
+  nftCollectionList: Array<NftCollection>;
 }
 
 export interface BalanceChildItem {
@@ -343,7 +348,8 @@ export type RequestSubscribeStakingReward = null
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
-  isSendingSelf: boolean
+  isSendingSelf: boolean,
+  chain: string
 }
 
 export enum TransferErrorCode {
@@ -397,8 +403,8 @@ export interface KoniRequestSignatures {
   'pri(stakingReward.getSubscription)': [RequestSubscribeStakingReward, StakingRewardJson, StakingRewardJson];
   'pri(nft.getNft)': [null, NftJson];
   'pri(nft.getSubscription)': [RequestSubscribeNft, NftJson, NftJson];
-  'pri(nftCollection.getNftCollection)': [null, NftCollection[]];
-  'pri(nftCollection.getSubscription)': [null, NftCollection[], NftCollection[]];
+  'pri(nftCollection.getNftCollection)': [null, NftCollectionJson];
+  'pri(nftCollection.getSubscription)': [null, NftCollectionJson, NftCollectionJson];
   'pri(price.getPrice)': [RequestPrice, PriceJson];
   'pri(price.getSubscription)': [RequestSubscribePrice, PriceJson, PriceJson];
   'pri(balance.getBalance)': [RequestBalance, BalanceJson];

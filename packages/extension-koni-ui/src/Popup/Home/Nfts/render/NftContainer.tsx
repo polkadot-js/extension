@@ -6,11 +6,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
+import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_GRID_SIZE } from '@polkadot/extension-koni-ui/util';
 

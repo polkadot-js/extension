@@ -3,7 +3,7 @@
 
 import { Subject } from 'rxjs';
 
-import { NftJson, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
@@ -67,9 +67,10 @@ export class KoniCron {
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.resetNft();
+          this.resetNftCollection();
+          this.resetNftTransferMeta();
           this.resetStakingReward();
           this.resetHistory();
-          this.resetNftTransferMeta();
           this.removeCron('refreshNft');
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
@@ -113,12 +114,13 @@ export class KoniCron {
   }
 
   resetNft () {
-    state.setNft({
-      ready: false,
-      total: 0,
-      nftList: []
-    } as NftJson);
-    // console.log('Reset Nft state');
+    state.resetNft();
+    console.log('Reset Nft state');
+  }
+
+  resetNftCollection () {
+    state.resetNftCollection();
+    console.log('Reset NftCollection state');
   }
 
   resetNftTransferMeta () {

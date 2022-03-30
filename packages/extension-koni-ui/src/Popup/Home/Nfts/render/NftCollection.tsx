@@ -6,9 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { NftCollection as _NftCollection, NftItem as _NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItem';
 import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview';
+import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props {

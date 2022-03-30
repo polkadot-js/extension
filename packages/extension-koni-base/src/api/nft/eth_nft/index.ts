@@ -116,6 +116,8 @@ export class Web3NftApi extends BaseNftApi {
               .then((resp) => resp.json()) as Record<string, any>;
             const parsedItem = this.parseMetadata(itemDetail);
 
+            parsedItem.collectionId = smartContract;
+
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               updateItem(parsedItem);

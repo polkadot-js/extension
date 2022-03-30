@@ -7,8 +7,7 @@ import { NftJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const initialState = {
   total: 0,
-  nftList: [],
-  ready: false
+  nftList: []
 } as NftJson;
 
 const nftSlice = createSlice({
@@ -20,7 +19,6 @@ const nftSlice = createSlice({
 
       state.total = payload.total;
       state.nftList = payload.nftList;
-      state.ready = payload.ready;
     }
   }
 });

@@ -3,7 +3,8 @@
 
 import BigN from 'bignumber.js';
 
-import { CrowdloanParaState, NftCollection, StakingItem, StakingRewardItem } from '@polkadot/extension-base/background/KoniTypes';
+import { CrowdloanParaState, StakingItem, StakingRewardItem } from '@polkadot/extension-base/background/KoniTypes';
+import { _NftCollection } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { BalanceValueType } from '@polkadot/extension-koni-ui/util';
 import { BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
@@ -19,7 +20,7 @@ export type AccountBalanceType = {
 }
 
 export type NftType = {
-  nftList: NftCollection[];
+  nftList: _NftCollection[];
   totalItems: number;
   totalCollection: number;
   loading: boolean;

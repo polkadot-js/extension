@@ -20,6 +20,7 @@ const transferNftExtraSlice = createSlice({
       state.cronUpdate = payload.cronUpdate;
       state.forceUpdate = payload.forceUpdate;
       state.selectedNftCollection = payload.selectedNftCollection;
+      state.nftItems = payload.nftItems;
     }
   }
 });

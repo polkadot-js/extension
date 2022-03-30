@@ -3,11 +3,11 @@
 
 import { useEffect } from 'react';
 
-import { NftCollection } from '@polkadot/extension-base/background/KoniTypes';
+import { NftCollectionJson } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeNftCollection } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
-function updateNftCollection (nftData: NftCollection[]): void {
+function updateNftCollection (nftData: NftCollectionJson): void {
   store.dispatch({ type: 'nftCollection/update', payload: nftData });
 }
 

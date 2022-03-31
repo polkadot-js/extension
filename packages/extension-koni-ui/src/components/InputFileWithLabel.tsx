@@ -102,7 +102,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
       {({ getInputProps, getRootProps }): JSX.Element => (
         <div {...getRootProps({ className: classes('ui--InputFile', isError ? 'error' : '', className) })}>
           <input {...getInputProps()} />
-          <div className='label'>
+          <div className={!file || clearContent ? 'label' : 'label -normal-padding'}>
             {
               !file || clearContent
                 ? placeholder || t('Drag and drop the file here')
@@ -122,6 +122,7 @@ function InputFile ({ accept, className = '', clearContent, convertHex, isDisabl
   return label
     ? (
       <Label
+        className='input-file__label'
         label={label}
       >
         <div className='input-file__sub-label'>{t<string>('Please drag an drop the .json file you exported from Polkadot.js')}</div>
@@ -139,7 +140,7 @@ export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps 
   font-size: 1rem;
   margin: 0.25rem 0;
   overflow-wrap: anywhere;
-  padding: 44px 12px;
+  padding: 14px 12px;
 
   .label {
     font-size: 15px;
@@ -150,6 +151,11 @@ export default React.memo(styled(InputFile)(({ isError, theme }: InputFileProps 
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+    padding: 30px 0;
+  }
+
+  .label.-normal-padding {
+    padding: 0;
   }
 
   &:hover {

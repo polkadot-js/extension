@@ -1,21 +1,19 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types';
+import type { ThemeProps } from '../../types';
 
-import { faExpand, faList } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
-import { setNotification, windowOpen } from '@polkadot/extension-koni-ui/messaging';
+import { setNotification } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
 
-import { ActionContext, ActionText, Checkbox, HorizontalLabelToggle, MenuDivider, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../components';
-import useTranslation from '../hooks/useTranslation';
-import { Theme } from '../types';
+import { Checkbox, HorizontalLabelToggle, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../../components';
+import useTranslation from '../../hooks/useTranslation';
+import { Theme } from '../../types';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -24,15 +22,13 @@ interface Props extends ThemeProps {
 const notificationOptions = ['Extension', 'PopUp', 'Window']
   .map((item) => ({ text: item, value: item.toLowerCase() }));
 
-function Settings ({ className }: Props): React.ReactElement {
+function GeneralSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [camera, setCamera] = useState(settings.camera === 'on');
   const [notification, updateNotification] = useState(settings.notification);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const setTheme = useContext(ThemeSwitchContext);
-  const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
-  const onAction = useContext(ActionContext);
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -53,22 +49,11 @@ function Settings ({ className }: Props): React.ReactElement {
     [setTheme]
   );
 
-  const _onWindowOpen = useCallback(
-    () => windowOpen('/').catch(console.error),
-    []
-  );
-
   const _onChangeLang = useCallback(
     (value: string): void => {
       settings.set({ i18nLang: value });
     },
     []
-  );
-
-  const _goToAuthList = useCallback(
-    () => {
-      onAction('auth-list');
-    }, [onAction]
   );
 
   return (
@@ -77,7 +62,8 @@ function Settings ({ className }: Props): React.ReactElement {
         <Header
           showBackArrow
           showSubHeader
-          subHeaderName={t<string>('Settings')}
+          subHeaderName={t<string>('General Setting')}
+          to='/account/settings'
         />
         <MenuItem
           className='setting'
@@ -128,34 +114,12 @@ function Settings ({ className }: Props): React.ReactElement {
             onChange={setCamera}
           />
         </MenuItem>
-        <MenuDivider className='settings-menu-divider' />
-        <MenuItem className='setting'>
-          <ActionText
-            className='manage-website-access'
-            // @ts-ignore
-            icon={faList}
-            onClick={_goToAuthList}
-            text={t<string>('Manage Website Access')}
-          />
-        </MenuItem>
-        {isPopup && (
-          <MenuItem className='setting'>
-            <ActionText
-              className='setting__action-text'
-              // @ts-ignore
-              icon={faExpand}
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={_onWindowOpen}
-              text={t<string>('Open extension in new window')}
-            />
-          </MenuItem>
-        )}
       </div>
     </>
   );
 }
 
-export default styled(Settings)(({ theme }: Props) => `
+export default styled(GeneralSetting)(({ theme }: Props) => `
   margin-top: -25px;
   padding-top: 25px;
 

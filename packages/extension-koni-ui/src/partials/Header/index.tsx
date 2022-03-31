@@ -23,6 +23,7 @@ import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui
 import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
+import VisibilityConfirmModal from '@polkadot/extension-koni-ui/partials/Header/VisibilityConfirmModal';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
@@ -53,16 +54,18 @@ interface Props extends ThemeProps {
   changeAccountCallback?: (address: string) => void;
   isBusy?: boolean;
   setShowBalanceDetail?: (isShowBalanceDetail: boolean) => void;
+  to?: string;
 }
 
 function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
+  const [isShowModal, setShowModal] = useState(false);
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
   const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
@@ -254,9 +257,28 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     [isNetworkSelectOpen]
   );
 
+  const closeModal = useCallback(
+    () => setShowModal(false),
+    []
+  );
+
+  const confirmConnectAcc = useCallback(
+    () => {
+      currentAccount && currentAccount.address && showAccount(currentAccount?.address, false).then(
+        () => setShowModal(false)).catch(console.error);
+    },
+    [currentAccount]
+  );
+
   const _toggleVisibility = useCallback(
-    () => currentAccount?.address && showAccount(currentAccount?.address, currentAccount?.isHidden || false).catch(console.error),
-    [currentAccount?.address, currentAccount?.isHidden]
+    () => {
+      if (currentAccount && currentAccount.isHidden) {
+        currentAccount.address && showAccount(currentAccount?.address, true).catch(console.error);
+      } else {
+        setShowModal(true);
+      }
+    },
+    [currentAccount]
   );
 
   return (
@@ -332,7 +354,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
                         iconTheme={theme}
                         prefix={networkPrefix}
                         showLogo
-                        size={48}
+                        size={46}
                         value={formattedAddress || currentAccount?.address}
                       />
                     )
@@ -368,6 +390,13 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
           )}
         </div>
         {isWelcomeScreen && (<div className='only-top-container' />)}
+        {isShowModal &&
+        <VisibilityConfirmModal
+          closeModal={closeModal}
+          confirmConnectAcc={confirmConnectAcc}
+          isBusy={isBusy}
+        />
+        }
         {isContainDetailHeader && currentAccount &&
           <DetailHeader
             currentAccount={currentAccount}
@@ -386,6 +415,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
             showBackArrow={showBackArrow}
             showCancelButton={showCancelButton}
             subHeaderName={subHeaderName}
+            to={to}
           />
         }
 
@@ -447,7 +477,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       color: ${theme.labelColor};
       font-family: ${theme.fontFamily};
       text-align: center;
-      margin-left: 15px;
+      margin-left: 5px;
 
       .logo {
         height: 48px;
@@ -576,7 +606,7 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     border: 2px solid ${theme.inputBorderColor};
     border-radius: 8px;
     min-height: 25px;
-    width: 250px;
+    width: 215px;
     padding: 2px 6px;
     cursor: pointer;
     position: relative;
@@ -654,11 +684,17 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   }
 
   .header__all-account-icon {
-    width: 56px;
-    min-width: 56px;
-    height: 56px;
+    width: 54px;
+    min-width: 54px;
+    height: 54px;
     border: 2px solid ${theme.checkDotColor};
     padding: 2px;
     border-radius: 50%;
+  }
+
+  .subwallet-modal {
+    top: 30%;
+    left: 70px;
+    right: 70px;
   }
 `));

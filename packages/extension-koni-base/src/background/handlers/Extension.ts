@@ -9,6 +9,7 @@ import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { getEVMTransactionObject, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { createPair } from '@polkadot/keyring';
@@ -18,7 +19,7 @@ import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert, BN, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
-import { base64Decode, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
 const bWindow = window as unknown as BackgroundWindow;
@@ -131,8 +132,16 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private saveCurrentAccountAddress ({ address, allAccountLogo, isShowBalance }: RequestCurrentAccountAddress): boolean {
-    this._saveCurrentAccountAddress(address, isShowBalance, allAccountLogo);
+  private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
+
+    this._saveCurrentAccountAddress(data.address, data.isShowBalance, data.allAccountLogo, () => {
+      cb(data);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
 
     return true;
   }
@@ -711,9 +720,26 @@ export default class KoniExtension extends Extension {
   private async checkTransfer ({ from, networkKey, to, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
     const [errors, fromKeyPair, valueNumber] = this.validateTransfer(from, undefined, value, transferAll);
 
-    const [fee, fromAccountFree, toAccountFree] = await Promise.all(
-      [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
-    );
+    let fee = '0';
+    let fromAccountFree = '0';
+    let toAccountFree = '0';
+
+    if (isEthereumAddress(from) && isEthereumAddress(to)) {
+      // Estimate with EVM API
+      [fromAccountFree, toAccountFree] = await Promise.all(
+        [getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+      );
+      const txVal: string = transferAll ? fromAccountFree : (value || '0');
+
+      const rs = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
+
+      fee = rs[1];
+    } else {
+      // Estimate with DotSama API
+      [fee, fromAccountFree, toAccountFree] = await Promise.all(
+        [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+      );
+    }
 
     const fromAccountFreeNumber = new BN(fromAccountFree);
     const feeNumber = fee ? new BN(fee) : undefined;
@@ -741,11 +767,22 @@ export default class KoniExtension extends Extension {
     const [errors, fromKeyPair] = this.validateTransfer(from, password, value, transferAll);
 
     if (fromKeyPair && errors.length === 0) {
-      makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, callback)
-        .then(() => {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
-        })
+      let transferProm: Promise<void>;
+
+      if (isEthereumAddress(from) && isEthereumAddress(to)) {
+        // Make transfer with EVM API
+        const { privateKey } = this.accountExportPrivateKey({ address: from, password });
+
+        transferProm = makeEVMTransfer(networkKey, to, privateKey, value || '0', !!transferAll, callback);
+      } else {
+        // Make transfer with Dotsama API
+        transferProm = makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, callback);
+      }
+
+      transferProm.then(() => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
+      })
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
           callback({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
@@ -783,7 +820,7 @@ export default class KoniExtension extends Extension {
       case 'pri(accounts.triggerSubscription)':
         return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
-        return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress);
+        return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
       case 'pri(price.getPrice)':
         return await this.getPrice();
       case 'pri(price.getSubscription)':

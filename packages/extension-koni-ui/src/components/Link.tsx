@@ -78,6 +78,6 @@ export default styled(Link)(({ isDanger, theme }: Props & ThemeProps) => `
   }
 
   &.isDisabled {
-    opacity: 0.4;
+    opacity: 0.6;
   }
 `);

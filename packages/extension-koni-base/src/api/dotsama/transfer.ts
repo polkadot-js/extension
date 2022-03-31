@@ -7,7 +7,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
-export async function estimateFee (networkKey: string, fromKeypair: KeyringPair | undefined, to: string, value: string | undefined, transferAll: boolean): Promise<string | void> {
+export async function estimateFee (networkKey: string, fromKeypair: KeyringPair | undefined, to: string, value: string | undefined, transferAll: boolean): Promise<string> {
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
 
   if (fromKeypair === undefined) {
@@ -23,9 +23,11 @@ export async function estimateFee (networkKey: string, fromKeypair: KeyringPair 
 
     return paymentInfo.partialFee.toString();
   }
+
+  return '0';
 }
 
-export async function makeTransfer (networkKey: string, to: string, fromKeypair: KeyringPair, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void): Promise<string | void> {
+export async function makeTransfer (networkKey: string, to: string, fromKeypair: KeyringPair, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void): Promise<void> {
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
   // @ts-ignore

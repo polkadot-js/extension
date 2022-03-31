@@ -9,6 +9,8 @@ import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, NetWorkMetadataDef, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -76,8 +78,8 @@ export async function showAccount (address: string, isShowing: boolean): Promise
   return sendMessage('pri(accounts.show)', { address, isShowing });
 }
 
-export async function saveCurrentAccountAddress (address: string, isShowBalance?: boolean, allAccountLogo?: string): Promise<boolean> {
-  return sendMessage('pri(currentAccount.saveAddress)', { address, isShowBalance, allAccountLogo });
+export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddress, callback: (data: CurrentAccountInfo) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAddress)', data, callback);
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {

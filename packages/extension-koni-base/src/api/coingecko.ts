@@ -11,6 +11,7 @@ const alternativeNameMap: Record<string, string> = {
   calamari: 'calamari-network',
   crab: 'darwinia-crab-network',
   crust: 'crust-network',
+  aleph: 'aleph-zero',
   darwinia: 'darwinia-network-native-token',
   kilt: 'kilt-protocol',
   kintsugi: 'kintsugi',

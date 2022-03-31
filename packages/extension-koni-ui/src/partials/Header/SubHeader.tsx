@@ -15,10 +15,11 @@ interface Props extends ThemeProps {
   showBackArrow?: boolean,
   subHeaderName?: string,
   showCancelButton?: boolean,
-  isBusy?: boolean
+  isBusy?: boolean,
+  to?: string
 }
 
-function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, subHeaderName }: Props): React.ReactElement {
+function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, subHeaderName, to = '/' }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -27,7 +28,7 @@ function SubHeader ({ className = '', isBusy, showBackArrow, showCancelButton, s
         {showBackArrow && (
           <Link
             className='backlink'
-            to='/'
+            to={to}
           >
             <FontAwesomeIcon
               className={`arrowLeftIcon ${isBusy ? 'disabled-btn' : ''}`}

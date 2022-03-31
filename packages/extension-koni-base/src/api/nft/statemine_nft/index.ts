@@ -106,13 +106,17 @@ export default class StatemineNftApi extends BaseNftApi {
     return this.getMetadata(collectionMetadata?.data);
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     // const start = performance.now();
 
     const assetIds = await this.getNfts(this.addresses);
 
     try {
-      if (!assetIds || assetIds.length === 0) return;
+      if (!assetIds || assetIds.length === 0) {
+        updateReady(true);
+
+        return;
+      }
 
       await Promise.all(assetIds.map(async (assetId) => {
         const parsedClassId = this.parseTokenId(assetId.classId as string);
@@ -142,6 +146,7 @@ export default class StatemineNftApi extends BaseNftApi {
         } as NftCollection;
 
         updateCollection(parsedCollection);
+        updateReady(true);
       }));
     } catch (e) {
       console.log('Failed to fetch statemine nft', e);
@@ -154,10 +159,10 @@ export default class StatemineNftApi extends BaseNftApi {
     // console.log(`Fetched ${assetIds.length} nfts from statemine`);
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection);
+      await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`);
 

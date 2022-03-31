@@ -12,10 +12,8 @@ import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
-import { categoryAddresses, isAddressesEqual } from '@polkadot/extension-koni-base/utils/utils';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
-
-const NFT_FETCHING_TIMEOUT = 20000;
+import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
 
 function createNftApi (chain: string, api: ApiProps | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
@@ -71,7 +69,7 @@ export class NftHandler {
 
   setAddresses (addresses: string[]) {
     this.addresses = addresses;
-    if (this.prevAddresses.length === 0) this.prevAddresses = addresses;
+    // if (this.prevAddresses.length === 0) this.prevAddresses = addresses;
 
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
@@ -105,17 +103,17 @@ export class NftHandler {
     }
   }
 
-  private sortData (data: NftCollection[]) {
-    const sortedData = this.allCollections;
-
-    for (const collection of data) {
-      if (!this.allCollections.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
-        sortedData.push(collection);
-      }
-    }
-
-    return sortedData;
-  }
+  // private sortData (data: NftCollection[]) {
+  //   const sortedData = this.allCollections;
+  //
+  //   for (const collection of data) {
+  //     if (!this.allCollections.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
+  //       sortedData.push(collection);
+  //     }
+  //   }
+  //
+  //   return sortedData;
+  // }
 
   private existCollection (newCollection: NftCollection) {
     return state.getNftCollection().nftCollectionList.some((collection) =>
@@ -132,81 +130,96 @@ export class NftHandler {
       item.name === newItem.name);
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection | null, ready: boolean) => void) {
-    let total = 0;
-    const dataMap: Record<string, NftCollection[]> = {};
-
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     this.setupApi();
 
     await Promise.all(this.handlers.map(async (handler) => {
       const currentChain = handler.getChain() as string;
 
-      const timeout = new Promise((resolve) => {
-        const id = setTimeout(() => {
-          clearTimeout(id);
-          resolve(0);
-        }, NFT_FETCHING_TIMEOUT);
-      });
+      const result = await handler.fetchNfts(
+        (data: NftItem) => {
+          if (!this.existItem(data)) {
+            updateItem(data);
+          }
+        },
+        (data: NftCollection) => {
+          if (!this.existCollection(data)) {
+            updateCollection(data);
+          }
+        },
+        updateReady);
 
-      await Promise.race([
-        handler.fetchNfts(
-          (data: NftItem) => {
-            if (!this.existItem(data)) {
-              this.allItems.push(data);
-              updateItem(data);
-            }
-          },
-          (data: NftCollection) => {
-            if (!this.existCollection(data)) {
-              this.allCollections.push(data);
-              updateCollection(data, true);
-            } else {
-              updateCollection(null, true);
-            }
-          }),
-        timeout
-      ]).then((res) => {
-        if (res === 1) {
-          total += handler.getTotal();
-          dataMap[currentChain] = handler.getData();
-        } else {
-          console.log(`nft fetching for ${currentChain} failed`);
-        }
-      });
+      if (result === 1) {
+        console.log(`${currentChain} fetched nft ok`);
+      } else {
+        console.log(`${currentChain} fetched nft failed`);
+      }
     }));
 
-    let data: NftCollection[] = [];
+    console.log('handled nft ok');
 
-    Object.values(dataMap).forEach((collection) => {
-      data = [...data, ...collection];
-    });
+    // await Promise.all(this.handlers.map(async (handler) => {
+    //   const currentChain = handler.getChain() as string;
+    //
+    //   const timeout = new Promise((resolve) => {
+    //     const id = setTimeout(() => {
+    //       clearTimeout(id);
+    //       resolve(0);
+    //     }, NFT_FETCHING_TIMEOUT);
+    //   });
+    //
+    //   await Promise.race([
+    //     handler.fetchNfts(
+    //       (data: NftItem) => {
+    //         if (!this.existItem(data)) {
+    //           this.allItems.push(data);
+    //           updateItem(data);
+    //         }
+    //       },
+    //       (data: NftCollection) => {
+    //         if (!this.existCollection(data)) {
+    //           this.allCollections.push(data);
+    //           updateCollection(data, true);
+    //         } else {
+    //           updateCollection(null, true);
+    //         }
+    //       }),
+    //     timeout
+    //   ]).then((res) => {
+    //     if (res === 1) {
+    //       console.log(`nft fetching for ${currentChain} ok`);
+    //     } else {
+    //       console.log(`nft fetching for ${currentChain} failed`);
+    //     }
+    //   });
+    // }));
 
     // TODO: clear outdated item
 
-    if (isAddressesEqual(this.addresses, this.prevAddresses)) {
-      // console.log('nft address no change');
-
-      if (total < this.total) {
-        this.total = total;
-        this.allCollections = data;
-      } else {
-        this.total = total;
-        this.allCollections = this.sortData(data);
-      }
-    } else {
-      // console.log('nft address change');
-      this.total = total;
-      this.allCollections = data;
-      this.prevAddresses = this.addresses;
-    }
-  }
-
-  public getTotal () {
-    return this.total;
-  }
-
-  public getNfts () {
-    return this.allCollections;
+    // let data: NftCollection[] = [];
+    //
+    // Object.values(dataMap).forEach((collection) => {
+    //   data = [...data, ...collection];
+    // });
+    //
+    //
+    //
+    // if (isAddressesEqual(this.addresses, this.prevAddresses)) {
+    //   // console.log('nft address no change');
+    //
+    //   if (total < this.total) {
+    //     this.total = total;
+    //     this.allCollections = data;
+    //   } else {
+    //     this.total = total;
+    //     this.allCollections = this.sortData(data);
+    //   }
+    // } else {
+    //   // console.log('nft address change');
+    //   this.total = total;
+    //   this.allCollections = data;
+    //   this.prevAddresses = this.addresses;
+    // }
   }
 
   public parseAssetId (id: string) {

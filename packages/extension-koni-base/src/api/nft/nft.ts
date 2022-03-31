@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {ApiProps, NftCollection, NftItem} from '@polkadot/extension-base/background/KoniTypes';
+import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { RMRK_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -81,7 +81,7 @@ export abstract class BaseNftApi {
   }
 
   // Sub-class implements this function to parse data into prop result
-  abstract handleNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): void;
+  abstract handleNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): void;
 
-  abstract fetchNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number>;
+  abstract fetchNfts(updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number>;
 }

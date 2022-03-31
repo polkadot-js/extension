@@ -67,7 +67,6 @@ export class KoniCron {
       state.subscribeCurrentAccount().subscribe({
         next: ({ address }) => {
           this.resetNft();
-          this.resetNftCollection();
           this.resetNftTransferMeta();
           this.resetStakingReward();
           this.resetHistory();
@@ -115,12 +114,8 @@ export class KoniCron {
 
   resetNft () {
     state.resetNft();
-    console.log('Reset Nft state');
-  }
-
-  resetNftCollection () {
     state.resetNftCollection();
-    console.log('Reset NftCollection state');
+    console.log('Reset Nft state');
   }
 
   resetNftTransferMeta () {

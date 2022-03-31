@@ -161,7 +161,7 @@ export class RmrkNftApi extends BaseNftApi {
     return nfts;
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     // const start = performance.now();
 
     let allNfts: Record<string | number, any>[] = [];
@@ -173,6 +173,10 @@ export class RmrkNftApi extends BaseNftApi {
 
         allNfts = allNfts.concat(nfts);
       }));
+
+      if (allNfts.length <= 0) {
+        updateReady(true);
+      }
 
       const collectionInfoUrl: string[] = [];
 
@@ -260,6 +264,7 @@ export class RmrkNftApi extends BaseNftApi {
         } as NftCollection;
 
         updateCollection(parsedCollection);
+        updateReady(true);
       });
     } catch (e) {
       console.log('Failed to fetch rmrk nft', e);
@@ -272,9 +277,9 @@ export class RmrkNftApi extends BaseNftApi {
     // console.log(`rmrk took ${end - start}ms`);
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
-      await this.handleNfts(updateItem, updateCollection);
+      await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`);
 

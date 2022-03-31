@@ -4,7 +4,7 @@
 import fetch from 'cross-fetch';
 
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import {CLOUDFLARE_SERVER, SUPPORTED_NFT_NETWORKS} from '@polkadot/extension-koni-base/api/nft/config';
+import { CLOUDFLARE_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -94,12 +94,16 @@ export class AcalaNftApi extends BaseNftApi {
     return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     // const start = performance.now();
     const assetIds = await this.getNfts(this.addresses);
 
     try {
-      if (!assetIds || assetIds.length === 0) return;
+      if (!assetIds || assetIds.length === 0) {
+        updateReady(true);
+
+        return;
+      }
 
       await Promise.all(assetIds.map(async (assetId) => {
         const parsedClassId = this.parseTokenId(assetId.classId as string);
@@ -133,6 +137,7 @@ export class AcalaNftApi extends BaseNftApi {
 
         updateItem(parsedNft);
         updateCollection(parsedCollection);
+        updateReady(true);
       }));
     } catch (e) {
       console.log('Failed to fetch acala nft', e);
@@ -145,10 +150,10 @@ export class AcalaNftApi extends BaseNftApi {
     // console.log(`Fetched ${assetIds.length} nfts from acala`);
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection);
+      await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`);
 

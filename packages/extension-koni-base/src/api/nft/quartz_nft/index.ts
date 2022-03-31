@@ -121,7 +121,7 @@ export default class QuartzNftApi extends BaseNftApi {
     };
   }
 
-  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     // const start = performance.now();
 
     const collectionCount = await this.getCreatedCollectionCount();
@@ -168,6 +168,10 @@ export default class QuartzNftApi extends BaseNftApi {
         _handleAddressTokenDict
       ]);
 
+      if (allNftId.length <= 0) {
+        updateReady(true);
+      }
+
       await Promise.all(allNftId.map(async (tokenId) => {
         const collectionId = nftMap[tokenId];
         const collectionProperties = collectionPropertiesMap[parseInt(collectionId)] as CollectionProperties;
@@ -196,6 +200,7 @@ export default class QuartzNftApi extends BaseNftApi {
           } as NftCollection;
 
           updateCollection(parsedCollection);
+          updateReady(true);
         }
       }));
     } catch (e) {
@@ -207,10 +212,10 @@ export default class QuartzNftApi extends BaseNftApi {
     // console.log(`Fetched ${total} nfts from quartz`);
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
       await this.connect();
-      await this.handleNfts(updateItem, updateCollection);
+      await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`);
 

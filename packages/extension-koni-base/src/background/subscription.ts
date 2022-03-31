@@ -141,23 +141,16 @@ export class KoniSubcription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
-      let parsedAddress: string[] = [];
-
-      if (addresses.length === 1) {
-        if (addresses.includes('5EsmjvZBNDjdTLGvCbr4CpUbxoQXi8meqZ83nEh1y9BBJ3ZG')) parsedAddress = ['5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
-        else if (addresses.includes('5D2aJpauWeZwKQAjWQSgKXfrQyguUr2p42SW638sWkfCZXiL')) parsedAddress = ['26AeiFcdfBtzaBYRjatTpPPJqRzCWyjR5r6wpqykZmXFSnh9'];
-      } else {
-        parsedAddress = ['5HMkyzwXxVtFa4VGid3DuDtuWxZcGqt57wq9WiZPP8YrSt6d', '5CFktU1BC5sXSfs64PJ9vBVUGZp2ezpVRGUCjAXv7spRZR3W'];
-      }
-      nftHandler.setAddresses(parsedAddress);
+      nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         (data) => {
           state.updateNft(data);
-          console.log('nft state got new update', data);
         },
-        (data, ready) => {
-          if (data !== null) state.updateNftCollection(data, ready);
-          console.log('nft collection state got new update', data);
+        (data) => {
+          if (data !== null) state.updateNftCollection(data);
+        },
+        (ready) => {
+          state.updateNftReady(ready);
         })
         .then(() => {
           console.log('nft state updated');

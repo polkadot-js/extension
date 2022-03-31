@@ -176,12 +176,21 @@ export default class KoniState extends State {
     this.nftCollectionSubject.next(this.nftCollectionState);
   }
 
-  public updateNftCollection (data: NftCollection, ready: boolean, callback?: (data: NftCollection) => void): void {
+  public updateNftCollection (data: NftCollection, callback?: (data: NftCollection) => void): void {
     this.nftCollectionState.nftCollectionList.push(data);
-    this.nftCollectionState.ready = ready;
 
     if (callback) {
       callback(data);
+    }
+
+    this.nftCollectionSubject.next(this.nftCollectionState);
+  }
+
+  public updateNftReady (ready: boolean, callback?: (ready: boolean) => void): void {
+    this.nftCollectionState.ready = ready;
+
+    if (callback) {
+      callback(ready);
     }
 
     this.nftCollectionSubject.next(this.nftCollectionState);
@@ -192,6 +201,8 @@ export default class KoniState extends State {
       ready: false,
       nftCollectionList: []
     } as NftCollectionJson;
+
+    this.nftCollectionSubject.next(this.nftCollectionState);
   }
 
   public getNftCollection () {
@@ -211,6 +222,8 @@ export default class KoniState extends State {
       total: 0,
       nftList: []
     } as NftJson;
+
+    this.nftSubject.next(this.nftState);
   }
 
   public setNft (data: NftJson, callback?: (nftData: NftJson) => void): void {

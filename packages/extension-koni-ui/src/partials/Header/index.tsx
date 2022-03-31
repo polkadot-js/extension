@@ -696,5 +696,6 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     top: 30%;
     left: 70px;
     right: 70px;
+    max-width: 320px;
   }
 `));

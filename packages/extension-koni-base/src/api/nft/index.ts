@@ -14,36 +14,39 @@ import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
+import {BitCountryNftApi} from "@polkadot/extension-koni-base/api/nft/bit.country";
 
 function createNftApi (chain: string, api: ApiProps | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
   const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
 
   switch (chain) {
-    case SUPPORTED_NFT_NETWORKS.karura:
-      return new KaruraNftApi(api, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.acala:
-      return new AcalaNftApi(api, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.rmrk:
-      // eslint-disable-next-line no-case-declarations
-      const rmrkNftApi = new RmrkNftApi();
-
-      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
-      rmrkNftApi.setAddresses(useAddresses);
-
-      return rmrkNftApi;
-    case SUPPORTED_NFT_NETWORKS.statemine:
-      return new StatemineNftApi(api, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.uniqueNft:
-      return new UniqueNftApi(api, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.quartz:
-      return new QuartzNftApi(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.karura:
+    //   return new KaruraNftApi(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.acala:
+    //   return new AcalaNftApi(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.rmrk:
+    //   // eslint-disable-next-line no-case-declarations
+    //   const rmrkNftApi = new RmrkNftApi();
+    //
+    //   rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
+    //   rmrkNftApi.setAddresses(useAddresses);
+    //
+    //   return rmrkNftApi;
+    // case SUPPORTED_NFT_NETWORKS.statemine:
+    //   return new StatemineNftApi(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.uniqueNft:
+    //   return new UniqueNftApi(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.quartz:
+    //   return new QuartzNftApi(api, useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.bitcountry:
+      return new BitCountryNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonbeam:
       return new Web3NftApi(useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.moonriver:
-      return new Web3NftApi(useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.astar:
-      return new Web3NftApi(useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.moonriver:
+    //   return new Web3NftApi(useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.astar:
+    //   return new Web3NftApi(useAddresses, chain);
   }
 
   return null;
@@ -96,24 +99,12 @@ export class NftHandler {
           }
         });
 
-        console.log(`${this.handlers.length} nft handlers setup done`);
-      } else { console.log('nft handlers already setup.'); }
+        console.log(`${this.handlers.length} nft connected`);
+      }
     } catch (e) {
       console.log('error setting up nft handlers', e);
     }
   }
-
-  // private sortData (data: NftCollection[]) {
-  //   const sortedData = this.allCollections;
-  //
-  //   for (const collection of data) {
-  //     if (!this.allCollections.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
-  //       sortedData.push(collection);
-  //     }
-  //   }
-  //
-  //   return sortedData;
-  // }
 
   private existCollection (newCollection: NftCollection) {
     return state.getNftCollection().nftCollectionList.some((collection) =>
@@ -134,9 +125,7 @@ export class NftHandler {
     this.setupApi();
 
     await Promise.all(this.handlers.map(async (handler) => {
-      const currentChain = handler.getChain() as string;
-
-      const result = await handler.fetchNfts(
+      await handler.fetchNfts(
         (data: NftItem) => {
           if (!this.existItem(data)) {
             updateItem(data);
@@ -148,12 +137,6 @@ export class NftHandler {
           }
         },
         updateReady);
-
-      if (result === 1) {
-        console.log(`${currentChain} fetched nft ok`);
-      } else {
-        console.log(`${currentChain} fetched nft failed`);
-      }
     }));
 
     console.log('handled nft ok');

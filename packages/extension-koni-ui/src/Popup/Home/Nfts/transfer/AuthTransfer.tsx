@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BackgroundWindow, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
@@ -13,13 +12,12 @@ import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import Output from '@polkadot/extension-koni-ui/components/Output';
 import { nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
-import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
 import { AddressProxy } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
 import { cacheUnlock } from '@polkadot/extension-koni-ui/Popup/Sending/old/util';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
 const { keyring } = bWindow.pdotApi;
@@ -28,8 +26,7 @@ interface Props extends ThemeProps {
   className?: string;
   setShowConfirm: (val: boolean) => void;
   senderAccount: AccountJson;
-  txInfo?: RuntimeDispatchInfo;
-  extrinsic: SubmittableExtrinsic<'promise'>;
+  substrateTransferParams: SubstrateTransferParams;
   setShowResult: (val: boolean) => void;
   setExtrinsicHash: (val: string) => void;
   setIsTxSuccess: (val: boolean) => void;
@@ -38,6 +35,7 @@ interface Props extends ThemeProps {
   collectionId: string;
   recipientAddress: string;
   chain: string;
+  web3TransferParams: Web3TransferParams;
 }
 
 function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressProxy): string | null {
@@ -69,13 +67,16 @@ function isRecipientSelf (currentAddress: string, recipientAddress: string) {
   return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
 }
 
-function AuthTransfer ({ chain, className, collectionId, extrinsic, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, txInfo }: Props): React.ReactElement<Props> {
+function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [callHash, setCallHash] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [balanceError, setBalanceError] = useState(false);
   const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
+
+  const extrinsic = substrateTransferParams.extrinsic;
+  const txInfo = substrateTransferParams.txInfo;
 
   const { currentAccount: account } = useSelector((state: RootState) => state);
 

@@ -75,7 +75,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Moonbeam',
     genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
     ss58Format: 1284,
-    provider: 'wss://moonbeam.api.onfinality.io/public-ws',
+    provider: 'wss://moonbeam-alpha.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2004,
     isEthereum: true,
@@ -588,7 +588,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Bit.Country - Testnet',
     genesisHash: '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5',
     ss58Format: 42,
-    provider: 'wss://tewai-rpc.bit.country',
+    provider: 'wss://dev-chain.bit.country',
     groups: ['TEST_NET'],
     nativeToken: 'NUUM'
   }

@@ -21,6 +21,8 @@ export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
 export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
+export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',
@@ -28,7 +30,8 @@ export enum SUPPORTED_NFT_NETWORKS {
   statemine = 'statemine',
   uniqueNft = 'uniqueNft',
   quartz = 'quartz',
+  bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonriver = 'moonriver',
-  astar = 'astar'
+  astar = 'astar',
 }

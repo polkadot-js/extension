@@ -6,7 +6,7 @@ import { take } from 'rxjs';
 import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import { getAllSubsquidStakingReward } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
+import { getAllSubsquidStaking } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
 import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
@@ -141,7 +141,7 @@ export class KoniSubcription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
-      nftHandler.setAddresses(addresses);
+      nftHandler.setAddresses(['5H8YLQCHwa5vRKSzbYXwK1m1AXGVTPm56sJt2bkitZECXSLj', '5Ei3BzuN6GT9RY7sykmEgDCuaMAEKghwDJbCKhSGudBBQLCg']);
       nftHandler.handleNfts(
         (data) => {
           state.updateNft(data);
@@ -189,7 +189,7 @@ export class KoniSubcription {
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 
-    await getAllSubsquidStakingReward(addresses, (networkKey, rs) => {
+    await getAllSubsquidStaking(addresses, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
       console.log('set staking item', rs);
     })

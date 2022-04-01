@@ -6,7 +6,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@polkadot/extension-koni-ui/components';
@@ -16,12 +15,11 @@ import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/param
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import AuthTransfer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
 import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
-import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import InputAddress from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress';
 import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -75,8 +73,12 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account } = useSelector((state: RootState) => state);
   const networkKey = nftItem.chain as string;
-  const [txInfo, setTxInfo] = useState<RuntimeDispatchInfo | null>(null);
-  const [extrinsic, setExtrinsic] = useState<SubmittableExtrinsic<'promise'> | null>(null);
+
+  // for substrate-based chains
+  const [substrateTransferParams, setSubstrateTransferParams] = useState<SubstrateTransferParams | null>(null);
+
+  // for evm-based chains
+  const [web3TransferParams, setWeb3TransferParams] = useState<Web3TransferParams | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [showConfirm, setShowConfirm] = useState(false);
@@ -119,8 +121,20 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress as string, params);
 
     if (transferMeta) {
-      setExtrinsic(transferMeta.extrinsic || null);
-      setTxInfo(transferMeta.info || null);
+      // @ts-ignore
+      if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
+        setSubstrateTransferParams({
+          // @ts-ignore
+          extrinsic: transferMeta.extrinsic,
+          txInfo: transferMeta.info
+        });
+        // @ts-ignore
+      } else if (SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1) {
+        setWeb3TransferParams({
+          tx: transferMeta.web3Tx
+        } as Web3TransferParams);
+      }
+
       setShowConfirm(true);
     }
 
@@ -214,11 +228,10 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       }
 
       {
-        showConfirm && isApiReady && extrinsic &&
+        showConfirm && isApiReady && substrateTransferParams &&
           <AuthTransfer
             chain={nftItem.chain}
             collectionId={collectionId}
-            extrinsic={extrinsic}
             nftItem={nftItem}
             recipientAddress={recipientAddress}
             senderAccount={account?.account}
@@ -228,7 +241,8 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
             setShowResult={setShowTransferResult}
             setTxError={setTxError}
             showResult={showTransferResult}
-            txInfo={txInfo}
+            substrateTransferParams={substrateTransferParams}
+            web3TransferParams={web3TransferParams}
           />
       }
 

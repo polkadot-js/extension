@@ -73,7 +73,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const [loading, setLoading] = useState(false);
   const [balanceError, setBalanceError] = useState(false);
-  const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
+  const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
   const extrinsic = substrateTransferParams.extrinsic;
   const txInfo = substrateTransferParams.txInfo;
@@ -82,22 +82,65 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   useEffect((): void => {
     setPasswordError(null);
-  }, [senderInfo]);
+  }, [senderInfoSubstrate]);
 
-  const unlock = useCallback(() => {
+  const unlockSubstrate = useCallback(() => {
     let passwordError: string | null = null;
 
-    if (senderInfo.signAddress) {
-      passwordError = unlockAccount(senderInfo);
+    if (senderInfoSubstrate.signAddress) {
+      passwordError = unlockAccount(senderInfoSubstrate);
     }
 
     setPasswordError(passwordError);
 
     return passwordError;
-  }, [senderInfo]);
+  }, [senderInfoSubstrate]);
 
-  const onSend = useCallback(async () => {
-    if (unlock() === null) {
+  const unlockEvm = useCallback((): { privateKey: string, passwordError: string | null } => {
+    console.log('message to background to verify');
+
+    return {
+      privateKey: '',
+      passwordError: null
+    }
+  }, [senderInfoSubstrate]);
+
+  const onSendEvm = useCallback(async () => {
+    const { privateKey, passwordError } = unlockEvm();
+    const {tx} = web3TransferParams;
+    if (passwordError === null && tx) {
+      try {
+        const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
+        tx.sign(Buffer.from(privateKey.slice(2), 'hex'));
+        const callHash = tx.serialize();
+        setCallHash(callHash.toString('hex'));
+
+        await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
+          .on('transactionHash', (hash: string) => {
+            console.log('Tx hash:', hash);
+          })
+          .on('receipt', (receipt: any) => {
+            console.log('Receipt info: \n', JSON.stringify(receipt, null, '\t'));
+          })
+          .on('confirmation', (confNumber: any, receipt: any, latestBlockHash: any) => {
+            console.log('Latest block hash:', latestBlockHash);
+            console.log('Confirmation number:', confNumber);
+            // console.log('Receipt info: \n', JSON.stringify(receipt, null, '\t'));
+          })
+          .on('error', (error: any) => {
+            console.log('Error occur:', error)
+          })
+          .then((receipt: any) => {
+            console.log('Finally done');
+          });
+      } catch (e) {
+        console.log('error');
+      }
+    }
+  }, [account?.account?.address, recipientAddress, unlockEvm, web3TransferParams]);
+
+  const onSendSubstrate = useCallback(async () => {
+    if (unlockSubstrate() === null) {
       const pair = keyring.getPair(senderAccount.address);
 
       try {
@@ -150,7 +193,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       console.log('unlock account failed');
       setLoading(false);
     }
-  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlock]);
+  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlockSubstrate]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) return;
@@ -159,9 +202,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
-      await onSend();
+      await onSendSubstrate();
     }, 1);
-  }, [loading, onSend]);
+  }, [loading, onSendSubstrate]);
 
   useEffect((): void => {
     const method = extrinsic.method;
@@ -199,7 +242,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
             <Address
               className={'sender-container'}
-              onChange={setSenderInfo}
+              onChange={setSenderInfoSubstrate}
               onEnter={handleSignAndSubmit}
               passwordError={passwordError}
               requestAddress={senderAccount.address}

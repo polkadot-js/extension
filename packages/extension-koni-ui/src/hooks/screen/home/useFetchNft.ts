@@ -22,9 +22,6 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
   const rawItems = nftReducer?.nftList;
   const rawCollections = nftCollectionReducer.nftCollectionList;
 
-  console.log('rawItems', rawItems);
-  console.log('rawCollections', rawCollections);
-
   for (const collection of rawCollections) {
     const parsedCollection: _NftCollection = {
       collectionId: collection.collectionId,

@@ -141,7 +141,7 @@ export class KoniSubcription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
-      nftHandler.setAddresses(['5H8YLQCHwa5vRKSzbYXwK1m1AXGVTPm56sJt2bkitZECXSLj', '5Ei3BzuN6GT9RY7sykmEgDCuaMAEKghwDJbCKhSGudBBQLCg']);
+      nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         (data) => {
           state.updateNft(data);

@@ -107,14 +107,14 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     navigate('/');
   }, [navigate]);
 
-  useEffect(() => {
-    setAddressError(!isValidAddress(recipientAddress as string) && !isEthereumAddress());
-  }, [recipientAddress]);
-
   const isEthereumAddress = useCallback((): boolean => {
     // @ts-ignore
     return SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1;
   }, [networkKey]);
+
+  useEffect(() => {
+    setAddressError(!isValidAddress(recipientAddress as string) && !isEthereumAddress());
+  }, [isEthereumAddress, recipientAddress]);
 
   const handleSend = useCallback(async () => {
     if (addressError || !isApiReady || !networkKey) {
@@ -203,7 +203,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
             autoPrefill={false}
             className={'kn-field -field-2'}
             help={'Select a contact or paste the address you want to send nft to.'}
-            isEtherium={isEthereumAddress}
+            isEtherium={isEthereumAddress()}
             // isDisabled={!!propRecipientId}
             label={'Send to address'}
             onChange={setRecipientAddress}

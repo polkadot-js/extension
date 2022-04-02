@@ -135,26 +135,28 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
       web3.eth.getGasPrice()
     ]);
 
-    const gasPrice = web3.utils.toHex(gasPriceGwei);
+    // @ts-ignore
+    const gasLimit = await web3.eth.estimateGas({
+      // @ts-ignore
+      nonce: '0x' + fromAccountTxCount.toString(16),
+      from: senderAddress,
+      gasPrice: web3.utils.toHex(gasPriceGwei),
+      // to: contractAddress,
+      value: '0x00'
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      // data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
+    });
 
     const rawTransaction = {
       nonce: '0x' + fromAccountTxCount.toString(16),
       from: senderAddress,
-      gasPrice,
+      gasPrice: web3.utils.toHex(gasPriceGwei),
+      gasLimit,
       to: contractAddress,
       value: '0x00',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
     };
-
-    // @ts-ignore
-    // const gasLimit = await web3.eth.estimateGas(rawTransaction);
-    const gasLimit = 100000;
-
-    // @ts-ignore
-    rawTransaction.gasLimit = gasLimit;
-
-    const estimateFee = parseInt(gasPrice) * gasLimit;
 
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
@@ -173,7 +175,7 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
 
     return {
       web3Tx: tx,
-      estimatedGas: estimateFee
+      estimatedGas: gasLimit
     } as TransferResponse;
   } catch (e) {
     console.log('error handling web3 transfer nft', e);

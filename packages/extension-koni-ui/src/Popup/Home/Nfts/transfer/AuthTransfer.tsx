@@ -8,12 +8,12 @@ import Web3 from 'web3';
 
 import { BackgroundWindow, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
-import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
+import NETWORKS, { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import Output from '@polkadot/extension-koni-ui/components/Output';
-import { nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
+import { exportAccountPrivateKey, nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
 import { AddressProxy } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
@@ -101,17 +101,31 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     return passwordError;
   }, [senderInfoSubstrate]);
 
-  const unlockEvm = useCallback((): { privateKey: string, passwordError: string | null } => {
+  const unlockEvm = useCallback(async (senderAddress: string, password: string): Promise<{ privateKey: string, passwordError: string | null }> => {
     console.log('message to background to verify');
+    console.log(senderAddress);
+    console.log(password);
 
-    return {
-      privateKey: '',
-      passwordError: null
-    };
+    try {
+      const { privateKey } = await exportAccountPrivateKey(senderAddress, 'baloney1');
+
+      console.log('got private key', privateKey);
+
+      return {
+        privateKey,
+        passwordError: 'null'
+      };
+    } catch (e) {
+      return {
+        privateKey: '',
+        passwordError: 'Error unlocking account'
+      };
+    }
   }, []);
 
   const onSendEvm = useCallback(async () => {
-    const { passwordError, privateKey } = unlockEvm();
+    console.log(senderInfoSubstrate);
+    const { passwordError, privateKey } = await unlockEvm(account?.account?.address as string, senderInfoSubstrate.signPassword);
 
     if (passwordError === null && web3Tx) {
       try {
@@ -144,8 +158,23 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       } catch (e) {
         console.log('error');
       }
+    } else {
+      console.log('unlock account failed');
+      setLoading(false);
     }
   }, [account, chain, recipientAddress, unlockEvm, web3Tx]);
+
+  const getWeb3Gas = useCallback(() => {
+    if (web3Gas !== null) {
+      // @ts-ignore
+      // const parsedFee = web3Gas / (10 ** NETWORKS[chain].decimals);
+
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+      return web3Gas.toString(2) + ' ' + NETWORKS[chain].nativeToken;
+    }
+
+    return null;
+  }, [chain, web3Gas]);
 
   const onSendSubstrate = useCallback(async () => {
     if (extrinsic !== null && unlockSubstrate() === null) {
@@ -210,7 +239,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
-      await onSendSubstrate();
+      if (extrinsic !== null) {
+        await onSendSubstrate();
+      } else if (web3Tx !== null) {
+        await onSendEvm();
+      }
     }, 1);
   }, [loading, onSendSubstrate]);
 
@@ -248,7 +281,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           <div
             className={'auth-container'}
           >
-            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || web3Gas} will be applied to the submission</div>
+            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || getWeb3Gas()} will be applied to the submission</div>
 
             <Address
               className={'sender-container'}

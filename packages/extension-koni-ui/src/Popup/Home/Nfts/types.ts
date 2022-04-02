@@ -6,6 +6,7 @@ import { Transaction } from 'ethereumjs-tx';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { RMRK_VER } from '@polkadot/extension-base/background/KoniTypes';
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
+import Web3 from "web3";
 
 // For rendering purposes only
 export interface _NftItem {
@@ -37,6 +38,7 @@ export interface _NftJson {
 
 export interface Web3TransferParams {
   tx: Transaction;
+  estimatedGas: number;
 }
 
 export interface SubstrateTransferParams {
@@ -48,6 +50,7 @@ export interface TransferResponse {
   info?: RuntimeDispatchInfo;
   extrinsic?: SubmittableExtrinsic<'promise'>;
   web3Tx?: Transaction;
+  estimatedGas?: number
 }
 
 export enum SUPPORTED_TRANSFER_CHAIN_NAME {

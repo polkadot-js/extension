@@ -8,7 +8,6 @@ import { subscribeNft } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateNft (nftData: NftJson): void {
-  console.log('nft state', nftData);
   store.dispatch({ type: 'nft/update', payload: nftData });
 }
 

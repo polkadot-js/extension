@@ -4,9 +4,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import Web3 from 'web3';
 
 import { BackgroundWindow, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
+import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
@@ -75,8 +77,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const [balanceError, setBalanceError] = useState(false);
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
-  const extrinsic = substrateTransferParams.extrinsic;
-  const txInfo = substrateTransferParams.txInfo;
+  const extrinsic = substrateTransferParams !== null ? substrateTransferParams.extrinsic : null;
+  const txInfo = substrateTransferParams !== null ? substrateTransferParams.txInfo : null;
+
+  const web3Tx = web3TransferParams !== null ? web3TransferParams.tx : null;
+  const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
 
   const { currentAccount: account } = useSelector((state: RootState) => state);
 
@@ -102,17 +107,20 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     return {
       privateKey: '',
       passwordError: null
-    }
-  }, [senderInfoSubstrate]);
+    };
+  }, []);
 
   const onSendEvm = useCallback(async () => {
-    const { privateKey, passwordError } = unlockEvm();
-    const {tx} = web3TransferParams;
-    if (passwordError === null && tx) {
+    const { passwordError, privateKey } = unlockEvm();
+
+    if (passwordError === null && web3Tx) {
       try {
         const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
-        tx.sign(Buffer.from(privateKey.slice(2), 'hex'));
-        const callHash = tx.serialize();
+        const web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[chain].provider));
+
+        web3Tx.sign(Buffer.from(privateKey.slice(2), 'hex'));
+        const callHash = web3Tx.serialize();
+
         setCallHash(callHash.toString('hex'));
 
         await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
@@ -128,7 +136,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
             // console.log('Receipt info: \n', JSON.stringify(receipt, null, '\t'));
           })
           .on('error', (error: any) => {
-            console.log('Error occur:', error)
+            console.log('Error occur:', error);
           })
           .then((receipt: any) => {
             console.log('Finally done');
@@ -137,10 +145,10 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         console.log('error');
       }
     }
-  }, [account?.account?.address, recipientAddress, unlockEvm, web3TransferParams]);
+  }, [account, chain, recipientAddress, unlockEvm, web3Tx]);
 
   const onSendSubstrate = useCallback(async () => {
-    if (unlockSubstrate() === null) {
+    if (extrinsic !== null && unlockSubstrate() === null) {
       const pair = keyring.getPair(senderAccount.address);
 
       try {
@@ -207,9 +215,11 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [loading, onSendSubstrate]);
 
   useEffect((): void => {
-    const method = extrinsic.method;
+    if (extrinsic) {
+      const method = extrinsic.method;
 
-    setCallHash((method && method.hash.toHex()) || null);
+      setCallHash((method && method.hash.toHex()) || null);
+    }
   }, [extrinsic]);
 
   const hideConfirm = useCallback(() => {
@@ -238,7 +248,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           <div
             className={'auth-container'}
           >
-            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman()} will be applied to the submission</div>
+            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || web3Gas} will be applied to the submission</div>
 
             <Address
               className={'sender-container'}
@@ -248,14 +258,17 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               requestAddress={senderAccount.address}
             />
 
-            <Output
-              className={'call-hash-container'}
-              isDisabled
-              isTrimmed
-              label={'Call hash'}
-              value={callHash}
-              withCopy
-            />
+            {
+              callHash &&
+              <Output
+                className={'call-hash-container'}
+                isDisabled
+                isTrimmed
+                label={'Call hash'}
+                value={callHash}
+                withCopy
+              />
+            }
 
             {
               balanceError &&

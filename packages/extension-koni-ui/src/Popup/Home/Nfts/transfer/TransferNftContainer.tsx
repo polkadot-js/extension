@@ -10,6 +10,7 @@ import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@polkadot/extension-koni-ui/components';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
@@ -92,6 +93,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   const [imageError, setImageError] = useState(false);
 
   const navigate = useContext(ActionContext);
+  const { show } = useToast();
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -106,8 +108,13 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   }, [navigate]);
 
   useEffect(() => {
-    setAddressError(!isValidAddress(recipientAddress as string));
+    setAddressError(!isValidAddress(recipientAddress as string) && !isEthereumAddress());
   }, [recipientAddress]);
+
+  const isEthereumAddress = useCallback((): boolean => {
+    // @ts-ignore
+    return SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1;
+  }, [networkKey]);
 
   const handleSend = useCallback(async () => {
     if (addressError || !isApiReady || !networkKey) {
@@ -120,7 +127,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     const params = paramsHandler(nftItem, networkKey);
     const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress as string, params);
 
-    if (transferMeta) {
+    if (transferMeta !== null) {
       // @ts-ignore
       if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(networkKey) > -1) {
         setSubstrateTransferParams({
@@ -131,15 +138,18 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
         // @ts-ignore
       } else if (SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1) {
         setWeb3TransferParams({
-          tx: transferMeta.web3Tx
+          tx: transferMeta.web3Tx,
+          estimatedGas: transferMeta.estimatedGas
         } as Web3TransferParams);
       }
 
       setShowConfirm(true);
+    } else {
+      show('Some error occurred. Please try again later.');
     }
 
     setLoading(false);
-  }, [account, addressError, api, isApiReady, networkKey, nftItem, recipientAddress, setShowConfirm]);
+  }, [account, addressError, api, isApiReady, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);
@@ -193,8 +203,9 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
             autoPrefill={false}
             className={'kn-field -field-2'}
             help={'Select a contact or paste the address you want to send nft to.'}
-            label={'Send to address'}
+            isEtherium={isEthereumAddress}
             // isDisabled={!!propRecipientId}
+            label={'Send to address'}
             onChange={setRecipientAddress}
             type='allPlus'
             withEllipsis
@@ -228,7 +239,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       }
 
       {
-        showConfirm && isApiReady && substrateTransferParams &&
+        showConfirm && isApiReady && (substrateTransferParams || web3TransferParams) &&
           <AuthTransfer
             chain={nftItem.chain}
             collectionId={collectionId}

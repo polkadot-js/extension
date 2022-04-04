@@ -128,21 +128,6 @@ function Upload ({ className }: Props): React.ReactElement {
         subHeaderName={t<string>('Restore from JSON')}
       />
       <div className={className}>
-        <div className='restore-from-json-wrapper'>
-          {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
-            <div
-              className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}
-              key={`${index}:${address}`}
-            >
-              <AccountInfoEl
-                address={address}
-                genesisHash={genesisHash}
-                name={name}
-                type={type}
-              />
-            </div>
-          ))}
-        </div>
         <InputFileWithLabel
           accept={acceptedFormats}
           isError={isFileError}
@@ -176,6 +161,22 @@ function Upload ({ className }: Props): React.ReactElement {
             )}
           </div>
         )}
+
+        <div className='restore-from-json-wrapper'>
+          {accountsInfo.map(({ address, genesisHash, name, type = DEFAULT_TYPE }, index) => (
+            <div
+              className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} restore-json__account-info`}
+              key={`${index}:${address}`}
+            >
+              <AccountInfoEl
+                address={address}
+                genesisHash={genesisHash}
+                name={name}
+                type={type}
+              />
+            </div>
+          ))}
+        </div>
         <ButtonArea className='restore-json-button-area'>
           <Button
             className='restoreButton'
@@ -196,8 +197,8 @@ export default styled(Upload)(({ theme }: ThemeProps) => `
   height: 100%;
   overflow-y: auto;
   .restore-from-json-wrapper {
-    max-height: 188px;
-    overflow-y: auto;
+    overflow: hidden;
+    margin-top: 16px;
   }
 
   .restore-json__account-info {
@@ -210,6 +211,7 @@ export default styled(Upload)(({ theme }: ThemeProps) => `
 
   .restore-json-button-area {
     bottom: 0;
+    z-index: 1;
   }
 
   .input-file__sub-label {

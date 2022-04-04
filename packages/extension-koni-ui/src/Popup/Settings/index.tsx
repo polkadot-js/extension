@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faBell, faCog, faExpand, faIdBadge, faInfoCircle, faList, faLock, faPlug, faSlidersH } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faExpand, faInfoCircle, faList, faLock, faPlug } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -92,27 +92,27 @@ function Settings ({ className }: Props): React.ReactElement {
         </div>
         }
 
-        <Link
-          className='menu-setting-item'
-          isDisabled
-          to=''
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faSlidersH} />
-          <div className='menu-setting-item__text'>{t<string>('Advanced')}</div>
-          <div className='menu-setting-item__toggle' />
-        </Link>
+        {/* <Link */}
+        {/*  className='menu-setting-item' */}
+        {/*  isDisabled */}
+        {/*  to='' */}
+        {/* > */}
+        {/*  /!* @ts-ignore *!/ */}
+        {/*  <FontAwesomeIcon icon={faSlidersH} /> */}
+        {/*  <div className='menu-setting-item__text'>{t<string>('Advanced')}</div> */}
+        {/*  <div className='menu-setting-item__toggle' /> */}
+        {/* </Link> */}
 
-        <Link
-          className='menu-setting-item'
-          isDisabled
-          to=''
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faIdBadge} />
-          <div className='menu-setting-item__text'>{t<string>('Contacts')}</div>
-          <div className='menu-setting-item__toggle' />
-        </Link>
+        {/* <Link */}
+        {/*  className='menu-setting-item' */}
+        {/*  isDisabled */}
+        {/*  to='' */}
+        {/* > */}
+        {/*  /!* @ts-ignore *!/ */}
+        {/*  <FontAwesomeIcon icon={faIdBadge} /> */}
+        {/*  <div className='menu-setting-item__text'>{t<string>('Contacts')}</div> */}
+        {/*  <div className='menu-setting-item__toggle' /> */}
+        {/* </Link> */}
 
         <a
           className='menu-setting-item'
@@ -126,16 +126,16 @@ function Settings ({ className }: Props): React.ReactElement {
           <div className='menu-setting-item__toggle' />
         </a>
 
-        <Link
-          className='menu-setting-item'
-          isDisabled
-          to=''
-        >
-          {/* @ts-ignore */}
-          <FontAwesomeIcon icon={faBell} />
-          <div className='menu-setting-item__text'>{t<string>('Alerts')}</div>
-          <div className='menu-setting-item__toggle' />
-        </Link>
+        {/* <Link */}
+        {/*  className='menu-setting-item' */}
+        {/*  isDisabled */}
+        {/*  to='' */}
+        {/* > */}
+        {/*  /!* @ts-ignore *!/ */}
+        {/*  <FontAwesomeIcon icon={faBell} /> */}
+        {/*  <div className='menu-setting-item__text'>{t<string>('Alerts')}</div> */}
+        {/*  <div className='menu-setting-item__toggle' /> */}
+        {/* </Link> */}
       </div>
 
     </div>

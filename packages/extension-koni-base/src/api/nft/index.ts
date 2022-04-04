@@ -39,8 +39,8 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
     //   return new UniqueNftApi(api, useAddresses, chain);
     // case SUPPORTED_NFT_NETWORKS.quartz:
     //   return new QuartzNftApi(api, useAddresses, chain);
-    // case SUPPORTED_NFT_NETWORKS.bitcountry:
-    //   return new BitCountryNftApi(api, useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.bitcountry:
+      return new BitCountryNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonbeam:
       return new Web3NftApi(useAddresses, chain);
     // case SUPPORTED_NFT_NETWORKS.moonriver:

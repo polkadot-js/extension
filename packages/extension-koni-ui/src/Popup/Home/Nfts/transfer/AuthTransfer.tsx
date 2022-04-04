@@ -102,29 +102,22 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [senderInfoSubstrate]);
 
   const unlockEvm = useCallback(async (senderAddress: string, password: string): Promise<{ privateKey: string, passwordError: string | null }> => {
-    console.log('message to background to verify');
-    console.log(senderAddress);
-    console.log(password);
-
     try {
-      const { privateKey } = await exportAccountPrivateKey(senderAddress, 'baloney1');
-
-      console.log('got private key', privateKey);
+      const { privateKey } = await exportAccountPrivateKey(senderAddress, password);
 
       return {
         privateKey,
-        passwordError: 'null'
+        passwordError: null
       };
     } catch (e) {
       return {
         privateKey: '',
-        passwordError: 'Error unlocking account'
+        passwordError: 'Error unlocking account with password'
       };
     }
   }, []);
 
   const onSendEvm = useCallback(async () => {
-    console.log(senderInfoSubstrate);
     const { passwordError, privateKey } = await unlockEvm(account?.account?.address as string, senderInfoSubstrate.signPassword);
 
     if (passwordError === null && web3Tx) {
@@ -135,10 +128,13 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         web3Tx.sign(Buffer.from(privateKey.slice(2), 'hex'));
         const callHash = web3Tx.serialize();
 
+        console.log('callHash', web3.utils.toHex(web3Tx.serialize().toString()));
+
         setCallHash(callHash.toString('hex'));
 
         await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
           .on('transactionHash', (hash: string) => {
+
             console.log('Tx hash:', hash);
           })
           .on('receipt', (receipt: any) => {
@@ -152,25 +148,39 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           .on('error', (error: any) => {
             console.log('Error occur:', error);
           })
-          .then((receipt: any) => {
-            console.log('Finally done');
+          .then((receipt: Record<string, any>) => {
+            if (receipt.status) {
+              console.log('Finally done');
+              setLoading(false);
+              setIsTxSuccess(true);
+              setShowConfirm(false);
+              setShowResult(true);
+              setExtrinsicHash(receipt.transactionHash as string);
+              nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf, chain } as RequestNftForceUpdate)
+                .catch(console.error);
+            } else if (!receipt.status) {
+              setIsTxSuccess(false);
+              setTxError('Error submitting transaction');
+              setShowConfirm(false);
+              setShowResult(true);
+            }
           });
       } catch (e) {
-        console.log('error');
+        setLoading(false);
       }
     } else {
       console.log('unlock account failed');
       setLoading(false);
     }
-  }, [account, chain, recipientAddress, unlockEvm, web3Tx]);
+  }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlockEvm, web3Tx]);
 
   const getWeb3Gas = useCallback(() => {
     if (web3Gas !== null) {
       // @ts-ignore
-      // const parsedFee = web3Gas / (10 ** NETWORKS[chain].decimals);
+      const parsedFee = web3Gas / (10 ** NETWORKS[chain].decimals);
 
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-      return web3Gas.toString(2) + ' ' + NETWORKS[chain].nativeToken;
+      return parsedFee + ' ' + NETWORKS[chain].nativeToken;
     }
 
     return null;
@@ -245,7 +255,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         await onSendEvm();
       }
     }, 1);
-  }, [loading, onSendSubstrate]);
+  }, [extrinsic, loading, onSendEvm, onSendSubstrate, web3Tx]);
 
   useEffect((): void => {
     if (extrinsic) {

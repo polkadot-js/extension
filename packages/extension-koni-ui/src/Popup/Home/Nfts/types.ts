@@ -6,7 +6,6 @@ import { Transaction } from 'ethereumjs-tx';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { RMRK_VER } from '@polkadot/extension-base/background/KoniTypes';
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
-import Web3 from "web3";
 
 // For rendering purposes only
 export interface _NftItem {
@@ -71,30 +70,30 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
 }
 
 export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
-  SUPPORTED_TRANSFER_CHAIN_NAME.statemine,
-  SUPPORTED_TRANSFER_CHAIN_NAME.acala,
-  SUPPORTED_TRANSFER_CHAIN_NAME.karura,
-  SUPPORTED_TRANSFER_CHAIN_NAME.kusama,
-  SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft,
-  SUPPORTED_TRANSFER_CHAIN_NAME.quartz,
-  SUPPORTED_TRANSFER_CHAIN_NAME.opal,
-  SUPPORTED_TRANSFER_CHAIN_NAME.statemint
+  SUPPORTED_TRANSFER_CHAIN_NAME.statemine as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.acala as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.karura as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.kusama as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.quartz as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.opal as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.statemint as string
 ];
 
 export const SUPPORTED_TRANSFER_EVM_CHAIN = [
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonbase,
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam,
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonriver,
-  SUPPORTED_TRANSFER_CHAIN_NAME.astar,
-  SUPPORTED_TRANSFER_CHAIN_NAME.shiden,
-  SUPPORTED_TRANSFER_CHAIN_NAME.shibuya
+  SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.astar as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string
 ];
 
 export const TRANSFER_CHAIN_ID = {
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase]: 1287,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam]: 1284,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonriver]: 1285,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.astar]: 592,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.shiden]: 336,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya]: 81
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string]: 1287,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string]: 1284,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string]: 1285,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.astar as string]: 592,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string]: 336,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string]: 81
 };

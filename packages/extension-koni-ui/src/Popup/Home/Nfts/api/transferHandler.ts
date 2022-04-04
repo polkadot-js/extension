@@ -143,8 +143,6 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
       gasPrice: web3.utils.toHex(gasPriceGwei),
       // to: contractAddress,
       value: '0x00'
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      // data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
     });
 
     const rawTransaction = {
@@ -161,13 +159,9 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const common = Common.forCustomChain('mainnet', {
-      name: networkKey,
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      networkId: TRANSFER_CHAIN_ID[networkKey],
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      chainId: TRANSFER_CHAIN_ID[networkKey]
+      name: 'moonbase',
+      networkId: TRANSFER_CHAIN_ID['moonbase'],
+      chainId: TRANSFER_CHAIN_ID['moonbase']
     }, 'petersburg');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -175,7 +169,7 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
 
     return {
       web3Tx: tx,
-      estimatedGas: gasLimit
+      estimatedGas: gasLimit * parseFloat(gasPriceGwei)
     } as TransferResponse;
   } catch (e) {
     console.log('error handling web3 transfer nft', e);

@@ -9,7 +9,7 @@ import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import { ERC721Contract, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -68,7 +68,6 @@ export class Web3NftApi extends BaseNftApi {
     }
 
     return {
-      id: data.token_id ? data.token_id as string : data.edition as string,
       name: data.name as string | undefined,
       image: data.image_url ? this.parseUrl(data.image_url as string) : this.parseUrl(data.image as string),
       description: data.description as string | undefined,
@@ -82,7 +81,8 @@ export class Web3NftApi extends BaseNftApi {
     if (!this.web3) return;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const contract = new this.web3.eth.Contract(TestERC721Contract, smartContract);
+    const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
+    let ownItem = false;
 
     let collectionImage: string | undefined;
 
@@ -107,7 +107,6 @@ export class Web3NftApi extends BaseNftApi {
       await Promise.all(itemIndexes.map(async (i) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const tokenId = await contract.methods.tokenOfOwnerByIndex(address, i).call() as number;
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const tokenURI = await contract.methods.tokenURI(tokenId).call() as string;
 
@@ -120,10 +119,12 @@ export class Web3NftApi extends BaseNftApi {
             const parsedItem = this.parseMetadata(itemDetail);
 
             parsedItem.collectionId = smartContract;
+            parsedItem.id = tokenId.toString();
 
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               updateItem(parsedItem);
+              ownItem = true;
             }
           } catch (e) {
             console.log(`error parsing item for ${this.chain as string} nft`, e);
@@ -132,15 +133,17 @@ export class Web3NftApi extends BaseNftApi {
       }));
     }));
 
-    const nftCollection = {
-      collectionId: smartContract,
-      collectionName,
-      image: collectionImage || undefined,
-      chain: this.chain
-    } as NftCollection;
+    if (ownItem) {
+      const nftCollection = {
+        collectionId: smartContract,
+        collectionName,
+        image: collectionImage || undefined,
+        chain: this.chain
+      } as NftCollection;
 
-    updateCollection(nftCollection);
-    updateReady(true);
+      updateCollection(nftCollection);
+      updateReady(true);
+    }
   }
 
   async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {

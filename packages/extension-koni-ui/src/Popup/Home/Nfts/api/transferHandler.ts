@@ -135,44 +135,32 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
       web3.eth.getGasPrice()
     ]);
 
-    // @ts-ignore
-    // const gasLimit = await web3.eth.estimateGas({
-    //   // @ts-ignore
-    //   nonce: '0x' + fromAccountTxCount.toString(16),
-    //   from: senderAddress,
-    //   gasPrice: web3.utils.toHex(gasPriceGwei),
-    //   // to: contractAddress,
-    //   value: '0x00',
-    //   data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, 2).encodeABI()
-    // });
-
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     const gasLimit = await contract.methods.safeTransferFrom(
       senderAddress,
       recipientAddress,
-      5
+      tokenId
     ).estimateGas({
-      'from': senderAddress
+      from: senderAddress
     });
 
     const rawTransaction = {
       nonce: '0x' + fromAccountTxCount.toString(16),
       from: senderAddress,
       gasPrice: web3.utils.toHex(gasPriceGwei),
-      gasLimit: web3.utils.toHex(gasLimit),
+      gasLimit: web3.utils.toHex(gasLimit as number),
       to: contractAddress,
       value: '0x00',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
       data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
     };
 
-    console.log(rawTransaction);
-
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const common = Common.forCustomChain('mainnet', {
-      name: 'moonbase',
-      networkId: TRANSFER_CHAIN_ID['moonbase'],
-      chainId: TRANSFER_CHAIN_ID['moonbase']
+      name: networkKey,
+      networkId: TRANSFER_CHAIN_ID[networkKey],
+      chainId: TRANSFER_CHAIN_ID[networkKey]
     }, 'petersburg');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -12,11 +12,7 @@ import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@polkadot/extension-koni-ui/messaging';
-import {
-  _NftItem,
-  SUPPORTED_TRANSFER_EVM_CHAIN,
-  SUPPORTED_TRANSFER_SUBSTRATE_CHAIN
-} from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { TransferNftParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';

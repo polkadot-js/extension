@@ -13,6 +13,7 @@ import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import Output from '@polkadot/extension-koni-ui/components/Output';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { exportAccountPrivateKey, nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
@@ -85,6 +86,8 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const { currentAccount: account } = useSelector((state: RootState) => state);
 
+  const { show } = useToast();
+
   useEffect((): void => {
     setPasswordError(null);
   }, [senderInfoSubstrate]);
@@ -119,38 +122,20 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
 
   const onSendEvm = useCallback(async () => {
     const { passwordError, privateKey } = await unlockEvm(account?.account?.address as string, senderInfoSubstrate.signPassword);
+    const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
 
     if (passwordError === null && web3Tx) {
       try {
-        const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
         const web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[chain].provider));
 
         web3Tx.sign(Buffer.from(privateKey.slice(2), 'hex'));
         const callHash = web3Tx.serialize();
 
-        console.log('callHash', web3.utils.toHex(web3Tx.serialize().toString()));
-
         setCallHash(callHash.toString('hex'));
 
         await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
-          .on('transactionHash', (hash: string) => {
-
-            console.log('Tx hash:', hash);
-          })
-          .on('receipt', (receipt: any) => {
-            console.log('Receipt info: \n', JSON.stringify(receipt, null, '\t'));
-          })
-          .on('confirmation', (confNumber: any, receipt: any, latestBlockHash: any) => {
-            console.log('Latest block hash:', latestBlockHash);
-            console.log('Confirmation number:', confNumber);
-            // console.log('Receipt info: \n', JSON.stringify(receipt, null, '\t'));
-          })
-          .on('error', (error: any) => {
-            console.log('Error occur:', error);
-          })
           .then((receipt: Record<string, any>) => {
-            if (receipt.status) {
-              console.log('Finally done');
+            if (receipt.status && receipt.status === true) {
               setLoading(false);
               setIsTxSuccess(true);
               setShowConfirm(false);
@@ -158,21 +143,24 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
               setExtrinsicHash(receipt.transactionHash as string);
               nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf, chain } as RequestNftForceUpdate)
                 .catch(console.error);
-            } else if (!receipt.status) {
+            } else if (receipt.status && receipt.status === false) {
               setIsTxSuccess(false);
               setTxError('Error submitting transaction');
               setShowConfirm(false);
               setShowResult(true);
+              setExtrinsicHash(receipt.transactionHash as string);
             }
           });
       } catch (e) {
+        console.log(e);
+        show('Encountered an error, please try again.');
         setLoading(false);
       }
     } else {
-      console.log('unlock account failed');
+      setPasswordError(passwordError);
       setLoading(false);
     }
-  }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlockEvm, web3Tx]);
+  }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unlockEvm, web3Tx]);
 
   const getWeb3Gas = useCallback(() => {
     if (web3Gas !== null) {
@@ -232,7 +220,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           }
         });
       } catch (e) {
-        console.log('error submitting tx', e);
+        show('Encountered an error, please try again.');
         setBalanceError(true);
         setLoading(false);
       }
@@ -240,7 +228,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       console.log('unlock account failed');
       setLoading(false);
     }
-  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, unlockSubstrate]);
+  }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unlockSubstrate]);
 
   const handleSignAndSubmit = useCallback(() => {
     if (loading) return;

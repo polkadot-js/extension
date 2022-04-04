@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.42.10 Apr 4, 2022
+
+**Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Removal for authorized URLs (Thanks to https://github.com/Are10)
+
+Changes:
+
+- Adjust for bundlers where `import.meta.url` is undefined
+- Bump `@polkadot/api` to 7.15.1
+- Bump `@polkadot/util` to 8.7.1
+
+
 ## 0.42.9 Mar 14, 2022
 
 **Important** Not published to the stores, aligns with latest released packages.

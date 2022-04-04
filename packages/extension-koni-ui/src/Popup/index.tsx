@@ -15,6 +15,7 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
 import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer';
+import ImportLedger from '@polkadot/extension-koni-ui/Popup/ImportLedger';
 import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
@@ -219,6 +220,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/forget/:address'>{wrapWithErrorBoundary(<Forget />, 'forget-address')}</Route>
                           <Route path='/account/export/:address'>{wrapWithErrorBoundary(<Export />, 'export-address')}</Route>
                           {/* <Route path='/account/export-all'>{wrapWithErrorBoundary(<ExportAll />, 'export-all-address')}</Route> */}
+                          <Route path='/account/import-ledger'>{wrapWithErrorBoundary(<ImportLedger />, 'import-ledger')}</Route>
                           <Route path='/account/import-qr'>{wrapWithErrorBoundary(<ImportQr />, 'import-qr')}</Route>
                           <Route path='/account/import-seed'>{wrapWithErrorBoundary(<ImportSeed />, 'import-seed')}</Route>
                           <Route path='/account/import-metamask-private-key'>{wrapWithErrorBoundary(<ImportMetamaskPrivateKey />, 'import-metamask-private-key')}</Route>

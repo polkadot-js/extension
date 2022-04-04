@@ -93,6 +93,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
             {account.isAddress && (<div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'}`}>
               <AccountInfoEl
                 address={address}
+                isExternal={true}
                 name={name}
               />
             </div>)}

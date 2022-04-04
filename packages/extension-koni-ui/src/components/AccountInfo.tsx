@@ -5,7 +5,8 @@ import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { Recoded, ThemeProps } from '../types';
 
-import { faCodeBranch } from '@fortawesome/free-solid-svg-icons';
+import { faUsb } from '@fortawesome/free-brands-svg-icons';
+import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
@@ -28,6 +29,8 @@ export interface Props {
   address?: string | null;
   className?: string;
   genesisHash?: string | null;
+  isExternal?: boolean | null;
+  isHardware?: boolean | null;
   name?: string | null;
   parentName?: string | null;
   suri?: string;
@@ -38,7 +41,7 @@ export interface Props {
   iconSize?: number;
 }
 
-function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
+function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExternal, isHardware, isShowAddress = true, isShowBanner = true, name, parentName, showCopyBtn = true, suri, type: givenType }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
   const [{ account,
@@ -89,6 +92,33 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
     return address.length > 13 ? `${address.slice(0, addressLength)}…${address.slice(-addressLength)}` : address;
   };
 
+  const Name = () => {
+    return (
+      <>
+        {!!accountName && (account?.isExternal || isExternal) && (
+          (account?.isHardware || isHardware)
+            ? (
+              <FontAwesomeIcon
+                className='hardwareIcon'
+                // @ts-ignore
+                icon={faUsb}
+                rotation={270}
+                title={t('hardware wallet account')}
+              />
+            )
+            : (
+              <FontAwesomeIcon
+                className='externalIcon'
+                // @ts-ignore
+                icon={faQrcode}
+                title={t('external account')}
+              />
+            )
+        )}
+        <span title={displayName}>{_isAccountAll ? t<string>('All Accounts') : displayName}</span>
+      </>);
+  };
+
   const parentNameSuri = getParentNameSuri(parentName, suri);
 
   return (
@@ -109,6 +139,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
           : <Identicon
             className='account-info-identity-icon'
             iconTheme={iconTheme}
+            isExternal={isExternal}
             prefix={prefix}
             size={iconSize}
             value={formatted || address}
@@ -132,7 +163,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
                   </div>
                 </div>
                 <div className='account-info__name displaced'>
-                  <span title={displayName}>{displayName}</span>
+                  <Name />
                 </div>
               </>
             )
@@ -141,7 +172,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isShowAd
                 className='account-info__name'
                 data-field='name'
               >
-                <span title={displayName}>{_isAccountAll ? t<string>('All Accounts') : displayName}</span>
+                <Name />
               </div>
             )
           }
@@ -298,5 +329,11 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     top: 5px;
     width: 9px;
     height: 9px;
+  }
+
+  .externalIcon, .hardwareIcon {
+    margin-right: 0.3rem;
+    color: ${theme.labelColor};
+    width: 0.875em;
   }
 `);

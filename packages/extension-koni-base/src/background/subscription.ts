@@ -32,7 +32,6 @@ export class KoniSubcription {
 
   init () {
     state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
-    this.initChainRegistrySubscription();
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -73,19 +72,6 @@ export class KoniSubcription {
         this.unsubCrowdloans = this.initCrowdloanSubscription(addresses);
       })
       .catch(console.error);
-  }
-
-  initChainRegistrySubscription () {
-    Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
-      const networkAPI = await apiProps.isReady;
-
-      const { chainDecimals, chainTokens } = networkAPI.api.registry;
-
-      state.setChainRegistryItem(networkKey, {
-        chainDecimals,
-        chainTokens
-      });
-    });
   }
 
   initBalanceSubscription (addresses: string[]) {

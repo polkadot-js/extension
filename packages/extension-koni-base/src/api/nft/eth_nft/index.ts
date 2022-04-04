@@ -9,7 +9,7 @@ import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import {ERC721Contract, TestERC721Contract} from '@polkadot/extension-koni-base/api/web3/web3';
+import { ERC721Contract, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -78,12 +78,11 @@ export class Web3NftApi extends BaseNftApi {
     } as NftItem;
   }
 
-  private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     if (!this.web3) return;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const contract = new this.web3.eth.Contract(TestERC721Contract, smartContract);
-    let ownItem = false;
 
     let collectionImage: string | undefined;
 
@@ -93,7 +92,11 @@ export class Web3NftApi extends BaseNftApi {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
-      if (Number(balance) === 0) return;
+      if (Number(balance) === 0) {
+        updateReady(true);
+
+        return;
+      }
 
       const itemIndexes: number[] = [];
 
@@ -121,7 +124,6 @@ export class Web3NftApi extends BaseNftApi {
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
               updateItem(parsedItem);
-              ownItem = true;
             }
           } catch (e) {
             console.log(`error parsing item for ${this.chain as string} nft`, e);
@@ -130,30 +132,29 @@ export class Web3NftApi extends BaseNftApi {
       }));
     }));
 
-    if (ownItem) {
-      const nftCollection = {
-        collectionId: smartContract,
-        collectionName,
-        image: collectionImage || undefined,
-        chain: this.chain
-      } as NftCollection;
+    const nftCollection = {
+      collectionId: smartContract,
+      collectionName,
+      image: collectionImage || undefined,
+      chain: this.chain
+    } as NftCollection;
 
-      updateCollection(nftCollection);
-    }
+    updateCollection(nftCollection);
+    updateReady(true);
   }
 
-  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<void> {
+  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
     if (!this.targetContracts) return;
 
     await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
-      return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection);
+      return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection, updateReady);
     }));
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
       this.connectWeb3();
-      await this.handleNfts(updateItem, updateCollection);
+      await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`, e);
 

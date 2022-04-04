@@ -145,16 +145,20 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
       value: '0x00'
     });
 
+    // const gasLimit = 1000000;
+
     const rawTransaction = {
       nonce: '0x' + fromAccountTxCount.toString(16),
       from: senderAddress,
       gasPrice: web3.utils.toHex(gasPriceGwei),
-      gasLimit,
+      gasLimit: web3.utils.toHex(gasLimit),
       to: contractAddress,
       value: '0x00',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
+      data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, 1).encodeABI()
     };
+
+    console.log(rawTransaction)
 
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment

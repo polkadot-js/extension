@@ -54,8 +54,6 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const [imageError, setImageError] = useState(false);
   const { currentAccount: account, currentNetwork, networkMetadata } = useSelector((state: RootState) => state);
 
-  console.log(data);
-
   const navigate = useContext(ActionContext);
   const { show } = useToast();
 

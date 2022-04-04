@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import {SUPPORTED_TRANSFER_CHAIN_NAME} from "@polkadot/extension-koni-ui/Popup/Home/Nfts/types";
+import { SUPPORTED_TRANSFER_CHAIN_NAME } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 
 const RMRK_PREFIX = 'RMRK';
 const RMRK_OP_TYPE = 'SEND';
@@ -80,6 +80,8 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string) {
       return web3Parser(nftItem);
     case SUPPORTED_TRANSFER_CHAIN_NAME.moonbase:
       return web3Parser(nftItem);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
+      return acalaParser(nftItem);
   }
 
   return {};

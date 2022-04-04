@@ -66,7 +66,8 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
   moonriver = 'moonriver',
   astar = 'astar',
   shiden = 'shiden',
-  shibuya = 'shibuya'
+  shibuya = 'shibuya',
+  bitcountry = 'bitcountry'
 }
 
 export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
@@ -77,7 +78,8 @@ export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.quartz as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.opal as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.statemint as string
+  SUPPORTED_TRANSFER_CHAIN_NAME.statemint as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry as string
 ];
 
 export const SUPPORTED_TRANSFER_EVM_CHAIN = [

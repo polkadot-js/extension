@@ -155,17 +155,17 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
       to: contractAddress,
       value: '0x00',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, 1).encodeABI()
+      data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
     };
 
-    console.log(rawTransaction)
+    console.log(rawTransaction);
 
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const common = Common.forCustomChain('mainnet', {
       name: 'moonbase',
-      networkId: TRANSFER_CHAIN_ID['moonbase'],
-      chainId: TRANSFER_CHAIN_ID['moonbase']
+      networkId: TRANSFER_CHAIN_ID.moonbase,
+      chainId: TRANSFER_CHAIN_ID.moonbase
     }, 'petersburg');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -206,6 +206,8 @@ export default async function transferHandler (api: ApiPromise, networkKey: stri
       return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_CHAIN_NAME.moonriver:
       return await web3TransferHandler(networkKey, senderAddress, recipientAddress, params);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
+      return await acalaTransferHandler(api, senderAddress, recipientAddress, params);
   }
 
   return null;

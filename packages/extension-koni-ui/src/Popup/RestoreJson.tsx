@@ -211,6 +211,7 @@ export default styled(Upload)(({ theme }: ThemeProps) => `
 
   .restore-json-button-area {
     bottom: 0;
+    z-index: 1;
   }
 
   .input-file__sub-label {

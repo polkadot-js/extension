@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCog, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useState } from 'react';
@@ -14,6 +15,7 @@ import Link from '@polkadot/extension-koni-ui/components/Link';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
 import MenuSettingItem from '@polkadot/extension-koni-ui/components/MenuSettingItem';
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
+import { useLedger } from '@polkadot/extension-koni-ui/hooks/useLedger';
 import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
 import AccountsTree from '@polkadot/extension-koni-ui/Popup/Accounts/AccountsTree';
 
@@ -30,10 +32,12 @@ interface Props extends ThemeProps {
 
 const jsonPath = '/account/restore-json';
 const createAccountPath = '/account/create';
+const ledgerPath = '/account/import-ledger';
 
 function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, onFilter, reference }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [filter, setFilter] = useState('');
+  const { isLedgerCapable, isLedgerEnabled } = useLedger();
   const { hierarchy } = useContext(AccountContext);
   const filteredAccount = filter
     ? hierarchy.filter((account) =>
@@ -51,6 +55,13 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
     () => {
       window.localStorage.setItem('popupNavigation', jsonPath);
       windowOpen(jsonPath).catch((e) => console.log('error', e));
+    }, []
+  );
+
+  const _onOpenLedgerConnect = useCallback(
+    (): void => {
+      window.localStorage.setItem('popupNavigation', ledgerPath);
+      windowOpen(ledgerPath).catch(console.error);
     }, []
   );
 
@@ -184,6 +195,39 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               <FontAwesomeIcon icon={faQrcode} />
               <span>{t<string>('Attach external QR-signer account')}</span>
             </Link>
+          </MenuSettingItem>
+
+          <MenuSettingItem className='account-menu-settings__menu-item ledger'>
+            {isLedgerEnabled
+              ? (
+                <Link
+                  className='menuItem__text'
+                  isDisabled={!isLedgerCapable}
+                  title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
+                  to={ledgerPath}
+                >
+                  <FontAwesomeIcon
+                    // @ts-ignore
+                    icon={faUsb}
+                    rotation={270}
+                  />
+                  <span>{ t<string>('Attach ledger account')}</span>
+                </Link>
+              )
+              : (
+                <Link
+                  className='menuItem__text'
+                  onClick={_onOpenLedgerConnect}
+                >
+                  <FontAwesomeIcon
+                  // @ts-ignore
+                    icon={faUsb}
+                    rotation={270}
+                  />
+                  <span>{ t<string>('Connect Ledger device')}</span>
+                </Link>
+              )
+            }
           </MenuSettingItem>
         </div>
       </div>

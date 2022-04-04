@@ -13,6 +13,7 @@ import Icon from '@polkadot/react-identicon';
 interface Props {
   className?: string;
   iconTheme?: IconTheme;
+  isExternal?: boolean | null;
   onCopy?: () => void;
   prefix?: number;
   value?: string | null;

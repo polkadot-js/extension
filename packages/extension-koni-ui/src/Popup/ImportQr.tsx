@@ -94,6 +94,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
               <AccountInfoEl
                 address={address}
                 name={name}
+                isExternal={true}
               />
             </div>)}
             {account.isAddress

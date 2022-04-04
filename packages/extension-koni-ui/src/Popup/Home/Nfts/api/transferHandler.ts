@@ -136,16 +136,23 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
     ]);
 
     // @ts-ignore
-    const gasLimit = await web3.eth.estimateGas({
-      // @ts-ignore
-      nonce: '0x' + fromAccountTxCount.toString(16),
-      from: senderAddress,
-      gasPrice: web3.utils.toHex(gasPriceGwei),
-      // to: contractAddress,
-      value: '0x00'
-    });
+    // const gasLimit = await web3.eth.estimateGas({
+    //   // @ts-ignore
+    //   nonce: '0x' + fromAccountTxCount.toString(16),
+    //   from: senderAddress,
+    //   gasPrice: web3.utils.toHex(gasPriceGwei),
+    //   // to: contractAddress,
+    //   value: '0x00',
+    //   data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, 2).encodeABI()
+    // });
 
-    // const gasLimit = 1000000;
+    const gasLimit = await contract.methods.safeTransferFrom(
+      senderAddress,
+      recipientAddress,
+      5
+    ).estimateGas({
+      'from': senderAddress
+    });
 
     const rawTransaction = {
       nonce: '0x' + fromAccountTxCount.toString(16),
@@ -155,7 +162,7 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
       to: contractAddress,
       value: '0x00',
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, 1).encodeABI()
+      data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, 5).encodeABI()
     };
 
     console.log(rawTransaction)

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { SUPPORTED_TRANSFER_CHAIN_NAME } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 
 const RMRK_PREFIX = 'RMRK';
 const RMRK_OP_TYPE = 'SEND';
@@ -45,24 +46,42 @@ function statemineParser (nftItem: NftItem) {
   };
 }
 
+function web3Parser (nftItem: NftItem) {
+  const contractAddress = nftItem.collectionId as string;
+  const tokenId = parseInt(nftItem.id as string);
+
+  return {
+    contractAddress,
+    tokenId
+  };
+}
+
 export default function paramsHandler (nftItem: NftItem, networkKey: string) {
   switch (networkKey) {
-    case 'acala':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.acala:
       return acalaParser(nftItem);
-    case 'karura':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.karura:
       return acalaParser(nftItem);
-    case 'kusama':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.kusama:
       return rmrkParser(nftItem);
-    case 'uniqueNft':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.uniqueNft:
       return uniqueParser(nftItem);
-    case 'quartz':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.quartz:
       return uniqueParser(nftItem);
-    case 'opal':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.opal:
       return uniqueParser(nftItem);
-    case 'statemine':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.statemine:
       return statemineParser(nftItem);
-    case 'statemint':
+    case SUPPORTED_TRANSFER_CHAIN_NAME.statemint:
       return statemineParser(nftItem);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.moonriver:
+      return web3Parser(nftItem);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam:
+      return web3Parser(nftItem);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.moonbase:
+      return web3Parser(nftItem);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
+      return acalaParser(nftItem);
   }
 
   return {};

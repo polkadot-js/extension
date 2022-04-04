@@ -68,7 +68,6 @@ export class Web3NftApi extends BaseNftApi {
     }
 
     return {
-      id: data.token_id ? data.token_id as string : data.edition as string,
       name: data.name as string | undefined,
       image: data.image_url ? this.parseUrl(data.image_url as string) : this.parseUrl(data.image as string),
       description: data.description as string | undefined,
@@ -78,7 +77,7 @@ export class Web3NftApi extends BaseNftApi {
     } as NftItem;
   }
 
-  private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void) {
+  private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     if (!this.web3) return;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -93,7 +92,11 @@ export class Web3NftApi extends BaseNftApi {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
 
-      if (Number(balance) === 0) return;
+      if (Number(balance) === 0) {
+        updateReady(true);
+
+        return;
+      }
 
       const itemIndexes: number[] = [];
 
@@ -104,7 +107,6 @@ export class Web3NftApi extends BaseNftApi {
       await Promise.all(itemIndexes.map(async (i) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const tokenId = await contract.methods.tokenOfOwnerByIndex(address, i).call() as number;
-
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const tokenURI = await contract.methods.tokenURI(tokenId).call() as string;
 
@@ -117,6 +119,7 @@ export class Web3NftApi extends BaseNftApi {
             const parsedItem = this.parseMetadata(itemDetail);
 
             parsedItem.collectionId = smartContract;
+            parsedItem.id = tokenId.toString();
 
             if (parsedItem) {
               if (parsedItem.image) collectionImage = parsedItem.image;
@@ -139,21 +142,22 @@ export class Web3NftApi extends BaseNftApi {
       } as NftCollection;
 
       updateCollection(nftCollection);
+      updateReady(true);
     }
   }
 
-  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<void> {
+  async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
     if (!this.targetContracts) return;
 
     await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
-      return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection);
+      return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection, updateReady);
     }));
   }
 
-  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void): Promise<number> {
+  public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
       this.connectWeb3();
-      await this.handleNfts(updateItem, updateCollection);
+      await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       console.log(`error fetching nft from ${this.getChain() as string}`, e);
 

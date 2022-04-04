@@ -588,7 +588,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Bit.Country - Testnet',
     genesisHash: '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5',
     ss58Format: 42,
-    provider: 'wss://tewai-rpc.bit.country',
+    provider: 'wss://dev-chain.bit.country',
     groups: ['TEST_NET'],
     nativeToken: 'NUUM'
   }

@@ -4,6 +4,7 @@
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
+import { BitCountryNftApi } from '@polkadot/extension-koni-base/api/nft/bit.country';
 import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { Web3NftApi } from '@polkadot/extension-koni-base/api/nft/eth_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
@@ -38,6 +39,8 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
       return new UniqueNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.quartz:
       return new QuartzNftApi(api, useAddresses, chain);
+    case SUPPORTED_NFT_NETWORKS.bitcountry:
+      return new BitCountryNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonbeam:
       return new Web3NftApi(useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonriver:
@@ -96,24 +99,12 @@ export class NftHandler {
           }
         });
 
-        console.log(`${this.handlers.length} nft handlers setup done`);
-      } else { console.log('nft handlers already setup.'); }
+        console.log(`${this.handlers.length} nft connected`);
+      }
     } catch (e) {
       console.log('error setting up nft handlers', e);
     }
   }
-
-  // private sortData (data: NftCollection[]) {
-  //   const sortedData = this.allCollections;
-  //
-  //   for (const collection of data) {
-  //     if (!this.allCollections.some((e) => e.collectionName === collection.collectionName && e.collectionId === collection.collectionId)) {
-  //       sortedData.push(collection);
-  //     }
-  //   }
-  //
-  //   return sortedData;
-  // }
 
   private existCollection (newCollection: NftCollection) {
     return state.getNftCollection().nftCollectionList.some((collection) =>
@@ -134,9 +125,7 @@ export class NftHandler {
     this.setupApi();
 
     await Promise.all(this.handlers.map(async (handler) => {
-      const currentChain = handler.getChain() as string;
-
-      const result = await handler.fetchNfts(
+      await handler.fetchNfts(
         (data: NftItem) => {
           if (!this.existItem(data)) {
             updateItem(data);
@@ -148,12 +137,6 @@ export class NftHandler {
           }
         },
         updateReady);
-
-      if (result === 1) {
-        console.log(`${currentChain} fetched nft ok`);
-      } else {
-        console.log(`${currentChain} fetched nft failed`);
-      }
     }));
 
     console.log('handled nft ok');

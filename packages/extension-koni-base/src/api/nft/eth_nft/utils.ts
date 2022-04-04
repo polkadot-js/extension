@@ -5,6 +5,7 @@ enum MOONBEAM_NFT_CONTRACT_NAME {
   MOON_MONKEY = 'Moon Monkeys',
   MOON_DAO_NFT = 'MoonDAONFT',
   GLIMMER_APES = 'GlimmerApes',
+  GLIMMER_JUNGLE = 'GlimmerJungle',
   MOONBEAM_BAYC = 'Moonbeam BAYC',
   MONKEY_BOTS_CULT = 'MonkeyBotsCult',
   BLOCKCHAIN_MONSTER = 'Blockchain Monster',
@@ -33,6 +34,10 @@ export const MOONBEAM_SUPPORTED_NFT_CONTRACTS = [
   {
     name: MOONBEAM_NFT_CONTRACT_NAME.GLIMMER_APES,
     smartContract: '0x8fbe243d898e7c88a6724bb9eb13d746614d23d6'
+  },
+  {
+    name: MOONBEAM_NFT_CONTRACT_NAME.GLIMMER_JUNGLE,
+    smartContract: '0xcB13945Ca8104f813992e4315F8fFeFE64ac49cA'
   },
   {
     name: MOONBEAM_NFT_CONTRACT_NAME.MONKEY_BOTS_CULT,
@@ -83,9 +88,9 @@ export const MOONBEAM_SUPPORTED_NFT_CONTRACTS = [
     smartContract: '0x15380599b39A020378146C0714D628f14731F0A6'
   }
   // {
-  //   name: NFT_CONTRACT_NAME.test,
+  //   name: MOONBEAM_NFT_CONTRACT_NAME.test,
   //   smartContract: '0x2953ea6f45fb189f1d33820d67c001ba287f6419'
-  // }
+  // },
   // {
   //   name: NFT_CONTRACT_NAME.BLOCKCHAIN_MONSTER,
   //   smartContract: '0x1759F2d7D3D1341081B3d7c19aFc5BDA503c8Dc5'

@@ -12,7 +12,7 @@ import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@polkadot/extension-koni-ui/messaging';
-import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
+import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { TransferNftParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -27,17 +27,6 @@ interface Props {
   collectionImage?: string;
   collectionId: string;
 }
-
-const SUPPORTED_TRANSFER_CHAIN = [
-  'statemine',
-  'acala',
-  'karura',
-  'kusama',
-  'uniqueNft',
-  'quartz',
-  'opal',
-  'statemint'
-];
 
 function updateTransferNftParams (nftItem: _NftItem, collectionImage: string | undefined, collectionId: string) {
   store.dispatch({ type: 'transferNftParams/update', payload: { nftItem, collectionImage, collectionId } as TransferNftParams });
@@ -85,7 +74,7 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
       return;
     }
 
-    if (SUPPORTED_TRANSFER_CHAIN.indexOf(data.chain) <= -1) {
+    if (SUPPORTED_TRANSFER_SUBSTRATE_CHAIN.indexOf(data.chain) <= -1 && SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(data.chain) <= -1) {
       show(`Transferring is not supported for ${data.chain.toUpperCase()} network`);
 
       return;

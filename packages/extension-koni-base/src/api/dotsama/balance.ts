@@ -1,16 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { Observable } from 'rxjs';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, MoonAsset } from '@polkadot/extension-base/background/KoniTypes';
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { getMoonAssets } from '@polkadot/extension-koni-base/api/dotsama/moonAssets';
+import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
+import { getRegistry } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
-import { ACALA_REFRESH_BALANCE_INTERVAL, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import { MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
@@ -50,140 +51,13 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
-async function getTokenBalance (address: string, api: ApiPromise, option: any) {
-  return await api.query.tokens.accounts(address, option);
-}
-
-function getBalanceChildItem (rawBalanceItems: any[], decimals: number): BalanceChildItem {
-  const storeObj = {
-    reserved: new BN(0),
-    frozen: new BN(0),
-    free: new BN(0)
-  };
-
-  rawBalanceItems.forEach((b) => {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    storeObj.free = storeObj.free.add(b?.free?.toBn() || new BN(0));
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    storeObj.frozen = storeObj.frozen.add(b?.frozen?.toBn() || new BN(0));
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    storeObj.reserved = storeObj.reserved.add(b?.reserved?.toBn() || new BN(0));
-  });
-
-  return ({
-    reserved: storeObj.reserved.toString(),
-    frozen: storeObj.frozen.toString(),
-    free: storeObj.free.toString(),
-    decimals
-  });
-}
-
-function subcribleAcalaTokenBalanceInterval (addresses: string[], api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
-  const getTokenBalances = () => {
-    (async () => {
-      const [dotBalances, ldotBalances, ausdBalances, lcdotBalances] = await Promise.all(['DOT', 'LDOT', 'AUSD', 'LCDOT'].map((token) => {
-        if (token === 'LCDOT') {
-          return Promise.all(addresses.map((address) => getTokenBalance(address, api, {
-            LiquidCrowdloan: 13
-          })));
-        }
-
-        return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
-      }));
-
-      originBalanceItem.children = {
-        DOT: getBalanceChildItem(dotBalances, 10),
-        LDOT: getBalanceChildItem(ldotBalances, 10),
-        aUSD: getBalanceChildItem(ausdBalances, 12),
-        LCDOT: getBalanceChildItem(lcdotBalances, 10)
-      };
-
-      // eslint-disable-next-line node/no-callback-literal
-      callback('acala', originBalanceItem);
-    })().catch((e) => {
-      console.log('There is problem when fetching Acaca token balance', e);
-    });
-  };
-
-  getTokenBalances();
-  const interval = setInterval(getTokenBalances, ACALA_REFRESH_BALANCE_INTERVAL);
-
-  return () => {
-    clearInterval(interval);
-  };
-}
-
-function subcribleKaruraTokenBalanceInterval (addresses: string[], api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
-  const getTokenBalances = () => {
-    (async () => {
-      const [
-        kusdBalances,
-        ksmBalances,
-        rmrkBalances,
-        lksmBalances,
-        bncBalances,
-        vsksmBalances,
-        phaBalances,
-        kintBalances,
-        kbtcBalances,
-        taiBalances
-      ] = await Promise.all([
-        'KUSD',
-        'KSM',
-        'RMRK',
-        'LKSM',
-        'BNC',
-        'VSKSM',
-        'PHA',
-        'KINT',
-        'KBTC',
-        'TAI'
-      ].map((token) => {
-        if (token === 'RMRK') {
-          return Promise.all(addresses.map((address) => getTokenBalance(address, api, { ForeignAsset: 0 })));
-        }
-
-        return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
-      }));
-
-      originBalanceItem.children = {
-        kUSD: getBalanceChildItem(kusdBalances, 12),
-        KSM: getBalanceChildItem(ksmBalances, 12),
-        RMRK: getBalanceChildItem(rmrkBalances, 10),
-        LKSM: getBalanceChildItem(lksmBalances, 12),
-        BNC: getBalanceChildItem(bncBalances, 12),
-        vsKSM: getBalanceChildItem(vsksmBalances, 12),
-        PHA: getBalanceChildItem(phaBalances, 12),
-        KINT: getBalanceChildItem(kintBalances, 12),
-        KBTC: getBalanceChildItem(kbtcBalances, 8),
-        TAI: getBalanceChildItem(taiBalances, 12)
-      };
-
-      // eslint-disable-next-line node/no-callback-literal
-      callback('karura', originBalanceItem);
-    })().catch((e) => {
-      console.log('There is problem when fetching Karura token balance', e);
-    });
-  };
-
-  getTokenBalances();
-  const interval = setInterval(getTokenBalances, ACALA_REFRESH_BALANCE_INTERVAL);
-
-  return () => {
-    clearInterval(interval);
-  };
-}
-
 function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
-  let assetMap = {} as Record<string, MoonAsset>;
+  let tokenList = {} as TokenInfo[];
   const ERC20ContractMap = {} as Record<string, Contract>;
   const tokenBalanceMap = {} as Record<string, BalanceChildItem>;
 
   const getTokenBalances = () => {
-    Object.values(assetMap).map(async ({ decimals, symbol }) => {
+    Object.values(tokenList).map(async ({ decimals, symbol }) => {
       let free = new BN(0);
 
       try {
@@ -211,10 +85,12 @@ function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api
     callback && callback(networkKey, originBalanceItem);
   };
 
-  getMoonAssets(api).then((assetRs) => {
-    assetMap = assetRs;
-    Object.entries(assetMap).forEach(([symbol, { address }]) => {
-      ERC20ContractMap[symbol] = getERC20Contract(networkKey, address);
+  getRegistry(networkKey, api).then(({ tokenMap }) => {
+    tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
+    tokenList.forEach(({ erc20Address, symbol }) => {
+      if (erc20Address) {
+        ERC20ContractMap[symbol] = getERC20Contract(networkKey, erc20Address);
+      }
     });
     getTokenBalances();
   }).catch(console.error);
@@ -226,55 +102,62 @@ function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api
   };
 }
 
-function subcribleBifrostTokenBalanceInterval (addresses: string[], api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
-  const getTokenBalances = () => {
-    (async () => {
-      const [
-        bncBalances,
-        dotBalances,
-        karBalances,
-        ksmBalances,
-        kusdBalances,
-        phaBalances,
-        rmrkBalances,
-        zlkBalances
-      ] = await Promise.all([
-        'BNC',
-        'DOT',
-        'KAR',
-        'KSM',
-        'KUSD',
-        'PHA',
-        'RMRK',
-        'ZLK'
-      ].map((token) => {
-        return Promise.all(addresses.map((address) => getTokenBalance(address, api, { Token: token })));
-      }));
+function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void) {
+  let forceStop = false;
 
-      originBalanceItem.children = {
-        BNC: getBalanceChildItem(bncBalances, 12),
-        DOT: getBalanceChildItem(dotBalances, 10),
-        KAR: getBalanceChildItem(karBalances, 12),
-        KSM: getBalanceChildItem(ksmBalances, 12),
-        kUSD: getBalanceChildItem(kusdBalances, 12),
-        PHA: getBalanceChildItem(phaBalances, 12),
-        RMRK: getBalanceChildItem(rmrkBalances, 10),
-        ZLK: getBalanceChildItem(zlkBalances, 18)
+  let unsubAll = () => {
+    forceStop = true;
+  };
+
+  originBalanceItem.children = originBalanceItem.children || {};
+
+  getRegistry(networkKey, api)
+    .then(({ tokenMap }) => {
+      if (forceStop) {
+        return;
+      }
+
+      const subTokenList = Object.values(tokenMap).filter((t) => !t.isMainToken);
+
+      if (subTokenList.length > 0) {
+        console.log('Get tokens balance of', networkKey, subTokenList);
+      }
+
+      const unsubList = subTokenList.map(({ decimals, specialOption, symbol }) => {
+        const observable = new Observable<BalanceChildItem>((subscriber) => {
+          // Get Token Balance
+          // @ts-ignore
+          const apiCall = api.query.tokens.accounts.multi(addresses.map((address) => [address, options]), (balances: TokenBalanceRaw[]) => {
+            const tokenBalance = {
+              reserved: sumBN(balances.map((b) => (b.reserved || new BN(0)))).toString(),
+              frozen: sumBN(balances.map((b) => (b.frozen || new BN(0)))).toString(),
+              free: sumBN(balances.map((b) => (b.free || new BN(0)))).toString(),
+              decimals
+            };
+
+            subscriber.next(tokenBalance);
+          });
+        });
+        const options = specialOption || { Token: symbol };
+
+        return observable.subscribe({
+          next: (childBalance) => {
+            // @ts-ignore
+            originBalanceItem.children[symbol] = childBalance;
+            callback(originBalanceItem);
+          }
+        });
+      });
+
+      unsubAll = () => {
+        unsubList.forEach((unsub) => {
+          unsub && unsub.unsubscribe();
+        });
       };
+    })
+    .catch(console.error);
 
-      // eslint-disable-next-line node/no-callback-literal
-      callback('bifrost', originBalanceItem);
-    })().catch((e) => {
-      console.log('There is problem when fetching Karura token balance', e);
-    });
-  };
-
-  getTokenBalances();
-  const interval = setInterval(getTokenBalances, ACALA_REFRESH_BALANCE_INTERVAL);
-
-  return () => {
-    clearInterval(interval);
-  };
+  return unsubAll;
 }
 
 function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
@@ -309,13 +192,11 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
 
   let unsub2: () => void;
 
-  if (networkKey === 'acala') {
-    unsub2 = subcribleAcalaTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
-  } else if (networkKey === 'karura') {
-    unsub2 = subcribleKaruraTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
-  } else if (networkKey === 'bifrost') {
-    unsub2 = subcribleBifrostTokenBalanceInterval(addresses, networkAPI.api, balanceItem, callback);
-  } else if (ethereumChains.indexOf(networkKey) > -1) {
+  if (['bifrost', 'acala', 'karura', 'interlay'].indexOf(networkKey) > -1) {
+    unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+      callback(networkKey, balanceItem);
+    });
+  } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
     unsub2 = subscribeMoonbeamInterval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }
 

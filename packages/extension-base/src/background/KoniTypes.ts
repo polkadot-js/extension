@@ -7,6 +7,7 @@ import { AccountJson, RequestAccountSubscribe, RequestBatchRestore, RequestCurre
 import { MetadataDefBase } from '@polkadot/extension-inject/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
+import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 export enum ApiInitStatus {
@@ -107,6 +108,12 @@ export interface NftCollectionJson {
   nftCollectionList: Array<NftCollection>;
 }
 
+export interface TokenBalanceRaw {
+  reserved: BN,
+  frozen: BN,
+  free: BN
+}
+
 export interface BalanceChildItem {
   reserved: string,
   frozen: string,
@@ -140,6 +147,7 @@ export interface CrowdloanJson {
 export interface ChainRegistry {
   chainDecimals: number[];
   chainTokens: string[];
+  tokenMap: Record<string, TokenInfo>
 }
 
 export interface DefaultFormatBalance {
@@ -219,6 +227,16 @@ export type CurrentNetworkInfo = {
   isEthereum: boolean;
 }
 
+export type TokenInfo = {
+  isMainToken: boolean,
+  symbol: string,
+  erc20Address?: string,
+  decimals: number,
+  name: string,
+  coinGeckoKey?: string,
+  specialOption?: object
+}
+
 // all Accounts and the address of the current Account
 export interface AccountsWithCurrentAddress {
   accounts: AccountJson[];
@@ -255,15 +273,6 @@ export interface TransactionHistoryItemType {
   isSuccess: boolean;
   action: 'send' | 'received';
   extrinsicHash: string
-}
-
-export interface MoonAsset {
-  deposit: number,
-  name: string,
-  symbol: string,
-  decimals: number,
-  isFrozen: boolean,
-  address: string
 }
 
 export interface RequestTransactionHistoryGet {

@@ -304,11 +304,11 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'LIT',
     crowdloanUrl: 'https://crowdloan.litentry.com/'
   },
-  Phala: {
+  phala: {
     chain: 'Phala',
     genesisHash: '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
     ss58Format: 30,
-    provider: 'wss://wss://api.phala.network/ws',
+    provider: 'wss://api.phala.network/ws',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2035,
     nativeToken: 'PHA',
@@ -504,7 +504,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     crowdloanUrl: 'https://genshiro.equilibrium.io/en'
   },
   subsocial_x: {
-    chain: 'SubsocialX Parachain',
+    chain: 'SubsocialX',
     genesisHash: '0x4a12be580bb959937a1c7a61d5cf24428ed67fa571974b4007645d1886e7c89f',
     ss58Format: 28,
     provider: 'wss://para.subsocial.network',

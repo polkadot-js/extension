@@ -201,7 +201,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             {isLedgerEnabled
               ? (
                 <Link
-                  className='menuItem__text'
+                  className='account-menu-settings__menu-item-text'
                   isDisabled={!isLedgerCapable}
                   title={ (!isLedgerCapable && t<string>('Ledger devices can only be connected with Chrome browser')) || ''}
                   to={ledgerPath}
@@ -216,7 +216,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
               )
               : (
                 <Link
-                  className='menuItem__text'
+                  className='account-menu-settings__menu-item-text'
                   onClick={_onOpenLedgerConnect}
                 >
                   <FontAwesomeIcon

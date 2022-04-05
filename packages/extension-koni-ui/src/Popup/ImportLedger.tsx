@@ -118,6 +118,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
         />
         {!!genesis && !!address && !ledgerError && (
           <Name
+            className='import-ledger__item'
             onChange={setName}
             value={name || ''}
           />
@@ -198,7 +199,7 @@ export default styled(ImportLedger)`
   }
 
   .import-ledger__item {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .import-ledger-account {

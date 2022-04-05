@@ -15,7 +15,9 @@ function updateNftTransfer (nftData: NftTransferExtra): void {
 export default function useFetchNftExtra (isShown: boolean): _NftCollection | undefined {
   const { transferNftExtra } = useSelector((state: RootState) => state);
 
-  if (transferNftExtra.cronUpdate && transferNftExtra.forceUpdate) return undefined;
+  if (transferNftExtra.cronUpdate && transferNftExtra.forceUpdate) {
+    return undefined;
+  }
 
   if (!isShown && transferNftExtra.selectedNftCollection) {
     const rawCollection = transferNftExtra.selectedNftCollection;

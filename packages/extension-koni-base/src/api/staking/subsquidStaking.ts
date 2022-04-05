@@ -77,11 +77,25 @@ const getSubsquidStaking = async (accounts: string[], chain: string, callback: (
         if (rewardItem) {
           const latestReward = rewardItem.rewards[0];
 
-          if (rewardItem.totalReward) result.totalReward = parseFloat(rewardItem.totalReward);
-          if (rewardItem.totalSlash) result.totalSlash = parseFloat(rewardItem.totalSlash);
-          if (rewardItem.totalBond) result.totalBond = parseFloat(rewardItem.totalBond);
-          if (latestReward && latestReward.amount) result.latestReward = parseFloat(latestReward.amount);
-          if (latestReward && latestReward.smartContract) result.smartContract = latestReward.smartContract;
+          if (rewardItem.totalReward) {
+            result.totalReward = parseFloat(rewardItem.totalReward);
+          }
+
+          if (rewardItem.totalSlash) {
+            result.totalSlash = parseFloat(rewardItem.totalSlash);
+          }
+
+          if (rewardItem.totalBond) {
+            result.totalBond = parseFloat(rewardItem.totalBond);
+          }
+
+          if (latestReward && latestReward.amount) {
+            result.latestReward = parseFloat(latestReward.amount);
+          }
+
+          if (latestReward && latestReward.smartContract) {
+            result.smartContract = latestReward.smartContract;
+          }
         }
       }
 
@@ -89,7 +103,9 @@ const getSubsquidStaking = async (accounts: string[], chain: string, callback: (
     }));
 
     for (const reward of rewards) {
-      if (reward.smartContract) parsedResult.smartContract = reward.smartContract;
+      if (reward.smartContract) {
+        parsedResult.smartContract = reward.smartContract;
+      }
 
       if (reward.totalReward) {
         if (parsedResult.totalReward) {

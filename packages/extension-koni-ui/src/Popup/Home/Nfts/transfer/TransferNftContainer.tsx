@@ -157,8 +157,11 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   }, []);
 
   const getItemImage = useCallback(() => {
-    if (nftItem.image && !imageError) return nftItem.image;
-    else if (collectionImage) return collectionImage;
+    if (nftItem.image && !imageError) {
+      return nftItem.image;
+    } else if (collectionImage) {
+      return collectionImage;
+    }
 
     return logo;
   }, [collectionImage, nftItem, imageError]);

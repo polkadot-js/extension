@@ -122,8 +122,11 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   }, [data]);
 
   const getItemImage = useCallback(() => {
-    if (data.image && !imageError) return data.image;
-    else if (collectionImage) return collectionImage;
+    if (data.image && !imageError) {
+      return data.image;
+    } else if (collectionImage) {
+      return collectionImage;
+    }
 
     return logo;
   }, [collectionImage, data, imageError]);

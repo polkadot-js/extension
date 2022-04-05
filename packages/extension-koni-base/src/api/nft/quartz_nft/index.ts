@@ -33,7 +33,9 @@ export default class QuartzNftApi extends BaseNftApi {
    * @returns number of created collection
    */
   public async getCreatedCollectionCount (): Promise<number> {
-    if (!this.dotSamaApi) return 0;
+    if (!this.dotSamaApi) {
+      return 0;
+    }
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
@@ -49,7 +51,9 @@ export default class QuartzNftApi extends BaseNftApi {
     * @returns the array of NFT token IDs
     */
   public async getAddressTokens (collectionId: number, address: string): Promise<any> {
-    if (!this.dotSamaApi) return;
+    if (!this.dotSamaApi) {
+      return;
+    }
 
     // noinspection TypeScriptValidateJSTypes
     // @ts-ignore
@@ -64,7 +68,9 @@ export default class QuartzNftApi extends BaseNftApi {
    * @returns collection properties
    */
   public async getCollectionProperties (collectionId: number) {
-    if (!this.dotSamaApi) return;
+    if (!this.dotSamaApi) {
+      return;
+    }
 
     // @ts-ignore
     // noinspection TypeScriptValidateJSTypes
@@ -83,7 +89,9 @@ export default class QuartzNftApi extends BaseNftApi {
     * @returns tokenData: Token data object
     */
   public async getNftData (collectionProperties: CollectionProperties, collectionId: number, tokenId: number, locale = 'en') {
-    if (!this.dotSamaApi) return;
+    if (!this.dotSamaApi) {
+      return;
+    }
 
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -139,7 +147,9 @@ export default class QuartzNftApi extends BaseNftApi {
 
       for (let i = 0; i < collectionCount; i++) {
         for (const address of this.addresses) {
-          if (collectionPropertiesMap[i] !== null) addressTokenDict.push({ i, account: address });
+          if (collectionPropertiesMap[i] !== null) {
+            addressTokenDict.push({ i, account: address });
+          }
         }
       }
 

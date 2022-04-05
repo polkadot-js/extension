@@ -3,14 +3,15 @@
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestCheckTransfer, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestCheckTransfer, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
+import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { getEVMTransactionObject, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
-import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
+import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
+import { dotSamaAPIMap, rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
@@ -674,7 +675,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private validateTransfer (from: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): [Array<TransferError>, KeyringPair | undefined, BN | undefined] {
+  private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
     const errors = [] as Array<TransferError>;
     let keypair: KeyringPair | undefined;
     let transferValue;
@@ -714,26 +715,48 @@ export default class KoniExtension extends Extension {
       });
     }
 
-    return [errors, keypair, transferValue];
+    let tokenInfo: TokenInfo | undefined;
+
+    if (token) {
+      const tokenInfo = await getTokenInfo(networkKey, dotSamaAPIMap[networkKey].api, token);
+
+      if (!tokenInfo) {
+        errors.push({
+          code: TransferErrorCode.INVALID_TOKEN,
+          message: 'Not found token from registry'
+        });
+      }
+
+      if (isEthereumAddress(from) && isEthereumAddress(to) && !(tokenInfo?.erc20Address)) {
+        errors.push({
+          code: TransferErrorCode.INVALID_TOKEN,
+          message: 'Not found ERC20 address for this token'
+        });
+      }
+    }
+
+    return [errors, keypair, transferValue, tokenInfo];
   }
 
-  private async checkTransfer ({ from, networkKey, to, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
-    const [errors, fromKeyPair, valueNumber] = this.validateTransfer(from, undefined, value, transferAll);
+  private async checkTransfer ({ from, networkKey, to, token, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
+    const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
 
     let fee = '0';
     let fromAccountFree = '0';
     let toAccountFree = '0';
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
-      // Estimate with EVM API
       [fromAccountFree, toAccountFree] = await Promise.all(
-        [getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+        [getFreeBalance(networkKey, from, token), getFreeBalance(networkKey, to, token)]
       );
       const txVal: string = transferAll ? fromAccountFree : (value || '0');
 
-      const rs = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
-
-      fee = rs[1];
+      // Estimate with EVM API
+      if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
+        [, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll);
+      } else {
+        [, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
+      }
     } else {
       // Estimate with DotSama API
       [fee, fromAccountFree, toAccountFree] = await Promise.all(
@@ -762,18 +785,30 @@ export default class KoniExtension extends Extension {
     } as ResponseCheckTransfer;
   }
 
-  private makeTransfer (id: string, port: chrome.runtime.Port, { from, networkKey, password, to, transferAll, value }: RequestTransfer): Array<TransferError> {
+  private async makeTransfer (id: string, port: chrome.runtime.Port, { from, networkKey, password, to, token, transferAll, value }: RequestTransfer): Promise<Array<TransferError>> {
     const callback = createSubscription<'pri(accounts.transfer)'>(id, port);
-    const [errors, fromKeyPair] = this.validateTransfer(from, password, value, transferAll);
+    const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, password, value, transferAll);
+
+    if (errors.length > 0) {
+      setTimeout(() => {
+        unsubscribe(id);
+      }, 500);
+
+      return errors;
+    }
 
     if (fromKeyPair && errors.length === 0) {
-      let transferProm: Promise<void>;
+      let transferProm: Promise<void> | undefined;
 
       if (isEthereumAddress(from) && isEthereumAddress(to)) {
         // Make transfer with EVM API
         const { privateKey } = this.accountExportPrivateKey({ address: from, password });
 
-        transferProm = makeEVMTransfer(networkKey, to, privateKey, value || '0', !!transferAll, callback);
+        if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
+          transferProm = makeERC20Transfer(tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll, callback);
+        } else {
+          transferProm = makeEVMTransfer(networkKey, to, privateKey, value || '0', !!transferAll, callback);
+        }
       } else {
         // Make transfer with Dotsama API
         transferProm = makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, callback);
@@ -874,7 +909,7 @@ export default class KoniExtension extends Extension {
       case 'pri(accounts.checkTransfer)':
         return await this.checkTransfer(request as RequestCheckTransfer);
       case 'pri(accounts.transfer)':
-        return this.makeTransfer(id, port, request as RequestTransfer);
+        return await this.makeTransfer(id, port, request as RequestTransfer);
       default:
         return super.handle(id, type, request, port);
     }

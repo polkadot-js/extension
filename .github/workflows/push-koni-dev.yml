@@ -1,9 +1,9 @@
 name: Koni Dev
 on:
+  pull_request: { }
   push:
     branches:
       - koni-dev
-      - 'koni/*'
 
 jobs:
   master:

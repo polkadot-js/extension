@@ -56,6 +56,7 @@ function Upload ({ className }: Props): React.ReactElement {
   const _onChangeFile = useCallback(
     (file: Uint8Array): void => {
       setFileError(false);
+      setIsPasswordError(false);
       setPassword('');
       setAccountsInfo(() => []);
 

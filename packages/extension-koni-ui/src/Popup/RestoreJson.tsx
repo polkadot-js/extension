@@ -55,6 +55,8 @@ function Upload ({ className }: Props): React.ReactElement {
 
   const _onChangeFile = useCallback(
     (file: Uint8Array): void => {
+      setFileError(false);
+      setPassword('');
       setAccountsInfo(() => []);
 
       let json: KeyringPair$Json | KeyringPairs$Json | undefined;
@@ -68,26 +70,33 @@ function Upload ({ className }: Props): React.ReactElement {
       }
 
       if (json === undefined) {
+        setFileError(true);
+
         return;
       }
 
-      if (isKeyringPairs$Json(json)) {
-        setRequirePassword(true);
-        json.accounts.forEach((account) => {
-          setAccountsInfo((old) => [...old, {
-            address: account.address,
-            genesisHash: account.meta.genesisHash,
-            name: account.meta.name
-          } as ResponseJsonGetAccountInfo]);
-        });
-      } else {
-        setRequirePassword(true);
-        jsonGetAccountInfo(json)
-          .then((accountInfo) => setAccountsInfo((old) => [...old, accountInfo]))
-          .catch((e) => {
-            setFileError(true);
-            console.error(e);
+      try {
+        if (isKeyringPairs$Json(json)) {
+          setRequirePassword(true);
+          json.accounts.forEach((account) => {
+            setAccountsInfo((old) => [...old, {
+              address: account.address,
+              genesisHash: account.meta.genesisHash,
+              name: account.meta.name
+            } as ResponseJsonGetAccountInfo]);
           });
+        } else {
+          setRequirePassword(true);
+          jsonGetAccountInfo(json)
+            .then((accountInfo) => setAccountsInfo((old) => [...old, accountInfo]))
+            .catch((e) => {
+              setFileError(true);
+              console.error(e);
+            });
+        }
+      } catch (e) {
+        console.error(e);
+        setFileError(true);
       }
     }, []
   );
@@ -149,6 +158,7 @@ function Upload ({ className }: Props): React.ReactElement {
               label={t<string>('Password for this file')}
               onChange={_onChangePass}
               type='password'
+              value={password}
             />
             {isPasswordError && (
               <Warning

@@ -12,6 +12,7 @@ import useTranslation from '../../hooks/useTranslation';
 import { createAccountSuri, createSeed, validateSeed } from '../../messaging';
 import { HeaderWithSteps } from '../../partials';
 import { DEFAULT_TYPE } from '../../util/defaultType';
+import CreateEthDerivationPath from './CreateEthDerivationPath';
 import Mnemonic from './Mnemonic';
 
 interface Props {
@@ -27,19 +28,19 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   const [seed, setSeed] = useState<null | string>(null);
   const [type, setType] = useState(DEFAULT_TYPE);
   const [name, setName] = useState('');
+  const [ethDerivePath, setEthDerivePath] = useState<string>("m/44'/60'/0'/0/0");
   const options = useGenesisHashOptions();
   const [genesisHash, setGenesis] = useState('');
   const chain = useMetadata(genesisHash, true);
 
   useEffect((): void => {
-    createSeed(undefined)
+    createSeed(undefined, undefined, type, ethDerivePath)
       .then(({ address, seed }): void => {
         setAddress(address);
         setSeed(seed);
       })
       .catch(console.error);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [type, ethDerivePath]);
 
   useEffect((): void => {
     if (seed) {
@@ -48,11 +49,11 @@ function CreateAccount ({ className }: Props): React.ReactElement {
         : DEFAULT_TYPE;
 
       setType(type);
-      validateSeed(seed, type)
+      validateSeed(seed, type, ethDerivePath)
         .then(({ address }) => setAddress(address))
         .catch(console.error);
     }
-  }, [seed, chain]);
+  }, [seed, chain, ethDerivePath]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {
@@ -82,7 +83,10 @@ function CreateAccount ({ className }: Props): React.ReactElement {
   );
 
   const _onChangeNetwork = useCallback(
-    (newGenesisHash: string) => setGenesis(newGenesisHash),
+    (newGenesisHash: string) => {
+      console.log('_onChangeNetwork', newGenesisHash);
+      setGenesis(newGenesisHash);
+    },
     []
   );
 
@@ -102,21 +106,28 @@ function CreateAccount ({ className }: Props): React.ReactElement {
         </div>
         {seed && (
           step === 1
-            ? (
+            ? (<>
+              <Dropdown
+                className={className}
+                label={t<string>('Network')}
+                onChange={_onChangeNetwork}
+                options={options}
+                value={genesisHash}
+              />
+              {type === 'ethereum'
+                ? <CreateEthDerivationPath
+                  derivePath={ethDerivePath}
+                  onChange={setEthDerivePath}
+                />
+                : null}
               <Mnemonic
                 onNextStep={_onNextStep}
                 seed={seed}
               />
+            </>
             )
             : (
               <>
-                <Dropdown
-                  className={className}
-                  label={t<string>('Network')}
-                  onChange={_onChangeNetwork}
-                  options={options}
-                  value={genesisHash}
-                />
                 <AccountNamePasswordCreation
                   buttonLabel={t<string>('Add the account with the generated seed')}
                   isBusy={isBusy}

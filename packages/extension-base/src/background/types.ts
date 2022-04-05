@@ -300,11 +300,13 @@ export interface RequestSeedCreate {
   length?: SeedLengths;
   seed?: string;
   type?: KeypairType;
+  customEthDerivationPath?: string;
 }
 
 export interface RequestSeedValidate {
   suri: string;
   type?: KeypairType;
+  customEthDerivationPath?: string;
 }
 
 // Responses

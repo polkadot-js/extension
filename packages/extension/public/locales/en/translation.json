@@ -161,5 +161,9 @@
   "I want to export all my accounts": "",
   "Notifications": "",
   "Search by name or network...": "",
+  "Use custom address index": "",
+  "Custom index": "",
+  "Use custom derivation index": "",
+  "secret derivation path": "",
   "Message signing is not supported for hardware wallets.": ""
 }

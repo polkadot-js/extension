@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - koni-dev
+      - 'koni/*'
 
 jobs:
   master:
@@ -25,6 +26,8 @@ jobs:
         DISCORD_WEBHOOK_ID: ${{ secrets.DISCORD_WEBHOOK_ID }}
         DISCORD_WEBHOOK_TOKEN: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
         GH_RELEASE_FILES: master-build.zip,master-src.zip
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        REF_NAME: ${{ github.ref_name }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
         yarn ${{ matrix.step }}

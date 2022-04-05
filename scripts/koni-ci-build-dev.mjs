@@ -35,9 +35,13 @@ function npmGetVersion () {
 }
 
 function uploadBuild(){
+  const refName = process.env.REF_NAME
+  const commitMessage = process.env.COMMIT_MESSAGE
   const nowTimestamp = new Date().getTime()
-  const newName = `./build-${npmGetVersion()}-${nowTimestamp}.zip`
+  const sRefName = refName.replace(/(\/)/g, '-');
+  const newName = `./${sRefName}-build-${npmGetVersion()}-${nowTimestamp}.zip`
   fs.renameSync('./master-build.zip', newName)
+  discordHook.send('Finish build ' + refName + ': '+ commitMessage)
   discordHook.sendFile(newName)
 }
 

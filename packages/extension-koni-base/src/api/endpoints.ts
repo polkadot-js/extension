@@ -94,6 +94,16 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
     decimals: 18
   },
+  astarEvm: {
+    chain: 'Astar - EVM',
+    genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
+    ss58Format: 5,
+    provider: 'wss://astar.api.onfinality.io/public-ws',
+    groups: ['POLKADOT_PARACHAIN'],
+    isEthereum: true,
+    nativeToken: 'ASTR',
+    decimals: 18
+  },
   parallel: {
     chain: 'Parallel',
     genesisHash: '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97',

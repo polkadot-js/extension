@@ -81,6 +81,12 @@ export const getRegistry = async (networkKey: string, api: ApiPromise) => {
   return chainRegistry;
 };
 
+export async function getTokenInfo (networkKey: string, api: ApiPromise, token: string): Promise<TokenInfo | undefined> {
+  const { tokenMap } = await getRegistry(networkKey, api);
+
+  return tokenMap[token];
+}
+
 export function initChainRegistrySubscription () {
   Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
     getRegistry(networkKey, api)

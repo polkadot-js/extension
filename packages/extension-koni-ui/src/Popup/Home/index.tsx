@@ -464,7 +464,7 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
 
   .home-tab-contents {
     flex: 1;
-    overflow: overlay;
+    overflow: auto;
   }
 
   .home-action-block {

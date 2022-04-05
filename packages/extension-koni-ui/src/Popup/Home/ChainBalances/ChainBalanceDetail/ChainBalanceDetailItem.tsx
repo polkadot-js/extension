@@ -59,7 +59,7 @@ function ChainBalanceDetailItem ({ accountInfo,
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       };
 
-      waitForElement(`.chain-balance-item__container.${networkKey}-detail`, callback);
+      waitForElement(`.chain-balance-item__container.${accountInfo.networkKey}-detail`, callback);
     }
   }, [accountInfo.networkKey, toggleBalanceDetail, isShowDetail]);
 

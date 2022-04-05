@@ -1,19 +1,19 @@
-// [object Object]
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export const waitForElement = (selector: string, callback: (element: Element) => any) => {
   let count = 0;
-  const poops = setInterval(function () {
+  const interval = setInterval(function () {
     const element = document.querySelector(selector);
 
     if (element) {
-      clearInterval(poops);
+      clearInterval(interval);
       callback(element);
     } else {
       count++;
 
       if (count >= 10) {
-        clearInterval(poops);
+        clearInterval(interval);
       }
     }
   }, 100);

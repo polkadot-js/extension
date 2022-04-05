@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.3.0 (Koni)
+## 0.3.1 (Koni)
 Build date: Apr 05, 2022. Complete internal security audit
 
 Update:

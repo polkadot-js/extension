@@ -519,7 +519,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 28,
     provider: 'wss://rpc.subsocial.network',
     groups: ['MAIN_NET'],
-    nativeToken: 'SUB',
+    nativeToken: 'SUB'
   },
   zeitgeist: {
     chain: 'Zeitgeist',
@@ -615,7 +615,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2114,
     nativeToken: 'TUR',
     crowdloanUrl: 'https://oak.tech/turing/check-reward/'
-  }
+  },
   mangatax: {
     chain: 'MangataX Public Testnet',
     genesisHash: '0x8032ad7a75a2b9732315592c672ec6d0ddf95308de03a19878ed8627ae8796cc',
@@ -623,7 +623,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://v4-prod-collator-01.mangatafinance.cloud',
     groups: ['TEST_NET'],
     nativeToken: 'MGAT'
-  },
+  }
 };
 
 export const EVM_NETWORKS = ethereumChains.reduce((previousValue, currentValue) => {

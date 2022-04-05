@@ -96,7 +96,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
   },
   astarEvm: {
     chain: 'Astar - EVM',
-    genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
+    genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6___EVM',
     ss58Format: 5,
     provider: 'wss://astar.api.onfinality.io/public-ws',
     groups: ['POLKADOT_PARACHAIN'],

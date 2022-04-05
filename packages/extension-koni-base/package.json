@@ -14,7 +14,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.2.10-1",
+  "version": "0.2.10-2",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "4.0.2-20",
@@ -36,10 +36,10 @@
     "@phala/typedefs": "0.2.30",
     "@polkadot/api": "^7.11.1",
     "@polkadot/api-derive": "^7.8.1",
-    "@polkadot/extension-base": "^0.2.10-1",
-    "@polkadot/extension-chains": "^0.2.10-1",
-    "@polkadot/extension-dapp": "^0.2.10-1",
-    "@polkadot/extension-inject": "^0.2.10-1",
+    "@polkadot/extension-base": "^0.2.10-2",
+    "@polkadot/extension-chains": "^0.2.10-2",
+    "@polkadot/extension-dapp": "^0.2.10-2",
+    "@polkadot/extension-inject": "^0.2.10-2",
     "@polkadot/keyring": "^8.3.1",
     "@polkadot/networks": "^8.3.1",
     "@polkadot/phishing": "^0.8.7",
@@ -69,6 +69,6 @@
     "web3-eth-contract": "^1.7.1"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "^0.2.10-1"
+    "@polkadot/extension-mocks": "^0.2.10-2"
   }
 }

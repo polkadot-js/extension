@@ -1,15 +1,15 @@
      465	Jaco                          	0.42.5 (#969)
-     116	Nam Phạm                      	fix es-lint
-      96	AnhMTV                        	Fix github build error
+     155	Nam Phạm                      	
+     121	AnhMTV                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      60	quangdo                       	Update AccountQrModal, Tooltip style
-      50	leewong                       	# update condition to display correct message on send fund screen
+      63	quangdo                       	Update UI Ledger screen
+      54	leewong                       	#92: Add suffix to Astar EVM genesis hash to prevent some unexpected issues
+      50	Dominhquangdev                	Update Settings screen, Update Restore Json
       42	lw                            	# update balance display
-      41	Dominhquangdev                	Update SendFund screen, ChainBalances tab
-      13	Hieu Dao                      	Update issue templates
+      16	Hieu Dao                      	
       10	Trang Trịnh                   	api get karura and acala nfts
+       9	Minh Le                       	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
-       7	Minh Le                       	refactor code rmrk_nft api
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
@@ -20,6 +20,8 @@
        2	carumusan                     	Support ipfs and ipns urls (#667)
        2	ccris02                       	Adding Polish Language Option to the Extension (#761)
        2	joe petrowski                 	add plasm (#462)
+       2	lw-cdm                        	
+       2	minhld1029                    	[Account] [Import] [Batch] fix UI bug
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)

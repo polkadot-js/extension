@@ -60,7 +60,7 @@ function NftContainer (
     totalCollection,
     totalItems }: Props
 ): React.ReactElement<Props> {
-  const selectedNftCollection = useFetchNftExtra(showTransferredCollection);
+  const selectedNftCollection = useFetchNftExtra(showTransferredCollection, setShowTransferredCollection);
 
   const handleShowCollectionDetail = useCallback((data: _NftCollection) => {
     setShowCollectionDetail(true);

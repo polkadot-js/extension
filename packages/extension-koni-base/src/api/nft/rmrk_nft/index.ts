@@ -267,22 +267,14 @@ export class RmrkNftApi extends BaseNftApi {
         updateReady(true);
       });
     } catch (e) {
-      console.log('Failed to fetch rmrk nft', e);
+      console.error('Failed to fetch rmrk nft', e);
     }
-
-    // const end = performance.now();
-    //
-    // console.log(`Fetched ${allNfts.length} nfts from rmrk`);
-    //
-    // console.log(`rmrk took ${end - start}ms`);
   }
 
   public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`);
-
       return 0;
     }
 

@@ -53,14 +53,10 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
 }
 
 export class NftHandler {
-  count = 0;
   apiPromises: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
-  prevAddresses: string[] = []; // handle change account
   total = 0;
-  allCollections: NftCollection[] = [];
-  allItems: NftItem[] = [];
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
     if (addresses) this.addresses = addresses;
@@ -99,10 +95,10 @@ export class NftHandler {
           }
         });
 
-        console.log(`${this.handlers.length} nft connected`);
+        // console.log(`${this.handlers.length} nft connected`);
       }
     } catch (e) {
-      console.log('error setting up nft handlers', e);
+      console.error('error setting up nft handlers', e);
     }
   }
 
@@ -138,71 +134,6 @@ export class NftHandler {
         },
         updateReady);
     }));
-
-    console.log('handled nft ok');
-
-    // await Promise.all(this.handlers.map(async (handler) => {
-    //   const currentChain = handler.getChain() as string;
-    //
-    //   const timeout = new Promise((resolve) => {
-    //     const id = setTimeout(() => {
-    //       clearTimeout(id);
-    //       resolve(0);
-    //     }, NFT_FETCHING_TIMEOUT);
-    //   });
-    //
-    //   await Promise.race([
-    //     handler.fetchNfts(
-    //       (data: NftItem) => {
-    //         if (!this.existItem(data)) {
-    //           this.allItems.push(data);
-    //           updateItem(data);
-    //         }
-    //       },
-    //       (data: NftCollection) => {
-    //         if (!this.existCollection(data)) {
-    //           this.allCollections.push(data);
-    //           updateCollection(data, true);
-    //         } else {
-    //           updateCollection(null, true);
-    //         }
-    //       }),
-    //     timeout
-    //   ]).then((res) => {
-    //     if (res === 1) {
-    //       console.log(`nft fetching for ${currentChain} ok`);
-    //     } else {
-    //       console.log(`nft fetching for ${currentChain} failed`);
-    //     }
-    //   });
-    // }));
-
-    // TODO: clear outdated item
-
-    // let data: NftCollection[] = [];
-    //
-    // Object.values(dataMap).forEach((collection) => {
-    //   data = [...data, ...collection];
-    // });
-    //
-    //
-    //
-    // if (isAddressesEqual(this.addresses, this.prevAddresses)) {
-    //   // console.log('nft address no change');
-    //
-    //   if (total < this.total) {
-    //     this.total = total;
-    //     this.allCollections = data;
-    //   } else {
-    //     this.total = total;
-    //     this.allCollections = this.sortData(data);
-    //   }
-    // } else {
-    //   // console.log('nft address change');
-    //   this.total = total;
-    //   this.allCollections = data;
-    //   this.prevAddresses = this.addresses;
-    // }
   }
 
   public parseAssetId (id: string) {

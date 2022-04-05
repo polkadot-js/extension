@@ -12,10 +12,14 @@ function updateNftTransfer (nftData: NftTransferExtra): void {
   setNftTransfer(nftData).catch(console.error);
 }
 
-export default function useFetchNftExtra (isShown: boolean): _NftCollection | undefined {
+export default function useFetchNftExtra (isShown: boolean, updateShown: (val: boolean) => void): _NftCollection | undefined {
   const { transferNftExtra } = useSelector((state: RootState) => state);
 
-  if (transferNftExtra.cronUpdate && transferNftExtra.forceUpdate) return undefined;
+  if (transferNftExtra.cronUpdate && transferNftExtra.forceUpdate) {
+    updateShown(true);
+
+    return undefined;
+  }
 
   if (!isShown && transferNftExtra.selectedNftCollection) {
     const rawCollection = transferNftExtra.selectedNftCollection;

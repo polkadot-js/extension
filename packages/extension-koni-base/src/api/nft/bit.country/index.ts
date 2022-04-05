@@ -92,8 +92,6 @@ export class BitCountryNftApi extends BaseNftApi {
       await this.connect();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`);
-
       return 0;
     }
 
@@ -145,7 +143,7 @@ export class BitCountryNftApi extends BaseNftApi {
         updateReady(true);
       }));
     } catch (e) {
-      console.log('Failed to fetch bit.country nft', e);
+      console.error('Failed to fetch bit.country nft', e);
     }
   }
 }

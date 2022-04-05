@@ -136,14 +136,8 @@ export class KaruraNftApi extends BaseNftApi {
         updateReady(true);
       }));
     } catch (e) {
-      console.log('Failed to fetch karura nft', e);
+      console.error('Failed to fetch karura nft', e);
     }
-
-    // const end = performance.now();
-    //
-    // console.log(`karura took ${end - start}ms`);
-    //
-    // console.log(`Fetched ${assetIds.length} nfts from karura`);
   }
 
   public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
@@ -151,8 +145,6 @@ export class KaruraNftApi extends BaseNftApi {
       await this.connect();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`);
-
       return 0;
     }
 

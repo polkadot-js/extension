@@ -9,7 +9,7 @@ import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import {ERC721Contract, TestERC721Contract} from '@polkadot/extension-koni-base/api/web3/web3';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -27,6 +27,7 @@ export class Web3NftApi extends BaseNftApi {
 
   connectWeb3 () {
     this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
+    // console.log(`${this.chain as string} nft connected`);
   }
 
   override parseUrl (input: string): string | undefined {
@@ -81,7 +82,7 @@ export class Web3NftApi extends BaseNftApi {
     if (!this.web3) return;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
+    const contract = new this.web3.eth.Contract(TestERC721Contract, smartContract);
     let ownItem = false;
 
     let collectionImage: string | undefined;
@@ -127,7 +128,7 @@ export class Web3NftApi extends BaseNftApi {
               ownItem = true;
             }
           } catch (e) {
-            console.log(`error parsing item for ${this.chain as string} nft`, e);
+            console.error(`error parsing item for ${this.chain as string} nft`, e);
           }
         }
       }));
@@ -159,8 +160,6 @@ export class Web3NftApi extends BaseNftApi {
       this.connectWeb3();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`, e);
-
       return 0;
     }
 

@@ -51,7 +51,7 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
       />
 
       {
-        isApiReady
+        isApiReady || currentNetwork.isEthereum
           ? (
             <TransferNftContainer
               api={api}
@@ -138,7 +138,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
         // @ts-ignore
       } else if (SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1) {
         setWeb3TransferParams({
-          tx: transferMeta.web3Tx,
+          rawTx: transferMeta.web3RawTx,
           estimatedGas: transferMeta.estimatedGas
         } as Web3TransferParams);
       }

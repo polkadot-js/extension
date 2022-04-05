@@ -204,12 +204,8 @@ export default class QuartzNftApi extends BaseNftApi {
         }
       }));
     } catch (e) {
-      console.log('Failed to fetch quartz nft', e);
+      console.error('Failed to fetch quartz nft', e);
     }
-
-    // console.log(`quartz took ${performance.now() - start}ms`);
-    //
-    // console.log(`Fetched ${total} nfts from quartz`);
   }
 
   public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
@@ -217,8 +213,6 @@ export default class QuartzNftApi extends BaseNftApi {
       await this.connect();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`);
-
       return 0;
     }
 

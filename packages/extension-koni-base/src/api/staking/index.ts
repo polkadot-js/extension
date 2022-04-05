@@ -6,6 +6,7 @@ import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { categoryAddresses, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 import { ethereumChains } from '../dotsama/api-helper';
+import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@polkadot/extension-koni-base/constants';
 
 interface LedgerData {
   active: string,
@@ -42,7 +43,9 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
-    allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
+    if (IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) < 0) {
+      allApiPromise.push({ chain: networkKey, api: dotSamaAPIMap[networkKey] });
+    }
   });
 
   const unsubPromises = await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {

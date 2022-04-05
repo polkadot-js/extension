@@ -24,7 +24,7 @@ export class Web3NftApi extends BaseNftApi {
       this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
     } else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) {
       this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
-    } else if (chain === SUPPORTED_NFT_NETWORKS.astar) {
+    } else if (chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
       this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
     }
   }

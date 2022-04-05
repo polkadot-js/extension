@@ -11,7 +11,7 @@ import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-bas
 import { getRegistry, getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
-import { MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import { IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
@@ -213,7 +213,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     const networkAPI = await apiProps.isReady;
     const useAddresses = ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
 
-    if (!useAddresses || useAddresses.length === 0) {
+    if (!useAddresses || useAddresses.length === 0 || IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) > -1) {
       // Return zero balance if not have any address
       const zeroBalance = {
         state: APIItemState.READY,

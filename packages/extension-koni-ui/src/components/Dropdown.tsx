@@ -25,8 +25,12 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
 
   const handleChange = useCallback(
     ({ value }): void => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      onChange && onChange(value.trim());
+      if (typeof value === 'string') {
+        value = value.trim();
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      onChange && onChange(value);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       setSelectedValue(value);
     }, [onChange]

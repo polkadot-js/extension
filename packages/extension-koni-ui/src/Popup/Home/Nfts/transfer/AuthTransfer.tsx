@@ -231,7 +231,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [account?.account?.address, chain, collectionId, extrinsic, nftItem, recipientAddress, senderAccount.address, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unlockSubstrate]);
 
   const handleSignAndSubmit = useCallback(() => {
-    if (loading) return;
+    if (loading) {
+      return;
+    }
 
     setLoading(true);
 
@@ -254,7 +256,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   }, [extrinsic]);
 
   const hideConfirm = useCallback(() => {
-    if (!loading) setShowConfirm(false);
+    if (!loading) {
+      setShowConfirm(false);
+    }
   }, [loading, setShowConfirm]);
 
   return (

@@ -35,7 +35,9 @@ async function rmrkTransferHandler (api: ApiPromise, senderAddress: string, reci
   try {
     const remark = params.remark as string;
 
-    if (!remark) return {};
+    if (!remark) {
+      return {};
+    }
 
     const parsedRemark = remark.concat(recipientAddress.replace(
       /\\s/g,

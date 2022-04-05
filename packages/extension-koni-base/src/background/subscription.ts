@@ -133,7 +133,9 @@ export class KoniSubcription {
           state.updateNft(data);
         },
         (data) => {
-          if (data !== null) state.updateNftCollection(data);
+          if (data !== null) {
+            state.updateNftCollection(data);
+          }
         },
         (ready) => {
           state.updateNftReady(ready);

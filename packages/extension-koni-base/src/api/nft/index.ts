@@ -63,7 +63,9 @@ export class NftHandler {
   allItems: NftItem[] = [];
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
-    if (addresses) this.addresses = addresses;
+    if (addresses) {
+      this.addresses = addresses;
+    }
 
     for (const item in SUPPORTED_NFT_NETWORKS) {
       this.apiPromises.push({ chain: item, api: dotSamaAPIMap[item] });

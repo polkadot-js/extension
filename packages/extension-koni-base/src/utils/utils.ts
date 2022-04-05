@@ -89,7 +89,9 @@ export function inJestTest () {
 }
 
 export const parseIpfsLink = (ipfsLink: string) => {
-  if (!ipfsLink.includes('ipfs://ipfs/')) return ipfsLink;
+  if (!ipfsLink.includes('ipfs://ipfs/')) {
+    return ipfsLink;
+  }
 
   return RMRK_PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
 };
@@ -98,16 +100,22 @@ export function hexToStr (buf: string): string {
   let str = '';
   let hexStart = buf.indexOf('0x');
 
-  if (hexStart < 0) hexStart = 0;
-  else hexStart = 2;
+  if (hexStart < 0) {
+    hexStart = 0;
+  } else {
+    hexStart = 2;
+  }
 
   for (let i = hexStart, strLen = buf.length; i < strLen; i += 2) {
     const ch = buf[i] + buf[i + 1];
     const num = parseInt(ch, 16);
 
     // eslint-disable-next-line eqeqeq
-    if (num != 0) str += String.fromCharCode(num);
-    else break;
+    if (num != 0) {
+      str += String.fromCharCode(num);
+    } else {
+      break;
+    }
   }
 
   return str;
@@ -129,8 +137,11 @@ export function hexToUTF16 (hex: string): Uint8Array {
   const buf = [];
   let hexStart = hex.indexOf('0x');
 
-  if (hexStart < 0) hexStart = 0;
-  else hexStart = 2;
+  if (hexStart < 0) {
+    hexStart = 0;
+  } else {
+    hexStart = 2;
+  }
 
   for (let i = hexStart, strLen = hex.length; i < strLen; i += 2) {
     const ch = hex[i] + hex[i + 1];
@@ -157,7 +168,9 @@ export const isValidAddress = (address: string) => {
 };
 
 export const toUnit = (balance: number, decimals: number) => {
-  if (balance === 0) return 0;
+  if (balance === 0) {
+    return 0;
+  }
 
   return balance / (10 ** decimals);
 };
@@ -185,10 +198,14 @@ export const convertFundStatus = (status: string) => {
 };
 
 export const isAddressesEqual = (addresses: string[], prevAddresses: string[]) => {
-  if (addresses.length !== prevAddresses.length) return false;
+  if (addresses.length !== prevAddresses.length) {
+    return false;
+  }
 
   for (const address of addresses) {
-    if (!prevAddresses.includes(address)) return false;
+    if (!prevAddresses.includes(address)) {
+      return false;
+    }
   }
 
   return true;

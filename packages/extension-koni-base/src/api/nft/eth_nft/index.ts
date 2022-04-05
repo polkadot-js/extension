@@ -20,9 +20,13 @@ export class Web3NftApi extends BaseNftApi {
   constructor (addresses: string[], chain: string) {
     super(undefined, addresses, chain);
 
-    if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
-    else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
-    else if (chain === SUPPORTED_NFT_NETWORKS.astar) this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
+    if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) {
+      this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
+    } else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) {
+      this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
+    } else if (chain === SUPPORTED_NFT_NETWORKS.astar) {
+      this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
+    }
   }
 
   connectWeb3 () {
@@ -30,9 +34,13 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   override parseUrl (input: string): string | undefined {
-    if (!input) return undefined;
+    if (!input) {
+      return undefined;
+    }
 
-    if (isUrl(input)) return input;
+    if (isUrl(input)) {
+      return input;
+    }
 
     if (input.includes('ipfs://')) {
       return RMRK_PINATA_SERVER + input.split('ipfs://')[1];
@@ -78,7 +86,9 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
-    if (!this.web3) return;
+    if (!this.web3) {
+      return;
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
@@ -87,7 +97,9 @@ export class Web3NftApi extends BaseNftApi {
     let collectionImage: string | undefined;
 
     await Promise.all(this.addresses.map(async (address) => {
-      if (!isEthereumAddress(address)) return;
+      if (!isEthereumAddress(address)) {
+        return;
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const balance = (await contract.methods.balanceOf(address).call()) as unknown as number;
@@ -122,7 +134,10 @@ export class Web3NftApi extends BaseNftApi {
             parsedItem.id = tokenId.toString();
 
             if (parsedItem) {
-              if (parsedItem.image) collectionImage = parsedItem.image;
+              if (parsedItem.image) {
+                collectionImage = parsedItem.image;
+              }
+
               updateItem(parsedItem);
               ownItem = true;
             }
@@ -147,7 +162,9 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
-    if (!this.targetContracts) return;
+    if (!this.targetContracts) {
+      return;
+    }
 
     await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
       return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection, updateReady);

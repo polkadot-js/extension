@@ -37,11 +37,17 @@ export class AcalaNftApi extends BaseNftApi {
   }
 
   override parseUrl (input: string): string | undefined {
-    if (!input || input.length === 0) return undefined;
+    if (!input || input.length === 0) {
+      return undefined;
+    }
 
-    if (isUrl(input)) return input;
+    if (isUrl(input)) {
+      return input;
+    }
 
-    if (!input.includes('ipfs://')) { return CLOUDFLARE_SERVER + input; }
+    if (!input.includes('ipfs://')) {
+      return CLOUDFLARE_SERVER + input;
+    }
 
     return CLOUDFLARE_SERVER + input.split('ipfs://')[1];
   }
@@ -53,7 +59,9 @@ export class AcalaNftApi extends BaseNftApi {
    * @param addresses
    */
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
-    if (!this.dotSamaApi) return [];
+    if (!this.dotSamaApi) {
+      return [];
+    }
 
     let accountAssets: any[] = [];
 
@@ -77,11 +85,15 @@ export class AcalaNftApi extends BaseNftApi {
   }
 
   private async getCollectionDetails (collectionId: number | string): Promise<Record<string, any> | null> {
-    if (!this.dotSamaApi) return null;
+    if (!this.dotSamaApi) {
+      return null;
+    }
 
     const metadataCollection = (await this.dotSamaApi.api.query.ormlNFT.classes(collectionId)).toHuman() as Record<string, any>;
 
-    if (!metadataCollection?.metadata) return null;
+    if (!metadataCollection?.metadata) {
+      return null;
+    }
 
     const data = await getMetadata(metadataCollection?.metadata as string) as unknown as Collection;
 
@@ -89,7 +101,9 @@ export class AcalaNftApi extends BaseNftApi {
   }
 
   private async getTokenDetails (assetId: AssetId): Promise<Token | null> {
-    if (!this.dotSamaApi) return null;
+    if (!this.dotSamaApi) {
+      return null;
+    }
 
     return (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
   }
@@ -171,7 +185,10 @@ const headers = {
 const getMetadata = (metadataUrl: string) => {
   let url: string | null = metadataUrl;
 
-  if (!metadataUrl) return null;
+  if (!metadataUrl) {
+    return null;
+  }
+
   url = CLOUDFLARE_SERVER + metadataUrl + '/metadata.json';
 
   return fetch(url, {

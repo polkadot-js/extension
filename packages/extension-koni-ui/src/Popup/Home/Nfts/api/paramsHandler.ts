@@ -18,7 +18,9 @@ function acalaParser (nftItem: NftItem) {
 }
 
 function rmrkParser (nftItem: NftItem) {
-  if (!nftItem.rmrk_ver) return {};
+  if (!nftItem.rmrk_ver) {
+    return {};
+  }
 
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const remark = `${RMRK_PREFIX}::${RMRK_OP_TYPE}::${nftItem.rmrk_ver}::${nftItem.id}::`;

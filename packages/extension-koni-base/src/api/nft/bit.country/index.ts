@@ -33,17 +33,25 @@ export class BitCountryNftApi extends BaseNftApi {
   }
 
   override parseUrl (input: string): string | undefined {
-    if (!input || input.length === 0) return undefined;
+    if (!input || input.length === 0) {
+      return undefined;
+    }
 
-    if (isUrl(input)) return input;
+    if (isUrl(input)) {
+      return input;
+    }
 
-    if (!input.includes('ipfs://')) { return BIT_COUNTRY_SERVER + input; }
+    if (!input.includes('ipfs://')) {
+      return BIT_COUNTRY_SERVER + input;
+    }
 
     return BIT_COUNTRY_SERVER + input.split('ipfs://')[1];
   }
 
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
-    if (!this.dotSamaApi) return [];
+    if (!this.dotSamaApi) {
+      return [];
+    }
 
     let accountAssets: any[] = [];
 
@@ -66,22 +74,30 @@ export class BitCountryNftApi extends BaseNftApi {
   }
 
   private async getTokenDetails (assetId: AssetId): Promise<Record<string, any> | null> {
-    if (!this.dotSamaApi) return null;
+    if (!this.dotSamaApi) {
+      return null;
+    }
 
     const onChainMeta = (await this.dotSamaApi.api.query.ormlNFT.tokens(assetId.classId, assetId.tokenId)).toHuman() as unknown as Token;
 
-    if (!onChainMeta.metadata) return null;
+    if (!onChainMeta.metadata) {
+      return null;
+    }
 
     return await fetch(BIT_COUNTRY_SERVER + onChainMeta.metadata)
       .then((resp) => resp.json()) as Record<string, any>;
   }
 
   private async getCollectionDetails (collectionId: string | number): Promise<Record<string, any> | null> {
-    if (!this.dotSamaApi) return null;
+    if (!this.dotSamaApi) {
+      return null;
+    }
 
     const metadataCollection = (await this.dotSamaApi.api.query.ormlNFT.classes(collectionId)).toHuman() as unknown as Collection;
 
-    if (!metadataCollection.metadata) return null;
+    if (!metadataCollection.metadata) {
+      return null;
+    }
 
     return await fetch(BIT_COUNTRY_SERVER + metadataCollection.metadata)
       .then((resp) => resp.json()) as Record<string, any>;

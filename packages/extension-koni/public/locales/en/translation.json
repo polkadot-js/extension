@@ -295,5 +295,8 @@
   "Block Explorer (Optional)": "",
   "Save": "",
   "Disconnect All": "",
-  "Connect All": ""
+  "Connect All": "",
+  "Forget All": "",
+  "Forget Site": "",
+  "Choose the account(s) you’d like to connect": ""
 }

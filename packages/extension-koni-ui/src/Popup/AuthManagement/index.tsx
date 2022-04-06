@@ -79,6 +79,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
         showSubHeader
         smallMargin
         subHeaderName={t<string>('Manage Website Access')}
+        to='/account/settings'
       >
         <div className='auth-management-input-filter'>
           <InputFilter

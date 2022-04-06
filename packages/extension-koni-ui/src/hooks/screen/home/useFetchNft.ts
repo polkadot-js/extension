@@ -45,7 +45,7 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
   if (!showAll) {
     totalItems = 0;
     nftCollections.forEach((collection) => {
-      if (collection.chain && collection.chain === networkKey.toLowerCase()) {
+      if (collection.chain && collection.chain.toLowerCase() === networkKey.toLowerCase()) {
         filteredNftCollections.push(collection);
         totalItems += collection.nftItems.length;
       }

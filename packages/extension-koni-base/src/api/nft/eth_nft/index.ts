@@ -31,6 +31,7 @@ export class Web3NftApi extends BaseNftApi {
 
   connectWeb3 () {
     this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
+    // console.log(`${this.chain as string} nft connected`);
   }
 
   override parseUrl (input: string): string | undefined {
@@ -142,7 +143,7 @@ export class Web3NftApi extends BaseNftApi {
               ownItem = true;
             }
           } catch (e) {
-            console.log(`error parsing item for ${this.chain as string} nft`, e);
+            console.error(`error parsing item for ${this.chain as string} nft`, e);
           }
         }
       }));
@@ -176,8 +177,6 @@ export class Web3NftApi extends BaseNftApi {
       this.connectWeb3();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`, e);
-
       return 0;
     }
 

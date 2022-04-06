@@ -3821,6 +3821,7 @@ __metadata:
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@babel/runtime": ^7.16.7
+    "@ethereumjs/common": ^2.6.3
     "@polkadot/api": ^7.3.1
     "@polkadot/extension-chains": ^0.3.1
     "@polkadot/extension-dapp": ^0.3.1
@@ -3835,8 +3836,10 @@ __metadata:
     "@polkadot/ui-settings": ^0.89.1
     "@polkadot/util": ^8.3.1
     "@polkadot/util-crypto": ^8.3.1
+    ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     rxjs: ^7.5.1
+    web3: ^1.7.1
   languageName: unknown
   linkType: soft
 
@@ -3917,6 +3920,7 @@ __metadata:
     "@docknetwork/node-types": 0.6.0
     "@edgeware/node-types": 3.6.2-wako
     "@equilab/definitions": 1.4.11
+    "@ethereumjs/common": ^2.6.3
     "@interlay/interbtc-types": 1.5.10
     "@kiltprotocol/type-definitions": 0.1.23
     "@laminar/type-definitions": 0.3.1
@@ -3948,6 +3952,7 @@ __metadata:
     "@zeroio/type-definitions": 0.0.14
     axios: ^0.24.0
     cross-fetch: ^3.1.5
+    ethereumjs-tx: ^2.1.2
     eventemitter3: ^4.0.7
     graphql: ^16.3.0
     moonbeam-types-bundle: 2.0.3

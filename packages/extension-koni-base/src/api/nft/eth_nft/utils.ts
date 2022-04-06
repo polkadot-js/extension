@@ -134,6 +134,10 @@ export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
     name: ASTAR_NFT_CONTRACT_NAME.KONGZ_OF_ASTAR,
     smartContract: '0xD4d23b6A848de0e43910D4edaA414254A8B569e3'
   }
+  // {
+  //   name: 'test',
+  //   smartContract: '0xc61615DfF45BC2aB50BCE15fd190EBb913b852C9'
+  // }
 ];
 
 export interface ContractInfo {

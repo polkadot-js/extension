@@ -172,7 +172,7 @@ export default styled(MetamaskPrivateKeyImport)(({ theme }: ThemeProps) => `
   }
 
   .seed-and-path__seed-input {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     color: ${theme.textColor2};
     textarea {
       height: 80px;
@@ -185,7 +185,7 @@ export default styled(MetamaskPrivateKeyImport)(({ theme }: ThemeProps) => `
   }
 
   .seed-and-path__error {
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
   }
 
   .account-info-item {

@@ -16,12 +16,12 @@ import { assert } from '@polkadot/util';
 import { MetadataStore } from '../../stores';
 import { withErrorLog } from './helpers';
 
-interface Resolver <T> {
+export interface Resolver <T> {
   reject: (error: Error) => void;
   resolve: (result: T) => void;
 }
 
-interface AuthRequest extends Resolver<boolean> {
+export interface AuthRequest extends Resolver<boolean> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
@@ -36,6 +36,7 @@ export interface AuthUrlInfo {
   isAllowed: boolean;
   origin: string;
   url: string;
+  isAllowedMap: Record<string, boolean>
 }
 
 interface MetaRequest extends Resolver<boolean> {
@@ -199,14 +200,14 @@ export default class State {
     return this.#authUrls;
   }
 
-  private popupClose (): void {
+  protected popupClose (): void {
     this.#windows.forEach((id: number) =>
       withErrorLog(() => chrome.windows.remove(id))
     );
     this.#windows = [];
   }
 
-  private popupOpen (): void {
+  protected popupOpen (): void {
     this.#notification !== 'extension' &&
       chrome.windows.create(
         this.#notification === 'window'
@@ -223,11 +224,13 @@ export default class State {
     const complete = (result: boolean | Error) => {
       const isAllowed = result === true;
       const { idStr, request: { origin }, url } = this.#authRequests[id];
+      const isAllowedMap = {};
 
       this.#authUrls[this.stripUrl(url)] = {
         count: 0,
         id: idStr,
         isAllowed,
+        isAllowedMap,
         origin,
         url
       };
@@ -289,7 +292,7 @@ export default class State {
     };
   };
 
-  private stripUrl (url: string): string {
+  public stripUrl (url: string): string {
     assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');

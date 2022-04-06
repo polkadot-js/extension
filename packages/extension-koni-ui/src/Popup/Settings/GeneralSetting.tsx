@@ -11,7 +11,7 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
 
-import { Checkbox, HorizontalLabelToggle, MenuItem, SimpleDropdown, themes, ThemeSwitchContext } from '../../components';
+import { Dropdown, HorizontalLabelToggle, MenuItem, themes, ThemeSwitchContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
 
@@ -24,15 +24,16 @@ const notificationOptions = ['Extension', 'PopUp', 'Window']
 
 function GeneralSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [camera, setCamera] = useState(settings.camera === 'on');
   const [notification, updateNotification] = useState(settings.notification);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const setTheme = useContext(ThemeSwitchContext);
   const languageOptions = useMemo(() => getLanguageOptions(), []);
 
   useEffect(() => {
-    settings.set({ camera: camera ? 'on' : 'off' });
-  }, [camera]);
+    if (settings.i18nLang === 'default') {
+      settings.set({ i18nLang: 'en' });
+    }
+  }, []);
 
   const _onChangeNotification = useCallback(
     (value: string): void => {
@@ -81,7 +82,7 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
           className='setting'
           title={t<string>('Language')}
         >
-          <SimpleDropdown
+          <Dropdown
             className='dropdown'
             label=''
             onChange={_onChangeLang}
@@ -93,25 +94,12 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
           className='setting'
           title={t<string>('Notifications')}
         >
-          <SimpleDropdown
+          <Dropdown
             className='dropdown'
             label=''
             onChange={_onChangeNotification}
             options={notificationOptions}
             value={notification}
-          />
-        </MenuItem>
-        {/* </div> */}
-
-        <MenuItem
-          className='setting'
-          title={t<string>('External accounts and Access')}
-        >
-          <Checkbox
-            checked={camera}
-            className='checkbox camera'
-            label={t<string>('Allow QR Camera Access')}
-            onChange={setCamera}
           />
         </MenuItem>
       </div>

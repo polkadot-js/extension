@@ -220,6 +220,7 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
 
           {!!error && !!seed && (
             <Warning
+              className='seed-and-path__error'
               isDanger
             >
               {error}
@@ -265,7 +266,7 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   }
 
   .seed-and-path-wrapper {
-    padding-bottom: 15px;
+    padding-bottom: 5px;
   }
 
   .next-step-btn {
@@ -279,13 +280,14 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
 
   .seed-and-path__genesis-selection {
     line-height: 26px;
+    margin-bottom: 10px;
     label {
       color: ${theme.textColor2};
     }
   }
 
   .seed-and-path__seed-input {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     color: ${theme.textColor2};
     textarea {
       height: 80px;
@@ -298,7 +300,7 @@ export default styled(SeedAndPath)(({ theme }: ThemeProps) => `
   }
 
   .seed-and-path__error {
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
   }
 
   .account-info-item {

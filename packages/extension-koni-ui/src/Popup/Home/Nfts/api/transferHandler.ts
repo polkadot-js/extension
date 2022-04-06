@@ -126,7 +126,9 @@ async function web3TransferHandler (networkKey: string, senderAddress: string, r
     params
   });
 
-  if (estimatedFee === null || tx === null) return null;
+  if (estimatedFee === null || tx === null) {
+    return null;
+  }
 
   return {
     web3RawTx: tx,

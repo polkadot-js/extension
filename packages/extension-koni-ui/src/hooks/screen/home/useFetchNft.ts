@@ -32,7 +32,7 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
     };
 
     for (const item of rawItems) {
-      if (item.collectionId === collection.collectionId) {
+      if (item.collectionId === collection.collectionId && item.chain === collection.chain) {
         parsedCollection.nftItems.push(item);
       }
     }

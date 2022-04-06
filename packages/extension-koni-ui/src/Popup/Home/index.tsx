@@ -384,6 +384,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           <NftContainer
             chosenCollection={chosenNftCollection}
             chosenItem={chosenNftItem}
+            currentNetwork={networkKey}
             loading={loadingNft}
             nftList={nftList}
             page={nftPage}

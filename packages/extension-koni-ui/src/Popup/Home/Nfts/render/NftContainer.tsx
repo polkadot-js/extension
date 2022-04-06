@@ -24,6 +24,7 @@ interface Props extends ThemeProps {
   loading: boolean;
   page: number;
   setPage: (newPage: number) => void;
+  currentNetwork: string;
 
   showTransferredCollection: boolean;
   setShowTransferredCollection: (val: boolean) => void;
@@ -45,6 +46,7 @@ function NftContainer (
   { chosenCollection,
     chosenItem,
     className,
+    currentNetwork,
     loading,
     nftList,
     page,
@@ -82,6 +84,11 @@ function NftContainer (
       setShowCollectionDetail(false);
     }
   }, [loading, setPage, setShowCollectionDetail, setShowItemDetail]);
+
+  useEffect(() => {
+    setShowCollectionDetail(false);
+    setPage(1);
+  }, [currentNetwork, setPage, setShowCollectionDetail]);
 
   const handleHideCollectionDetail = useCallback(() => {
     setShowCollectionDetail(false);
@@ -148,6 +155,7 @@ function NftContainer (
         showCollectionDetail &&
           <NftCollection
             chosenItem={chosenItem}
+            currentNetwork={currentNetwork}
             data={chosenCollection}
             onClickBack={handleHideCollectionDetail}
             setChosenItem={setChosenItem}

@@ -79,6 +79,7 @@ export default styled(ConnectAccount)(({ theme }: Props) => `
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
+  cursor: pointer;
 
   &:last-child {
     margin-bottom: 0;

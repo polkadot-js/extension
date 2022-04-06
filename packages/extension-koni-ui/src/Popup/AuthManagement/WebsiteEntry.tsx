@@ -26,7 +26,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
   const [isShowDetail, setShowDetail] = useState<boolean>(false);
   const { hostname } = new URL(info.url);
   const { accounts } = useContext(AccountContext);
-  const accountsWithoutAll = accounts.filter((acc) => acc.address !== 'ALL');
+  const accountsWithoutAllAndEth = accounts.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
 
   const connectAll = useCallback(() => {
     changeConnectSite(true, url);
@@ -95,7 +95,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
               {t<string>('Connect All')}
             </div>
           </div>
-          {accountsWithoutAll.map((acc) =>
+          {accountsWithoutAllAndEth.map((acc) =>
             <WebsiteEntryAccount
               address={acc.address}
               isConnected={info.isAllowedMap[acc.address]}

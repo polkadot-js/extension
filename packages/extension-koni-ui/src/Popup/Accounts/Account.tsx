@@ -15,7 +15,7 @@ import { AccountContext, AccountInfoEl, ActionContext } from '@polkadot/extensio
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { saveCurrentAccountAddress, triggerAccountsSubscription, windowOpen } from '@polkadot/extension-koni-ui/messaging';
+import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@polkadot/extension-koni-ui/util';
@@ -124,11 +124,9 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
   const onSelectImg = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
 
-    if (isPopup && (isFirefox || isLinux)) {
-      windowOpen('/').catch(console.error);
+    if (!(isPopup && (isFirefox || isLinux))) {
+      inputRef.current && inputRef.current.click();
     }
-
-    inputRef.current && inputRef.current.click();
   }, [isFirefox, isLinux, isPopup]);
 
   return (
@@ -160,7 +158,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
       {_isAllAccount && (
         <div
-          className='account__change-avatar'
+          className={`account__change-avatar ${(isPopup && (isFirefox || isLinux)) ? 'account__change-avatar-is-disabled' : ''}`}
           onClick={onSelectImg}
         >
           <input
@@ -215,6 +213,11 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     align-items: center;
     right: 15px;
     height: 100%;
+  }
+
+  .account__change-avatar-is-disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 
   .account__change-avatar-icon-btn {

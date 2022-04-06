@@ -27,7 +27,14 @@ import uiSettings from '@polkadot/ui-settings';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
-import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
+import {
+  saveCurrentAccountAddress,
+  subscribeAccountsWithCurrentAddress,
+  subscribeAuthorizeRequests,
+  subscribeAuthorizeRequestsV2,
+  subscribeMetadataRequests,
+  subscribeSigningRequests
+} from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 import AuthList from './AuthManagement';
@@ -165,7 +172,7 @@ export default function Popup (): React.ReactElement {
     Promise.all([
       // subscribeAccounts(setAccounts),
       subscribeAccountsWithCurrentAddress(handleGetAccountsWithCurrentAddress),
-      subscribeAuthorizeRequests(setAuthRequests),
+      subscribeAuthorizeRequestsV2(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);

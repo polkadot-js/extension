@@ -3,8 +3,23 @@
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { AccountJson, RequestAccountSubscribe, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, SeedLengths } from '@polkadot/extension-base/background/types';
-import { MetadataDefBase } from '@polkadot/extension-inject/types';
+import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
+import {
+  AccountJson,
+  AuthorizeRequest,
+  RequestAccountList,
+  RequestAccountSubscribe,
+  RequestAuthorizeReject,
+  RequestAuthorizeSubscribe,
+  RequestAuthorizeTab,
+  RequestBatchRestore,
+  RequestCurrentAccountAddress,
+  RequestDeriveCreate,
+  RequestJsonRestore,
+  ResponseAuthorizeList,
+  SeedLengths
+} from '@polkadot/extension-base/background/types';
+import {InjectedAccount, MetadataDefBase} from '@polkadot/extension-inject/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
@@ -14,6 +29,44 @@ export enum ApiInitStatus {
   SUCCESS,
   ALREADY_EXIST,
   NOT_SUPPORT
+}
+
+export interface AuthRequestV2 extends Resolver<ResultResolver> {
+  id: string;
+  idStr: string;
+  request: RequestAuthorizeTab;
+  url: string;
+}
+
+export interface RequestAuthorizeApproveV2 {
+  id: string;
+  accounts: string[];
+}
+
+export interface RequestAuthorizationAll {
+  connectValue: boolean;
+}
+
+export interface RequestAuthorization extends RequestAuthorizationAll {
+  url: string;
+}
+
+export interface RequestAuthorizationPerAccount extends RequestAuthorization {
+  address: string;
+}
+
+export interface ResultResolver {
+  result: boolean;
+  accounts: string[];
+}
+
+export interface RejectResolver {
+  error: Error;
+  accounts: string[];
+}
+
+export interface RequestForgetSite {
+  url: string;
 }
 
 export interface StakingRewardItem {
@@ -422,6 +475,15 @@ export interface KoniRequestSignatures {
   'pri(balance.getSubscription)': [RequestSubscribeBalance, BalanceJson, BalanceJson];
   'pri(crowdloan.getCrowdloan)': [RequestCrowdloan, CrowdloanJson];
   'pri(crowdloan.getSubscription)': [RequestSubscribeCrowdloan, CrowdloanJson, CrowdloanJson];
+  'pri(authorize.listV2)': [null, ResponseAuthorizeList];
+  'pri(authorize.requestsV2)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
+  'pri(authorize.approveV2)': [RequestAuthorizeApproveV2, boolean];
+  'pri(authorize.changeSiteAll)': [RequestAuthorizationAll, boolean, AuthUrls];
+  'pri(authorize.changeSite)': [RequestAuthorization, boolean, AuthUrls];
+  'pri(authorize.changeSitePerAccount)': [RequestAuthorizationPerAccount, boolean, AuthUrls];
+  'pri(authorize.forgetSite)': [RequestForgetSite, boolean, AuthUrls];
+  'pri(authorize.forgetAllSite)': [null, boolean, AuthUrls];
+  'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
   'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
@@ -439,4 +501,6 @@ export interface KoniRequestSignatures {
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
   'pub(utils.getRandom)': [RandomTestRequest, number];
+  'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
+  'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
 }

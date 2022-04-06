@@ -14,6 +14,7 @@ import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-accoun
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
+import ConfirmModal from '@polkadot/extension-koni-ui/components/ConfirmModal';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -23,7 +24,6 @@ import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui
 import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
 import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
-import VisibilityConfirmModal from '@polkadot/extension-koni-ui/partials/Header/VisibilityConfirmModal';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
@@ -391,10 +391,13 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
         </div>
         {isWelcomeScreen && (<div className='only-top-container' />)}
         {isShowModal &&
-        <VisibilityConfirmModal
+        <ConfirmModal
           closeModal={closeModal}
-          confirmConnectAcc={confirmConnectAcc}
+          confirmAction={confirmConnectAcc}
+          confirmMessage={'Do you want to disconnect this account?'}
+          confirmButton={'Disconnect'}
           isBusy={isBusy}
+
         />
         }
         {isContainDetailHeader && currentAccount &&

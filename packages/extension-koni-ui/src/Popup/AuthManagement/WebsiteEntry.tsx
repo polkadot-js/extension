@@ -100,8 +100,8 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
               address={acc.address}
               isConnected={info.isAllowedMap[acc.address]}
               key={acc.address}
-              url={url}
               setList={setList}
+              url={url}
             />
           )}
         </div>

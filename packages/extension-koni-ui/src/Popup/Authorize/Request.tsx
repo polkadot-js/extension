@@ -66,10 +66,6 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
             {origin}
           </div>
         </div>
-
-        {/* <div className='request-info-connected-app__title'> */}
-        {/*  {t<string>('Connect the SubWallet')} */}
-        {/* </div> */}
         <a
           className='request-info-url'
           href={url}
@@ -136,13 +132,6 @@ export default styled(Request)(({ theme }: Props) => `
     display: flex;
     justify-content: center;
     align-item: center;
-  }
-
-  .request-info-connected-app__title {
-    font-size: 24px;
-    line-height: 36px;
-    font-weight: 500;
-    text-align: center;
   }
 
   .request-info-connected-app__text {

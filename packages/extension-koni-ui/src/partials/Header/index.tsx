@@ -394,8 +394,8 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
         <ConfirmModal
           closeModal={closeModal}
           confirmAction={confirmConnectAcc}
-          confirmMessage={'Do you want to disconnect this account?'}
           confirmButton={'Disconnect'}
+          confirmMessage={'Do you want to disconnect this account?'}
           isBusy={isBusy}
 
         />

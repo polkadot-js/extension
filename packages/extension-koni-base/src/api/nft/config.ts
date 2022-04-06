@@ -35,3 +35,30 @@ export enum SUPPORTED_NFT_NETWORKS {
   moonriver = 'moonriver',
   astarEvm = 'astarEvm',
 }
+
+export enum SUPPORTED_TRANSFER_CHAIN_NAME {
+  moonbeam = 'moonbeam',
+  moonbase = 'moonbase',
+  astarEvm = 'astarEvm',
+  moonriver = 'moonriver',
+  shiden = 'shiden',
+  shibuya = 'shibuya'
+}
+
+export const SUPPORTED_TRANSFER_EVM_CHAIN = [
+  SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string
+];
+
+export const TRANSFER_CHAIN_ID = {
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string]: 1287,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string]: 1284,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string]: 1285,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm as string]: 592,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string]: 336,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string]: 81
+};

@@ -29,15 +29,11 @@ export abstract class BaseNftApi {
   async connect () {
     if (!this.dotSamaApi?.isApiConnected) {
       this.dotSamaApi = await this.dotSamaApi?.isReady as ApiProps;
-      console.log(`${this.chain as string} nft connected`);
-    } else {
-      console.log(`${this.chain as string} nft already connected`);
     }
   }
 
   recoverConnection () {
     if (!this.dotSamaApi?.isApiConnected) {
-      console.log(`${this.chain as string} nft needs recover`);
       this.dotSamaApi?.recoverConnect && this.dotSamaApi.recoverConnect();
     }
   }

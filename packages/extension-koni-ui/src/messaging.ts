@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -411,4 +411,12 @@ export async function checkTransfer (request: RequestCheckTransfer): Promise<Res
 
 export async function makeTransfer (request: RequestTransfer, callback: (data: ResponseTransfer) => void): Promise<Array<TransferError>> {
   return sendMessage('pri(accounts.transfer)', request, callback);
+}
+
+export async function evmNftGetTransaction (request: EvmNftTransactionRequest): Promise<EvmNftTransaction> {
+  return sendMessage('pri(evmNft.getTransaction)', request);
+}
+
+export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction, callback: (data: EvmNftTransactionResponse) => void): Promise<EvmNftTransactionResponse> {
+  return sendMessage('pri(evmNft.submitTransaction)', request, callback);
 }

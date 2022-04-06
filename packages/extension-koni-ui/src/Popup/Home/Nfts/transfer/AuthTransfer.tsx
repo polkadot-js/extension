@@ -4,17 +4,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import Web3 from 'web3';
 
 import { BackgroundWindow, RequestNftForceUpdate } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
-import NETWORKS, { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { Spinner } from '@polkadot/extension-koni-ui/components';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import Output from '@polkadot/extension-koni-ui/components/Output';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { exportAccountPrivateKey, nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
+import { evmNftSubmitTransaction, nftForceUpdate } from '@polkadot/extension-koni-ui/messaging';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import Address from '@polkadot/extension-koni-ui/Popup/Sending/old/parts/Address';
 import { AddressProxy } from '@polkadot/extension-koni-ui/Popup/Sending/old/types';
@@ -81,7 +79,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const extrinsic = substrateTransferParams !== null ? substrateTransferParams.extrinsic : null;
   const txInfo = substrateTransferParams !== null ? substrateTransferParams.txInfo : null;
 
-  const web3Tx = web3TransferParams !== null ? web3TransferParams.tx : null;
+  const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
 
   const { currentAccount: account } = useSelector((state: RootState) => state);
@@ -104,75 +102,52 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
     return passwordError;
   }, [senderInfoSubstrate]);
 
-  const unlockEvm = useCallback(async (senderAddress: string, password: string): Promise<{ privateKey: string, passwordError: string | null }> => {
-    try {
-      const { privateKey } = await exportAccountPrivateKey(senderAddress, password);
-
-      return {
-        privateKey,
-        passwordError: null
-      };
-    } catch (e) {
-      return {
-        privateKey: '',
-        passwordError: 'Error unlocking account with password'
-      };
-    }
-  }, []);
-
   const onSendEvm = useCallback(async () => {
-    const { passwordError, privateKey } = await unlockEvm(account?.account?.address as string, senderInfoSubstrate.signPassword);
-    const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
+    if (web3Tx) {
+      await evmNftSubmitTransaction({
+        senderAddress: account?.account?.address as string,
+        recipientAddress,
+        password: senderInfoSubstrate.signPassword,
+        networkKey: chain,
+        rawTransaction: web3Tx
+      }, (data) => {
+        if (data.passwordError) {
+          setPasswordError(data.passwordError);
+          setLoading(false);
+        }
 
-    if (passwordError === null && web3Tx) {
-      try {
-        const web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[chain].provider));
+        if (data.callHash) setCallHash(data.callHash);
 
-        web3Tx.sign(Buffer.from(privateKey.slice(2), 'hex'));
-        const callHash = web3Tx.serialize();
+        if (data.txError) {
+          show('Encountered an error, please try again.');
+          setLoading(false);
 
-        setCallHash(callHash.toString('hex'));
+          return;
+        }
 
-        await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
-          .then((receipt: Record<string, any>) => {
-            if (receipt.status && receipt.status === true) {
-              setLoading(false);
-              setIsTxSuccess(true);
-              setShowConfirm(false);
-              setShowResult(true);
-              setExtrinsicHash(receipt.transactionHash as string);
-              nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf, chain } as RequestNftForceUpdate)
-                .catch(console.error);
-            } else if (receipt.status && receipt.status === false) {
-              setIsTxSuccess(false);
-              setTxError('Error submitting transaction');
-              setShowConfirm(false);
-              setShowResult(true);
-              setExtrinsicHash(receipt.transactionHash as string);
-            }
-          });
-      } catch (e) {
-        console.log(e);
-        show('Encountered an error, please try again.');
-        setLoading(false);
-      }
+        if (data.status) {
+          setLoading(false);
+
+          if (data.status) {
+            setIsTxSuccess(true);
+            setShowConfirm(false);
+            setShowResult(true);
+            setExtrinsicHash(data.transactionHash as string);
+            nftForceUpdate({ nft: nftItem, collectionId, isSendingSelf: data.isSendingSelf, chain } as RequestNftForceUpdate)
+              .catch(console.error);
+          } else {
+            setIsTxSuccess(false);
+            setTxError('Error submitting transaction');
+            setShowConfirm(false);
+            setShowResult(true);
+            setExtrinsicHash(data.transactionHash as string);
+          }
+        }
+      });
     } else {
-      setPasswordError(passwordError);
-      setLoading(false);
+      show('Encountered an error, please try again.');
     }
-  }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, unlockEvm, web3Tx]);
-
-  const getWeb3Gas = useCallback(() => {
-    if (web3Gas !== null) {
-      // @ts-ignore
-      const parsedFee = web3Gas / (10 ** NETWORKS[chain].decimals);
-
-      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-      return parsedFee + ' ' + NETWORKS[chain].nativeToken;
-    }
-
-    return null;
-  }, [chain, web3Gas]);
+  }, [account?.account?.address, chain, collectionId, nftItem, recipientAddress, senderInfoSubstrate.signPassword, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, show, web3Tx]);
 
   const onSendSubstrate = useCallback(async () => {
     if (extrinsic !== null && unlockSubstrate() === null) {
@@ -283,7 +258,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           <div
             className={'auth-container'}
           >
-            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || getWeb3Gas()} will be applied to the submission</div>
+            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || web3Gas} will be applied to the submission</div>
 
             <Address
               className={'sender-container'}

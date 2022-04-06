@@ -163,14 +163,8 @@ export default class StatemineNftApi extends BaseNftApi {
         updateReady(true);
       }));
     } catch (e) {
-      console.log('Failed to fetch statemine nft', e);
+      console.error('Failed to fetch statemine nft', e);
     }
-
-    // const end = performance.now();
-    //
-    // console.log(`statemine took ${end - start}ms`);
-    //
-    // console.log(`Fetched ${assetIds.length} nfts from statemine`);
   }
 
   public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
@@ -178,8 +172,6 @@ export default class StatemineNftApi extends BaseNftApi {
       await this.connect();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
-      console.log(`error fetching nft from ${this.getChain() as string}`);
-
       return 0;
     }
 

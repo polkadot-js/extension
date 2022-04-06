@@ -455,7 +455,38 @@ export interface ResponseTransfer {
   data?: object
 }
 
+export interface EvmNftTransactionRequest {
+  networkKey: string,
+  senderAddress: string,
+  recipientAddress: string,
+  params: Record<string, any>
+}
+
+export interface EvmNftTransaction {
+  tx: Record<string, any> | null,
+  estimatedFee: string | null
+}
+
+export interface EvmNftSubmitTransaction {
+  senderAddress: string,
+  password: string,
+  recipientAddress: string,
+  networkKey: string,
+  rawTransaction: Record<string, any>
+}
+
+export interface EvmNftTransactionResponse {
+  passwordError?: string | null,
+  callHash?: string,
+  status?: boolean,
+  transactionHash?: string,
+  txError?: boolean,
+  isSendingSelf: boolean
+}
+
 export interface KoniRequestSignatures {
+  'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
+  'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
   'pri(nftTransfer.getNftTransfer)': [null, NftTransferExtra];
   'pri(nftTransfer.getSubscription)': [null, NftTransferExtra, NftTransferExtra];

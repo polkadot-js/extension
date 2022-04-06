@@ -1,19 +1,25 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Common from 'ethereumjs-common';
+import { Transaction } from 'ethereumjs-tx';
+
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
+import { getWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
+import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -999,6 +1005,117 @@ export default class KoniExtension extends Extension {
     return errors;
   }
 
+  private async evmNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: EvmNftTransactionRequest): Promise<EvmNftTransaction> {
+    const contractAddress = params.contractAddress as string;
+    const tokenId = params.tokenId as string;
+
+    try {
+      const web3 = getWeb3Api(networkKey);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      const contract = new web3.eth.Contract(TestERC721Contract, contractAddress);
+
+      const [fromAccountTxCount, gasPriceGwei] = await Promise.all([
+        web3.eth.getTransactionCount(senderAddress),
+        web3.eth.getGasPrice()
+      ]);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+      const gasLimit = await contract.methods.safeTransferFrom(
+        senderAddress,
+        recipientAddress,
+        tokenId
+      ).estimateGas({
+        from: senderAddress
+      });
+
+      const rawTransaction = {
+        nonce: '0x' + fromAccountTxCount.toString(16),
+        from: senderAddress,
+        gasPrice: web3.utils.toHex(gasPriceGwei),
+        gasLimit: web3.utils.toHex(gasLimit as number),
+        to: contractAddress,
+        value: '0x00',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+        data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
+      };
+      // @ts-ignore
+      const estimatedFee = (gasLimit * parseFloat(gasPriceGwei)) / (10 ** NETWORKS[networkKey].decimals);
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+      const feeString = estimatedFee.toString() + ' ' + NETWORKS[networkKey].nativeToken;
+
+      return {
+        tx: rawTransaction,
+        estimatedFee: feeString
+      };
+    } catch (e) {
+      console.error('error handling web3 transfer nft', e);
+
+      return {
+        tx: null,
+        estimatedFee: null
+      };
+    }
+  }
+
+  private async evmNftSubmitTransaction (id: string, port: chrome.runtime.Port, { networkKey, password, rawTransaction, recipientAddress, senderAddress }: EvmNftSubmitTransaction): Promise<EvmNftTransactionResponse> {
+    const updateState = createSubscription<'pri(evmNft.submitTransaction)'>(id, port);
+    let parsedPrivateKey = '';
+    const txState = {
+      isSendingSelf: reformatAddress(senderAddress, 1) === reformatAddress(recipientAddress, 1)
+    } as EvmNftTransactionResponse;
+
+    try {
+      const { privateKey } = this.accountExportPrivateKey({ address: senderAddress, password });
+
+      parsedPrivateKey = privateKey.slice(2);
+      txState.passwordError = null;
+      updateState(txState);
+    } catch (e) {
+      txState.passwordError = 'Error unlocking account with password';
+      updateState(txState);
+
+      port.onDisconnect.addListener((): void => {
+        unsubscribe(id);
+      });
+
+      return txState;
+    }
+
+    try {
+      const web3 = getWeb3Api(networkKey);
+
+      const common = Common.forCustomChain('mainnet', {
+        name: networkKey,
+        networkId: TRANSFER_CHAIN_ID[networkKey],
+        chainId: TRANSFER_CHAIN_ID[networkKey]
+      }, 'petersburg');
+      const tx = new Transaction(rawTransaction, { common });
+
+      tx.sign(Buffer.from(parsedPrivateKey, 'hex'));
+      const callHash = tx.serialize();
+
+      txState.callHash = callHash.toString('hex');
+      updateState(txState);
+
+      await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
+        .then((receipt: Record<string, any>) => {
+          if (receipt.status) txState.status = receipt.status as boolean;
+          if (receipt.transactionHash) txState.transactionHash = receipt.transactionHash as string;
+          updateState(txState);
+        });
+    } catch (e) {
+      console.error('transfer nft error', e);
+      txState.txError = true;
+      updateState(txState);
+    }
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return txState;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1092,6 +1209,10 @@ export default class KoniExtension extends Extension {
         return await this.checkTransfer(request as RequestCheckTransfer);
       case 'pri(accounts.transfer)':
         return await this.makeTransfer(id, port, request as RequestTransfer);
+      case 'pri(evmNft.getTransaction)':
+        return this.evmNftGetTransaction(request as EvmNftTransactionRequest);
+      case 'pri(evmNft.submitTransaction)':
+        return this.evmNftSubmitTransaction(id, port, request as EvmNftSubmitTransaction);
       default:
         return super.handle(id, type, request, port);
     }

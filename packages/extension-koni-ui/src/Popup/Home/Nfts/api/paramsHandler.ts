@@ -82,6 +82,8 @@ export default function paramsHandler (nftItem: NftItem, networkKey: string) {
       return web3Parser(nftItem);
     case SUPPORTED_TRANSFER_CHAIN_NAME.moonbase:
       return web3Parser(nftItem);
+    case SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm:
+      return web3Parser(nftItem);
     case SUPPORTED_TRANSFER_CHAIN_NAME.bitcountry:
       return acalaParser(nftItem);
   }

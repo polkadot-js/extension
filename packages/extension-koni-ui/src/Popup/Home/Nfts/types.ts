@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from 'ethereumjs-tx';
-
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { RMRK_VER } from '@polkadot/extension-base/background/KoniTypes';
 import { RuntimeDispatchInfo } from '@polkadot/types/interfaces';
@@ -36,8 +34,8 @@ export interface _NftJson {
 }
 
 export interface Web3TransferParams {
-  tx: Transaction;
-  estimatedGas: number;
+  rawTx: Record<string, any>;
+  estimatedGas: string;
 }
 
 export interface SubstrateTransferParams {
@@ -48,8 +46,8 @@ export interface SubstrateTransferParams {
 export interface TransferResponse {
   info?: RuntimeDispatchInfo;
   extrinsic?: SubmittableExtrinsic<'promise'>;
-  web3Tx?: Transaction;
-  estimatedGas?: number
+  web3RawTx?: Record<string, any>;
+  estimatedGas?: string
 }
 
 export enum SUPPORTED_TRANSFER_CHAIN_NAME {
@@ -61,13 +59,13 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
   quartz = 'quartz',
   opal = 'opal',
   statemint = 'statemint',
+  bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonbase = 'moonbase',
+  astarEvm = 'astarEvm',
   moonriver = 'moonriver',
-  astar = 'astar',
   shiden = 'shiden',
-  shibuya = 'shibuya',
-  bitcountry = 'bitcountry'
+  shibuya = 'shibuya'
 }
 
 export const SUPPORTED_TRANSFER_SUBSTRATE_CHAIN = [
@@ -86,16 +84,7 @@ export const SUPPORTED_TRANSFER_EVM_CHAIN = [
   SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.astar as string,
+  SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string,
   SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string
 ];
-
-export const TRANSFER_CHAIN_ID = {
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string]: 1287,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string]: 1284,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string]: 1285,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.astar as string]: 592,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string]: 336,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string]: 81
-};

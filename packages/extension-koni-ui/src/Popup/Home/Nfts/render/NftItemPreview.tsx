@@ -40,8 +40,11 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
   }, []);
 
   const getItemImage = useCallback(() => {
-    if (data.image && !imageError) return data.image;
-    else if (collectionImage) return collectionImage;
+    if (data.image && !imageError) {
+      return data.image;
+    } else if (collectionImage) {
+      return collectionImage;
+    }
 
     return logo;
   }, [collectionImage, data.image, imageError]);

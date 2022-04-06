@@ -48,7 +48,9 @@ function SignArea ({ buttonText, children, className, error, isExternal, isFirst
       })
       .catch((error: Error) => console.error(error));
 
-    return () => { !!timeout && clearTimeout(timeout); };
+    return () => {
+      !!timeout && clearTimeout(timeout);
+    };
   }, [isExternal, signId]);
 
   const _onSign = useCallback(

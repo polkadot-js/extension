@@ -40,9 +40,8 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<string | null>(null);
   const onAction = useContext(ActionContext);
-  const [name, setName] = useState<string | null>('123');
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
-  const address = '1gg1nDHXCbKALkSs5k9i8HMstRHy794vHYgJ7T81cyKxB7R';
+  const [name, setName] = useState<string | null>(null);
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
 
   useEffect(() => {
     if (address) {
@@ -66,6 +65,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
       value: ''
     },
     ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       text: displayName,
       value: genesisHash[0]
     }))]
@@ -94,13 +94,13 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const _onSetAddressOffset = useCallback((value: number) => setAddressOffset(Number(value)), []);
 
   return (
-    <>
+    <div className={className}>
       <Header
         showBackArrow
         showSubHeader
         subHeaderName={t<string>('Import Ledger Account')}
       />
-      <div className={className}>
+      <div className={'import-ledger-body-area'}>
         <AccountInfoEl
           address={address}
           className={'import-ledger-account'}
@@ -118,6 +118,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
         />
         {!!genesis && !!address && !ledgerError && (
           <Name
+            className='import-ledger__item'
             onChange={setName}
             value={name || ''}
           />
@@ -154,7 +155,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
             {error || ledgerError}
           </Warning>
         )}
-        <ButtonArea>
+        <ButtonArea className={'import-ledger-button-area'}>
           {ledgerLocked
             ? (
               <Button
@@ -178,19 +179,27 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           }
         </ButtonArea>
       </div>
-    </>
+    </div>
   );
 }
 
 export default styled(ImportLedger)`
-  padding: 10px 15px 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .import-ledger-body-area {
+    padding: 10px 15px 0;
+    flex: 1;
+    overflow: auto;
+  }
 
   .refreshIcon {
     margin-right: 0.3rem;
   }
 
   .import-ledger__item {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   .import-ledger-account {
@@ -200,5 +209,10 @@ export default styled(ImportLedger)`
     .account-info-chain {
       right: 0;
     }
+  }
+
+  .import-ledger-button-area {
+    bottom: 0;
+    z-index: 1;
   }
 `;

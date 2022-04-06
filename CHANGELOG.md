@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.3.1 (Koni)
+Build date: Apr 05, 2022. Complete internal security audit
+
+Update:
+- Display Moonbeam / Moonriver NFT (issue #33)
+- Send / Receive Moonbeam / Moonriver NFT (issue #34)
+- Support hardware wallet (issue #43)
+- Integrate Bit.Country's NFT (issue #52)
+- Update new setting screen (issue #85)
+- Improve layout for Import account from JSON screen (issue #90)
+- Support EVM Account for Astar Network (issue #92)
+- Adding new assets to the extension (issue #101)
+- Improve NFT flow (issue #102)
+
+Bug Fixed:
+- Fix some bugs with AlephZero balance (issue #50)
+- Fix avatar of all account does not update when changing from collapse (popup) (issue #68)
+- Fix some bug with NFT (issues #95, #97 and #105)
+- Fix some small bugs
+
 ## 0.2.9 (Koni)
 Build date: Mar 22, 2022. Complete internal security audit
 Update:

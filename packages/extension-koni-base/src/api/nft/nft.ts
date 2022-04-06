@@ -13,9 +13,17 @@ export abstract class BaseNftApi {
   addresses: string[] = [];
 
   protected constructor (api?: ApiProps | null, addresses?: string[], chain?: string) {
-    if (api) this.dotSamaApi = api;
-    if (addresses) this.addresses = addresses;
-    if (chain) this.chain = chain;
+    if (api) {
+      this.dotSamaApi = api;
+    }
+
+    if (addresses) {
+      this.addresses = addresses;
+    }
+
+    if (chain) {
+      this.chain = chain;
+    }
   }
 
   async connect () {
@@ -59,15 +67,21 @@ export abstract class BaseNftApi {
   }
 
   protected parseTokenId (tokenId: string) {
-    if (tokenId.includes(',')) return tokenId.replace(',', '');
+    if (tokenId.includes(',')) {
+      return tokenId.replace(',', '');
+    }
 
     return tokenId;
   }
 
   parseUrl (input: string): string | undefined {
-    if (!input || input.length === 0) return undefined;
+    if (!input || input.length === 0) {
+      return undefined;
+    }
 
-    if (isUrl(input)) return input;
+    if (isUrl(input)) {
+      return input;
+    }
 
     if (!input.includes('ipfs://')) {
       return RMRK_PINATA_SERVER + input;

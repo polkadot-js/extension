@@ -29,7 +29,9 @@ export default class UniqueNftApi extends BaseNftApi {
   }
 
   public async getCollectionCount (): Promise<number> {
-    if (!this.dotSamaApi) return 0;
+    if (!this.dotSamaApi) {
+      return 0;
+    }
 
     return (await this.dotSamaApi.api.query.nft.createdCollectionCount()) as unknown as number;
   }
@@ -42,7 +44,9 @@ export default class UniqueNftApi extends BaseNftApi {
     * @returns the array of NFTs
     */
   public async getAddressTokens (collectionId: number, owner: string): Promise<any> {
-    if (!this.dotSamaApi) return;
+    if (!this.dotSamaApi) {
+      return;
+    }
 
     return (await this.dotSamaApi.api.query.nft.addressTokens(collectionId, owner)).toJSON();
   }
@@ -55,12 +59,17 @@ export default class UniqueNftApi extends BaseNftApi {
    * @returns the URL of the token image
    */
   public getNftImageUrl (collection: Collection, tokenId: string) {
-    if (!this.dotSamaApi) return;
+    if (!this.dotSamaApi) {
+      return;
+    }
 
     let url = '';
 
     // Get schema version and off-chain schema
-    if (!collection) return;
+    if (!collection) {
+      return;
+    }
+
     const schemaVersion = collection.SchemaVersion;
     const offchainSchema = hexToStr(collection.OffchainSchema);
 
@@ -86,7 +95,10 @@ export default class UniqueNftApi extends BaseNftApi {
    * @returns tokenData: Token data object
    */
   public async getNftData (collection: Collection, tokenId: string, locale = 'en', collectionId: number) {
-    if (!this.dotSamaApi) return;
+    if (!this.dotSamaApi) {
+      return;
+    }
+
     const schemaRead = hexToStr(collection.ConstOnChainSchema);
     const token = (await this.dotSamaApi.api.query.nft.nftItemList(collectionId, tokenId)).toJSON() as unknown as Token;
     const nftProps = hexToUTF16(token.ConstData);
@@ -95,7 +107,10 @@ export default class UniqueNftApi extends BaseNftApi {
     let url = '';
 
     // Get schema version and off-chain schema
-    if (!collection) return;
+    if (!collection) {
+      return;
+    }
+
     const schemaVersion = collection.SchemaVersion;
     const offchainSchema = hexToStr(collection.OffchainSchema);
 
@@ -141,7 +156,10 @@ export default class UniqueNftApi extends BaseNftApi {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (nftIds && nftIds.length > 0) {
           allNftId = allNftId.concat(nftIds as string[]);
-          if (!allCollectionId.includes(item.i as number)) allCollectionId.push(item.i as number);
+
+          if (!allCollectionId.includes(item.i as number)) {
+            allCollectionId.push(item.i as number);
+          }
 
           for (const nftId of nftIds) {
             nftMap[nftId as string] = item.i as number;

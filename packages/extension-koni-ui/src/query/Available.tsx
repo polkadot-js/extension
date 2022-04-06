@@ -22,7 +22,8 @@ interface Props {
 function Available ({ children, className = '', label, params }: Props): React.ReactElement<Props> {
   const chainRegistry: ChainRegistry = {
     chainDecimals: [10],
-    chainTokens: ['DOT']
+    chainTokens: ['DOT'],
+    tokenMap: {}
   };
 
   return (

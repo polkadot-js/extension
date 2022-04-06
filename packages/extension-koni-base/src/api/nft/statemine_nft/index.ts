@@ -44,7 +44,10 @@ export default class StatemineNftApi extends BaseNftApi {
 
     if (!isUrl(metadataUrl)) {
       url = this.parseUrl(metadataUrl);
-      if (!url || url.length === 0) return undefined;
+
+      if (!url || url.length === 0) {
+        return undefined;
+      }
     }
 
     return fetch(url, {
@@ -61,7 +64,9 @@ export default class StatemineNftApi extends BaseNftApi {
    * @param addresses
    */
   private async getNfts (addresses: string[]): Promise<AssetId[]> {
-    if (!this.dotSamaApi) return [];
+    if (!this.dotSamaApi) {
+      return [];
+    }
 
     let accountAssets: any[] = [];
 
@@ -85,22 +90,31 @@ export default class StatemineNftApi extends BaseNftApi {
   }
 
   private async getTokenDetails (assetId: AssetId): Promise<TokenDetail | null> {
-    if (!this.dotSamaApi) return null;
+    if (!this.dotSamaApi) {
+      return null;
+    }
 
     const { classId, tokenId } = assetId;
     const metadataNft = (await this.dotSamaApi.api.query.uniques.instanceMetadataOf(this.parseTokenId(classId as string), this.parseTokenId(tokenId as string))).toHuman() as MetadataResponse;
 
-    if (!metadataNft?.data) return null;
+    if (!metadataNft?.data) {
+      return null;
+    }
 
     // @ts-ignore
     return this.getMetadata(metadataNft?.data);
   }
 
   private async getCollectionDetail (collectionId: number): Promise<CollectionDetail | null> {
-    if (!this.dotSamaApi) return null;
+    if (!this.dotSamaApi) {
+      return null;
+    }
+
     const collectionMetadata = (await this.dotSamaApi.api.query.uniques.classMetadataOf(collectionId)).toHuman() as MetadataResponse;
 
-    if (!collectionMetadata?.data) return null;
+    if (!collectionMetadata?.data) {
+      return null;
+    }
 
     // @ts-ignore
     return this.getMetadata(collectionMetadata?.data);

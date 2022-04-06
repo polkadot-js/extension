@@ -58,11 +58,17 @@ export class RmrkNftApi extends BaseNftApi {
   }
 
   override parseUrl (input: string): string | undefined {
-    if (!input || input.length === 0) return undefined;
+    if (!input || input.length === 0) {
+      return undefined;
+    }
 
-    if (isUrl(input) || input.includes('https://') || input.includes('http')) return input;
+    if (isUrl(input) || input.includes('https://') || input.includes('http')) {
+      return input;
+    }
 
-    if (!input.includes('ipfs://ipfs/')) { return RMRK_PINATA_SERVER + input; }
+    if (!input.includes('ipfs://ipfs/')) {
+      return RMRK_PINATA_SERVER + input;
+    }
 
     return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
   }
@@ -72,7 +78,10 @@ export class RmrkNftApi extends BaseNftApi {
 
     if (!isUrl(metadataUrl)) {
       url = this.parseUrl(metadataUrl);
-      if (!url || url.length === 0) return undefined;
+
+      if (!url || url.length === 0) {
+        return undefined;
+      }
     }
 
     return await fetch(url, {
@@ -99,7 +108,9 @@ export class RmrkNftApi extends BaseNftApi {
       })
         .then((res) => res.json()) as Record<number | string, number | string | NFTResource>[];
 
-      _data = _data.map((item) => { return { ...item, source }; });
+      _data = _data.map((item) => {
+        return { ...item, source };
+      });
 
       data = data.concat(_data);
     }));
@@ -230,8 +241,11 @@ export class RmrkNftApi extends BaseNftApi {
           });
         }
 
-        if (data.length > 0) return result;
-        else return {};
+        if (data.length > 0) {
+          return result;
+        } else {
+          return {};
+        }
       }));
 
       const allCollectionMeta: Record<string | number, any> = {};

@@ -334,6 +334,7 @@ export interface RequestCheckTransfer {
   to: string,
   value?: string,
   transferAll?: boolean
+  token?: string
 }
 
 export interface RequestTransfer extends RequestCheckTransfer {
@@ -366,6 +367,7 @@ export enum TransferErrorCode {
   INVALID_TO_ADDRESS = 'invalidToAccount',
   NOT_ENOUGH_VALUE = 'notEnoughValue',
   INVALID_VALUE = 'invalidValue',
+  INVALID_TOKEN = 'invalidToken',
   KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
   TIMEOUT = 'timeout'

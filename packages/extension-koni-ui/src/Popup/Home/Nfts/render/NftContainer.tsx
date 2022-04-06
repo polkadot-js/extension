@@ -88,7 +88,9 @@ function NftContainer (
   }, [setShowCollectionDetail]);
 
   const onPreviousClick = useCallback(() => {
-    if (page === 1) return;
+    if (page === 1) {
+      return;
+    }
 
     setPage(page - 1);
   }, [page, setPage]);
@@ -97,7 +99,9 @@ function NftContainer (
     const nextPage = page + 1;
     // const from = (nextPage - 1) * NFT_GRID_SIZE;
 
-    if (page >= Math.ceil(totalCollection / NFT_GRID_SIZE)) return;
+    if (page >= Math.ceil(totalCollection / NFT_GRID_SIZE)) {
+      return;
+    }
 
     setPage(nextPage);
   }, [page, setPage, totalCollection]);

@@ -14,3 +14,4 @@ export const CRON_REFRESH_STAKING_REWARD_INTERVAL = 90000;
 export const CRON_REFRESH_HISTORY_INTERVAL = 2000;
 
 export const ALL_ACCOUNT_KEY = 'ALL';
+export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm'];

@@ -45,7 +45,7 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
       return new Web3NftApi(useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonriver:
       return new Web3NftApi(useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.astar:
+    case SUPPORTED_NFT_NETWORKS.astarEvm:
       return new Web3NftApi(useAddresses, chain);
   }
 
@@ -59,7 +59,9 @@ export class NftHandler {
   total = 0;
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
-    if (addresses) this.addresses = addresses;
+    if (addresses) {
+      this.addresses = addresses;
+    }
 
     for (const item in SUPPORTED_NFT_NETWORKS) {
       this.apiPromises.push({ chain: item, api: dotSamaAPIMap[item] });

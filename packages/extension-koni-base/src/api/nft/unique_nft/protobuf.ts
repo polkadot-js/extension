@@ -42,7 +42,9 @@ function convertEnumToString (value: any, key: string, NFTMeta: any, locale: any
 export const deserializeNft = (schema: string, buffer: Uint8Array, locale: string) => {
   const root = defineMessage(schema);
 
-  if (root === null) return root;
+  if (root === null) {
+    return root;
+  }
 
   // Obtain the message type
   const NFTMeta = root.lookupType('onChainMetaData.NFTMeta');

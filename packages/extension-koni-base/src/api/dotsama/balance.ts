@@ -8,10 +8,10 @@ import { ApiPromise } from '@polkadot/api';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { getRegistry } from '@polkadot/extension-koni-base/api/dotsama/registry';
+import { getRegistry, getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
-import { MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import { IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
@@ -213,7 +213,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     const networkAPI = await apiProps.isReady;
     const useAddresses = ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
 
-    if (!useAddresses || useAddresses.length === 0) {
+    if (!useAddresses || useAddresses.length === 0 || IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) > -1) {
       // Return zero balance if not have any address
       const zeroBalance = {
         state: APIItemState.READY,
@@ -237,12 +237,32 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
   });
 }
 
-export async function getFreeBalance (networkKey: string, address: string) {
+export async function getFreeBalance (networkKey: string, address: string, token?: string): Promise<string> {
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
 
+  if (token) {
+    const tokenInfo = await getTokenInfo(networkKey, api, token);
+
+    if (!(tokenInfo?.isMainToken)) {
+      if (moonbeamBaseChains.indexOf(networkKey) > -1 && tokenInfo?.erc20Address) {
+        const contract = getERC20Contract(networkKey, tokenInfo.erc20Address);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        const free = await contract.methods.balanceOf(address).call();
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
+        return free?.toString() || '0';
+      } else {
+        // @ts-ignore
+        const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
+
+        return balance.free?.toString() || '0';
+      }
+    }
+  }
+
   if (networkKey === 'kintsugi') {
-    const balance = await api.derive.balances?.all(address) as DeriveBalancesAll;
+    const balance = await api.derive.balances?.all(address);
 
     return balance.freeBalance?.toString() || '0';
   } else {

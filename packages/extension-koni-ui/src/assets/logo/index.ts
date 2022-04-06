@@ -17,6 +17,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astar: require('./astar.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  astarEvm: require('./astar.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   basilisk: require('./basilisk.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bifrost: require('./bifrost.svg'),
@@ -67,7 +69,9 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   litentry: require('./litentry.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  manta: require('./manta.png'),
+  manta: require('./manta.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  dolphin: require('./dolphin.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   moonbeam: require('./moonbeam.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -104,6 +108,8 @@ const LogosMap: Record<string, string> = {
   subgame: require('./subgame.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   statemint: require('./statemine.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  subsocial_x: require('./subsocial.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   subsocial: require('./subsocial.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -154,6 +160,12 @@ const LogosMap: Record<string, string> = {
   kar: require('./karura.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   zlk: require('./zenlink.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  neumann: require('./oak_network.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  turing: require('./oak_network.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  mangatax: require('./mangatax.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

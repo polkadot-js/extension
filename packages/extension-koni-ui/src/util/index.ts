@@ -177,7 +177,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   subgame: 'https://subgame.subscan.io',
   // 'statemint': 'https://statemint.subscan.io',
   // 'subsocial': 'https://subsocial.subscan.io',
-  // 'zeitgeist': 'https://zeitgeist.subscan.io',
+  zeitgeist: 'https://zeitgeist.subscan.io',
   westend: 'https://westend.subscan.io',
   rococo: 'https://rococo.subscan.io',
   robonomics: 'https://robonomics.subscan.io',

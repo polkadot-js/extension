@@ -9,7 +9,7 @@ import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import {ERC721Contract, TestERC721Contract} from '@polkadot/extension-koni-base/api/web3/web3';
+import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -92,7 +92,7 @@ export class Web3NftApi extends BaseNftApi {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const contract = new this.web3.eth.Contract(TestERC721Contract, smartContract);
+    const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
     let ownItem = false;
 
     let collectionImage: string | undefined;

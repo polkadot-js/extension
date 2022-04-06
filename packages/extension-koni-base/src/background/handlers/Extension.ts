@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Common from 'ethereumjs-common';
+import Common from '@ethereumjs/common';
 import { Transaction } from 'ethereumjs-tx';
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
@@ -925,6 +925,7 @@ export default class KoniExtension extends Extension {
         networkId: TRANSFER_CHAIN_ID[networkKey],
         chainId: TRANSFER_CHAIN_ID[networkKey]
       }, 'petersburg');
+      // @ts-ignore
       const tx = new Transaction(rawTransaction, { common });
 
       tx.sign(Buffer.from(parsedPrivateKey, 'hex'));

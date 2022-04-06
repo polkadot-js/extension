@@ -35,7 +35,7 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { hierarchy } = useContext(AccountContext);
-  const accounts = hierarchy.filter((acc) => acc.address !== 'ALL');
+  const accounts = hierarchy.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
   const { hostname } = new URL(url);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 

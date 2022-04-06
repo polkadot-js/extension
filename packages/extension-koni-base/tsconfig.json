@@ -6,6 +6,7 @@
     "rootDir": "./src"
   },
   "references": [
-    { "path": "../extension-base" }
+    { "path": "../extension-base" },
+    { "path": "../extension-inject" }
   ]
 }

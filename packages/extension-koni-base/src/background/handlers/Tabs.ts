@@ -7,7 +7,7 @@ import Tabs from '@polkadot/extension-base/background/handlers/Tabs';
 import { RandomTestRequest } from '@polkadot/extension-base/background/KoniTypes';
 import { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@polkadot/extension-base/background/types';
 import { canDerive } from '@polkadot/extension-base/utils';
-import { InjectedAccount } from '@polkadot/extension-inject/types';
+import type { InjectedAccount } from '@polkadot/extension-inject/types';
 import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';

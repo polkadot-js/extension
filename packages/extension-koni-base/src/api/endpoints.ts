@@ -246,7 +246,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 88,
     provider: 'wss://mainnet.polkadex.trade',
     groups: ['POLKADOT_PARACHAIN'],
-    paraId: 2036,
+    paraId: 2040,
     nativeToken: 'PDEX',
     crowdloanUrl: 'https://www.polkadex.trade/crowdloans'
   },

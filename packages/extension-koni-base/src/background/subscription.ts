@@ -147,33 +147,6 @@ export class KoniSubcription {
     }
   }
 
-  // subscribeStaking (address: string) {
-  //   this.unsubStaking && this.unsubStaking();
-  //   state.resetStakingMap();
-  //   this.detectAddresses(address)
-  //     .then((addresses) => {
-  //       this.unsubStaking = this.initStakingSubscription(addresses);
-  //     })
-  //     .catch(console.error);
-  // }
-  //
-  // initStakingSubscription (addresses: string[]) {
-  //   const subscriptionPromises = subscribeStaking(addresses, dotSamaAPIMap, (networkKey, rs) => {
-  //     state.setStakingItem(networkKey, rs);
-  //     // console.log('set new staking item', rs);
-  //   });
-  //
-  //   return () => {
-  //     // @ts-ignore
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  //     subscriptionPromises
-  //       .then((unsub) => {
-  //         unsub && unsub();
-  //       })
-  //       .catch(console.error);
-  //   };
-  // }
-
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
 

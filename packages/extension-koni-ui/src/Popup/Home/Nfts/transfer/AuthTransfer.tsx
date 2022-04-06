@@ -82,7 +82,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
 
-  const { currentAccount: account } = useSelector((state: RootState) => state);
+  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
 
   const { show } = useToast();
 
@@ -212,6 +212,12 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       return;
     }
 
+    if (chain !== currentNetwork.networkKey) {
+      show('Incorrect network');
+
+      return;
+    }
+
     setLoading(true);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -222,7 +228,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
         await onSendEvm();
       }
     }, 1);
-  }, [extrinsic, loading, onSendEvm, onSendSubstrate, web3Tx]);
+  }, [chain, currentNetwork.networkKey, extrinsic, loading, onSendEvm, onSendSubstrate, show, web3Tx]);
 
   useEffect((): void => {
     if (extrinsic) {

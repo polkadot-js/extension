@@ -72,7 +72,7 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
 function TransferNftContainer ({ api, className, collectionId, collectionImage, isApiReady, nftItem }: ContentProps): React.ReactElement<ContentProps> {
   const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
-  const { currentAccount: account } = useSelector((state: RootState) => state);
+  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
   const networkKey = nftItem.chain as string;
 
   // for substrate-based chains
@@ -121,6 +121,12 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       return;
     }
 
+    if (networkKey !== currentNetwork.networkKey) {
+      show(`Please change to ${networkKey.toUpperCase()} network.`);
+
+      return;
+    }
+
     setLoading(true);
     // @ts-ignore
     const senderAddress = account.account.address;
@@ -149,7 +155,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     }
 
     setLoading(false);
-  }, [account, addressError, api, isApiReady, networkKey, nftItem, recipientAddress, show]);
+  }, [account?.account?.address, addressError, api, currentNetwork.networkKey, isApiReady, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);

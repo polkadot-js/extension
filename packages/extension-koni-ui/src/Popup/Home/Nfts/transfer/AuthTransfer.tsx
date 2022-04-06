@@ -116,7 +116,9 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           setLoading(false);
         }
 
-        if (data.callHash) setCallHash(data.callHash);
+        if (data.callHash) {
+          setCallHash(data.callHash);
+        }
 
         if (data.txError) {
           show('Encountered an error, please try again.');

@@ -935,8 +935,14 @@ export default class KoniExtension extends Extension {
 
       await web3.eth.sendSignedTransaction('0x' + callHash.toString('hex'))
         .then((receipt: Record<string, any>) => {
-          if (receipt.status) txState.status = receipt.status as boolean;
-          if (receipt.transactionHash) txState.transactionHash = receipt.transactionHash as string;
+          if (receipt.status) {
+            txState.status = receipt.status as boolean;
+          }
+
+          if (receipt.transactionHash) {
+            txState.transactionHash = receipt.transactionHash as string;
+          }
+
           updateState(txState);
         });
     } catch (e) {

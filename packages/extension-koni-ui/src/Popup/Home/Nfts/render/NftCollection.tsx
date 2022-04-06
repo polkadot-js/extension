@@ -10,6 +10,7 @@ import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItem'
 import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import {NFT_PER_ROW} from "@polkadot/extension-koni-ui/util";
 
 interface Props {
   className?: string;
@@ -116,7 +117,7 @@ export default React.memo(styled(NftCollection)(({ theme }: ThemeProps) => `
     column-gap: 20px;
     row-gap: 20px;
     justify-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(${NFT_PER_ROW}, 1fr);
   }
 
   .back-icon:hover {

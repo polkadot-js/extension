@@ -39,7 +39,7 @@ import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { BN_ZERO, isAccountAll } from '@polkadot/extension-koni-ui/util';
+import { BN_ZERO, isAccountAll, NFT_DEFAULT_GRID_SIZE, NFT_GRID_HEIGHT_THRESHOLD, NFT_HEADER_HEIGHT, NFT_PER_ROW, NFT_PREVIEW_HEIGHT } from '@polkadot/extension-koni-ui/util';
 
 import buyIcon from '../../assets/buy-icon.svg';
 import donateIcon from '../../assets/donate-icon.svg';
@@ -185,7 +185,19 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const [showTransferredCollection, setShowTransferredCollection] = useState(false);
   const [showForcedCollection, setShowForcedCollection] = useState(false);
-  const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey);
+
+  const parseNftGridSize = useCallback(() => {
+    if (window.innerHeight > NFT_GRID_HEIGHT_THRESHOLD) {
+      const nftContainerHeight = window.innerHeight - NFT_HEADER_HEIGHT;
+      const rowCount = Math.floor(nftContainerHeight / NFT_PREVIEW_HEIGHT);
+
+      return rowCount * NFT_PER_ROW;
+    } else {
+      return NFT_DEFAULT_GRID_SIZE;
+    }
+  }, []);
+  const nftGridSize = parseNftGridSize();
+  const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey, nftGridSize);
   const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking(networkKey);
 
   const handleNftPage = useCallback((page: number) => {
@@ -386,6 +398,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             chosenItem={chosenNftItem}
             currentNetwork={networkKey}
             loading={loadingNft}
+            nftGridSize={nftGridSize}
             nftList={nftList}
             page={nftPage}
             setChosenCollection={setChosenNftCollection}

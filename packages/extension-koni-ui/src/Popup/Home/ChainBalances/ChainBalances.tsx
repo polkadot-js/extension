@@ -100,8 +100,9 @@ function ChainBalances ({ address,
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> =
     getAccountInfoByNetworkMap(address, networkKeys, networkMetadataMap);
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
-  const [scrollable, setScrollable] = useState<boolean>(false);
   const [scrollWidth, setScrollWidth] = useState<number>(6);
+  const [containerWidth, setContainerWidth] = useState<number>(458);
+  const [listWidth, setListWidth] = useState<number>(452);
   const selectedInfo = accountInfoByNetworkMap[selectedNetworkKey];
   const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
 
@@ -184,17 +185,21 @@ function ChainBalances ({ address,
   const handlerResize = () => {
     const container = document.querySelector('.home-tab-contents') as HTMLElement;
 
-    setScrollable(container.offsetHeight < container.scrollHeight);
+    setContainerWidth(container.offsetWidth);
   };
 
   useEffect(() => {
     handlerResize();
     window.addEventListener('resize', handlerResize);
-  }, [selectedNetworkKey]);
+  }, []);
 
   useEffect(() => {
     getScrollbarWidth();
   }, []);
+
+  useEffect(() => {
+    setListWidth(containerWidth - scrollWidth);
+  }, [containerWidth, scrollWidth]);
 
   return (
     <div className={CN(className, 'chain-balances-container')}>
@@ -203,7 +208,7 @@ function ChainBalances ({ address,
           <>
             <div
               className={CN('chain-balances-container__body')}
-              style={{ paddingRight: !scrollable ? scrollWidth : 0 }}
+              style={{ width: listWidth }}
             >
               {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
             </div>

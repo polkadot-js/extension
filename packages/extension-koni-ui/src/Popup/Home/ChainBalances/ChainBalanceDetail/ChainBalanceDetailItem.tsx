@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import CN from 'classnames';
 import React, { useCallback } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
@@ -13,6 +14,7 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceItemRow from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItemRow';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
+import { waitForElement } from '@polkadot/extension-koni-ui/util/dom';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 import { Loading } from '../../../../components';
@@ -33,7 +35,14 @@ interface Props extends ThemeProps {
   toggleBalanceDetail?: (networkKey: string) => void
 }
 
-function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoading, isShowDetail, setQrModalOpen, setQrModalProps, toggleBalanceDetail }: Props): React.ReactElement<Props> {
+function ChainBalanceDetailItem ({ accountInfo,
+  balanceInfo,
+  className,
+  isLoading,
+  isShowDetail,
+  setQrModalOpen,
+  setQrModalProps,
+  toggleBalanceDetail }: Props): React.ReactElement<Props> {
   const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
   const { show } = useToast();
   const { t } = useTranslation();
@@ -44,7 +53,15 @@ function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoadin
 
   const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
     toggleBalanceDetail && toggleBalanceDetail(accountInfo.networkKey);
-  }, [accountInfo.networkKey, toggleBalanceDetail]);
+
+    if (!isShowDetail && toggleBalanceDetail) {
+      const callback = (element: Element) => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+
+      waitForElement(`.chain-balance-item__container.${accountInfo.networkKey}-detail`, callback);
+    }
+  }, [accountInfo.networkKey, toggleBalanceDetail, isShowDetail]);
 
   const _openQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -61,8 +78,7 @@ function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoadin
 
   return (
     <div
-      className={`${className || ''} ${isShowDetail ? '-show-detail' : ''}`}
-      onClick={_onToggleDetail}
+      className={CN(className, { '-show-detail': isShowDetail }, 'chain-balance-item__container', `${networkKey}-detail`)}
     >
       <div className='chain-balance-item__main-area'>
         <div className='chain-balance-item__main-area-part-1'>
@@ -118,7 +134,10 @@ function ChainBalanceDetailItem ({ accountInfo, balanceInfo, className, isLoadin
         )}
 
         {!isLoading && (
-          <div className='chain-balance-item__main-area-part-2'>
+          <div
+            className='chain-balance-item__main-area-part-2'
+            onClick={_onToggleDetail}
+          >
             <div className='chain-balance-item__balance'>
               <BalanceVal
                 symbol={balanceInfo.symbol}

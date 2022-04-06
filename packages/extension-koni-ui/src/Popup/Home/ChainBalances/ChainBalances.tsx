@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BigN from 'bignumber.js';
-import React, { Fragment, useCallback, useState } from 'react';
+import CN from 'classnames';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
@@ -99,6 +100,9 @@ function ChainBalances ({ address,
   const accountInfoByNetworkMap: Record<string, AccountInfoByNetwork> =
     getAccountInfoByNetworkMap(address, networkKeys, networkMetadataMap);
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
+  const [scrollWidth, setScrollWidth] = useState<number>(6);
+  const [containerWidth, setContainerWidth] = useState<number>(458);
+  const [listWidth, setListWidth] = useState<number>(452);
   const selectedInfo = accountInfoByNetworkMap[selectedNetworkKey];
   const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
 
@@ -157,12 +161,55 @@ function ChainBalances ({ address,
     );
   };
 
+  const getScrollbarWidth = () => {
+    // Creating invisible container
+    const outer = document.createElement('div');
+
+    outer.style.visibility = 'hidden';
+    outer.style.overflow = 'scroll'; // forcing scrollbar to appear
+    // @ts-ignore
+    outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+    document.body.appendChild(outer);
+    // Creating inner element and placing it in the container
+    const inner = document.createElement('div');
+
+    outer.appendChild(inner);
+    // Calculating difference between container's full width and the child width
+    const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
+
+    // Removing temporary elements from the DOM
+    document.body.removeChild(outer);
+    setScrollWidth(scrollbarWidth);
+  };
+
+  const handlerResize = () => {
+    const container = document.querySelector('.home-tab-contents') as HTMLElement;
+
+    setContainerWidth(container.offsetWidth);
+  };
+
+  useEffect(() => {
+    handlerResize();
+    window.addEventListener('resize', handlerResize);
+  }, []);
+
+  useEffect(() => {
+    getScrollbarWidth();
+  }, []);
+
+  useEffect(() => {
+    setListWidth(containerWidth - scrollWidth);
+  }, [containerWidth, scrollWidth]);
+
   return (
-    <div className={`chain-balances-container ${className || ''}`}>
+    <div className={CN(className, 'chain-balances-container')}>
       {!isShowBalanceDetail || !selectedNetworkKey || !selectedInfo || !selectedBalanceInfo
         ? (
           <>
-            <div className='chain-balances-container__body'>
+            <div
+              className={CN('chain-balances-container__body')}
+              style={{ width: listWidth }}
+            >
               {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
             </div>
             <div className='chain-balances-container__footer'>

@@ -479,7 +479,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://api-testnet.interlay.io:443/parachain',
     groups: ['TEST_NET'],
-    nativeToken: 'KINT',
+    nativeToken: 'KINT'
   },
   picasso: {
     chain: 'Picasso',

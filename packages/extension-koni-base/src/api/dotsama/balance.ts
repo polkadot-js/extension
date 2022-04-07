@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Contract } from 'web3-eth-contract';
 
 import { ApiPromise } from '@polkadot/api';
+import { UnsubscribePromise } from '@polkadot/api/types';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
@@ -16,6 +17,8 @@ import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/ut
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore
 function subscribeWithDerive (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
   const freeMap: Record<string, BN> = {};
   const reservedMap: Record<string, BN> = {};
@@ -102,7 +105,7 @@ function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api
   };
 }
 
-function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void) {
+function subscribeTokensBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void, includeMainToken?: boolean) {
   let forceStop = false;
 
   let unsubAll = () => {
@@ -117,13 +120,17 @@ function subscribeTokensBalance (addresses: string[], networkKey: string, api: A
         return;
       }
 
-      const subTokenList = Object.values(tokenMap).filter((t) => !t.isMainToken);
+      let tokenList = Object.values(tokenMap);
 
-      if (subTokenList.length > 0) {
-        console.log('Get tokens balance of', networkKey, subTokenList);
+      if (!includeMainToken) {
+        tokenList = tokenList.filter((t) => !t.isMainToken);
       }
 
-      const unsubList = subTokenList.map(({ decimals, specialOption, symbol }) => {
+      if (tokenList.length > 0) {
+        console.log('Get tokens balance of', networkKey, tokenList);
+      }
+
+      const unsubList = tokenList.map(({ decimals, specialOption, symbol }) => {
         const observable = new Observable<BalanceChildItem>((subscriber) => {
           // Get Token Balance
           // @ts-ignore
@@ -142,8 +149,16 @@ function subscribeTokensBalance (addresses: string[], networkKey: string, api: A
 
         return observable.subscribe({
           next: (childBalance) => {
-            // @ts-ignore
-            originBalanceItem.children[symbol] = childBalance;
+            if (includeMainToken && tokenMap[symbol].isMainToken) {
+              originBalanceItem.state = APIItemState.READY;
+              originBalanceItem.free = childBalance.free;
+              originBalanceItem.reserved = childBalance.reserved;
+              originBalanceItem.feeFrozen = childBalance.frozen;
+            } else {
+              // @ts-ignore
+              originBalanceItem.children[symbol] = childBalance;
+            }
+
             callback(originBalanceItem);
           }
         });
@@ -171,37 +186,46 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
   };
 
   // @ts-ignore
-  const unsub = networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
-    let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+  let unsub: UnsubscribePromise;
 
-    balances.forEach((balance: AccountInfo) => {
-      free = free.add(balance.data?.free?.toBn() || new BN(0));
-      reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
-      miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || new BN(0));
-      feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
+  if (!['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
+    unsub = networkAPI.api.query.system.account.multi(addresses, (balances: AccountInfo[]) => {
+      let [free, reserved, miscFrozen, feeFrozen] = [new BN(0), new BN(0), new BN(0), new BN(0)];
+
+      balances.forEach((balance: AccountInfo) => {
+        free = free.add(balance.data?.free?.toBn() || new BN(0));
+        reserved = reserved.add(balance.data?.reserved?.toBn() || new BN(0));
+        miscFrozen = miscFrozen.add(balance.data?.miscFrozen?.toBn() || new BN(0));
+        feeFrozen = feeFrozen.add(balance.data?.feeFrozen?.toBn() || new BN(0));
+      });
+
+      balanceItem.state = APIItemState.READY;
+      balanceItem.free = free.toString();
+      balanceItem.reserved = reserved.toString();
+      balanceItem.miscFrozen = miscFrozen.toString();
+      balanceItem.feeFrozen = feeFrozen.toString();
+
+      callback(networkKey, balanceItem);
     });
-
-    balanceItem.state = APIItemState.READY;
-    balanceItem.free = free.toString();
-    balanceItem.reserved = reserved.toString();
-    balanceItem.miscFrozen = miscFrozen.toString();
-    balanceItem.feeFrozen = feeFrozen.toString();
-
-    callback(networkKey, balanceItem);
-  });
+  }
 
   let unsub2: () => void;
 
-  if (['bifrost', 'acala', 'karura', 'interlay'].indexOf(networkKey) > -1) {
+  if (['bifrost', 'acala', 'karura'].includes(networkKey)) {
     unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     });
-  } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
+  } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
+    unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+      callback(networkKey, balanceItem);
+    }, true);
+  } else if (moonbeamBaseChains.includes(networkKey)) {
     unsub2 = subscribeMoonbeamInterval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }
 
   return async () => {
-    (await unsub)();
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    unsub && (await unsub)();
     unsub2 && unsub2();
   };
 }
@@ -228,12 +252,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
       return undefined;
     }
 
-    if (networkKey === 'kintsugi') {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      return subscribeWithDerive(useAddresses, networkKey, networkAPI, callback);
-    } else {
-      return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
-    }
+    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
   });
 }
 

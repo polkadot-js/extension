@@ -473,6 +473,14 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'KINT',
     crowdloanUrl: 'https://kintsugi.interlay.io/'
   },
+  kintsugi_test: {
+    chain: 'Kintsugi Testnet',
+    genesisHash: '0x364dd762ee3fa02f63548f579f185e64932fc1a29052d7d9a588d2a57b191abf',
+    ss58Format: 42,
+    provider: 'wss://api-testnet.interlay.io:443/parachain',
+    groups: ['TEST_NET'],
+    nativeToken: 'KINT'
+  },
   picasso: {
     chain: 'Picasso',
     genesisHash: '0x6811a339673c9daa897944dcdac99c6e2939cc88245ed21951a0a3c9a2be75bc',

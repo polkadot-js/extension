@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.3.2 (Koni)
+Build date: Apr 07, 2022. Complete internal security audit
+
+Update:
+- Improve custom access screen (issue #91)
+- Display Astar(EVM) tokens balances and ERC20 tokens (issue #92)
+
 ## 0.3.1 (Koni)
 Build date: Apr 05, 2022. Complete internal security audit
 

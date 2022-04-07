@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
      165	Nam Phạm                      	fix webpack and import error
-     139	AnhMTV                        	#92 Fix error can not see balance price of AstarEVM
+     140	AnhMTV                        	Release version 0.3.2
       82	Thibaut Sardan                	Add account filtering feature (#832)
       74	quangdo                       	Improve UI and fix logic bugs Authorize and Auth Management
       55	leewong                       	#118: update balance logic for Kintsugi testnet

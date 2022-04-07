@@ -109,7 +109,7 @@ async function loadOnReady(registry, api) {
 
 function initApi(networkKey, apiUrl) {
   const registry = new _create.TypeRegistry();
-  const provider = new _api2.WsProvider(apiUrl, _constants.DOTSAMA_AUTO_CONNECT_MS);
+  const provider = apiUrl.startsWith('http') ? new _api2.HttpProvider(apiUrl) : new _api2.WsProvider(apiUrl, _constants.DOTSAMA_AUTO_CONNECT_MS);
   const apiOption = {
     provider,
     typesBundle: _apiHelper.typesBundle,

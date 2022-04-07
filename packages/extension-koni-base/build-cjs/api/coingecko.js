@@ -27,7 +27,8 @@ const alternativeNameMap = {
   picasso: 'pica',
   robonomics: 'robonomics-network',
   shadow: 'crust-storage-market',
-  'sora-substrate': 'sora'
+  'sora-substrate': 'sora',
+  astarEvm: 'astar'
 };
 
 const getTokenPrice = async function () {
@@ -58,11 +59,11 @@ const getTokenPrice = async function () {
     const priceMap = {};
     const tokenPriceMap = {};
     responseData.forEach(val => {
+      priceMap[val.id] = val.current_price;
+
       if (inverseMap[val.id]) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         priceMap[inverseMap[val.id]] = val.current_price;
-      } else {
-        priceMap[val.id] = val.current_price;
       }
 
       tokenPriceMap[val.symbol] = val.current_price;

@@ -221,11 +221,10 @@ class Tabs {
   async handle(id, type, request, url, port) {
     if (type === 'pub(phishing.redirectIfDenied)') {
       return this.redirectIfPhishing(url);
-    }
+    } // if (type !== 'pub(authorize.tab)') {
+    //   this.#state.ensureUrlAuthorized(url);
+    // }
 
-    if (type !== 'pub(authorize.tab)') {
-      this.#state.ensureUrlAuthorized(url);
-    }
 
     switch (type) {
       case 'pub(authorize.tab)':

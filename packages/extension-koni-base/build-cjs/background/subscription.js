@@ -33,6 +33,25 @@ class KoniSubcription {
   }
 
   init() {
+    _handlers.state.getAuthorize(value => {
+      if (!Object.keys(value).length) {
+        const authString = localStorage.getItem('authUrls') || '{}';
+        const previousAuth = JSON.parse(authString);
+
+        if (previousAuth && Object.keys(previousAuth).length) {
+          Object.keys(previousAuth).forEach(url => {
+            if (previousAuth[url].isAllowed) {
+              previousAuth[url].isAllowedMap = _handlers.state.getAddressList(true);
+            } else {
+              previousAuth[url].isAllowedMap = _handlers.state.getAddressList();
+            }
+          });
+        }
+
+        _handlers.state.setAuthorize(previousAuth);
+      }
+    });
+
     _handlers.state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
 
     _handlers.state.getCurrentAccount(currentAccountInfo => {

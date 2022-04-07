@@ -193,11 +193,12 @@ class KoniState extends _State.default {
   }
 
   getAddressList() {
-    const a = Object.keys(_accounts.accounts.subject.value);
-    const b = a.reduce((a, v) => ({ ...a,
-      [v]: false
+    let value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    const addressList = Object.keys(_accounts.accounts.subject.value).filter(address => _accounts.accounts.subject.value[address].type !== 'ethereum');
+    const addressListMap = addressList.reduce((addressList, v) => ({ ...addressList,
+      [v]: value
     }), {});
-    return b;
+    return addressListMap;
   }
 
   updateIconAuthV2(shouldClose) {
@@ -210,9 +211,21 @@ class KoniState extends _State.default {
 
     const complete = (result, accounts) => {
       const isAllowed = result === true;
-      accounts && accounts.forEach(acc => {
-        isAllowedMap[acc] = true;
-      });
+
+      if (accounts && accounts.length) {
+        Object.keys(isAllowedMap).forEach(address => {
+          if (accounts.includes(address)) {
+            isAllowedMap[address] = true;
+          } else {
+            isAllowedMap[address] = false;
+          }
+        });
+      } else {
+        // eslint-disable-next-line no-return-assign
+        Object.keys(isAllowedMap).forEach(address => isAllowedMap[address] = false);
+      }
+
+      console.log('isAllowedMap=====isAllowedMap=====isAllowedMap=====', isAllowedMap);
       const {
         idStr,
         request: {
@@ -268,13 +281,10 @@ class KoniState extends _State.default {
       authList = {};
     }
 
-    localStorage.setItem('authList', JSON.stringify(authList));
-
     if (authList[idStr]) {
       // this url was seen in the past
-      // const isConnected = Object.keys(authList[idStr].isAllowedMap)
-      //   .some((address) => authList[idStr].isAllowedMap[address]);
-      (0, _util.assert)(authList[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
+      const isConnected = Object.keys(authList[idStr].isAllowedMap).some(address => authList[idStr].isAllowedMap[address]);
+      (0, _util.assert)(isConnected, `The source ${url} is not allowed to interact with this extension`);
       return false;
     }
 
@@ -303,15 +313,16 @@ class KoniState extends _State.default {
   }
 
   ensureUrlAuthorizedV2(url) {
+    const idStr = this.stripUrl(url);
     this.getAuthorize(value => {
       if (!value) {
         value = {};
       }
 
-      localStorage.setItem('authList', JSON.stringify(value));
-      const entry = value[this.stripUrl(url)];
+      const isConnected = Object.keys(value[idStr].isAllowedMap).some(address => value[idStr].isAllowedMap[address]);
+      const entry = Object.keys(value).includes(idStr);
       (0, _util.assert)(entry, `The source ${url} has not been enabled yet`);
-      (0, _util.assert)(entry.isAllowed, `The source ${url} is not allowed to interact with this extension`);
+      (0, _util.assert)(isConnected, `The source ${url} is not allowed to interact with this extension`);
     });
     return true;
   }

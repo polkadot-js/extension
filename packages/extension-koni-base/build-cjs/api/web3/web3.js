@@ -35,7 +35,11 @@ const connectWeb3Apis = function () {
     let [networkKey, networkInfo] = _ref;
 
     if (networkInfo && networkInfo.provider) {
-      apiMap[networkKey] = new _web.default(networkInfo.provider);
+      if (networkInfo.provider.startsWith('ws')) {
+        apiMap[networkKey] = new _web.default(new _web.default.providers.WebsocketProvider(networkInfo.provider));
+      } else if (networkInfo.provider.startsWith('http')) {
+        apiMap[networkKey] = new _web.default(new _web.default.providers.HttpProvider(networkInfo.provider));
+      }
     }
   });
   return apiMap;

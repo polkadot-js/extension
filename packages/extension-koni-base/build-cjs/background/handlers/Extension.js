@@ -252,6 +252,7 @@ class KoniExtension extends _Extension.default {
 
   _changeAuthorizationAll(connectValue, callBack) {
     _index.state.getAuthorize(value => {
+      console.log('value', value);
       (0, _util.assert)(value, 'The source is not known');
       Object.keys(value).forEach(url => {
         // eslint-disable-next-line no-return-assign

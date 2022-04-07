@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getFreeBalance = getFreeBalance;
 exports.subscribeBalance = subscribeBalance;
+exports.subscribeEVMBalance = subscribeEVMBalance;
 
 var _rxjs = require("rxjs");
 
@@ -13,6 +14,8 @@ var _KoniTypes = require("@polkadot/extension-base/background/KoniTypes");
 var _apiHelper = require("@polkadot/extension-koni-base/api/dotsama/api-helper");
 
 var _registry = require("@polkadot/extension-koni-base/api/dotsama/registry");
+
+var _balance = require("@polkadot/extension-koni-base/api/web3/balance");
 
 var _web = require("@polkadot/extension-koni-base/api/web3/web3");
 
@@ -26,6 +29,8 @@ var _util = require("@polkadot/util");
 
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore
 function subscribeWithDerive(addresses, networkKey, networkAPI, callback) {
   const freeMap = {};
   const reservedMap = {};
@@ -60,7 +65,7 @@ function subscribeWithDerive(addresses, networkKey, networkAPI, callback) {
   };
 }
 
-function subscribeMoonbeamInterval(addresses, networkKey, api, originBalanceItem, callback) {
+function subscribeERC20Interval(addresses, networkKey, api, originBalanceItem, callback) {
   let tokenList = {};
   const ERC20ContractMap = {};
   const tokenBalanceMap = {};
@@ -123,7 +128,7 @@ function subscribeMoonbeamInterval(addresses, networkKey, api, originBalanceItem
   };
 }
 
-function subscribeTokensBalance(addresses, networkKey, api, originBalanceItem, callback) {
+function subscribeTokensBalance(addresses, networkKey, api, originBalanceItem, callback, includeMainToken) {
   let forceStop = false;
 
   let unsubAll = () => {
@@ -140,13 +145,17 @@ function subscribeTokensBalance(addresses, networkKey, api, originBalanceItem, c
       return;
     }
 
-    const subTokenList = Object.values(tokenMap).filter(t => !t.isMainToken);
+    let tokenList = Object.values(tokenMap);
 
-    if (subTokenList.length > 0) {
-      console.log('Get tokens balance of', networkKey, subTokenList);
+    if (!includeMainToken) {
+      tokenList = tokenList.filter(t => !t.isMainToken);
     }
 
-    const unsubList = subTokenList.map(_ref6 => {
+    if (tokenList.length > 0) {
+      console.log('Get tokens balance of', networkKey, tokenList);
+    }
+
+    const unsubList = tokenList.map(_ref6 => {
       let {
         decimals,
         specialOption,
@@ -170,8 +179,16 @@ function subscribeTokensBalance(addresses, networkKey, api, originBalanceItem, c
       };
       return observable.subscribe({
         next: childBalance => {
-          // @ts-ignore
-          originBalanceItem.children[symbol] = childBalance;
+          if (includeMainToken && tokenMap[symbol].isMainToken) {
+            originBalanceItem.state = _KoniTypes.APIItemState.READY;
+            originBalanceItem.free = childBalance.free;
+            originBalanceItem.reserved = childBalance.reserved;
+            originBalanceItem.feeFrozen = childBalance.frozen;
+          } else {
+            // @ts-ignore
+            originBalanceItem.children[symbol] = childBalance;
+          }
+
           callback(originBalanceItem);
         }
       });
@@ -196,35 +213,70 @@ function subscribeWithAccountMulti(addresses, networkKey, networkAPI, callback) 
     children: undefined
   }; // @ts-ignore
 
-  const unsub = networkAPI.api.query.system.account.multi(addresses, balances => {
-    let [free, reserved, miscFrozen, feeFrozen] = [new _util.BN(0), new _util.BN(0), new _util.BN(0), new _util.BN(0)];
-    balances.forEach(balance => {
-      var _balance$data, _balance$data$free, _balance$data2, _balance$data2$reserv, _balance$data3, _balance$data3$miscFr, _balance$data4, _balance$data4$feeFro;
+  let unsub;
 
-      free = free.add(((_balance$data = balance.data) === null || _balance$data === void 0 ? void 0 : (_balance$data$free = _balance$data.free) === null || _balance$data$free === void 0 ? void 0 : _balance$data$free.toBn()) || new _util.BN(0));
-      reserved = reserved.add(((_balance$data2 = balance.data) === null || _balance$data2 === void 0 ? void 0 : (_balance$data2$reserv = _balance$data2.reserved) === null || _balance$data2$reserv === void 0 ? void 0 : _balance$data2$reserv.toBn()) || new _util.BN(0));
-      miscFrozen = miscFrozen.add(((_balance$data3 = balance.data) === null || _balance$data3 === void 0 ? void 0 : (_balance$data3$miscFr = _balance$data3.miscFrozen) === null || _balance$data3$miscFr === void 0 ? void 0 : _balance$data3$miscFr.toBn()) || new _util.BN(0));
-      feeFrozen = feeFrozen.add(((_balance$data4 = balance.data) === null || _balance$data4 === void 0 ? void 0 : (_balance$data4$feeFro = _balance$data4.feeFrozen) === null || _balance$data4$feeFro === void 0 ? void 0 : _balance$data4$feeFro.toBn()) || new _util.BN(0));
+  if (!['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
+    unsub = networkAPI.api.query.system.account.multi(addresses, balances => {
+      let [free, reserved, miscFrozen, feeFrozen] = [new _util.BN(0), new _util.BN(0), new _util.BN(0), new _util.BN(0)];
+      balances.forEach(balance => {
+        var _balance$data, _balance$data$free, _balance$data2, _balance$data2$reserv, _balance$data3, _balance$data3$miscFr, _balance$data4, _balance$data4$feeFro;
+
+        free = free.add(((_balance$data = balance.data) === null || _balance$data === void 0 ? void 0 : (_balance$data$free = _balance$data.free) === null || _balance$data$free === void 0 ? void 0 : _balance$data$free.toBn()) || new _util.BN(0));
+        reserved = reserved.add(((_balance$data2 = balance.data) === null || _balance$data2 === void 0 ? void 0 : (_balance$data2$reserv = _balance$data2.reserved) === null || _balance$data2$reserv === void 0 ? void 0 : _balance$data2$reserv.toBn()) || new _util.BN(0));
+        miscFrozen = miscFrozen.add(((_balance$data3 = balance.data) === null || _balance$data3 === void 0 ? void 0 : (_balance$data3$miscFr = _balance$data3.miscFrozen) === null || _balance$data3$miscFr === void 0 ? void 0 : _balance$data3$miscFr.toBn()) || new _util.BN(0));
+        feeFrozen = feeFrozen.add(((_balance$data4 = balance.data) === null || _balance$data4 === void 0 ? void 0 : (_balance$data4$feeFro = _balance$data4.feeFrozen) === null || _balance$data4$feeFro === void 0 ? void 0 : _balance$data4$feeFro.toBn()) || new _util.BN(0));
+      });
+      balanceItem.state = _KoniTypes.APIItemState.READY;
+      balanceItem.free = free.toString();
+      balanceItem.reserved = reserved.toString();
+      balanceItem.miscFrozen = miscFrozen.toString();
+      balanceItem.feeFrozen = feeFrozen.toString();
+      callback(networkKey, balanceItem);
     });
-    balanceItem.state = _KoniTypes.APIItemState.READY;
-    balanceItem.free = free.toString();
-    balanceItem.reserved = reserved.toString();
-    balanceItem.miscFrozen = miscFrozen.toString();
-    balanceItem.feeFrozen = feeFrozen.toString();
-    callback(networkKey, balanceItem);
-  });
+  }
+
   let unsub2;
 
-  if (['bifrost', 'acala', 'karura', 'interlay'].indexOf(networkKey) > -1) {
+  if (['bifrost', 'acala', 'karura'].includes(networkKey)) {
     unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, balanceItem => {
       callback(networkKey, balanceItem);
     });
+  } else if (['kintsugi', 'interlay', 'kintsugi_test'].includes(networkKey)) {
+    unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, balanceItem => {
+      callback(networkKey, balanceItem);
+    }, true);
   } else if (_apiHelper.moonbeamBaseChains.indexOf(networkKey) > -1) {
-    unsub2 = subscribeMoonbeamInterval(addresses, networkKey, networkAPI.api, balanceItem, callback);
+    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }
 
   return async () => {
-    (await unsub)();
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    unsub && (await unsub)();
+    unsub2 && unsub2();
+  };
+}
+
+function subscribeEVMBalance(networkKey, api, addresses, callback) {
+  const balanceItem = {
+    state: _KoniTypes.APIItemState.READY,
+    free: '0',
+    reserved: '0',
+    miscFrozen: '0',
+    feeFrozen: '0'
+  };
+
+  function getBalance() {
+    (0, _balance.getEVMBalance)(networkKey, addresses).then(balances => {
+      balanceItem.free = (0, _utils.sumBN)(balances.map(b => new _util.BN(b || '0'))).toString();
+      callback(networkKey, balanceItem);
+    }).catch(console.error);
+  }
+
+  getBalance();
+  const interval = setInterval(getBalance, _constants.ASTAR_REFRESH_BALANCE_INTERVAL);
+  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, callback);
+  return () => {
+    clearInterval(interval);
     unsub2 && unsub2();
   };
 }
@@ -235,6 +287,10 @@ function subscribeBalance(addresses, dotSamaAPIMap, callback) {
     let [networkKey, apiProps] = _ref7;
     const networkAPI = await apiProps.isReady;
     const useAddresses = _apiHelper.ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
+
+    if (networkKey === 'astarEvm') {
+      return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, callback);
+    }
 
     if (!useAddresses || useAddresses.length === 0 || _constants.IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) > -1) {
       // Return zero balance if not have any address
@@ -247,14 +303,10 @@ function subscribeBalance(addresses, dotSamaAPIMap, callback) {
       };
       callback(networkKey, zeroBalance);
       return undefined;
-    }
+    } // eslint-disable-next-line @typescript-eslint/no-misused-promises
 
-    if (networkKey === 'kintsugi') {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      return subscribeWithDerive(useAddresses, networkKey, networkAPI, callback);
-    } else {
-      return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
-    }
+
+    return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
   });
 }
 

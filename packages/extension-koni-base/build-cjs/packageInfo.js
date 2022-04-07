@@ -11,6 +11,6 @@ const packageInfo = {
   name: '@polkadot/extension-koni-base',
   path: typeof __dirname === 'string' ? __dirname : 'auto',
   type: 'cjs',
-  version: '0.3.2-0'
+  version: '0.3.2-1'
 };
 exports.packageInfo = packageInfo;

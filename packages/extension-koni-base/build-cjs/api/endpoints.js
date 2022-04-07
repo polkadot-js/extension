@@ -103,7 +103,7 @@ const NETWORKS = {
     chain: 'Astar - EVM',
     genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6___EVM',
     ss58Format: 5,
-    provider: 'wss://astar.api.onfinality.io/public-ws',
+    provider: 'https://rpc.astar.network:8545',
     groups: ['POLKADOT_PARACHAIN'],
     isEthereum: true,
     nativeToken: 'ASTR',
@@ -477,6 +477,14 @@ const NETWORKS = {
     paraId: 2092,
     nativeToken: 'KINT',
     crowdloanUrl: 'https://kintsugi.interlay.io/'
+  },
+  kintsugi_test: {
+    chain: 'Kintsugi Testnet',
+    genesisHash: '0x364dd762ee3fa02f63548f579f185e64932fc1a29052d7d9a588d2a57b191abf',
+    ss58Format: 42,
+    provider: 'wss://api-testnet.interlay.io:443/parachain',
+    groups: ['TEST_NET'],
+    nativeToken: 'KINT'
   },
   picasso: {
     chain: 'Picasso',

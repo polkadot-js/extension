@@ -111,7 +111,9 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
 }
 
 export default styled(WebsiteEntry)(({ theme }: Props) => `
-  margin-bottom: 16px;
+  &:not(:last-child) {
+    margin-bottom: 16px;
+  }
 
   .website-entry__main-content {
     display: flex;

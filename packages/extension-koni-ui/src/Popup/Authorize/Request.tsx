@@ -34,8 +34,8 @@ function stripUrl (url: string): string {
 function Request ({ authId, className, request: { origin }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  const { hierarchy } = useContext(AccountContext);
-  const accounts = hierarchy.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
+  const { accounts } = useContext(AccountContext);
+  const filteredAccounts = accounts.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
   const { hostname } = new URL(url);
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 
@@ -79,7 +79,7 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
         {t<string>('Choose the account(s) you’d like to connect')}
       </div>
       <div className='request__accounts'>
-        {accounts.map((acc) => (
+        {filteredAccounts.map((acc) => (
           <ConnectAccount
             address={acc.address}
             genesisHash={acc.genesisHash}
@@ -156,6 +156,7 @@ export default styled(Request)(({ theme }: Props) => `
   .request__accounts {
     flex: 1;
     overflow-y: auto;
+    padding-right: 6px;
   }
 
   .authorize-request__account .account-info-row {

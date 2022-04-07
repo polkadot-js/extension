@@ -204,5 +204,119 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       decimals: 12,
       name: 'xcBNC'
     }
+  },
+  astarEvm: {
+    ARSW: {
+      isMainToken: false,
+      symbol: 'ARSW',
+      erc20Address: '0xde2578edec4669ba7f41c5d5d2386300bcea4678',
+      decimals: 18,
+      name: 'ArthSwap Token'
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      erc20Address: '0x7f27352D5F83Db87a5A3E00f4B07Cc2138D8ee52',
+      decimals: 18,
+      name: 'Binance Coin'
+    },
+    BUSD: {
+      isMainToken: false,
+      symbol: 'BUSD',
+      erc20Address: '0x4Bf769b05E832FCdc9053fFFBC78Ca889aCb5E1E',
+      decimals: 18,
+      name: 'Binance USD'
+    },
+    CRV: {
+      isMainToken: false,
+      symbol: 'CRV',
+      erc20Address: '0x7756a83563f0f56937A6FdF668E7D9F387c0D199',
+      decimals: 18,
+      name: 'Curve DAO Token'
+    },
+    DAI: {
+      isMainToken: false,
+      symbol: 'DAI',
+      erc20Address: '0x6De33698e9e9b787e09d3Bd7771ef63557E148bb',
+      decimals: 18,
+      name: 'Dai Stablecoin'
+    },
+    PKEX: {
+      isMainToken: false,
+      symbol: 'PKEX',
+      erc20Address: '0x1fE622E91e54D6AD00B01917351Ea6081426764A',
+      decimals: 18,
+      name: 'PolkaEx'
+    },
+    SDN: {
+      isMainToken: false,
+      symbol: 'SDN',
+      erc20Address: '0x1fE622E91e54D6AD00B01917351Ea6081426764A',
+      decimals: 18,
+      name: 'Shiden Network'
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      erc20Address: '0x6a2d262D56735DbA19Dd70682B39F6bE9a931D98',
+      decimals: 6,
+      name: 'USD Coin'
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0x3795C36e7D12A8c252A20C5a7B455f7c57b60283',
+      decimals: 6,
+      name: 'Tether USD (USDT)'
+    },
+    WBTC: {
+      isMainToken: false,
+      symbol: 'WBTC',
+      erc20Address: '0xad543f18cff85c77e140e3e5e3c3392f6ba9d5ca',
+      decimals: 8,
+      name: 'Wrapped BTC'
+    },
+    WETH: {
+      isMainToken: false,
+      symbol: 'WETH',
+      erc20Address: '0x81ECac0D6Be0550A00FF064a4f9dd2400585FE9c',
+      decimals: 18,
+      name: 'Wrapped Ether'
+    },
+    KZY: {
+      isMainToken: false,
+      symbol: 'KZY',
+      erc20Address: '0x3d4DCFD2B483549527f7611ccFecb40b47d0c17b',
+      decimals: 18,
+      name: 'Kazuya Token'
+    },
+    WASTR: {
+      isMainToken: false,
+      symbol: 'WASTR',
+      erc20Address: '0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720',
+      decimals: 18,
+      name: 'Wrapped Astar'
+    },
+    'ARSW-LP': {
+      isMainToken: false,
+      symbol: 'ARSW-LP',
+      erc20Address: '0x87988EbDE7E661F44eB3a586C5E0cEAB533a2d9C',
+      decimals: 18,
+      name: 'Arthswap LPs (ARSW-LP)'
+    },
+    KOS: {
+      isMainToken: false,
+      symbol: 'KOS',
+      erc20Address: '0xbcF7aa4fC081f5670d9b8a1BdD1cFd98DCAeE6e6',
+      decimals: 18,
+      name: 'KaioShin Token'
+    },
+    PPC: {
+      isMainToken: false,
+      symbol: 'PPC',
+      erc20Address: '0x34F79636a55d9961E47b7784eF460B021B499406',
+      decimals: 18,
+      name: 'Pepe Coin'
+    }
   }
 };

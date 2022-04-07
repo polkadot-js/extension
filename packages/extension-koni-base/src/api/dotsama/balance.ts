@@ -10,9 +10,10 @@ import { DeriveBalancesAll } from '@polkadot/api-derive/types';
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { getRegistry, getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
+import { getEVMBalance } from '@polkadot/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
-import { IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
+import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
@@ -54,7 +55,7 @@ function subscribeWithDerive (addresses: string[], networkKey: string, networkAP
   };
 }
 
-function subscribeMoonbeamInterval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
+function subscribeERC20Interval (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (networkKey: string, rs: BalanceItem) => void): () => void {
   let tokenList = {} as TokenInfo[];
   const ERC20ContractMap = {} as Record<string, Contract>;
   const tokenBalanceMap = {} as Record<string, BalanceChildItem>;
@@ -219,13 +220,41 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
     unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     }, true);
-  } else if (moonbeamBaseChains.includes(networkKey)) {
-    unsub2 = subscribeMoonbeamInterval(addresses, networkKey, networkAPI.api, balanceItem, callback);
+  } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
+    unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }
 
   return async () => {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     unsub && (await unsub)();
+    unsub2 && unsub2();
+  };
+}
+
+export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addresses: string[], callback: (networkKey: string, rs: BalanceItem) => void) {
+  const balanceItem = {
+    state: APIItemState.READY,
+    free: '0',
+    reserved: '0',
+    miscFrozen: '0',
+    feeFrozen: '0'
+  } as BalanceItem;
+
+  function getBalance () {
+    getEVMBalance(networkKey, addresses)
+      .then((balances) => {
+        balanceItem.free = sumBN(balances.map((b) => (new BN(b || '0')))).toString();
+        callback(networkKey, balanceItem);
+      })
+      .catch(console.error);
+  }
+
+  getBalance();
+  const interval = setInterval(getBalance, ASTAR_REFRESH_BALANCE_INTERVAL);
+  const unsub2 = subscribeERC20Interval(addresses, networkKey, api, balanceItem, callback);
+
+  return () => {
+    clearInterval(interval);
     unsub2 && unsub2();
   };
 }
@@ -236,6 +265,10 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
   return Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
     const networkAPI = await apiProps.isReady;
     const useAddresses = ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
+
+    if (networkKey === 'astarEvm') {
+      return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, callback);
+    }
 
     if (!useAddresses || useAddresses.length === 0 || IGNORE_GET_SUBSTRATE_FEATURES_LIST.indexOf(networkKey) > -1) {
       // Return zero balance if not have any address
@@ -252,6 +285,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
       return undefined;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return subscribeWithAccountMulti(useAddresses, networkKey, networkAPI, callback);
   });
 }

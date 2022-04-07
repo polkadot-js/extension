@@ -3,7 +3,7 @@
 
 import { options } from '@acala-network/api';
 
-import { ApiPromise, WsProvider } from '@polkadot/api';
+import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
@@ -101,10 +101,10 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
-export function initApi (networkKey: string, apiUrl: string | string[]): ApiProps {
+export function initApi (networkKey: string, apiUrl: string): ApiProps {
   const registry = new TypeRegistry();
 
-  const provider = new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
+  const provider = apiUrl.startsWith('http') ? new HttpProvider(apiUrl) : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
   const apiOption = { provider, typesBundle, typesChain: typesChain };
 

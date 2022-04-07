@@ -70,12 +70,10 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
 export default React.memo(styled(NftCollectionPreview)(({ theme }: ThemeProps) => `
   .img-container {
     position: relative;
-    height: 124px;
-    width: 124px;
   }
 
   .img-spinner {
-    top: 50%;
+    position: absolute;
   }
 
   .nft-preview {

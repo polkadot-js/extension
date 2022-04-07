@@ -10,7 +10,7 @@ import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItem'
 import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import {NFT_PER_ROW} from "@polkadot/extension-koni-ui/util";
+import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 interface Props {
   className?: string;

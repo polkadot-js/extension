@@ -159,34 +159,36 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
         </div>
 
         <div className={'detail-container'}>
-          {
-            loading &&
-            <Spinner className={'img-spinner'} />
-          }
-          {
-            showImage
-              ? <img
-                alt={'item-img'}
-                className={'item-img'}
-                onClick={handleOnClick}
-                onError={handleImageError}
-                onLoad={handleOnLoad}
-                src={getItemImage()}
-                style={{ borderRadius: '5px' }}
-              />
-              : <video
-                autoPlay
-                height='416'
-                loop={true}
-                onError={handleVideoError}
-                width='100%'
-              >
-                <source
+          <div className={'img-container'}>
+            {
+              loading &&
+              <Spinner className={'img-spinner'} />
+            }
+            {
+              showImage
+                ? <img
+                  alt={'item-img'}
+                  className={'item-img'}
+                  onClick={handleOnClick}
+                  onError={handleImageError}
+                  onLoad={handleOnLoad}
                   src={getItemImage()}
-                  type='video/mp4'
+                  style={{ borderRadius: '5px' }}
                 />
-              </video>
-          }
+                : <video
+                  autoPlay
+                  height='416'
+                  loop={true}
+                  onError={handleVideoError}
+                  width='100%'
+                >
+                  <source
+                    src={getItemImage()}
+                    type='video/mp4'
+                  />
+                </video>
+            }
+          </div>
 
           {
             // @ts-ignore
@@ -247,10 +249,12 @@ export default React.memo(styled(NftItem)(({ theme }: ThemeProps) => `
     word-break: keep-all;
   }
 
+  .img-spinner {
+    position: absolute;
+  }
+
   .img-container {
     position: relative;
-    height: 124px;
-    width: 124px;
   }
 
   .back-icon:hover {

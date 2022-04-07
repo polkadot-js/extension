@@ -601,10 +601,10 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     crowdloanUrl: 'https://crab.network/plo'
   },
   bitcountry: {
-    chain: 'Bit.Country - Testnet',
+    chain: 'Bit.Country - Alpha Net',
     genesisHash: '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5',
     ss58Format: 42,
-    provider: 'wss://dev-chain.bit.country',
+    provider: 'wss://alphanet-rpc.bit.country',
     groups: ['TEST_NET'],
     nativeToken: 'NUUM'
   },

@@ -20,6 +20,7 @@ import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPOR
 import InputAddress from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress';
 import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { CurrentAccountType } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
@@ -73,6 +74,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const [currentAccount] = useState<CurrentAccountType>(account);
   const networkKey = nftItem.chain as string;
 
   // for substrate-based chains
@@ -94,6 +96,12 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
+
+  useEffect(() => { // handle user change account during sending process
+    if (account.account?.address !== currentAccount.account?.address) {
+      navigate('/');
+    }
+  }, [account, currentAccount.account?.address, navigate]);
 
   const handleResend = useCallback(() => {
     setExtrinsicHash('');
@@ -129,7 +137,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
 
     setLoading(true);
     // @ts-ignore
-    const senderAddress = account.account.address;
+    const senderAddress = currentAccount.account.address;
     const params = paramsHandler(nftItem, networkKey);
     const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress as string, params);
 
@@ -155,7 +163,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     }
 
     setLoading(false);
-  }, [account?.account?.address, addressError, api, currentNetwork.networkKey, isApiReady, networkKey, nftItem, recipientAddress, show]);
+  }, [addressError, api, currentAccount.account?.address, currentNetwork.networkKey, isApiReady, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);
@@ -254,7 +262,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
             collectionId={collectionId}
             nftItem={nftItem}
             recipientAddress={recipientAddress}
-            senderAccount={account?.account}
+            senderAccount={currentAccount?.account}
             setExtrinsicHash={setExtrinsicHash}
             setIsTxSuccess={setIsTxSuccess}
             setShowConfirm={setShowConfirm}

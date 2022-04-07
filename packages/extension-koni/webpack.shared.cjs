@@ -102,13 +102,12 @@ module.exports = (entry, alias = {}) => ({
       stream: require.resolve('stream-browserify'),
       os: require.resolve('os-browserify/browser'),
       http: require.resolve('stream-http'),
+      https: require.resolve("https-browserify"),
       assert: require.resolve('assert'),
       zlib: false,
       url: false,
-      https: false
       // http: false,
       // zlib: require.resolve("browserify-zlib"),
-      // https: require.resolve("https-browserify"),
       // url: require.resolve("url/")
     }
   },

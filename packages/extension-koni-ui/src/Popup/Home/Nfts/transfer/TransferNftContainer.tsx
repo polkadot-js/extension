@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@polkadot/extension-koni-ui/components';
@@ -52,7 +53,7 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
       />
 
       {
-        isApiReady || currentNetwork.isEthereum
+        isApiReady || currentNetwork.isEthereum || currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()
           ? (
             <TransferNftContainer
               api={api}
@@ -125,7 +126,15 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
   }, [isEthereumAddress, recipientAddress]);
 
   const handleSend = useCallback(async () => {
-    if (addressError || !isApiReady || !networkKey) {
+    if (addressError) {
+      return;
+    }
+
+    if (!isApiReady || !networkKey) {
+      if (currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()) {
+        show(`Please change to ${networkKey.toUpperCase()} network.`);
+      }
+
       return;
     }
 

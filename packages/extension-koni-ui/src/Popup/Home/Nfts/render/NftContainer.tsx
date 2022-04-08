@@ -90,7 +90,6 @@ function NftContainer (
 
   useEffect(() => {
     if (networkKey !== currentNetwork) {
-      console.log('run here');
       setShowCollectionDetail(false);
       setPage(1);
       setNetworkKey(currentNetwork);

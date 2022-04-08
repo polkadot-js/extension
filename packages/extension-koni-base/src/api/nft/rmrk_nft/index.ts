@@ -9,9 +9,6 @@ import { isUrl, reformatAddress } from '@polkadot/extension-koni-base/utils/util
 
 import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, RMRK_PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
 
-const headers = {
-};
-
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
   KANARIA = 'kanaria',
@@ -84,8 +81,7 @@ export class RmrkNftApi extends BaseNftApi {
     }
 
     return await fetch(url, {
-      method: 'GET',
-      headers
+      method: 'GET'
     })
       .then((res) => res.json()) as NFTMetadata;
   }
@@ -102,8 +98,7 @@ export class RmrkNftApi extends BaseNftApi {
 
     await Promise.all(fetchUrls.map(async ({ source, url }) => {
       let _data = await fetch(url, {
-        method: 'GET',
-        headers
+        method: 'GET'
       })
         .then((res) => res.json()) as Record<number | string, number | string | NFTResource>[];
 
@@ -230,8 +225,7 @@ export class RmrkNftApi extends BaseNftApi {
 
       await Promise.all(collectionInfoUrl.map(async (url) => {
         const data = await fetch(url, {
-          method: 'get',
-          headers
+          method: 'get'
         })
           .then((resp) => resp.json()) as Record<string | number, string | number>[];
         const result = data[0];
@@ -257,8 +251,7 @@ export class RmrkNftApi extends BaseNftApi {
 
         if (item.url) {
           data = await fetch(item?.url as string, {
-            method: 'get',
-            headers
+            method: 'get'
           })
             .then((resp) => resp.json()) as Record<string, any>;
         }

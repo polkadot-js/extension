@@ -35,7 +35,6 @@ function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBa
 
   useEffect(() => {
     if (networkKey !== currentNetwork) {
-      console.log('run here');
       setShowItemDetail(false);
       setNetworkKey(currentNetwork);
     }

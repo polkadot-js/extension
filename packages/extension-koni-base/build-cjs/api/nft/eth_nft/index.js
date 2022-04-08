@@ -11,7 +11,7 @@ var _crossFetch = _interopRequireDefault(require("cross-fetch"));
 
 var _web = _interopRequireDefault(require("web3"));
 
-var _endpoints = require("@polkadot/extension-koni-base/api/endpoints");
+var _endpoints = _interopRequireWildcard(require("@polkadot/extension-koni-base/api/endpoints"));
 
 var _config = require("@polkadot/extension-koni-base/api/nft/config");
 
@@ -25,10 +25,15 @@ var _utils2 = require("@polkadot/extension-koni-base/utils/utils");
 
 var _utilCrypto = require("@polkadot/util-crypto");
 
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 class Web3NftApi extends _nft.BaseNftApi {
   web3 = null;
+  isConnected = false;
 
   constructor(addresses, chain) {
     super(undefined, addresses, chain);
@@ -43,7 +48,11 @@ class Web3NftApi extends _nft.BaseNftApi {
   }
 
   connectWeb3() {
-    this.web3 = new _web.default(new _web.default.providers.WebsocketProvider(_endpoints.EVM_NETWORKS[this.chain].provider)); // console.log(`${this.chain as string} nft connected`);
+    if (this.chain === _config.SUPPORTED_NFT_NETWORKS.astarEvm) {
+      this.web3 = new _web.default(new _web.default.providers.WebsocketProvider(_endpoints.default.astar.provider));
+    } else {
+      this.web3 = new _web.default(new _web.default.providers.WebsocketProvider(_endpoints.EVM_NETWORKS[this.chain].provider));
+    }
   }
 
   parseUrl(input) {

@@ -258,7 +258,7 @@ function subscribeWithAccountMulti(addresses, networkKey, networkAPI, callback) 
 
 function subscribeEVMBalance(networkKey, api, addresses, callback) {
   const balanceItem = {
-    state: _KoniTypes.APIItemState.READY,
+    state: _KoniTypes.APIItemState.PENDING,
     free: '0',
     reserved: '0',
     miscFrozen: '0',
@@ -268,6 +268,7 @@ function subscribeEVMBalance(networkKey, api, addresses, callback) {
   function getBalance() {
     (0, _balance.getEVMBalance)(networkKey, addresses).then(balances => {
       balanceItem.free = (0, _utils.sumBN)(balances.map(b => new _util.BN(b || '0'))).toString();
+      balanceItem.state = _KoniTypes.APIItemState.READY;
       callback(networkKey, balanceItem);
     }).catch(console.error);
   }
@@ -288,7 +289,7 @@ function subscribeBalance(addresses, dotSamaAPIMap, callback) {
     const networkAPI = await apiProps.isReady;
     const useAddresses = _apiHelper.ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
 
-    if (networkKey === 'astarEvm') {
+    if (networkKey === 'astarEvm' || networkKey === 'shidenEvm') {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, callback);
     }
 

@@ -53,16 +53,30 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
 
-  const propDetail = (title: string, value: string, rarity: number, key: number) => {
+  const propDetail = (title: string, valueDict: Record<string, any>, key: number) => {
     return (
-      <div
-        className={'prop-detail'}
-        key={key}
-      >
-        <div className={'prop-title'}>{title}</div>
-        <div className={'prop-value'}>{value}
-          {/* {rarity && `(~${Math.round((rarity + Number.EPSILON) * 100) / 100}%)`} */}
-        </div>
+      <div>
+        {
+          valueDict.type && valueDict.type === 'string' &&
+          <div
+            className={'prop-detail'}
+            key={key}
+          >
+            <div className={'prop-title'}>{title}</div>
+            <div className={'prop-value'}>{valueDict.value}</div>
+          </div>
+        }
+
+        {
+          !valueDict.type &&
+          <div
+            className={'prop-detail'}
+            key={key}
+          >
+            <div className={'prop-title'}>{title}</div>
+            <div className={'prop-value'}>{valueDict.value}</div>
+          </div>
+        }
       </div>
     );
   };
@@ -225,11 +239,9 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
               <div className={'prop-container'}>
                 {
                   Object.keys(data?.properties).map((key, index) => {
-                    // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
                     // @ts-ignore
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                    return propDetail(key, data?.properties[key]?.value, data?.properties[key]?.rarity, index);
-                    // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    return propDetail(key, data?.properties[key], index);
                   })
                 }
               </div>

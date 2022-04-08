@@ -21,7 +21,8 @@ const alternativeNameMap: Record<string, string> = {
   robonomics: 'robonomics-network',
   shadow: 'crust-storage-market',
   'sora-substrate': 'sora',
-  astarEvm: 'astar'
+  astarEvm: 'astar',
+  shidenEvm: 'shiden'
 };
 
 interface GeckoItem {

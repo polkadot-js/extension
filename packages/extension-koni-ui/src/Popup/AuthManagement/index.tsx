@@ -25,55 +25,12 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
   const [filter, setFilter] = useState('');
   const [isBusy, setBusy] = useState(false);
   const [isShowConfirmModal, setShowConfirmModal] = useState(false);
-  const [scrollWidth, setScrollWidth] = useState<number>(6);
-  const [containerWidth, setContainerWidth] = useState<number>(458);
-  const [listWidth, setListWidth] = useState<number>(428);
 
   useEffect(() => {
     getAuthListV2()
       .then(({ list }) => setAuthList(list))
       .catch((e) => console.error(e));
   }, []);
-
-  const handlerResize = () => {
-    const container = document.querySelector('.auth-list-wrapper') as HTMLElement;
-
-    setContainerWidth(container.offsetWidth);
-  };
-
-  useEffect(() => {
-    handlerResize();
-    window.addEventListener('resize', handlerResize);
-  }, []);
-
-  useEffect(() => {
-    getScrollbarWidth();
-  }, []);
-
-  useEffect(() => {
-    setListWidth(containerWidth - 30);
-  }, [containerWidth, scrollWidth]);
-
-  const getScrollbarWidth = () => {
-    // Creating invisible container
-    const outer = document.createElement('div');
-
-    outer.style.visibility = 'hidden';
-    outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-    // @ts-ignore
-    outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
-    document.body.appendChild(outer);
-    // Creating inner element and placing it in the container
-    const inner = document.createElement('div');
-
-    outer.appendChild(inner);
-    // Calculating difference between container's full width and the child width
-    const scrollbarWidth = (outer.offsetWidth - inner.offsetWidth);
-
-    // Removing temporary elements from the DOM
-    document.body.removeChild(outer);
-    setScrollWidth(scrollbarWidth);
-  };
 
   const closeModal = useCallback(
     () => setShowConfirmModal(false),
@@ -159,10 +116,7 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
             !authList || !Object.entries(authList)?.length
               ? <div className='empty-list'>{t<string>('No website request yet!')}</div>
               : <>
-                <div
-                  className='website-list'
-                  style={{ width: listWidth }}
-                >
+                <div className='website-list'>
                   {Object.entries(authList)
                     .filter(([url]: [string, AuthUrlInfo]) => url.includes(filter))
                     .map(
@@ -199,10 +153,8 @@ export default styled(AuthManagement)(({ theme }: Props) => `
   height: 100%;
 
   .auth-list-wrapper {
-    padding: 0 15px;
-    flex: 1;
-    overflow: auto;
     margin-bottom: 15px;
+    overflow-x: hidden;
   }
 
   .auth-management__top-action {
@@ -216,6 +168,9 @@ export default styled(AuthManagement)(({ theme }: Props) => `
   }
 
   .website-list {
+    width: 460px;
+    overflow-y: auto;
+    padding: 0 15px;
   }
 
   .empty-list {

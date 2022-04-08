@@ -75,6 +75,7 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
                 autoPlay
                 height='124'
                 loop={true}
+                muted
                 onError={handleVideoError}
                 width='124'
               >

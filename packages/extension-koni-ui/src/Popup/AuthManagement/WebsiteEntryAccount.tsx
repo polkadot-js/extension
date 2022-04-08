@@ -57,7 +57,7 @@ export default styled(WebsiteEntryAccount)(({ theme }: Props) => `
   justify-content: space-between;
   padding: 0 10px;
 
-  &.account-info-row {
+  & .account-info-row {
     height: 50px;
   }
 `);

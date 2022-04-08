@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.3.3 (Koni)
+Build date: Apr 08, 2022. Complete internal security audit
+
+Update:
+- Support get Shiden balance and tokens (issue #136)
+- Improve NFT display with extending mode (issue #109)
+
+Bug Fixed:
+- Some problems related to NFT function (issue #105)
+
 ## 0.3.2 (Koni)
 Build date: Apr 07, 2022. Complete internal security audit
 

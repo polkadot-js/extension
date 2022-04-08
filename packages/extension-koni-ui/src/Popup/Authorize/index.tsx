@@ -53,7 +53,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
         <Header>
           <AuthorizeIndex
             index={requestIndex}
-            name={t<string>('')}
+            name={t<string>('Connect the SubWallet')}
             onNextClick={_onNextClick}
             onPreviousClick={_onPreviousClick}
             totalItems={requests.length}

@@ -3,6 +3,7 @@
 
 import { take } from 'rxjs';
 
+import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
@@ -31,6 +32,25 @@ export class KoniSubcription {
   }
 
   init () {
+    state.getAuthorize((value) => {
+      if (!(Object.keys(value).length)) {
+        const authString = localStorage.getItem('authUrls') || '{}';
+        const previousAuth = JSON.parse(authString) as AuthUrls;
+
+        if (previousAuth && Object.keys(previousAuth).length) {
+          Object.keys(previousAuth).forEach((url) => {
+            if (previousAuth[url].isAllowed) {
+              previousAuth[url].isAllowedMap = state.getAddressList(true);
+            } else {
+              previousAuth[url].isAllowedMap = state.getAddressList();
+            }
+          });
+        }
+
+        state.setAuthorize(previousAuth);
+      }
+    });
+
     state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
 
     state.getCurrentAccount((currentAccountInfo) => {

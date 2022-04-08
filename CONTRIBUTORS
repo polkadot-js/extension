@@ -1,27 +1,28 @@
      465	Jaco                          	0.42.5 (#969)
-     155	Nam Phạm                      	
-     122	AnhMTV                        	Release 0.3.0
+     165	Nam Phạm                      	fix webpack and import error
+     140	AnhMTV                        	Release version 0.3.2
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      63	quangdo                       	Update UI Ledger screen
-      54	leewong                       	#92: Add suffix to Astar EVM genesis hash to prevent some unexpected issues
+      74	quangdo                       	Improve UI and fix logic bugs Authorize and Auth Management
+      55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
       42	lw                            	# update balance display
-      16	Hieu Dao                      	
+      19	Hieu Dao                      	#118 add kintsugi testnet endpoint
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
+       8	minhld1029                    	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
+       7	lw-cdm                        	
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
+       3	S2kael                        	[Issue-107] [Account] [Import] fix error password when change file
        2	Axel Chalon                   	Add typings to messages (#130)
        2	Bartłomiej Rutkowski          	Allow account creation by derivation from existing one (#296)
        2	carumusan                     	Support ipfs and ipns urls (#667)
        2	ccris02                       	Adding Polish Language Option to the Extension (#761)
        2	joe petrowski                 	add plasm (#462)
-       2	lw-cdm                        	
-       2	minhld1029                    	[Account] [Import] [Batch] fix UI bug
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)

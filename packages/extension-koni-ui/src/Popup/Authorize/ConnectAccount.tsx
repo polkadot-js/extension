@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import type { ThemeProps } from '../../types';
 
 import React, { useCallback, useState } from 'react';
@@ -12,22 +14,31 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 interface Props extends ThemeProps {
   className?: string;
-  address?: string | null;
+  address: string;
   genesisHash?: string | null;
   name?: string | null;
   parentName?: string | null;
   type?: KeypairType;
   suri?: string;
-  selectAccountCallBack?: () => void;
+  selectedAccounts: string[];
+  selectAccountCallBack?: (selectedAccounts: string[]) => void;
 }
 
-function ConnectAccount ({ address, className, genesisHash, name, parentName, selectAccountCallBack, suri, type }: Props): React.ReactElement<Props> {
+function ConnectAccount ({ address, className, genesisHash, name, parentName, selectAccountCallBack, selectedAccounts, suri, type }: Props): React.ReactElement<Props> {
   const [isSelected, setSelected] = useState(false);
+  const deps = selectedAccounts.toString();
 
   const selectAccounts = useCallback(() => {
+    console.log('isSelected', isSelected);
+
+    if (isSelected) {
+      selectAccountCallBack && selectAccountCallBack(selectedAccounts.filter((acc) => acc !== address));
+    } else {
+      selectAccountCallBack && selectAccountCallBack(selectedAccounts.concat(address));
+    }
+
     setSelected(!isSelected);
-    selectAccountCallBack && selectAccountCallBack();
-  }, [isSelected, selectAccountCallBack]);
+  }, [address, isSelected, selectAccountCallBack, deps]);
 
   return (
     <div
@@ -68,6 +79,7 @@ export default styled(ConnectAccount)(({ theme }: Props) => `
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
+  cursor: pointer;
 
   &:last-child {
     margin-bottom: 0;

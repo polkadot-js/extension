@@ -36,6 +36,7 @@ describe('Extension', () => {
       count: 0,
       id: '11',
       isAllowed: true,
+      isAllowedMap: {},
       origin: 'example.com',
       url: 'http://localhost:3000'
     };

@@ -65,6 +65,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   kintsugi: require('./kintsugi.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kintsugi_test: require('./kintsugi.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   kusama: require('./kusama.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   litentry: require('./litentry.png'),

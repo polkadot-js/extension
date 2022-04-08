@@ -4,13 +4,14 @@
 import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-// import ConnectAccount from '@polkadot/extension-koni-ui/Popup/Authorize/ConnectAccount';
-import { ActionContext, Button } from '../../components';
+import ConnectAccount from '@polkadot/extension-koni-ui/Popup/Authorize/ConnectAccount';
+
+import { AccountContext, ActionContext, Button } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
-import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
+import { approveAuthRequestV2, rejectAuthRequestV2 } from '../../messaging';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -20,22 +21,33 @@ interface Props extends ThemeProps {
   url: string;
 }
 
+function stripUrl (url: string): string {
+  if (url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:'))) {
+    const parts = url.split('/');
+
+    return parts[2];
+  }
+
+  return url;
+}
+
 function Request ({ authId, className, request: { origin }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
-  // const { hierarchy } = useContext(AccountContext);
-  // const accounts = hierarchy.filter((acc) => acc.address !== 'ALL');
+  const { accounts } = useContext(AccountContext);
+  const filteredAccounts = accounts.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
   const { hostname } = new URL(url);
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([]);
 
   const _onApprove = useCallback(
-    () => approveAuthRequest(authId)
+    () => approveAuthRequestV2(authId, selectedAccounts)
       .then(() => onAction())
       .catch((error: Error) => console.error(error)),
-    [authId, onAction]
+    [authId, onAction, selectedAccounts]
   );
 
   const _onReject = useCallback(
-    () => rejectAuthRequest(authId)
+    () => rejectAuthRequestV2(authId)
       .then(() => onAction())
       .catch((error: Error) => console.error(error)),
     [authId, onAction]
@@ -44,17 +56,15 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   return (
     <div className={className}>
       <div className='request-info-wrapper'>
-        <img
-          alt={`${hostname}`}
-          className='request-info__connected-app-logo'
-          src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
-        />
-        <div className='request-info-connected-app__text'>
-          {origin}
-        </div>
-
-        <div className='request-info-connected-app__title'>
-          {t<string>('Connect the SubWallet')}
+        <div className='request-info-connected-app'>
+          <img
+            alt={`${hostname}`}
+            className='request-info__connected-app-logo'
+            src={`https://icons.duckduckgo.com/ip2/${hostname}.ico`}
+          />
+          <div className='request-info-connected-app__text'>
+            {origin}
+          </div>
         </div>
         <a
           className='request-info-url'
@@ -62,23 +72,25 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
           rel='noopener noreferrer'
           target='_blank'
         >
-          <span className='tab-url'>{url}</span>
+          <span className='tab-url'>{stripUrl(url)}</span>
         </a>
       </div>
-      {/* <div className='request-info-choose-account'> */}
-      {/*  {t<string>('Choose the account(s) you’d like to connect')} */}
-      {/* </div> */}
-      {/* <div className='request__accounts'> */}
-      {/*  {accounts.map((acc) => ( */}
-      {/*    <ConnectAccount */}
-      {/*      address={acc.address} */}
-      {/*      genesisHash={acc.genesisHash} */}
-      {/*      key={acc.address} */}
-      {/*      name={acc.name} */}
-      {/*      type={acc.type} */}
-      {/*    /> */}
-      {/*  ))} */}
-      {/* </div> */}
+      <div className='request-info-choose-account'>
+        {t<string>('Choose the account(s) you’d like to connect')}
+      </div>
+      <div className='request__accounts'>
+        {filteredAccounts.map((acc) => (
+          <ConnectAccount
+            address={acc.address}
+            genesisHash={acc.genesisHash}
+            key={acc.address}
+            name={acc.name}
+            selectAccountCallBack={setSelectedAccounts}
+            selectedAccounts={selectedAccounts}
+            type={acc.type}
+          />
+        ))}
+      </div>
       <div className='authorize-request__warning'>
         {t<string>('Make sure you trust this site before connecting')}
       </div>
@@ -91,6 +103,7 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
         </Button>
         <Button
           className='authorize-request__btn'
+          isDisabled={selectedAccounts.length === 0}
           onClick={_onApprove}
         >
           {t<string>('Connect')}
@@ -109,28 +122,27 @@ export default styled(Request)(({ theme }: Props) => `
 
   .request-info-url {
     text-align: center;
-    padding-top: 10px;
-    padding-bottom: 60px;
   }
 
-  .request-info-connected-app__title {
-    font-size: 24px;
-    line-height: 36px;
-    font-weight: 500;
-    text-align: center;
+  .request-info-connected-app {
+    border-radius: 5px;
+    padding: 6px;
+    background-color: ${theme.backgroundAccountAddress};
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-item: center;
   }
 
   .request-info-connected-app__text {
     font-size: 14px;
     // line-height: 24px;
     color: ${theme.textColor2};
-    padding-top: 8px;
-    padding-bottom: 13px;
   }
 
   .request-info__connected-app-logo {
-    height: 56px;
-    min-width: 56px;
+    height: 28px;
+    min-height: 28px;
     padding-right: 9px;
   }
 
@@ -144,6 +156,7 @@ export default styled(Request)(({ theme }: Props) => `
   .request__accounts {
     flex: 1;
     overflow-y: auto;
+    padding-right: 6px;
   }
 
   .authorize-request__account .account-info-row {
@@ -177,7 +190,6 @@ export default styled(Request)(({ theme }: Props) => `
     line-height: 26px;
     color: ${theme.textColor2};
     text-align: center;
-    padding-bottom: 30px;
   }
 
   .tab-info {
@@ -194,7 +206,7 @@ export default styled(Request)(({ theme }: Props) => `
     vertical-align: top;
     cursor: pointer;
     text-align: center;
-    text-decoration: underline;
+    text-decoration: none;
     font-size: 14px;
     line-height: 24px;
   }
@@ -204,7 +216,6 @@ export default styled(Request)(({ theme }: Props) => `
     flex-direction: column;
     align-items: center;
     margin-bottom: 8px;
-    padding-top: 30px;
   }
 
   .request-info {

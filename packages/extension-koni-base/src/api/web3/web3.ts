@@ -18,7 +18,11 @@ export const connectWeb3Apis = (networks = EVM_NETWORKS): Record<string, Web3> =
 
   Object.entries(networks).forEach(([networkKey, networkInfo]) => {
     if (networkInfo && networkInfo.provider) {
-      apiMap[networkKey] = new Web3(networkInfo.provider);
+      if (networkInfo.provider.startsWith('ws')) {
+        apiMap[networkKey] = new Web3(new Web3.providers.WebsocketProvider(networkInfo.provider));
+      } else if (networkInfo.provider.startsWith('http')) {
+        apiMap[networkKey] = new Web3(new Web3.providers.HttpProvider(networkInfo.provider));
+      }
     }
   });
 

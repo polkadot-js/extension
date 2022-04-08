@@ -15,10 +15,12 @@ interface Props extends ThemeProps {
   className?: string;
   closeModal: () => void;
   isBusy?: boolean;
-  confirmConnectAcc: () => void;
+  confirmAction: () => void;
+  confirmMessage: string;
+  confirmButton: string;
 }
 
-function VisibilityConfirmModal ({ className, closeModal, confirmConnectAcc, isBusy }: Props): React.ReactElement {
+function ConfirmModal ({ className, closeModal, confirmAction, confirmButton, confirmMessage, isBusy }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -40,7 +42,7 @@ function VisibilityConfirmModal ({ className, closeModal, confirmConnectAcc, isB
           />
           <div className='confirm-modal__body'>
             <div className='confirm-modal__message'>
-              {t<string>('Do you want to disconnect this account?')}
+              {t<string>(confirmMessage)}
             </div>
             <div className='confirm-modal__button-area'>
               <Button
@@ -54,9 +56,9 @@ function VisibilityConfirmModal ({ className, closeModal, confirmConnectAcc, isB
                 className='confirm-modal__btn'
                 isDanger
                 isDisabled={isBusy}
-                onClick={confirmConnectAcc}
+                onClick={confirmAction}
               >
-                {t<string>('Disconnect')}
+                {t<string>(confirmButton)}
               </Button>
             </div>
 
@@ -68,7 +70,7 @@ function VisibilityConfirmModal ({ className, closeModal, confirmConnectAcc, isB
   );
 }
 
-export default styled(VisibilityConfirmModal)(({ theme }: Props) => `
+export default styled(ConfirmModal)(({ theme }: Props) => `
   .confirm-modal {
     position: relative;
     display: flex;

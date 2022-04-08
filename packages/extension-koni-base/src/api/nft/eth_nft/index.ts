@@ -5,7 +5,7 @@ import fetch from 'cross-fetch';
 import Web3 from 'web3';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
+import NETWORKS, { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
@@ -16,6 +16,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 export class Web3NftApi extends BaseNftApi {
   web3: Web3 | null = null;
   targetContracts: ContractInfo[] | undefined;
+  isConnected = false;
 
   constructor (addresses: string[], chain: string) {
     super(undefined, addresses, chain);
@@ -30,8 +31,11 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   connectWeb3 () {
-    this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
-    // console.log(`${this.chain as string} nft connected`);
+    if (this.chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
+      this.web3 = new Web3(new Web3.providers.WebsocketProvider(NETWORKS.astar.provider));
+    } else {
+      this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
+    }
   }
 
   override parseUrl (input: string): string | undefined {

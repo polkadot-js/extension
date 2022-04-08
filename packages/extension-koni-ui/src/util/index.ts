@@ -117,7 +117,15 @@ export function getGenesisOptionsByAddressType (address: string | null | undefin
 
 export const defaultRecoded: Recoded = { account: null, formatted: null, prefix: 42, isEthereum: false };
 
-export const NFT_GRID_SIZE = 6;
+export const NFT_DEFAULT_GRID_SIZE = 6;
+
+export const NFT_PREVIEW_HEIGHT = 184;
+
+export const NFT_GRID_HEIGHT_THRESHOLD = 600;
+
+export const NFT_HEADER_HEIGHT = 202;
+
+export const NFT_PER_ROW = 3;
 
 export const accountAllRecoded: Recoded = {
   account: {

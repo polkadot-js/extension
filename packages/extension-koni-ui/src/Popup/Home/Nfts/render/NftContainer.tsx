@@ -12,7 +12,7 @@ import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyL
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { NFT_GRID_SIZE } from '@polkadot/extension-koni-ui/util';
+import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 import NftCollectionPreview from './NftCollectionPreview';
 
@@ -24,6 +24,8 @@ interface Props extends ThemeProps {
   loading: boolean;
   page: number;
   setPage: (newPage: number) => void;
+  currentNetwork: string;
+  nftGridSize: number;
 
   showTransferredCollection: boolean;
   setShowTransferredCollection: (val: boolean) => void;
@@ -45,7 +47,9 @@ function NftContainer (
   { chosenCollection,
     chosenItem,
     className,
+    currentNetwork,
     loading,
+    nftGridSize,
     nftList,
     page,
     setChosenCollection,
@@ -83,6 +87,11 @@ function NftContainer (
     }
   }, [loading, setPage, setShowCollectionDetail, setShowItemDetail]);
 
+  useEffect(() => {
+    setShowCollectionDetail(false);
+    setPage(1);
+  }, [currentNetwork, setPage, setShowCollectionDetail]);
+
   const handleHideCollectionDetail = useCallback(() => {
     setShowCollectionDetail(false);
   }, [setShowCollectionDetail]);
@@ -97,14 +106,13 @@ function NftContainer (
 
   const onNextClick = useCallback(() => {
     const nextPage = page + 1;
-    // const from = (nextPage - 1) * NFT_GRID_SIZE;
 
-    if (page >= Math.ceil(totalCollection / NFT_GRID_SIZE)) {
+    if (page >= Math.ceil(totalCollection / nftGridSize)) {
       return;
     }
 
     setPage(nextPage);
-  }, [page, setPage, totalCollection]);
+  }, [nftGridSize, page, setPage, totalCollection]);
 
   return (
     <div className={`${className as string} scroll-container`}>
@@ -148,6 +156,7 @@ function NftContainer (
         showCollectionDetail &&
           <NftCollection
             chosenItem={chosenItem}
+            currentNetwork={currentNetwork}
             data={chosenCollection}
             onClickBack={handleHideCollectionDetail}
             setChosenItem={setChosenItem}
@@ -158,7 +167,7 @@ function NftContainer (
 
       {
         // @ts-ignore
-        !loading && !showCollectionDetail && totalCollection > NFT_GRID_SIZE &&
+        !loading && !showCollectionDetail && totalCollection > nftGridSize &&
         <div className={'pagination'}>
           <div
             className={'nav-item'}
@@ -171,7 +180,7 @@ function NftContainer (
             />
           </div>
           <div>
-            {page}/{Math.ceil(totalCollection / NFT_GRID_SIZE)}
+            {page}/{Math.ceil(totalCollection / nftGridSize)}
           </div>
           <div
             className={'nav-item'}
@@ -244,7 +253,7 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
     column-gap: 20px;
     row-gap: 20px;
     justify-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(${NFT_PER_ROW}, 1fr);
   }
 
   .footer {

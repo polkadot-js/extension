@@ -3,18 +3,20 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItem';
 import NftItemPreview from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 interface Props {
   className?: string;
   data: _NftCollection | undefined;
   onClickBack: () => void;
+  currentNetwork: string;
 
   chosenItem: _NftItem;
   setChosenItem: (val: _NftItem) => void;
@@ -23,11 +25,15 @@ interface Props {
   setShowItemDetail: (val: boolean) => void;
 }
 
-function NftCollection ({ chosenItem, className, data, onClickBack, setChosenItem, setShowItemDetail, showItemDetail }: Props): React.ReactElement<Props> {
+function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBack, setChosenItem, setShowItemDetail, showItemDetail }: Props): React.ReactElement<Props> {
   const handleShowItem = useCallback((data: _NftItem) => {
     setChosenItem(data);
     setShowItemDetail(true);
   }, [setChosenItem, setShowItemDetail]);
+
+  useEffect(() => {
+    setShowItemDetail(false);
+  }, [currentNetwork, setShowItemDetail]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();
@@ -111,7 +117,7 @@ export default React.memo(styled(NftCollection)(({ theme }: ThemeProps) => `
     column-gap: 20px;
     row-gap: 20px;
     justify-items: center;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(${NFT_PER_ROW}, 1fr);
   }
 
   .back-icon:hover {

@@ -215,7 +215,6 @@ export default class KoniState extends State {
         Object.keys(isAllowedMap).forEach((address) => isAllowedMap[address] = false);
       }
 
-      console.log('isAllowedMap=====isAllowedMap=====isAllowedMap=====', isAllowedMap);
       const { idStr, request: { origin }, url } = this.#authRequestsV2[id];
 
       this.getAuthorize((value) => {

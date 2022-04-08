@@ -28,7 +28,7 @@ function getChainTypes(_specName, chainName) {
 
 const moonbeamBaseChains = ['moonbase', 'moonbeam', 'moonriver'];
 exports.moonbeamBaseChains = moonbeamBaseChains;
-const ethereumChains = ['moonbase', 'moonbeam', 'moonriver', 'moonshadow', 'astarEvm', 'shiddenEvm', 'origintrail-parachain'];
+const ethereumChains = ['moonbase', 'moonbeam', 'moonriver', 'moonshadow', 'astarEvm', 'shidenEvm', 'origintrail-parachain'];
 exports.ethereumChains = ethereumChains;
 const typesBundle = {
   spec: _spec.default

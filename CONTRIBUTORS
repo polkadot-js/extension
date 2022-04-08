@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
      176	Nam Phạm                      	#44: Update handling astar endpoint
-     142	AnhMTV                        	
+     146	AnhMTV                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       75	quangdo                       	Fix bug not migrate site access, fix UI Auth Management screen, refactor code
       55	leewong                       	#118: update balance logic for Kintsugi testnet
@@ -8,8 +8,8 @@
       42	lw                            	# update balance display
       19	Hieu Dao                      	#118 add kintsugi testnet endpoint
       10	Trang Trịnh                   	api get karura and acala nfts
+       9	lw-cdm                        	
        9	Minh Le                       	
-       8	lw-cdm                        	
        8	minhld1029                    	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code

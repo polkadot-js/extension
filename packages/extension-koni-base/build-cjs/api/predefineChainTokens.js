@@ -323,6 +323,113 @@ const PREDEFINE_TOKEN_DATA_MAP = {
       decimals: 18,
       name: 'Pepe Coin'
     }
+  },
+  shidenEvm: {
+    PKEX: {
+      isMainToken: false,
+      symbol: 'PKEX',
+      erc20Address: '0xdc42728b0ea910349ed3c6e1c9dc06b5fb591f98',
+      decimals: 18,
+      name: 'PolkaEx'
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      erc20Address: '0x332730a4f6e03d9c55829435f10360e13cfa41ff',
+      decimals: 18,
+      name: 'Binance'
+    },
+    BUSD: {
+      isMainToken: false,
+      symbol: 'BUSD',
+      erc20Address: '0xdc42728b0ea910349ed3c6e1c9dc06b5fb591f98',
+      decimals: 18,
+      name: 'Binance-Peg BUSD Token'
+    },
+    JPYC: {
+      isMainToken: false,
+      symbol: 'JPYC',
+      erc20Address: '0x735abe48e8782948a37c7765ecb76b98cde97b0f',
+      decimals: 18,
+      name: 'JPY Coin'
+    },
+    ETH: {
+      isMainToken: false,
+      symbol: 'ETH',
+      erc20Address: '0x765277eebeca2e31912c9946eae1021199b39c61',
+      decimals: 18,
+      name: 'Ethereum'
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      erc20Address: '0xfa9343c3897324496a05fc75abed6bac29f8a40f',
+      decimals: 6,
+      name: 'USD Coin'
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
+      decimals: 18,
+      name: 'Tether USD'
+    },
+    WSDN: {
+      isMainToken: false,
+      symbol: 'WSDN',
+      erc20Address: '0x0f933dc137d21ca519ae4c7e93f87a4c8ef365ef',
+      decimals: 18,
+      name: 'Wrapped Shiden'
+    },
+    Kac: {
+      isMainToken: false,
+      symbol: 'Kac',
+      erc20Address: '0xb12c13e66ade1f72f71834f2fc5082db8c091358',
+      decimals: 18,
+      name: 'Kaco Token'
+    },
+    SHBI: {
+      isMainToken: false,
+      symbol: 'SHBI',
+      erc20Address: '0xec0c789c6dc019b1c19f055edf938b369d235d2c',
+      decimals: 18,
+      name: 'SHINOBI'
+    },
+    SMS: {
+      isMainToken: false,
+      symbol: 'SMS',
+      erc20Address: '0xec0c789c6dc019b1c19f055edf938b369d235d2c',
+      decimals: 18,
+      name: 'SafeMoonShiden'
+    },
+    STND: {
+      isMainToken: false,
+      symbol: 'STND',
+      erc20Address: '0x722377A047e89CA735f09Eb7CccAb780943c4CB4',
+      decimals: 18,
+      name: 'Standard'
+    },
+    SRISE: {
+      isMainToken: false,
+      symbol: 'SRISE',
+      erc20Address: '0x16bf7ecaf868348703ff5b5c0c3b84be7bf483f9',
+      decimals: 18,
+      name: 'SHIDENRISE'
+    },
+    FEGS: {
+      isMainToken: false,
+      symbol: 'FEGS',
+      erc20Address: '0xa9b79AAB9d60e8e6d08D2cbAd56ff0De58ff8d41',
+      decimals: 18,
+      name: 'FEGSHIDEN'
+    },
+    KWIK: {
+      isMainToken: false,
+      symbol: 'KWIK',
+      erc20Address: '0xa9b79AAB9d60e8e6d08D2cbAd56ff0De58ff8d41',
+      decimals: 18,
+      name: 'Kwikswap'
+    }
   }
 };
 exports.PREDEFINE_TOKEN_DATA_MAP = PREDEFINE_TOKEN_DATA_MAP;

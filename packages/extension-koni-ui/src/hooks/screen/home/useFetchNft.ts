@@ -7,9 +7,8 @@ import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { NftType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import { _NftCollection } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { NFT_GRID_SIZE } from '@polkadot/extension-koni-ui/util';
 
-export default function useFetchNft (page: number, networkKey: string): NftType {
+export default function useFetchNft (page: number, networkKey: string, gridSize: number): NftType {
   const { nft: nftReducer, nftCollection: nftCollectionReducer } = useSelector((state: RootState) => state);
 
   const nftCollections: _NftCollection[] = [];
@@ -32,7 +31,7 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
     };
 
     for (const item of rawItems) {
-      if (item.collectionId === collection.collectionId) {
+      if (item.collectionId === collection.collectionId && item.chain === collection.chain) {
         parsedCollection.nftItems.push(item);
       }
     }
@@ -52,12 +51,12 @@ export default function useFetchNft (page: number, networkKey: string): NftType 
     });
   }
 
-  if (!showAll && filteredNftCollections.length <= NFT_GRID_SIZE) {
+  if (!showAll && filteredNftCollections.length <= gridSize) {
     from = 0;
     to = filteredNftCollections.length;
   } else {
-    from = (page - 1) * NFT_GRID_SIZE;
-    to = from + NFT_GRID_SIZE;
+    from = (page - 1) * gridSize;
+    to = from + gridSize;
   }
 
   return {

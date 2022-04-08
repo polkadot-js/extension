@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
@@ -53,36 +54,35 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
 
+  // @ts-ignore
   const propDetail = (title: string, valueDict: Record<string, any>, key: number) => {
-    return (
-      <div>
-        {
-          valueDict.type && valueDict.type === 'string' &&
-          <div
-            className={'prop-detail'}
-            key={key}
-          >
-            <div className={'prop-title'}>{title}</div>
-            <div className={'prop-value'}>{valueDict.value}</div>
-          </div>
-        }
+    if (valueDict.type && valueDict.type === 'string') {
+      return (
+        <div
+          className={'prop-detail'}
+          key={key}
+        >
+          <div className={'prop-title'}>{title}</div>
+          <div className={'prop-value'}>{valueDict.value}</div>
+        </div>
+      );
+    }
 
-        {
-          !valueDict.type &&
-          <div
-            className={'prop-detail'}
-            key={key}
-          >
-            <div className={'prop-title'}>{title}</div>
-            <div className={'prop-value'}>{valueDict.value}</div>
-          </div>
-        }
-      </div>
-    );
+    if (!valueDict.type) {
+      return (
+        <div
+          className={'prop-detail'}
+          key={key}
+        >
+          <div className={'prop-title'}>{title}</div>
+          <div className={'prop-value'}>{valueDict.value}</div>
+        </div>
+      );
+    }
   };
 
   const handleClickTransfer = useCallback(async () => {
-    if (!account.account || account.account.address === 'ALL' || !data.chain) {
+    if (!account.account || account.account.address.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase() || !data.chain) {
       show('An error has occurred.');
 
       return;

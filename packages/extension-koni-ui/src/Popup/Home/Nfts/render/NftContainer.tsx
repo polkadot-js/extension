@@ -3,7 +3,7 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
@@ -65,6 +65,7 @@ function NftContainer (
     totalItems }: Props
 ): React.ReactElement<Props> {
   const selectedNftCollection = useFetchNftExtra(showTransferredCollection, setShowTransferredCollection);
+  const [networkKey, setNetworkKey] = useState(currentNetwork);
 
   const handleShowCollectionDetail = useCallback((data: _NftCollection) => {
     setShowCollectionDetail(true);
@@ -88,9 +89,13 @@ function NftContainer (
   }, [loading, setPage, setShowCollectionDetail, setShowItemDetail]);
 
   useEffect(() => {
-    setShowCollectionDetail(false);
-    setPage(1);
-  }, [currentNetwork, setPage, setShowCollectionDetail]);
+    if (networkKey !== currentNetwork) {
+      console.log('run here');
+      setShowCollectionDetail(false);
+      setPage(1);
+      setNetworkKey(currentNetwork);
+    }
+  }, [currentNetwork, networkKey, setPage, setShowCollectionDetail]);
 
   const handleHideCollectionDetail = useCallback(() => {
     setShowCollectionDetail(false);

@@ -121,6 +121,28 @@ export default class KoniExtension extends Extension {
   private _getAuthListV2 (): Promise<AuthUrls> {
     return new Promise<AuthUrls>((resolve, reject) => {
       state.getAuthorize((rs: AuthUrls) => {
+        const accounts = accountsObservable.subject.getValue();
+        const addressList = Object.keys(accounts).filter((address) => accounts[address].type !== 'ethereum');
+        const urlList = Object.keys(rs);
+
+        if (Object.keys(rs[urlList[0]].isAllowedMap).toString() !== addressList.toString()) {
+          urlList.forEach((url) => {
+            addressList.forEach((address) => {
+              if (!Object.keys(rs[url].isAllowedMap).includes(address)) {
+                rs[url].isAllowedMap[address] = false;
+              }
+            });
+
+            Object.keys(rs[url].isAllowedMap).forEach((address) => {
+              if (!addressList.includes(address)) {
+                delete rs[url].isAllowedMap[address];
+              }
+            });
+          });
+
+          state.setAuthorize(rs);
+        }
+
         resolve(rs);
       });
     });
@@ -436,6 +458,18 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  private _addAddressToAuthList (address: string): void {
+    state.getAuthorize((value) => {
+      if (value && Object.keys(value).length) {
+        Object.keys(value).forEach((url) => {
+          value[url].isAllowedMap[address] = false;
+        });
+
+        state.setAuthorize(value);
+      }
+    });
+  }
+
   private async accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
     const addressDict = {} as Record<KeypairType, string>;
 
@@ -448,6 +482,7 @@ export default class KoniExtension extends Extension {
 
       this._saveCurrentAccountAddress(address, false, '', () => {
         keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
+        this._addAddressToAuthList(address);
       });
     });
 
@@ -466,6 +501,16 @@ export default class KoniExtension extends Extension {
       state.removeAccountRef(address, () => {
         resolve();
       });
+    });
+
+    state.getAuthorize((value) => {
+      if (value && Object.keys(value).length) {
+        Object.keys(value).forEach((url) => {
+          delete value[url].isAllowedMap[address];
+        });
+
+        state.setAuthorize(value);
+      }
     });
 
     return true;
@@ -536,6 +581,7 @@ export default class KoniExtension extends Extension {
 
     this._saveCurrentAccountAddress(address, false, '', () => {
       keyring.addPair(childPair, password);
+      this._addAddressToAuthList(address);
     });
 
     return true;
@@ -548,6 +594,7 @@ export default class KoniExtension extends Extension {
       try {
         this._saveCurrentAccountAddress(address, false, '', () => {
           keyring.restoreAccount(file, password);
+          this._addAddressToAuthList(address);
         });
       } catch (error) {
         throw new Error((error as Error).message);

@@ -10,6 +10,7 @@ import { AuthUrlInfo, AuthUrls } from '@polkadot/extension-base/background/handl
 import { AccountContext } from '@polkadot/extension-koni-ui/components';
 import { forgetSite } from '@polkadot/extension-koni-ui/messaging';
 import WebsiteEntryAccount from '@polkadot/extension-koni-ui/Popup/AuthManagement/WebsiteEntryAccount';
+import { waitForElement } from '@polkadot/extension-koni-ui/util/dom';
 
 import useTranslation from '../../hooks/useTranslation';
 
@@ -27,6 +28,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
   const { hostname } = new URL(info.url);
   const { accounts } = useContext(AccountContext);
   const accountsWithoutAllAndEth = accounts.filter((acc) => acc.address !== 'ALL' && acc.type !== 'ethereum');
+  const transformId = info.id.replace(/\./g, '-');
 
   const connectAll = useCallback(() => {
     changeConnectSite(true, url);
@@ -44,7 +46,15 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
 
   const _onToggleDetail = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setShowDetail(!isShowDetail);
-  }, [isShowDetail]);
+
+    if (!isShowDetail) {
+      const callback = (element: Element) => {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+
+      waitForElement(`.${transformId}-detail`, callback);
+    }
+  }, [transformId, isShowDetail]);
 
   const accountSelectedLength = Object.keys(info.isAllowedMap)
     .filter((acc) => info.isAllowedMap[acc]).length;
@@ -74,7 +84,7 @@ function WebsiteEntry ({ changeConnectSite, className = '', info, setList, url }
         </div>
       </div>
       {isShowDetail &&
-        <div className='website-entry__detail'>
+        <div className={`website-entry__detail ${transformId}-detail`}>
           <div className='website-entry__top-action'>
             <div
               className='website-entry__btn'

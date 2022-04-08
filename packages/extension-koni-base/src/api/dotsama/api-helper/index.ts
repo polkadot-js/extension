@@ -20,6 +20,7 @@ export const ethereumChains = [
   'moonriver',
   'moonshadow',
   'astarEvm',
+  'shidenEvm',
   'origintrail-parachain'
 ];
 

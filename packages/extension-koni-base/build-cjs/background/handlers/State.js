@@ -225,7 +225,6 @@ class KoniState extends _State.default {
         Object.keys(isAllowedMap).forEach(address => isAllowedMap[address] = false);
       }
 
-      console.log('isAllowedMap=====isAllowedMap=====isAllowedMap=====', isAllowedMap);
       const {
         idStr,
         request: {

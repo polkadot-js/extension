@@ -103,7 +103,7 @@ const NETWORKS = {
     chain: 'Astar - EVM',
     genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6___EVM',
     ss58Format: 5,
-    provider: 'https://rpc.astar.network:8545',
+    provider: 'wss://rpc.astar.network',
     groups: ['POLKADOT_PARACHAIN'],
     isEthereum: true,
     nativeToken: 'ASTR',
@@ -390,6 +390,15 @@ const NETWORKS = {
     nativeToken: 'SDN',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
+  shidenEvm: {
+    chain: 'Shiden - EVM',
+    genesisHash: '0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108___EVM',
+    ss58Format: 5,
+    provider: 'wss://rpc.shiden.astar.network',
+    groups: ['KUSAMA_PARACHAIN'],
+    nativeToken: 'SDN',
+    isEthereum: true
+  },
   khala: {
     chain: 'Khala',
     genesisHash: '0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d',
@@ -614,10 +623,10 @@ const NETWORKS = {
     crowdloanUrl: 'https://crab.network/plo'
   },
   bitcountry: {
-    chain: 'Bit.Country - Testnet',
+    chain: 'Bit.Country - Alpha Net',
     genesisHash: '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5',
     ss58Format: 42,
-    provider: 'wss://dev-chain.bit.country',
+    provider: 'wss://alphanet-rpc.bit.country',
     groups: ['TEST_NET'],
     nativeToken: 'NUUM'
   },

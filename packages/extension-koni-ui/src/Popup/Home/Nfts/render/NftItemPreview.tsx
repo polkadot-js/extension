@@ -72,10 +72,10 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
                 style={{ borderRadius: '5px 5px 0 0' }}
               />
               : <video
-                muted
                 autoPlay
                 height='124'
                 loop={true}
+                muted
                 onError={handleVideoError}
                 width='124'
               >

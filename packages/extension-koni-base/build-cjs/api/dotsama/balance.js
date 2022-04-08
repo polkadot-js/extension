@@ -288,7 +288,7 @@ function subscribeBalance(addresses, dotSamaAPIMap, callback) {
     const networkAPI = await apiProps.isReady;
     const useAddresses = _apiHelper.ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
 
-    if (networkKey === 'astarEvm') {
+    if (networkKey === 'astarEvm' || networkKey === 'shidenEvm') {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, callback);
     }
 

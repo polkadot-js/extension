@@ -233,7 +233,7 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
 
 export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addresses: string[], callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem = {
-    state: APIItemState.READY,
+    state: APIItemState.PENDING,
     free: '0',
     reserved: '0',
     miscFrozen: '0',
@@ -244,6 +244,7 @@ export function subscribeEVMBalance (networkKey: string, api: ApiPromise, addres
     getEVMBalance(networkKey, addresses)
       .then((balances) => {
         balanceItem.free = sumBN(balances.map((b) => (new BN(b || '0')))).toString();
+        balanceItem.state = APIItemState.READY;
         callback(networkKey, balanceItem);
       })
       .catch(console.error);
@@ -266,7 +267,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
     const networkAPI = await apiProps.isReady;
     const useAddresses = ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
 
-    if (networkKey === 'astarEvm') {
+    if (networkKey === 'astarEvm' || networkKey === 'shidenEvm') {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, callback);
     }
 

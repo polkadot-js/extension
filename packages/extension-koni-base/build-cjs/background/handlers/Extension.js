@@ -117,8 +117,6 @@ class KoniExtension extends _Extension.default {
       const transformedAccounts = transformAccounts(storedAccounts);
       const accounts = transformedAccounts && transformedAccounts.length ? [{ ...ACCOUNT_ALL_JSON
       }, ...transformedAccounts] : [];
-      console.log('storedAccounts====', storedAccounts);
-      console.log('accounts====', accounts);
       const accountsWithCurrentAddress = {
         accounts
       };
@@ -252,7 +250,6 @@ class KoniExtension extends _Extension.default {
 
   _changeAuthorizationAll(connectValue, callBack) {
     _index.state.getAuthorize(value => {
-      console.log('value', value);
       (0, _util.assert)(value, 'The source is not known');
       Object.keys(value).forEach(url => {
         // eslint-disable-next-line no-return-assign

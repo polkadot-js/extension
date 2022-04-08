@@ -20,7 +20,10 @@ var _config = require("../config");
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 const headers = {
-  'Content-Type': 'application/json'
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': '*',
+  'Access-Control-Allow-Headers': '*'
 };
 var RMRK_SOURCE;
 
@@ -223,7 +226,10 @@ class RmrkNftApi extends _nft.BaseNftApi {
 
       const allCollectionMetaUrl = [];
       await Promise.all(collectionInfoUrl.map(async url => {
-        const data = await (0, _crossFetch.default)(url).then(resp => resp.json());
+        const data = await (0, _crossFetch.default)(url, {
+          method: 'get',
+          headers
+        }).then(resp => resp.json());
         const result = data[0];
 
         if (result && 'metadata' in result) {
@@ -244,7 +250,10 @@ class RmrkNftApi extends _nft.BaseNftApi {
         let data = {};
 
         if (item.url) {
-          data = await (0, _crossFetch.default)(item === null || item === void 0 ? void 0 : item.url).then(resp => resp.json());
+          data = await (0, _crossFetch.default)(item === null || item === void 0 ? void 0 : item.url, {
+            method: 'get',
+            headers
+          }).then(resp => resp.json());
         }
 
         if ('mediaUri' in data) {

@@ -34,22 +34,26 @@ class KoniSubcription {
 
   init() {
     _handlers.state.getAuthorize(value => {
-      if (!Object.keys(value).length) {
-        const authString = localStorage.getItem('authUrls') || '{}';
-        const previousAuth = JSON.parse(authString);
+      const authString = localStorage.getItem('authUrls') || '{}';
+      const previousAuth = JSON.parse(authString);
 
-        if (previousAuth && Object.keys(previousAuth).length) {
-          Object.keys(previousAuth).forEach(url => {
-            if (previousAuth[url].isAllowed) {
-              previousAuth[url].isAllowedMap = _handlers.state.getAddressList(true);
-            } else {
-              previousAuth[url].isAllowedMap = _handlers.state.getAddressList();
-            }
-          });
-        }
-
-        _handlers.state.setAuthorize(previousAuth);
+      if (previousAuth && Object.keys(previousAuth).length) {
+        Object.keys(previousAuth).forEach(url => {
+          if (previousAuth[url].isAllowed) {
+            previousAuth[url].isAllowedMap = _handlers.state.getAddressList(true);
+          } else {
+            previousAuth[url].isAllowedMap = _handlers.state.getAddressList();
+          }
+        });
       }
+
+      const migrateValue = { ...previousAuth,
+        ...value
+      };
+
+      _handlers.state.setAuthorize(migrateValue);
+
+      localStorage.setItem('authUrls', '{}');
     });
 
     _handlers.state.fetchCrowdloanFundMap().then(console.log).catch(console.error);

@@ -87,9 +87,6 @@ export default class KoniExtension extends Extension {
         ]
         : [];
 
-      console.log('storedAccounts====', storedAccounts);
-      console.log('accounts====', accounts);
-
       const accountsWithCurrentAddress: AccountsWithCurrentAddress = {
         accounts
       };
@@ -219,7 +216,6 @@ export default class KoniExtension extends Extension {
 
   private _changeAuthorizationAll (connectValue: boolean, callBack?: (value: AuthUrls) => void) {
     state.getAuthorize((value) => {
-      console.log('value', value);
       assert(value, 'The source is not known');
 
       Object.keys(value).forEach((url) => {

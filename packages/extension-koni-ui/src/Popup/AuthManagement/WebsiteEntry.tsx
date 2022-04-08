@@ -134,6 +134,10 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
     font-weight: 500;
     color: ${theme.textColor};
     padding-right: 7px;
+    max-width: 140px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .url{
@@ -141,6 +145,10 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
     font-size: 14px;
     line-height: 24px;
     color: ${theme.manageWebsiteAccessColor};
+    padding-right: 15px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .website-entry__connected-app-logo {

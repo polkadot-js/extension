@@ -225,7 +225,7 @@ export class RmrkNftApi extends BaseNftApi {
 
       await Promise.all(collectionInfoUrl.map(async (url) => {
         const data = await fetch(url, {
-          method: 'get'
+          method: 'GET'
         })
           .then((resp) => resp.json()) as Record<string | number, string | number>[];
         const result = data[0];
@@ -251,7 +251,7 @@ export class RmrkNftApi extends BaseNftApi {
 
         if (item.url) {
           data = await fetch(item?.url as string, {
-            method: 'get'
+            method: 'GET'
           })
             .then((resp) => resp.json()) as Record<string, any>;
         }

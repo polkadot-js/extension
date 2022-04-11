@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.43.1 Apr 11, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+- **Breaking change** In this version the commonjs outputs are moved to a sub-folder. Since the export map and main field in package.json does reflect this change, there should be no usage changes. However the packages here will all need to be on the same version for internal linkage.
+
+Changes:
+
+- Output commonjs files under the `cjs/**` root
+- Upgrade to `@polkadot/api` 8.0.1
+- Updated to `@polkadot/util` 9.0.1
+
+
 ## 0.42.10 Apr 4, 2022
 
 **Important** Not published to the stores, aligns with latest released packages.

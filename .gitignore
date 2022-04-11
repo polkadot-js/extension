@@ -4,6 +4,7 @@ build-esm/
 coverage/
 node_modules/
 tmp/
+NOTES.md
 .DS_Store
 .env.local
 .env.development.local

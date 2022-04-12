@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Web3 from 'web3';
+
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
@@ -240,6 +242,57 @@ export interface NetWorkInfo {
   nativeToken?: string;
   crowdloanUrl?: string;
   decimals?: number;
+}
+
+export interface NetWorkJson {
+  // General Informations
+  key: string, // Key of network in NetworkMap
+  chain: string; // Name of the network
+  icon?: string; // Icon name, available with known network
+
+  // Provider Informations
+  providers: Record<string, string> // Predefined provider map
+  customProviders?: Record<string, string> // Custom provider map, provider name same with provider map
+  nftProvider?: string // Should be same with provider if is not defined
+  currentProvider: string, // Current provider key
+  currentProviderMode: 'http' | 'ws' // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
+
+  // Metadata get after connect to provider
+  paraId?: number;
+  genesisHash: string;
+  groups: NetWorkGroup[];
+  ss58Format: number;
+  chainType?: 'substrate' | 'ethereum';
+  crowdloanUrl?: string;
+
+  // Ethereum informations for predefine network only
+  isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account
+
+  // Native token information
+  nativeToken?: string;
+  decimals?: number;
+
+  // Other informations
+  active: boolean, // Network is active or not
+  coinGeckoKey?: string, // Provider key to get token price from CoinGecko
+  blockExplorer?: string, // Link to block scanner to check transaction with extrinsic hash
+  dependencies?: string[] // Auto active network in dependencies if current network is activated
+
+  // Support features
+  getBalanceMethod?: 'SUBSTRATE' | 'SUBSTRATE_TOKEN' | 'EVM' | 'ERC20'; // How to get balance
+  sendFundMethod?: 'SUBSTRATE' | 'EVM'
+  getTokenMethod?: 'SUBSTRATE_TOKENS' | 'ERC20'; // How to get tokens
+  sendTokenMethod?: 'SUBSTRATE' | 'ERC20'
+  sendXCMTokens?: 'SUBSTRATE_XTOKENS' | 'EVM_XTOKENS' | 'RAW_XCM';
+  getStakingMethod?: 'SUBSTRATE';
+  getCrowdloanMethod?: 'POLKADOT' | 'DOTSAMA' | 'CUSTOM' // This method is required paraId, custom network can not select custom method
+  getNFTMethod?: 'ERC721' | 'CUSTOM';
+  sendNFTMethod?: 'ERC721' | 'CUSTOM'
+
+  // Methods
+  getDotsamaAPI?: ApiPromise;
+  getWeb3API?: Web3;
+  getNFTWeb3API?: Web3;
 }
 
 export interface DonateInfo {

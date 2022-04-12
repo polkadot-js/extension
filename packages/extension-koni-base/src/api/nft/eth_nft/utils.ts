@@ -135,7 +135,8 @@ enum ASTAR_NFT_CONTRACT_NAME {
   ASTAR_PUNK_X = 'Astar Punk X',
   ASTAR_INVISIBLE_FRIENDS = 'Astar Invisible Friends',
   ASTAR_METALION_KINGDOM = 'Astar MetaLion Kingdom',
-  ASTAR_KARAFURU = 'Astar Karafuru'
+  ASTAR_KARAFURU = 'Astar Karafuru',
+  ASTAR_APES_AIDING_APES = 'Apes Aiding Apes'
 }
 
 export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
@@ -151,14 +152,14 @@ export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
     name: ASTAR_NFT_CONTRACT_NAME.ASTAR_DEGENS,
     smartContract: '0xd59fc6bfd9732ab19b03664a45dc29b8421bda9a'
   },
-  {
-    name: ASTAR_NFT_CONTRACT_NAME.ASTARIANS,
-    smartContract: '0xdf663a45d17fc3d669df586b8b9641c888a301dc'
-  },
-  {
-    name: ASTAR_NFT_CONTRACT_NAME.ASTAR_BOTS,
-    smartContract: '0x2af8a3eeab86545d6bb2f6bae7c4ab6b6d1141b8'
-  },
+  // {
+  //   name: ASTAR_NFT_CONTRACT_NAME.ASTARIANS,
+  //   smartContract: '0xdf663a45d17fc3d669df586b8b9641c888a301dc'
+  // },
+  // {
+  //   name: ASTAR_NFT_CONTRACT_NAME.ASTAR_BOTS,
+  //   smartContract: '0x2af8a3eeab86545d6bb2f6bae7c4ab6b6d1141b8'
+  // },
   {
     name: ASTAR_NFT_CONTRACT_NAME.ASTAR_KEVIN,
     smartContract: '0xd311c9a8ff0d5045039a8723b20df36b42bd1554'
@@ -167,10 +168,10 @@ export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
     name: ASTAR_NFT_CONTRACT_NAME.ASTAR_GHOST,
     smartContract: '0xb4bd85893d6f66869d7766ace1b1eb4d867d963e'
   },
-  {
-    name: ASTAR_NFT_CONTRACT_NAME.ASTAR_PUNK_X,
-    smartContract: '0x5425948a8a83516D26C7081F2742De5767CFEEad'
-  },
+  // {
+  //   name: ASTAR_NFT_CONTRACT_NAME.ASTAR_PUNK_X,
+  //   smartContract: '0x5425948a8a83516D26C7081F2742De5767CFEEad'
+  // },
   {
     name: ASTAR_NFT_CONTRACT_NAME.ASTAR_INVISIBLE_FRIENDS,
     smartContract: '0xdf8567bf301ce9b29e284f4de585D8eE782b1158'
@@ -182,6 +183,10 @@ export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
   {
     name: ASTAR_NFT_CONTRACT_NAME.ASTAR_KARAFURU,
     smartContract: '0x5D49B30986111f45d503fEAAFF7412Ec0f22C189'
+  },
+  {
+    name: ASTAR_NFT_CONTRACT_NAME.ASTAR_APES_AIDING_APES,
+    smartContract: '0x43139550284a3e6bA07896D7317242156b8f745e'
   }
   // {
   //   name: ASTAR_NFT_CONTRACT_NAME.ASTAR_ZODIAC,

@@ -53,22 +53,18 @@ export class BitCountryNftApi extends BaseNftApi {
       return [];
     }
 
-    let accountAssets: any[] = [];
+    const assetIds: AssetId[] = [];
 
     await Promise.all(addresses.map(async (address) => {
       // @ts-ignore
-      const resp = await this.dotSamaApi.api.query.nft.assetsByOwner(address);
-      const parsedResp = resp.toHuman() as any[];
+      const resp = await this.dotSamaApi.api.query.ormlNFT.tokensByOwner.entries(address);
 
-      accountAssets = accountAssets.concat(parsedResp);
+      for (const item of resp) {
+        const data = item[0].toHuman() as string[];
+
+        assetIds.push({ classId: this.parseTokenId(data[1]), tokenId: this.parseTokenId(data[2]) });
+      }
     }));
-
-    const assetIds: AssetId[] = [];
-
-    for (const pair of accountAssets) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      assetIds.push({ classId: this.parseTokenId(pair[0] as string), tokenId: this.parseTokenId(pair[1] as string) });
-    }
 
     return assetIds;
   }

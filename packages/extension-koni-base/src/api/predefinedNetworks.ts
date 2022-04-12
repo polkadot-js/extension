@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkJson } from '@polkadot/extension-base/background/KoniTypes';
+import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 
-export const PREDEFINED_NETWORKS: Record<string, NetWorkJson> = {
+export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   polkadot: {
     key: 'polkadot',
     chain: 'Polkadot Relay Chain',
@@ -168,6 +168,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetWorkJson> = {
     chain: 'Astar',
     genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
     ss58Format: 5,
+    nftProvider: 'wss://astar.api.onfinality.io/public-ws',
     providers: {
       Astar: 'wss://rpc.astar.network',
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',

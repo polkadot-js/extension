@@ -244,7 +244,7 @@ export interface NetWorkInfo {
   decimals?: number;
 }
 
-export interface NetWorkJson {
+export interface NetworkJson {
   // General Informations
   key: string, // Key of network in NetworkMap
   chain: string; // Name of the network
@@ -524,6 +524,9 @@ export interface EvmNftTransactionResponse {
 }
 
 export interface KoniRequestSignatures {
+  'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
+  'pri(networkMap.upsert)': [Record<string, NetworkJson>, boolean];
+  'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];

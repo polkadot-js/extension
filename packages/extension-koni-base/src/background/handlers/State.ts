@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -14,7 +14,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/stak
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
-import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
+import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
@@ -69,18 +69,21 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private readonly networkMapStore = new NetworkMapStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
-  // private readonly nftStore = new NftStore();
-  // private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
+  // private readonly nftStore = new NftStore();
+  // private readonly stakingStore = new StakingStore();
+
   // private nftStoreReady = false;
   // private stakingStoreReady = false;
+
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
@@ -688,5 +691,21 @@ export default class KoniState extends State {
 
   public subscribePrice () {
     return this.priceStore.getSubject();
+  }
+
+  public setNetworkMap (data: Record<string, NetworkJson>, callback?: (data: Record<string, NetworkJson>) => void): void {
+    this.networkMapStore.set('NetworkMap', data, () => {
+      if (callback) {
+        callback(data);
+      }
+    });
+  }
+
+  public getNetworkMap (update: (data: Record<string, NetworkJson>) => void): void {
+    this.networkMapStore.get('NetworkMap', update);
+  }
+
+  public subscribeNetworkMap () {
+    return this.networkMapStore.getSubject();
   }
 }

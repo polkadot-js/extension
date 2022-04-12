@@ -117,7 +117,10 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account: currentAccount },
     currentNetwork,
+    networkMap,
     transactionHistory: { historyMap } } = useSelector((state: RootState) => state);
+
+  console.log('networkMap', networkMap);
 
   if (!hierarchy.length) {
     return (<AddAccount />);

@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 0.3.3 (Koni)
-Build date: Apr 08, 2022. Complete internal security audit
+Build date: Apr 08, 2022.
 
 Update:
 - Support get Shiden balance and tokens (issue #136)
@@ -9,63 +9,78 @@ Update:
 
 Bug Fixed:
 - Some problems related to NFT function (issue #105)
+- Not have website list in website access screen
 
 ## 0.3.2 (Koni)
-Build date: Apr 07, 2022. Complete internal security audit
+Build date: Apr 07, 2022. 
 
 Update:
-- Improve custom access screen (issue #91)
+- Improve the custom access screen (issue #91)
 - Display Astar(EVM) tokens balances and ERC20 tokens (issue #92)
+- Update the new Settings screen (issue #85)
+- Integrate Astar NFT (issue #44)
+  - AstarDegens
+  - Astarians
+  - AstarBots
+  - AstarGhost
+  - Astar Kevin
+  - Astar Punk X
+  - Astar Invisible Friends
+  - Astar MetaLion Kingdom
+  - Astar Karafuru
 
 ## 0.3.1 (Koni)
-Build date: Apr 05, 2022. Complete internal security audit
+Build date: Apr 05, 2022. Complete External security audit
 
 Update:
 - Display Moonbeam / Moonriver NFT (issue #33)
-- Send / Receive Moonbeam / Moonriver NFT (issue #34)
-- Support hardware wallet (issue #43)
-- Integrate Bit.Country's NFT (issue #52)
-- Update new setting screen (issue #85)
-- Improve layout for Import account from JSON screen (issue #90)
+- Send & Receive Moonbeam / Moonriver NFT (issue #34)
 - Support EVM Account for Astar Network (issue #92)
-- Adding new assets to the extension (issue #101)
-- Improve NFT flow (issue #102)
+- Support Ledger: Attach account, show balance, receive assets (issue #43)
+- Integrate Bit.Country NFT: Display, Send, Receive (issue #52)
+- Improve experience when clicking the disconnect icon (issue #86)
+- Improved import JSON file from Polkadot {.js}: Single Account and All Account (Issue #88 & #90)
 
 Bug Fixed:
 - Fix some bugs with AlephZero balance (issue #50)
-- Fix avatar of all account does not update when changing from collapse (popup) (issue #68)
-- Fix some bug with NFT (issues #95, #97 and #105)
 - Fix some small bugs
 
 ## 0.2.9 (Koni)
-Build date: Mar 22, 2022. Complete internal security audit
+Build date: Mar 22, 2022. Complete external security audit
 Update:
-- Support Moonriver, Moonbase token balances
-- Support Bifrost token Balance
+- Show Moonbase and Moonriver tokens balance
+- Show Bifrost cross-chain tokens Balance: DOT, KAR, KSM, kUSD, PHA, RMRK, ZLK
+- Improve some UX tasks
 
 Bug Fixed:
-- Fix RMRK 2.0 nft error
+- Display RMRK 2.0
+- Staking balance 
 
 ## 0.2.8 (Koni)
-Build date: Mar 18, 2022. Complete internal security audit
-Update:
-- Support child balance.
-- Show Karura, RMRK, Acala tokens balances. 
+Build date: Mar 18, 2022. Complete External Security Audit
+**Update:**
+- Send and Receive NFT: Acala, RMRK, Quartz, Statemine
+- Support RMRK 2.0 NFT for Singular
+- Show Karura and Acala tokens balances: LCDOT, LDOT, DOT,aUSD, kUSD
+- Show Karura and Acala cross-chain assets: BNC, KINT, KSM, LKSM, PHA, TAI, kBTC, vsKSM, RMRK
+- Import Private key for EVM account from Metamask
+- Hide account balance 
+- Customize avatar for All account
 
----
+**Bug Fixed:**
+- Bug when search account
+- Temporary remove Export all account feature
 
 ## 0.2.7 (Koni)
-Build date: Mar 07, 2022. Complete internal security audit
-
-Update:
-- Support H160 address only: $GLMR, $MOVR
+**Update:**
+- Support $GLMR, $MOVR
 - Shows balance amount in multiple formats
 - Update Transactions history screen using SubQuery data
 - Update export Private key for Metamask
 - Improve NFT display performance
 - Add Bit.Country Testnet
 
-Bug Fixed:
+**Bug Fixed:**
 - Fix request access UI
 - Fix Scan Address Qr UI
 - Fix RMRK's NFT display error by wrong metadata
@@ -73,9 +88,8 @@ Bug Fixed:
 ---
 
 ## 0.2.6 (Koni)
-Build date: Mar 03, 2022. Complete internal security audit
+**Update:**
 
-Update:
 - Update Crowdloan Status
 - Update Crowdloan Link
 - Add Donate button
@@ -85,23 +99,17 @@ Update:
 - Improve performance for Staking tab
 - Remove require enter account name when creating an account
 
-Bug Fixed:
+**Bug Fixed:**
+
 - Karura's NFT display error
-
 ---
 
-## 0.2.4 (Koni)
-Build date: Feb 22, 2022. Complete internal security audit
-
-Update:
-- Run Yarn test for all features
-- Update Eslint for all features
-
-Bug Fixed:
-- Can't show Kint Balance
-
-
----
+## 0.2.5 (Koni)
+Changes:
+- Add crowdloan funds status
+- Support SubSquid Graphql
+- Update style Authorize, Metadata, Signing, Export All, Export, Forget screen
+- ...
 
 ## 0.2.3 (Koni)
 Build date: Feb 21, 2022. Complete internal security audit

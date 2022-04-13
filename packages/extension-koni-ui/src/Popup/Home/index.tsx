@@ -30,7 +30,7 @@ import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchN
 import useFetchStaking from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
+import { saveCurrentAccountAddress, triggerAccountsSubscription, upsertNetworkMap } from '@polkadot/extension-koni-ui/messaging';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
@@ -117,10 +117,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account: currentAccount },
     currentNetwork,
-    networkMap,
     transactionHistory: { historyMap } } = useSelector((state: RootState) => state);
-
-  console.log('networkMap', networkMap);
 
   if (!hierarchy.length) {
     return (<AddAccount />);
@@ -269,6 +266,29 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     setShowBalanceDetail(false);
   }, []);
 
+  const upsertNetwork = useCallback(async () => {
+    const { conflictNetwork, errors } = await upsertNetworkMap({
+      key: 'kusama', // randomly generated for custom chain
+      chain: 'Kusama Relay Chain',
+      genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
+      icon: 'polkadot',
+      ss58Format: 2,
+      providers: {
+        Parity: 'wss://kusama-rpc.polkadot.io',
+      },
+      active: true,
+      currentProvider: 'OnFinality',
+      currentProviderMode: 'ws',
+      groups: ['RELAY_CHAIN'],
+      nativeToken: 'KSM',
+      decimals: 12
+    });
+
+    console.log(errors, conflictNetwork);
+  }, []);
+
+
+
   return (
     <div className={`home-screen home ${className}`}>
       <Header
@@ -283,6 +303,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
         text={t<string>('Accounts')}
         toggleZeroBalances={_toggleZeroBalances}
       />
+      <div
+        onClick={upsertNetwork}
+      >Upsert network</div>
 
       <div className={'home-action-block'}>
         <div className='account-total-balance'>

@@ -10,6 +10,7 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
@@ -83,6 +84,9 @@ export default class KoniState extends State {
 
   // private nftStoreReady = false;
   // private stakingStoreReady = false;
+
+  private networkMap: Record<string, NetworkJson> = PREDEFINED_NETWORKS; // initial state, only polkadot is active
+  private networkMapSubject = new Subject<Record<string, NetworkJson>>();
 
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
@@ -694,18 +698,22 @@ export default class KoniState extends State {
   }
 
   public setNetworkMap (data: Record<string, NetworkJson>, callback?: (data: Record<string, NetworkJson>) => void): void {
+    this.networkMap = data;
+
     this.networkMapStore.set('NetworkMap', data, () => {
       if (callback) {
         callback(data);
       }
     });
+
+    this.networkMapSubject.next(data);
   }
 
-  public getNetworkMap (update: (data: Record<string, NetworkJson>) => void): void {
-    this.networkMapStore.get('NetworkMap', update);
+  public getNetworkMap (): Record<string, NetworkJson> {
+    return this.networkMap;
   }
 
   public subscribeNetworkMap () {
-    return this.networkMapStore.getSubject();
+    return this.networkMapSubject;
   }
 }

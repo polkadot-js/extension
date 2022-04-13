@@ -7,7 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetworkJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -19,7 +19,7 @@ import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, 
 import { getWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
+import { isValidProvider, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -29,7 +29,6 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert, BN, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
-import {PREDEFINED_NETWORKS} from "@polkadot/extension-koni-base/api/predefinedNetworks";
 
 const bWindow = window as unknown as BackgroundWindow;
 
@@ -1121,22 +1120,12 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private getNetworkMap (): Promise<Record<string, NetworkJson>> {
-    return new Promise<Record<string, NetworkJson>>((resolve) => {
-      state.getNetworkMap((rs: Record<string, NetworkJson>) => {
-        if (!rs) {
-          console.log('networkMap empty');
-          state.setNetworkMap(PREDEFINED_NETWORKS);
-        }
-
-        resolve(rs);
-      });
-    });
+  private getNetworkMap (): Record<string, NetworkJson> {
+    return state.getNetworkMap();
   }
 
-  private subscribeNetworkMap (id: string, port: chrome.runtime.Port): Promise<Record<string, NetworkJson>> {
+  private subscribeNetworkMap (id: string, port: chrome.runtime.Port): Record<string, NetworkJson> {
     const cb = createSubscription<'pri(networkMap.getSubscription)'>(id, port);
-
     const networkMapSubscription = state.subscribeNetworkMap().subscribe({
       next: (rs) => {
         cb(rs);
@@ -1151,15 +1140,48 @@ export default class KoniExtension extends Extension {
     return this.getNetworkMap();
   }
 
-  private upsertNetworkMap (data: Record<string, NetworkJson>, callback?: (data: Record<string, NetworkJson>) => void): boolean {
-    // TODO: filter network, check validation
-    state.setNetworkMap(data);
+  private validateNetwork (data: NetworkJson) {
+    const errors: NETWORK_ERROR[] = [];
+    const currentNetworks = state.getNetworkMap();
+    const allExistedProviders: Record<string, string>[] = [];
+    let conflictNetwork = '';
 
-    if (callback) {
-      callback(data);
+    for (const [key, value] of Object.entries(currentNetworks)) {
+      Object.values(value.providers).forEach((provider) => {
+        allExistedProviders.push({ key, provider });
+      });
     }
 
-    return true;
+    for (const _provider of Object.values(data.providers)) {
+      if (!isValidProvider(_provider)) {
+        errors.push(NETWORK_ERROR.INVALID_PROVIDER);
+        break;
+      }
+
+      for (const { key, provider } of allExistedProviders) {
+        if (provider === _provider) {
+          errors.push(NETWORK_ERROR.EXISTED_NETWORK);
+          conflictNetwork = key;
+          break;
+        }
+      }
+    }
+
+    return { errors, conflictNetwork };
+  }
+
+  private upsertNetworkMap (data: NetworkJson): NetworkUpsertResponse {
+    // TODO: filter network, check validation
+    // state.setNetworkMap(data);
+    const { conflictNetwork, errors } = this.validateNetwork(data);
+
+    if (errors.length <= 0) {
+      console.log('network valid');
+    } else {
+      console.log('network invalid', errors);
+    }
+
+    return { errors, conflictNetwork };
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -1262,7 +1284,7 @@ export default class KoniExtension extends Extension {
       case 'pri(networkMap.getSubscription)':
         return this.subscribeNetworkMap(id, port);
       case 'pri(networkMap.upsert)':
-        return this.upsertNetworkMap(request as Record<string, NetworkJson>);
+        return this.upsertNetworkMap(request as NetworkJson);
       case 'pri(networkMap.getNetworkMap)':
         return this.getNetworkMap();
       default:

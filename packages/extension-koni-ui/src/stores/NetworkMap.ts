@@ -5,14 +5,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 
-const initialState = {} as Record<string, NetworkJson>;
+const initialState = {
+} as Record<string, NetworkJson>;
 
 const networkMapSlice = createSlice({
   initialState,
   name: 'networkMap',
   reducers: {
     update (state, action: PayloadAction<Record<string, NetworkJson>>) {
-      state = action.payload;
+      return action.payload;
     }
   }
 });

@@ -293,6 +293,8 @@ export interface NetworkJson {
   getDotsamaAPI?: ApiPromise;
   getWeb3API?: Web3;
   getNFTWeb3API?: Web3;
+
+  dotSamaAPIStatus?: NETWORK_STATUS;
 }
 
 export interface DonateInfo {
@@ -454,6 +456,19 @@ export type RequestNftForceUpdate = {
   chain: string
 }
 
+export enum NETWORK_ERROR {
+  INVALID_INFO_TYPE = 'invalidInfoType',
+  INJECT_SCRIPT_DETECTED = 'injectScriptDetected',
+  EXISTED_NETWORK = 'existedNetwork',
+  INVALID_PROVIDER = 'invalidProvider'
+}
+
+export enum NETWORK_STATUS {
+  CONNECTED = 'connected',
+  CONNECTING = 'connecting',
+  DISCONNECTED = 'disconnected'
+}
+
 export enum TransferErrorCode {
   INVALID_FROM_ADDRESS = 'invalidFromAccount',
   INVALID_TO_ADDRESS = 'invalidToAccount',
@@ -523,9 +538,14 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
+export interface NetworkUpsertResponse {
+  errors: NETWORK_ERROR[],
+  conflictNetwork: string
+}
+
 export interface KoniRequestSignatures {
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
-  'pri(networkMap.upsert)': [Record<string, NetworkJson>, boolean];
+  'pri(networkMap.upsert)': [NetworkJson, NetworkUpsertResponse];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];

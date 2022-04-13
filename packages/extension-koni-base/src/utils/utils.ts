@@ -210,3 +210,13 @@ export const isAddressesEqual = (addresses: string[], prevAddresses: string[]) =
 
   return true;
 };
+
+export const isValidProvider = (provider: string) => {
+  if (isUrl(provider)) {
+    return true;
+  } else if (provider.startsWith('wss://') || provider.startsWith('light://')) {
+    return true;
+  }
+
+  return false;
+};

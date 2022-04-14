@@ -10,7 +10,7 @@
   "Create new account (root or derived)": "สร้างบัญชีใหม่(บัญชีหลักหรือบัญชีลูก)",
   "Create new account": "สร้างบัญชีใหม่",
   "Import account from pre-existing seed": "นำเข้าบัญชีจากseedที่มีอยู่",
-  "Restore account from backup JSON file": "กู้คืนบัญชีจากไฟล์JSONที่มี",
+  "Restore account from JSON backup file": "กู้คืนบัญชีจากไฟล์สำรอง JSON",
   "Attach external QR-signer account": "เพิ่มบัญชี QR-signer ภายนอก",
   "External QR accounts and Access": "บัญชีQRภายนอก และการเข้าถึง",
   "Allow Camera Access": "อนุญาตให้เข้าถึงกล้อง",

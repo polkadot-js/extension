@@ -10,7 +10,7 @@
   "Create new account (root or derived)": "Yeni hesap oluştur (kök veya türetilmiş)",
   "Create new account": "Yeni hesap oluştur",
   "Import account from pre-existing seed": "Hesabı önceden var olan anımsatıcıdan içe aktar",
-  "Restore account from backup JSON file": "Hesabı yedek JSON dosyasından geri yükle",
+  "Restore account from JSON backup file": "JSON yedekleme dosyasından hesabı geri yükle",
   "Attach external QR-signer account": "Harici QR imzalayan hesabı ekle",
   "External QR accounts and Access": "Harici QR hesapları ve Erişim",
   "Allow Camera Access": "Kamera Erişimine İzin Ver",

@@ -10,7 +10,7 @@
   "Create new account (root or derived)": "Créer un nouveau compte (racine ou dérivé)",
   "Create new account": "Créer un nouveau compte",
   "Import account from pre-existing seed": "Importer depuis une phrase mnémotechnique",
-  "Restore account from backup JSON file": "Restaurer depuis un fichier JSON de sauvegarde",
+  "Restore account from JSON backup file": "Restaurer le compte à partir du fichier de sauvegarde JSON",
   "Attach external QR-signer account": "Ajouter un compte externe",
   "External QR accounts and Access": "Comptes QR externes et accès",
   "Allow Camera Access": "Autoriser l'accès à la caméra",

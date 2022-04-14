@@ -10,7 +10,7 @@
   "Create new account (root or derived)": "Tạo tài khoản mới (quản trị hoặc dẫn xuất)",
   "Create new account": "Tạo tài khoản mới",
   "Import account from pre-existing seed": "Nhập tài khoản có sẵn bằng mã ghi nhớ",
-  "Restore account from backup JSON file": "Khôi phục tài khoản từ tập tin JSON dự phòng",
+  "Restore account from JSON backup file": "Khôi phục tài khoản từ tập tin JSON dự phòng",
   "Attach external QR-signer account": "Đính kèm tài khoản QR-signer",
   "External QR accounts and Access": "Tài khoản QR và truy cập",
   "Allow Camera Access": "Cho phép truy cập máy ảnh",

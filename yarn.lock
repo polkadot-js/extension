@@ -1569,6 +1569,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.17.9":
+  version: 7.17.9
+  resolution: "@babel/runtime@npm:7.17.9"
+  dependencies:
+    regenerator-runtime: ^0.13.4
+  checksum: 4d56bdb82890f386d5a57c40ef985a0ed7f0a78f789377a2d0c3e8826819e0f7f16ba0fe906d9b2241c5f7ca56630ef0653f5bb99f03771f7b87ff8af4bf5fe3
+  languageName: node
+  linkType: hard
+
 "@babel/template@npm:^7.16.7, @babel/template@npm:^7.3.3":
   version: 7.16.7
   resolution: "@babel/template@npm:7.16.7"
@@ -3484,7 +3493,7 @@ __metadata:
     "@polkadot/extension-mocks": ^0.3.3-1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
-    "@polkadot/phishing": ^0.8.7
+    "@polkadot/phishing": ^0.11.30
     "@polkadot/rpc-provider": ^7.3.1
     "@polkadot/types": ^7.3.1
     "@polkadot/ui-keyring": ^0.89.1
@@ -3591,7 +3600,7 @@ __metadata:
     "@polkadot/extension-mocks": ^0.3.3-1
     "@polkadot/keyring": ^8.3.1
     "@polkadot/networks": ^8.3.1
-    "@polkadot/phishing": ^0.8.7
+    "@polkadot/phishing": ^0.11.30
     "@polkadot/rpc-provider": ^7.3.1
     "@polkadot/types": ^7.3.1
     "@polkadot/ui-keyring": ^0.89.1
@@ -3870,15 +3879,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.8.7":
-  version: 0.8.307
-  resolution: "@polkadot/phishing@npm:0.8.307"
+"@polkadot/phishing@npm:^0.11.30":
+  version: 0.11.30
+  resolution: "@polkadot/phishing@npm:0.11.30"
   dependencies:
-    "@babel/runtime": ^7.17.2
-    "@polkadot/util": ^8.4.1
-    "@polkadot/util-crypto": ^8.4.1
-    "@polkadot/x-fetch": ^8.4.1
-  checksum: d54d6ea6f33fadb410a20cc74c0424d7830bf4fa9572f011e91536f8118e184c44883ab82a5bb2cc357f62c7c635962aaf8c4c9a7eff2f7d7e0d75860f484b34
+    "@babel/runtime": ^7.17.9
+    "@polkadot/util": ^9.0.1
+    "@polkadot/util-crypto": ^9.0.1
+    "@polkadot/x-fetch": ^9.0.1
+  checksum: a9e59614b968377684a59623bfc98775f192872838a8db7c260c504399f1d4abd082a380ae0a3e13ec0af1c55ef03d3e6023ac340f816c70efae9c3a9241c4ac
   languageName: node
   linkType: hard
 

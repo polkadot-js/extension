@@ -90,7 +90,7 @@ function AddAccount ({ className }: Props): React.ReactElement<Props> {
               onClick={isPopup && (isFirefox || isLinux) ? _openJson : undefined}
               to={isPopup && (isFirefox || isLinux) ? undefined : jsonPath}
             >
-              {t<string>('Restore account from backup JSON file')}
+              {t<string>('Restore account from JSON backup file')}
             </Link>
           </Button>
         </div>

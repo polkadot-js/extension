@@ -2,56 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { HorizontalLabelToggle, InputFilter, Link } from '@polkadot/extension-koni-ui/components';
+import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
+import { InputFilter, Link } from '@polkadot/extension-koni-ui/components';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
+import NetworkItem from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkItem';
+import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { NetworkEditParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
 }
 
-const networks = [
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  },
-  {
-    name: 'Test',
-    isConnect: false
-  }
-];
-
 function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const toggleFund = useCallback(() => {}, []);
+
+  const { networkMap } = useSelector((state: RootState) => state);
 
   const _onChangeFilter = useCallback(() => {
     console.log(123);
@@ -59,34 +29,29 @@ function Networks ({ className }: Props): React.ReactElement {
 
   const filteredNetwork = '';
 
-  const renderNetworkItem = (item: { name: string, isConnect: boolean; }) => {
-    return (
-      <Link
-        className='network-item'
-        to='/account/network-edit'
-      >
-        <div className='network-item__top-content'>
-          <HorizontalLabelToggle
-            checkedLabel={''}
-            className='info'
-            toggleFunc={toggleFund}
-            uncheckedLabel={''}
-            value={item.isConnect}
-          />
-          <div className='network-item__text'>{item.name}</div>
-          <div className='network-item__toggle' />
-        </div>
-        <div className='network-item__separator' />
-      </Link>
-    );
-  };
+  const handleAddNetwork = useCallback(() => {
+    const item: NetworkJson = {
+      active: false,
+      currentProvider: '',
+      currentProviderMode: 'ws',
+      genesisHash: '',
+      groups: [],
+      providers: {},
+      ss58Format: 0,
+      key: '',
+      chain: ''
+    };
+
+    store.dispatch({ type: 'networkEditParams/update', payload: { data: item, mode: 'create' } as NetworkEditParams });
+  }, []);
 
   return (
     <div className={className}>
       <Header
         showBackArrow
         showSubHeader
-        subHeaderName={t<string>('Networks')}
+        subHeaderName={t<string>('Network Settings')}
+        to='/account/settings'
       >
         <InputFilter
           className='networks__input-filter'
@@ -107,9 +72,22 @@ function Networks ({ className }: Props): React.ReactElement {
       </div>
 
       <div className='networks-list'>
-        {networks.map((item) => renderNetworkItem(item))}
+        {Object.values(networkMap).map((item, index) => <NetworkItem
+          item={item}
+          key={index}
+        />)}
       </div>
 
+      <div className={'add-network-container'}>
+        <Link
+          onClick={handleAddNetwork}
+          to='/account/network-edit'
+        >
+          <div className={'add-network-button'}>
+            Add Network
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -118,6 +96,23 @@ export default styled(Networks)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  .add-network-button {
+    width: 100%;
+    cursor: pointer;
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background-color: ${theme.buttonBackground}
+  }
+
+  .add-network-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+  }
 
   .networks__input-filter {
     padding: 0 15px 15px;
@@ -200,7 +195,6 @@ export default styled(Networks)(({ theme }: Props) => `
   }
 
   .networks-list {
-    flex: 1;
     overflow: auto;
   }
 `);

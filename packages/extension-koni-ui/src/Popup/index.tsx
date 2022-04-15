@@ -20,8 +20,8 @@ import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
-import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit';
-import Networks from '@polkadot/extension-koni-ui/Popup/Settings/Networks';
+import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkEdit';
+import Networks from '@polkadot/extension-koni-ui/Popup/Settings/networks/Networks';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';

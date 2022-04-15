@@ -20,8 +20,10 @@ import StakingRewardReducer from './StakingReward';
 import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
+import NetworkEditParamsReducer from './NetworkEditParams';
 
 const reducers = {
+  networkEditParams: NetworkEditParamsReducer,
   networkMap: NetworkMapReducer,
   transferNftExtra: TransferNftExtraReducer,
   transferNftParams: TransferNftParamsReducer,

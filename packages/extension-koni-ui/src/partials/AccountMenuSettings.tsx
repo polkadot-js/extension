@@ -154,7 +154,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
             >
               {/* @ts-ignore */}
               <FontAwesomeIcon icon={faSeedling} />
-              <span>{t<string>('Import account from Seed Phase')}</span>
+              <span>{t<string>('Import account from Seed Phrase')}</span>
             </Link>
           </MenuSettingItem>
           <MenuSettingItem className='account-menu-settings__menu-item'>

@@ -38,8 +38,9 @@ function AuthManagement ({ className }: Props): React.ReactElement<Props> {
   );
 
   const openForgetConfirmModal = useCallback(
-    () => !(authList && Object.keys(authList).length === 0) && setShowConfirmModal(true),
-    [authList]
+    () => {
+      (authList && Object.keys(authList).length !== 0) && setShowConfirmModal(true);
+    }, [authList]
   );
 
   const _onChangeFilter = useCallback((filter: string) => {

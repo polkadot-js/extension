@@ -57,17 +57,17 @@ export const getRegistry = async (networkKey: string, api: ApiPromise) => {
     };
   });
 
+  const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
+
+  if (predefineTokenMap) {
+    Object.assign(tokenMap, predefineTokenMap);
+  }
+
   // Get moonbeam base chains tokens
   if (moonbeamBaseChains.indexOf(networkKey) > -1) {
     const moonTokens = await getMoonAssets(api);
 
     Object.assign(tokenMap, moonTokens);
-  }
-
-  const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
-
-  if (predefineTokenMap) {
-    Object.assign(tokenMap, predefineTokenMap);
   }
 
   const chainRegistry = {

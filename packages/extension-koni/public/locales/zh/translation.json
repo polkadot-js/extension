@@ -10,7 +10,7 @@
   "Create new account (root or derived)": "创建新帐户(根帐户或派生帐户)",
   "Create new account": "创建新账户",
   "Import account from pre-existing seed": "从已存在的种子导入帐户",
-  "Restore account from backup JSON file": "从备份 JSON 文件恢复帐户",
+  "Restore account from JSON backup file": "从 JSON 备份文件恢复帐户",
   "Attach external QR-signer account": "附加外部 QR-signer 帐户",
   "External QR accounts and Access": "外部 QR 账户和访问",
   "Allow Camera Access": "允许摄像头访问",

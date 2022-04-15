@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 import { getAllNetworkMetadata } from '../messaging';
-import chains from '../util/chains';
+import { _getKnownHashes } from '../util/chains';
 import useTranslation from './useTranslation';
 
-export interface networkSelectOption {
+export interface NetworkSelectOption {
   text: string;
   value: string;
   networkKey: string;
@@ -17,16 +19,20 @@ export interface networkSelectOption {
   icon: string;
   groups: NetWorkGroup[];
   isEthereum: boolean;
+  active: boolean;
 }
 
 const RELAY_CHAIN = 'Relay Chain';
 
-const availableChain = chains.filter((c) => c.isAvailable);
-
-export default function (): networkSelectOption[] {
+export default function (): NetworkSelectOption[] {
   const { t } = useTranslation();
-  const [metadataChains, setMetadataChains] = useState<networkSelectOption[]>([]);
+  const [metadataChains, setMetadataChains] = useState<NetworkSelectOption[]>([]);
   const mounted = useRef(false);
+  const { networkMap } = useSelector((state: RootState) => state);
+  const parsedChains = _getKnownHashes(networkMap);
+  const availableChains = parsedChains.filter((c) => c.isAvailable);
+
+  // console.log('availableChains', availableChains);
 
   useEffect(() => {
     mounted.current = true;
@@ -41,7 +47,8 @@ export default function (): networkSelectOption[] {
             networkPrefix: metadata.ss58Format,
             icon: metadata.icon,
             groups: metadata.groups,
-            isEthereum: metadata.isEthereum
+            isEthereum: metadata.isEthereum,
+            active: metadata.active
           }));
 
         setMetadataChains(res);
@@ -53,7 +60,9 @@ export default function (): networkSelectOption[] {
     };
   }, []);
 
-  const hashes = useMemo(() => [
+  // console.log('metadataChains', metadataChains);
+
+  return useMemo(() => [
     {
       text: t('Allow use on any chain'),
       value: '',
@@ -61,27 +70,30 @@ export default function (): networkSelectOption[] {
       networkPrefix: -1,
       icon: 'polkadot',
       groups: ['UNKNOWN'] as NetWorkGroup[],
-      isEthereum: false
+      isEthereum: false,
+      active: true
     },
     // put the relay chains at the top
-    ...availableChain.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
+      .map(({ active, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
         networkKey,
         icon,
         groups,
-        isEthereum
+        isEthereum,
+        active
       })),
-    ...availableChain.map(({ chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChains.map(({ active, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
       networkKey,
       icon,
       groups,
-      isEthereum
+      isEthereum,
+      active
     }))
       // remove the relay chains, they are at the top already
       .filter(({ text }) => !text.includes(RELAY_CHAIN))
@@ -89,12 +101,10 @@ export default function (): networkSelectOption[] {
         // get any chain present in the metadata and not already part of chains
         ...metadataChains.filter(
           ({ value }) => {
-            return !availableChain.find(
+            return !availableChains.find(
               ({ genesisHash }) => genesisHash === value);
           }
         ))
       .sort((a, b) => a.text.localeCompare(b.text))
-  ], [metadataChains, t]);
-
-  return hashes;
+  ], [availableChains, metadataChains, t]);
 }

@@ -5,7 +5,7 @@ import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
-import { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import { NetworkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import { Recoded } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
@@ -73,12 +73,12 @@ function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
   ];
 }
 
-export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: networkSelectOption[]): networkSelectOption[] {
+export function getGenesisOptionsByAddressType (address: string | null | undefined, accounts: AccountJson[], genesisOptions: NetworkSelectOption[]): NetworkSelectOption[] {
   if (!address || !accounts.length) {
     return genesisOptions.filter((o) => !o.isEthereum);
   }
 
-  const result: networkSelectOption[] = [];
+  const result: NetworkSelectOption[] = [];
 
   if (isAccountAll(address)) {
     const [isContainOnlySubstrate, isContainOnlyEtherum] = analysisAccounts(accounts);

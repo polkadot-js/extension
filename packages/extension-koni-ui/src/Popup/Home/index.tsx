@@ -30,7 +30,7 @@ import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchN
 import useFetchStaking from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { saveCurrentAccountAddress, triggerAccountsSubscription, upsertNetworkMap } from '@polkadot/extension-koni-ui/messaging';
+import { disableNetworkMap, enableNetworkMap, removeNetworkMap, saveCurrentAccountAddress, triggerAccountsSubscription, upsertNetworkMap } from '@polkadot/extension-koni-ui/messaging';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
@@ -268,26 +268,49 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const upsertNetwork = useCallback(async () => {
     const { conflictNetwork, errors } = await upsertNetworkMap({
-      key: 'kusama', // randomly generated for custom chain
-      chain: 'Kusama Relay Chain',
-      genesisHash: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
-      icon: 'polkadot',
-      ss58Format: 2,
+      key: 'acala',
+      chain: 'Acala',
+      genesisHash: '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c',
+      ss58Format: 10,
       providers: {
-        Parity: 'wss://kusama-rpc.polkadot.io',
+        'Acala Foundation 0': 'wss://acala-rpc-0.aca-api.network',
+        'Acala Foundation 1': 'wss://acala-rpc-1.aca-api.network',
+        // 'Acala Foundation 2': 'wss://acala-rpc-2.aca-api.network/ws', // https://github.com/polkadot-js/apps/issues/6965
+        'Acala Foundation 3': 'wss://acala-rpc-3.aca-api.network/ws',
+        'Polkawallet 0': 'wss://acala.polkawallet.io',
+        OnFinality: 'wss://acala-polkadot.api.onfinality.io/public-ws',
+        Dwellir: 'wss://acala-rpc.dwellir.com'
       },
-      active: true,
-      currentProvider: 'OnFinality',
+      active: false,
       currentProviderMode: 'ws',
-      groups: ['RELAY_CHAIN'],
-      nativeToken: 'KSM',
+      currentProvider: 'OnFinality',
+      groups: ['POLKADOT_PARACHAIN'],
+      paraId: 2000,
+      nativeToken: 'ACA',
+      crowdloanUrl: 'https://distribution.acala.network/',
       decimals: 12
     });
 
     console.log(errors, conflictNetwork);
   }, []);
 
+  const removeNetwork = useCallback(async () => {
+    const resp = await removeNetworkMap('test');
 
+    console.log(resp);
+  }, []);
+
+  const disableNetwork = useCallback(async () => {
+    const resp = await disableNetworkMap('test');
+
+    console.log(resp);
+  }, []);
+
+  const enableNetwork = useCallback(async () => {
+    const resp = await enableNetworkMap('test');
+
+    console.log(resp);
+  }, []);
 
   return (
     <div className={`home-screen home ${className}`}>
@@ -306,6 +329,18 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
       <div
         onClick={upsertNetwork}
       >Upsert network</div>
+
+      <div
+        onClick={removeNetwork}
+      >Remove network</div>
+
+      <div
+        onClick={disableNetwork}
+      >Disable network</div>
+
+      <div
+        onClick={enableNetwork}
+      >Enable network</div>
 
       <div className={'home-action-block'}>
         <div className='account-total-balance'>

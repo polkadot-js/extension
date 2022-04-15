@@ -692,9 +692,10 @@ export default class KoniExtension extends Extension {
   // todo: add custom network metadata to here
   private networkMetadataList (): NetWorkMetadataDef[] {
     const result: NetWorkMetadataDef[] = [];
+    const networkMap = state.getNetworkMap();
 
-    Object.keys(NETWORKS).forEach((networkKey) => {
-      const { chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = NETWORKS[networkKey];
+    Object.keys(networkMap).forEach((networkKey) => {
+      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = networkMap[networkKey];
 
       let isAvailable = true;
 
@@ -712,7 +713,8 @@ export default class KoniExtension extends Extension {
         groups,
         isEthereum: !!isEthereum,
         paraId,
-        isAvailable
+        isAvailable,
+        active
       });
     });
 
@@ -1142,7 +1144,7 @@ export default class KoniExtension extends Extension {
 
   private validateNetwork (data: NetworkJson) {
     const errors: NETWORK_ERROR[] = [];
-    const currentNetworks = state.getNetworkMap();
+    const currentNetworks = this.getNetworkMap();
     const allExistedProviders: Record<string, string>[] = [];
     let conflictNetwork = '';
 
@@ -1171,17 +1173,49 @@ export default class KoniExtension extends Extension {
   }
 
   private upsertNetworkMap (data: NetworkJson): NetworkUpsertResponse {
-    // TODO: filter network, check validation
-    // state.setNetworkMap(data);
     const { conflictNetwork, errors } = this.validateNetwork(data);
 
     if (errors.length <= 0) {
-      console.log('network valid');
-    } else {
-      console.log('network invalid', errors);
+      state.upsertNetworkMap(data);
     }
 
     return { errors, conflictNetwork };
+  }
+
+  private async removeNetworkMap (networkKey: string): Promise<boolean> {
+    const currentNetworkMap = this.getNetworkMap();
+
+    if (!(networkKey in currentNetworkMap)) {
+      return false;
+    }
+
+    await state.removeNetworkMap(networkKey);
+
+    return true;
+  }
+
+  private disableNetworkMap (networkKey: string): boolean {
+    const currentNetworkMap = this.getNetworkMap();
+
+    if (!(networkKey in currentNetworkMap)) {
+      return false;
+    }
+
+    state.disableNetworkMap(networkKey);
+
+    return true;
+  }
+
+  private enableNetworkMap (networkKey: string): boolean {
+    const networkMap = this.getNetworkMap();
+
+    if (!(networkKey in networkMap)) {
+      return false;
+    }
+
+    state.enableNetworkMap(networkKey);
+
+    return true;
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -1287,6 +1321,12 @@ export default class KoniExtension extends Extension {
         return this.upsertNetworkMap(request as NetworkJson);
       case 'pri(networkMap.getNetworkMap)':
         return this.getNetworkMap();
+      case 'pri(networkMap.disableOne)':
+        return this.disableNetworkMap(request as string);
+      case 'pri(networkMap.removeOne)':
+        return this.removeNetworkMap(request as string);
+      case 'pri(networkMap.enableOne)':
+        return this.enableNetworkMap(request as string);
       default:
         return super.handle(id, type, request, port);
     }

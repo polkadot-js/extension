@@ -10,7 +10,7 @@ import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
-import useGenesisHashOptions, { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import useGenesisHashOptions, { NetworkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
@@ -21,14 +21,19 @@ interface Props extends ThemeProps {
   onFilter?: (filter: string) => void;
   closeSetting?: () => void;
   currentNetwork?: string;
-  genesisOptions: networkSelectOption[];
+  genesisOptions: NetworkSelectOption[];
   selectNetwork: (genesisHash: string, networkPrefix: number, icon: string, networkKey: string) => void;
   isNotHaveAccount?: boolean;
 }
 
 function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [filteredGenesisOptions, setFilteredGenesisOption] = useState(genesisOptions);
+
+  const getActiveNetworks = useCallback(() => {
+    return genesisOptions.filter((option) => option.active);
+  }, [genesisOptions]);
+
+  const [filteredGenesisOptions, setFilteredGenesisOption] = useState<NetworkSelectOption[]>(getActiveNetworks());
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
   const filterCategories: {text: string, type: NetWorkGroup | string}[] = [
@@ -68,6 +73,7 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       const lowerCaseFilteredNetwork = filteredNetwork.toLowerCase();
 
       if (selectedGroup && selectedGroup.length) {
+        console.log('run this');
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
             .includes(lowerCaseFilteredNetwork) &&
@@ -82,10 +88,10 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
         setFilteredGenesisOption(genesisOptions
           .filter((network) => network.groups.includes(selectedGroup as NetWorkGroup)));
       } else {
-        setFilteredGenesisOption(genesisOptions);
+        setFilteredGenesisOption(getActiveNetworks());
       }
     }
-  }, [filteredNetwork, genesisOptions, selectedGroup]);
+  }, [filteredNetwork, genesisOptions, getActiveNetworks, selectedGroup]);
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilteredNetwork(filter);

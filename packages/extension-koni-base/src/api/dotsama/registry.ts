@@ -96,3 +96,7 @@ export function initChainRegistrySubscription () {
       .catch(console.error);
   });
 }
+
+export function initNetworkMapStore () {
+
+}

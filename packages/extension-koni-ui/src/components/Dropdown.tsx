@@ -7,7 +7,7 @@ import React, { useCallback, useState } from 'react';
 import Select from 'react-select';
 import styled from 'styled-components';
 
-import { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import { NetworkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 
 import Label from './Label';
 
@@ -15,7 +15,7 @@ interface Props extends ThemeProps {
   className?: string;
   label: string;
   onChange?: any;
-  options: networkSelectOption[];
+  options: NetworkSelectOption[];
   value?: string;
 }
 

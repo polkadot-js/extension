@@ -311,6 +311,7 @@ export interface NetWorkMetadataDef extends MetadataDefBase {
   isEthereum: boolean;
   paraId?: number;
   isAvailable: boolean;
+  active: boolean;
 }
 
 export type CurrentNetworkInfo = {
@@ -466,7 +467,8 @@ export enum NETWORK_ERROR {
 export enum NETWORK_STATUS {
   CONNECTED = 'connected',
   CONNECTING = 'connecting',
-  DISCONNECTED = 'disconnected'
+  DISCONNECTED = 'disconnected',
+  PENDING = 'pending'
 }
 
 export enum TransferErrorCode {
@@ -544,8 +546,11 @@ export interface NetworkUpsertResponse {
 }
 
 export interface KoniRequestSignatures {
-  'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
+  'pri(networkMap.enableOne)': [string, boolean];
+  'pri(networkMap.disableOne)': [string, boolean];
+  'pri(networkMap.removeOne)': [string, boolean];
   'pri(networkMap.upsert)': [NetworkJson, NetworkUpsertResponse];
+  'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];

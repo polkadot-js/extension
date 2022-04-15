@@ -70,7 +70,7 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  private readonly networkMapStore = new NetworkMapStore();
+  private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly accountRefStore = new AccountRefStore();
@@ -79,13 +79,38 @@ export default class KoniState extends State {
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
-  // private readonly nftStore = new NftStore();
-  // private readonly stakingStore = new StakingStore();
+  // init default value for networkMap (first time only)
+  public initNetworkMapStore () {
+    this.networkMapStore.get('NetworkMap', (storedNetworkMap) => {
+      if (!storedNetworkMap) { // first time init extension
+        this.networkMapStore.set('NetworkMap', PREDEFINED_NETWORKS);
+        this.networkMap = PREDEFINED_NETWORKS;
+      } else { // merge custom providers in stored data with predefined data
+        const mergedNetworkMap: Record<string, NetworkJson> = PREDEFINED_NETWORKS;
 
-  // private nftStoreReady = false;
-  // private stakingStoreReady = false;
+        for (const [key, network] of Object.entries(storedNetworkMap)) {
+          if (key in PREDEFINED_NETWORKS) {
+            // check change and override custom providers if exist
+            if ('customProviders' in network) {
+              mergedNetworkMap[key].customProviders = network.customProviders;
+            }
 
-  private networkMap: Record<string, NetworkJson> = PREDEFINED_NETWORKS; // initial state, only polkadot is active
+            if (network.customProviders && Object.keys(network.customProviders).includes(network.currentProvider)) {
+              mergedNetworkMap[key].currentProvider = network.currentProvider;
+              mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
+            }
+          } else {
+            mergedNetworkMap[key] = network;
+          }
+        }
+
+        this.networkMapStore.set('NetworkMap', mergedNetworkMap);
+        this.networkMap = mergedNetworkMap; // init networkMap state
+      }
+    });
+  }
+
+  private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
 
   // Todo: Persist data to balanceStore later
@@ -697,23 +722,58 @@ export default class KoniState extends State {
     return this.priceStore.getSubject();
   }
 
-  public setNetworkMap (data: Record<string, NetworkJson>, callback?: (data: Record<string, NetworkJson>) => void): void {
-    this.networkMap = data;
+  public upsertNetworkMap (data: NetworkJson): void {
+    if (data.key in this.networkMap) { // update provider for existed network
+      const existedNetwork = this.networkMap[data.key];
 
-    this.networkMapStore.set('NetworkMap', data, () => {
-      if (callback) {
-        callback(data);
+      if (data.customProviders) {
+        existedNetwork.customProviders = data.customProviders;
       }
-    });
 
-    this.networkMapSubject.next(data);
+      if (data.currentProvider !== existedNetwork.currentProvider) {
+        existedNetwork.currentProvider = data.currentProvider;
+        existedNetwork.currentProviderMode = existedNetwork.currentProvider.startsWith('ws') ? 'ws' : 'http';
+      }
+
+      this.networkMap[data.key] = existedNetwork;
+    } else { // insert
+      this.networkMap[data.key] = data;
+    }
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
-  public getNetworkMap (): Record<string, NetworkJson> {
+  public getNetworkMap () {
     return this.networkMap;
   }
 
   public subscribeNetworkMap () {
-    return this.networkMapSubject;
+    return this.networkMapStore.getSubject();
+  }
+
+  public async removeNetworkMap (networkKey: string) {
+    if (this.networkMap[networkKey].active && this.networkMap[networkKey].getDotsamaAPI) {
+      await this.networkMap[networkKey]?.getDotsamaAPI?.disconnect();
+    }
+
+    delete this.networkMap[networkKey];
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+  }
+
+  public disableNetworkMap (networkKey: string) {
+    this.networkMap[networkKey].active = false;
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+  }
+
+  public enableNetworkMap (networkKey: string) {
+    this.networkMap[networkKey].active = true;
+
+    this.networkMapSubject.next(this.networkMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 }

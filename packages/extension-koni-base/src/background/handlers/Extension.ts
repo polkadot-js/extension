@@ -695,27 +695,29 @@ export default class KoniExtension extends Extension {
     const networkMap = state.getNetworkMap();
 
     Object.keys(networkMap).forEach((networkKey) => {
-      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = networkMap[networkKey];
+      if (networkMap[networkKey].active) {
+        const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = networkMap[networkKey];
 
-      let isAvailable = true;
+        let isAvailable = true;
 
-      // todo: add more logic in further update
-      if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
-        isAvailable = false;
+        // todo: add more logic in further update
+        if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
+          isAvailable = false;
+        }
+
+        result.push({
+          chain,
+          networkKey,
+          genesisHash,
+          icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
+          ss58Format,
+          groups,
+          isEthereum: !!isEthereum,
+          paraId,
+          isAvailable,
+          active
+        });
       }
-
-      result.push({
-        chain,
-        networkKey,
-        genesisHash,
-        icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
-        ss58Format,
-        groups,
-        isEthereum: !!isEthereum,
-        paraId,
-        isAvailable,
-        active
-      });
     });
 
     return result;

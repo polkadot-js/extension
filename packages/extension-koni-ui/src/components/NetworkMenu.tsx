@@ -29,11 +29,7 @@ interface Props extends ThemeProps {
 function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAccount, onFilter, reference, selectNetwork }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const getActiveNetworks = useCallback(() => {
-    return genesisOptions.filter((option) => option.active);
-  }, [genesisOptions]);
-
-  const [filteredGenesisOptions, setFilteredGenesisOption] = useState<NetworkSelectOption[]>(getActiveNetworks());
+  const [filteredGenesisOptions, setFilteredGenesisOption] = useState<NetworkSelectOption[]>(genesisOptions);
   const [filteredNetwork, setFilteredNetwork] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
   const filterCategories: {text: string, type: NetWorkGroup | string}[] = [
@@ -88,10 +84,10 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
         setFilteredGenesisOption(genesisOptions
           .filter((network) => network.groups.includes(selectedGroup as NetWorkGroup)));
       } else {
-        setFilteredGenesisOption(getActiveNetworks());
+        setFilteredGenesisOption(genesisOptions);
       }
     }
-  }, [filteredNetwork, genesisOptions, getActiveNetworks, selectedGroup]);
+  }, [filteredNetwork, genesisOptions, selectedGroup]);
 
   const _onChangeFilter = useCallback((filter: string) => {
     setFilteredNetwork(filter);
@@ -153,19 +149,29 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       <div className='network-item-list'>
         {
           filteredGenesisOptions && filteredGenesisOptions.length
-            ? filteredGenesisOptions.map(({ icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
+            ? filteredGenesisOptions.map(({ active, icon, networkKey, networkPrefix, text, value }): React.ReactNode => (
               <div
                 className='network-item-container'
                 key={value}
                 onClick={_selectNetwork(value, networkPrefix, icon, networkKey)}
               >
-                <img
-                  alt='logo'
-                  className={'network-logo'}
-                  src={getLogoByGenesisHash(value)}
-                />
+                <div className={'network-item'}>
+                  <img
+                    alt='logo'
+                    className={'network-logo'}
+                    src={getLogoByGenesisHash(value)}
+                  />
 
-                <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
+                  <span className={value === currentNetwork ? 'network-text__selected' : 'network-text'}>{text}</span>
+                  {/* { */}
+                  {/*  networkKey.toLowerCase() !== ALL_ACCOUNT_KEY.toLowerCase() && */}
+                  {/*  <span */}
+                  {/*    className={'status-dot'} */}
+                  {/*    style={{ backgroundColor: active ? 'green' : 'red' }} */}
+                  {/*  /> */}
+                  {/* } */}
+                </div>
+
                 {value === currentNetwork
                   ? (
                     <img
@@ -192,6 +198,52 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
   right: 15px;
   user-select: none;
   border-radius: 8px;
+
+  .confirm-button {
+    cursor: pointer;
+    background: #004BFF;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    color: #FFFFFF;
+  }
+
+  .cancel-button {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #181E42;
+    border-radius: 8px;
+    color: #42C59A;
+    padding: 10px;
+  }
+
+  .confirm-modal-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+  }
+
+  .confirm-modal-title {
+    font-size: 20px;
+    margin-bottom: 50px;
+  }
+
+  .network-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-dot {
+    height: 7px;
+    width: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+  }
 
   .network-item-list-header {
     padding: 10px;
@@ -241,6 +293,7 @@ export default React.memo(styled(NetworkMenu)(({ theme }: Props) => `
     padding: 5px 0;
     cursor: pointer;
     display: flex;
+    justify-content: space-between;
     align-items: center;
 
     &:hover {

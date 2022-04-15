@@ -6,11 +6,11 @@ import { Transaction } from 'ethereumjs-tx';
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
-import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
+import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
@@ -54,6 +54,22 @@ const ACCOUNT_ALL_JSON: AccountJson = {
 };
 
 export default class KoniExtension extends Extension {
+  private cancelSubscriptionMap: Record<string, () => void> = {};
+
+  private cancelSubscription (id: string): boolean {
+    if (isSubscriptionRunning(id)) {
+      unsubscribe(id);
+    }
+
+    if (this.cancelSubscriptionMap[id]) {
+      this.cancelSubscriptionMap[id]();
+
+      delete this.cancelSubscriptionMap[id];
+    }
+
+    return true;
+  }
+
   public decodeAddress = (key: string | Uint8Array, ignoreChecksum?: boolean, ss58Format?: Prefix): Uint8Array => {
     return keyring.decodeAddress(key, ignoreChecksum, ss58Format);
   };
@@ -932,7 +948,7 @@ export default class KoniExtension extends Extension {
     let tokenInfo: TokenInfo | undefined;
 
     if (token) {
-      const tokenInfo = await getTokenInfo(networkKey, dotSamaAPIMap[networkKey].api, token);
+      tokenInfo = await getTokenInfo(networkKey, dotSamaAPIMap[networkKey].api, token);
 
       if (!tokenInfo) {
         errors.push({
@@ -974,7 +990,11 @@ export default class KoniExtension extends Extension {
     } else {
       // Estimate with DotSama API
       [fee, fromAccountFree, toAccountFree] = await Promise.all(
-        [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+        [
+          estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, tokenInfo),
+          getFreeBalance(networkKey, from, token),
+          getFreeBalance(networkKey, to, token)
+        ]
       );
     }
 
@@ -1025,7 +1045,7 @@ export default class KoniExtension extends Extension {
         }
       } else {
         // Make transfer with Dotsama API
-        transferProm = makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, callback);
+        transferProm = makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, tokenInfo, callback);
       }
 
       transferProm.then(() => {
@@ -1167,6 +1187,18 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
+  private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
+    const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
+
+    this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, token, cb);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return id;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1264,6 +1296,10 @@ export default class KoniExtension extends Extension {
         return this.evmNftGetTransaction(request as EvmNftTransactionRequest);
       case 'pri(evmNft.submitTransaction)':
         return this.evmNftSubmitTransaction(id, port, request as EvmNftSubmitTransaction);
+      case 'pri(freeBalance.subscribe)':
+        return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
+      case 'pri(subscription.cancel)':
+        return this.cancelSubscription(request as string);
       default:
         return super.handle(id, type, request, port);
     }

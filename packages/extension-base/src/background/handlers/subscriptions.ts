@@ -18,6 +18,10 @@ export function createSubscription<TMessageType extends MessageTypesWithSubscrip
   };
 }
 
+export function isSubscriptionRunning (id: string): boolean {
+  return !!subscriptions[id];
+}
+
 // clear a previous subscriber
 export function unsubscribe (id: string): void {
   if (subscriptions[id]) {

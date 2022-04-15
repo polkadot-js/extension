@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -419,4 +419,12 @@ export async function evmNftGetTransaction (request: EvmNftTransactionRequest): 
 
 export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction, callback: (data: EvmNftTransactionResponse) => void): Promise<EvmNftTransactionResponse> {
   return sendMessage('pri(evmNft.submitTransaction)', request, callback);
+}
+
+export async function cancelSubscription (request: string): Promise<boolean> {
+  return sendMessage('pri(subscription.cancel)', request);
+}
+
+export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
+  return sendMessage('pri(freeBalance.subscribe)', request, callback);
 }

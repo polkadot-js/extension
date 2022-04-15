@@ -409,7 +409,8 @@ export enum TransferErrorCode {
   INVALID_TOKEN = 'invalidToken',
   KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
-  TIMEOUT = 'timeout'
+  TIMEOUT = 'timeout',
+  UNSUPPORTED = 'unsupported'
 }
 
 export type TransferError = {
@@ -470,6 +471,12 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
+export interface RequestFreeBalance {
+  address: string,
+  networkKey: string,
+  token?: string
+}
+
 export interface KoniRequestSignatures {
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
@@ -517,6 +524,8 @@ export interface KoniRequestSignatures {
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
+  'pri(subscription.cancel)': [string, boolean];
+  'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];

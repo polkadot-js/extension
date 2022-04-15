@@ -1,44 +1,149 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseTransfer, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { ResponseTransfer, TokenInfo, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+// import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
-export async function estimateFee (networkKey: string, fromKeypair: KeyringPair | undefined, to: string, value: string | undefined, transferAll: boolean): Promise<string> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
-
+export async function estimateFee (
+  networkKey: string,
+  fromKeypair: KeyringPair | undefined,
+  to: string, value: string | undefined,
+  transferAll: boolean,
+  tokenInfo?: TokenInfo
+): Promise<string> {
   if (fromKeypair === undefined) {
     return '0';
   }
 
-  if (transferAll) {
-    const paymentInfo = await apiProps.api.tx.balances.transferAll(to, false).paymentInfo(fromKeypair);
+  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const api = apiProps.api;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
 
-    return paymentInfo.partialFee.toString();
-  } else if (value) {
-    const paymentInfo = await apiProps.api.tx.balances.transfer(to, new BN(value)).paymentInfo(fromKeypair);
+  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+    // todo: perform calculating transaction fee for 'karura', 'acala', 'acala_testnet'
 
-    return paymentInfo.partialFee.toString();
+    // if (transferAll) {
+    //   const freeBalanceString = await getFreeBalance(networkKey, fromKeypair.address, tokenInfo.symbol);
+    //
+    //   const paymentInfo = await api.tx.currencies
+    //     .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, freeBalanceString)
+    //     .paymentInfo(fromKeypair);
+    //
+    //   return paymentInfo.partialFee.toString();
+    // } else if (value) {
+    //   const paymentInfo = await api.tx.currencies
+    //     .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value)
+    //     .paymentInfo(fromKeypair);
+    //
+    //   return paymentInfo.partialFee.toString();
+    // }
+  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+    if (transferAll) {
+      const paymentInfo = await api.tx.tokens
+        .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false)
+        .paymentInfo(fromKeypair);
+
+      return paymentInfo.partialFee.toString();
+    } else if (value) {
+      const paymentInfo = await api.tx.tokens
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value))
+        .paymentInfo(fromKeypair);
+
+      return paymentInfo.partialFee.toString();
+    }
+  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
+    if (transferAll) {
+      const paymentInfo = await api.tx.balances.transferAll(to, false).paymentInfo(fromKeypair);
+
+      return paymentInfo.partialFee.toString();
+    } else if (value) {
+      const paymentInfo = await api.tx.balances.transfer(to, new BN(value)).paymentInfo(fromKeypair);
+
+      return paymentInfo.partialFee.toString();
+    }
   }
 
   return '0';
 }
 
-export async function makeTransfer (networkKey: string, to: string, fromKeypair: KeyringPair, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void): Promise<void> {
+function getUnsupportedResponse (): ResponseTransfer {
+  return {
+    step: TransferStep.ERROR,
+    errors: [
+      {
+        code: TransferErrorCode.UNSUPPORTED,
+        message: 'The transaction of current network is unsupported'
+      }
+    ],
+    extrinsicStatus: undefined,
+    data: {}
+  };
+}
+
+export async function makeTransfer (
+  networkKey: string,
+  to: string,
+  fromKeypair: KeyringPair,
+  value: string,
+  transferAll: boolean,
+  tokenInfo: undefined | TokenInfo,
+  callback: (data: ResponseTransfer) => void
+): Promise<void> {
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
+  const fromAddress = fromKeypair.address;
   // @ts-ignore
-  const { nonce } = await api.query.system.account(fromKeypair.address);
+  const { nonce } = await api.query.system.account(fromAddress);
 
   let transfer;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
 
-  if (transferAll) {
-    transfer = api.tx.balances.transferAll(to, false);
-  } else {
-    transfer = api.tx.balances.transfer(to, new BN(value));
+  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+    if (transferAll) {
+      // todo: perform transferring all balance for 'karura', 'acala', 'acala_testnet'
+
+      // const freeBalanceString = await getFreeBalance(networkKey, fromAddress, tokenInfo.symbol);
+      //
+      // const paymentInfo = await api.tx.currencies
+      //   .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, freeBalanceString)
+      //   .paymentInfo(fromKeypair);
+      //
+      // const transferringValue = (new BN(freeBalanceString)).sub(paymentInfo.partialFee);
+      //
+      // transfer = api.tx.currencies
+      //   .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, transferringValue.toString());
+    } else if (value) {
+      transfer = api.tx.currencies
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value);
+    }
+  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+    if (transferAll) {
+      transfer = api.tx.tokens
+        .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false);
+    } else if (value) {
+      transfer = api.tx.tokens
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value));
+    }
+  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
+    if (transferAll) {
+      transfer = api.tx.balances.transferAll(to, false);
+    } else if (value) {
+      transfer = api.tx.balances.transfer(to, new BN(value));
+    }
+  }
+
+  if (!transfer) {
+    callback(getUnsupportedResponse());
+
+    return;
   }
 
   const response: ResponseTransfer = {

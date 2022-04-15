@@ -5,6 +5,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   acala: require('./acala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  acala_testnet: require('./acala.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   ausd: require('./ausd.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   dot: require('./dot.svg'),

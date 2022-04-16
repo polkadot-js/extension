@@ -298,5 +298,6 @@
   "Connect All": "",
   "Forget All": "",
   "Forget Site": "",
-  "Choose the account(s) you’d like to connect": ""
+  "Choose the account(s) you’d like to connect": "",
+  "Import account from Seed Phrase": ""
 }

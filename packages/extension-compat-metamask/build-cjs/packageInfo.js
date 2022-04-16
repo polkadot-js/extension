@@ -11,6 +11,6 @@ const packageInfo = {
   name: '@polkadot/extension-compat-metamask',
   path: typeof __dirname === 'string' ? __dirname : 'auto',
   type: 'cjs',
-  version: '0.3.3-1'
+  version: '0.3.4-1'
 };
 exports.packageInfo = packageInfo;

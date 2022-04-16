@@ -163,7 +163,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   karura: 'https://karura.subscan.io',
   khala: 'https://khala.subscan.io',
   kilt: 'https://spiritnet.subscan.io',
-  // 'kintsugi': 'https://kintsugi.subscan.io',
+  kintsugi: 'https://kintsugi.subscan.io',
   kusama: 'https://kusama.subscan.io',
   // 'litentry': 'https://litentry.subscan.io',
   // 'manta': 'https://manta.subscan.io',
@@ -172,7 +172,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   // 'nodle': 'https://nodle.subscan.io',
   parallel: 'https://parallel.subscan.io',
   // 'phala': 'https://phala.subscan.io',
-  // 'picasso': 'https://picasso.subscan.io',
+  picasso: 'https://picasso.subscan.io',
   pichiu: 'https://pichiu.subscan.io',
   // 'pioneer': 'https://pioneer.subscan.io',
   polkadot: 'https://polkadot.subscan.io',
@@ -183,14 +183,17 @@ export const subscanByNetworkKey: Record<string, string> = {
   sora: 'https://sora.subscan.io',
   statemine: 'https://statemine.subscan.io',
   subgame: 'https://subgame.subscan.io',
-  // 'statemint': 'https://statemint.subscan.io',
+  statemint: 'https://statemint.subscan.io',
   // 'subsocial': 'https://subsocial.subscan.io',
   zeitgeist: 'https://zeitgeist.subscan.io',
   westend: 'https://westend.subscan.io',
   rococo: 'https://rococo.subscan.io',
   robonomics: 'https://robonomics.subscan.io',
-  moonbase: 'https://moonbase.subscan.io'
-
+  moonbase: 'https://moonbase.subscan.io',
+  dolphin: 'https://dolphin.subscan.io/',
+  encointer: 'https://encointer.subscan.io/',
+  chainx: 'https://chainx.subscan.io/',
+  litmus: 'https://litmus.subscan.io/'
 };
 
 export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';

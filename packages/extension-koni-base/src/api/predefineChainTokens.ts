@@ -5,7 +5,62 @@ import { TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {
-
+    USDT: {
+      isMainToken: false,
+      assetIndex: 11,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 4
+    },
+    USDC: {
+      isMainToken: false,
+      assetIndex: 10,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 4
+    },
+    RMRK: {
+      isMainToken: false,
+      assetIndex: 8,
+      symbol: 'RMRK',
+      name: 'RMRK.app',
+      decimals: 10
+    },
+    ARIS: {
+      isMainToken: false,
+      assetIndex: 16,
+      symbol: 'ARIS',
+      name: 'PolarisDAO',
+      decimals: 8
+    },
+    BILL: {
+      isMainToken: false,
+      assetIndex: 223,
+      symbol: 'BILL',
+      name: 'BILLCOIN',
+      decimals: 8
+    },
+    CHAOS: {
+      isMainToken: false,
+      assetIndex: 69420,
+      symbol: 'CHAOS',
+      name: 'Chaos',
+      decimals: 10
+    },
+    CHRWNA: {
+      isMainToken: false,
+      assetIndex: 567,
+      symbol: 'CHRWNA',
+      name: 'Chrawnna Coin',
+      decimals: 10
+    },
+    BAILEGO: {
+      isMainToken: false,
+      assetIndex: 88888,
+      symbol: 'BAILEGO',
+      name: 'SHIBATALES',
+      decimals: 0
+    }
   },
   acala: {
     AUSD: {

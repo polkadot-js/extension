@@ -237,6 +237,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   hko: require('./hko.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bill: require('./bill.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

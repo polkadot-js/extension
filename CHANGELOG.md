@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.3.4 (Koni)
+Build date: Apr 16, 2022.
+
+Update:
+- Improve custom access screen (issue #91)
+- Update stable coin tokens and others in some networks (issue #117,#170)
+  - Statemine
+  - Moonbeam
+  - Moonriver
+  - Karura
+  - Bifrost
+
+Bug Fixed:
+- Fix network list is incorrect in case importing an account from seed phase when there is no account yet (issue #120)
+- Fix grammar error and type issue of button (issue #156,#166)
+- Fix some network in wrong group (issue #180)
+
+
 ## 0.3.3 (Koni)
 Build date: Apr 08, 2022.
 

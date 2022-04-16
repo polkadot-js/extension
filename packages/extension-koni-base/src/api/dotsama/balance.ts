@@ -176,6 +176,88 @@ function subscribeTokensBalance (addresses: string[], networkKey: string, api: A
   return unsubAll;
 }
 
+function subscribeAssetsBalance (addresses: string[], networkKey: string, api: ApiPromise, originBalanceItem: BalanceItem, callback: (rs: BalanceItem) => void) {
+  let forceStop = false;
+
+  let unsubAll = () => {
+    forceStop = true;
+  };
+
+  originBalanceItem.children = originBalanceItem.children || {};
+
+  getRegistry(networkKey, api)
+    .then(({ tokenMap }) => {
+      if (forceStop) {
+        return;
+      }
+
+      let tokenList = Object.values(tokenMap);
+
+      tokenList = tokenList.filter((t) => !t.isMainToken && t.assetIndex);
+
+      if (tokenList.length > 0) {
+        console.log('Get tokens assets of', networkKey, tokenList);
+      }
+
+      const unsubList = tokenList.map(({ assetIndex, decimals, symbol }) => {
+        const observable = new Observable<BalanceChildItem>((subscriber) => {
+          // Get Token Balance
+          // @ts-ignore
+          const apiCall = api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
+            let free = new BN(0);
+            let frozen = new BN(0);
+
+            balances.forEach((b) => {
+              // @ts-ignore
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+              const bdata = b?.toJSON();
+
+              if (bdata) {
+                // @ts-ignore
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+                const addressBalance = new BN(String(bdata?.balance) || '0');
+
+                // @ts-ignore
+                if (bdata?.isFrozen) {
+                  frozen = frozen.add(addressBalance);
+                } else {
+                  free = free.add(addressBalance);
+                }
+              }
+            });
+
+            const tokenBalance = {
+              reserved: '0',
+              frozen: frozen.toString(),
+              free: free.toString(),
+              decimals
+            };
+
+            subscriber.next(tokenBalance);
+          });
+        });
+
+        return observable.subscribe({
+          next: (childBalance) => {
+            // @ts-ignore
+            originBalanceItem.children[symbol] = childBalance;
+
+            callback(originBalanceItem);
+          }
+        });
+      });
+
+      unsubAll = () => {
+        unsubList.forEach((unsub) => {
+          unsub && unsub.unsubscribe();
+        });
+      };
+    })
+    .catch(console.error);
+
+  return unsubAll;
+}
+
 function subscribeWithAccountMulti (addresses: string[], networkKey: string, networkAPI: ApiProps, callback: (networkKey: string, rs: BalanceItem) => void) {
   const balanceItem: BalanceItem = {
     state: APIItemState.PENDING,
@@ -220,6 +302,10 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
     unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     }, true);
+  } else if (['statemine'].indexOf(networkKey) > -1) {
+    unsub2 = subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
+      callback(networkKey, balanceItem);
+    });
   } else if (moonbeamBaseChains.indexOf(networkKey) > -1) {
     unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }

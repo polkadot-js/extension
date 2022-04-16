@@ -135,7 +135,9 @@ enum ASTAR_NFT_CONTRACT_NAME {
   ASTAR_PUNK_X = 'Astar Punk X',
   ASTAR_INVISIBLE_FRIENDS = 'Astar Invisible Friends',
   ASTAR_METALION_KINGDOM = 'Astar MetaLion Kingdom',
-  ASTAR_KARAFURU = 'Astar Karafuru'
+  ASTAR_KARAFURU = 'Astar Karafuru',
+  ASTARNAUT = 'Astarnaut',
+  ASTAR_CATS = 'AstarCats'
 }
 
 export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
@@ -182,6 +184,14 @@ export const ASTAR_SUPPORTED_NFT_CONTRACTS = [
   {
     name: ASTAR_NFT_CONTRACT_NAME.ASTAR_KARAFURU,
     smartContract: '0x5D49B30986111f45d503fEAAFF7412Ec0f22C189'
+  },
+  {
+    name: ASTAR_NFT_CONTRACT_NAME.ASTARNAUT,
+    smartContract: '0xf008371a7EeD0AB54FDd975fE0d0f66fEFBA3415'
+  },
+  {
+    name: ASTAR_NFT_CONTRACT_NAME.ASTAR_CATS,
+    smartContract: '0x8b5d62f396Ca3C6cF19803234685e693733f9779'
   }
   // {
   //   name: ASTAR_NFT_CONTRACT_NAME.ASTAR_ZODIAC,

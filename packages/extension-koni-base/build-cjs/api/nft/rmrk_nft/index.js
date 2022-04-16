@@ -19,12 +19,6 @@ var _config = require("../config");
 
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-const headers = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': '*',
-  'Access-Control-Allow-Headers': '*'
-};
 var RMRK_SOURCE;
 
 (function (RMRK_SOURCE) {
@@ -80,8 +74,7 @@ class RmrkNftApi extends _nft.BaseNftApi {
     }
 
     return await (0, _crossFetch.default)(url, {
-      method: 'GET',
-      headers
+      method: 'GET'
     }).then(res => res.json());
   }
 
@@ -107,8 +100,7 @@ class RmrkNftApi extends _nft.BaseNftApi {
       } = _ref;
 
       let _data = await (0, _crossFetch.default)(url, {
-        method: 'GET',
-        headers
+        method: 'GET'
       }).then(res => res.json());
 
       _data = _data.map(item => {
@@ -227,8 +219,7 @@ class RmrkNftApi extends _nft.BaseNftApi {
       const allCollectionMetaUrl = [];
       await Promise.all(collectionInfoUrl.map(async url => {
         const data = await (0, _crossFetch.default)(url, {
-          method: 'get',
-          headers
+          method: 'GET'
         }).then(resp => resp.json());
         const result = data[0];
 
@@ -251,8 +242,7 @@ class RmrkNftApi extends _nft.BaseNftApi {
 
         if (item.url) {
           data = await (0, _crossFetch.default)(item === null || item === void 0 ? void 0 : item.url, {
-            method: 'get',
-            headers
+            method: 'GET'
           }).then(resp => resp.json());
         }
 

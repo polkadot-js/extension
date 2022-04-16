@@ -1,23 +1,23 @@
      465	Jaco                          	0.42.5 (#969)
-     176	Nam Phạm                      	#44: Update handling astar endpoint
-     147	AnhMTV                        	Release version 0.3.3
+     189	Nam Phạm                      	fix es-lint
+     159	AnhMTV                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      75	quangdo                       	Fix bug not migrate site access, fix UI Auth Management screen, refactor code
+      79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
       42	lw                            	# update balance display
-      19	Hieu Dao                      	#118 add kintsugi testnet endpoint
+      24	Hieu Dao                      	
+      21	lw-cdm                        	
       10	Trang Trịnh                   	api get karura and acala nfts
-       9	lw-cdm                        	
        9	Minh Le                       	
-       8	minhld1029                    	
+       9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
+       4	S2kael                        	[Issue-156] [Account] [Text] Change text
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
-       3	S2kael                        	[Issue-107] [Account] [Import] fix error password when change file
        2	Axel Chalon                   	Add typings to messages (#130)
        2	Bartłomiej Rutkowski          	Allow account creation by derivation from existing one (#296)
        2	carumusan                     	Support ipfs and ipns urls (#667)

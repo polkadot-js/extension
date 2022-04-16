@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getForeignToken = getForeignToken;
 exports.getMoonAssets = getMoonAssets;
 exports.getRegistry = void 0;
 exports.getTokenInfo = getTokenInfo;
@@ -47,6 +48,37 @@ async function getMoonAssets(api) {
   return assetRecord;
 }
 
+async function getForeignToken(api) {
+  await api.isReady;
+  const allTokens = await api.query.assetRegistry.assetMetadatas.entries();
+  const tokenMap = {};
+  allTokens.forEach(_ref2 => {
+    let [storageKey, tokenData] = _ref2;
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const foreignAsset = storageKey.toHuman()[0].ForeignAssetId;
+
+    if (foreignAsset) {
+      const {
+        decimals,
+        name,
+        symbol
+      } = tokenData.toHuman();
+      tokenMap[symbol] = {
+        isMainToken: false,
+        symbol,
+        decimals: parseInt(decimals),
+        name,
+        specialOption: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          ForeignAsset: foreignAsset
+        }
+      };
+    }
+  });
+  return tokenMap;
+}
+
 const getRegistry = async (networkKey, api) => {
   const cached = cacheRegistryMap[networkKey];
 
@@ -68,17 +100,22 @@ const getRegistry = async (networkKey, api) => {
       symbol: token,
       decimals: chainDecimals[index]
     };
-  }); // Get moonbeam base chains tokens
-
-  if (_apiHelper.moonbeamBaseChains.indexOf(networkKey) > -1) {
-    const moonTokens = await getMoonAssets(api);
-    Object.assign(tokenMap, moonTokens);
-  }
-
+  });
   const predefineTokenMap = _predefineChainTokens.PREDEFINE_TOKEN_DATA_MAP[networkKey];
 
   if (predefineTokenMap) {
     Object.assign(tokenMap, predefineTokenMap);
+  }
+
+  if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
+    const foreignTokens = await getForeignToken(api);
+    Object.assign(tokenMap, foreignTokens);
+  } // Get moonbeam base chains tokens
+
+
+  if (_apiHelper.moonbeamBaseChains.indexOf(networkKey) > -1) {
+    const moonTokens = await getMoonAssets(api);
+    Object.assign(tokenMap, moonTokens);
   }
 
   const chainRegistry = {
@@ -100,10 +137,10 @@ async function getTokenInfo(networkKey, api, token) {
 }
 
 function initChainRegistrySubscription() {
-  Object.entries(_handlers.dotSamaAPIMap).forEach(_ref2 => {
+  Object.entries(_handlers.dotSamaAPIMap).forEach(_ref3 => {
     let [networkKey, {
       api
-    }] = _ref2;
+    }] = _ref3;
     getRegistry(networkKey, api).then(rs => {
       _handlers.state.setChainRegistryItem(networkKey, rs);
     }).catch(console.error);

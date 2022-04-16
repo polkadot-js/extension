@@ -4,6 +4,9 @@
 import { TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
+  statemine: {
+
+  },
   acala: {
     AUSD: {
       isMainToken: false,
@@ -162,6 +165,13 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   moonriver: {
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xB44a9B6905aF7c801311e8F4E76932ee959c663C',
+      decimals: 6,
+      name: 'Tether USD'
+    },
     USDC: {
       isMainToken: false,
       symbol: 'USDC',
@@ -269,6 +279,27 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   moonbeam: {
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73',
+      decimals: 6,
+      name: 'Tether USD'
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
+      decimals: 6,
+      name: 'USD Coin'
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      erc20Address: '0xc9BAA8cfdDe8E328787E29b4B078abf2DaDc2055',
+      decimals: 18,
+      name: 'Binance'
+    },
     GLINT: {
       isMainToken: false,
       symbol: 'GLINT',

@@ -225,6 +225,18 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   csg: require('./csg.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  movr: require('./moonriver.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  qtz: require('./quartz.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  csm: require('./csm.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  aris: require('./aris.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kico: require('./kico.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  hko: require('./hko.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

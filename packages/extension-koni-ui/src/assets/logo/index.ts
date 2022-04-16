@@ -143,6 +143,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bitcountry: require('./bitcountry.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  unique_network: require('./unique.network.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   pha: require('./phala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bnc: require('./bnc.svg'),
@@ -167,9 +169,17 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   neumann: require('./oak_network.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  turing: require('./oak_network.png'),
+  turing: require('./turing.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   mangatax: require('./mangatax.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  mangatax_para: require('./mangatax.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  chainx: require('./chainx.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  litmus: require('./litmus.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  encointer: require('./encointer.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   btc: require('./btc.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

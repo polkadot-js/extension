@@ -272,7 +272,7 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 44,
     provider: 'wss://mainnet.chainx.org/ws',
     groups: ['MAIN_NET'],
-    nativeToken: 'PCX',
+    nativeToken: 'PCX'
   },
   opal: {
     chain: 'OPAL by UNIQUE',

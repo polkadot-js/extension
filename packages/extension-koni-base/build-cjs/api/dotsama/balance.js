@@ -203,6 +203,86 @@ function subscribeTokensBalance(addresses, networkKey, api, originBalanceItem, c
   return unsubAll;
 }
 
+function subscribeAssetsBalance(addresses, networkKey, api, originBalanceItem, callback) {
+  let forceStop = false;
+
+  let unsubAll = () => {
+    forceStop = true;
+  };
+
+  originBalanceItem.children = originBalanceItem.children || {};
+  (0, _registry.getRegistry)(networkKey, api).then(_ref7 => {
+    let {
+      tokenMap
+    } = _ref7;
+
+    if (forceStop) {
+      return;
+    }
+
+    let tokenList = Object.values(tokenMap);
+    tokenList = tokenList.filter(t => !t.isMainToken && t.assetIndex);
+
+    if (tokenList.length > 0) {
+      console.log('Get tokens assets of', networkKey, tokenList);
+    }
+
+    const unsubList = tokenList.map(_ref8 => {
+      let {
+        assetIndex,
+        decimals,
+        symbol
+      } = _ref8;
+      const observable = new _rxjs.Observable(subscriber => {
+        // Get Token Balance
+        // @ts-ignore
+        const apiCall = api.query.assets.account.multi(addresses.map(address => [assetIndex, address]), balances => {
+          let free = new _util.BN(0);
+          let frozen = new _util.BN(0);
+          balances.forEach(b => {
+            // @ts-ignore
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+            const bdata = b === null || b === void 0 ? void 0 : b.toJSON();
+
+            if (bdata) {
+              // @ts-ignore
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+              const addressBalance = new _util.BN(String(bdata === null || bdata === void 0 ? void 0 : bdata.balance) || '0'); // @ts-ignore
+
+              if (bdata !== null && bdata !== void 0 && bdata.isFrozen) {
+                frozen = frozen.add(addressBalance);
+              } else {
+                free = free.add(addressBalance);
+              }
+            }
+          });
+          const tokenBalance = {
+            reserved: '0',
+            frozen: frozen.toString(),
+            free: free.toString(),
+            decimals
+          };
+          subscriber.next(tokenBalance);
+        });
+      });
+      return observable.subscribe({
+        next: childBalance => {
+          // @ts-ignore
+          originBalanceItem.children[symbol] = childBalance;
+          callback(originBalanceItem);
+        }
+      });
+    });
+
+    unsubAll = () => {
+      unsubList.forEach(unsub => {
+        unsub && unsub.unsubscribe();
+      });
+    };
+  }).catch(console.error);
+  return unsubAll;
+}
+
 function subscribeWithAccountMulti(addresses, networkKey, networkAPI, callback) {
   const balanceItem = {
     state: _KoniTypes.APIItemState.PENDING,
@@ -245,6 +325,10 @@ function subscribeWithAccountMulti(addresses, networkKey, networkAPI, callback) 
     unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, balanceItem => {
       callback(networkKey, balanceItem);
     }, true);
+  } else if (['statemine'].indexOf(networkKey) > -1) {
+    unsub2 = subscribeAssetsBalance(addresses, networkKey, networkAPI.api, balanceItem, balanceItem => {
+      callback(networkKey, balanceItem);
+    });
   } else if (_apiHelper.moonbeamBaseChains.indexOf(networkKey) > -1) {
     unsub2 = subscribeERC20Interval(addresses, networkKey, networkAPI.api, balanceItem, callback);
   }
@@ -284,8 +368,8 @@ function subscribeEVMBalance(networkKey, api, addresses, callback) {
 
 function subscribeBalance(addresses, dotSamaAPIMap, callback) {
   const [substrateAddresses, evmAddresses] = (0, _utils.categoryAddresses)(addresses);
-  return Object.entries(dotSamaAPIMap).map(async _ref7 => {
-    let [networkKey, apiProps] = _ref7;
+  return Object.entries(dotSamaAPIMap).map(async _ref9 => {
+    let [networkKey, apiProps] = _ref9;
     const networkAPI = await apiProps.isReady;
     const useAddresses = _apiHelper.ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
 

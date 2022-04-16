@@ -480,18 +480,22 @@ class KoniState extends _State.default {
 
   removeAccountRef(address, callback) {
     this.accountRefStore.get('refList', refList => {
-      refList.forEach(accRef => {
-        if (accRef.indexOf(address) > -1) {
-          accRef.splice(accRef.indexOf(address), 1);
-        }
+      if (refList) {
+        refList.forEach(accRef => {
+          if (accRef.indexOf(address) > -1) {
+            accRef.splice(accRef.indexOf(address), 1);
+          }
 
-        if (accRef.length < 2) {
-          refList.splice(refList.indexOf(accRef), 1);
-        }
-      });
-      this.accountRefStore.set('refList', refList, () => {
+          if (accRef.length < 2) {
+            refList.splice(refList.indexOf(accRef), 1);
+          }
+        });
+        this.accountRefStore.set('refList', refList, () => {
+          callback();
+        });
+      } else {
         callback();
-      });
+      }
     });
   }
 

@@ -129,7 +129,6 @@ class QuartzNftApi extends _nft.BaseNftApi {
   }
 
   async handleNfts(updateItem, updateCollection, updateReady) {
-    // const start = performance.now();
     const collectionCount = await this.getCreatedCollectionCount();
     const collectionPropertiesMap = {};
     const collectionIds = [];

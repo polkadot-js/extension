@@ -216,12 +216,12 @@ const NETWORKS = {
     groups: ['TEST_NET'],
     nativeToken: 'DOL'
   },
-  'sora-substrate': {
-    chain: 'SORA',
+  sora: {
+    chain: 'SORA KUSAMA',
     genesisHash: '0x7e4e32d0feafd4f9c9414b0be86373f9a1efa904809b683453a9af6856d38ad5',
     ss58Format: 69,
     provider: 'wss://sora.api.onfinality.io/public-ws',
-    groups: ['POLKADOT_PARACHAIN'],
+    groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'XOR',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
@@ -431,7 +431,7 @@ const NETWORKS = {
     genesisHash: '0x8b290fa39a8808f29d7309ea99442c95bf964838aef14be5a6449ae48f8a5f1f',
     ss58Format: 6,
     provider: 'wss://bifrost-rpc.testnet.liebi.com/ws',
-    groups: ['KUSAMA_PARACHAIN'],
+    groups: ['TEST_NET'],
     nativeToken: 'BNC'
   },
   kilt: {

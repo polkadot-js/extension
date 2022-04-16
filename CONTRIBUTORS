@@ -1,12 +1,12 @@
      465	Jaco                          	0.42.5 (#969)
-     189	Nam Phạm                      	fix es-lint
-     159	AnhMTV                        	
+     192	Nam Phạm                      	disable comment
+     163	AnhMTV                        	Release version 0.3.4
       82	Thibaut Sardan                	Add account filtering feature (#832)
       79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
       42	lw                            	# update balance display
-      24	Hieu Dao                      	
+      28	Hieu Dao                      	
       21	lw-cdm                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

@@ -130,8 +130,6 @@ export default class QuartzNftApi extends BaseNftApi {
   }
 
   public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
-    // const start = performance.now();
-
     const collectionCount = await this.getCreatedCollectionCount();
     const collectionPropertiesMap: Record<number, any> = {};
     const collectionIds: number[] = [];

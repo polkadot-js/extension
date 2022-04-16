@@ -105,7 +105,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   shidenEvm: require('./shiden.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  'sora-substrate': require('./sora-substrate.svg'),
+  sora: require('./sora-substrate.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   statemine: require('./statemine.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

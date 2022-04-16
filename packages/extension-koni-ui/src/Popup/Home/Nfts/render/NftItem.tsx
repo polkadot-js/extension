@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { ActionContext } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
@@ -53,22 +54,35 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const navigate = useContext(ActionContext);
   const { show } = useToast();
 
-  const propDetail = (title: string, value: string, rarity: number, key: number) => {
-    return (
-      <div
-        className={'prop-detail'}
-        key={key}
-      >
-        <div className={'prop-title'}>{title}</div>
-        <div className={'prop-value'}>{value}
-          {/* {rarity && `(~${Math.round((rarity + Number.EPSILON) * 100) / 100}%)`} */}
+  // @ts-ignore
+  const propDetail = (title: string, valueDict: Record<string, any>, key: number) => {
+    if (valueDict.type && valueDict.type === 'string') {
+      return (
+        <div
+          className={'prop-detail'}
+          key={key}
+        >
+          <div className={'prop-title'}>{title}</div>
+          <div className={'prop-value'}>{valueDict.value}</div>
         </div>
-      </div>
-    );
+      );
+    }
+
+    if (!valueDict.type) {
+      return (
+        <div
+          className={'prop-detail'}
+          key={key}
+        >
+          <div className={'prop-title'}>{title}</div>
+          <div className={'prop-value'}>{valueDict.value}</div>
+        </div>
+      );
+    }
   };
 
   const handleClickTransfer = useCallback(async () => {
-    if (!account.account || account.account.address === 'ALL' || !data.chain) {
+    if (!account.account || account.account.address.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase() || !data.chain) {
       show('An error has occurred.');
 
       return;
@@ -225,11 +239,9 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
               <div className={'prop-container'}>
                 {
                   Object.keys(data?.properties).map((key, index) => {
-                    // eslint-disable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
                     // @ts-ignore
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-                    return propDetail(key, data?.properties[key]?.value, data?.properties[key]?.rarity, index);
-                    // eslint-enable @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    return propDetail(key, data?.properties[key], index);
                   })
                 }
               </div>

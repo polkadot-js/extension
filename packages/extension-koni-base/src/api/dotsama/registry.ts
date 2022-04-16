@@ -34,6 +34,40 @@ export async function getMoonAssets (api: ApiPromise) {
   return assetRecord;
 }
 
+export async function getForeignToken (api: ApiPromise) {
+  await api.isReady;
+  const allTokens = await api.query.assetRegistry.assetMetadatas.entries();
+
+  const tokenMap = {} as Record<string, TokenInfo>;
+
+  allTokens.forEach(([storageKey, tokenData]) => {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+    const foreignAsset = storageKey.toHuman()[0].ForeignAssetId;
+
+    if (foreignAsset) {
+      const { decimals, name, symbol } = tokenData.toHuman() as {
+        symbol: string,
+        decimals: string,
+        name: string
+      };
+
+      tokenMap[symbol] = {
+        isMainToken: false,
+        symbol,
+        decimals: parseInt(decimals),
+        name,
+        specialOption: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          ForeignAsset: foreignAsset
+        }
+      };
+    }
+  });
+
+  return tokenMap;
+}
+
 export const getRegistry = async (networkKey: string, api: ApiPromise) => {
   const cached = cacheRegistryMap[networkKey];
 
@@ -57,17 +91,23 @@ export const getRegistry = async (networkKey: string, api: ApiPromise) => {
     };
   });
 
+  const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
+
+  if (predefineTokenMap) {
+    Object.assign(tokenMap, predefineTokenMap);
+  }
+
+  if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
+    const foreignTokens = await getForeignToken(api);
+
+    Object.assign(tokenMap, foreignTokens);
+  }
+
   // Get moonbeam base chains tokens
   if (moonbeamBaseChains.indexOf(networkKey) > -1) {
     const moonTokens = await getMoonAssets(api);
 
     Object.assign(tokenMap, moonTokens);
-  }
-
-  const predefineTokenMap = PREDEFINE_TOKEN_DATA_MAP[networkKey];
-
-  if (predefineTokenMap) {
-    Object.assign(tokenMap, predefineTokenMap);
   }
 
   const chainRegistry = {

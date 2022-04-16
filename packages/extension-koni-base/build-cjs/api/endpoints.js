@@ -170,12 +170,12 @@ const NETWORKS = {
   },
   equilibrium: {
     chain: 'Equilibrium',
-    genesisHash: '0x6f1a800de3daff7f5e037ddf66ab22ce03ab91874debeddb1086f5f7dbd48925',
-    ss58Format: 68,
-    provider: 'wss://node.equilibrium.io',
+    genesisHash: '00x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
+    ss58Format: 67,
+    provider: 'wss://node.pol.equilibrium.io/',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2011,
-    nativeToken: 'EQ',
+    nativeToken: 'TOKEN',
     crowdloanUrl: 'https://equilibrium.io/en/crowdloan#bid'
   },
   nodle: {
@@ -524,6 +524,15 @@ const NETWORKS = {
     paraId: 2095,
     nativeToken: 'QTZ',
     crowdloanUrl: 'https://unique.network/quartz/crowdloan/'
+  },
+  unique_network: {
+    chain: 'UNIQUE NETWORK',
+    genesisHash: '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
+    ss58Format: 7391,
+    provider: 'wss://ws.unique.network/',
+    groups: ['POLKADO_PARACHAIN'],
+    paraId: 2037,
+    nativeToken: 'UNQ'
   },
   genshiro: {
     chain: 'Genshiro',

@@ -13,10 +13,9 @@ import styled, { ThemeContext } from 'styled-components';
 import RadioStatus from '@polkadot/extension-koni-ui/components/RadioStatus';
 import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
-import { getGenesisOptionsByAddressType } from '@polkadot/extension-koni-ui/util';
 import { objectSpread } from '@polkadot/util';
 
-import { AccountContext, AccountInfoEl, ButtonArea, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
+import { AccountInfoEl, ButtonArea, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
@@ -38,22 +37,21 @@ interface Props {
 
 function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name, onAccountChange, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const { accounts } = useContext(AccountContext);
   const [address, setAddress] = useState('');
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
   const options = useGenesisHashOptions();
-  const [genesisHashOption, setGenesisHashOption] = useState(options);
   const [seed, setSeed] = useState<string | null>(null);
   // const [advanced, setAdvances] = useState(false);
   const [error, setError] = useState('');
   const [genesis, setGenesis] = useState('');
   const [evmGenesis, setEvmGenesis] = useState('');
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);
-  const [isEvmAccountSelected, setEvmAccountSelected] = useState(false);
+  const [selectedAccType, setSelectedAccType] = useState<string>('');
   const networkRef = useRef(null);
   const evmNetworkRef = useRef(null);
   const dep = keyTypes.toString();
+  const sustrateGenesisHashOption = options.filter((opt) => !opt.isEthereum);
+  const ethGenesisHashOption = options.filter((opt) => opt.isEthereum || opt.networkKey === 'all');
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -71,12 +69,6 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
       .then(({ addressMap, seed }) => {
         const address = addressMap[SUBSTRATE_ACCOUNT_TYPE];
         const evmAddress = addressMap[EVM_ACCOUNT_TYPE];
-
-        if (evmAddress) {
-          setGenesisHashOption(getGenesisOptionsByAddressType(evmAddress, accounts, options));
-        } else {
-          setGenesisHashOption(getGenesisOptionsByAddressType(null, accounts, options));
-        }
 
         if (address) {
           setAddress(address);
@@ -108,32 +100,28 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
   }, [t, genesis, seed, onAccountChange, onEvmAccountChange, type, dep, evmGenesis]);
 
   const _onSelectNormalAccount = useCallback(() => {
-    if (!isNormalAccountSelected) {
-      setGenesisHashOption(getGenesisOptionsByAddressType(null, accounts, options));
+    if (selectedAccType !== SUBSTRATE_ACCOUNT_TYPE) {
       onSelectAccountImported && onSelectAccountImported([SUBSTRATE_ACCOUNT_TYPE]);
-      setNormalAccountSelected(true);
-      setEvmAccountSelected(false);
+      setSelectedAccType(SUBSTRATE_ACCOUNT_TYPE);
       setEvmGenesis('');
     } else {
       onSelectAccountImported && onSelectAccountImported([]);
-      setNormalAccountSelected(false);
+      setSelectedAccType('');
       setGenesis('');
     }
-  }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
+  }, [onSelectAccountImported, selectedAccType]);
 
   const _onSelectEvmAccount = useCallback(() => {
-    if (!isEvmAccountSelected) {
-      setGenesisHashOption(getGenesisOptionsByAddressType(evmAddress, accounts, options));
+    if (selectedAccType !== EVM_ACCOUNT_TYPE) {
       onSelectAccountImported && onSelectAccountImported([EVM_ACCOUNT_TYPE]);
-      setNormalAccountSelected(false);
-      setEvmAccountSelected(true);
+      setSelectedAccType(EVM_ACCOUNT_TYPE);
       setGenesis('');
     } else {
       onSelectAccountImported && onSelectAccountImported([]);
-      setEvmAccountSelected(false);
+      setSelectedAccType('');
       setEvmGenesis('');
     }
-  }, [isEvmAccountSelected, isNormalAccountSelected, onSelectAccountImported]);
+  }, [onSelectAccountImported, selectedAccType]);
 
   const onChangeAccountGenesis = useCallback((genesis: string) => {
     setGenesis(genesis);
@@ -151,7 +139,7 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
         <div className={`account-info-container ${themeContext.id === 'dark' ? '-dark' : '-light'} seed-and-path-wrapper`}>
           <div className='account-info-item'>
             <RadioStatus
-              checked={isNormalAccountSelected}
+              checked={selectedAccType === SUBSTRATE_ACCOUNT_TYPE}
               className='account-info-item__radio-btn'
               onChange={_onSelectNormalAccount}
             />
@@ -165,7 +153,7 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
 
           <div className='account-info-item'>
             <RadioStatus
-              checked={isEvmAccountSelected}
+              checked={selectedAccType === EVM_ACCOUNT_TYPE}
               className='account-info-item__radio-btn'
               onChange={_onSelectEvmAccount}
             />
@@ -196,23 +184,23 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
               {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
             </Warning>
           )}
-          {isNormalAccountSelected && seed &&
+          {selectedAccType === SUBSTRATE_ACCOUNT_TYPE && seed &&
             <Dropdown
               className='seed-and-path__genesis-selection'
               label={t<string>('Network')}
               onChange={onChangeAccountGenesis}
-              options={genesisHashOption}
+              options={sustrateGenesisHashOption}
               reference={networkRef}
               value={genesis}
             />
           }
 
-          {isEvmAccountSelected && seed &&
+          {selectedAccType === EVM_ACCOUNT_TYPE && seed &&
             <Dropdown
               className='seed-and-path__genesis-selection'
               label={t<string>('Network')}
               onChange={onChangeEvmAccountGenesis}
-              options={genesisHashOption}
+              options={ethGenesisHashOption}
               reference={evmNetworkRef}
               value={evmGenesis}
             />
@@ -231,7 +219,7 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
       <ButtonArea>
         <NextStepButton
           className='next-step-btn'
-          isDisabled={(!address && !evmAddress) || !!error || !seed || (!isNormalAccountSelected && !isEvmAccountSelected)}
+          isDisabled={(!address && !evmAddress) || !!error || !seed || (!selectedAccType)}
           onClick={onNextStep}
         >
           {t<string>('Next Step')}

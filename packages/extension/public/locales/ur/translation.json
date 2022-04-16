@@ -10,7 +10,7 @@
     "Create new account (root or derived)": "نیااکاؤنٹبنائیں (جڑیاماخوذ))",
     "Create new account": "نیااکاؤنٹبنائیں",
     "Import account from pre-existing seed": "پہلےسےموجودبیجسےاکاؤنٹدرآمدکریں۔",
-    "Restore account from backup JSON file": "بیکاپ JSON فائلسےاکاؤنٹبحالکریں۔",
+    "Restore account from JSON backup file": "بازیابی حساب از فایل پشتیبان JSON",
     "Attach external QR-signer account": "یرونیکیوآرسائنراکاؤنٹمنسلککریں۔",
     "External QR accounts and Access": "بیرونی QR اکاؤنٹساوررسائی۔",
     "Allow Camera Access": "کیمرےتکرسائیکیاجازتدیں۔",

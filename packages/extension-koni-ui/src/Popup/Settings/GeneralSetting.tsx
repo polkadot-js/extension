@@ -3,7 +3,7 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { setNotification } from '@polkadot/extension-koni-ui/messaging';
@@ -25,15 +25,10 @@ const notificationOptions = ['Extension', 'PopUp', 'Window']
 function GeneralSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [notification, updateNotification] = useState(settings.notification);
+  const [language, updateLanguage] = useState(settings.i18nLang === 'default' ? 'en' : settings.i18nLang);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const setTheme = useContext(ThemeSwitchContext);
   const languageOptions = useMemo(() => getLanguageOptions(), []);
-
-  useEffect(() => {
-    if (settings.i18nLang === 'default') {
-      settings.set({ i18nLang: 'en' });
-    }
-  }, []);
 
   const _onChangeNotification = useCallback(
     (value: string): void => {
@@ -52,6 +47,7 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
 
   const _onChangeLang = useCallback(
     (value: string): void => {
+      updateLanguage(value);
       settings.set({ i18nLang: value });
     },
     []
@@ -87,7 +83,7 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
             label=''
             onChange={_onChangeLang}
             options={languageOptions}
-            value={settings.i18nLang}
+            value={language}
           />
         </MenuItem>
         <MenuItem

@@ -3,7 +3,7 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import NftItem from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftItem';
@@ -26,14 +26,19 @@ interface Props {
 }
 
 function NftCollection ({ chosenItem, className, currentNetwork, data, onClickBack, setChosenItem, setShowItemDetail, showItemDetail }: Props): React.ReactElement<Props> {
+  const [networkKey, setNetworkKey] = useState(currentNetwork);
+
   const handleShowItem = useCallback((data: _NftItem) => {
     setChosenItem(data);
     setShowItemDetail(true);
   }, [setChosenItem, setShowItemDetail]);
 
   useEffect(() => {
-    setShowItemDetail(false);
-  }, [currentNetwork, setShowItemDetail]);
+    if (networkKey !== currentNetwork) {
+      setShowItemDetail(false);
+      setNetworkKey(currentNetwork);
+    }
+  }, [currentNetwork, networkKey, setShowItemDetail]);
 
   const handleClickBack = useCallback(() => {
     onClickBack();

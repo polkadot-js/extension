@@ -80,7 +80,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           to={isPopup ? undefined : jsonPath}
         >
           <FontAwesomeIcon icon={faFileUpload} />
-          <span>{t<string>('Restore account from backup JSON file')}</span>
+          <span>{t<string>('Restore account from JSON backup file')}</span>
         </Link>
       </MenuItem>
       <MenuDivider />

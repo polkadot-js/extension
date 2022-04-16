@@ -97,7 +97,7 @@ export const getRegistry = async (networkKey: string, api: ApiPromise) => {
     Object.assign(tokenMap, predefineTokenMap);
   }
 
-  if (['karura', 'acala'].indexOf(networkKey) > -1) {
+  if (['karura', 'acala', 'bifrost'].indexOf(networkKey) > -1) {
     const foreignTokens = await getForeignToken(api);
 
     Object.assign(tokenMap, foreignTokens);

@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import Web3 from 'web3';
-
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
@@ -249,19 +247,20 @@ export interface NetworkJson {
   key: string, // Key of network in NetworkMap
   chain: string; // Name of the network
   icon?: string; // Icon name, available with known network
+  active: boolean, // Network is active or not
 
   // Provider Informations
   providers: Record<string, string> // Predefined provider map
-  customProviders?: string // Custom provider map, provider name same with provider map
-  nftProvider?: string // Should be same with provider if is not defined
   currentProvider: string, // Current provider key
   currentProviderMode: 'http' | 'ws' // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
+  customProviders?: string // Custom provider map, provider name same with provider map
+  nftProvider?: string // Should be same with provider if is not defined
 
   // Metadata get after connect to provider
-  paraId?: number;
   genesisHash: string;
   groups: NetWorkGroup[];
   ss58Format: number;
+  paraId?: number;
   chainType?: 'substrate' | 'ethereum';
   crowdloanUrl?: string;
 
@@ -273,7 +272,6 @@ export interface NetworkJson {
   decimals?: number;
 
   // Other informations
-  active: boolean, // Network is active or not
   coinGeckoKey?: string, // Provider key to get token price from CoinGecko
   blockExplorer?: string, // Link to block scanner to check transaction with extrinsic hash
   dependencies?: string[] // Auto active network in dependencies if current network is activated
@@ -287,12 +285,7 @@ export interface NetworkJson {
   getStakingMethod?: 'SUBSTRATE';
   getCrowdloanMethod?: 'POLKADOT' | 'DOTSAMA' | 'CUSTOM' // This method is required paraId, custom network can not select custom method
   getNFTMethod?: 'ERC721' | 'CUSTOM';
-  sendNFTMethod?: 'ERC721' | 'CUSTOM'
-
-  // Methods
-  getDotsamaAPI?: ApiPromise;
-  getWeb3API?: Web3;
-  getNFTWeb3API?: Web3;
+  sendNFTMethod?: 'ERC721' | 'CUSTOM';
 
   dotSamaAPIStatus?: NETWORK_STATUS;
 }
@@ -546,8 +539,15 @@ export interface NetworkUpsertResponse {
   conflictNetwork: string
 }
 
+export interface ApiConnectResponse {
+  success: boolean,
+  genesisHash: string,
+  ss58Prefix: string,
+  chainType: string
+}
+
 export interface KoniRequestSignatures {
-  'pri(apiMap.connectOne)': [string, boolean];
+  'pri(apiMap.connectOne)': [string, ApiConnectResponse];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, boolean];
   'pri(networkMap.removeOne)': [string, boolean];

@@ -9,10 +9,10 @@ import { isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { apiMapConnect } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import {apiMapConnect} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -41,16 +41,24 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         _setIsvalidProvider(false);
       } else {
         _setIsvalidProvider(true);
-        console.log('start connecting');
         // Call backend to validate
-        apiMapConnect(provider).then((resp) => console.log(resp)).catch(console.error);
+        apiMapConnect(provider).then((resp) => {
+          setIsProviderConnected(resp.success);
+
+          if (resp.success) {
+            setNetworkInfo({
+              ...networkInfo,
+              customProviders: provider
+            });
+          }
+        }).catch(console.error);
       }
     }
-  }, [networkInfo.currentProvider, provider]);
+  }, [networkInfo, networkInfo.currentProvider, provider]);
 
   const _onSaveNetwork = useCallback(() => {
     if (!_isValidProvider || !isProviderConnected) {
-      console.log('cant submit');
+      return;
     }
 
     console.log(mode, networkInfo);
@@ -134,6 +142,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           value={networkInfo?.blockExplorer || ''}
         />
 
+        {isProviderConnected && _isValidProvider && <div className={'connect-success'}>Provider connected successfully</div>}
+
+        {!isProviderConnected && _isValidProvider && <div>Provider cannot connect</div>}
+
         <ButtonArea className={'button-area'}>
           <Button
             className='network-edit-button'
@@ -159,13 +171,25 @@ export default styled(NetworkEdit)(({ theme }: Props) => `
   flex: 1;
   overflow-y: auto;
 
+  .connect-success {
+    margin-top: 10px;
+    font-size: 14px;
+    color: green;
+  }
+
+  .connect-fail {
+    margin-top: 10px;
+    font-size: 14px;
+    color: red;
+  }
+
   .invalid-input {
     color: red;
     font-size: 12px;
   }
 
   .button-area {
-    margin-top: 20px;
+    margin-top: 10px;
   }
 
   .network-edit__action-area {
@@ -192,6 +216,4 @@ export default styled(NetworkEdit)(({ theme }: Props) => `
   .network-edit-button:last-child {
     margin-left: 8px;
   }
-
-
 `);

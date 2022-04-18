@@ -7,7 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiConnectResponse, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -1267,9 +1267,23 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private apiMapConnect (networkKey: string): boolean {
-    console.log('connect ', networkKey);
-    return true;
+  private async apiMapConnect (provider: string): Promise<ApiConnectResponse> {
+    console.log('connect ', provider);
+    const apiProps = initApi('custom', provider);
+    const api = await apiProps.isReady;
+    const genesisHash = api.api.genesisHash?.toHex();
+    const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
+    const chainType = api.api.rpc.system.chainType().toString();
+    const chain = api.api.rpc.system.chain();
+
+    console.log('blah', genesisHash, ss58Prefix, chain, chainType);
+
+    return {
+      success: true,
+      genesisHash: '',
+      ss58Prefix: '',
+      chainType: ''
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -1382,7 +1396,7 @@ export default class KoniExtension extends Extension {
       case 'pri(networkMap.enableOne)':
         return this.enableNetworkMap(request as string);
       case 'pri(apiMap.connectOne)':
-        return this.apiMapConnect(request as string);
+        return await this.apiMapConnect(request as string);
       default:
         return super.handle(id, type, request, port);
     }

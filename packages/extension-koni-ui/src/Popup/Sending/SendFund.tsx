@@ -6,12 +6,12 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import Button from '@polkadot/extension-koni-ui/components/Button';
-import InputAddress from '@polkadot/extension-koni-ui/components/InputAddress';
+import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
+import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
-import Available from '@polkadot/extension-koni-ui/query/Available';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps, TxResult } from '@polkadot/extension-koni-ui/types';
 
@@ -22,19 +22,17 @@ interface Props extends ThemeProps {
 function SendFund ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const propSenderId = currentAccount?.address;
   const [recipientId, setRecipientId] = useState<string | null>('5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k');
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [senderId, setSenderId] = useState<string | null>(null);
+  const [senderValue, setSenderValue] = useState<string>('');
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const _onSend = useCallback(() => {
     // setShowTxModal(true);
-    console.log(senderId, recipientId, networkKey);
-  }, [senderId, recipientId, networkKey]);
+  }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const _onTxSuccess = useCallback(() => {
@@ -71,38 +69,14 @@ function SendFund ({ className }: Props): React.ReactElement {
             subHeaderName={t<string>('Send fund')}
           />
           <div className='send-fund-container'>
-            <InputAddress
-              className={'send-fund-item'}
-              defaultValue={propSenderId}
-              help={t<string>('Select a contact or paste the address you want to send funds to.')}
-              label={t<string>('Send to address')}
-              // isDisabled={!!propRecipientId}
-              labelExtra={
-                <Available
-                  label={t<string>('Transferable')}
-                  params={''}
-                />
-              }
-              onChange={setSenderId}
-              type='allPlus'
-              withEllipsis
+            <SenderInputAddress
+              className=''
+              setSenderValue={setSenderValue}
             />
 
-            <InputAddress
-              autoPrefill={false}
-              className={'send-fund-item'}
-              help={t<string>('Select a contact or paste the address you want to send funds to.')}
-              label={t<string>('Send to address')}
-              // isDisabled={!!propRecipientId}
-              labelExtra={
-                <Available
-                  label={t<string>('Transferable')}
-                  params={recipientId}
-                />
-              }
-              onChange={setRecipientId}
-              type='allPlus'
-              withEllipsis
+            <ReceiverInputAddress
+              className={''}
+              setRecipientId={setRecipientId}
             />
 
             {/* <InputBalance */}
@@ -138,7 +112,7 @@ function SendFund ({ className }: Props): React.ReactElement {
         <AuthTransaction
           extrinsic={extrinsic}
           onCancel={_onCancelTx}
-          requestAddress={senderId}
+          requestAddress={''}
           txHandler={{
             onTxSuccess: _onTxSuccess,
             onTxFail: _onTxFail

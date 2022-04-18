@@ -5,9 +5,17 @@ import type { KeyringOption$Type, KeyringSectionOption } from '@polkadot/ui-keyr
 
 import React from 'react';
 
+export interface AccountOption extends KeyringSectionOption {
+  text: string;
+}
+
+export interface DropdownOption {
+  label: string;
+  value: string;
+}
+
 export interface Option extends KeyringSectionOption {
   className?: string;
-  text: React.ReactNode;
 }
 
 export interface InputAddressProps {

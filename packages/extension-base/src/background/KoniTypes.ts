@@ -6,10 +6,12 @@ import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
 import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, ResponseAuthorizeList, SeedLengths } from '@polkadot/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
+import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
 export enum ApiInitStatus {
   SUCCESS,
@@ -250,6 +252,21 @@ export interface DonateInfo {
   link: string;
 }
 
+export interface DropdownOptionType {
+  text: string;
+  value: string;
+}
+
+export interface DropdownTransformOptionType {
+  label: string;
+  value: string;
+}
+
+export interface DropdownTransformGroupOptionType {
+  label: string;
+  options: DropdownTransformOptionType[];
+}
+
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkKey: string;
   groups: NetWorkGroup[];
@@ -283,6 +300,10 @@ export interface AccountsWithCurrentAddress {
   currentAddress?: string;
   isShowBalance?: boolean;
   allAccountLogo?: string;
+}
+
+export interface OptionInputAddress {
+  options: KeyringOptions;
 }
 
 export interface CurrentAccountInfo {
@@ -478,6 +499,10 @@ export interface RequestFreeBalance {
   token?: string
 }
 
+export interface RequestSaveRecentAccount {
+  accountId: string;
+}
+
 export interface KoniRequestSignatures {
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
@@ -519,6 +544,8 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, boolean, OptionInputAddress];
+  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];

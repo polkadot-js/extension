@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.3.5 (Koni)
+Build date: Apr 18, 2022.
+Bug Fixed:
+- Fix Astar issues on display NFT because wrong IPFS
+
 ## 0.3.4 (Koni)
 Build date: Apr 16, 2022.
 

@@ -23,6 +23,8 @@ export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
 export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
 
+export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',

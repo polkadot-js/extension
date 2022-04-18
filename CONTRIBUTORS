@@ -1,12 +1,12 @@
      465	Jaco                          	0.42.5 (#969)
      192	Nam Phạm                      	disable comment
-     163	AnhMTV                        	Release version 0.3.4
+     165	AnhMTV                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
       42	lw                            	# update balance display
-      28	Hieu Dao                      	
+      34	Hieu Dao                      	[CI Skip]Issue 117: Update xctoken logo
       21	lw-cdm                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

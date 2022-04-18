@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
-     192	Nam Phạm                      	disable comment
-     165	AnhMTV                        	
+     193	Nam Phạm                      	fix ipfs gateway for Astar NFT
+     167	AnhMTV                        	
       82	Thibaut Sardan                	Add account filtering feature (#832)
       79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet

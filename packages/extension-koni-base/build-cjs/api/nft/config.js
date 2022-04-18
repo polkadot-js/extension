@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.TRANSFER_CHAIN_ID = exports.SUPPORTED_TRANSFER_EVM_CHAIN = exports.SUPPORTED_TRANSFER_CHAIN_NAME = exports.SUPPORTED_NFT_NETWORKS = exports.SINGULAR_V2_EXTERNAL_SERVER = exports.SINGULAR_V2_ENDPOINT = exports.SINGULAR_V2_COLLECTION_ENDPOINT = exports.SINGULAR_V1_EXTERNAL_SERVER = exports.SINGULAR_V1_ENDPOINT = exports.SINGULAR_V1_COLLECTION_ENDPOINT = exports.RMRK_PINATA_SERVER = exports.KANARIA_EXTERNAL_SERVER = exports.KANARIA_ENDPOINT = exports.CLOUDFLARE_SERVER = exports.BIT_COUNTRY_SERVER = void 0;
+exports.TRANSFER_CHAIN_ID = exports.SUPPORTED_TRANSFER_EVM_CHAIN = exports.SUPPORTED_TRANSFER_CHAIN_NAME = exports.SUPPORTED_NFT_NETWORKS = exports.SINGULAR_V2_EXTERNAL_SERVER = exports.SINGULAR_V2_ENDPOINT = exports.SINGULAR_V2_COLLECTION_ENDPOINT = exports.SINGULAR_V1_EXTERNAL_SERVER = exports.SINGULAR_V1_ENDPOINT = exports.SINGULAR_V1_COLLECTION_ENDPOINT = exports.RMRK_PINATA_SERVER = exports.KANARIA_EXTERNAL_SERVER = exports.KANARIA_ENDPOINT = exports.CLOUDFLARE_SERVER = exports.CF_IPFS_GATEWAY = exports.BIT_COUNTRY_SERVER = void 0;
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
@@ -28,6 +28,8 @@ const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 exports.CLOUDFLARE_SERVER = CLOUDFLARE_SERVER;
 const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
 exports.BIT_COUNTRY_SERVER = BIT_COUNTRY_SERVER;
+const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
+exports.CF_IPFS_GATEWAY = CF_IPFS_GATEWAY;
 let SUPPORTED_NFT_NETWORKS;
 exports.SUPPORTED_NFT_NETWORKS = SUPPORTED_NFT_NETWORKS;
 

@@ -11,6 +11,6 @@ const packageInfo = {
   name: '@polkadot/extension-inject',
   path: typeof __dirname === 'string' ? __dirname : 'auto',
   type: 'cjs',
-  version: '0.3.5-0'
+  version: '0.3.5-1'
 };
 exports.packageInfo = packageInfo;

@@ -65,10 +65,10 @@ class Web3NftApi extends _nft.BaseNftApi {
     }
 
     if (input.includes('ipfs://')) {
-      return _config.RMRK_PINATA_SERVER + input.split('ipfs://')[1];
+      return _config.CF_IPFS_GATEWAY + input.split('ipfs://')[1];
     }
 
-    return _config.RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return _config.CF_IPFS_GATEWAY + input.split('ipfs://ipfs/')[1];
   }
 
   parseMetadata(data) {

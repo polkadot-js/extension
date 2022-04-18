@@ -1267,6 +1267,11 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private apiMapConnect (networkKey: string): boolean {
+    console.log('connect ', networkKey);
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1376,6 +1381,8 @@ export default class KoniExtension extends Extension {
         return this.removeNetworkMap(request as string);
       case 'pri(networkMap.enableOne)':
         return this.enableNetworkMap(request as string);
+      case 'pri(apiMap.connectOne)':
+        return this.apiMapConnect(request as string);
       default:
         return super.handle(id, type, request, port);
     }

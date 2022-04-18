@@ -1,15 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@polkadot/extension-koni-ui/components';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import {apiMapConnect} from "@polkadot/extension-koni-ui/messaging";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -17,8 +20,12 @@ interface Props extends ThemeProps {
 
 function NetworkEdit ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const { show } = useToast();
   const { networkEditParams: { data, mode } } = useSelector((state: RootState) => state);
   const [networkInfo, setNetworkInfo] = useState(data);
+  const [_isValidProvider, _setIsvalidProvider] = useState(false);
+  const [isProviderConnected, setIsProviderConnected] = useState(false);
+  const [provider, setProvider] = useState<string | null>(null);
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
     () => {
@@ -28,10 +35,27 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     [onAction]
   );
 
-  const _onEditNetwork = useCallback(() => {
+  useEffect(() => {
+    if (provider) {
+      if (!isValidProvider(provider)) {
+        _setIsvalidProvider(false);
+      } else {
+        _setIsvalidProvider(true);
+        console.log('start connecting');
+        // Call backend to validate
+        apiMapConnect(provider).then((resp) => console.log(resp)).catch(console.error);
+      }
+    }
+  }, [networkInfo.currentProvider, provider]);
+
+  const _onSaveNetwork = useCallback(() => {
+    if (!_isValidProvider || !isProviderConnected) {
+      console.log('cant submit');
+    }
+
     console.log(mode, networkInfo);
     // _goBack();
-  }, [mode, networkInfo]);
+  }, [_isValidProvider, isProviderConnected, mode, networkInfo]);
 
   const onChangeChain = useCallback((val: string) => {
     setNetworkInfo({
@@ -41,18 +65,30 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [networkInfo]);
 
   const onChangeProvider = useCallback((val: string) => {
-    setNetworkInfo({
-      ...networkInfo,
-      customProviders: { custom: val }
-    });
-  }, [networkInfo]);
+    setProvider(val);
+  }, []);
 
   const onChangeParaId = useCallback((val: string) => {
-    setNetworkInfo({
-      ...networkInfo,
-      paraId: parseInt(val)
-    });
-  }, [networkInfo]);
+    if (val === '') {
+      setNetworkInfo({
+        ...networkInfo,
+        paraId: undefined
+      });
+
+      return;
+    }
+
+    const paraId = parseInt(val);
+
+    if (isNaN(paraId)) {
+      show('ParaId can only be number');
+    } else {
+      setNetworkInfo({
+        ...networkInfo,
+        paraId
+      });
+    }
+  }, [networkInfo, show]);
 
   const onChangeExplorer = useCallback((val: string) => {
     setNetworkInfo({
@@ -74,14 +110,17 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         <InputWithLabel
           label={t<string>('Network name')}
           onChange={onChangeChain}
-          value={networkInfo.chain}
+          value={networkInfo.chain || ''}
         />
 
         <InputWithLabel
-          label={t<string>('Provider')}
+          label={t<string>('Provider URL (*)')}
           onChange={onChangeProvider}
-          value={networkInfo.providers[networkInfo.currentProvider]}
+          value={provider || ''}
         />
+        {
+          !_isValidProvider && provider !== null && <div className={'invalid-input'}>Provider URL requires http/https or wss prefix</div>
+        }
 
         <InputWithLabel
           label={t<string>('paraId')}
@@ -104,7 +143,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            onClick={_onEditNetwork}
+            isDisabled={!isProviderConnected || !_isValidProvider}
+            onClick={_onSaveNetwork}
           >
             {t<string>('Save')}
           </Button>
@@ -118,6 +158,11 @@ export default styled(NetworkEdit)(({ theme }: Props) => `
   padding: 0 15px 15px;
   flex: 1;
   overflow-y: auto;
+
+  .invalid-input {
+    color: red;
+    font-size: 12px;
+  }
 
   .button-area {
     margin-top: 20px;

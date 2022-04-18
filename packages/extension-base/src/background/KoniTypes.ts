@@ -252,7 +252,7 @@ export interface NetworkJson {
 
   // Provider Informations
   providers: Record<string, string> // Predefined provider map
-  customProviders?: Record<string, string> // Custom provider map, provider name same with provider map
+  customProviders?: string // Custom provider map, provider name same with provider map
   nftProvider?: string // Should be same with provider if is not defined
   currentProvider: string, // Current provider key
   currentProviderMode: 'http' | 'ws' // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
@@ -547,6 +547,7 @@ export interface NetworkUpsertResponse {
 }
 
 export interface KoniRequestSignatures {
+  'pri(apiMap.connectOne)': [string, boolean];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, boolean];
   'pri(networkMap.removeOne)': [string, boolean];

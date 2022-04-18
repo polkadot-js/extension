@@ -444,3 +444,7 @@ export async function disableNetworkMap (networkKey: string): Promise<boolean> {
 export async function enableNetworkMap (networkKey: string): Promise<boolean> {
   return sendMessage('pri(networkMap.enableOne)', networkKey);
 }
+
+export async function apiMapConnect (networkKey: string): Promise<boolean> {
+  return sendMessage('pri(apiMap.connectOne)', networkKey);
+}

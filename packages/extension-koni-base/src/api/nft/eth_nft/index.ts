@@ -6,7 +6,7 @@ import Web3 from 'web3';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS, { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
-import { RMRK_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
+import { CF_IPFS_GATEWAY, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
@@ -48,10 +48,10 @@ export class Web3NftApi extends BaseNftApi {
     }
 
     if (input.includes('ipfs://')) {
-      return RMRK_PINATA_SERVER + input.split('ipfs://')[1];
+      return CF_IPFS_GATEWAY + input.split('ipfs://')[1];
     }
 
-    return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return CF_IPFS_GATEWAY + input.split('ipfs://ipfs/')[1];
   }
 
   private parseMetadata (data: Record<string, any>): NftItem {

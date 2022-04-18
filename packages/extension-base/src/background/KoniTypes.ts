@@ -326,6 +326,7 @@ export type TokenInfo = {
   isMainToken: boolean,
   symbol: string,
   erc20Address?: string,
+  assetIndex?: number,
   decimals: number,
   name: string,
   coinGeckoKey?: string,

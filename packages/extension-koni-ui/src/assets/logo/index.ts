@@ -105,7 +105,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   shidenEvm: require('./shiden.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  'sora-substrate': require('./sora-substrate.svg'),
+  sora: require('./sora-substrate.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   statemine: require('./statemine.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -143,6 +143,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bitcountry: require('./bitcountry.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  unique_network: require('./unique.network.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   pha: require('./phala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bnc: require('./bnc.svg'),
@@ -167,9 +169,17 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   neumann: require('./oak_network.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  turing: require('./oak_network.png'),
+  turing: require('./turing.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   mangatax: require('./mangatax.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  mangatax_para: require('./mangatax.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  chainx: require('./chainx.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  litmus: require('./litmus.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  encointer: require('./encointer.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   btc: require('./btc.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -224,6 +234,34 @@ const LogosMap: Record<string, string> = {
   rib: require('./rib.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   csg: require('./csg.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  movr: require('./moonriver.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  qtz: require('./quartz.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  csm: require('./csm.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  aris: require('./aris.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kico: require('./kico.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  hko: require('./hko.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bill: require('./bill.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  chaos: require('./chaosdao.jpeg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcrmrk: require('./rmrk.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckint: require('./kintsugi.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcksm: require('./kusama.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckar: require('./karura.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcbnc: require('./bifrost.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcausd: require('./ausd.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

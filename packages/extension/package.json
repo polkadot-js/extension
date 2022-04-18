@@ -14,12 +14,12 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.3.3-1",
+  "version": "0.3.4-2",
   "dependencies": {
     "@babel/runtime": "^7.16.7",
-    "@polkadot/extension-base": "^0.3.3-1",
-    "@polkadot/extension-inject": "^0.3.3-1",
-    "@polkadot/extension-ui": "^0.3.3-1"
+    "@polkadot/extension-base": "^0.3.4-2",
+    "@polkadot/extension-inject": "^0.3.4-2",
+    "@polkadot/extension-ui": "^0.3.4-2"
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",

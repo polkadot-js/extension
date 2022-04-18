@@ -19,8 +19,6 @@ var _eth_nft = require("@polkadot/extension-koni-base/api/nft/eth_nft");
 
 var _karura_nft = require("@polkadot/extension-koni-base/api/nft/karura_nft");
 
-var _quartz_nft = _interopRequireDefault(require("@polkadot/extension-koni-base/api/nft/quartz_nft"));
-
 var _rmrk_nft = require("@polkadot/extension-koni-base/api/nft/rmrk_nft");
 
 var _statemine_nft = _interopRequireDefault(require("@polkadot/extension-koni-base/api/nft/statemine_nft"));
@@ -56,9 +54,8 @@ function createNftApi(chain, api, addresses) {
 
     case _config.SUPPORTED_NFT_NETWORKS.uniqueNft:
       return new _unique_nft.default(api, useAddresses, chain);
-
-    case _config.SUPPORTED_NFT_NETWORKS.quartz:
-      return new _quartz_nft.default(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.quartz:
+    //   return new QuartzNftApi(api, useAddresses, chain);
 
     case _config.SUPPORTED_NFT_NETWORKS.bitcountry:
       return new _bit.BitCountryNftApi(api, useAddresses, chain);

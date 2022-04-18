@@ -7,7 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiConnectResponse, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiConnectResponse, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetWorkGroup, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -1231,14 +1231,14 @@ export default class KoniExtension extends Extension {
     return { errors, conflictNetwork };
   }
 
-  private async removeNetworkMap (networkKey: string): Promise<boolean> {
+  private removeNetworkMap (networkKey: string): boolean {
     const currentNetworkMap = this.getNetworkMap();
 
     if (!(networkKey in currentNetworkMap)) {
       return false;
     }
 
-    await state.removeNetworkMap(networkKey);
+    state.removeNetworkMap(networkKey);
 
     return true;
   }
@@ -1268,22 +1268,47 @@ export default class KoniExtension extends Extension {
   }
 
   private async apiMapConnect (provider: string): Promise<ApiConnectResponse> {
-    console.log('connect ', provider);
-    const apiProps = initApi('custom', provider);
-    const api = await apiProps.isReady;
-    const genesisHash = api.api.genesisHash?.toHex();
-    const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
-    const chainType = api.api.rpc.system.chainType().toString();
-    const chain = api.api.rpc.system.chain();
+    try {
+      const apiProps = initApi('custom', provider);
+      const api = await apiProps.isReady;
+      const genesisHash = api.api.genesisHash?.toHex();
+      const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
+      const [chainType, chain] = await Promise.all([
+        api.api.rpc.system.chainType(),
+        api.api.rpc.system.chain()
+      ]);
+      const key = 'custom_' + genesisHash.toString();
 
-    console.log('blah', genesisHash, ss58Prefix, chain, chainType);
+      let parsedChainType: NetWorkGroup = 'UNKNOWN';
 
-    return {
-      success: true,
-      genesisHash: '',
-      ss58Prefix: '',
-      chainType: ''
-    };
+      if (chainType) {
+        if (chainType.type === 'Development') {
+          parsedChainType = 'TEST_NET';
+        } else if (chainType.type === 'Live') {
+          parsedChainType = 'MAIN_NET';
+        }
+      }
+
+      return {
+        success: true,
+        key,
+        genesisHash,
+        ss58Prefix,
+        networkGroup: [parsedChainType],
+        chain: chain ? chain.toString() : ''
+      };
+    } catch (e) {
+      console.error('Error connecting to provider', e);
+
+      return {
+        success: false,
+        key: '',
+        genesisHash: '',
+        ss58Prefix: '',
+        networkGroup: [],
+        chain: ''
+      };
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await

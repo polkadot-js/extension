@@ -756,10 +756,10 @@ export default class KoniState extends State {
     return this.networkMapStore.getSubject();
   }
 
-  public async removeNetworkMap (networkKey: string) {
-    if (this.networkMap[networkKey].active && this.networkMap[networkKey].getDotsamaAPI) {
-      await this.networkMap[networkKey]?.getDotsamaAPI?.disconnect();
-    }
+  public removeNetworkMap (networkKey: string) {
+    // if (this.networkMap[networkKey].active && this.networkMap[networkKey].getDotsamaAPI) {
+    //   await this.networkMap[networkKey]?.getDotsamaAPI?.disconnect();
+    // }
 
     delete this.networkMap[networkKey];
 

@@ -16,6 +16,7 @@ import TokenDropdown from './TokenDropdown';
 
 interface Props {
   className: string;
+  options: TokenItemType[];
   setSenderValue: (value: SenderInputAddressType) => void;
 }
 
@@ -23,82 +24,49 @@ function getShortenText (text: string, cut = 6) {
   return `${text.slice(0, cut)}…${text.slice(-cut)}`;
 }
 
-function SenderInputAddress ({ className = '', setSenderValue }: Props): React.ReactElement {
+function SenderInputAddress ({ className = '', options, setSenderValue }: Props): React.ReactElement {
+  const defaultValue = {
+    address: '5CkNsSxDfRKqiojvuSh9ZyTD2GReGoavqnpC8pTmTXwomVLd',
+    token: 'DOT',
+    networkKey: 'polkadot'
+  };
+  const defaultTokenValueStr = `${defaultValue.token}|${defaultValue.networkKey}`;
   const { t } = useTranslation();
-  const { chainRegistry: chainRegistryMap,
-    currentAccount: { account: currentAccount },
-    currentNetwork: { isEthereum, networkKey, networkPrefix } } = useSelector((state: RootState) => state);
-  const propSenderId = currentAccount?.address;
-  const [value, setInputAddressValue] = useState<string | undefined>(propSenderId);
+  const { currentAccount: { account: currentAccount },
+    currentNetwork: { isEthereum, networkPrefix } } = useSelector((state: RootState) => state);
+  const [value, setInputAddressValue] = useState<string | undefined>(defaultValue.address);
   let formattedAddress = '';
-  const options: TokenItemType[] = [];
-
-  Object.keys(chainRegistryMap).forEach((networkKey) => {
-    Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
-      const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
-
-      options.push({
-        networkKey: networkKey,
-        token: tokenInfo.symbol,
-        decimals: tokenInfo.decimals,
-        isMainToken: tokenInfo.isMainToken,
-        specialOption: tokenInfo?.specialOption
-      });
-    });
-  });
-
-  let defaultValueStr: string;
-
-  if (networkKey === 'all') {
-    const defaultValue = options[0];
-
-    defaultValueStr = `${defaultValue.token}|${defaultValue.networkKey}|${defaultValue.isMainToken ? '1' : '0'}`;
-  } else {
-    const defaultValue = options.find((opt) => opt.networkKey === networkKey);
-
-    defaultValueStr = defaultValue ? `${defaultValue.token}|${defaultValue.networkKey}|${defaultValue.isMainToken ? '1' : '0'}` : '';
-  }
 
   const [tokenValue, setTokenValue] = useState<string>('');
+  const symbol = tokenValue.split('|')[0];
 
   useEffect(() => {
-    setTokenValue(defaultValueStr);
-  }, [defaultValueStr]);
+    setTokenValue(defaultTokenValueStr);
+  }, [defaultTokenValueStr]);
 
   if (value && value !== '-') {
     formattedAddress = reformatAddress(value, networkPrefix, isEthereum);
   }
 
   const onChangeValue = useCallback((address: string) => {
+    const tokenVal = tokenValue.split('|');
     const senderInputValue: SenderInputAddressType = {
       address: address,
-      token: 'DOT',
-      isMainToken: true,
-      networkKey: 'polkadot'
+      token: tokenVal[0],
+      networkKey: tokenVal[1]
     };
-    const tokenVal = tokenValue.split('|');
-
-    senderInputValue.token = tokenVal[0];
-    senderInputValue.networkKey = tokenVal[1];
-    senderInputValue.isMainToken = tokenVal[2] === '1';
 
     setInputAddressValue(address);
     setSenderValue(senderInputValue);
   }, [setSenderValue, tokenValue]);
 
   const onChangeTokenValue = useCallback((tokenValueStr: string) => {
+    const tokenVal = tokenValueStr.split('|');
     const senderInputValue: SenderInputAddressType = {
       address: value || '',
-      token: 'DOT',
-      isMainToken: true,
-      networkKey: 'polkadot'
+      token: tokenVal[0],
+      networkKey: tokenVal[1]
     };
-
-    const tokenVal = tokenValueStr.split('|');
-
-    senderInputValue.token = tokenVal[0];
-    senderInputValue.networkKey = tokenVal[1];
-    senderInputValue.isMainToken = tokenVal[2] === '1';
 
     setTokenValue(tokenValueStr);
     setSenderValue(senderInputValue);
@@ -108,7 +76,7 @@ function SenderInputAddress ({ className = '', setSenderValue }: Props): React.R
     <div className={className}>
       <InputAddress
         className={'sender-input-address'}
-        defaultValue={propSenderId}
+        defaultValue={defaultValue.address}
         help={t<string>('The account you will send funds from.')}
         isEthereum={currentAccount?.type === 'ethereum'}
         isSetDefaultValue={true}
@@ -120,7 +88,7 @@ function SenderInputAddress ({ className = '', setSenderValue }: Props): React.R
       />
 
       <div className='sender-input-address__balance'>
-        1.0000 ACA
+        {`1.0000 ${symbol}`}
       </div>
 
       <div className='sender-input-address__address'>

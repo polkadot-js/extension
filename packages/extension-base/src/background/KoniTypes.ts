@@ -544,7 +544,7 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
-  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, boolean, OptionInputAddress];
+  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
   'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];

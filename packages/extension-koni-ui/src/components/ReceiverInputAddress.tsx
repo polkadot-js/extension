@@ -25,8 +25,7 @@ function ReceiverInputAddress ({ className = '', setRecipientId }: Props): React
   const { t } = useTranslation();
   const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
   const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
-  const propSenderId = currentAccount?.address;
-  const [value, setInputAddressValue] = useState<string | undefined>(propSenderId);
+  const [value, setInputAddressValue] = useState<string | undefined>('');
   let formattedAddress = '';
 
   if (value && value !== '-') {
@@ -54,7 +53,7 @@ function ReceiverInputAddress ({ className = '', setRecipientId }: Props): React
       </div>
 
       <div className='receiver-input-address__address'>
-        {getShortenText(formattedAddress, 6)}
+        {formattedAddress ? getShortenText(formattedAddress, 6) : ''}
       </div>
     </div>
   );

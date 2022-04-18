@@ -81,7 +81,7 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenV
 }
 
 function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChange, options, reference, value }: Props): React.ReactElement<Props> {
-  const transformOptions = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}|${t.isMainToken ? '1' : '0'}`, networkKey: t.networkKey }));
+  const transformOptions = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}`, networkKey: t.networkKey }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 

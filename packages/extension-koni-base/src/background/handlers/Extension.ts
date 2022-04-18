@@ -126,7 +126,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private accountsGetAll (id: string, port: chrome.runtime.Port): boolean {
+  private accountsGetAll (id: string, port: chrome.runtime.Port): string {
     const cb = createSubscription<'pri(accounts.subscribeAccountsInputAddress)'>(id, port);
     const subscription = keyring.keyringOption.optionsSubject.subscribe((options): void => {
       const optionsInputAddress: OptionInputAddress = {
@@ -136,12 +136,13 @@ export default class KoniExtension extends Extension {
       cb(optionsInputAddress);
     });
 
+    this.cancelSubscriptionMap[id] = subscription.unsubscribe;
+
     port.onDisconnect.addListener((): void => {
-      unsubscribe(id);
-      subscription.unsubscribe();
+      this.cancelSubscription(id);
     });
 
-    return true;
+    return id;
   }
 
   private saveRecentAccountId ({ accountId }: RequestSaveRecentAccount): SingleAddress {

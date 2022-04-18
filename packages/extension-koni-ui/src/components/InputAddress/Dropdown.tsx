@@ -12,6 +12,7 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 interface Props extends ThemeProps {
   className?: string;
   label: string;
+  defaultValue?: string;
   getFormatOptLabel?: (label: string, value: string) => React.ReactNode;
   onChange?: any;
   options: DropdownOptionType[];
@@ -21,7 +22,7 @@ interface Props extends ThemeProps {
   isSetDefaultValue?: boolean;
 }
 
-function Dropdown ({ className, filterOptions, getFormatOptLabel, isSetDefaultValue = true, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, isSetDefaultValue = true, label, onChange, options, value }: Props): React.ReactElement<Props> {
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const transformGrOptions: DropdownTransformGroupOptionType[] = [];
 
@@ -40,10 +41,16 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, isSetDefaultVa
   const grDeps = transformGrOptions.toString();
 
   useEffect(() => {
-    if (transformOptions && transformOptions.length && isSetDefaultValue) {
-      setSelectedValue(transformGrOptions[0].options[0].value);
+    if (isSetDefaultValue) {
+      if (defaultValue) {
+        setSelectedValue(defaultValue);
+      } else {
+        if (transformOptions && transformOptions.length) {
+          setSelectedValue(transformGrOptions[0].options[0].value);
+        }
+      }
     }
-  }, [grDeps, isSetDefaultValue]);
+  }, [defaultValue, grDeps, isSetDefaultValue]);
 
   const handleChange = useCallback(
     ({ value }): void => {

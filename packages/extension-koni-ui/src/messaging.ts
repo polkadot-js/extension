@@ -216,7 +216,7 @@ export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWi
   return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
 }
 
-export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<boolean> {
+export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<string> {
   return sendMessage('pri(accounts.subscribeAccountsInputAddress)', null, cb);
 }
 

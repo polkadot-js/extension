@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { OptionInputAddress } from '@polkadot/extension-base/background/KoniTypes';
 import Dropdown from '@polkadot/extension-koni-ui/components/InputAddress/Dropdown';
 import KeyPair from '@polkadot/extension-koni-ui/components/InputAddress/KeyPair';
-import { saveRecentAccountId, subscribeAccountsInputAddress } from '@polkadot/extension-koni-ui/messaging';
+import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@polkadot/extension-koni-ui/messaging';
 import createItem from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress/createItem';
 import LabelHelp from '@polkadot/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -23,7 +23,7 @@ import { AccountOption } from './types';
 
 interface Props {
   className?: string;
-  defaultValue?: Uint8Array | string | null;
+  defaultValue?: string;
   filter?: string[] | null;
   help?: React.ReactNode;
   hideAddress?: boolean;
@@ -130,15 +130,7 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
   const [lastValue, setInputAddressLastValue] = useState('');
   const inputAddressRef = useRef(null);
   const [options, setOptions] = useState<AccountOption[]>([]);
-  const deps = options.toString();
-
-  useEffect(() => {
-    subscribeAccountsInputAddress(handleGetAccountsInputAddress).catch(console.error);
-  }, [deps]);
-
-  useEffect(() => {
-    setInputAddressLastValue(getLastValue(type));
-  }, [lastValue, type]);
+  const [subscriptionId, setSubscriptionId] = useState<string>('');
 
   const handleGetAccountsInputAddress = (data: OptionInputAddress) => {
     const { options } = data;
@@ -153,6 +145,22 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
 
     setOptions(filteredOptions);
   };
+
+  useEffect(() => {
+    subscribeAccountsInputAddress(handleGetAccountsInputAddress)
+      .then((id) => setSubscriptionId(id))
+      .catch(console.error);
+
+    return () => {
+      cancelSubscription(subscriptionId).catch((e) => console.log('Error when cancel subscription', e));
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setInputAddressLastValue(getLastValue(type));
+  }, [lastValue, type]);
 
   const getFiltered = (): Option[] => {
     return !optionsAll
@@ -234,6 +242,7 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
     <div className={className}>
       <Dropdown
         className='input-address__dropdown'
+        defaultValue={defaultValue}
         filterOptions={filterOptions}
         getFormatOptLabel={formatOptionLabel}
         isSetDefaultValue={isSetDefaultValue}

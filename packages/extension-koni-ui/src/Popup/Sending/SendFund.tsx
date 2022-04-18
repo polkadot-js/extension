@@ -9,6 +9,7 @@ import Button from '@polkadot/extension-koni-ui/components/Button';
 import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
+import { SenderInputAddressType, TokenItemType } from '@polkadot/extension-koni-ui/components/types';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
@@ -21,15 +22,43 @@ interface Props extends ThemeProps {
 
 function SendFund ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const [recipientId, setRecipientId] = useState<string | null>('5G3Wr5f4fDv913LLLXq6B9a2c4oJonhSVXcs69wX7CkSC67k');
+  const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
+  const [recipientId, setRecipientId] = useState<string | null>(null);
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [senderValue, setSenderValue] = useState<string>('');
+  const [senderValue, setSenderValue] = useState<SenderInputAddressType>({} as SenderInputAddressType);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
+  const options: TokenItemType[] = [];
+
+  Object.keys(chainRegistryMap).forEach((networkKey) => {
+    Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
+      const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
+
+      options.push({
+        networkKey: networkKey,
+        token: tokenInfo.symbol,
+        decimals: tokenInfo.decimals,
+        isMainToken: tokenInfo.isMainToken,
+        specialOption: tokenInfo?.specialOption
+      });
+    });
+  });
+
+  // let defaultValueStr: string;
+
+  // if (networkKey === 'all') {
+  //   const defaultValue = options[0];
+  //
+  //   defaultValueStr = `${defaultValue.token}|${defaultValue.networkKey}}`;
+  // } else {
+  //   const defaultValue = options.find((opt) => opt.networkKey === networkKey);
+  //
+  //   defaultValueStr = defaultValue ? `${defaultValue.token}|${defaultValue.networkKey}` : '';
+  // }
+
   const _onSend = useCallback(() => {
     // setShowTxModal(true);
   }, []);
@@ -71,6 +100,7 @@ function SendFund ({ className }: Props): React.ReactElement {
           <div className='send-fund-container'>
             <SenderInputAddress
               className=''
+              options={options}
               setSenderValue={setSenderValue}
             />
 

@@ -17,7 +17,6 @@ export interface TokenItemType {
 
 export interface SenderInputAddressType {
   address: string;
-  isMainToken: boolean;
   networkKey: string;
   token: string;
 }

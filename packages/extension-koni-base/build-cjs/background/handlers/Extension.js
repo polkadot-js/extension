@@ -148,6 +148,28 @@ class KoniExtension extends _Extension.default {
   _getAuthListV2() {
     return new Promise((resolve, reject) => {
       _index.state.getAuthorize(rs => {
+        const accounts = _accounts.accounts.subject.getValue();
+
+        const addressList = Object.keys(accounts).filter(address => accounts[address].type !== 'ethereum');
+        const urlList = Object.keys(rs);
+
+        if (Object.keys(rs[urlList[0]].isAllowedMap).toString() !== addressList.toString()) {
+          urlList.forEach(url => {
+            addressList.forEach(address => {
+              if (!Object.keys(rs[url].isAllowedMap).includes(address)) {
+                rs[url].isAllowedMap[address] = false;
+              }
+            });
+            Object.keys(rs[url].isAllowedMap).forEach(address => {
+              if (!addressList.includes(address)) {
+                delete rs[url].isAllowedMap[address];
+              }
+            });
+          });
+
+          _index.state.setAuthorize(rs);
+        }
+
         resolve(rs);
       });
     });
@@ -460,6 +482,18 @@ class KoniExtension extends _Extension.default {
     }
   }
 
+  _addAddressToAuthList(address) {
+    _index.state.getAuthorize(value => {
+      if (value && Object.keys(value).length) {
+        Object.keys(value).forEach(url => {
+          value[url].isAllowedMap[address] = false;
+        });
+
+        _index.state.setAuthorize(value);
+      }
+    });
+  }
+
   async accountsCreateSuriV2(_ref5) {
     let {
       genesisHash,
@@ -482,6 +516,8 @@ class KoniExtension extends _Extension.default {
           genesisHash,
           name: newAccountName
         }, type);
+
+        this._addAddressToAuthList(address);
       });
     });
     await new Promise(resolve => {
@@ -504,6 +540,17 @@ class KoniExtension extends _Extension.default {
         resolve();
       });
     });
+
+    _index.state.getAuthorize(value => {
+      if (value && Object.keys(value).length) {
+        Object.keys(value).forEach(url => {
+          delete value[url].isAllowedMap[address];
+        });
+
+        _index.state.setAuthorize(value);
+      }
+    });
+
     return true;
   }
 
@@ -594,6 +641,8 @@ class KoniExtension extends _Extension.default {
 
     this._saveCurrentAccountAddress(address, false, '', () => {
       _uiKeyring.default.addPair(childPair, password);
+
+      this._addAddressToAuthList(address);
     });
 
     return true;
@@ -611,6 +660,8 @@ class KoniExtension extends _Extension.default {
       try {
         this._saveCurrentAccountAddress(address, false, '', () => {
           _uiKeyring.default.restoreAccount(file, password);
+
+          this._addAddressToAuthList(address);
         });
       } catch (error) {
         throw new Error(error.message);

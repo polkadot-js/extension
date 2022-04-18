@@ -9,7 +9,6 @@ import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/co
 import { Web3NftApi } from '@polkadot/extension-koni-base/api/nft/eth_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import QuartzNftApi from '@polkadot/extension-koni-base/api/nft/quartz_nft';
 import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
 import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
 import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
@@ -37,8 +36,8 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
       return new StatemineNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.uniqueNft:
       return new UniqueNftApi(api, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.quartz:
-      return new QuartzNftApi(api, useAddresses, chain);
+    // case SUPPORTED_NFT_NETWORKS.quartz:
+    //   return new QuartzNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.bitcountry:
       return new BitCountryNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonbeam:

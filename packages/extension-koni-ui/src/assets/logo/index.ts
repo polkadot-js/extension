@@ -107,7 +107,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   shidenEvm: require('./shiden.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  'sora-substrate': require('./sora-substrate.svg'),
+  sora: require('./sora-substrate.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   statemine: require('./statemine.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -250,6 +250,20 @@ const LogosMap: Record<string, string> = {
   hko: require('./hko.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bill: require('./bill.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  chaos: require('./chaosdao.jpeg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcrmrk: require('./rmrk.jpg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckint: require('./kintsugi.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcksm: require('./kusama.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xckar: require('./karura.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcbnc: require('./bifrost.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  xcausd: require('./ausd.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

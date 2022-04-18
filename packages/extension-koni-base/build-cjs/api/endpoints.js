@@ -170,7 +170,7 @@ const NETWORKS = {
   },
   equilibrium: {
     chain: 'Equilibrium',
-    genesisHash: '00x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
+    genesisHash: '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
     ss58Format: 67,
     provider: 'wss://node.pol.equilibrium.io/',
     groups: ['POLKADOT_PARACHAIN'],
@@ -216,12 +216,12 @@ const NETWORKS = {
     groups: ['TEST_NET'],
     nativeToken: 'DOL'
   },
-  'sora-substrate': {
-    chain: 'SORA',
+  sora: {
+    chain: 'SORA KUSAMA',
     genesisHash: '0x7e4e32d0feafd4f9c9414b0be86373f9a1efa904809b683453a9af6856d38ad5',
     ss58Format: 69,
     provider: 'wss://sora.api.onfinality.io/public-ws',
-    groups: ['POLKADOT_PARACHAIN'],
+    groups: ['KUSAMA_PARACHAIN'],
     nativeToken: 'XOR',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
@@ -261,8 +261,7 @@ const NETWORKS = {
     ss58Format: 42,
     provider: 'wss://ws.azero.dev/',
     groups: ['MAIN_NET'],
-    nativeToken: 'AZERO',
-    crowdloanUrl: 'https://contribute.alephzero.org/'
+    nativeToken: 'AZERO'
   },
   alephTest: {
     chain: 'Aleph Zero Testnet',
@@ -271,6 +270,14 @@ const NETWORKS = {
     provider: 'wss://ws.test.azero.dev/',
     groups: ['TEST_NET'],
     nativeToken: 'TZERO'
+  },
+  chainx: {
+    chain: 'Chain X',
+    genesisHash: '0x6ac13efb5b368b97b4934cef6edfdd99c2af51ba5109bfb8dacc116f9c584c10',
+    ss58Format: 44,
+    provider: 'wss://mainnet.chainx.org/ws',
+    groups: ['MAIN_NET'],
+    nativeToken: 'PCX'
   },
   opal: {
     chain: 'OPAL by UNIQUE',
@@ -291,9 +298,9 @@ const NETWORKS = {
   },
   efinity: {
     chain: 'Efinity',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    provider: 'PROVIDER',
+    genesisHash: '0x335369975fced3fc22e23498da306a712f4fd964c957364d53c49cea9db8bc2f',
+    ss58Format: 1110,
+    provider: 'wss://rpc.efinity.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2021,
     nativeToken: 'EFI',
@@ -424,7 +431,7 @@ const NETWORKS = {
     genesisHash: '0x8b290fa39a8808f29d7309ea99442c95bf964838aef14be5a6449ae48f8a5f1f',
     ss58Format: 6,
     provider: 'wss://bifrost-rpc.testnet.liebi.com/ws',
-    groups: ['KUSAMA_PARACHAIN'],
+    groups: ['TEST_NET'],
     nativeToken: 'BNC'
   },
   kilt: {
@@ -530,7 +537,7 @@ const NETWORKS = {
     genesisHash: '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
     ss58Format: 7391,
     provider: 'wss://ws.unique.network/',
-    groups: ['POLKADO_PARACHAIN'],
+    groups: ['POLKADOT_PARACHAIN'],
     paraId: 2037,
     nativeToken: 'UNQ'
   },
@@ -649,13 +656,13 @@ const NETWORKS = {
   },
   turing: {
     chain: 'Turing Network',
-    genesisHash: 'UNKNOWN',
+    genesisHash: '0x0f62b701fb12d02237a33b84818c11f621653d2b1614c777973babf4652b535d',
     ss58Format: 51,
-    provider: 'wss://neumann.api.onfinality.io/public-ws',
+    provider: 'wss://rpc.turing.oak.tech',
     groups: ['KUSAMA_PARACHAIN'],
     paraId: 2114,
     nativeToken: 'TUR',
-    crowdloanUrl: 'https://oak.tech/turing/check-reward/'
+    crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
   },
   mangatax: {
     chain: 'MangataX Public Testnet',
@@ -663,7 +670,36 @@ const NETWORKS = {
     ss58Format: 42,
     provider: 'wss://v4-prod-collator-01.mangatafinance.cloud',
     groups: ['TEST_NET'],
+    paraId: 2110,
     nativeToken: 'MGAT'
+  },
+  mangatax_para: {
+    chain: 'MangataX',
+    genesisHash: 'UNKNOWN',
+    ss58Format: 42,
+    provider: 'wss://v4-prod-collator-01.mangatafinance.cloud',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2110,
+    nativeToken: 'MGAT'
+  },
+  encointer: {
+    chain: 'Encointer Network',
+    genesisHash: '0x7dd99936c1e9e6d1ce7d90eb6f33bea8393b4bf87677d675aa63c9cb3e8c5b5b',
+    ss58Format: 42,
+    provider: 'wss://encointer.api.onfinality.io/public-ws',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 1001,
+    nativeToken: 'KSM'
+  },
+  litmus: {
+    chain: 'Litmus',
+    genesisHash: '0xda5831fbc8570e3c6336d0d72b8c08f8738beefec812df21ef2afc2982ede09c',
+    ss58Format: 131,
+    provider: 'wss://rpc.litmus-parachain.litentry.io',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2106,
+    nativeToken: 'LIT',
+    crowdloanUrl: 'https://kusama-crowdloan.litentry.com/'
   }
 };
 

@@ -7,6 +7,64 @@ exports.PREDEFINE_TOKEN_DATA_MAP = void 0;
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 const PREDEFINE_TOKEN_DATA_MAP = {
+  statemine: {
+    USDT: {
+      isMainToken: false,
+      assetIndex: 11,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 4
+    },
+    USDC: {
+      isMainToken: false,
+      assetIndex: 10,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 4
+    },
+    RMRK: {
+      isMainToken: false,
+      assetIndex: 8,
+      symbol: 'RMRK',
+      name: 'RMRK.app',
+      decimals: 10
+    },
+    ARIS: {
+      isMainToken: false,
+      assetIndex: 16,
+      symbol: 'ARIS',
+      name: 'PolarisDAO',
+      decimals: 8
+    },
+    BILL: {
+      isMainToken: false,
+      assetIndex: 223,
+      symbol: 'BILL',
+      name: 'BILLCOIN',
+      decimals: 8
+    },
+    CHAOS: {
+      isMainToken: false,
+      assetIndex: 69420,
+      symbol: 'CHAOS',
+      name: 'Chaos',
+      decimals: 10
+    },
+    CHRWNA: {
+      isMainToken: false,
+      assetIndex: 567,
+      symbol: 'CHRWNA',
+      name: 'Chrawnna Coin',
+      decimals: 10
+    },
+    BAILEGO: {
+      isMainToken: false,
+      assetIndex: 88888,
+      symbol: 'BAILEGO',
+      name: 'SHIBATALES',
+      decimals: 0
+    }
+  },
   acala: {
     AUSD: {
       isMainToken: false,
@@ -167,6 +225,76 @@ const PREDEFINE_TOKEN_DATA_MAP = {
     }
   },
   moonriver: {
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xB44a9B6905aF7c801311e8F4E76932ee959c663C',
+      decimals: 6,
+      name: 'Tether USD'
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      erc20Address: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D',
+      decimals: 6,
+      name: 'USD Coin'
+    },
+    DAI: {
+      isMainToken: false,
+      symbol: 'DAI',
+      erc20Address: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
+      decimals: 18,
+      name: 'Dai Stablecoin'
+    },
+    MFAM: {
+      isMainToken: false,
+      symbol: 'MFAM',
+      erc20Address: '0xBb8d88bcD9749636BC4D2bE22aaC4Bb3B01A58F1',
+      decimals: 18,
+      name: 'MFAM'
+    },
+    ZLK: {
+      isMainToken: false,
+      symbol: 'ZLK',
+      erc20Address: '0x0f47ba9d9Bde3442b42175e51d6A367928A1173B',
+      decimals: 18,
+      name: 'Zenlink Network'
+    },
+    SOLAR: {
+      isMainToken: false,
+      symbol: 'SOLAR',
+      erc20Address: '0x6bD193Ee6D2104F14F94E2cA6efefae561A4334B',
+      decimals: 18,
+      name: 'SolarBeam'
+    },
+    FRAX: {
+      isMainToken: false,
+      symbol: 'FRAX',
+      erc20Address: '0x1A93B23281CC1CDE4C4741353F3064709A16197d',
+      decimals: 18,
+      name: 'SolarBeam'
+    },
+    FXS: {
+      isMainToken: false,
+      symbol: 'FXS',
+      erc20Address: '0x6f1D1Ee50846Fcbc3de91723E61cb68CFa6D0E98',
+      decimals: 18,
+      name: 'Frax Share'
+    },
+    CWS: {
+      isMainToken: false,
+      symbol: 'CWS',
+      erc20Address: '0x6fc9651f45B262AE6338a701D563Ab118B1eC0Ce',
+      decimals: 18,
+      name: 'Crowns'
+    },
+    RIB: {
+      isMainToken: false,
+      symbol: 'RIB',
+      erc20Address: '0xbD90A6125a84E5C512129D622a75CDDE176aDE5E',
+      decimals: 18,
+      name: 'RiverBoat'
+    },
     xcKBTC: {
       isMainToken: false,
       symbol: 'xcKBTC',
@@ -208,6 +336,85 @@ const PREDEFINE_TOKEN_DATA_MAP = {
       erc20Address: '0xFFFFFFFFF075423BE54811ECB478E911F22DDE7D',
       decimals: 12,
       name: 'xcBNC'
+    }
+  },
+  moonbeam: {
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      erc20Address: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73',
+      decimals: 6,
+      name: 'Tether USD'
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      erc20Address: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b',
+      decimals: 6,
+      name: 'USD Coin'
+    },
+    BNB: {
+      isMainToken: false,
+      symbol: 'BNB',
+      erc20Address: '0xc9BAA8cfdDe8E328787E29b4B078abf2DaDc2055',
+      decimals: 18,
+      name: 'Binance'
+    },
+    GLINT: {
+      isMainToken: false,
+      symbol: 'GLINT',
+      erc20Address: '0xcd3B51D98478D53F4515A306bE565c6EebeF1D58',
+      decimals: 18,
+      name: 'Beamswap'
+    },
+    SHARE: {
+      isMainToken: false,
+      symbol: 'SHARE',
+      erc20Address: '0x4204cAd97732282d261FbB7088e07557810A6408',
+      decimals: 18,
+      name: 'Beamshare'
+    },
+    BEANS: {
+      isMainToken: false,
+      symbol: 'BEANS',
+      erc20Address: '0x65b09ef8c5A096C5Fd3A80f1F7369E56eB932412',
+      decimals: 18,
+      name: 'MoonBeans'
+    },
+    STELLA: {
+      isMainToken: false,
+      symbol: 'STELLA',
+      erc20Address: '0x0E358838ce72d5e61E0018a2ffaC4bEC5F4c88d2',
+      decimals: 18,
+      name: 'StellaSwap'
+    },
+    xStella: {
+      isMainToken: false,
+      symbol: 'xStella',
+      erc20Address: '0x06A3b410b681c82417A906993aCeFb91bAB6A080',
+      decimals: 18,
+      name: 'XStella'
+    },
+    veSOLAR: {
+      isMainToken: false,
+      symbol: 'veSOLAR',
+      erc20Address: '0x0DB6729C03C85B0708166cA92801BcB5CAc781fC',
+      decimals: 18,
+      name: 'Vested SolarBeam'
+    },
+    FLARE: {
+      isMainToken: false,
+      symbol: 'FLARE',
+      erc20Address: '0xE3e43888fa7803cDC7BEA478aB327cF1A0dc11a7',
+      decimals: 18,
+      name: 'Flare'
+    },
+    CSG: {
+      isMainToken: false,
+      symbol: 'CSG',
+      erc20Address: '0x2Dfc76901bB2ac2A5fA5fc479590A490BBB10a5F',
+      decimals: 18,
+      name: 'Cougar'
     }
   },
   astarEvm: {

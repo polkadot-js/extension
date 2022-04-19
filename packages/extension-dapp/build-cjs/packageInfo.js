@@ -11,6 +11,6 @@ const packageInfo = {
   name: '@polkadot/extension-dapp',
   path: typeof __dirname === 'string' ? __dirname : 'auto',
   type: 'cjs',
-  version: '0.3.4-2'
+  version: '0.3.5-1'
 };
 exports.packageInfo = packageInfo;

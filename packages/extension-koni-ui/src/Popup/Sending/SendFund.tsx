@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import Button from '@polkadot/extension-koni-ui/components/Button';
+import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
@@ -15,6 +16,7 @@ import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTrans
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps, TxResult } from '@polkadot/extension-koni-ui/types';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string,
@@ -22,6 +24,7 @@ interface Props extends ThemeProps {
 
 function SendFund ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
@@ -32,6 +35,11 @@ function SendFund ({ className }: Props): React.ReactElement {
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const options: TokenItemType[] = [];
+  let decimals = 10;
+
+  if (senderValue && Object.keys(senderValue).length) {
+    decimals = chainRegistryMap[senderValue.networkKey].chainDecimals[0];
+  }
 
   Object.keys(chainRegistryMap).forEach((networkKey) => {
     Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
@@ -109,16 +117,17 @@ function SendFund ({ className }: Props): React.ReactElement {
               setRecipientId={setRecipientId}
             />
 
-            {/* <InputBalance */}
-            {/*  autoFocus */}
-            {/*  className={'send-fund-balance-item'} */}
-            {/*  defaultValue={4} */}
-            {/*  help={'The full account balance to be transferred, minus the transaction fees'} */}
-            {/*  isDisabled={false} */}
-            {/*  isSi */}
-            {/*  key={'key'} */}
-            {/*  label={'transferable minus fees'} */}
-            {/* /> */}
+            <InputBalance
+              autoFocus
+              className={'send-fund-balance-item'}
+              decimals={decimals}
+              help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+              isError={false}
+              isZeroable
+              label={t<string>('amount')}
+              onChange={setAmount}
+              placeholder={'0'}
+            />
             <div className='submit-btn-wrapper'>
               <Button
                 className={'kn-submit-btn'}

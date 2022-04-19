@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SiDef } from '@polkadot/util/types';
-import type { BitLength } from './types';
+import type { BitLength } from '../types';
 
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
+import Input, { KEYS_PRE } from '@polkadot/extension-koni-ui/components/InputNumber/Input';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn } from '@polkadot/util';
-
-import Input, { KEYS_PRE } from './Input';
 
 interface Props {
   autoFocus?: boolean;
@@ -305,7 +304,6 @@ export default React.memo(styled(InputNumber)(({ theme }: ThemeProps) => `
   padding: 7px 120px 7px 16px;
   color: ${theme.textColor2};
   position: relative;
-  z-index: 2;
 
   > label {
     font-size: 15px;

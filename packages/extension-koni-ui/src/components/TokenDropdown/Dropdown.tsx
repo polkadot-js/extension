@@ -32,7 +32,6 @@ interface Props {
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
   isSetDefaultValue?: boolean;
-  reference: React.MutableRefObject<null>
 }
 
 function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenValue }: WrapperProps): React.ReactElement<WrapperProps> {
@@ -41,11 +40,12 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenV
   const dropdownRef = useRef(null);
 
   const toggleDropdownWrapper = useCallback(() => {
-    setDropdownOpen(true);
-  }, []);
+    setDropdownOpen(!isDropdownOpen);
+  }, [isDropdownOpen]);
 
   useOutsideClick(dropdownRef, (): void => {
-    setDropdownOpen(false);
+    console.log('isDropdownOpen', isDropdownOpen);
+    // setDropdownOpen(false);
   });
 
   const _onChange = useCallback((value: string) => {
@@ -58,6 +58,7 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenV
       <div
         className='dropdown-wrapper-item'
         onClick={toggleDropdownWrapper}
+        ref={dropdownRef}
       >
         <img
           alt={tokenValueArr[1]}
@@ -73,14 +74,13 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenV
           label={''}
           onChange={_onChange}
           options={options}
-          reference={dropdownRef}
         />
       )}
     </div>
   );
 }
 
-function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChange, options, reference, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChange, options, value }: Props): React.ReactElement<Props> {
   const transformOptions = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}`, networkKey: t.networkKey }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
@@ -172,7 +172,7 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
   };
 
   return (
-    <div ref={reference}>
+    <>
       <Label
         className={className}
         label={label}
@@ -195,7 +195,7 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
           value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
         />
       </Label>
-    </div>
+    </>
   );
 }
 
@@ -209,6 +209,7 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
   }
 
   .dropdown-wrapper-selected-logo {

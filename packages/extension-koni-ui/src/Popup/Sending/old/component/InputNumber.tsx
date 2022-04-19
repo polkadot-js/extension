@@ -14,7 +14,7 @@ import { Registry } from '@polkadot/types/types';
 import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
 
 import Dropdown from './Dropdown';
-import Input, { KEYS_PRE } from './Input';
+import Input, { KEYS_PRE } from '../../../../components/InputNumber/Input';
 
 interface Props {
   registry: Registry;

@@ -20,6 +20,7 @@ import { keyring } from '@polkadot/ui-keyring';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 
 import { AccountOption } from './types';
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props {
   className?: string;
@@ -138,9 +139,9 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
     let filteredOptions: AccountOption[];
 
     if (isEthereum) {
-      filteredOptions = addressList.filter((opt) => opt.key && (opt.key.includes('0x') || opt.key === 'header-accounts' || opt.key === 'header-recent'));
+      filteredOptions = addressList.filter((opt) => (opt.key && isEthereumAddress(opt.key)) || opt.key === 'header-accounts' || opt.key === 'header-recent');
     } else {
-      filteredOptions = addressList.filter((opt) => opt.key && (!opt.key.includes('0x') || opt.key === 'header-accounts' || opt.key === 'header-recent'));
+      filteredOptions = addressList.filter((opt) => (opt.key && !isEthereumAddress(opt.key)) || opt.key === 'header-accounts' || opt.key === 'header-recent');
     }
 
     setOptions(filteredOptions);
@@ -245,6 +246,7 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
         defaultValue={defaultValue}
         filterOptions={filterOptions}
         getFormatOptLabel={formatOptionLabel}
+        isDisabled={isDisabled}
         isSetDefaultValue={isSetDefaultValue}
         onChange={onChangeData}
         options={actualOptions}

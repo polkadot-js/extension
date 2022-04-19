@@ -17,8 +17,8 @@ import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore
 import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer';
 import ImportLedger from '@polkadot/extension-koni-ui/Popup/ImportLedger';
 import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
-import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/SendFund';
-// import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
+// import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/SendFund';
+import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
 import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit';

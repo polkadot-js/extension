@@ -20,9 +20,10 @@ interface Props extends ThemeProps {
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
   isSetDefaultValue?: boolean;
+  isDisabled: boolean
 }
 
-function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, isSetDefaultValue = true, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, isDisabled, isSetDefaultValue = true, label, onChange, options, value }: Props): React.ReactElement<Props> {
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const transformGrOptions: DropdownTransformGroupOptionType[] = [];
 
@@ -109,6 +110,7 @@ function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, 
           classNamePrefix='input-address-dropdown'
           filterOption={filterOptions && filterOption}
           formatOptionLabel={getFormatOptLabel && formatOptionLabel}
+          isDisabled={isDisabled}
           isSearchable
           menuPlacement={'auto'}
           menuPortalTarget={document.querySelector('body')}

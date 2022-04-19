@@ -10,8 +10,7 @@ import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constant
 import { BitLength } from '@polkadot/extension-koni-ui/components/types';
 import { Registry } from '@polkadot/types/types';
 import { BN, formatBalance, isUndefined } from '@polkadot/util';
-
-import InputNumber from './InputNumber';
+import InputNumber from '@polkadot/extension-koni-ui/components/InputNumber/index';
 
 interface Props {
   autoFocus?: boolean;

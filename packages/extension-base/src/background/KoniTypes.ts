@@ -536,7 +536,8 @@ export interface EvmNftTransactionResponse {
 
 export interface NetworkUpsertResponse {
   errors: NETWORK_ERROR[],
-  conflictNetwork: string
+  conflictKey: string,
+  conflictChain: string
 }
 
 export interface ApiConnectResponse {

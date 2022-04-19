@@ -30,13 +30,14 @@ function getCurrentEndpoint (data: NetworkJson) {
 function NetworkEdit ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
-  const { networkEditParams: { data, mode } } = useSelector((state: RootState) => state);
+  const { networkCreateParams: { data } } = useSelector((state: RootState) => state);
   const [networkInfo, setNetworkInfo] = useState(data);
   const [_isValidProvider, _setIsvalidProvider] = useState(false);
   const [isProviderConnected, setIsProviderConnected] = useState(false);
-  const [provider, setProvider] = useState<string | null>(mode === 'edit' ? getCurrentEndpoint(data) : null);
+  const [provider, setProvider] = useState<string | null>(getCurrentEndpoint(data) || null);
   const [loading, setLoading] = useState(false);
-  const [needCheckConnection, setNeedCheckConnection] = useState(mode === 'create');
+  const [needValidate, setNeedValidate] = useState(false);
+  const isCurrentEndpoint = provider === getCurrentEndpoint(data);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -53,54 +54,64 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         _setIsvalidProvider(false);
       } else {
         _setIsvalidProvider(true);
-        setNeedCheckConnection(true);
+
+        if (needValidate && !isCurrentEndpoint) {
+          setNeedValidate(false);
+          setLoading(true);
+          apiMapConnect(provider).then((resp) => {
+            setLoading(false);
+            setIsProviderConnected(resp.success);
+
+            if (resp.success) {
+              setNetworkInfo({
+                ...networkInfo,
+                key: resp.key,
+                active: true,
+                customProviders: { custom: provider },
+                currentProvider: 'custom',
+                groups: resp.networkGroup,
+                currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+                genesisHash: resp.genesisHash,
+                ss58Format: parseInt(resp.ss58Prefix),
+                chain: resp.chain
+              });
+            }
+          }).catch(console.error);
+        }
       }
     }
-  }, [provider]);
-
-  useEffect(() => {
-    if (provider && _isValidProvider && needCheckConnection) {
-      setLoading(true);
-      // Call backend to validate
-      apiMapConnect(provider).then((resp) => {
-        setLoading(false);
-        setIsProviderConnected(resp.success);
-
-        if (resp.success) {
-          setNetworkInfo({
-            ...networkInfo,
-            key: resp.key,
-            active: true,
-            customProviders: { custom: provider },
-            currentProvider: 'custom',
-            groups: resp.networkGroup,
-            currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
-            genesisHash: resp.genesisHash,
-            ss58Format: parseInt(resp.ss58Prefix),
-            chain: resp.chain
-          });
-        }
-      }).catch(console.error);
-    }
-  }, [_isValidProvider, needCheckConnection, networkInfo, provider]);
+  }, [data, isCurrentEndpoint, needValidate, networkInfo, provider]);
 
   const _onSaveNetwork = useCallback(() => {
     if (!_isValidProvider || !isProviderConnected) {
       return;
     }
 
-    // upsertNetworkMap(networkInfo).then((resp) => {
-    //   if (resp.errors.length <= 0) {
-    //     show('Successfully added a new network');
-    //     window.localStorage.setItem('popupNavigation', '/');
-    //     onAction('/');
-    //   } else {
-    //     show(`New network has conflicts with ${resp.conflictNetwork} network`);
-    //   }
-    // }).catch(console.error);
-
-    console.log(mode, networkInfo);
-  }, [_isValidProvider, isProviderConnected, mode, networkInfo, onAction, show]);
+    upsertNetworkMap({
+      active: true,
+      currentProvider: 'custom',
+      currentProviderMode: 'ws',
+      genesisHash: '0x56854b19e50b40fb81be2cfda9cba5b43556854258b0fae8af170abbb1c700d1',
+      groups: [
+        'TEST_NET'
+      ],
+      providers: {},
+      ss58Format: 42,
+      key: 'custom_0x56854b19e50b40fb81be2cfda9cba5b43556854258b0fae8af170abbb1c700d1',
+      chain: 'Metaverse Dev',
+      customProviders: {
+        custom: 'wss://dev-chain.bit.country'
+      }
+    }).then((resp) => {
+      if (resp.errors.length <= 0) {
+        show('Successfully added a new network');
+        window.localStorage.setItem('popupNavigation', '/');
+        onAction('/');
+      } else {
+        show(`New network conflicts with ${resp.conflictChain}`);
+      }
+    }).catch(console.error);
+  }, [_isValidProvider, isProviderConnected, networkInfo, onAction, show]);
 
   const onChangeChain = useCallback((val: string) => {
     setNetworkInfo({
@@ -111,6 +122,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const onChangeProvider = useCallback((val: string) => {
     setProvider(val);
+    setNeedValidate(true);
   }, []);
 
   const onChangeParaId = useCallback((val: string) => {
@@ -147,7 +159,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       <Header
         showBackArrow
         showSubHeader
-        subHeaderName={mode === 'edit' ? t<string>('Network Edit') : t<string>('Add new network')}
+        subHeaderName={t<string>('Configure network')}
         to='/account/networks'
       />
 
@@ -179,11 +191,11 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           value={networkInfo?.blockExplorer || ''}
         />
 
-        {isProviderConnected && _isValidProvider && !loading && <div className={'connect-success'}>Provider connected successfully</div>}
+        {!isCurrentEndpoint && isProviderConnected && _isValidProvider && !loading && <div className={'connect-success'}>Provider connected successfully</div>}
 
-        {!isProviderConnected && _isValidProvider && !loading && <div className={'connect-fail'}>Provider cannot connect</div>}
+        {!isCurrentEndpoint && !isProviderConnected && _isValidProvider && !loading && <div className={'connect-fail'}>Encountered a problem trying to validate this provider</div>}
 
-        {loading && <div className={'connect-info'}>Connecting to the provider...</div>}
+        {!isCurrentEndpoint && loading && <div className={'connect-info'}>Connecting to the provider...</div>}
 
         <ButtonArea className={'button-area'}>
           <Button
@@ -194,7 +206,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            isDisabled={!isProviderConnected || !_isValidProvider || networkInfo.chain === ''}
+            isDisabled={!isProviderConnected || !_isValidProvider}
             onClick={_onSaveNetwork}
           >
             {t<string>('Save')}

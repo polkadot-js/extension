@@ -9,7 +9,7 @@ import { HorizontalLabelToggle, Link } from '@polkadot/extension-koni-ui/compone
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { disableNetworkMap, enableNetworkMap } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
-import { NetworkEditParams } from '@polkadot/extension-koni-ui/stores/types';
+import { NetworkCreateParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
@@ -41,7 +41,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
   }, [handleShowConfirm, item.key]);
 
   const updateNetworkEditParams = useCallback(() => {
-    store.dispatch({ type: 'networkEditParams/update', payload: { data: item, mode: 'edit' } as NetworkEditParams });
+    store.dispatch({ type: 'networkCreateParams/update', payload: { data: item, mode: 'edit' } as NetworkCreateParams });
   }, [item]);
 
   return (
@@ -60,7 +60,7 @@ function NetworkItem ({ className, item }: Props): React.ReactElement {
         <Link
           className={'link-edit'}
           onClick={updateNetworkEditParams}
-          to='/account/network-edit'
+          to='/account/config-network'
         >
           <div className='network-item__text'>{item.chain}</div>
           <div className='network-item__toggle' />

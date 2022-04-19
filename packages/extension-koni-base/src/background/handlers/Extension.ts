@@ -7,7 +7,56 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiConnectResponse, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetWorkGroup, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  ApiConnectResponse,
+  ApiInitStatus,
+  ApiProps,
+  BackgroundWindow,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmNftTransactionResponse,
+  NETWORK_ERROR,
+  NetWorkGroup,
+  NetworkJson,
+  NetWorkMetadataDef,
+  NetworkUpsertResponse,
+  NftCollection,
+  NftCollectionJson,
+  NftItem,
+  NftJson,
+  NftTransferExtra,
+  PriceJson,
+  RequestAccountCreateSuriV2,
+  RequestAccountExportPrivateKey,
+  RequestApi,
+  RequestAuthorization,
+  RequestAuthorizationPerAccount,
+  RequestAuthorizeApproveV2,
+  RequestCheckTransfer,
+  RequestForgetSite,
+  RequestNftForceUpdate,
+  RequestSeedCreateV2,
+  RequestSeedValidateV2,
+  RequestTransactionHistoryAdd,
+  RequestTransfer,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountExportPrivateKey,
+  ResponseCheckTransfer,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  StakingJson,
+  StakingRewardJson,
+  TokenInfo,
+  TransactionHistoryItemType,
+  TransferError,
+  TransferErrorCode,
+  TransferStep
+} from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -1195,15 +1244,30 @@ export default class KoniExtension extends Extension {
     const errors: NETWORK_ERROR[] = [];
     const currentNetworks = this.getNetworkMap();
     const allExistedProviders: Record<string, string>[] = [];
-    let conflictNetwork = '';
+    let conflictKey = '';
+    let conflictChain = '';
 
     for (const [key, value] of Object.entries(currentNetworks)) {
       Object.values(value.providers).forEach((provider) => {
         allExistedProviders.push({ key, provider });
       });
+
+      if (value.customProviders) {
+        Object.values(value.customProviders).forEach((provider) => {
+          allExistedProviders.push({ key, provider });
+        });
+      }
     }
 
-    for (const _provider of Object.values(data.providers)) {
+    let allNewProviders: string[] = [];
+
+    if (!data.customProviders) {
+      allNewProviders = Object.values(data.providers);
+    } else {
+      allNewProviders = [...Object.values(data.providers), ...Object.values(data.customProviders)];
+    }
+
+    for (const _provider of allNewProviders) {
       if (!isValidProvider(_provider)) {
         errors.push(NETWORK_ERROR.INVALID_PROVIDER);
         break;
@@ -1212,23 +1276,24 @@ export default class KoniExtension extends Extension {
       for (const { key, provider } of allExistedProviders) {
         if (provider === _provider) {
           errors.push(NETWORK_ERROR.EXISTED_NETWORK);
-          conflictNetwork = key;
+          conflictKey = key;
+          conflictChain = currentNetworks[key].chain;
           break;
         }
       }
     }
 
-    return { errors, conflictNetwork };
+    return { errors, conflictKey, conflictChain };
   }
 
   private upsertNetworkMap (data: NetworkJson): NetworkUpsertResponse {
-    const { conflictNetwork, errors } = this.validateNetwork(data);
+    const { conflictChain, conflictKey, errors } = this.validateNetwork(data);
 
     if (errors.length <= 0) {
       state.upsertNetworkMap(data);
     }
 
-    return { errors, conflictNetwork };
+    return { errors, conflictKey, conflictChain };
   }
 
   private removeNetworkMap (networkKey: string): boolean {
@@ -1268,46 +1333,64 @@ export default class KoniExtension extends Extension {
   }
 
   private async apiMapConnect (provider: string): Promise<ApiConnectResponse> {
+    let result: ApiConnectResponse = {
+      success: false,
+      key: '',
+      genesisHash: '',
+      ss58Prefix: '',
+      networkGroup: [],
+      chain: ''
+    };
+
     try {
       const apiProps = initApi('custom', provider);
-      const api = await apiProps.isReady;
-      const genesisHash = api.api.genesisHash?.toHex();
-      const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
-      const [chainType, chain] = await Promise.all([
-        api.api.rpc.system.chainType(),
-        api.api.rpc.system.chain()
+      const timeout = new Promise((resolve) => {
+        const id = setTimeout(() => {
+          clearTimeout(id);
+          resolve(null);
+        }, 5000);
+      });
+
+      const res = await Promise.race([
+        timeout,
+        apiProps.isReady
       ]);
-      const key = 'custom_' + genesisHash.toString();
 
-      let parsedChainType: NetWorkGroup = 'UNKNOWN';
+      if (res !== null) {
+        const api = res as ApiProps;
+        const genesisHash = api.api.genesisHash?.toHex();
+        const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
+        const [chainType, chain] = await Promise.all([
+          api.api.rpc.system.chainType(),
+          api.api.rpc.system.chain()
+        ]);
+        const key = 'custom_' + genesisHash.toString();
 
-      if (chainType) {
-        if (chainType.type === 'Development') {
-          parsedChainType = 'TEST_NET';
-        } else if (chainType.type === 'Live') {
-          parsedChainType = 'MAIN_NET';
+        let parsedChainType: NetWorkGroup = 'UNKNOWN';
+
+        if (chainType) {
+          if (chainType.type === 'Development') {
+            parsedChainType = 'TEST_NET';
+          } else if (chainType.type === 'Live') {
+            parsedChainType = 'MAIN_NET';
+          }
         }
+
+        result = {
+          success: true,
+          key,
+          genesisHash,
+          ss58Prefix,
+          networkGroup: [parsedChainType],
+          chain: chain ? chain.toString() : ''
+        };
       }
 
-      return {
-        success: true,
-        key,
-        genesisHash,
-        ss58Prefix,
-        networkGroup: [parsedChainType],
-        chain: chain ? chain.toString() : ''
-      };
+      return result;
     } catch (e) {
       console.error('Error connecting to provider', e);
 
-      return {
-        success: false,
-        key: '',
-        genesisHash: '',
-        ss58Prefix: '',
-        networkGroup: [],
-        chain: ''
-      };
+      return result;
     }
   }
 

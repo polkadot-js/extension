@@ -11,7 +11,7 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import NetworkItem from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkItem';
 import { RootState, store } from '@polkadot/extension-koni-ui/stores';
-import { NetworkEditParams } from '@polkadot/extension-koni-ui/stores/types';
+import { NetworkCreateParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
@@ -42,7 +42,7 @@ function Networks ({ className }: Props): React.ReactElement {
       chain: ''
     };
 
-    store.dispatch({ type: 'networkEditParams/update', payload: { data: item, mode: 'create' } as NetworkEditParams });
+    store.dispatch({ type: 'networkCreateParams/update', payload: { data: item } as NetworkCreateParams });
   }, []);
 
   return (
@@ -81,7 +81,7 @@ function Networks ({ className }: Props): React.ReactElement {
       <div className={'add-network-container'}>
         <Link
           onClick={handleAddNetwork}
-          to='/account/network-edit'
+          to='/account/config-network'
         >
           <div className={'add-network-button'}>
             Add Network

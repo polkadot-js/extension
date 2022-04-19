@@ -20,7 +20,7 @@ import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
-import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkEdit';
+import NetworkCreate from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkEdit';
 import Networks from '@polkadot/extension-koni-ui/Popup/Settings/networks/Networks';
 import uiSettings from '@polkadot/ui-settings';
 
@@ -230,7 +230,7 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/settings'>{wrapWithErrorBoundary(<Settings />, 'account-settings')}</Route>
                           <Route path='/account/general-setting'>{wrapWithErrorBoundary(<GeneralSetting />, 'account-general-settings')}</Route>
                           <Route path='/account/networks'>{wrapWithErrorBoundary(<Networks />, 'account-networks')}</Route>
-                          <Route path='/account/network-edit'>{wrapWithErrorBoundary(<NetworkEdit />, 'account-network-edit')}</Route>
+                          <Route path='/account/config-network'>{wrapWithErrorBoundary(<NetworkCreate />, 'account-network-edit')}</Route>
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>

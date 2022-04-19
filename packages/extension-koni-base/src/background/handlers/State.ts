@@ -91,10 +91,13 @@ export default class KoniState extends State {
 
         for (const [key, network] of Object.entries(storedNetworkMap)) {
           if (key in PREDEFINED_NETWORKS) {
+            // TODO: fields to merge
             // check change and override custom providers if exist
             if ('customProviders' in network) {
               mergedNetworkMap[key].customProviders = network.customProviders;
             }
+
+            mergedNetworkMap[key].active = network.active;
 
             if (network.customProviders && Object.keys(network.customProviders).includes(network.currentProvider)) {
               mergedNetworkMap[key].currentProvider = network.currentProvider;
@@ -114,7 +117,6 @@ export default class KoniState extends State {
           this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(value));
         }
       }
-      console.log('apiMap init', this.apiMap);
     });
   }
 
@@ -782,7 +784,6 @@ export default class KoniState extends State {
       delete this.apiMap.dotSama[networkKey];
     }
 
-    console.log('apiMap disable', this.apiMap);
     this.networkMap[networkKey].active = false;
     this.networkMapSubject.next(this.networkMap);
     this.apiMapSubject.next(this.apiMap);
@@ -797,7 +798,6 @@ export default class KoniState extends State {
       this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
     }
 
-    console.log('apiMap enable', this.apiMap);
     this.networkMap[networkKey].active = true;
     this.networkMapSubject.next(this.networkMap);
     this.apiMapSubject.next(this.apiMap);

@@ -67,6 +67,12 @@ export class KoniSubcription {
         }
       });
     });
+
+    state.subscribeApiMap().subscribe({
+      next: (apiMap) => {
+        console.log('subscribe apiMap', apiMap);
+      }
+    });
   }
 
   detectAddresses (currentAccountAddress: string) {

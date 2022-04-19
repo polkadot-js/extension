@@ -56,6 +56,7 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+    this.addCron('checkApiMap', this.checkApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -93,6 +94,18 @@ export class KoniCron {
 
       this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
     });
+  }
+
+  checkApiMap () {
+    console.log('start recover apiMap for network');
+    const apiMap = state.getApiMap();
+
+    for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
+      if (apiProp.apiRetry && apiProp.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
+        apiProp.recoverConnect && apiProp.recoverConnect();
+        console.log('Recover ApiMap for network', key);
+      }
+    }
   }
 
   refreshPrice () {

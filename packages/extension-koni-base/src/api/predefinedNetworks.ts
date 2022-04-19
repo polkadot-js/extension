@@ -43,7 +43,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       custom: 'wss://kusama-rpc.custom.com'
     },
     active: true,
-    currentProvider: 'custom',
+    currentProvider: 'OnFinality',
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
     nativeToken: 'KSM',

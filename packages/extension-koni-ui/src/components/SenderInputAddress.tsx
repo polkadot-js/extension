@@ -117,7 +117,6 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     font-size: 15px;
     line-height: 26px;
     color: ${theme.textColor2};
-    z-index: 10;
     right: 80px;
     top: 32px;
     pointer-events: none;
@@ -128,7 +127,6 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     font-size: 15px;
     line-height: 26px;
     color: ${theme.textColor2};
-    z-index: 10;
     right: 80px;
     top: 8px;
     pointer-events: none;

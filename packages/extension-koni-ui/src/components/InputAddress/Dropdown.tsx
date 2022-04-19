@@ -42,7 +42,7 @@ function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, 
 
   useEffect(() => {
     if (isSetDefaultValue) {
-      if (defaultValue) {
+      if (defaultValue && defaultValue !== 'all') {
         setSelectedValue(defaultValue);
       } else {
         if (transformOptions && transformOptions.length) {
@@ -124,7 +124,7 @@ function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, 
   );
 }
 
-export default React.memo(styled(Dropdown)(({ isSetDefaultValue, theme }: Props) => `
+export default React.memo(styled(Dropdown)(({ theme }: Props) => `
   font-weight: 500;
   color: ${theme.textColor2};
   position: relative;
@@ -144,14 +144,6 @@ export default React.memo(styled(Dropdown)(({ isSetDefaultValue, theme }: Props)
 
   .label-wrapper {
     margin-bottom: 0;
-  }
-
-  .input-address-dropdown-wrapper {
-    // // background: ${theme.background};
-    // position: relative;
-    // border: 2px solid ${theme.boxBorderColor};
-    // height: 72px;
-    // border-radius: 8px;
   }
 
   .input-address-dropdown__indicators {

@@ -7,56 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import {
-  AccountsWithCurrentAddress,
-  ApiConnectResponse,
-  ApiInitStatus,
-  ApiProps,
-  BackgroundWindow,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanJson,
-  EvmNftSubmitTransaction,
-  EvmNftTransaction,
-  EvmNftTransactionRequest,
-  EvmNftTransactionResponse,
-  NETWORK_ERROR,
-  NetWorkGroup,
-  NetworkJson,
-  NetWorkMetadataDef,
-  NetworkUpsertResponse,
-  NftCollection,
-  NftCollectionJson,
-  NftItem,
-  NftJson,
-  NftTransferExtra,
-  PriceJson,
-  RequestAccountCreateSuriV2,
-  RequestAccountExportPrivateKey,
-  RequestApi,
-  RequestAuthorization,
-  RequestAuthorizationPerAccount,
-  RequestAuthorizeApproveV2,
-  RequestCheckTransfer,
-  RequestForgetSite,
-  RequestNftForceUpdate,
-  RequestSeedCreateV2,
-  RequestSeedValidateV2,
-  RequestTransactionHistoryAdd,
-  RequestTransfer,
-  ResponseAccountCreateSuriV2,
-  ResponseAccountExportPrivateKey,
-  ResponseCheckTransfer,
-  ResponseSeedCreateV2,
-  ResponseSeedValidateV2,
-  StakingJson,
-  StakingRewardJson,
-  TokenInfo,
-  TransactionHistoryItemType,
-  TransferError,
-  TransferErrorCode,
-  TransferStep
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiConnectResponse, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetWorkGroup, NetworkJson, NetWorkMetadataDef, NetworkUpsertResponse, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';

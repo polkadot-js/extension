@@ -87,22 +87,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       return;
     }
 
-    upsertNetworkMap({
-      active: true,
-      currentProvider: 'custom',
-      currentProviderMode: 'ws',
-      genesisHash: '0x56854b19e50b40fb81be2cfda9cba5b43556854258b0fae8af170abbb1c700d1',
-      groups: [
-        'TEST_NET'
-      ],
-      providers: {},
-      ss58Format: 42,
-      key: 'custom_0x56854b19e50b40fb81be2cfda9cba5b43556854258b0fae8af170abbb1c700d1',
-      chain: 'Metaverse Dev',
-      customProviders: {
-        custom: 'wss://dev-chain.bit.country'
-      }
-    }).then((resp) => {
+    upsertNetworkMap(networkInfo).then((resp) => {
       if (resp.errors.length <= 0) {
         show('Successfully added a new network');
         window.localStorage.setItem('popupNavigation', '/');

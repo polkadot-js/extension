@@ -14,6 +14,7 @@ import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();
+state.initNetworkMapStore();
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
@@ -39,8 +40,6 @@ export const rpcsMap: Record<string, string> = getRpcsMap();
 
 // Load registry and fill to state
 initChainRegistrySubscription();
-
-state.initNetworkMapStore();
 
 export function initBackgroundWindow (keyring: any) {
   (window as any as BackgroundWindow).pdotApi = {

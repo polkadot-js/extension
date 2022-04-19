@@ -10,6 +10,7 @@ import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
+import Web3 from "web3";
 
 export enum ApiInitStatus {
   SUCCESS,
@@ -547,6 +548,11 @@ export interface ApiConnectResponse {
   ss58Prefix: string,
   networkGroup: NetWorkGroup[],
   chain: string,
+}
+
+export interface ApiMap {
+  dotSama: Record<string, ApiProps>;
+  web3: Record<string, Web3>;
 }
 
 export interface KoniRequestSignatures {

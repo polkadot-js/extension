@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
+import {CrowdloanParaState, NetworkJson} from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { RMRK_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
@@ -219,4 +219,12 @@ export const isValidProvider = (provider: string) => {
   }
 
   return false;
+};
+
+export const getCurrentProvider = (data: NetworkJson) => {
+  if (data.currentProvider === 'custom' && data.customProviders) {
+    return data.customProviders.custom;
+  } else {
+    return data.providers[data.currentProvider];
+  }
 };

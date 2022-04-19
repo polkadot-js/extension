@@ -5,10 +5,11 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
@@ -19,7 +20,7 @@ import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@polkadot/exte
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
-import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
+import { convertFundStatus, getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
@@ -107,11 +108,21 @@ export default class KoniState extends State {
         this.networkMapStore.set('NetworkMap', mergedNetworkMap);
         this.networkMap = mergedNetworkMap; // init networkMap state
       }
+
+      for (const [key, value] of Object.entries(this.networkMap)) {
+        if (value.active) {
+          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(value));
+        }
+      }
+      console.log('apiMap init', this.apiMap);
     });
   }
 
   private networkMap: Record<string, NetworkJson> = {}; // mapping to networkMapStore, for uses in background
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
+
+  private apiMap: ApiMap = { dotSama: {}, web3: {} };
+  private apiMapSubject = new Subject<ApiMap>();
 
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
@@ -728,23 +739,22 @@ export default class KoniState extends State {
 
   public upsertNetworkMap (data: NetworkJson): void {
     if (data.key in this.networkMap) { // update provider for existed network
-      const existedNetwork = this.networkMap[data.key];
-
       if (data.customProviders) {
-        existedNetwork.customProviders = data.customProviders;
+        this.networkMap[data.key].customProviders = data.customProviders;
       }
 
-      if (data.currentProvider !== existedNetwork.currentProvider) {
-        existedNetwork.currentProvider = data.currentProvider;
-        existedNetwork.currentProviderMode = existedNetwork.currentProvider.startsWith('ws') ? 'ws' : 'http';
+      if (data.currentProvider !== this.networkMap[data.key].currentProvider) {
+        this.networkMap[data.key].currentProvider = data.currentProvider;
+        this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
       }
-
-      this.networkMap[data.key] = existedNetwork;
     } else { // insert
       this.networkMap[data.key] = data;
     }
 
+    this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
+    console.log('apiMap upsert', this.apiMap);
     this.networkMapSubject.next(this.networkMap);
+    this.apiMapSubject.next(this.apiMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
@@ -757,9 +767,7 @@ export default class KoniState extends State {
   }
 
   public removeNetworkMap (networkKey: string) {
-    // if (this.networkMap[networkKey].active && this.networkMap[networkKey].getDotsamaAPI) {
-    //   await this.networkMap[networkKey]?.getDotsamaAPI?.disconnect();
-    // }
+    this.disableNetworkMap(networkKey);
 
     delete this.networkMap[networkKey];
 
@@ -768,16 +776,39 @@ export default class KoniState extends State {
   }
 
   public disableNetworkMap (networkKey: string) {
-    this.networkMap[networkKey].active = false;
+    if (this.networkMap[networkKey].isEthereum) {
+      console.log('handle web3');
+    } else {
+      delete this.apiMap.dotSama[networkKey];
+    }
 
+    console.log('apiMap disable', this.apiMap);
+    this.networkMap[networkKey].active = false;
     this.networkMapSubject.next(this.networkMap);
+    this.apiMapSubject.next(this.apiMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
   public enableNetworkMap (networkKey: string) {
-    this.networkMap[networkKey].active = true;
+    if (this.networkMap[networkKey].isEthereum) {
+      console.log('handle web3');
+    } else {
+      console.log('enable network', networkKey);
+      this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
+    }
 
+    console.log('apiMap enable', this.apiMap);
+    this.networkMap[networkKey].active = true;
     this.networkMapSubject.next(this.networkMap);
+    this.apiMapSubject.next(this.apiMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
+  }
+
+  public getApiMap () {
+    return this.apiMap;
+  }
+
+  public subscribeApiMap () {
+    return this.apiMapSubject;
   }
 }

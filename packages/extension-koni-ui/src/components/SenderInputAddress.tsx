@@ -4,17 +4,16 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { SenderInputAddressType, TokenItemType } from '@polkadot/extension-koni-ui/components/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { toShort } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 
 import InputAddress from './InputAddress';
 import TokenDropdown from './TokenDropdown';
-import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
-import { toShort } from '@polkadot/extension-koni-ui/util';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-
 
 interface Props {
   className: string;
@@ -23,8 +22,8 @@ interface Props {
   chainRegistryMap: Record<string, ChainRegistry>
 }
 
-function getOptions(chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
-  const options: TokenItemType[]  = []
+function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
+  const options: TokenItemType[] = [];
 
   Object.keys(chainRegistryMap).forEach((networkKey) => {
     Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
@@ -43,9 +42,9 @@ function getOptions(chainRegistryMap: Record<string, ChainRegistry>): TokenItemT
   return options;
 }
 
-function SenderInputAddress ({ className = '', chainRegistryMap, onChange, initValue }: Props): React.ReactElement {
+function SenderInputAddress ({ chainRegistryMap, className = '', initValue, onChange }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [{address, networkKey, token}, setValue] = useState<SenderInputAddressType>(initValue);
+  const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
   const networkPrefix = NETWORKS[networkKey].ss58Format;
 
@@ -64,6 +63,7 @@ function SenderInputAddress ({ className = '', chainRegistryMap, onChange, initV
         };
 
         onChange(newVal);
+
         return newVal;
       });
     } else {
@@ -82,6 +82,7 @@ function SenderInputAddress ({ className = '', chainRegistryMap, onChange, initV
       };
 
       onChange(newVal);
+
       return newVal;
     });
   }, [onChange]);
@@ -111,7 +112,7 @@ function SenderInputAddress ({ className = '', chainRegistryMap, onChange, initV
         className='sender-input-address__token-dropdown'
         onChangeTokenValue={onChangeTokenValue}
         options={options}
-        tokenValue={`${token}|${networkKey}`}
+        value={`${token}|${networkKey}`}
       />
     </div>
   );

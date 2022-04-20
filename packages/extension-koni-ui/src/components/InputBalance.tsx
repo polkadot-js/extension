@@ -7,10 +7,9 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
-import { BitLength } from '@polkadot/extension-koni-ui/components/types';
-import { Registry } from '@polkadot/types/types';
-import { BN, formatBalance, isUndefined } from '@polkadot/util';
 import InputNumber from '@polkadot/extension-koni-ui/components/InputNumber/index';
+import { BitLength } from '@polkadot/extension-koni-ui/components/types';
+import { BN, formatBalance, isUndefined } from '@polkadot/util';
 
 interface Props {
   autoFocus?: boolean;
@@ -25,7 +24,6 @@ interface Props {
   isWarning?: boolean;
   isZeroable?: boolean;
   label?: React.ReactNode;
-  labelExtra?: React.ReactNode;
   maxValue?: BN;
   onChange?: (value?: BN | string) => void;
   onEnter?: () => void;
@@ -34,10 +32,6 @@ interface Props {
   siDecimals?: number;
   siSymbol?: string;
   value?: BN;
-  withEllipsis?: boolean;
-  withLabel?: boolean;
-  withMax?: boolean;
-  registry: Registry;
 }
 
 const DEFAULT_BITLENGTH = BitLengthOption.CHAIN_SPEC as BitLength;
@@ -60,7 +54,7 @@ function reformat (value?: string | BN, isDisabled?: boolean, siDecimals?: numbe
   ];
 }
 
-function InputBalance ({ autoFocus, children, className = '', decimals, defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, registry, siDecimals, siSymbol, value, withEllipsis, withLabel, withMax }: Props): React.ReactElement<Props> {
+function InputBalance ({ autoFocus, children, className = '', decimals, defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, maxValue, onChange, onEnter, onEscape, placeholder, siDecimals, siSymbol, value }: Props): React.ReactElement<Props> {
   const [defaultValue, siDefault] = useMemo(
     () => reformat(inDefault, isDisabled, siDecimals),
     [inDefault, isDisabled, siDecimals]
@@ -81,7 +75,6 @@ function InputBalance ({ autoFocus, children, className = '', decimals, defaultV
       isWarning={isWarning}
       isZeroable={isZeroable}
       label={label}
-      labelExtra={labelExtra}
       maxValue={maxValue}
       onChange={onChange}
       onEnter={onEnter}

@@ -6,12 +6,12 @@ import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
 import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, ResponseAuthorizeList, SeedLengths } from '@polkadot/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
-import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
+import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
+import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
 export enum ApiInitStatus {
   SUCCESS,

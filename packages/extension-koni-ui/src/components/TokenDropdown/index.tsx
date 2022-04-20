@@ -14,11 +14,11 @@ interface Props {
   className?: string;
   options: TokenItemType[];
   onChangeTokenValue: (tokenValueStr: string) => void;
-  tokenValue: string;
+  value: string;
 }
 
 // eslint-disable-next-line no-empty-pattern
-function TokenDropdown ({ className = '', onChangeTokenValue, options, tokenValue }: Props): React.ReactElement {
+function TokenDropdown ({ className = '', onChangeTokenValue, options, value }: Props): React.ReactElement {
   const formatOptLabel = useCallback((label: string, value: string, networkKey: string) => {
     return (
       <TokenItem
@@ -35,7 +35,7 @@ function TokenDropdown ({ className = '', onChangeTokenValue, options, tokenValu
         formatOptLabel={formatOptLabel}
         onChange={onChangeTokenValue}
         options={options}
-        tokenValue={tokenValue}
+        value={value}
       />
     </div>
   );

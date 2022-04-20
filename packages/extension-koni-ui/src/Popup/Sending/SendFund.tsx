@@ -54,18 +54,17 @@ function SendFund ({ className }: ContentProps): React.ReactElement {
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
   const [recipientId, setRecipientId] = useState<string | null>(null);
-  const networkKey = useSelector((state: RootState) => state.currentNetwork.networkKey);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [senderValue, setSenderValue] = useState<SenderInputAddressType>({} as SenderInputAddressType);
+  const [{ address, networkKey, token }, setSenderValue] = useState<SenderInputAddressType>({
+    address: '5CkNsSxDfRKqiojvuSh9ZyTD2GReGoavqnpC8pTmTXwomVLd',
+    token: 'DOT',
+    networkKey: 'polkadot'
+  } as SenderInputAddressType);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
-  let decimals = 10;
-
-  if (senderValue && Object.keys(senderValue).length) {
-    decimals = chainRegistryMap[senderValue.networkKey].chainDecimals[0];
-  }
+  const decimals = 10;
 
   // let defaultValueStr: string;
 
@@ -109,17 +108,20 @@ function SendFund ({ className }: ContentProps): React.ReactElement {
       {/* eslint-disable-next-line multiline-ternary */}
       {!isShowTxResult ? (
         <div className={className}>
-          {/*<SenderInputAddress*/}
-          {/*  chainRegistryMap={chainRegistryMap}*/}
-          {/*  className=''*/}
-          {/*  onChange={setSenderValue}*/}
-          {/*  initValue={*/}
-          {/*    */}
-          {/*  }*/}
-          {/*/>*/}
+          <SenderInputAddress
+            chainRegistryMap={chainRegistryMap}
+            className=''
+            initValue={{
+              address,
+              token,
+              networkKey
+            }}
+            onChange={setSenderValue}
+          />
 
           <ReceiverInputAddress
             className={''}
+            networkKey={networkKey}
             setRecipientId={setRecipientId}
           />
 

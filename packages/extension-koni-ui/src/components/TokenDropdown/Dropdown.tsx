@@ -15,11 +15,10 @@ interface WrapperProps {
   className?: string;
   formatOptLabel?: (label: string, value: string, networkKey: string) => React.ReactNode;
   onChange?: (token: string) => void;
-  tokenValue: string;
+  value: string;
   options: TokenItemType[];
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
-  isSetDefaultValue?: boolean;
 }
 
 interface Props {
@@ -31,12 +30,11 @@ interface Props {
   value?: string;
   ci?: React.ReactNode;
   filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
-  isSetDefaultValue?: boolean;
 }
 
-function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenValue }: WrapperProps): React.ReactElement<WrapperProps> {
+function DropdownWrapper ({ className, formatOptLabel, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const tokenValueArr = tokenValue.split('|');
+  const tokenValueArr = value.split('|');
   const dropdownRef = useRef(null);
 
   const toggleDropdownWrapper = useCallback(() => {
@@ -44,8 +42,7 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenV
   }, [isDropdownOpen]);
 
   useOutsideClick(dropdownRef, (): void => {
-    console.log('isDropdownOpen', isDropdownOpen);
-    // setDropdownOpen(false);
+    setDropdownOpen(false);
   });
 
   const _onChange = useCallback((value: string) => {
@@ -74,6 +71,7 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, tokenV
           label={''}
           onChange={_onChange}
           options={options}
+          value={value}
         />
       )}
     </div>

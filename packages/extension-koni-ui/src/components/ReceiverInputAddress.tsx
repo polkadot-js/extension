@@ -1,36 +1,40 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { toShort } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 
 import InputAddress from './InputAddress';
 
 interface Props {
+  networkKey: string;
   className: string;
-  setRecipientId: (id: string | null) => void;
+  setRecipientId: (id: string) => void;
 }
 
-function getShortenText (text: string, cut = 6) {
-  return `${text.slice(0, cut)}…${text.slice(-cut)}`;
-}
-
-function ReceiverInputAddress ({ className = '', setRecipientId }: Props): React.ReactElement {
+function ReceiverInputAddress ({ className = '', networkKey, setRecipientId }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
-  const [value, setInputAddressValue] = useState<string | undefined>('');
-  let formattedAddress = '';
+  const networkPrefix = NETWORKS[networkKey].ss58Format;
+  const [receiveAddress, setReceiveAddress] = useState<string>('');
 
-  if (value && value !== '-') {
-    formattedAddress = reformatAddress(value, networkPrefix, isEthereum);
-  }
+  const formattedAddress = useMemo<string>(() => {
+    if (receiveAddress) {
+      return reformatAddress(receiveAddress, networkPrefix);
+    }
+
+    return '';
+  }, [receiveAddress, networkPrefix]);
+
+  const onChangeReceiveAddress = useCallback((address: string) => {
+    setRecipientId(address);
+    setReceiveAddress(address);
+  }, [setRecipientId]);
 
   return (
     <div className={className}>
@@ -38,12 +42,10 @@ function ReceiverInputAddress ({ className = '', setRecipientId }: Props): React
         autoPrefill={false}
         className={'send-fund-item'}
         help={t<string>('Select a contact or paste the address you want to send funds to.')}
-        isEthereum={currentAccount?.type === 'ethereum'}
         isSetDefaultValue={false}
         label={t<string>('Send to address')}
         // isDisabled={!!propRecipientId}
-        onChange={setRecipientId}
-        setInputAddressValue={setInputAddressValue}
+        onChange={onChangeReceiveAddress}
         type='allPlus'
         withEllipsis
       />
@@ -53,7 +55,7 @@ function ReceiverInputAddress ({ className = '', setRecipientId }: Props): React
       </div>
 
       <div className='receiver-input-address__address'>
-        {formattedAddress ? getShortenText(formattedAddress, 6) : ''}
+        {toShort(formattedAddress)}
       </div>
     </div>
   );

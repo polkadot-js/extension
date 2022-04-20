@@ -13,8 +13,8 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { Registry } from '@polkadot/types/types';
 import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
 
-import Dropdown from './Dropdown';
 import Input, { KEYS_PRE } from '../../../../components/InputNumber/Input';
+import Dropdown from './Dropdown';
 
 interface Props {
   registry: Registry;

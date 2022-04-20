@@ -18,8 +18,8 @@ function TokenItem ({ className = '', networkKey, symbol }: Props): React.ReactE
   return (
     <div className={className}>
       <img
-        className='token-item-logo'
         alt={networkKey}
+        className='token-item-logo'
         src={getLogoByNetworkKey(networkKey)}
       />
       <div className='token-item-right-content'>

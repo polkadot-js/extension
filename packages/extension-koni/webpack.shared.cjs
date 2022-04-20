@@ -34,7 +34,7 @@ const packages = [
   'extension-koni-ui'
 ];
 
-module.exports = (entry, alias = {}, overwrite) => {
+module.exports = (entry, alias = {}, useSplitChunk = false) => {
   const result = {
     context: __dirname,
     devtool: false,
@@ -153,9 +153,25 @@ module.exports = (entry, alias = {}, overwrite) => {
     watch: false
   };
 
-  if (overwrite) {
-    Object.assign(overwrite);
+  if (useSplitChunk) {
+    result.optimization = {
+      splitChunks: {
+        chunks: 'all',
+        maxSize: 2000000,
+        cacheGroups: {
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10
+          },
+          default: {
+            priority: -20,
+            reuseExistingChunk: true
+          }
+        }
+      }
+    }
   }
 
   return result;
-};
+}
+

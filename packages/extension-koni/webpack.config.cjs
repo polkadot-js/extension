@@ -10,21 +10,6 @@ module.exports = [createConfig({
   content: './src/content.ts',
   page: './src/page.ts'
 }), createConfig({
-  background: './src/background.ts'
-}, [], {
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          priority: -10
-        },
-        default: {
-          priority: -20,
-          reuseExistingChunk: true
-        }
-      }
-    }
-  }
-})];
+  background: './src/background.ts',
+  extension: './src/extension.ts'
+}, [], true)];

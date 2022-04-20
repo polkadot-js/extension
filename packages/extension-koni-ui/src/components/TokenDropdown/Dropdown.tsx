@@ -51,11 +51,13 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
   }, [onChange]);
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      ref={dropdownRef}
+    >
       <div
         className='dropdown-wrapper-item'
         onClick={toggleDropdownWrapper}
-        ref={dropdownRef}
       >
         <img
           alt={tokenValueArr[1]}

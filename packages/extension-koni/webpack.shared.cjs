@@ -169,9 +169,8 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
           }
         }
       }
-    }
+    };
   }
 
   return result;
-}
-
+};

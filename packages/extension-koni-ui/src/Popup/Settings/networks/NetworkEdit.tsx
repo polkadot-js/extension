@@ -5,12 +5,12 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
+import { NETWORK_ERROR, NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { apiMapConnect, upsertNetworkMap } from '@polkadot/extension-koni-ui/messaging';
+import { upsertNetworkMap, validateNetwork } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -38,6 +38,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [loading, setLoading] = useState(false);
   const [needValidate, setNeedValidate] = useState(false);
   const isCurrentEndpoint = provider === getCurrentEndpoint(data);
+  const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -58,7 +59,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         if (needValidate && !isCurrentEndpoint) {
           setNeedValidate(false);
           setLoading(true);
-          apiMapConnect(provider).then((resp) => {
+
+          validateNetwork(provider).then((resp) => {
+            if (resp.error) {
+              setValidateError(resp.error);
+            }
+
             setLoading(false);
             setIsProviderConnected(resp.success);
 
@@ -88,12 +94,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
 
     upsertNetworkMap(networkInfo).then((resp) => {
-      if (resp.errors.length <= 0) {
+      if (resp) {
         show('Successfully added a new network');
         window.localStorage.setItem('popupNavigation', '/');
         onAction('/');
       } else {
-        show(`New network conflicts with ${resp.conflictChain}`);
+        show('Error trying to configure network');
       }
     }).catch(console.error);
   }, [_isValidProvider, isProviderConnected, networkInfo, onAction, show]);
@@ -139,6 +145,16 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     });
   }, [networkInfo]);
 
+  const getValidateErrorMessage = useCallback(() => {
+    if (validateError === NETWORK_ERROR.EXISTED_NETWORK) {
+      return 'This network has already been added';
+    } else if (validateError === NETWORK_ERROR.EXISTED_PROVIDER) {
+      return 'This provider has existed';
+    } else {
+      return 'Unable to connect to the provider';
+    }
+  }, [validateError]);
+
   return (
     <>
       <Header
@@ -178,7 +194,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
         {!isCurrentEndpoint && isProviderConnected && _isValidProvider && !loading && <div className={'connect-success'}>Provider connected successfully</div>}
 
-        {!isCurrentEndpoint && !isProviderConnected && _isValidProvider && !loading && <div className={'connect-fail'}>Encountered a problem trying to validate this provider</div>}
+        {!isCurrentEndpoint && !isProviderConnected && _isValidProvider && !loading && <div className={'connect-fail'}>{getValidateErrorMessage()}</div>}
 
         {!isCurrentEndpoint && loading && <div className={'connect-info'}>Connecting to the provider...</div>}
 

@@ -57,10 +57,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     ss58Format: 42,
     providers: {
       Parity: 'wss://westend-rpc.polkadot.io',
-      OnFinality: 'wss://westend.api.onfinality.io/public-ws',
-      Pinknode: 'wss://rpc.pinknode.io/westend/explorer',
-      Dwellir: 'wss://westend-rpc.dwellir.com',
-      'light client': 'light://substrate-connect/westend'
+      // OnFinality: 'wss://polkadot.api.onfinality.io/public-ws',
+      // Pinknode: 'wss://rpc.pinknode.io/westend/explorer',
+      // Dwellir: 'wss://westend-rpc.dwellir.com',
+      // 'light client': 'light://substrate-connect/westend'
     },
     active: false,
     currentProvider: 'OnFinality',

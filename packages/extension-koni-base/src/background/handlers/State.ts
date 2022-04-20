@@ -92,6 +92,7 @@ export default class KoniState extends State {
         for (const [key, network] of Object.entries(storedNetworkMap)) {
           if (key in PREDEFINED_NETWORKS) {
             // TODO: fields to merge
+            // TODO: merge network with same genesis hash
             // check change and override custom providers if exist
             if ('customProviders' in network) {
               mergedNetworkMap[key].customProviders = network.customProviders;
@@ -754,8 +755,9 @@ export default class KoniState extends State {
     }
 
     this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
-    this.networkMapSubject.next(this.networkMap);
     this.apiMapSubject.next(this.apiMap);
+
+    this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
@@ -780,6 +782,10 @@ export default class KoniState extends State {
     if (this.networkMap[networkKey].isEthereum) {
       console.log('handle web3');
     } else {
+      // disconnect api
+      this.apiMap.dotSama[networkKey].api.disconnect()
+        .then((r) => console.log('disconnected from ', networkKey, r))
+        .catch(console.error);
       delete this.apiMap.dotSama[networkKey];
     }
 

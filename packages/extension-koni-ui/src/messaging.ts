@@ -10,44 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import {
-  AccountsWithCurrentAddress,
-  ApiConnectResponse,
-  ApiInitStatus,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanJson,
-  CurrentAccountInfo,
-  EvmNftSubmitTransaction,
-  EvmNftTransaction,
-  EvmNftTransactionRequest,
-  EvmNftTransactionResponse,
-  NetworkJson,
-  NetWorkMetadataDef,
-  NetworkUpsertResponse,
-  NftCollectionJson,
-  NftJson,
-  NftTransferExtra,
-  PriceJson,
-  RequestCheckTransfer,
-  RequestNftForceUpdate,
-  RequestSubscribeBalance,
-  RequestSubscribeCrowdloan,
-  RequestSubscribeNft,
-  RequestSubscribePrice,
-  RequestSubscribeStaking,
-  RequestSubscribeStakingReward,
-  RequestTransfer,
-  ResponseAccountCreateSuriV2,
-  ResponseCheckTransfer,
-  ResponseSeedCreateV2,
-  ResponseSeedValidateV2,
-  ResponseTransfer,
-  StakingJson,
-  StakingRewardJson,
-  TransactionHistoryItemType,
-  TransferError
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetworkJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError, ValidateNetworkResponse } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -462,7 +425,7 @@ export async function subscribeNetworkMap (callback: (data: Record<string, Netwo
   return sendMessage('pri(networkMap.getSubscription)', null, callback);
 }
 
-export async function upsertNetworkMap (data: NetworkJson): Promise<NetworkUpsertResponse> {
+export async function upsertNetworkMap (data: NetworkJson): Promise<boolean> {
   return sendMessage('pri(networkMap.upsert)', data);
 }
 
@@ -482,6 +445,6 @@ export async function enableNetworkMap (networkKey: string): Promise<boolean> {
   return sendMessage('pri(networkMap.enableOne)', networkKey);
 }
 
-export async function apiMapConnect (provider: string): Promise<ApiConnectResponse> {
-  return sendMessage('pri(apiMap.connectOne)', provider);
+export async function validateNetwork (provider: string): Promise<ValidateNetworkResponse> {
+  return sendMessage('pri(apiMap.validate)', provider);
 }

@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Web3 from 'web3';
+
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
@@ -10,7 +12,6 @@ import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import Web3 from "web3";
 
 export enum ApiInitStatus {
   SUCCESS,
@@ -258,23 +259,23 @@ export interface NetworkJson {
   nftProvider?: string // Should be same with provider if is not defined
 
   // Metadata get after connect to provider
-  genesisHash: string;
+  genesisHash: string; // identifier for network
   groups: NetWorkGroup[];
   ss58Format: number;
   paraId?: number;
   chainType?: 'substrate' | 'ethereum';
-  crowdloanUrl?: string;
+  crowdloanUrl?: string; // user input
 
   // Ethereum informations for predefine network only
-  isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account
+  isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
 
   // Native token information
   nativeToken?: string;
   decimals?: number;
 
   // Other informations
-  coinGeckoKey?: string, // Provider key to get token price from CoinGecko
-  blockExplorer?: string, // Link to block scanner to check transaction with extrinsic hash
+  coinGeckoKey?: string, // Provider key to get token price from CoinGecko // user input
+  blockExplorer?: string, // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[] // Auto active network in dependencies if current network is activated
 
   // Support features
@@ -457,7 +458,10 @@ export enum NETWORK_ERROR {
   INVALID_INFO_TYPE = 'invalidInfoType',
   INJECT_SCRIPT_DETECTED = 'injectScriptDetected',
   EXISTED_NETWORK = 'existedNetwork',
-  INVALID_PROVIDER = 'invalidProvider'
+  EXISTED_PROVIDER = 'existedProvider',
+  INVALID_PROVIDER = 'invalidProvider',
+  NONE = 'none',
+  CONNECTION_FAILURE = 'connectionFailure'
 }
 
 export enum NETWORK_STATUS {
@@ -536,19 +540,17 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
-export interface NetworkUpsertResponse {
-  errors: NETWORK_ERROR[],
-  conflictKey: string,
-  conflictChain: string
-}
-
-export interface ApiConnectResponse {
+export interface ValidateNetworkResponse {
   success: boolean,
   key: string,
   genesisHash: string,
   ss58Prefix: string,
   networkGroup: NetWorkGroup[],
   chain: string,
+
+  error?: NETWORK_ERROR,
+  conflictChain?: string,
+  conflictKey?: string,
 }
 
 export interface ApiMap {
@@ -557,11 +559,11 @@ export interface ApiMap {
 }
 
 export interface KoniRequestSignatures {
-  'pri(apiMap.connectOne)': [string, ApiConnectResponse];
+  'pri(apiMap.validate)': [string, ValidateNetworkResponse];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, boolean];
   'pri(networkMap.removeOne)': [string, boolean];
-  'pri(networkMap.upsert)': [NetworkJson, NetworkUpsertResponse];
+  'pri(networkMap.upsert)': [NetworkJson, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];
   'pri(networkMap.getSubscription)': [null, Record<string, NetworkJson>, Record<string, NetworkJson>];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];

@@ -1,20 +1,20 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type {ThemeProps} from '../types';
+import type { ThemeProps } from '../types';
 
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import {NETWORK_STATUS, NetWorkGroup} from '@polkadot/extension-base/background/KoniTypes';
-import {ALL_ACCOUNT_KEY} from '@polkadot/extension-koni-base/constants';
+import { NETWORK_STATUS, NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import check from '@polkadot/extension-koni-ui/assets/check.svg';
 import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
 import Menu from '@polkadot/extension-koni-ui/components/Menu';
-import useGenesisHashOptions, {NetworkSelectOption} from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
+import useGenesisHashOptions, { NetworkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import {triggerAccountsSubscription} from '@polkadot/extension-koni-ui/messaging';
-import {getLogoByGenesisHash} from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
+import { triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
+import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
 
 interface Props extends ThemeProps {
   className?: string;

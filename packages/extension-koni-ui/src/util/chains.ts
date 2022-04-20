@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import {NETWORK_STATUS, NetworkJson, NetWorkMetadataDef} from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 
 function getKnownHashes (): NetWorkMetadataDef[] {
@@ -43,7 +43,7 @@ export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWo
 
   Object.keys(networkMap).forEach((networkKey) => {
     if (networkMap[networkKey].active) {
-      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = networkMap[networkKey];
+      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format, dotSamaAPIStatus } = networkMap[networkKey];
 
       let isAvailable = true;
 
@@ -62,7 +62,8 @@ export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWo
         isEthereum: !!isEthereum,
         paraId,
         isAvailable,
-        active
+        active,
+        apiStatus: dotSamaAPIStatus || NETWORK_STATUS.DISCONNECTED
       });
     }
   });

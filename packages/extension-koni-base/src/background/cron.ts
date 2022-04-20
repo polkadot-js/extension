@@ -3,7 +3,7 @@
 
 import { Subject } from 'rxjs';
 
-import { NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { NETWORK_STATUS, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
@@ -56,7 +56,7 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-    this.addCron('checkApiMap', this.checkApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+    this.addCron('checkApiMap', this.updateApiMapStatus, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -96,16 +96,18 @@ export class KoniCron {
     });
   }
 
-  checkApiMap () {
-    console.log('start recover apiMap for network');
+  updateApiMapStatus () {
     const apiMap = state.getApiMap();
 
     for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
-      if (apiProp.apiRetry && apiProp.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
-        apiProp.recoverConnect && apiProp.recoverConnect();
-        console.log('Recover ApiMap for network', key);
+      if (apiProp.isApiConnected) {
+        state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+      } else {
+        state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
       }
     }
+
+    console.log('update status ApiMap');
   }
 
   refreshPrice () {

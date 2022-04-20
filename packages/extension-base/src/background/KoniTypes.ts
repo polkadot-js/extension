@@ -306,6 +306,7 @@ export interface NetWorkMetadataDef extends MetadataDefBase {
   paraId?: number;
   isAvailable: boolean;
   active: boolean;
+  apiStatus: NETWORK_STATUS;
 }
 
 export type CurrentNetworkInfo = {

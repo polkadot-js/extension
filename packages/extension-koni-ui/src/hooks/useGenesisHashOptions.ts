@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
+import { NETWORK_STATUS, NetWorkGroup } from '@polkadot/extension-base/background/KoniTypes';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 import { getAllNetworkMetadata } from '../messaging';
@@ -20,6 +20,7 @@ export interface NetworkSelectOption {
   groups: NetWorkGroup[];
   isEthereum: boolean;
   active: boolean;
+  apiStatus: NETWORK_STATUS;
 }
 
 const RELAY_CHAIN = 'Relay Chain';
@@ -48,7 +49,8 @@ export default function (): NetworkSelectOption[] {
             icon: metadata.icon,
             groups: metadata.groups,
             isEthereum: metadata.isEthereum,
-            active: metadata.active
+            active: metadata.active,
+            apiStatus: metadata.apiStatus
           }));
 
         setMetadataChains(res);
@@ -71,11 +73,12 @@ export default function (): NetworkSelectOption[] {
       icon: 'polkadot',
       groups: ['UNKNOWN'] as NetWorkGroup[],
       isEthereum: false,
-      active: true
+      active: true,
+      apiStatus: NETWORK_STATUS.DISCONNECTED
     },
     // put the relay chains at the top
     ...availableChains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
-      .map(({ active, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
+      .map(({ active, apiStatus, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
         text: chain,
         value: genesisHash,
         networkPrefix: ss58Format,
@@ -83,9 +86,10 @@ export default function (): NetworkSelectOption[] {
         icon,
         groups,
         isEthereum,
-        active
+        active,
+        apiStatus
       })),
-    ...availableChains.map(({ active, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
+    ...availableChains.map(({ active, apiStatus, chain, genesisHash, groups, icon, isEthereum, networkKey, ss58Format }) => ({
       text: chain,
       value: genesisHash,
       networkPrefix: ss58Format,
@@ -93,7 +97,8 @@ export default function (): NetworkSelectOption[] {
       icon,
       groups,
       isEthereum,
-      active
+      active,
+      apiStatus
     }))
       // remove the relay chains, they are at the top already
       .filter(({ text }) => !text.includes(RELAY_CHAIN))

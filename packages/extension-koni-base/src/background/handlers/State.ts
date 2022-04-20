@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -754,7 +754,6 @@ export default class KoniState extends State {
     }
 
     this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
-    console.log('apiMap upsert', this.apiMap);
     this.networkMapSubject.next(this.networkMap);
     this.apiMapSubject.next(this.apiMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
@@ -794,13 +793,19 @@ export default class KoniState extends State {
     if (this.networkMap[networkKey].isEthereum) {
       console.log('handle web3');
     } else {
-      console.log('enable network', networkKey);
       this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
     }
 
     this.networkMap[networkKey].active = true;
     this.networkMapSubject.next(this.networkMap);
     this.apiMapSubject.next(this.apiMap);
+    this.networkMapStore.set('NetworkMap', this.networkMap);
+  }
+
+  public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
+    this.networkMap[networkKey].dotSamaAPIStatus = status;
+
+    this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 

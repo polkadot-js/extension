@@ -50,6 +50,7 @@ function Tooltip ({ className = '', clickable = false, effect = 'solid', offset,
     };
   }, [tooltipContainer]);
 
+  // @ts-ignore
   return ReactDOM.createPortal(
     <ReactTooltip
       backgroundColor={theme === 'dark' ? '#181E42' : ''}

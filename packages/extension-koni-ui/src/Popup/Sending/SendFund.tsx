@@ -109,11 +109,14 @@ function SendFund ({ className }: ContentProps): React.ReactElement {
       {/* eslint-disable-next-line multiline-ternary */}
       {!isShowTxResult ? (
         <div className={className}>
-          <SenderInputAddress
-            chainRegistryMap={chainRegistryMap}
-            className=''
-            setSenderValue={setSenderValue}
-          />
+          {/*<SenderInputAddress*/}
+          {/*  chainRegistryMap={chainRegistryMap}*/}
+          {/*  className=''*/}
+          {/*  onChange={setSenderValue}*/}
+          {/*  initValue={*/}
+          {/*    */}
+          {/*  }*/}
+          {/*/>*/}
 
           <ReceiverInputAddress
             className={''}

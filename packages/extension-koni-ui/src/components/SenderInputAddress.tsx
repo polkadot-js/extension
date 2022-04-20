@@ -1,105 +1,117 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { SenderInputAddressType, TokenItemType } from '@polkadot/extension-koni-ui/components/types';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 
 import InputAddress from './InputAddress';
 import TokenDropdown from './TokenDropdown';
+import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
+import { toShort } from '@polkadot/extension-koni-ui/util';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+
 
 interface Props {
   className: string;
-  options: TokenItemType[];
-  setSenderValue: (value: SenderInputAddressType) => void;
+  onChange: (value: SenderInputAddressType) => void;
+  initValue: SenderInputAddressType,
+  chainRegistryMap: Record<string, ChainRegistry>
 }
 
-function getShortenText (text: string, cut = 6) {
-  return `${text.slice(0, cut)}…${text.slice(-cut)}`;
+function getOptions(chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
+  const options: TokenItemType[]  = []
+
+  Object.keys(chainRegistryMap).forEach((networkKey) => {
+    Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
+      const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
+
+      options.push({
+        networkKey: networkKey,
+        token: tokenInfo.symbol,
+        decimals: tokenInfo.decimals,
+        isMainToken: tokenInfo.isMainToken,
+        specialOption: tokenInfo?.specialOption
+      });
+    });
+  });
+
+  return options;
 }
 
-function SenderInputAddress ({ className = '', options, setSenderValue }: Props): React.ReactElement {
-  const defaultValue = {
-    address: '5CkNsSxDfRKqiojvuSh9ZyTD2GReGoavqnpC8pTmTXwomVLd',
-    token: 'DOT',
-    networkKey: 'polkadot'
-  };
-  const defaultTokenValueStr = `${defaultValue.token}|${defaultValue.networkKey}`;
+function SenderInputAddress ({ className = '', chainRegistryMap, onChange, initValue }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const { currentAccount: { account: currentAccount },
-    currentNetwork: { isEthereum, networkPrefix } } = useSelector((state: RootState) => state);
-  const [value, setInputAddressValue] = useState<string | undefined>(defaultValue.address);
-  let formattedAddress = '';
+  const [{address, networkKey, token}, setValue] = useState<SenderInputAddressType>(initValue);
 
-  const [tokenValue, setTokenValue] = useState<string>('');
-  const symbol = tokenValue.split('|')[0];
+  const networkPrefix = NETWORKS[networkKey].ss58Format;
 
-  useEffect(() => {
-    setTokenValue(defaultTokenValueStr);
-  }, [defaultTokenValueStr]);
+  const formattedAddress = useMemo<string>(() => {
+    return reformatAddress(address, networkPrefix);
+  }, [address, networkPrefix]);
 
-  if (value && value !== '-') {
-    formattedAddress = reformatAddress(value, networkPrefix, isEthereum);
-  }
+  const options: TokenItemType[] = getOptions(chainRegistryMap);
 
-  const onChangeValue = useCallback((address: string) => {
-    const tokenVal = tokenValue.split('|');
-    const senderInputValue: SenderInputAddressType = {
-      address: address,
-      token: tokenVal[0],
-      networkKey: tokenVal[1]
-    };
+  const onChangeInputAddress = useCallback((address: string | null) => {
+    if (address) {
+      setValue((prev) => {
+        const newVal = {
+          ...prev,
+          address
+        };
 
-    setInputAddressValue(address);
-    setSenderValue(senderInputValue);
-  }, [setSenderValue, tokenValue]);
+        onChange(newVal);
+        return newVal;
+      });
+    } else {
+      // handle null case
+    }
+  }, [onChange]);
 
   const onChangeTokenValue = useCallback((tokenValueStr: string) => {
     const tokenVal = tokenValueStr.split('|');
-    const senderInputValue: SenderInputAddressType = {
-      address: value || '',
-      token: tokenVal[0],
-      networkKey: tokenVal[1]
-    };
 
-    setTokenValue(tokenValueStr);
-    setSenderValue(senderInputValue);
-  }, [setSenderValue, value]);
+    setValue((prev) => {
+      const newVal = {
+        ...prev,
+        token: tokenVal[0],
+        networkKey: tokenVal[1]
+      };
+
+      onChange(newVal);
+      return newVal;
+    });
+  }, [onChange]);
 
   return (
     <div className={className}>
       <InputAddress
         className={'sender-input-address'}
-        defaultValue={defaultValue.address}
+        defaultValue={initValue.address}
         help={t<string>('The account you will send funds from.')}
-        isEthereum={currentAccount?.type === 'ethereum'}
         isSetDefaultValue={true}
         label={t<string>('Send from account')}
-        onChange={onChangeValue}
-        setInputAddressValue={setInputAddressValue}
+        onChange={onChangeInputAddress}
         type='account'
         withEllipsis
       />
 
       <div className='sender-input-address__balance'>
-        {`1.0000 ${symbol}`}
+
       </div>
 
       <div className='sender-input-address__address'>
-        {getShortenText(formattedAddress, 4)}
+        {toShort(formattedAddress, 4, 4)}
       </div>
 
       <TokenDropdown
         className='sender-input-address__token-dropdown'
         onChangeTokenValue={onChangeTokenValue}
         options={options}
-        tokenValue={tokenValue}
+        tokenValue={`${token}|${networkKey}`}
       />
     </div>
   );

@@ -20,7 +20,6 @@ import { keyring } from '@polkadot/ui-keyring';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 
 import { AccountOption } from './types';
-import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props {
   className?: string;
@@ -44,7 +43,6 @@ interface Props {
   withLabel?: boolean;
   value: string;
   isSetDefaultValue?: boolean;
-  isEthereum: boolean;
   setInputAddressValue?: (value: string) => void;
 }
 
@@ -127,7 +125,7 @@ function dedupe (options: Option[]): Option[] {
 }
 
 // eslint-disable-next-line no-empty-pattern
-function InputAddress ({ className = '', defaultValue, filter, isEthereum, help, isDisabled, isSetDefaultValue, label, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis, setInputAddressValue }: Props): React.ReactElement {
+function InputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
   const [lastValue, setInputAddressLastValue] = useState('');
   const inputAddressRef = useRef(null);
   const [options, setOptions] = useState<AccountOption[]>([]);
@@ -136,15 +134,8 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
   const handleGetAccountsInputAddress = (data: OptionInputAddress) => {
     const { options } = data;
     const addressList = options[type].map((acc) => ({ value: acc.value, text: acc.name, name: acc.name, key: acc.key }));
-    let filteredOptions: AccountOption[];
 
-    if (isEthereum) {
-      filteredOptions = addressList.filter((opt) => (opt.key && isEthereumAddress(opt.key)) || opt.key === 'header-accounts' || opt.key === 'header-recent');
-    } else {
-      filteredOptions = addressList.filter((opt) => (opt.key && !isEthereumAddress(opt.key)) || opt.key === 'header-accounts' || opt.key === 'header-recent');
-    }
-
-    setOptions(filteredOptions);
+    setOptions(addressList);
   };
 
   useEffect(() => {
@@ -198,14 +189,13 @@ function InputAddress ({ className = '', defaultValue, filter, isEthereum, help,
   const onChangeData = useCallback((address: string): void => {
     !filter && setLastValue(type, address);
     setInputAddressLastValue(getLastValue(type));
-    setInputAddressValue && setInputAddressValue(address);
 
     onChange && onChange(
       address
         ? transformToAccountId(address)
         : null
     );
-  }, [filter, onChange, setInputAddressValue, type]);
+  }, [filter, onChange, type]);
 
   const filterOptions = useCallback((candidate: { label: string; value: string }, input: string) => {
     if (input) {

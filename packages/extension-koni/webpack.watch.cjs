@@ -16,13 +16,13 @@ module.exports = [createConfig({
       cacheGroups: {
         vendors: {
           test: /[\\/]node_modules[\\/]/,
-          priority: -10,
+          priority: -10
         },
         default: {
           priority: -20,
           reuseExistingChunk: true
-        },
-      },
+        }
+      }
     }
   }
 })];

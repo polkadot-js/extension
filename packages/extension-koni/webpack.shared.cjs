@@ -11,17 +11,18 @@ const pkgJson = require('./package.json');
 const manifest = require('./manifest.json');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const args = process.argv.slice(2)
-let mode = 'production'
+const args = process.argv.slice(2);
+let mode = 'production';
+
 if (args) {
   args.forEach((p, index) => {
     if (p === '--mode') {
       mode = args[index + 1] || mode;
     }
-  })
+  });
 }
 
-console.log('You are using ' + mode + ' mode.')
+console.log('You are using ' + mode + ' mode.');
 
 const packages = [
   'extension-base',
@@ -93,7 +94,8 @@ module.exports = (entry, alias = {}, overwrite) => {
       }),
       new CopyPlugin({
         patterns: [{
-          from: 'public', globOptions: {
+          from: 'public',
+          globOptions: {
             ignore: [
               '**/*.html'
             ]

@@ -6,5 +6,21 @@ const createConfig = require('./webpack.shared.cjs');
 module.exports = createConfig(
   {
     extension: './src/extension.ts'
+  }, [], {
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+          },
+          default: {
+            priority: -20,
+            reuseExistingChunk: true
+          },
+        },
+      }
+    }
   }
 );

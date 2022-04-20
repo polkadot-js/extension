@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { SenderInputAddressType, TokenItemType } from '@polkadot/extension-koni-ui/components/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -18,8 +19,10 @@ import TokenDropdown from './TokenDropdown';
 interface Props {
   className: string;
   onChange: (value: SenderInputAddressType) => void;
-  initValue: SenderInputAddressType,
-  chainRegistryMap: Record<string, ChainRegistry>
+  initValue: SenderInputAddressType;
+  chainRegistryMap: Record<string, ChainRegistry>;
+  balance: string;
+  balanceFormat: [number, string];
 }
 
 function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
@@ -42,7 +45,7 @@ function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItem
   return options;
 }
 
-function SenderInputAddress ({ chainRegistryMap, className = '', initValue, onChange }: Props): React.ReactElement {
+function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, onChange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
@@ -101,7 +104,10 @@ function SenderInputAddress ({ chainRegistryMap, className = '', initValue, onCh
       />
 
       <div className='sender-input-address__balance'>
-
+        <FormatBalance
+          format={balanceFormat}
+          value={balance}
+        />
       </div>
 
       <div className='sender-input-address__address'>

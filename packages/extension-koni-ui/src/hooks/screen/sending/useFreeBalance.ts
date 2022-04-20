@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { cancelSubscription, subscribeFreeBalance } from '@polkadot/extension-koni-ui/messaging';
 
-export default function useFreeBalance (networkKey: string, address: string | undefined | null, token: string | undefined): string {
+export default function useFreeBalance (networkKey: string | undefined | null, address: string | undefined | null, token: string | undefined | null): string {
   const [balance, setBalance] = useState<string>('0');
 
   useEffect(() => {
@@ -13,9 +13,9 @@ export default function useFreeBalance (networkKey: string, address: string | un
 
     let id: string;
 
-    if (address) {
+    if (address && networkKey) {
       (async () => {
-        id = await subscribeFreeBalance({ networkKey, address, token }, (free) => {
+        id = await subscribeFreeBalance({ networkKey, address, token: token || undefined }, (free) => {
           if (isSync) {
             setBalance(free);
           }
@@ -33,6 +33,8 @@ export default function useFreeBalance (networkKey: string, address: string | un
       if (id) {
         cancelSubscription(id).catch((e) => console.log('Error when cancel subscription', e));
       }
+
+      setBalance('0');
     };
   }, [networkKey, address, token]);
 

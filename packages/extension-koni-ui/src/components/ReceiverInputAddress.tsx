@@ -5,6 +5,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { toShort } from '@polkadot/extension-koni-ui/util';
@@ -15,10 +16,12 @@ import InputAddress from './InputAddress';
 interface Props {
   networkKey: string;
   className: string;
-  setRecipientId: (id: string) => void;
+  onchange: (address: string) => void;
+  balance: string;
+  balanceFormat: [number, string];
 }
 
-function ReceiverInputAddress ({ className = '', networkKey, setRecipientId }: Props): React.ReactElement {
+function ReceiverInputAddress ({ balance, balanceFormat, className = '', networkKey, onchange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const networkPrefix = NETWORKS[networkKey].ss58Format;
   const [receiveAddress, setReceiveAddress] = useState<string>('');
@@ -32,9 +35,9 @@ function ReceiverInputAddress ({ className = '', networkKey, setRecipientId }: P
   }, [receiveAddress, networkPrefix]);
 
   const onChangeReceiveAddress = useCallback((address: string) => {
-    setRecipientId(address);
+    onchange(address);
     setReceiveAddress(address);
-  }, [setRecipientId]);
+  }, [onchange]);
 
   return (
     <div className={className}>
@@ -51,7 +54,10 @@ function ReceiverInputAddress ({ className = '', networkKey, setRecipientId }: P
       />
 
       <div className='receiver-input-address__balance'>
-        1.0000 ACA
+        <FormatBalance
+          format={balanceFormat}
+          value={balance}
+        />
       </div>
 
       <div className='receiver-input-address__address'>

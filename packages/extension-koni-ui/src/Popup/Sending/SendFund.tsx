@@ -1,11 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { Warning } from '@polkadot/extension-koni-ui/components';
+import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson } from '@polkadot/extension-base/background/types';
+import { AccountContext, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
@@ -17,6 +19,7 @@ import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTrans
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps, TxResult } from '@polkadot/extension-koni-ui/types';
+import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 interface Props extends ThemeProps {
@@ -25,10 +28,43 @@ interface Props extends ThemeProps {
 
 interface ContentProps extends ThemeProps {
   className?: string;
+  defaultValue: SenderInputAddressType;
+}
+
+function getDefaultAddress (address: string, accounts: AccountJson[]): string {
+  return isAccountAll(address) ? accounts[1].address : address;
+}
+
+function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): [string, string] {
+  const firstNetworkKey = Object.keys(chainRegistryMap)[0];
+  const token = networkKey === 'all' ? chainRegistryMap[firstNetworkKey].chainTokens[0] : chainRegistryMap[networkKey].chainTokens[0];
+
+  return networkKey === 'all' ? [firstNetworkKey, token] : [networkKey, token];
+}
+
+function getDefaultValue (networkKey: string, address: string, chainRegistryMap: Record<string, ChainRegistry>, accounts: AccountJson[]): SenderInputAddressType {
+  const defaultToken = getDefaultToken(networkKey, chainRegistryMap);
+
+  return {
+    address: getDefaultAddress(address, accounts),
+    networkKey: defaultToken[0],
+    token: defaultToken[1]
+  };
 }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { accounts } = useContext(AccountContext);
+  const { chainRegistry: chainRegistryMap,
+    currentAccount: { account },
+    currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
+
+  console.log('networkKey', networkKey);
+  let defaultValue = {} as SenderInputAddressType;
+
+  if (account) {
+    defaultValue = getDefaultValue(networkKey, account.address, chainRegistryMap, accounts);
+  }
 
   return (
     <div className={className}>
@@ -43,40 +79,25 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
       />
       <SendFund
         className='send-fund-container'
+        defaultValue={defaultValue}
         theme={theme}
       />
     </div>
   );
 }
 
-function SendFund ({ className }: ContentProps): React.ReactElement {
+function SendFund ({ className, defaultValue }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [{ address, networkKey, token }, setSenderValue] = useState<SenderInputAddressType>({
-    address: '5CkNsSxDfRKqiojvuSh9ZyTD2GReGoavqnpC8pTmTXwomVLd',
-    token: 'DOT',
-    networkKey: 'polkadot'
-  } as SenderInputAddressType);
+  const [{ address, networkKey, token }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const decimals = 10;
-
-  // let defaultValueStr: string;
-
-  // if (networkKey === 'all') {
-  //   const defaultValue = options[0];
-  //
-  //   defaultValueStr = `${defaultValue.token}|${defaultValue.networkKey}}`;
-  // } else {
-  //   const defaultValue = options.find((opt) => opt.networkKey === networkKey);
-  //
-  //   defaultValueStr = defaultValue ? `${defaultValue.token}|${defaultValue.networkKey}` : '';
-  // }
 
   const _onSend = useCallback(() => {
     // setShowTxModal(true);
@@ -111,11 +132,7 @@ function SendFund ({ className }: ContentProps): React.ReactElement {
           <SenderInputAddress
             chainRegistryMap={chainRegistryMap}
             className=''
-            initValue={{
-              address,
-              token,
-              networkKey
-            }}
+            initValue={defaultValue}
             onChange={setSenderValue}
           />
 

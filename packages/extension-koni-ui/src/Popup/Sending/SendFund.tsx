@@ -5,12 +5,13 @@ import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
-import { SenderInputAddressType, TokenItemType } from '@polkadot/extension-koni-ui/components/types';
+import { SenderInputAddressType } from '@polkadot/extension-koni-ui/components/types';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
@@ -22,7 +23,33 @@ interface Props extends ThemeProps {
   className?: string,
 }
 
-function SendFund ({ className }: Props): React.ReactElement {
+interface ContentProps extends ThemeProps {
+  className?: string;
+}
+
+function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
+
+  return (
+    <div className={className}>
+      <Header
+        isShowNetworkSelect={false}
+        showAdd
+        showCancelButton
+        showSearch
+        showSettings
+        showSubHeader
+        subHeaderName={t<string>('Send fund')}
+      />
+      <SendFund
+        className='send-fund-container'
+        theme={theme}
+      />
+    </div>
+  );
+}
+
+function SendFund ({ className }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
@@ -34,26 +61,11 @@ function SendFund ({ className }: Props): React.ReactElement {
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
-  const options: TokenItemType[] = [];
   let decimals = 10;
 
   if (senderValue && Object.keys(senderValue).length) {
     decimals = chainRegistryMap[senderValue.networkKey].chainDecimals[0];
   }
-
-  Object.keys(chainRegistryMap).forEach((networkKey) => {
-    Object.keys(chainRegistryMap[networkKey].tokenMap).forEach((token) => {
-      const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
-
-      options.push({
-        networkKey: networkKey,
-        token: tokenInfo.symbol,
-        decimals: tokenInfo.decimals,
-        isMainToken: tokenInfo.isMainToken,
-        specialOption: tokenInfo?.specialOption
-      });
-    });
-  });
 
   // let defaultValueStr: string;
 
@@ -97,46 +109,67 @@ function SendFund ({ className }: Props): React.ReactElement {
       {/* eslint-disable-next-line multiline-ternary */}
       {!isShowTxResult ? (
         <div className={className}>
-          <Header
-            showAdd
-            showCancelButton
-            showSearch
-            showSettings
-            showSubHeader
-            subHeaderName={t<string>('Send fund')}
+          <SenderInputAddress
+            chainRegistryMap={chainRegistryMap}
+            className=''
+            setSenderValue={setSenderValue}
           />
-          <div className='send-fund-container'>
-            <SenderInputAddress
-              className=''
-              options={options}
-              setSenderValue={setSenderValue}
-            />
 
-            <ReceiverInputAddress
-              className={''}
-              setRecipientId={setRecipientId}
-            />
+          <ReceiverInputAddress
+            className={''}
+            setRecipientId={setRecipientId}
+          />
 
-            <InputBalance
-              autoFocus
-              className={'send-fund-balance-item'}
-              decimals={decimals}
-              help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-              isError={false}
-              isZeroable
-              label={t<string>('amount')}
-              onChange={setAmount}
-              placeholder={'0'}
-            />
-            <div className='submit-btn-wrapper'>
-              <Button
-                className={'kn-submit-btn'}
-                isDisabled={false}
-                onClick={_onSend}
-              >
-                {t<string>('Make Transfer')}
-              </Button>
-            </div>
+          {false && (
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
+              {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: '' } })}
+            </Warning>
+          )}
+
+          {false && (
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
+              {t<string>('The recipient address is the same as the sender address.')}
+            </Warning>
+          )}
+
+          <InputBalance
+            autoFocus
+            className={'send-fund-balance-item'}
+            decimals={decimals}
+            help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+            isError={false}
+            isZeroable
+            label={t<string>('amount')}
+            onChange={setAmount}
+            placeholder={'0'}
+          />
+
+          {false && (
+            <Warning className={'kn-l-warning'}>
+              {t<string>('There is an existing reference count on the sender account. As such the account cannot be reaped from the state.')}
+            </Warning>
+          )}
+
+          {false && (
+            <Warning className={'kn-l-warning'}>
+              {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
+            </Warning>
+          )}
+
+          <div className='submit-btn-wrapper'>
+            <Button
+              className={'kn-submit-btn'}
+              isDisabled={false}
+              onClick={_onSend}
+            >
+              {t<string>('Make Transfer')}
+            </Button>
           </div>
         </div>
       ) : (
@@ -163,7 +196,12 @@ function SendFund ({ className }: Props): React.ReactElement {
   );
 }
 
-export default React.memo(styled(SendFund)(({ theme }: Props) => `
+export default React.memo(styled(Wrapper)(({ theme }: Props) => `
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+
   .send-fund-container {
     padding-left: 15px;
     padding-right: 15px;
@@ -182,7 +220,7 @@ export default React.memo(styled(SendFund)(({ theme }: Props) => `
   }
 
   .send-fund-balance-item {
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 10px;
   }
 

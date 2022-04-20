@@ -64,6 +64,7 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
   height: 72px;
   border-radius: 8px;
   position: relative;
+  margin-bottom: 10px;
 
   .receiver-input-address__address {
     position: absolute;

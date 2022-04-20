@@ -49,6 +49,7 @@ interface Props extends ThemeProps {
   subHeaderName?: string;
   showCancelButton?: boolean;
   isWelcomeScreen?: boolean;
+  isShowNetworkSelect?: boolean;
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
   changeAccountCallback?: (address: string) => void;
@@ -61,7 +62,7 @@ function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
 }
 
-function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
@@ -310,7 +311,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               />
             </div>)}
             <div
-              className={`network-select-item ${isNetworkSelectOpen ? 'pointer-events-none' : ''}`}
+              className={`network-select-item ${isNetworkSelectOpen ? 'pointer-events-none' : ''} ${isShowNetworkSelect ? '' : 'network-select-disabled'}`}
               onClick={_toggleNetwork}
             >
               <img
@@ -459,6 +460,12 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   }
 
   .pointer-events-none {
+    pointer-events: none;
+  }
+
+  .network-select-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
     pointer-events: none;
   }
 

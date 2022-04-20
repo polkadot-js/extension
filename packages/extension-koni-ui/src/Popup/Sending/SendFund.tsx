@@ -14,6 +14,7 @@ import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/Receive
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { SenderInputAddressType } from '@polkadot/extension-koni-ui/components/types';
+import useFreeBalance from '@polkadot/extension-koni-ui/hooks/screen/sending/useFreeBalance';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
@@ -50,6 +51,12 @@ function getDefaultValue (networkKey: string, address: string, chainRegistryMap:
     networkKey: defaultToken[0],
     token: defaultToken[1]
   };
+}
+
+function getBalanceFormat (networkKey: string, token: string, chainRegistryMap: Record<string, ChainRegistry>): [number, string] {
+  const tokenInfo = chainRegistryMap[networkKey].tokenMap[token];
+
+  return [tokenInfo.decimals, tokenInfo.symbol];
 }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
@@ -92,12 +99,16 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
-  const [{ address, networkKey, token }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
+  const [{ address: senderId,
+    networkKey: selectedNetworkKey,
+    token: selectedToken }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
-  const decimals = 10;
+  const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
+  const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
+  const balanceFormat = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
 
   const _onSend = useCallback(() => {
     // setShowTxModal(true);
@@ -130,6 +141,8 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
       {!isShowTxResult ? (
         <div className={className}>
           <SenderInputAddress
+            balance={senderFreeBalance}
+            balanceFormat={balanceFormat}
             chainRegistryMap={chainRegistryMap}
             className=''
             initValue={defaultValue}
@@ -137,9 +150,11 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
           />
 
           <ReceiverInputAddress
+            balance={recipientFreeBalance}
+            balanceFormat={balanceFormat}
             className={''}
-            networkKey={networkKey}
-            setRecipientId={setRecipientId}
+            networkKey={selectedNetworkKey}
+            onchange={setRecipientId}
           />
 
           {false && (
@@ -163,7 +178,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
           <InputBalance
             autoFocus
             className={'send-fund-balance-item'}
-            decimals={decimals}
+            decimals={balanceFormat[0]}
             help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
             isError={false}
             isZeroable
@@ -196,7 +211,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
         </div>
       ) : (
         <SendFundResult
-          networkKey={networkKey}
+          networkKey={selectedNetworkKey}
           onResend={_onResend}
           txResult={txResult}
         />

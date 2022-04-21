@@ -68,9 +68,10 @@ export class KoniSubcription {
       });
     });
 
-    state.subscribeApiMap().subscribe({
-      next: (apiMap) => {
-        console.log('subscribe apiMap', apiMap);
+    state.subscribeServiceInfo().subscribe({
+      next: (serviceInfo) => {
+        this.detectAddresses
+        console.log('subscribe serviceInfo', serviceInfo, );
       }
     });
   }

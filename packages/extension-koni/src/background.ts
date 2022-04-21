@@ -42,6 +42,7 @@ cryptoWaitReady()
     const subscriptions = new KoniSubcription();
 
     subscriptions.init();
+    console.log('init subscription');
 
     // Init cron
     (new KoniCron(subscriptions)).init();

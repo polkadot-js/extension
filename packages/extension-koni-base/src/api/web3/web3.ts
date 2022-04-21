@@ -40,3 +40,11 @@ export const getERC20Contract = (networkKey: string, assetAddress: string, optio
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
   return new web3Map[networkKey].eth.Contract(ERC20Contract.abi, assetAddress, options);
 };
+
+export const initWeb3Api = (provider: string) => {
+  if (provider.startsWith('http')) {
+    return new Web3(new Web3.providers.HttpProvider(provider));
+  } else {
+    return new Web3(new Web3.providers.WebsocketProvider(provider));
+  }
+};

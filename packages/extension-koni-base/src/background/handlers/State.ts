@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -23,6 +23,7 @@ import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/Transa
 import { convertFundStatus, getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
+import {initWeb3Api} from "@polkadot/extension-koni-base/api/web3/web3";
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -177,7 +178,6 @@ export default class KoniState extends State {
   private networkMapSubject = new Subject<Record<string, NetworkJson>>();
 
   private apiMap: ApiMap = { dotSama: {}, web3: {} };
-  private apiMapSubject = new Subject<ApiMap>();
 
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
@@ -219,6 +219,8 @@ export default class KoniState extends State {
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
+
+  private serviceInfoSubject = new Subject<ServiceInfo>();
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -816,9 +818,13 @@ export default class KoniState extends State {
       this.networkMap[data.key] = data;
     }
 
-    this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
-    this.apiMapSubject.next(this.apiMap);
+    if (data.isEthereum && data.isEthereum) {
+      this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
+    } else {
+      this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
+    }
 
+    this.updateServiceInfo();
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
@@ -837,14 +843,14 @@ export default class KoniState extends State {
     delete this.networkMap[networkKey];
 
     this.networkMapSubject.next(this.networkMap);
+    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
   public disableNetworkMap (networkKey: string) {
-    if (this.networkMap[networkKey].isEthereum) {
-      console.log('handle web3');
+    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
+      delete this.apiMap.web3[networkKey];
     } else {
-      // disconnect api
       this.apiMap.dotSama[networkKey].api.disconnect()
         .then((r) => console.log('disconnected from ', networkKey, r))
         .catch(console.error);
@@ -853,20 +859,20 @@ export default class KoniState extends State {
 
     this.networkMap[networkKey].active = false;
     this.networkMapSubject.next(this.networkMap);
-    this.apiMapSubject.next(this.apiMap);
+    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
   public enableNetworkMap (networkKey: string) {
-    if (this.networkMap[networkKey].isEthereum) {
-      console.log('handle web3');
+    if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
+      this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
     } else {
       this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
     }
 
     this.networkMap[networkKey].active = true;
     this.networkMapSubject.next(this.networkMap);
-    this.apiMapSubject.next(this.apiMap);
+    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
@@ -874,6 +880,7 @@ export default class KoniState extends State {
     this.networkMap[networkKey].dotSamaAPIStatus = status;
 
     this.networkMapSubject.next(this.networkMap);
+    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
   }
 
@@ -881,7 +888,14 @@ export default class KoniState extends State {
     return this.apiMap;
   }
 
-  public subscribeApiMap () {
-    return this.apiMapSubject;
+  public subscribeServiceInfo () {
+    return this.serviceInfoSubject;
+  }
+
+  public updateServiceInfo () {
+    this.serviceInfoSubject.next({
+      apiMap: this.apiMap,
+      networkMap: this.networkMap
+    });
   }
 }

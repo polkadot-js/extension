@@ -13,6 +13,12 @@ import { Keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
+export interface ServiceInfo {
+  networkMap: Record<string, NetworkJson>;
+  apiMap: ApiMap;
+  addresses?: string[];
+}
+
 export enum ApiInitStatus {
   SUCCESS,
   ALREADY_EXIST,

@@ -110,12 +110,19 @@ export class KoniCron {
 
   updateApiMapStatus () {
     const apiMap = state.getApiMap();
+    const networkMap = state.getNetworkMap();
 
     for (const [key, apiProp] of Object.entries(apiMap.dotSama)) {
+      let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
+
       if (apiProp.isApiConnected) {
-        state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
-      } else {
-        state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+        status = NETWORK_STATUS.CONNECTED;
+      }
+
+      if (!networkMap[key].dotSamaAPIStatus) {
+        state.updateNetworkStatus(key, status);
+      } else if (networkMap[key].dotSamaAPIStatus && networkMap[key].dotSamaAPIStatus !== status) {
+        state.updateNetworkStatus(key, status);
       }
     }
   }

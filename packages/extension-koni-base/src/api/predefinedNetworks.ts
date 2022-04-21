@@ -146,26 +146,26 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   //   crowdloanUrl: 'https://distribution.acala.network/',
   //   decimals: 12
   // },
-  // moonbeam: {
-  //   key: 'moonbeam',
-  //   chain: 'Moonbeam',
-  //   genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
-  //   ss58Format: 1284,
-  //   providers: {
-  //     'Moonbeam Foundation': 'wss://wss.api.moonbeam.network',
-  //     OnFinality: 'wss://moonbeam.api.onfinality.io/public-ws',
-  //     Dwellir: 'wss://moonbeam-rpc.dwellir.com'
-  //   },
-  //   active: false,
-  //   currentProviderMode: 'ws',
-  //   currentProvider: 'OnFinality',
-  //   groups: ['POLKADOT_PARACHAIN'],
-  //   paraId: 2004,
-  //   isEthereum: true,
-  //   nativeToken: 'GLMR',
-  //   crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
-  //   decimals: 18
-  // },
+  moonbeam: {
+    key: 'moonbeam',
+    chain: 'Moonbeam',
+    genesisHash: '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d',
+    ss58Format: 1284,
+    providers: {
+      'Moonbeam Foundation': 'wss://wss.api.moonbeam.network',
+      OnFinality: 'wss://moonbeam.api.onfinality.io/public-ws',
+      Dwellir: 'wss://moonbeam-rpc.dwellir.com'
+    },
+    active: false,
+    currentProviderMode: 'ws',
+    currentProvider: 'OnFinality',
+    groups: ['POLKADOT_PARACHAIN'],
+    paraId: 2004,
+    isEthereum: true,
+    nativeToken: 'GLMR',
+    crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
+    decimals: 18
+  },
   // astar: {
   //   key: 'astar',
   //   chain: 'Astar',

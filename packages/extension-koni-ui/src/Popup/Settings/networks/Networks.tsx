@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { InputFilter, Link } from '@polkadot/extension-koni-ui/components';
+import useFetchNetworkMap from '@polkadot/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import NetworkItem from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkItem';
-import { RootState, store } from '@polkadot/extension-koni-ui/stores';
+import { store } from '@polkadot/extension-koni-ui/stores';
 import { NetworkCreateParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
 function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
 
-  const { networkMap } = useSelector((state: RootState) => state);
+  const networkMap = useFetchNetworkMap();
 
   const _onChangeFilter = useCallback(() => {
     console.log(123);

@@ -49,45 +49,45 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     nativeToken: 'KSM',
     decimals: 12
   },
-  westend: {
-    key: 'westend',
-    chain: 'Westend Relay Chain',
-    genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
-    icon: 'polkadot',
-    ss58Format: 42,
-    providers: {
-      Parity: 'wss://westend-rpc.polkadot.io',
-      // OnFinality: 'wss://polkadot.api.onfinality.io/public-ws',
-      // Pinknode: 'wss://rpc.pinknode.io/westend/explorer',
-      // Dwellir: 'wss://westend-rpc.dwellir.com',
-      // 'light client': 'light://substrate-connect/westend'
-    },
-    active: false,
-    currentProvider: 'OnFinality',
-    currentProviderMode: 'ws',
-    groups: ['RELAY_CHAIN', 'TEST_NET'],
-    nativeToken: 'WND',
-    decimals: 12
-  },
-  rococo: {
-    key: 'rococo',
-    chain: 'Rococo Relay Chain',
-    genesisHash: '0xaaf2cd1b74b5f726895921259421b534124726263982522174147046b8827897',
-    icon: 'polkadot',
-    ss58Format: 42,
-    providers: {
-      Parity: 'wss://rococo-rpc.polkadot.io'
-      // OnFinality: 'wss://rococo.api.onfinality.io/public-ws', // After reset, node misses host functions
-      // Pinknode: 'wss://rpc.pinknode.io/rococo/explorer' // After reset, syncs to old chain
-      // 'Ares Protocol': 'wss://rococo.aresprotocol.com' // https://github.com/polkadot-js/apps/issues/5767
-    },
-    active: false,
-    currentProvider: 'Parity',
-    currentProviderMode: 'ws',
-    groups: ['RELAY_CHAIN', 'TEST_NET'],
-    nativeToken: 'ROC',
-    decimals: 12
-  },
+  // westend: {
+  //   key: 'westend',
+  //   chain: 'Westend Relay Chain',
+  //   genesisHash: '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e',
+  //   icon: 'polkadot',
+  //   ss58Format: 42,
+  //   providers: {
+  //     Parity: 'wss://westend-rpc.polkadot.io',
+  //     // OnFinality: 'wss://polkadot.api.onfinality.io/public-ws',
+  //     // Pinknode: 'wss://rpc.pinknode.io/westend/explorer',
+  //     // Dwellir: 'wss://westend-rpc.dwellir.com',
+  //     // 'light client': 'light://substrate-connect/westend'
+  //   },
+  //   active: false,
+  //   currentProvider: 'OnFinality',
+  //   currentProviderMode: 'ws',
+  //   groups: ['RELAY_CHAIN', 'TEST_NET'],
+  //   nativeToken: 'WND',
+  //   decimals: 12
+  // },
+  // rococo: {
+  //   key: 'rococo',
+  //   chain: 'Rococo Relay Chain',
+  //   genesisHash: '0x27b0e1604364f6a7309d31ad60cdfb820666c3095b9f948c4a7d7894b6b3c184',
+  //   icon: 'polkadot',
+  //   ss58Format: 42,
+  //   providers: {
+  //     Parity: 'wss://rococo-rpc.polkadot.io'
+  //     // OnFinality: 'wss://rococo.api.onfinality.io/public-ws', // After reset, node misses host functions
+  //     // Pinknode: 'wss://rpc.pinknode.io/rococo/explorer' // After reset, syncs to old chain
+  //     // 'Ares Protocol': 'wss://rococo.aresprotocol.com' // https://github.com/polkadot-js/apps/issues/5767
+  //   },
+  //   active: false,
+  //   currentProvider: 'Parity',
+  //   currentProviderMode: 'ws',
+  //   groups: ['RELAY_CHAIN', 'TEST_NET'],
+  //   nativeToken: 'ROC',
+  //   decimals: 12
+  // },
   // rmrk: {
   //   key: 'rococo',
   //   chain: 'RMRK test',
@@ -1086,4 +1086,10 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   //   nativeToken: 'NUUM',
   //   decimals: 18
   // }
+};
+
+export const PREDEFINED_GENESIS_HASHES = {
+  '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3': 'polkadot',
+  '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe': 'kusama',
+  '0x27b0e1604364f6a7309d31ad60cdfb820666c3095b9f948c4a7d7894b6b3c184': 'rococo'
 };

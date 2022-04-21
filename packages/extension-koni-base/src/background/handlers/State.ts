@@ -11,7 +11,7 @@ import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
+import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
@@ -68,6 +68,45 @@ function generateDefaultCrowdloanMap () {
   return crowdloanMap;
 }
 
+export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNetwork: NetworkJson) { // merge providers for 2 networks with the same genesisHash
+  if (customNetwork.customProviders) {
+    const parsedCustomProviders: Record<string, string> = {};
+    const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
+    let parsedProviderKey = '';
+
+    for (const customProvider of Object.values(customNetwork.customProviders)) {
+      let exist = false;
+
+      for (const [key, provider] of Object.entries(predefinedNetwork.providers)) {
+        if (currentProvider === provider) { // point currentProvider to predefined
+          parsedProviderKey = key;
+        }
+
+        if (provider === customProvider) {
+          exist = true;
+          break;
+        }
+      }
+
+      if (!exist) {
+        const index = Object.values(parsedCustomProviders).length;
+
+        parsedCustomProviders[`custom_${index}`] = customProvider;
+      }
+    }
+
+    for (const [key, parsedProvider] of Object.entries(parsedCustomProviders)) {
+      if (currentProvider === parsedProvider) {
+        parsedProviderKey = key;
+      }
+    }
+
+    return { parsedProviderKey, parsedCustomProviders };
+  } else {
+    return { parsedProviderKey: '', parsedCustomProviders: {} };
+  }
+}
+
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
@@ -89,23 +128,33 @@ export default class KoniState extends State {
       } else { // merge custom providers in stored data with predefined data
         const mergedNetworkMap: Record<string, NetworkJson> = PREDEFINED_NETWORKS;
 
-        for (const [key, network] of Object.entries(storedNetworkMap)) {
+        for (const [key, storedNetwork] of Object.entries(storedNetworkMap)) {
           if (key in PREDEFINED_NETWORKS) {
             // TODO: fields to merge
-            // TODO: merge network with same genesis hash
             // check change and override custom providers if exist
-            if ('customProviders' in network) {
-              mergedNetworkMap[key].customProviders = network.customProviders;
+            if ('customProviders' in storedNetwork) {
+              mergedNetworkMap[key].customProviders = storedNetwork.customProviders;
             }
 
-            mergedNetworkMap[key].active = network.active;
+            mergedNetworkMap[key].active = storedNetwork.active;
 
-            if (network.customProviders && Object.keys(network.customProviders).includes(network.currentProvider)) {
-              mergedNetworkMap[key].currentProvider = network.currentProvider;
+            if (storedNetwork.customProviders && Object.keys(storedNetwork.customProviders).includes(storedNetwork.currentProvider)) {
+              mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
               mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
             }
           } else {
-            mergedNetworkMap[key] = network;
+            if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
+              // @ts-ignore
+              const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash] as string;
+
+              const { parsedCustomProviders, parsedProviderKey } = mergeNetworkProviders(storedNetwork, PREDEFINED_NETWORKS[targetKey]);
+
+              mergedNetworkMap[targetKey].customProviders = parsedCustomProviders;
+              mergedNetworkMap[targetKey].currentProvider = parsedProviderKey;
+              mergedNetworkMap[targetKey].active = storedNetwork.active;
+            } else {
+              mergedNetworkMap[key] = storedNetwork;
+            }
           }
         }
 

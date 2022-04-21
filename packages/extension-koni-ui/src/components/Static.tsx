@@ -36,8 +36,10 @@ function Static ({ children, className = '', defaultValue, help, isFull, isHidde
       withLabel={withLabel}
     >
       <div className='ui--Static ui dropdown selection disabled'>
-        {value || defaultValue}
-        {children}
+        <>
+          {value || defaultValue}
+          {children}
+        </>
       </div>
     </Labelled>
   );

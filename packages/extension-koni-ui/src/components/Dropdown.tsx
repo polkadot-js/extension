@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback, useState } from 'react';
-import Select from 'react-select';
+import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled from 'styled-components';
 
 import { networkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
@@ -24,10 +24,8 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
 
   const handleChange = useCallback(
-    ({ value }): void => {
-      if (typeof value === 'string') {
-        value = value.trim();
-      }
+    (newValue: SingleValue<{ label: string; value: string; }>, actionMeta: ActionMeta<{ label: string; value: string; }>): void => {
+      const value = newValue?.value.trim() || '';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       onChange && onChange(value);

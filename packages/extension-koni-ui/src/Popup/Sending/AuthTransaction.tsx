@@ -1,30 +1,49 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
+import { RequestCheckTransfer } from '@polkadot/extension-base/background/KoniTypes';
+import { InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
-import { useToggle } from '@polkadot/extension-koni-ui/hooks/useToggle';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import Address from '@polkadot/extension-koni-ui/Popup/Sending/parts/Address';
-import { AddressProxy, ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { checkTransfer, makeTransfer } from '@polkadot/extension-koni-ui/messaging';
+import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { BN, formatBalance } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
-  requestAddress: string;
-  extrinsic: never;
+  requestPayload: RequestCheckTransfer;
+  balanceFormat: [number, string]
 }
 
-function AuthTransaction ({ className, onCancel, requestAddress }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ balanceFormat, className, onCancel, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
-  const [isRenderError] = useToggle();
-  const [senderInfo, setSenderInfo] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: requestAddress, signPassword: '' }));
   const [isBusy, setBusy] = useState(false);
+  const [password, setPassword] = useState<string>('');
+  const [fee, setFee] = useState<null | string>(null);
 
-  const passwordError = null;
+  useEffect(() => {
+    let isSync = true;
+
+    checkTransfer({
+      ...requestPayload
+    }).then((rs) => {
+      if (isSync) {
+        setFee(rs.estimateFee || null);
+      }
+    }).catch((e) => {
+      console.log('There is problem when checkTransfer', e);
+    });
+
+    return () => {
+      isSync = false;
+    };
+  }, [requestPayload]);
 
   const _onCancel = useCallback(() => {
     onCancel();
@@ -32,9 +51,39 @@ function AuthTransaction ({ className, onCancel, requestAddress }: Props): React
   [onCancel]
   );
 
+  const _doCheck = useCallback(
+    (): void => {
+      setBusy(true);
+
+      checkTransfer({
+        ...requestPayload
+      }).then((rs) => {
+        setBusy(false);
+      })
+        .catch((e) => {
+          setBusy(false);
+        });
+    },
+    [requestPayload]
+  );
+
   const _doStart = useCallback(
     (): void => {
       setBusy(true);
+
+      makeTransfer({
+        ...requestPayload,
+        password
+      }, (a) => {
+        // do Something
+      }).catch((e) => console.log('There is problem when makeTransfer', e));
+    },
+    [password, requestPayload]
+  );
+
+  const _onChangePass = useCallback(
+    (value: string): void => {
+      setPassword(value);
     },
     []
   );
@@ -61,20 +110,37 @@ function AuthTransaction ({ className, onCancel, requestAddress }: Props): React
             }
           </div>
         </div>
+
         <div className='auth-transaction-body'>
-          <Address
-            class
-            onChange={setSenderInfo}
-            onEnter={_doStart}
-            passwordError={passwordError}
-            requestAddress={requestAddress}
+          {!!fee && (
+            <Trans i18nKey='feesForSubmission'>
+                Fees of <span className='highlight'>
+                {formatBalance(new BN(fee), { withSiFull: true, decimals: balanceFormat[0], withUnit: balanceFormat[1] })}
+              </span> will be applied to the submission
+            </Trans>
+          )}
+
+          <InputWithLabel
+            label={t<string>('Password')}
+            onChange={_onChangePass}
+            type='password'
+            value={password}
           />
 
           <div className='auth-transaction__submit-wrapper'>
             <Button
               className={'auth-transaction__submit-btn'}
               isBusy={isBusy}
+              onClick={_doCheck}
+            >
+              {t<string>('Check transfer')}
+            </Button>
+          </div>
 
+          <div className='auth-transaction__submit-wrapper'>
+            <Button
+              className={'auth-transaction__submit-btn'}
+              isBusy={isBusy}
               onClick={_doStart}
             >
               {t<string>('Sign and Submit')}

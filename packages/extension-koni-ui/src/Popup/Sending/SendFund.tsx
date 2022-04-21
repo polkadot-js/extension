@@ -110,7 +110,6 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     token: selectedToken }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [recipientPhish, setRecipientPhish] = useState<string | null>(null);
-  const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
@@ -140,7 +139,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   , [recipientId]);
 
   const _onSend = useCallback(() => {
-    // setShowTxModal(true);
+    setShowTxModal(true);
   }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -152,7 +151,6 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   }, []);
 
   const _onCancelTx = useCallback(() => {
-    setExtrinsic(null);
     setShowTxModal(false);
   }, []);
 
@@ -275,9 +273,16 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
       {isShowTxModal && (
         <AuthTransaction
-          extrinsic={extrinsic}
+          balanceFormat={balanceFormat}
           onCancel={_onCancelTx}
-          requestAddress={''}
+          requestPayload={{
+            networkKey: selectedNetworkKey,
+            from: senderId,
+            to: recipientId,
+            transferAll: false,
+            token: selectedToken,
+            value: amount?.toString() || '0'
+          }}
           txHandler={{
             onTxSuccess: _onTxSuccess,
             onTxFail: _onTxFail

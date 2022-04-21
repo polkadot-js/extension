@@ -301,7 +301,7 @@ function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, chil
 export default React.memo(styled(InputNumber)(({ theme }: ThemeProps) => `
   background: ${theme.backgroundAccountAddress};
   border-radius: 8px;
-  padding: 7px 120px 7px 16px;
+  padding: 7px 16px;
   color: ${theme.textColor2};
   position: relative;
 

@@ -266,6 +266,11 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     border-radius: 8px;
   }
 
+  .token-dropdown-dropdown__input {
+    min-width: 100% !important;
+    width: auto !important;
+  }
+
   .token-dropdown-dropdown__single-value {
     display: none;
   }

@@ -2,20 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { isUndefined } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props {
   name?: string;
   address: string;
   className?: string;
+  networkPrefix: number;
   style?: Record<string, string>;
 }
 
@@ -27,12 +27,12 @@ function getName (address: string, name?: string): string {
   return isUndefined(name) ? address.length > 15 ? getShortenText(address) : address : name;
 }
 
-function KeyPair ({ address, className = '', name }: Props): React.ReactElement<Props> {
-  const { icon, isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
+function KeyPair ({ address, className = '', name, networkPrefix }: Props): React.ReactElement<Props> {
   let formattedAddress = '';
+  const icon = isEthereumAddress(address) ? 'ethereum' : 'polkadot';
 
   if (address !== '-') {
-    formattedAddress = reformatAddress(address, networkPrefix, isEthereum);
+    formattedAddress = reformatAddress(address, networkPrefix);
   }
 
   return (
@@ -88,6 +88,7 @@ export default React.memo(styled(KeyPair)(({ theme }: ThemeProps) => `
     width: 24px;
     height: 24px;
     margin-right: 16px;
+    pointer-events: none;
   }
 
   .key-pair__icon .icon {

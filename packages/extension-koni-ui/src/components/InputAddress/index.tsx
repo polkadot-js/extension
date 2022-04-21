@@ -38,6 +38,7 @@ interface Props {
   options?: KeyringSectionOption[];
   optionsAll?: Record<string, Option[]>;
   placeholder?: string;
+  networkPrefix?: number;
   type?: KeyringOption$Type;
   withEllipsis?: boolean;
   withLabel?: boolean;
@@ -125,7 +126,7 @@ function dedupe (options: Option[]): Option[] {
 }
 
 // eslint-disable-next-line no-empty-pattern
-function InputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
+function InputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, networkPrefix, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
   const [lastValue, setInputAddressLastValue] = useState('');
   const inputAddressRef = useRef(null);
   const [options, setOptions] = useState<AccountOption[]>([]);
@@ -212,8 +213,6 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
           }).catch(console.error);
         }
       }
-
-      return isMatches;
     }
 
     return true;
@@ -225,9 +224,10 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
       <KeyPair
         address={value}
         name={label}
+        networkPrefix={networkPrefix}
       />
     );
-  }, []);
+  }, [networkPrefix]);
 
   return (
     <div className={className}>

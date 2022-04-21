@@ -98,6 +98,7 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
         help={t<string>('The account you will send funds from.')}
         isSetDefaultValue={true}
         label={t<string>('Send from account')}
+        networkPrefix={networkPrefix}
         onChange={onChangeInputAddress}
         type='account'
         withEllipsis

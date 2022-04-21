@@ -14,9 +14,11 @@ import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
+import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { SenderInputAddressType } from '@polkadot/extension-koni-ui/components/types';
 import useFreeBalance from '@polkadot/extension-koni-ui/hooks/screen/sending/useFreeBalance';
+import { checkTransfer, transferCheckReferenceCount, transferCheckSupporting, transferGetExistentialDeposit } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
@@ -24,7 +26,7 @@ import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps, TxResult } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { checkAddress } from '@polkadot/phishing';
-import { BN, BN_ZERO } from '@polkadot/util';
+import { BN, BN_HUNDRED, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
@@ -63,6 +65,16 @@ function getBalanceFormat (networkKey: string, token: string, chainRegistryMap: 
   return [tokenInfo.decimals, tokenInfo.symbol];
 }
 
+function getMaxTransferAndNoFees (fee: string | null, senderFreeBalance: string, existentialDeposit: string): [BN | null, boolean] {
+  const partialFee = fee ? new BN(fee) : new BN('0');
+  const adjFee = partialFee.muln(110).div(BN_HUNDRED);
+  const maxTransfer = (new BN(senderFreeBalance)).sub(adjFee);
+
+  return maxTransfer.gt(new BN(existentialDeposit))
+    ? [maxTransfer, false]
+    : [null, true];
+}
+
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts } = useContext(AccountContext);
@@ -87,7 +99,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSubHeader
         subHeaderName={t<string>('Send fund')}
       />
-      {accounts && accounts.length && account && chainRegistryMap
+      {accounts && accounts.length && account && Object.keys(chainRegistryMap).length
         ? (<SendFund
           className='send-fund-container'
           defaultValue={defaultValue}
@@ -110,15 +122,67 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     token: selectedToken }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [recipientPhish, setRecipientPhish] = useState<string | null>(null);
+  const [reference, setReference] = useState<boolean | null>(null);
+  // const [isProtected, setIsProtected] = useState(false);
+  const [isAll, setIsAll] = useState(false);
+  const [isTransferSupport, setTransferSupport] = useState<boolean | null>(null);
+  // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
+  const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
+  const [fee, setFee] = useState<null | string>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
   const balanceFormat = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
   const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
-  const isNotSameAddressAndTokenType = (isEthereumAddress(senderId) && !ethereumChains.includes(selectedNetworkKey)) || (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
-  const isNotSameAddressType = (isEthereumAddress(senderId) && !!recipientId && !isEthereumAddress(recipientId)) || (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
+  const isNotSameAddressAndTokenType = (isEthereumAddress(senderId) && !ethereumChains.includes(selectedNetworkKey)) ||
+    (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
+  const isNotSameAddressType = (isEthereumAddress(senderId) && !!recipientId && !isEthereumAddress(recipientId)) ||
+    (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
+  const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, senderFreeBalance, existentialDeposit);
+  const canToggleAll = maxTransfer && !reference && !!recipientId;
+
+  useEffect(() => {
+    let isSync = true;
+
+    if (recipientId) {
+      checkTransfer({
+        networkKey: selectedNetworkKey,
+        from: senderId,
+        to: recipientId,
+        transferAll: false,
+        token: selectedToken,
+        value: amount?.toString() || '0'
+      }).then((rs) => {
+        if (isSync) {
+          setFee(rs.estimateFee || null);
+        }
+      }).catch((e) => {
+        console.log('There is problem when checkTransfer', e);
+      });
+    }
+
+    return () => {
+      isSync = false;
+    };
+  }, [amount, recipientId, selectedNetworkKey, selectedToken, senderId]);
+
+  useEffect(() => {
+    let isSync = true;
+
+    transferGetExistentialDeposit({ networkKey: selectedNetworkKey, token: selectedToken })
+      .then((rs) => {
+        if (isSync) {
+          setExistentialDeposit(rs);
+        }
+      }).catch((e) => console.log('There is problem when transferGetExistentialDeposit', e));
+
+    return () => {
+      isSync = false;
+      setExistentialDeposit('0');
+    };
+  });
 
   useEffect(() => {
     let isSync = true;
@@ -137,6 +201,36 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     };
   }
   , [recipientId]);
+
+  useEffect(() => {
+    let isSync = true;
+
+    transferCheckReferenceCount({ address: senderId, networkKey: selectedNetworkKey }).then((res) => {
+      if (isSync) {
+        setReference(res);
+      }
+    }).catch((e) => console.log(e));
+
+    return () => {
+      isSync = false;
+      setReference(null);
+    };
+  }, [selectedNetworkKey, senderId]);
+
+  useEffect(() => {
+    let isSync = true;
+
+    transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).then((res) => {
+      if (isSync) {
+        setTransferSupport(res);
+      }
+    }).catch((e) => console.log(e));
+
+    return () => {
+      isSync = false;
+      setTransferSupport(null);
+    };
+  }, [selectedNetworkKey, selectedToken]);
 
   const _onSend = useCallback(() => {
     setShowTxModal(true);
@@ -186,7 +280,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
           {!!recipientPhish && (
             <Warning
-              className={'kn-l-warning'}
+              className={'send-fund-warning'}
               isDanger
             >
               {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
@@ -195,60 +289,96 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
           {isSameAddress && (
             <Warning
-              className={'kn-l-warning'}
+              className={'send-fund-warning'}
               isDanger
             >
               {t<string>('The recipient address is the same as the sender address.')}
             </Warning>
           )}
 
-          <InputBalance
-            autoFocus
-            className={'send-fund-balance-item'}
-            decimals={balanceFormat[0]}
-            help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-            isError={false}
-            isZeroable
-            label={t<string>('amount')}
-            onChange={setAmount}
-            placeholder={'0'}
-          />
+          {canToggleAll && isAll
+            ? (
+              <InputBalance
+                autoFocus
+                className={'send-fund-balance-item'}
+                decimals={balanceFormat[0]}
+                defaultValue={maxTransfer}
+                help={t<string>('The full account balance to be transferred, minus the transaction fees')}
+                isDisabled
+                key={maxTransfer?.toString()}
+                label={t<string>('transferable minus fees')}
+              />
+            )
+            : (
+              <InputBalance
+                autoFocus
+                className={'send-fund-balance-item'}
+                decimals={balanceFormat[0]}
+                help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+                isError={false}
+                isZeroable
+                label={t<string>('amount')}
+                onChange={setAmount}
+                placeholder={'0'}
+              />
+            )
+          }
+
+          {canToggleAll && (
+            <div className={'kn-field -toggle -toggle-2'}>
+              <Toggle
+                className='typeToggle'
+                label={t<string>('Transfer the full account balance, reap the sender')}
+                onChange={setIsAll}
+                value={isAll}
+              />
+            </div>
+          )}
 
           {isNotSameAddressAndTokenType && (
             <Warning
-              className={'kn-l-warning'}
+              className={'send-fund-warning'}
               isDanger
             >
-              {t<string>('Sender account and token are not of the same type')}
+              {t<string>('Transfer is not supported for this type of account and token')}
+            </Warning>
+          )}
+
+          {isTransferSupport === false && (
+            <Warning
+              className={'send-fund-warning'}
+              isDanger
+            >
+              {t<string>('The token is not support transfer')}
             </Warning>
           )}
 
           {isNotSameAddressType && (
             <Warning
-              className={'kn-l-warning'}
+              className={'send-fund-warning'}
               isDanger
             >
-              {t<string>('The recipient address is not the same type as the sender address.')}
+              {t<string>('The recipient address must be same type as the sender address.')}
             </Warning>
           )}
 
           {amountGtAvailableBalance && (
             <Warning
-              className={'kn-l-warning'}
+              className={'send-fund-warning'}
               isDanger
             >
               {t<string>('The amount you want to transfer is greater than your available balance.')}
             </Warning>
           )}
 
-          {false && (
-            <Warning className={'kn-l-warning'}>
+          {reference && (
+            <Warning className={'send-fund-warning'}>
               {t<string>('There is an existing reference count on the sender account. As such the account cannot be reaped from the state.')}
             </Warning>
           )}
 
-          {false && (
-            <Warning className={'kn-l-warning'}>
+          {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
+            <Warning className={'send-fund-warning'}>
               {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
             </Warning>
           )}
@@ -309,6 +439,10 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     overflow-y: auto;
   }
 
+  .send-fund-warning {
+    margin-bottom: 10px;
+  }
+
   .send-fund-item {
     margin-bottom: 10px;
   }
@@ -318,7 +452,6 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   }
 
   .send-fund-balance-item {
-    margin-top: 10px;
     margin-bottom: 10px;
   }
 

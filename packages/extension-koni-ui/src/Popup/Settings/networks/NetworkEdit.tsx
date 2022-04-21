@@ -89,20 +89,20 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [data, isCurrentEndpoint, needValidate, networkInfo, provider]);
 
   const _onSaveNetwork = useCallback(() => {
-    if (!_isValidProvider || !isProviderConnected) {
+    if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
       return;
     }
 
     upsertNetworkMap(networkInfo).then((resp) => {
       if (resp) {
-        show('Successfully added a new network');
+        show('Your changes are saved successfully');
         window.localStorage.setItem('popupNavigation', '/');
         onAction('/');
       } else {
         show('Error trying to configure network');
       }
     }).catch(console.error);
-  }, [_isValidProvider, isProviderConnected, networkInfo, onAction, show]);
+  }, [_isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, onAction, show]);
 
   const onChangeChain = useCallback((val: string) => {
     setNetworkInfo({
@@ -207,7 +207,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            isDisabled={!isProviderConnected || !_isValidProvider}
+            isDisabled={(!isProviderConnected || !_isValidProvider) && !isCurrentEndpoint}
             onClick={_onSaveNetwork}
           >
             {t<string>('Save')}

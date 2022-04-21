@@ -72,6 +72,7 @@ export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNet
   if (customNetwork.customProviders) {
     const parsedCustomProviders: Record<string, string> = {};
     const currentProvider = customNetwork.customProviders[customNetwork.currentProvider];
+    const currentProviderMethod = currentProvider.startsWith('http') ? 'http' : 'ws';
     let parsedProviderKey = '';
 
     for (const customProvider of Object.values(customNetwork.customProviders)) {
@@ -101,9 +102,9 @@ export function mergeNetworkProviders (customNetwork: NetworkJson, predefinedNet
       }
     }
 
-    return { parsedProviderKey, parsedCustomProviders };
+    return { currentProviderMethod, parsedProviderKey, parsedCustomProviders };
   } else {
-    return { parsedProviderKey: '', parsedCustomProviders: {} };
+    return { currentProviderMethod: '', parsedProviderKey: '', parsedCustomProviders: {} };
   }
 }
 
@@ -147,11 +148,13 @@ export default class KoniState extends State {
               // @ts-ignore
               const targetKey = PREDEFINED_GENESIS_HASHES[storedNetwork.genesisHash] as string;
 
-              const { parsedCustomProviders, parsedProviderKey } = mergeNetworkProviders(storedNetwork, PREDEFINED_NETWORKS[targetKey]);
+              const { currentProviderMethod, parsedCustomProviders, parsedProviderKey } = mergeNetworkProviders(storedNetwork, PREDEFINED_NETWORKS[targetKey]);
 
               mergedNetworkMap[targetKey].customProviders = parsedCustomProviders;
               mergedNetworkMap[targetKey].currentProvider = parsedProviderKey;
               mergedNetworkMap[targetKey].active = storedNetwork.active;
+              // @ts-ignore
+              mergedNetworkMap[targetKey].currentProviderMode = currentProviderMethod;
             } else {
               mergedNetworkMap[key] = storedNetwork;
             }
@@ -798,6 +801,16 @@ export default class KoniState extends State {
       if (data.currentProvider !== this.networkMap[data.key].currentProvider) {
         this.networkMap[data.key].currentProvider = data.currentProvider;
         this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
+      }
+
+      this.networkMap[data.key].chain = data.chain;
+
+      if (data.paraId) {
+        this.networkMap[data.key].paraId = data.paraId;
+      }
+
+      if (data.blockExplorer) {
+        this.networkMap[data.key].blockExplorer = data.blockExplorer;
       }
     } else { // insert
       this.networkMap[data.key] = data;

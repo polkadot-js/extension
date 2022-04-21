@@ -44,6 +44,8 @@ function getDefaultAddress (address: string, accounts: AccountJson[]): string {
 
 function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): [string, string] {
   const firstNetworkKey = Object.keys(chainRegistryMap)[0];
+  console.log('firstNetworkKey', firstNetworkKey);
+  console.log('chainRegistryMap', JSON.stringify(chainRegistryMap));
   const token = networkKey === 'all' ? chainRegistryMap[firstNetworkKey].chainTokens[0] : chainRegistryMap[networkKey].chainTokens[0];
 
   return networkKey === 'all' ? [firstNetworkKey, token] : [networkKey, token];
@@ -82,12 +84,6 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
     currentAccount: { account },
     currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
 
-  let defaultValue = {} as SenderInputAddressType;
-
-  if (account) {
-    defaultValue = getDefaultValue(networkKey, account.address, chainRegistryMap, accounts);
-  }
-
   return (
     <div className={className}>
       <Header
@@ -102,7 +98,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
       {accounts && accounts.length && account && Object.keys(chainRegistryMap).length
         ? (<SendFund
           className='send-fund-container'
-          defaultValue={defaultValue}
+          defaultValue={getDefaultValue(networkKey, account.address, chainRegistryMap, accounts)}
           theme={theme}
         />)
         : (<LoadingContainer />)

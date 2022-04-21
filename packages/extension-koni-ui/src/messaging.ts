@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -436,6 +436,10 @@ export async function transferCheckReferenceCount (request: RequestTransferCheck
 
 export async function transferCheckSupporting (request: RequestTransferCheckSupporting): Promise<boolean> {
   return sendMessage('pri(transfer.checkSupporting)', request);
+}
+
+export async function transferGetExistentialDeposit (request: RequestTransferExistentialDeposit): Promise<string> {
+  return sendMessage('pri(transfer.getExistentialDeposit)', request);
 }
 
 export async function cancelSubscription (request: string): Promise<boolean> {

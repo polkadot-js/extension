@@ -509,6 +509,11 @@ export interface RequestTransferCheckSupporting {
   token: string
 }
 
+export interface RequestTransferExistentialDeposit {
+  networkKey: string,
+  token: string
+}
+
 export interface RequestSaveRecentAccount {
   accountId: string;
 }
@@ -564,6 +569,7 @@ export interface KoniRequestSignatures {
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
   'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, boolean];
+  'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
   'pub(utils.getRandom)': [RandomTestRequest, number];

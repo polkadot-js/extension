@@ -9,6 +9,21 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
+export async function getExistentialDeposit (networkKey: string, token: string): Promise<string> {
+  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  const tokenInfo = await getTokenInfo(networkKey, api, token);
+
+  if (tokenInfo && tokenInfo.isMainToken) {
+    if (api?.consts?.balances?.existentialDeposit) {
+      return api.consts.balances.existentialDeposit.toString();
+    }
+  }
+
+  return '0';
+}
+
 function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
 }

@@ -1046,15 +1046,18 @@ export default class KoniExtension extends Extension {
     const callback = createSubscription<'pri(accounts.transfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, password, value, transferAll);
 
-    if (errors.length > 0) {
+    if (errors.length) {
       setTimeout(() => {
-        unsubscribe(id);
+        this.cancelSubscription(id);
       }, 500);
+
+      // todo: add condition to lock KeyPair (for example: not remember password)
+      fromKeyPair && fromKeyPair.lock();
 
       return errors;
     }
 
-    if (fromKeyPair && errors.length === 0) {
+    if (fromKeyPair) {
       let transferProm: Promise<void> | undefined;
 
       if (isEthereumAddress(from) && isEthereumAddress(to)) {
@@ -1074,6 +1077,9 @@ export default class KoniExtension extends Extension {
       transferProm.then(() => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
+
+        // todo: add condition to lock KeyPair
+        fromKeyPair.lock();
       })
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
@@ -1082,6 +1088,9 @@ export default class KoniExtension extends Extension {
           setTimeout(() => {
             unsubscribe(id);
           }, 500);
+
+          // todo: add condition to lock KeyPair
+          fromKeyPair.lock();
         });
     }
 

@@ -20,7 +20,11 @@ export async function checkReferenceCount (networkKey: string, address: string):
   // @ts-ignore
   const accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount = await api.query.system.account(address);
 
-  return isRefCount(accountInfo);
+  return accountInfo
+    ? isRefCount(accountInfo)
+      ? !accountInfo.refcount.isZero()
+      : !accountInfo.consumers.isZero()
+    : false;
 }
 
 export async function checkSupportTransfer (networkKey: string, token: string): Promise<boolean> {

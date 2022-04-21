@@ -1,15 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AccountContext, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
+import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
@@ -21,7 +23,9 @@ import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundRe
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps, TxResult } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+import { checkAddress } from '@polkadot/phishing';
 import { BN, BN_ZERO } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
   className?: string,
@@ -66,7 +70,6 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
     currentAccount: { account },
     currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
 
-  console.log('networkKey', networkKey);
   let defaultValue = {} as SenderInputAddressType;
 
   if (account) {
@@ -84,11 +87,14 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSubHeader
         subHeaderName={t<string>('Send fund')}
       />
-      <SendFund
-        className='send-fund-container'
-        defaultValue={defaultValue}
-        theme={theme}
-      />
+      {accounts && accounts.length && account && chainRegistryMap
+        ? (<SendFund
+          className='send-fund-container'
+          defaultValue={defaultValue}
+          theme={theme}
+        />)
+        : (<LoadingContainer />)
+      }
     </div>
   );
 }
@@ -103,12 +109,35 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     networkKey: selectedNetworkKey,
     token: selectedToken }, setSenderValue] = useState<SenderInputAddressType>(defaultValue);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const [recipientPhish, setRecipientPhish] = useState<string | null>(null);
   const [extrinsic, setExtrinsic] = useState<never | null>(null);
   const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
   const balanceFormat = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
+  const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
+  const isNotSameAddressAndTokenType = (isEthereumAddress(senderId) && !ethereumChains.includes(selectedNetworkKey)) || (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
+  const isNotSameAddressType = (isEthereumAddress(senderId) && !!recipientId && !isEthereumAddress(recipientId)) || (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
+  const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
+
+  useEffect(() => {
+    let isSync = true;
+
+    if (recipientId) {
+      checkAddress(recipientId).then((v) => {
+        if (isSync) {
+          setRecipientPhish(v);
+        }
+      }).catch((e) => console.log(e));
+    }
+
+    return () => {
+      isSync = false;
+      setRecipientPhish(null);
+    };
+  }
+  , [recipientId]);
 
   const _onSend = useCallback(() => {
     // setShowTxModal(true);
@@ -157,16 +186,16 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             onchange={setRecipientId}
           />
 
-          {false && (
+          {!!recipientPhish && (
             <Warning
               className={'kn-l-warning'}
               isDanger
             >
-              {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: '' } })}
+              {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
             </Warning>
           )}
 
-          {false && (
+          {isSameAddress && (
             <Warning
               className={'kn-l-warning'}
               isDanger
@@ -186,6 +215,33 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             onChange={setAmount}
             placeholder={'0'}
           />
+
+          {isNotSameAddressAndTokenType && (
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
+              {t<string>('Sender account and token are not of the same type')}
+            </Warning>
+          )}
+
+          {isNotSameAddressType && (
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
+              {t<string>('The recipient address is not the same type as the sender address.')}
+            </Warning>
+          )}
+
+          {amountGtAvailableBalance && (
+            <Warning
+              className={'kn-l-warning'}
+              isDanger
+            >
+              {t<string>('The amount you want to transfer is greater than your available balance.')}
+            </Warning>
+          )}
 
           {false && (
             <Warning className={'kn-l-warning'}>

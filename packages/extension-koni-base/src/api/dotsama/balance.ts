@@ -17,6 +17,7 @@ import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOO
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // @ts-ignore
@@ -409,9 +410,24 @@ export async function getFreeBalance (networkKey: string, address: string, token
   return balance.data?.free?.toString() || '0';
 }
 
-export async function subscribeFreeBalance (networkKey: string, address: string, token: string | undefined, callback: (balance: string) => void): Promise<() => void> {
+export async function subscribeFreeBalance (networkKey: string, address: string, token: string | undefined, update: (balance: string) => void): Promise<() => void> {
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
+
+  // todo: Need update the condition if the way to get ethereum chains is dynamic
+  if (ethereumChains.includes(networkKey)) {
+    if (!isEthereumAddress(address)) {
+      update('0');
+
+      return () => undefined;
+    }
+  } else {
+    if (isEthereumAddress(address)) {
+      update('0');
+
+      return () => undefined;
+    }
+  }
 
   if (token) {
     const tokenInfo = await getTokenInfo(networkKey, api, token);
@@ -430,7 +446,7 @@ export async function subscribeFreeBalance (networkKey: string, address: string,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
           contract.methods.balanceOf(address).call().then((free) => {
             // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-            callback(free?.toString() || '0');
+            update(free?.toString() || '0');
           });
         };
 
@@ -446,7 +462,7 @@ export async function subscribeFreeBalance (networkKey: string, address: string,
         // @ts-ignore
         const unsub = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }, (balance) => {
           // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-          callback(balance.free?.toString() || '0');
+          update(balance.free?.toString() || '0');
         });
 
         return () => {
@@ -460,7 +476,7 @@ export async function subscribeFreeBalance (networkKey: string, address: string,
   // @ts-ignore
   const unsub = await api.query.system.account(address, (balance) => {
     // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    callback(balance.data?.free?.toString() || '0');
+    update(balance.data?.free?.toString() || '0');
   });
 
   return () => {

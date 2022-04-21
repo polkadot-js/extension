@@ -499,6 +499,16 @@ export interface RequestFreeBalance {
   token?: string
 }
 
+export interface RequestTransferCheckReferenceCount {
+  address: string,
+  networkKey: string
+}
+
+export interface RequestTransferCheckSupporting {
+  networkKey: string,
+  token: string
+}
+
 export interface RequestSaveRecentAccount {
   accountId: string;
 }
@@ -552,6 +562,8 @@ export interface KoniRequestSignatures {
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
+  'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
+  'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, boolean];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
   'pub(utils.getRandom)': [RandomTestRequest, number];

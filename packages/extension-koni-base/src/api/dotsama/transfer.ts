@@ -2,11 +2,48 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseTransfer, TokenInfo, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 // import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
+import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+
+function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
+  return !!(accountInfo as AccountInfoWithRefCount).refcount;
+}
+
+export async function checkReferenceCount (networkKey: string, address: string): Promise<boolean> {
+  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  // @ts-ignore
+  const accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount = await api.query.system.account(address);
+
+  return isRefCount(accountInfo);
+}
+
+export async function checkSupportTransfer (networkKey: string, token: string): Promise<boolean> {
+  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const api = apiProps.api;
+  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
+  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
+  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+
+  if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported)) {
+    return false;
+  }
+
+  const tokenInfo = await getTokenInfo(networkKey, api, token);
+
+  if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+    return true;
+  } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
+    return true;
+  }
+
+  return false;
+}
 
 export async function estimateFee (
   networkKey: string,

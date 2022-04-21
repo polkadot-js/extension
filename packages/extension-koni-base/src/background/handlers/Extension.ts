@@ -7,12 +7,12 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
@@ -1222,6 +1222,14 @@ export default class KoniExtension extends Extension {
     return id;
   }
 
+  private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
+    return await checkReferenceCount(networkKey, address);
+  }
+
+  private async transferCheckSupporting ({ networkKey, token }: RequestTransferCheckSupporting): Promise<boolean> {
+    return await checkSupportTransfer(networkKey, token);
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1323,6 +1331,10 @@ export default class KoniExtension extends Extension {
         return this.evmNftGetTransaction(request as EvmNftTransactionRequest);
       case 'pri(evmNft.submitTransaction)':
         return this.evmNftSubmitTransaction(id, port, request as EvmNftSubmitTransaction);
+      case 'pri(transfer.checkReferenceCount)':
+        return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);
+      case 'pri(transfer.checkSupporting)':
+        return await this.transferCheckSupporting(request as RequestTransferCheckSupporting);
       case 'pri(freeBalance.subscribe)':
         return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
       case 'pri(subscription.cancel)':

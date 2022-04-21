@@ -70,7 +70,6 @@ function NetworkMenu ({ className, currentNetwork, genesisOptions, isNotHaveAcco
       const lowerCaseFilteredNetwork = filteredNetwork.toLowerCase();
 
       if (selectedGroup && selectedGroup.length) {
-        console.log('run this');
         setFilteredGenesisOption(genesisOptions.filter(
           (network) => network.text.toLowerCase()
             .includes(lowerCaseFilteredNetwork) &&

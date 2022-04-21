@@ -8,7 +8,7 @@ import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -55,9 +55,9 @@ export class KoniCron {
 
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
-    this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-    this.addCron('checkApiMap', this.updateApiMapStatus, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-
+    // this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+    this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS, false);
+    this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
@@ -96,6 +96,18 @@ export class KoniCron {
     });
   }
 
+  recoverApiMap () {
+    const apiMap = state.getApiMap();
+
+    for (const apiProp of Object.values(apiMap.dotSama)) {
+      if (!apiProp.isApiConnected) {
+        apiProp.recoverConnect && apiProp.recoverConnect();
+      }
+    }
+
+    console.log('recover api');
+  }
+
   updateApiMapStatus () {
     const apiMap = state.getApiMap();
 
@@ -106,8 +118,6 @@ export class KoniCron {
         state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
       }
     }
-
-    console.log('update status ApiMap');
   }
 
   refreshPrice () {

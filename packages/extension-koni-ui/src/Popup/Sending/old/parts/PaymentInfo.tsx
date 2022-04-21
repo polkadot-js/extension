@@ -59,9 +59,6 @@ function PaymentInfo ({ accountId, api, apiUrl, className = '', extrinsic, isBus
     balances.freeBalance.sub(dispatchInfo.partialFee).lte(api.consts.balances.existentialDeposit as unknown as BN)
   );
 
-  console.log('dispatchInfo', dispatchInfo.partialFee);
-  console.log('formatBalance(dispatchInfo.partialFee, { withSiFull: true })', formatBalance(dispatchInfo.partialFee));
-
   return (
     <div className={className}>
       <div className={'kn-l-fee-info'}>

@@ -142,6 +142,24 @@ function getUnsupportedResponse (): ResponseTransfer {
   };
 }
 
+function updateResponseTxResult (response: ResponseTransfer, record: EventRecord): void {
+  if (!response.txResult) {
+    response.txResult = { change: '0' };
+  }
+
+  if ((record.event.section === 'balances' &&
+    record.event.method.toLowerCase() === 'transfer')) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    response.txResult.change = record.event.data[2]?.toString() || '0';
+  }
+
+  if (record.event.section === 'balances' &&
+    record.event.method.toLowerCase() === 'withdraw') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    response.txResult.fee = record.event.data[1]?.toString();
+  }
+}
+
 export async function makeTransfer (
   networkKey: string,
   to: string,
@@ -210,7 +228,9 @@ export async function makeTransfer (
   };
 
   function updateResponseByEvents (response: ResponseTransfer, events: EventRecord[]) {
-    events.forEach(({ event: { method, section, data: [error, info] } }) => {
+    events.forEach((record) => {
+      const { event: { method, section, data: [error, info] } } = record;
+
       // @ts-ignore
       const isFailed = section === 'system' && method === 'ExtrinsicFailed';
       // @ts-ignore
@@ -228,18 +248,18 @@ export async function makeTransfer (
           const decoded = api.registry.findMetaError(error.asModule);
           const { docs, method, section } = decoded;
 
-          const errorMesssage = docs.join(' ');
+          const errorMessage = docs.join(' ');
 
-          console.log(`${section}.${method}: ${errorMesssage}`);
+          console.log(`${section}.${method}: ${errorMessage}`);
           response.data = {
             section,
             method,
-            message: errorMesssage,
+            message: errorMessage,
             info
           };
           response.errors?.push({
             code: TransferErrorCode.TRANSFER_ERROR,
-            message: errorMesssage
+            message: errorMessage
           });
         } else {
           // Other, CannotLookup, BadOrigin, no extra info
@@ -252,6 +272,8 @@ export async function makeTransfer (
       } else if (isSuccess) {
         response.step = TransferStep.SUCCESS;
       }
+
+      updateResponseTxResult(response, record);
     });
   }
 

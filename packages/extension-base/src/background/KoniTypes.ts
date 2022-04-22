@@ -329,6 +329,7 @@ export interface BackgroundWindow extends Window {
 export interface TransactionHistoryItemType {
   time: number;
   networkKey: string;
+  token?: string; // if undefined => native token
   change: string;
   fee?: string;
   isSuccess: boolean;
@@ -456,12 +457,18 @@ export enum TransferStep {
   ERROR = 'error'
 }
 
+type TxResultType = {
+  change: string;
+  fee?: string;
+}
+
 export interface ResponseTransfer {
   step: TransferStep,
   errors?: Array<TransferError>,
   extrinsicHash?: string,
   extrinsicStatus?: string,
-  data?: object
+  data?: object,
+  txResult?: TxResultType
 }
 
 export interface EvmNftTransactionRequest {

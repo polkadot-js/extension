@@ -137,6 +137,13 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, senderFreeBalance, existentialDeposit);
   const canToggleAll = !!maxTransfer && !reference && !!recipientId;
   const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
+  const canMakeTransfer = isTransferSupport &&
+    !recipientPhish &&
+    !!recipientId &&
+    !isSameAddress &&
+    !isNotSameAddressAndTokenType &&
+    !isNotSameAddressType &&
+    !amountGtAvailableBalance;
 
   useEffect(() => {
     let isSync = true;
@@ -228,8 +235,10 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   }, [selectedNetworkKey, selectedToken]);
 
   const _onSend = useCallback(() => {
-    setShowTxModal(true);
-  }, []);
+    if (canMakeTransfer) {
+      setShowTxModal(true);
+    }
+  }, [canMakeTransfer]);
 
   const _onCancelTx = useCallback(() => {
     setShowTxModal(false);
@@ -245,148 +254,149 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
   return (
     <>
-      {/* eslint-disable-next-line multiline-ternary */}
-      {!isShowTxResult ? (
-        <div className={className}>
-          <SenderInputAddress
-            balance={senderFreeBalance}
-            balanceFormat={balanceFormat}
-            chainRegistryMap={chainRegistryMap}
-            className=''
-            initValue={defaultValue}
-            onChange={setSenderValue}
-          />
+      {!isShowTxResult
+        ? (
+          <div className={className}>
+            <SenderInputAddress
+              balance={senderFreeBalance}
+              balanceFormat={balanceFormat}
+              chainRegistryMap={chainRegistryMap}
+              className=''
+              initValue={defaultValue}
+              onChange={setSenderValue}
+            />
 
-          <ReceiverInputAddress
-            balance={recipientFreeBalance}
-            balanceFormat={balanceFormat}
-            className={''}
-            networkKey={selectedNetworkKey}
-            onchange={setRecipientId}
-          />
+            <ReceiverInputAddress
+              balance={recipientFreeBalance}
+              balanceFormat={balanceFormat}
+              className={''}
+              networkKey={selectedNetworkKey}
+              onchange={setRecipientId}
+            />
 
-          {!!recipientPhish && (
-            <Warning
-              className={'send-fund-warning'}
-              isDanger
-            >
-              {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
-            </Warning>
-          )}
+            {!!recipientPhish && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
+              </Warning>
+            )}
 
-          {isSameAddress && (
-            <Warning
-              className={'send-fund-warning'}
-              isDanger
-            >
-              {t<string>('The recipient address is the same as the sender address.')}
-            </Warning>
-          )}
+            {isSameAddress && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The recipient address is the same as the sender address.')}
+              </Warning>
+            )}
 
-          {canToggleAll && isAll
-            ? (
-              <InputBalance
-                autoFocus
-                className={'send-fund-balance-item'}
-                decimals={balanceFormat[0]}
-                defaultValue={maxTransfer}
-                help={t<string>('The full account balance to be transferred, minus the transaction fees')}
-                isDisabled
-                key={maxTransfer?.toString()}
-                label={t<string>('transferable minus fees')}
-              />
-            )
-            : (
-              <InputBalance
-                autoFocus
-                className={'send-fund-balance-item'}
-                decimals={balanceFormat[0]}
-                help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-                isError={false}
-                isZeroable
-                label={t<string>('amount')}
-                onChange={setAmount}
-                placeholder={'0'}
-              />
-            )
-          }
+            {canToggleAll && isAll
+              ? (
+                <InputBalance
+                  autoFocus
+                  className={'send-fund-balance-item'}
+                  decimals={balanceFormat[0]}
+                  defaultValue={maxTransfer}
+                  help={t<string>('The full account balance to be transferred, minus the transaction fees')}
+                  isDisabled
+                  key={maxTransfer?.toString()}
+                  label={t<string>('transferable minus fees')}
+                />
+              )
+              : (
+                <InputBalance
+                  autoFocus
+                  className={'send-fund-balance-item'}
+                  decimals={balanceFormat[0]}
+                  help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+                  isError={false}
+                  isZeroable
+                  label={t<string>('amount')}
+                  onChange={setAmount}
+                  placeholder={'0'}
+                />
+              )
+            }
 
-          {canToggleAll && (
-            <div className={'kn-field -toggle -toggle-2'}>
-              <Toggle
-                className='typeToggle'
-                label={t<string>('Transfer the full account balance, reap the sender')}
-                onChange={setIsAll}
-                value={isAll}
-              />
+            {canToggleAll && (
+              <div className={'kn-field -toggle -toggle-2'}>
+                <Toggle
+                  className='typeToggle'
+                  label={t<string>('Transfer the full account balance, reap the sender')}
+                  onChange={setIsAll}
+                  value={isAll}
+                />
+              </div>
+            )}
+
+            {isNotSameAddressAndTokenType && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('Transfer is not supported for this type of account and token')}
+              </Warning>
+            )}
+
+            {isTransferSupport === false && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The transfer for the current token is not supported')}
+              </Warning>
+            )}
+
+            {isNotSameAddressType && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The recipient address must be same type as the sender address.')}
+              </Warning>
+            )}
+
+            {amountGtAvailableBalance && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The amount you want to transfer is greater than your available balance.')}
+              </Warning>
+            )}
+
+            {reference && (
+              <Warning className={'send-fund-warning'}>
+                {t<string>('There is an existing reference count on the sender account. As such the account cannot be reaped from the state.')}
+              </Warning>
+            )}
+
+            {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
+              <Warning className={'send-fund-warning'}>
+                {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
+              </Warning>
+            )}
+
+            <div className='submit-btn-wrapper'>
+              <Button
+                className={'kn-submit-btn'}
+                isDisabled={!canMakeTransfer}
+                onClick={_onSend}
+              >
+                {t<string>('Make Transfer')}
+              </Button>
             </div>
-          )}
-
-          {isNotSameAddressAndTokenType && (
-            <Warning
-              className={'send-fund-warning'}
-              isDanger
-            >
-              {t<string>('Transfer is not supported for this type of account and token')}
-            </Warning>
-          )}
-
-          {isTransferSupport === false && (
-            <Warning
-              className={'send-fund-warning'}
-              isDanger
-            >
-              {t<string>('The token is not support transfer')}
-            </Warning>
-          )}
-
-          {isNotSameAddressType && (
-            <Warning
-              className={'send-fund-warning'}
-              isDanger
-            >
-              {t<string>('The recipient address must be same type as the sender address.')}
-            </Warning>
-          )}
-
-          {amountGtAvailableBalance && (
-            <Warning
-              className={'send-fund-warning'}
-              isDanger
-            >
-              {t<string>('The amount you want to transfer is greater than your available balance.')}
-            </Warning>
-          )}
-
-          {reference && (
-            <Warning className={'send-fund-warning'}>
-              {t<string>('There is an existing reference count on the sender account. As such the account cannot be reaped from the state.')}
-            </Warning>
-          )}
-
-          {senderFreeBalance !== '0' && !amountGtAvailableBalance && !isSameAddress && noFees && (
-            <Warning className={'send-fund-warning'}>
-              {t<string>('The transaction, after application of the transfer fees, will drop the available balance below the existential deposit. As such the transfer will fail. The account needs more free funds to cover the transaction fees.')}
-            </Warning>
-          )}
-
-          <div className='submit-btn-wrapper'>
-            <Button
-              className={'kn-submit-btn'}
-              isDisabled={false}
-              onClick={_onSend}
-            >
-              {t<string>('Make Transfer')}
-            </Button>
           </div>
-        </div>
-      ) : (
-        <SendFundResult
-          networkKey={selectedNetworkKey}
-          onResend={_onResend}
-          txResult={txResult}
-        />
-      )}
+        )
+        : (
+          <SendFundResult
+            networkKey={selectedNetworkKey}
+            onResend={_onResend}
+            txResult={txResult}
+          />
+        )}
 
       {isShowTxModal && (
         <AuthTransaction

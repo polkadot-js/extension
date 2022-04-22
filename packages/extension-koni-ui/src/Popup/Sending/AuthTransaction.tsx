@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components'
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { checkTransfer, makeTransfer } from '@polkadot/extension-koni-ui/messaging';
+import { makeTransfer } from '@polkadot/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
 import { BN, formatBalance } from '@polkadot/util';
 
@@ -32,38 +32,11 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const deps = requestPayload.toString();
-
-  useEffect(() => {
-    checkTransfer({
-      ...requestPayload
-    }).catch((e) => {
-      console.log('There is problem when checkTransfer', e);
-    });
-  }, [requestPayload]);
 
   const _onCancel = useCallback(() => {
     onCancel();
   },
   [onCancel]
-  );
-
-  const _doCheck = useCallback(
-    (): void => {
-      setBusy(true);
-
-      checkTransfer({
-        ...requestPayload
-      }).then((rs) => {
-        console.log('checkTransfer rs', rs);
-        setBusy(false);
-      })
-        .catch((e) => {
-          console.log('checkTransfer error', e);
-          setBusy(false);
-        });
-    },
-    [deps]
   );
 
   const _doStart = useCallback(
@@ -98,7 +71,15 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
       })
         .catch((e) => console.log('There is problem when makeTransfer', e));
     },
-    [password, onChangeResult, onChangeShowModal, deps]
+    [
+      password, onChangeResult, onChangeShowModal,
+      requestPayload.networkKey,
+      requestPayload.from,
+      requestPayload.to,
+      requestPayload.value,
+      requestPayload.transferAll,
+      requestPayload.token
+    ]
   );
 
   const _onChangePass = useCallback(
@@ -165,16 +146,6 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
           />
 
           {!!(errorArr && errorArr.length) && renderError()}
-
-          <div className='auth-transaction__submit-wrapper'>
-            <Button
-              className={'auth-transaction__submit-btn'}
-              isBusy={isBusy}
-              onClick={_doCheck}
-            >
-              {t<string>('Check transfer')}
-            </Button>
-          </div>
 
           <div className='auth-transaction__submit-wrapper'>
             <Button

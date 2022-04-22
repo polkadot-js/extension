@@ -7,7 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -1042,8 +1042,31 @@ export default class KoniExtension extends Extension {
     } as ResponseCheckTransfer;
   }
 
+  private makeTransferCallback (
+    address: string,
+    networkKey: string,
+    token: string | undefined,
+    portCallback: (res: ResponseTransfer) => void): (res: ResponseTransfer) => void {
+    return (res: ResponseTransfer) => {
+      if (res.txResult && res.extrinsicHash) {
+        state.setTransactionHistory(address, networkKey, {
+          time: Date.now(),
+          networkKey,
+          token,
+          change: res.txResult.change,
+          fee: res.txResult.fee,
+          isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
+          action: 'send',
+          extrinsicHash: res.extrinsicHash
+        });
+      }
+
+      portCallback(res);
+    };
+  }
+
   private async makeTransfer (id: string, port: chrome.runtime.Port, { from, networkKey, password, to, token, transferAll, value }: RequestTransfer): Promise<Array<TransferError>> {
-    const callback = createSubscription<'pri(accounts.transfer)'>(id, port);
+    const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, password, value, transferAll);
 
     if (errors.length) {
@@ -1065,13 +1088,22 @@ export default class KoniExtension extends Extension {
         const { privateKey } = this.accountExportPrivateKey({ address: from, password });
 
         if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-          transferProm = makeERC20Transfer(tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll, callback);
+          transferProm = makeERC20Transfer(
+            tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll,
+            this.makeTransferCallback(from, networkKey, token, cb)
+          );
         } else {
-          transferProm = makeEVMTransfer(networkKey, to, privateKey, value || '0', !!transferAll, callback);
+          transferProm = makeEVMTransfer(
+            networkKey, to, privateKey, value || '0', !!transferAll,
+            this.makeTransferCallback(from, networkKey, token, cb)
+          );
         }
       } else {
         // Make transfer with Dotsama API
-        transferProm = makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, tokenInfo, callback);
+        transferProm = makeTransfer(
+          networkKey, to, fromKeyPair, value || '0', !!transferAll, tokenInfo,
+          this.makeTransferCallback(from, networkKey, token, cb)
+        );
       }
 
       transferProm.then(() => {
@@ -1083,7 +1115,7 @@ export default class KoniExtension extends Extension {
       })
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          callback({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
+          cb({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
           console.error('Transfer error', e);
           setTimeout(() => {
             unsubscribe(id);

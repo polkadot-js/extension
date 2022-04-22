@@ -18,6 +18,7 @@ export type TransferNftParams = {
   collectionId: string;
 }
 
-export type NetworkCreateParams = {
+export type NetworkConfigParams = {
+  mode: 'create' | 'edit',
   data: NetworkJson;
 }

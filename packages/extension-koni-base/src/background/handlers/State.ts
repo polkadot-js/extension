@@ -809,6 +809,8 @@ export default class KoniState extends State {
         this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
       }
 
+      // TODO: update other fields
+
       this.networkMap[data.key].chain = data.chain;
 
       if (data.paraId) {

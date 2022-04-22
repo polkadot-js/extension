@@ -11,7 +11,7 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import NetworkItem from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkItem';
 import { store } from '@polkadot/extension-koni-ui/stores';
-import { NetworkCreateParams } from '@polkadot/extension-koni-ui/stores/types';
+import { NetworkConfigParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
@@ -43,7 +43,7 @@ function Networks ({ className }: Props): React.ReactElement {
       isEthereum
     };
 
-    store.dispatch({ type: 'networkCreateParams/update', payload: { data: item } as NetworkCreateParams });
+    store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'create' } as NetworkConfigParams });
   }, [isEthereum]);
 
   return (

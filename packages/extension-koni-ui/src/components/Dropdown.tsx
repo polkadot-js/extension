@@ -5,9 +5,8 @@ import type { ThemeProps } from '../types';
 
 import React, { useCallback, useState } from 'react';
 import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import styled from 'styled-components';
-
-import { NetworkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
 
 import Label from './Label';
 
@@ -15,12 +14,15 @@ interface Props extends ThemeProps {
   className?: string;
   label: string;
   onChange?: any;
-  options: NetworkSelectOption[];
+  options: any[];
   value?: string;
+  allowAdd?: boolean;
 }
 
-function Dropdown ({ className, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
+function Dropdown ({ allowAdd, className, label, onChange, options, value }: Props): React.ReactElement<Props> {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+  const transformOptions = options.map((t) => ({ label: t.text, value: t.value })); // will work as long as options has text and value field
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
 
   const handleChange = useCallback(
@@ -58,19 +60,36 @@ function Dropdown ({ className, label, onChange, options, value }: Props): React
         className={className}
         label={label}
       >
-        <Select
-          className='dropdown-wrapper'
-          classNamePrefix='dropdown'
-          isSearchable
-          menuPlacement={'auto'}
-          menuPortalTarget={document.body}
-          menuPosition='fixed'
-          onChange={handleChange}
-          options={transformOptions}
-          placeholder=''
-          styles={customStyles}
-          value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
-        />
+        {
+          allowAdd && allowAdd
+            ? <CreatableSelect
+              className='dropdown-wrapper'
+              classNamePrefix='dropdown'
+              isSearchable
+              menuPlacement={'auto'}
+              menuPortalTarget={document.body}
+              menuPosition='fixed'
+              onChange={handleChange}
+              options={transformOptions}
+              placeholder=''
+              styles={customStyles}
+              value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
+            />
+            : <Select
+              className='dropdown-wrapper'
+              classNamePrefix='dropdown'
+              isSearchable
+              menuPlacement={'auto'}
+              menuPortalTarget={document.body}
+              menuPosition='fixed'
+              onChange={handleChange}
+              options={transformOptions}
+              placeholder=''
+              styles={customStyles}
+              value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
+            />
+        }
+
       </Label>
     </>
   );

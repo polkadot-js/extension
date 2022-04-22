@@ -3,9 +3,10 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { NetworkCreateParams } from '@polkadot/extension-koni-ui/stores/types';
+import { NetworkConfigParams } from '@polkadot/extension-koni-ui/stores/types';
 
 const initialState = {
+  mode: 'create',
   data: {
     active: false,
     currentProvider: '',
@@ -18,19 +19,20 @@ const initialState = {
     chain: '',
     isEthereum: false
   }
-} as NetworkCreateParams;
+} as NetworkConfigParams;
 
-const networkCreateParamsSlice = createSlice({
+const networkConfigParamsSlice = createSlice({
   initialState,
-  name: 'networkCreateParams',
+  name: 'networkConfigParams',
   reducers: {
-    update (state, action: PayloadAction<NetworkCreateParams>) {
+    update (state, action: PayloadAction<NetworkConfigParams>) {
       const payload = action.payload;
 
       state.data = payload.data;
+      state.mode = payload.mode;
     }
   }
 });
 
-export const { update } = networkCreateParamsSlice.actions;
-export default networkCreateParamsSlice.reducer;
+export const { update } = networkConfigParamsSlice.actions;
+export default networkConfigParamsSlice.reducer;

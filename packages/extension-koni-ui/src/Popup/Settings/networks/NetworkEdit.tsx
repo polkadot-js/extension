@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import { NETWORK_ERROR, NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
-import { ActionContext, Button, ButtonArea, HorizontalLabelToggle, InputWithLabel } from '@polkadot/extension-koni-ui/components';
+import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { upsertNetworkMap, validateNetwork } from '@polkadot/extension-koni-ui/messaging';
@@ -31,10 +31,48 @@ function getCurrentEndpoint (data: NetworkJson) {
   }
 }
 
+function getAllProviders (data: NetworkJson) {
+  const allProviders: Record<string, string>[] = [];
+
+  for (const [key, provider] of Object.entries(data.providers)) {
+    allProviders.push({
+      text: provider,
+      value: key
+    });
+  }
+
+  if (data.customProviders) {
+    for (const [key, provider] of Object.entries(data.customProviders)) {
+      allProviders.push({
+        text: provider,
+        value: key
+      });
+    }
+  }
+
+  return allProviders;
+}
+
+function getAllProviderKeys (data: NetworkJson) {
+  const allProviderKeys: string[] = [];
+
+  for (const key of Object.keys(data.providers)) {
+    allProviderKeys.push(key);
+  }
+
+  if (data.customProviders) {
+    for (const key of Object.keys(data.customProviders)) {
+      allProviderKeys.push(key);
+    }
+  }
+
+  return allProviderKeys;
+}
+
 function NetworkEdit ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
   const { show } = useToast();
-  const { networkCreateParams: { data } } = useSelector((state: RootState) => state);
+  const { networkConfigParams: { data, mode } } = useSelector((state: RootState) => state);
   const [networkInfo, setNetworkInfo] = useState(data);
   const [_isValidProvider, _setIsvalidProvider] = useState(false);
   const [isProviderConnected, setIsProviderConnected] = useState(false);
@@ -45,6 +83,11 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
   const [isEthereum, setIsEthereum] = useState(data.isEthereum || false);
   const [showMore, setShowMore] = useState(false);
+
+  const [providerKey, setProviderKey] = useState(data.currentProvider);
+  const [allProviders, setAllProviders] = useState(getAllProviders(data));
+
+  console.log(networkInfo);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -110,6 +153,34 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       }
     }
   }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider]);
+
+  const onSelectProvider = useCallback((val: any) => {
+    const providerKey = val as string;
+
+    if (!getAllProviderKeys(data).includes(providerKey)) {
+      if (data.customProviders) {
+        const currentCustomProviders = data.customProviders;
+        const providerLength = Object.values(data.customProviders).length;
+
+        currentCustomProviders[`custom_${providerLength}`] = providerKey;
+
+        setNetworkInfo({
+          ...networkInfo,
+          customProviders: currentCustomProviders
+        });
+      } else {
+        console.log('create custom providers')
+        // TODO: set providerKey
+        // validate provider
+        setNetworkInfo({
+          ...networkInfo,
+          customProviders: { custom: providerKey }
+        });
+      }
+    } else {
+      setProviderKey(providerKey);
+    }
+  }, [data, networkInfo]);
 
   const toggleEthereum = useCallback((val: boolean) => {
     setIsEthereum(val);
@@ -217,11 +288,24 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       />
 
       <div className={className}>
-        <InputWithLabel
-          label={t<string>('Provider URL (*)')}
-          onChange={onChangeProvider}
-          value={provider || ''}
-        />
+        {
+          mode === 'create'
+            ? <InputWithLabel
+              label={t<string>('Provider URL (*)')}
+              onChange={onChangeProvider}
+              value={provider || ''}
+            />
+            : <div style={{ marginTop: '12px' }}>
+              <Dropdown
+                allowAdd={true}
+                label={'Provider URL (*)'}
+                onChange={onSelectProvider}
+                options={allProviders}
+                value={providerKey}
+              />
+            </div>
+        }
+
         {
           !_isValidProvider && provider !== null && <div className={'invalid-input'}>Provider URL requires http/https or wss prefix</div>
         }

@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
      193	Nam Phạm                      	fix ipfs gateway for Astar NFT
-     176	AnhMTV                        	Add support ERC20 tokens of Moonfit on Moonbase
+     177	AnhMTV                        	Release version 0.3.6
       82	Thibaut Sardan                	Add account filtering feature (#832)
       79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet

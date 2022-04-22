@@ -1,48 +1,45 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { RequestCheckTransfer } from '@polkadot/extension-base/background/KoniTypes';
-import { InputWithLabel } from '@polkadot/extension-koni-ui/components';
+import { RequestCheckTransfer, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { checkTransfer, makeTransfer } from '@polkadot/extension-koni-ui/messaging';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
 import { BN, formatBalance } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
   requestPayload: RequestCheckTransfer;
-  balanceFormat: [number, string]
+  fee: string | null;
+  balanceFormat: [number, string];
+  onChangeResult: (txResult: TransferResultType) => void;
+  onChangeShowModal: (isShowTxModal: boolean) => void;
 }
 
-function AuthTransaction ({ balanceFormat, className, onCancel, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeResult, onChangeShowModal, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
-  const [fee, setFee] = useState<null | string>(null);
+  const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
+  const [errorArr, setErrorArr] = useState<string[]>([]);
+  const deps = requestPayload.toString();
 
   useEffect(() => {
-    let isSync = true;
-
     checkTransfer({
       ...requestPayload
-    }).then((rs) => {
-      if (isSync) {
-        setFee(rs.estimateFee || null);
-      }
     }).catch((e) => {
       console.log('There is problem when checkTransfer', e);
     });
-
-    return () => {
-      isSync = false;
-    };
   }, [requestPayload]);
 
   const _onCancel = useCallback(() => {
@@ -58,13 +55,15 @@ function AuthTransaction ({ balanceFormat, className, onCancel, requestPayload }
       checkTransfer({
         ...requestPayload
       }).then((rs) => {
+        console.log('checkTransfer rs', rs);
         setBusy(false);
       })
         .catch((e) => {
+          console.log('checkTransfer error', e);
           setBusy(false);
         });
     },
-    [requestPayload]
+    [deps]
   );
 
   const _doStart = useCallback(
@@ -75,18 +74,55 @@ function AuthTransaction ({ balanceFormat, className, onCancel, requestPayload }
         ...requestPayload,
         password
       }, (a) => {
-        // do Something
-      }).catch((e) => console.log('There is problem when makeTransfer', e));
+        if (a.step === TransferStep.SUCCESS.valueOf()) {
+          onChangeResult({ isShowTxResult: true, isTxSuccess: a.step === TransferStep.SUCCESS.valueOf(), extrinsicHash: a.extrinsicHash });
+          onChangeShowModal(false);
+        }
+
+        if (a.step === TransferStep.ERROR.valueOf()) {
+          onChangeResult({ isShowTxResult: true, isTxSuccess: a.step === TransferStep.SUCCESS.valueOf(), extrinsicHash: a.extrinsicHash, txError: a.errors });
+          onChangeShowModal(false);
+        }
+      }).then((errors) => {
+        const errorMessage = errors.map((err) => err.message);
+
+        if (errors.find((err) => err.code === 'keyringError')) {
+          setKeyringErr(true);
+        }
+
+        setErrorArr(errorMessage);
+
+        if (errorMessage && errorMessage.length) {
+          setBusy(false);
+        }
+      })
+        .catch((e) => console.log('There is problem when makeTransfer', e));
     },
-    [password, requestPayload]
+    [password, onChangeResult, onChangeShowModal, deps]
   );
 
   const _onChangePass = useCallback(
     (value: string): void => {
       setPassword(value);
+      setErrorArr([]);
+      setKeyringErr(false);
     },
     []
   );
+
+  const renderError = () => {
+    return errorArr.map((err) =>
+      (
+        <Warning
+          className='auth-transaction-error'
+          isDanger
+          key={err}
+        >
+          {t<string>(err)}
+        </Warning>
+      )
+    );
+  };
 
   return (
     <div className={className}>
@@ -121,11 +157,14 @@ function AuthTransaction ({ balanceFormat, className, onCancel, requestPayload }
           )}
 
           <InputWithLabel
+            isError={isKeyringErr}
             label={t<string>('Password')}
             onChange={_onChangePass}
             type='password'
             value={password}
           />
+
+          {!!(errorArr && errorArr.length) && renderError()}
 
           <div className='auth-transaction__submit-wrapper'>
             <Button
@@ -141,6 +180,7 @@ function AuthTransaction ({ balanceFormat, className, onCancel, requestPayload }
             <Button
               className={'auth-transaction__submit-btn'}
               isBusy={isBusy}
+              isDisabled={!password || !!(errorArr && errorArr.length)}
               onClick={_doStart}
             >
               {t<string>('Sign and Submit')}

@@ -23,7 +23,7 @@ import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { ThemeProps, TxResult } from '@polkadot/extension-koni-ui/types';
+import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
 import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 import { checkAddress } from '@polkadot/phishing';
 import { BN, BN_HUNDRED, BN_ZERO } from '@polkadot/util';
@@ -44,8 +44,6 @@ function getDefaultAddress (address: string, accounts: AccountJson[]): string {
 
 function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): [string, string] {
   const firstNetworkKey = Object.keys(chainRegistryMap)[0];
-  console.log('firstNetworkKey', firstNetworkKey);
-  console.log('chainRegistryMap', JSON.stringify(chainRegistryMap));
   const token = networkKey === 'all' ? chainRegistryMap[firstNetworkKey].chainTokens[0] : chainRegistryMap[networkKey].chainTokens[0];
 
   return networkKey === 'all' ? [firstNetworkKey, token] : [networkKey, token];
@@ -125,7 +123,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
   const [fee, setFee] = useState<null | string>(null);
-  const [txResult, setTxResult] = useState<TxResult>({ isShowTxResult: false, isTxSuccess: false });
+  const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
@@ -137,7 +135,8 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
   const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, senderFreeBalance, existentialDeposit);
-  const canToggleAll = maxTransfer && !reference && !!recipientId;
+  const canToggleAll = !!maxTransfer && !reference && !!recipientId;
+  const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
 
   useEffect(() => {
     let isSync = true;
@@ -147,9 +146,9 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
         networkKey: selectedNetworkKey,
         from: senderId,
         to: recipientId,
-        transferAll: false,
+        transferAll: canToggleAll && isAll,
         token: selectedToken,
-        value: amount?.toString() || '0'
+        value: valueToTransfer
       }).then((rs) => {
         if (isSync) {
           setFee(rs.estimateFee || null);
@@ -162,7 +161,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     return () => {
       isSync = false;
     };
-  }, [amount, recipientId, selectedNetworkKey, selectedToken, senderId]);
+  }, [amount, canToggleAll, isAll, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
 
   useEffect(() => {
     let isSync = true;
@@ -178,7 +177,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
       isSync = false;
       setExistentialDeposit('0');
     };
-  });
+  }, [selectedNetworkKey, selectedToken]);
 
   useEffect(() => {
     let isSync = true;
@@ -230,14 +229,6 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
   const _onSend = useCallback(() => {
     setShowTxModal(true);
-  }, []);
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const _onTxSuccess = useCallback(() => {
-  }, []);
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const _onTxFail = useCallback(() => {
   }, []);
 
   const _onCancelTx = useCallback(() => {
@@ -400,7 +391,10 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
       {isShowTxModal && (
         <AuthTransaction
           balanceFormat={balanceFormat}
+          fee={fee}
           onCancel={_onCancelTx}
+          onChangeResult={setTxResult}
+          onChangeShowModal={setShowTxModal}
           requestPayload={{
             networkKey: selectedNetworkKey,
             from: senderId,
@@ -408,10 +402,6 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             transferAll: false,
             token: selectedToken,
             value: amount?.toString() || '0'
-          }}
-          txHandler={{
-            onTxSuccess: _onTxSuccess,
-            onTxFail: _onTxFail
           }}
         />
       )}

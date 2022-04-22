@@ -105,15 +105,11 @@ export class KoniCron {
       }
     }
 
-    const needRefreshKeys: string[] = [];
-
     for (const [key, web3] of Object.entries(apiMap.web3)) {
       web3.eth.net.isListening()
-        .catch(() => needRefreshKeys.push(key));
-    }
-
-    for (const key of needRefreshKeys) {
-      state.refreshWeb3Api(key);
+        .catch(() => {
+          state.refreshWeb3Api(key);
+        });
     }
   }
 
@@ -136,19 +132,21 @@ export class KoniCron {
     }
 
     for (const [key, web3] of Object.entries(apiMap.web3)) {
-      let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
-
       web3.eth.net.isListening()
         .then(() => {
-          status = NETWORK_STATUS.CONNECTED;
+          if (!networkMap[key].apiStatus) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+          } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== NETWORK_STATUS.CONNECTED) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTED);
+          }
         })
-        .catch(console.error);
-
-      if (!networkMap[key].apiStatus) {
-        state.updateNetworkStatus(key, status);
-      } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== status) {
-        state.updateNetworkStatus(key, status);
-      }
+        .catch(() => {
+          if (!networkMap[key].apiStatus) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+          } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== NETWORK_STATUS.CONNECTING) {
+            state.updateNetworkStatus(key, NETWORK_STATUS.CONNECTING);
+          }
+        });
     }
   }
 

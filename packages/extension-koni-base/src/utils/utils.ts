@@ -222,8 +222,8 @@ export const isValidProvider = (provider: string) => {
 };
 
 export const getCurrentProvider = (data: NetworkJson) => {
-  if (data.currentProvider === 'custom' && data.customProviders) {
-    return data.customProviders.custom;
+  if (data.currentProvider.startsWith('custom') && data.customProviders) {
+    return data.customProviders[data.currentProvider];
   } else {
     return data.providers[data.currentProvider];
   }

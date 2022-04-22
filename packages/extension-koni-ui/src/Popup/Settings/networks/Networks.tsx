@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
 function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
 
-  const networkMap = useFetchNetworkMap();
+  const { isEthereum, parsedNetworkMap: networkMap } = useFetchNetworkMap();
 
   const _onChangeFilter = useCallback(() => {
     console.log(123);
@@ -39,11 +39,12 @@ function Networks ({ className }: Props): React.ReactElement {
       providers: {},
       ss58Format: 0,
       key: '',
-      chain: ''
+      chain: '',
+      isEthereum
     };
 
     store.dispatch({ type: 'networkCreateParams/update', payload: { data: item } as NetworkCreateParams });
-  }, []);
+  }, [isEthereum]);
 
   return (
     <div className={className}>

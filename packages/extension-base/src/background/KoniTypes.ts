@@ -270,10 +270,11 @@ export interface NetworkJson {
   ss58Format: number;
   paraId?: number;
   chainType?: 'substrate' | 'ethereum';
-  crowdloanUrl?: string; // user input
+  crowdloanUrl?: string;
 
   // Ethereum informations for predefine network only
   isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
+  ethChainId?: number;
 
   // Native token information
   nativeToken?: string;
@@ -286,16 +287,16 @@ export interface NetworkJson {
 
   // Support features
   getBalanceMethod?: 'SUBSTRATE' | 'SUBSTRATE_TOKEN' | 'EVM' | 'ERC20'; // How to get balance
-  sendFundMethod?: 'SUBSTRATE' | 'EVM'
+  sendFundMethod?: 'SUBSTRATE' | 'EVM';
   getTokenMethod?: 'SUBSTRATE_TOKENS' | 'ERC20'; // How to get tokens
-  sendTokenMethod?: 'SUBSTRATE' | 'ERC20'
+  sendTokenMethod?: 'SUBSTRATE' | 'ERC20';
   sendXCMTokens?: 'SUBSTRATE_XTOKENS' | 'EVM_XTOKENS' | 'RAW_XCM';
   getStakingMethod?: 'SUBSTRATE';
-  getCrowdloanMethod?: 'POLKADOT' | 'DOTSAMA' | 'CUSTOM' // This method is required paraId, custom network can not select custom method
+  getCrowdloanMethod?: 'POLKADOT' | 'DOTSAMA' | 'CUSTOM'; // This method is required paraId, custom network can not select custom method
   getNFTMethod?: 'ERC721' | 'CUSTOM';
   sendNFTMethod?: 'ERC721' | 'CUSTOM';
 
-  dotSamaAPIStatus?: NETWORK_STATUS;
+  apiStatus?: NETWORK_STATUS;
 }
 
 export interface DonateInfo {
@@ -553,10 +554,16 @@ export interface ValidateNetworkResponse {
   ss58Prefix: string,
   networkGroup: NetWorkGroup[],
   chain: string,
+  ethChainId: number,
 
   error?: NETWORK_ERROR,
   conflictChain?: string,
   conflictKey?: string,
+}
+
+export interface ValidateNetworkRequest {
+  provider: string,
+  isEthereum: boolean
 }
 
 export interface ApiMap {
@@ -565,7 +572,7 @@ export interface ApiMap {
 }
 
 export interface KoniRequestSignatures {
-  'pri(apiMap.validate)': [string, ValidateNetworkResponse];
+  'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, boolean];
   'pri(networkMap.removeOne)': [string, boolean];

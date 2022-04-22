@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 import { NETWORK_ERROR, NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
-import { ActionContext, Button, ButtonArea, InputWithLabel } from '@polkadot/extension-koni-ui/components';
+import { ActionContext, Button, ButtonArea, HorizontalLabelToggle, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { upsertNetworkMap, validateNetwork } from '@polkadot/extension-koni-ui/messaging';
@@ -20,6 +20,10 @@ interface Props extends ThemeProps {
 }
 
 function getCurrentEndpoint (data: NetworkJson) {
+  if (!data) {
+    return null;
+  }
+
   if (data.currentProvider === 'custom') {
     return data?.customProviders?.custom as string;
   } else {
@@ -39,6 +43,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [needValidate, setNeedValidate] = useState(false);
   const isCurrentEndpoint = provider === getCurrentEndpoint(data);
   const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
+  const [isEthereum, setIsEthereum] = useState(data.isEthereum || false);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -60,7 +65,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           setNeedValidate(false);
           setLoading(true);
 
-          validateNetwork(provider).then((resp) => {
+          validateNetwork(provider, isEthereum).then((resp) => {
             if (resp.error) {
               setValidateError(resp.error);
             }
@@ -69,24 +74,45 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
             setIsProviderConnected(resp.success);
 
             if (resp.success) {
-              setNetworkInfo({
-                ...networkInfo,
-                key: resp.key,
-                active: true,
-                customProviders: { custom: provider },
-                currentProvider: 'custom',
-                groups: resp.networkGroup,
-                currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
-                genesisHash: resp.genesisHash,
-                ss58Format: parseInt(resp.ss58Prefix),
-                chain: resp.chain
-              });
+              if (isEthereum) {
+                setNetworkInfo({
+                  ...networkInfo,
+                  key: resp.key,
+                  active: true,
+                  customProviders: { custom: provider },
+                  currentProvider: 'custom',
+                  groups: resp.networkGroup,
+                  currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+                  genesisHash: resp.genesisHash,
+                  ss58Format: -1,
+                  chain: resp.chain,
+                  isEthereum,
+                  ethChainId: resp.ethChainId
+                });
+              } else {
+                setNetworkInfo({
+                  ...networkInfo,
+                  key: resp.key,
+                  active: true,
+                  customProviders: { custom: provider },
+                  currentProvider: 'custom',
+                  groups: resp.networkGroup,
+                  currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
+                  genesisHash: resp.genesisHash,
+                  ss58Format: parseInt(resp.ss58Prefix),
+                  chain: resp.chain
+                });
+              }
             }
           }).catch(console.error);
         }
       }
     }
-  }, [data, isCurrentEndpoint, needValidate, networkInfo, provider]);
+  }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider]);
+
+  const toggleEthereum = useCallback((val: boolean) => {
+    setIsEthereum(val);
+  }, []);
 
   const _onSaveNetwork = useCallback(() => {
     if ((!_isValidProvider || !isProviderConnected) && !isCurrentEndpoint) {
@@ -137,6 +163,27 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       });
     }
   }, [networkInfo, show]);
+
+  const onChangeEthChainId = useCallback((val: string) => {
+    setNetworkInfo({
+      ...networkInfo,
+      ethChainId: parseInt(val)
+    });
+  }, [networkInfo]);
+
+  const onChangeCoingeckoKey = useCallback((val: string) => {
+    setNetworkInfo({
+      ...networkInfo,
+      coinGeckoKey: val
+    });
+  }, [networkInfo]);
+
+  const onChangeCrowdloanUrl = useCallback((val: string) => {
+    setNetworkInfo({
+      ...networkInfo,
+      crowdloanUrl: val
+    });
+  }, [networkInfo]);
 
   const onChangeExplorer = useCallback((val: string) => {
     setNetworkInfo({
@@ -192,6 +239,39 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           value={networkInfo?.blockExplorer || ''}
         />
 
+        <InputWithLabel
+          label={t<string>('Crowdloan Url (Optional)')}
+          onChange={onChangeCrowdloanUrl}
+          value={networkInfo?.crowdloanUrl || ''}
+        />
+
+        <InputWithLabel
+          label={t<string>('Coingecko key (Optional)')}
+          onChange={onChangeCoingeckoKey}
+          value={networkInfo?.coinGeckoKey || ''}
+        />
+
+        <div className={'is-eth-container'}>
+          <div>Ethereum chain</div>
+          <HorizontalLabelToggle
+            checkedLabel={''}
+            className='info'
+            toggleFunc={toggleEthereum}
+            uncheckedLabel={''}
+            value={isEthereum}
+          />
+        </div>
+
+        {
+          isEthereum &&
+          <InputWithLabel
+            disabled
+            label={t<string>('Ethereum Chain ID')}
+            onChange={onChangeEthChainId}
+            value={networkInfo?.ethChainId?.toString() || ''}
+          />
+        }
+
         {!isCurrentEndpoint && isProviderConnected && _isValidProvider && !loading && <div className={'connect-success'}>Provider connected successfully</div>}
 
         {!isCurrentEndpoint && !isProviderConnected && _isValidProvider && !loading && <div className={'connect-fail'}>{getValidateErrorMessage()}</div>}
@@ -207,7 +287,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            isDisabled={(!isProviderConnected || !_isValidProvider) && !isCurrentEndpoint}
+            isDisabled={(!isProviderConnected || !_isValidProvider || !networkInfo.chain || networkInfo.chain.length <= 0) && !isCurrentEndpoint}
             onClick={_onSaveNetwork}
           >
             {t<string>('Save')}
@@ -222,6 +302,11 @@ export default styled(NetworkEdit)(({ theme }: Props) => `
   padding: 0 15px 15px;
   flex: 1;
   overflow-y: auto;
+
+  .is-eth-container {
+    display: flex;
+    margin-top: 12px;
+  }
 
   .connect-info {
     margin-top: 10px;

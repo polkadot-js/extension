@@ -43,7 +43,7 @@ export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWo
 
   Object.keys(networkMap).forEach((networkKey) => {
     if (networkMap[networkKey].active) {
-      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format, dotSamaAPIStatus } = networkMap[networkKey];
+      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format, apiStatus } = networkMap[networkKey];
 
       let isAvailable = true;
 
@@ -63,7 +63,7 @@ export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWo
         paraId,
         isAvailable,
         active,
-        apiStatus: dotSamaAPIStatus || NETWORK_STATUS.DISCONNECTED
+        apiStatus: apiStatus || NETWORK_STATUS.DISCONNECTED
       });
     }
   });

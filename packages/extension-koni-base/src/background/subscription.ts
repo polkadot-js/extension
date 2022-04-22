@@ -70,8 +70,7 @@ export class KoniSubcription {
 
     state.subscribeServiceInfo().subscribe({
       next: (serviceInfo) => {
-        this.detectAddresses
-        console.log('subscribe serviceInfo', serviceInfo, );
+        console.log('subscribe serviceInfo', serviceInfo);
       }
     });
   }

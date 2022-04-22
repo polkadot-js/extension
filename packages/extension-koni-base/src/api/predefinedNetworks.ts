@@ -156,7 +156,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
       OnFinality: 'wss://moonbeam.api.onfinality.io/public-ws',
       Dwellir: 'wss://moonbeam-rpc.dwellir.com'
     },
-    active: false,
+    active: true,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',
     groups: ['POLKADOT_PARACHAIN'],

@@ -6,11 +6,14 @@ import { useSelector } from 'react-redux';
 import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 
-export default function useFetchNetworkMap (): Record<string, NetworkJson> {
+export default function useFetchNetworkMap () {
   const { currentAccount, networkMap } = useSelector((state: RootState) => state);
   const parsedNetworkMap: Record<string, NetworkJson> = {};
+  let isEthereum = false;
 
   if (currentAccount?.account?.type === 'ethereum') {
+    isEthereum = true;
+
     for (const [key, network] of Object.entries(networkMap)) {
       if (network.isEthereum && network.isEthereum) {
         parsedNetworkMap[key] = network;
@@ -24,5 +27,5 @@ export default function useFetchNetworkMap (): Record<string, NetworkJson> {
     }
   }
 
-  return parsedNetworkMap;
+  return { parsedNetworkMap, isEthereum };
 }

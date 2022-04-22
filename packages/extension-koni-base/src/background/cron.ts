@@ -56,7 +56,7 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     // this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
-    this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS, false);
+    this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
     this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -105,7 +105,16 @@ export class KoniCron {
       }
     }
 
-    console.log('recover api');
+    const needRefreshKeys: string[] = [];
+
+    for (const [key, web3] of Object.entries(apiMap.web3)) {
+      web3.eth.net.isListening()
+        .catch(() => needRefreshKeys.push(key));
+    }
+
+    for (const key of needRefreshKeys) {
+      state.refreshWeb3Api(key);
+    }
   }
 
   updateApiMapStatus () {
@@ -119,9 +128,25 @@ export class KoniCron {
         status = NETWORK_STATUS.CONNECTED;
       }
 
-      if (!networkMap[key].dotSamaAPIStatus) {
+      if (!networkMap[key].apiStatus) {
         state.updateNetworkStatus(key, status);
-      } else if (networkMap[key].dotSamaAPIStatus && networkMap[key].dotSamaAPIStatus !== status) {
+      } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== status) {
+        state.updateNetworkStatus(key, status);
+      }
+    }
+
+    for (const [key, web3] of Object.entries(apiMap.web3)) {
+      let status: NETWORK_STATUS = NETWORK_STATUS.CONNECTING;
+
+      web3.eth.net.isListening()
+        .then(() => {
+          status = NETWORK_STATUS.CONNECTED;
+        })
+        .catch(console.error);
+
+      if (!networkMap[key].apiStatus) {
+        state.updateNetworkStatus(key, status);
+      } else if (networkMap[key].apiStatus && networkMap[key].apiStatus !== status) {
         state.updateNetworkStatus(key, status);
       }
     }

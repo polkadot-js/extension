@@ -16,6 +16,7 @@ import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/stak
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
+import { initWeb3Api } from '@polkadot/extension-koni-base/api/web3/web3';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
@@ -23,7 +24,6 @@ import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/Transa
 import { convertFundStatus, getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
-import {initWeb3Api} from "@polkadot/extension-koni-base/api/web3/web3";
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -166,9 +166,13 @@ export default class KoniState extends State {
         this.networkMap = mergedNetworkMap; // init networkMap state
       }
 
-      for (const [key, value] of Object.entries(this.networkMap)) {
-        if (value.active) {
-          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(value));
+      for (const [key, network] of Object.entries(this.networkMap)) {
+        if (network.active) {
+          if (network.isEthereum && network.isEthereum) {
+            this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(network));
+          } else {
+            this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network));
+          }
         }
       }
     });
@@ -877,7 +881,7 @@ export default class KoniState extends State {
   }
 
   public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
-    this.networkMap[networkKey].dotSamaAPIStatus = status;
+    this.networkMap[networkKey].apiStatus = status;
 
     this.networkMapSubject.next(this.networkMap);
     this.updateServiceInfo();
@@ -886,6 +890,10 @@ export default class KoniState extends State {
 
   public getApiMap () {
     return this.apiMap;
+  }
+
+  public refreshWeb3Api (key: string) {
+    this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
   }
 
   public subscribeServiceInfo () {

@@ -23,6 +23,7 @@ import { isValidProvider, reformatAddress } from '@polkadot/extension-koni-base/
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
+import { ChainType } from '@polkadot/types/interfaces';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -1295,7 +1296,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async validateSubstrateNetwork (provider: string): Promise<ValidateNetworkResponse> {
+  private async validateNetwork ({ isEthereum, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
     let result: ValidateNetworkResponse = {
       success: false,
       key: '',
@@ -1332,10 +1333,31 @@ export default class KoniExtension extends Extension {
 
           if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
             const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
-            const [chainType, chain] = await Promise.all([
-              api.api.rpc.system.chainType(),
-              api.api.rpc.system.chain()
-            ]);
+            let chainType: ChainType;
+            let chain = '';
+            let ethChainId = -1;
+
+            if (isEthereum) {
+              const web3 = initWeb3Api(provider);
+
+              const [_chainType, _chain, _ethChainId] = await Promise.all([
+                api.api.rpc.system.chainType(),
+                api.api.rpc.system.chain(),
+                web3.eth.getChainId()
+              ]);
+
+              chainType = _chainType;
+              chain = _chain.toString();
+              ethChainId = _ethChainId;
+            } else {
+              const [_chainType, _chain] = await Promise.all([
+                api.api.rpc.system.chainType(),
+                api.api.rpc.system.chain()
+              ]);
+
+              chainType = _chainType;
+              chain = _chain.toString();
+            }
 
             networkKey = 'custom_' + genesisHash.toString();
 
@@ -1356,7 +1378,7 @@ export default class KoniExtension extends Extension {
               ss58Prefix,
               networkGroup: [parsedChainType],
               chain: chain ? chain.toString() : '',
-              ethChainId: -1
+              ethChainId
             };
           } else {
             result.error = genesisError;
@@ -1379,58 +1401,6 @@ export default class KoniExtension extends Extension {
       console.error('Error connecting to provider', e);
 
       return result;
-    }
-  }
-
-  private async validateEthNetwork (provider: string): Promise<ValidateNetworkResponse> {
-    console.log('validate eth network')
-    let result: ValidateNetworkResponse = {
-      success: false,
-      key: '',
-      genesisHash: '',
-      ss58Prefix: '',
-      networkGroup: [],
-      chain: '',
-      ethChainId: -1
-    };
-
-    try {
-      const { conflictChain: providerConflictChain, conflictKey: providerConflictKey, error: providerError } = this.validateProvider([provider], true);
-
-      if (providerError === NETWORK_ERROR.NONE) {
-        const web3 = initWeb3Api(provider);
-        const chainId = await web3.eth.getChainId();
-
-        const networkKey = 'custom_eth_' + chainId.toString();
-
-        result = {
-          success: true,
-          key: networkKey,
-          genesisHash: '',
-          ss58Prefix: '',
-          networkGroup: ['UNKNOWN'],
-          chain: '',
-          ethChainId: chainId
-        };
-      } else {
-        result.error = providerError;
-        result.conflictChain = providerConflictChain;
-        result.conflictKey = providerConflictKey;
-      }
-
-      return result;
-    } catch (e) {
-      console.error('Error connecting to provider', e);
-
-      return result;
-    }
-  }
-
-  private async validateNetwork ({ isEthereum, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
-    if (!isEthereum) {
-      return await this.validateSubstrateNetwork(provider);
-    } else {
-      return await this.validateEthNetwork(provider);
     }
   }
 

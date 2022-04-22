@@ -43,7 +43,7 @@ export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWo
 
   Object.keys(networkMap).forEach((networkKey) => {
     if (networkMap[networkKey].active) {
-      const { active, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format, apiStatus } = networkMap[networkKey];
+      const { active, apiStatus, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = networkMap[networkKey];
 
       let isAvailable = true;
 

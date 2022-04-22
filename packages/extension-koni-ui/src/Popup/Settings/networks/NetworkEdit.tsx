@@ -44,6 +44,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const isCurrentEndpoint = provider === getCurrentEndpoint(data);
   const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
   const [isEthereum, setIsEthereum] = useState(data.isEthereum || false);
+  const [showMore, setShowMore] = useState(false);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -112,6 +113,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const toggleEthereum = useCallback((val: boolean) => {
     setIsEthereum(val);
+  }, []);
+
+  const toggleShowMore = useCallback((val: boolean) => {
+    setShowMore(val);
   }, []);
 
   const _onSaveNetwork = useCallback(() => {
@@ -233,25 +238,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           value={networkInfo?.paraId?.toString() || ''}
         />
 
-        <InputWithLabel
-          label={t<string>('Block Explorer (Optional)')}
-          onChange={onChangeExplorer}
-          value={networkInfo?.blockExplorer || ''}
-        />
-
-        <InputWithLabel
-          label={t<string>('Crowdloan Url (Optional)')}
-          onChange={onChangeCrowdloanUrl}
-          value={networkInfo?.crowdloanUrl || ''}
-        />
-
-        <InputWithLabel
-          label={t<string>('Coingecko key (Optional)')}
-          onChange={onChangeCoingeckoKey}
-          value={networkInfo?.coinGeckoKey || ''}
-        />
-
-        <div className={'is-eth-container'}>
+        <div className={'toggle-container'}>
           <div>Ethereum chain</div>
           <HorizontalLabelToggle
             checkedLabel={''}
@@ -272,6 +259,39 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           />
         }
 
+        <div className={'option-toggle-container'}>
+          <div>More options</div>
+          <HorizontalLabelToggle
+            checkedLabel={''}
+            className='info'
+            toggleFunc={toggleShowMore}
+            uncheckedLabel={''}
+            value={showMore}
+          />
+        </div>
+
+        {
+          showMore &&
+          <div>
+            <InputWithLabel
+              label={t<string>('Block Explorer (Optional)')}
+              onChange={onChangeExplorer}
+              value={networkInfo?.blockExplorer || ''}
+            />
+
+            <InputWithLabel
+              label={t<string>('Crowdloan Url (Optional)')}
+              onChange={onChangeCrowdloanUrl}
+              value={networkInfo?.crowdloanUrl || ''}
+            />
+
+            <InputWithLabel
+              label={t<string>('Coingecko key (Optional)')}
+              onChange={onChangeCoingeckoKey}
+              value={networkInfo?.coinGeckoKey || ''}
+            />
+          </div>
+        }
         {!isCurrentEndpoint && isProviderConnected && _isValidProvider && !loading && <div className={'connect-success'}>Provider connected successfully</div>}
 
         {!isCurrentEndpoint && !isProviderConnected && _isValidProvider && !loading && <div className={'connect-fail'}>{getValidateErrorMessage()}</div>}
@@ -303,7 +323,13 @@ export default styled(NetworkEdit)(({ theme }: Props) => `
   flex: 1;
   overflow-y: auto;
 
-  .is-eth-container {
+  .option-toggle-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  .toggle-container {
     display: flex;
     margin-top: 12px;
   }

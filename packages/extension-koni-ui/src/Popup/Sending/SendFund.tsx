@@ -309,6 +309,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
                   isDisabled
                   key={maxTransfer?.toString()}
                   label={t<string>('transferable minus fees')}
+                  siDecimals={balanceFormat[0]}
                 />
               )
               : (

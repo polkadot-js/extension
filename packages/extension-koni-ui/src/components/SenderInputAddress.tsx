@@ -137,7 +137,7 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     font-size: 15px;
     line-height: 26px;
     color: ${theme.textColor2};
-    right: 80px;
+    right: 70px;
     top: 32px;
     pointer-events: none;
   }
@@ -147,7 +147,7 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     font-size: 15px;
     line-height: 26px;
     color: ${theme.textColor2};
-    right: 80px;
+    right: 70px;
     top: 8px;
     pointer-events: none;
   }
@@ -156,7 +156,6 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     position: absolute;
     top: 0;
     right: 0;
-    width: 72px;
     height: 72px;
   }
 

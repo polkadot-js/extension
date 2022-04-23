@@ -10,6 +10,8 @@ import { TokenItemType } from '@polkadot/extension-koni-ui/components/types';
 import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 interface WrapperProps {
   className?: string;
@@ -64,6 +66,12 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
           className='dropdown-wrapper-selected-logo'
           src={getLogoByNetworkKey(tokenValueArr[1])}
         />
+        <FontAwesomeIcon
+          className='dropdown-wrapper-item__icon'
+          // @ts-ignore
+          icon={faChevronDown}
+          size='sm'
+        />
       </div>
 
       {isDropdownOpen && (
@@ -112,7 +120,7 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
     option (base: any, { isSelected }: any) {
       const isDarkTheme = themeContext.id === 'dark';
       const color = isDarkTheme ? '#888888' : '#7B8098';
-      const hoverBgc = 'rgba(255, 255, 255, 0.05)';
+      const hoverBgc = isDarkTheme ? 'rgba(255, 255, 255, 0.05)' : 'rgba(17, 17, 17, 0.08)';
       const hoverColor = isDarkTheme ? '#FFFFFF' : '#00072D';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -205,18 +213,19 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
   .dropdown-wrapper-item {
     height: 68px;
     display: flex;
-    justify-content: center;
     align-items: center;
     cursor: pointer;
+    padding-right: 8px;
   }
 
   .dropdown-wrapper-selected-logo {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
     border-radius: 50%;
     background: ${theme.identiconBackground};
     border: 2px solid transparent;
+    margin-right: 8px;
   }
 
   .label-wrapper {

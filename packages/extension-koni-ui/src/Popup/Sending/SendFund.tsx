@@ -45,8 +45,9 @@ function getDefaultAddress (address: string, accounts: AccountJson[]): string {
 function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): [string, string] | null {
   const firstNetworkKey = Object.keys(chainRegistryMap)[0];
 
-  if ((networkKey === 'all' && (!firstNetworkKey || !chainRegistryMap[firstNetworkKey])) ||
-    !chainRegistryMap[networkKey]) {
+  if (networkKey === 'all'
+    ? (!firstNetworkKey || !chainRegistryMap[firstNetworkKey])
+    : !chainRegistryMap[networkKey]) {
     return null;
   }
 

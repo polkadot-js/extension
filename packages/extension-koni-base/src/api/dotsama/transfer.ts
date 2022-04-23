@@ -295,15 +295,7 @@ export async function makeTransfer (
         status: status.type
       };
 
-      // updateResponseByEvents(response, events);
       callback(response);
-    } else if (status.isFinalized) {
-      const blockHash = status.asFinalized.toHex();
-
-      response.data = {
-        block: blockHash,
-        status: status.type
-      };
 
       updateResponseByEvents(response, events);
 
@@ -319,6 +311,19 @@ export async function makeTransfer (
           console.error('Transaction errors:', e);
           callback(response);
         });
+    } else if (status.isFinalized) {
+      const blockHash = status.asFinalized.toHex();
+
+      response.isFinalized = true;
+
+      response.data = {
+        block: blockHash,
+        status: status.type
+      };
+
+      // todo: may do something here
+
+      callback(response);
     } else {
       callback(response);
     }

@@ -42,15 +42,29 @@ function getDefaultAddress (address: string, accounts: AccountJson[]): string {
   return isAccountAll(address) ? accounts[1].address : address;
 }
 
-function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): [string, string] {
+function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): [string, string] | null {
   const firstNetworkKey = Object.keys(chainRegistryMap)[0];
+
+  if ((networkKey === 'all' && (!firstNetworkKey || !chainRegistryMap[firstNetworkKey])) ||
+    !chainRegistryMap[networkKey]) {
+    return null;
+  }
+
   const token = networkKey === 'all' ? chainRegistryMap[firstNetworkKey].chainTokens[0] : chainRegistryMap[networkKey].chainTokens[0];
 
   return networkKey === 'all' ? [firstNetworkKey, token] : [networkKey, token];
 }
 
-function getDefaultValue (networkKey: string, address: string, chainRegistryMap: Record<string, ChainRegistry>, accounts: AccountJson[]): SenderInputAddressType {
+function getDefaultValue (networkKey: string, address: string | undefined, chainRegistryMap: Record<string, ChainRegistry>, accounts: AccountJson[]): SenderInputAddressType | null {
+  if (!address) {
+    return null;
+  }
+
   const defaultToken = getDefaultToken(networkKey, chainRegistryMap);
+
+  if (!defaultToken) {
+    return null;
+  }
 
   return {
     address: getDefaultAddress(address, accounts),
@@ -82,6 +96,8 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
     currentAccount: { account },
     currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
 
+  const defaultValue = getDefaultValue(networkKey, account?.address, chainRegistryMap, accounts);
+
   return (
     <div className={className}>
       <Header
@@ -93,12 +109,14 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSubHeader
         subHeaderName={t<string>('Send fund')}
       />
-      {accounts && accounts.length && account && Object.keys(chainRegistryMap).length
-        ? (<SendFund
-          className='send-fund-container'
-          defaultValue={getDefaultValue(networkKey, account.address, chainRegistryMap, accounts)}
-          theme={theme}
-        />)
+      {accounts && accounts.length && account && defaultValue
+        ? (
+          <SendFund
+            className='send-fund-container'
+            defaultValue={defaultValue}
+            theme={theme}
+          />
+        )
         : (<LoadingContainer />)
       }
     </div>

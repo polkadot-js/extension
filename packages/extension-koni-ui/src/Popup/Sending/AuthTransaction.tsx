@@ -46,21 +46,21 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
         ...requestPayload,
         password
       }, (rs) => {
-        if (rs.step === TransferStep.SUCCESS.valueOf()) {
-          onChangeResult({
-            isShowTxResult: true,
-            isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-            extrinsicHash: rs.extrinsicHash
-          });
-        }
-
-        if (rs.step === TransferStep.ERROR.valueOf()) {
-          onChangeResult({
-            isShowTxResult: true,
-            isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
-            extrinsicHash: rs.extrinsicHash,
-            txError: rs.errors
-          });
+        if (!rs.isFinalized) {
+          if (rs.step === TransferStep.SUCCESS.valueOf()) {
+            onChangeResult({
+              isShowTxResult: true,
+              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+              extrinsicHash: rs.extrinsicHash
+            });
+          } else if (rs.step === TransferStep.ERROR.valueOf()) {
+            onChangeResult({
+              isShowTxResult: true,
+              isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+              extrinsicHash: rs.extrinsicHash,
+              txError: rs.errors
+            });
+          }
         }
       }).then((errors) => {
         const errorMessage = errors.map((err) => err.message);

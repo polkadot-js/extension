@@ -1048,7 +1048,8 @@ export default class KoniExtension extends Extension {
     token: string | undefined,
     portCallback: (res: ResponseTransfer) => void): (res: ResponseTransfer) => void {
     return (res: ResponseTransfer) => {
-      if (res.txResult && res.extrinsicHash) {
+      // !res.isFinalized to prevent duplicate action
+      if (!res.isFinalized && res.txResult && res.extrinsicHash) {
         state.setTransactionHistory(address, networkKey, {
           time: Date.now(),
           networkKey,

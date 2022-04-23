@@ -468,7 +468,8 @@ export interface ResponseTransfer {
   extrinsicHash?: string,
   extrinsicStatus?: string,
   data?: object,
-  txResult?: TxResultType
+  txResult?: TxResultType,
+  isFinalized?: boolean
 }
 
 export interface EvmNftTransactionRequest {

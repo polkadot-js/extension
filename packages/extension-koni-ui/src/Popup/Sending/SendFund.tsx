@@ -432,9 +432,9 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             networkKey: selectedNetworkKey,
             from: senderId,
             to: recipientId,
-            transferAll: false,
+            transferAll: canToggleAll && isAll,
             token: selectedToken,
-            value: amount?.toString() || '0'
+            value: valueToTransfer
           }}
         />
       )}

@@ -6,7 +6,7 @@ import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry
 // import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
+import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
 export async function getExistentialDeposit (networkKey: string, token: string): Promise<string> {
@@ -175,6 +175,7 @@ export async function makeTransfer (
   // @ts-ignore
   const { nonce } = await api.query.system.account(fromAddress);
 
+  // @ts-ignore
   let transfer;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
@@ -298,19 +299,23 @@ export async function makeTransfer (
       callback(response);
 
       updateResponseByEvents(response, events);
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+      response.extrinsicHash = transfer.hash.toHex();
+      callback(response);
 
-      const extrinsicIndex = parseInt(events[0]?.phase.asApplyExtrinsic.toString());
-
-      // Get extrinsic hash from network
-      api.rpc.chain.getBlock(blockHash)
-        .then((blockQuery: SignedBlockWithJustifications) => {
-          response.extrinsicHash = blockQuery.block.extrinsics[extrinsicIndex].hash.toHex();
-          callback(response);
-        })
-        .catch((e) => {
-          console.error('Transaction errors:', e);
-          callback(response);
-        });
+      // const extrinsicIndex = parseInt(events[0]?.phase.asApplyExtrinsic.toString());
+      //
+      // // Get extrinsic hash from network
+      // api.rpc.chain.getBlock(blockHash)
+      //   .then((blockQuery: SignedBlockWithJustifications) => {
+      //     response.extrinsicHash = blockQuery.block.extrinsics[extrinsicIndex].hash.toHex();
+      //     callback(response);
+      //   })
+      //   .catch((e) => {
+      //     console.error('Transaction errors:', e);
+      //     callback(response);
+      //   });
     } else if (status.isFinalized) {
       const blockHash = status.asFinalized.toHex();
 

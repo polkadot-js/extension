@@ -93,7 +93,19 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     [onAction]
   );
 
-  useEffect(() => { // check provider
+  const getValidateErrorMessage = useCallback((input?: string) => {
+    if (validateError === NETWORK_ERROR.EXISTED_NETWORK || input === NETWORK_ERROR.EXISTED_NETWORK) {
+      return 'This network has already been added';
+    } else if (validateError === NETWORK_ERROR.EXISTED_PROVIDER || input === NETWORK_ERROR.EXISTED_PROVIDER) {
+      return 'This provider has existed';
+    } else if (validateError === NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK || input === NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK) {
+      return 'This provider is not the same network';
+    } else {
+      return 'Unable to connect to the provider';
+    }
+  }, [validateError]);
+
+  useEffect(() => { // check provider for network creation
     if (provider) {
       if (!isValidProvider(provider)) {
         _setIsvalidProvider(false);
@@ -149,29 +161,57 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
   }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider]);
 
-  const onSelectProvider = useCallback((val: any) => {
-    const providerKey = val as string;
+  const handleCreateProvider = useCallback(async (newProvider: string) => { // handle add provider for network edit
+    if (!isValidProvider(newProvider)) {
+      show('Provider URL requires http/https or wss prefix');
 
-    if (!getAllProviderKeys(networkInfo).includes(providerKey)) {
+      return '';
+    }
+
+    setLoading(true);
+    const resp = await validateNetwork(newProvider, isEthereum, networkInfo);
+
+    if (resp.error) {
+      show(getValidateErrorMessage(resp.error));
+
+      return '';
+    }
+
+    setLoading(false);
+    setIsProviderConnected(resp.success);
+
+    if (resp.success) {
       if (networkInfo.customProviders) {
         const currentCustomProviders = networkInfo.customProviders;
         const providerLength = Object.values(networkInfo.customProviders).length;
 
-        currentCustomProviders[`custom_${providerLength}`] = providerKey;
+        currentCustomProviders[`custom_${providerLength}`] = newProvider;
 
         setNetworkInfo({
           ...networkInfo,
           currentProvider: `custom_${providerLength}`,
           customProviders: currentCustomProviders
         });
+
+        return `custom_${providerLength}`;
       } else {
         setNetworkInfo({
           ...networkInfo,
           currentProvider: 'custom',
-          customProviders: { custom: providerKey }
+          customProviders: { custom: newProvider }
         });
+
+        return 'custom';
       }
-    } else {
+    }
+
+    return '';
+  }, [getValidateErrorMessage, isEthereum, networkInfo, show]);
+
+  const onSelectProvider = useCallback((val: any) => {
+    const providerKey = val as string;
+
+    if (getAllProviderKeys(networkInfo).includes(providerKey)) {
       setNetworkInfo({
         ...networkInfo,
         currentProvider: providerKey
@@ -265,16 +305,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     });
   }, [networkInfo]);
 
-  const getValidateErrorMessage = useCallback(() => {
-    if (validateError === NETWORK_ERROR.EXISTED_NETWORK) {
-      return 'This network has already been added';
-    } else if (validateError === NETWORK_ERROR.EXISTED_PROVIDER) {
-      return 'This provider has existed';
-    } else {
-      return 'Unable to connect to the provider';
-    }
-  }, [validateError]);
-
   return (
     <>
       <Header
@@ -295,6 +325,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
             : <div style={{ marginTop: '12px' }}>
               <Dropdown
                 allowAdd={true}
+                handleCreate={handleCreateProvider}
                 label={'Provider URL (*)'}
                 onChange={onSelectProvider}
                 options={getAllProviders(networkInfo)}

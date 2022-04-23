@@ -17,13 +17,15 @@ interface Props extends ThemeProps {
   options: any[];
   value?: string;
   allowAdd?: boolean;
+  handleCreate?: (createValue: string) => Promise<string>; // handle create logic, return new value prop after custom logic
 }
 
-function Dropdown ({ allowAdd, className, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options, value }: Props): React.ReactElement<Props> {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value })); // will work as long as options has text and value field
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const [selectedValue, setSelectedValue] = useState(value || transformOptions[0].value);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = useCallback(
     ({ value }): void => {
@@ -37,6 +39,22 @@ function Dropdown ({ allowAdd, className, label, onChange, options, value }: Pro
       setSelectedValue(value);
     }, [onChange]
   );
+
+  const onCreate = useCallback(async (val: string) => {
+    setLoading(true);
+
+    if (handleCreate) {
+      const value = await handleCreate(val);
+
+      if (value !== '') {
+        setSelectedValue(value);
+      }
+    } else {
+      setSelectedValue(val);
+    }
+
+    setLoading(false);
+  }, [handleCreate]);
 
   const customStyles = {
     option: (base: any) => {
@@ -65,15 +83,18 @@ function Dropdown ({ allowAdd, className, label, onChange, options, value }: Pro
             ? <CreatableSelect
               className='dropdown-wrapper'
               classNamePrefix='dropdown'
+              isDisabled={loading}
+              isLoading={loading}
               isSearchable
               menuPlacement={'auto'}
               menuPortalTarget={document.body}
               menuPosition='fixed'
               onChange={handleChange}
+              onCreateOption={onCreate}
               options={transformOptions}
               placeholder=''
               styles={customStyles}
-              value={transformOptions.filter((obj: { value: string }) => obj.value === value)}
+              value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
             />
             : <Select
               className='dropdown-wrapper'

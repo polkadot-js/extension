@@ -468,7 +468,8 @@ export enum NETWORK_ERROR {
   EXISTED_PROVIDER = 'existedProvider',
   INVALID_PROVIDER = 'invalidProvider',
   NONE = 'none',
-  CONNECTION_FAILURE = 'connectionFailure'
+  CONNECTION_FAILURE = 'connectionFailure',
+  PROVIDER_NOT_SAME_NETWORK = 'providerNotSameNetwork'
 }
 
 export enum NETWORK_STATUS {
@@ -563,7 +564,8 @@ export interface ValidateNetworkResponse {
 
 export interface ValidateNetworkRequest {
   provider: string,
-  isEthereum: boolean
+  isEthereum: boolean,
+  existedNetwork?: NetworkJson
 }
 
 export interface ApiMap {

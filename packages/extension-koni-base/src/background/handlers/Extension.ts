@@ -1296,7 +1296,7 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async validateNetwork ({ isEthereum, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
+  private async validateNetwork ({ existedNetwork, isEthereum, provider }: ValidateNetworkRequest): Promise<ValidateNetworkResponse> {
     let result: ValidateNetworkResponse = {
       success: false,
       key: '',
@@ -1332,6 +1332,12 @@ export default class KoniExtension extends Extension {
           const { conflictChain: genesisConflictChain, conflictKey: genesisConflictKey, error: genesisError } = this.validateGenesisHash(genesisHash);
 
           if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
+            if (existedNetwork && existedNetwork.genesisHash !== genesisHash) {
+              result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+
+              return result;
+            }
+
             const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
             let chainType: ChainType;
             let chain = '';
@@ -1349,6 +1355,12 @@ export default class KoniExtension extends Extension {
               chainType = _chainType;
               chain = _chain.toString();
               ethChainId = _ethChainId;
+
+              if (existedNetwork && existedNetwork.ethChainId && existedNetwork.ethChainId !== ethChainId) {
+                result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+
+                return result;
+              }
             } else {
               const [_chainType, _chain] = await Promise.all([
                 api.api.rpc.system.chainType(),

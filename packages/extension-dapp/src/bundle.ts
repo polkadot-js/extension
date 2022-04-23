@@ -30,15 +30,13 @@ function throwError (method: string): never {
 
 // internal helper to map from Array<InjectedAccount> -> Array<InjectedAccountWithMeta>
 function mapAccounts (source: string, list: InjectedAccount[], ss58Format?: number): InjectedAccountWithMeta[] {
-  return list.map(({ address, genesisHash, name, type }): InjectedAccountWithMeta => {
-    const encodedAddress = address.length === 42 ? address : encodeAddress(decodeAddress(address), ss58Format);
-
-    return ({
-      address: encodedAddress,
-      meta: { genesisHash, name, source },
-      type
-    });
-  });
+  return list.map(({ address, genesisHash, name, type }): InjectedAccountWithMeta => ({
+    address: address.length === 42
+      ? address
+      : encodeAddress(decodeAddress(address), ss58Format),
+    meta: { genesisHash, name, source },
+    type
+  }));
 }
 
 // have we found a properly constructed window.injectedWeb3

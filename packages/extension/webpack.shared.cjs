@@ -87,10 +87,7 @@ module.exports = (entry, alias = {}) => ({
     alias: packages.reduce((alias, p) => ({
       ...alias,
       [`@polkadot/${p}`]: path.resolve(__dirname, `../${p}/src`)
-    }), {
-      ...alias,
-      'react/jsx-runtime': require.resolve('react/jsx-runtime')
-    }),
+    }), alias),
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     fallback: {
       crypto: require.resolve('crypto-browserify'),

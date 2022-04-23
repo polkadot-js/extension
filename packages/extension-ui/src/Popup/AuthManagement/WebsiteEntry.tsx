@@ -42,7 +42,6 @@ function WebsiteEntry ({ className = '', info, removeAuth, toggleAuth, url }: Pr
         onChange={switchAccess}
         uncheckedLabel={t<string>('denied')}
       />
-
       <div
         className='removeAuth'
         onClick={_removeAuth}

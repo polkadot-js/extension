@@ -1,63 +1,52 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import React, { useCallback, useEffect, useState } from 'react';
-import Select from 'react-select';
+import { ActionMeta, SingleValue } from 'react-select';
+import AsyncSelect from 'react-select/async';
 import styled from 'styled-components';
 
-import { DropdownOptionType, DropdownTransformGroupOptionType } from '@polkadot/extension-base/background/KoniTypes';
+import { DropdownOptionType, DropdownTransformGroupOptionType, DropdownTransformOptionType } from '@polkadot/extension-base/background/KoniTypes';
 import { Label } from '@polkadot/extension-koni-ui/components';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;
   label: string;
+  defaultOptions: DropdownTransformGroupOptionType[];
   defaultValue?: string;
   getFormatOptLabel?: (label: string, value: string) => React.ReactNode;
   onChange?: any;
   options: DropdownOptionType[];
   value?: string;
   ci?: React.ReactNode;
-  filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
   isSetDefaultValue?: boolean;
+  loadOptions?: (inputValue: string, callback: (options: DropdownTransformGroupOptionType[]) => void) => Promise<DropdownTransformGroupOptionType[]> | void;
   isDisabled: boolean
 }
 
-function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, isDisabled, isSetDefaultValue = true, label, onChange, options, value }: Props): React.ReactElement<Props> {
+function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel, isDisabled, isSetDefaultValue = true, label, loadOptions, onChange, options, value }: Props): React.ReactElement<Props> {
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
-  const transformGrOptions: DropdownTransformGroupOptionType[] = [];
-
-  let index = 0;
-
-  for (let i = 0; i < transformOptions.length; i++) {
-    if (!transformOptions[i].value) {
-      transformGrOptions.push({ label: transformOptions[i].label, options: [] });
-      index++;
-    } else {
-      transformGrOptions[index - 1].options.push(transformOptions[i]);
-    }
-  }
-
   const [selectedValue, setSelectedValue] = useState(value);
-  const grDeps = transformGrOptions.toString();
+  const grDeps = defaultOptions.toString();
 
   useEffect(() => {
     if (isSetDefaultValue) {
       if (defaultValue && defaultValue !== 'all') {
         setSelectedValue(defaultValue);
       } else {
-        if (transformOptions && transformOptions.length) {
-          setSelectedValue(transformGrOptions[0].options[0].value);
+        if (defaultOptions && defaultOptions.length) {
+          setSelectedValue(defaultOptions[0].options[0].value);
         }
       }
     }
   }, [defaultValue, grDeps, isSetDefaultValue]);
 
   const handleChange = useCallback(
-    ({ value }): void => {
-      if (typeof value === 'string') {
-        value = value.trim();
-      }
+    (newValue: SingleValue<{ label: string; value: string; }>, actionMeta: ActionMeta<{ label: string; value: string; }>): void => {
+      const value = newValue?.value.trim() || '';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       onChange && onChange(value);
@@ -66,17 +55,9 @@ function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, 
     }, [onChange]
   );
 
-  const formatOptionLabel = useCallback(({ label, value }) => {
-    return getFormatOptLabel && getFormatOptLabel(label as string, value as string);
+  const formatOptionLabel = useCallback(({ label, value }: DropdownTransformOptionType) => {
+    return getFormatOptLabel && getFormatOptLabel(label, value);
   }, [getFormatOptLabel]);
-
-  const filterOption = useCallback((candidate: { label: string; value: string }, input: string) => {
-    if (filterOptions) {
-      return filterOptions(candidate, input);
-    }
-
-    return false;
-  }, [filterOptions]);
 
   const customStyles = {
     option: (base: any) => {
@@ -105,18 +86,18 @@ function Dropdown ({ className, defaultValue, filterOptions, getFormatOptLabel, 
         label={label}
       >
         { !selectedValue && <div className='input-address-logo-placeholder' />}
-        <Select
+        <AsyncSelect
           className='input-address-dropdown-wrapper'
           classNamePrefix='input-address-dropdown'
-          filterOption={filterOptions && filterOption}
+          defaultOptions={defaultOptions}
           formatOptionLabel={getFormatOptLabel && formatOptionLabel}
           isDisabled={isDisabled}
           isSearchable
+          loadOptions={loadOptions}
           menuPlacement={'auto'}
           menuPortalTarget={document.querySelector('body')}
           menuPosition='fixed'
           onChange={handleChange}
-          options={transformGrOptions}
           placeholder=''
           styles={customStyles}
           value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}

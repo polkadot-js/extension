@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
-import { OptionInputAddress } from '@polkadot/extension-base/background/KoniTypes';
+import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@polkadot/extension-base/background/KoniTypes';
 import Dropdown from '@polkadot/extension-koni-ui/components/InputAddress/Dropdown';
 import KeyPair from '@polkadot/extension-koni-ui/components/InputAddress/KeyPair';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@polkadot/extension-koni-ui/messaging';
@@ -32,16 +32,13 @@ interface Props {
   isInput?: boolean;
   autoPrefill?: boolean;
   label?: React.ReactNode;
-  labelExtra?: React.ReactNode;
   onChange?: (value: string | null) => void;
-  onChangeMulti?: (value: string[]) => void;
   options?: KeyringSectionOption[];
   optionsAll?: Record<string, Option[]>;
   placeholder?: string;
   networkPrefix?: number;
   type?: KeyringOption$Type;
   withEllipsis?: boolean;
-  withLabel?: boolean;
   value: string;
   isSetDefaultValue?: boolean;
   setInputAddressValue?: (value: string) => void;
@@ -125,6 +122,27 @@ function dedupe (options: Option[]): Option[] {
   }, []);
 }
 
+function getTransformOptions (options: AccountOption[]): DropdownTransformOptionType[] {
+  return options.map((t) => ({ label: t.text, value: t.value || '' }));
+}
+
+function transformGrOptions (options: AccountOption[]) {
+  const transformGrOptions: DropdownTransformGroupOptionType[] = [];
+  const transformOptions = getTransformOptions(options);
+  let index = 0;
+
+  for (let i = 0; i < transformOptions.length; i++) {
+    if (!transformOptions[i].value) {
+      transformGrOptions.push({ label: transformOptions[i].label, options: [] });
+      index++;
+    } else {
+      transformGrOptions[index - 1].options.push(transformOptions[i]);
+    }
+  }
+
+  return transformGrOptions;
+}
+
 // eslint-disable-next-line no-empty-pattern
 function InputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, networkPrefix, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
   const [lastValue, setInputAddressLastValue] = useState('');
@@ -198,25 +216,37 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
     );
   }, [filter, onChange, type]);
 
-  const filterOptions = useCallback((candidate: { label: string; value: string }, input: string) => {
+  const loadOptions = useCallback((input: string, callback: (options: DropdownTransformGroupOptionType[]) => void) => {
     if (input) {
       const query = input.trim();
       const queryLower = query.toLowerCase();
-      const isMatches = !!candidate.value && ((candidate.label.toLowerCase && candidate.label.toLowerCase().includes(queryLower)) || candidate.value.toLowerCase().includes(queryLower));
+      const matches = options.filter((item) => !item.value || (item.value && (item.text.toLowerCase().includes(queryLower) || item.value.toLowerCase().includes(queryLower))));
+      const matchesWithoutHeader = matches.filter((match) => match.value !== null);
 
-      if (!isMatches) {
+      if (!matchesWithoutHeader.length) {
         const accountId = transformToAccountId(query);
 
         if (accountId) {
           saveRecentAccountId(accountId.toString()).then((res) => {
-            console.log('res', res);
+            matches.push({
+              key: res.option.key,
+              text: res.option.name,
+              value: res.option.value,
+              name: res.option.name
+            });
+            // eslint-disable-next-line node/no-callback-literal
+            callback(transformGrOptions(matches));
           }).catch(console.error);
+        } else {
+          callback(transformGrOptions(matchesWithoutHeader));
         }
+      } else {
+        callback(transformGrOptions(matches));
       }
+    } else {
+      transformGrOptions(options);
     }
-
-    return true;
-  }, []);
+  }, [options]);
 
   // @ts-ignore
   const formatOptionLabel = useCallback((label: string, value: string) => {
@@ -233,11 +263,12 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
     <div className={className}>
       <Dropdown
         className='input-address__dropdown'
+        defaultOptions={transformGrOptions(options)}
         defaultValue={defaultValue}
-        filterOptions={filterOptions}
         getFormatOptLabel={formatOptionLabel}
         isDisabled={isDisabled}
         isSetDefaultValue={isSetDefaultValue}
+        loadOptions={loadOptions}
         onChange={onChangeData}
         options={actualOptions}
         reference={inputAddressRef}
@@ -260,7 +291,7 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
 export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
   position: relative;
 
-  > label, .labelExtra {
+  > label {
     position: absolute;
   }
 

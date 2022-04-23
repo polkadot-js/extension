@@ -23,10 +23,9 @@ interface Props extends ThemeProps {
   fee: string | null;
   balanceFormat: [number, string];
   onChangeResult: (txResult: TransferResultType) => void;
-  onChangeShowModal: (isShowTxModal: boolean) => void;
 }
 
-function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeResult, onChangeShowModal, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -46,15 +45,22 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
       makeTransfer({
         ...requestPayload,
         password
-      }, (a) => {
-        if (a.step === TransferStep.SUCCESS.valueOf()) {
-          onChangeResult({ isShowTxResult: true, isTxSuccess: a.step === TransferStep.SUCCESS.valueOf(), extrinsicHash: a.extrinsicHash });
-          onChangeShowModal(false);
+      }, (rs) => {
+        if (rs.step === TransferStep.SUCCESS.valueOf()) {
+          onChangeResult({
+            isShowTxResult: true,
+            isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+            extrinsicHash: rs.extrinsicHash
+          });
         }
 
-        if (a.step === TransferStep.ERROR.valueOf()) {
-          onChangeResult({ isShowTxResult: true, isTxSuccess: a.step === TransferStep.SUCCESS.valueOf(), extrinsicHash: a.extrinsicHash, txError: a.errors });
-          onChangeShowModal(false);
+        if (rs.step === TransferStep.ERROR.valueOf()) {
+          onChangeResult({
+            isShowTxResult: true,
+            isTxSuccess: rs.step === TransferStep.SUCCESS.valueOf(),
+            extrinsicHash: rs.extrinsicHash,
+            txError: rs.errors
+          });
         }
       }).then((errors) => {
         const errorMessage = errors.map((err) => err.message);
@@ -72,7 +78,7 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
         .catch((e) => console.log('There is problem when makeTransfer', e));
     },
     [
-      password, onChangeResult, onChangeShowModal,
+      password, onChangeResult,
       requestPayload.networkKey,
       requestPayload.from,
       requestPayload.to,

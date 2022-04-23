@@ -252,6 +252,11 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     });
   }, []);
 
+  const _onChangeResult = useCallback((txResult: TransferResultType) => {
+    setTxResult(txResult);
+    setShowTxModal(false);
+  }, []);
+
   return (
     <>
       {!isShowTxResult
@@ -403,8 +408,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
           balanceFormat={balanceFormat}
           fee={fee}
           onCancel={_onCancelTx}
-          onChangeResult={setTxResult}
-          onChangeShowModal={setShowTxModal}
+          onChangeResult={_onChangeResult}
           requestPayload={{
             networkKey: selectedNetworkKey,
             from: senderId,

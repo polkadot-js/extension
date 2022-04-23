@@ -52,7 +52,7 @@ describe('Derive', () => {
         <ActionContext.Provider value={onActionStub}>
           <AccountContext.Provider
             value={{
-              accounts: accounts,
+              accounts,
               hierarchy: buildHierarchy(accounts)
             }}
           >

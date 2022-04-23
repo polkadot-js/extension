@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useRef, useState } from 'react';
-import Select from 'react-select';
+import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
 
 import { Label, Theme } from '@polkadot/extension-koni-ui/components';
@@ -86,10 +86,8 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   const handleChange = useCallback(
-    ({ value }): void => {
-      if (typeof value === 'string') {
-        value = value.trim();
-      }
+    (newValue: SingleValue<{ label: string; value: string; }>, actionMeta: ActionMeta<{ label: string; value: string; }>): void => {
+      const value = newValue?.value.trim() || '';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       onChange && onChange(value);
@@ -98,8 +96,8 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
     }, [onChange]
   );
 
-  const formatOptionLabel = useCallback(({ label, networkKey, value }) => {
-    return getFormatOptLabel && getFormatOptLabel(label as string, value as string, networkKey as string);
+  const formatOptionLabel = useCallback(({ label, networkKey, value }: {label: string, value: string, networkKey: string}) => {
+    return getFormatOptLabel && getFormatOptLabel(label, value, networkKey);
   }, [getFormatOptLabel]);
 
   const filterOption = useCallback((candidate: { label: string; value: string }, input: string) => {
@@ -217,6 +215,8 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     height: 40px;
     min-width: 40px;
     border-radius: 50%;
+    background: ${theme.identiconBackground};
+    border: 2px solid transparent;
   }
 
   .label-wrapper {

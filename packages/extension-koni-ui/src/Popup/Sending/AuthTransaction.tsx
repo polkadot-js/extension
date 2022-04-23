@@ -183,6 +183,10 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     overflow: hidden;
   }
 
+  .auth-transaction-error {
+    margin-top: 10px
+  }
+
   .auth-transaction-header {
     display: flex;
     align-items: center;

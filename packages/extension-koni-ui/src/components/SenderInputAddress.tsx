@@ -159,4 +159,10 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     width: 72px;
     height: 72px;
   }
+
+  .sender-input-address {
+    .input-address-dropdown__input {
+      width: 180px !important;
+    }
+  }
 `);

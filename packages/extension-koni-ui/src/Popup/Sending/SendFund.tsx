@@ -298,24 +298,6 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
               onchange={setRecipientId}
             />
 
-            {!!recipientPhish && (
-              <Warning
-                className={'send-fund-warning'}
-                isDanger
-              >
-                {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
-              </Warning>
-            )}
-
-            {isSameAddress && (
-              <Warning
-                className={'send-fund-warning'}
-                isDanger
-              >
-                {t<string>('The recipient address is the same as the sender address.')}
-              </Warning>
-            )}
-
             {canToggleAll && isAll
               ? (
                 <InputBalance
@@ -345,7 +327,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             }
 
             {canToggleAll && (
-              <div className={'kn-field -toggle -toggle-2'}>
+              <div className={'send-fund-toggle'}>
                 <Toggle
                   className='typeToggle'
                   label={t<string>('Transfer the full account balance, reap the sender')}
@@ -353,6 +335,24 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
                   value={isAll}
                 />
               </div>
+            )}
+
+            {!!recipientPhish && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The recipient is associated with a known phishing site on {{url}}', { replace: { url: recipientPhish } })}
+              </Warning>
+            )}
+
+            {isSameAddress && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The recipient address is the same as the sender address.')}
+              </Warning>
             )}
 
             {isNotSameAddressAndTokenType && (
@@ -471,6 +471,10 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   }
 
   .send-fund-balance-item {
+    margin-bottom: 10px;
+  }
+
+  .send-fund-toggle {
     margin-bottom: 10px;
   }
 

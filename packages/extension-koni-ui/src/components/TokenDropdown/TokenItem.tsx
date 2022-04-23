@@ -44,9 +44,11 @@ export default React.memo(styled(TokenItem)(({ theme }: ThemeProps) => `
   }
 
   .token-item-logo {
-    height: 28px;
-    min-width: 28px;
+    height: 30px;
+    min-width: 30px;
     border-radius: 50%;
     margin-right: 6px;
+    border: 2px solid transparent;
+    background: ${theme.identiconBackground};
   }
 `));

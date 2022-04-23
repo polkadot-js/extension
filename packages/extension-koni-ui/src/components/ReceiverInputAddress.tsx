@@ -43,7 +43,7 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', network
     <div className={className}>
       <InputAddress
         autoPrefill={false}
-        className={'send-fund-item'}
+        className={'receive-input-address'}
         help={t<string>('Select a contact or paste the address you want to send funds to.')}
         isSetDefaultValue={false}
         label={t<string>('Send to address')}
@@ -82,6 +82,12 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
     right: 16px;
     top: 32px;
     pointer-events: none;
+  }
+
+  .receive-input-address {
+    .input-address-dropdown__input {
+      width: 220px !important;
+    }
   }
 
   .receiver-input-address__balance {

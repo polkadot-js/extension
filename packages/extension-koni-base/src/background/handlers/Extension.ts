@@ -1326,76 +1326,88 @@ export default class KoniExtension extends Extension {
         ]); // check connection
 
         if (res !== null) { // test connection ok
+          // get all necessary information
           const api = res as ApiProps;
           const genesisHash = api.api.genesisHash?.toHex();
+          const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
+          let chainType: ChainType;
+          let chain = '';
+          let ethChainId = -1;
 
-          const { conflictChain: genesisConflictChain, conflictKey: genesisConflictKey, error: genesisError } = this.validateGenesisHash(genesisHash);
+          if (isEthereum) {
+            const web3 = initWeb3Api(provider);
 
-          if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
-            if (existedNetwork && existedNetwork.genesisHash !== genesisHash) {
+            const [_chainType, _chain, _ethChainId] = await Promise.all([
+              api.api.rpc.system.chainType(),
+              api.api.rpc.system.chain(),
+              web3.eth.getChainId()
+            ]);
+
+            chainType = _chainType;
+            chain = _chain.toString();
+            ethChainId = _ethChainId;
+
+            if (existedNetwork && existedNetwork.ethChainId && existedNetwork.ethChainId !== ethChainId) {
               result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
 
               return result;
             }
-
-            const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
-            let chainType: ChainType;
-            let chain = '';
-            let ethChainId = -1;
-
-            if (isEthereum) {
-              const web3 = initWeb3Api(provider);
-
-              const [_chainType, _chain, _ethChainId] = await Promise.all([
-                api.api.rpc.system.chainType(),
-                api.api.rpc.system.chain(),
-                web3.eth.getChainId()
-              ]);
-
-              chainType = _chainType;
-              chain = _chain.toString();
-              ethChainId = _ethChainId;
-
-              if (existedNetwork && existedNetwork.ethChainId && existedNetwork.ethChainId !== ethChainId) {
-                result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
-
-                return result;
-              }
-            } else {
-              const [_chainType, _chain] = await Promise.all([
-                api.api.rpc.system.chainType(),
-                api.api.rpc.system.chain()
-              ]);
-
-              chainType = _chainType;
-              chain = _chain.toString();
-            }
-
-            networkKey = 'custom_' + genesisHash.toString();
-
-            let parsedChainType: NetWorkGroup = 'UNKNOWN';
-
-            if (chainType) {
-              if (chainType.type === 'Development') {
-                parsedChainType = 'TEST_NET';
-              } else if (chainType.type === 'Live') {
-                parsedChainType = 'MAIN_NET';
-              }
-            }
-
-            result = {
-              success: true,
-              key: networkKey,
-              genesisHash,
-              ss58Prefix,
-              networkGroup: [parsedChainType],
-              chain: chain ? chain.toString() : '',
-              ethChainId
-            };
           } else {
-            result.error = genesisError;
-            result.conflictKey = genesisConflictKey;
-            result.conflictChain = genesisConflictChain;
+            const [_chainType, _chain] = await Promise.all([
+              api.api.rpc.system.chainType(),
+              api.api.rpc.system.chain()
+            ]);
+
+            chainType = _chainType;
+            chain = _chain.toString();
+          }
+
+          networkKey = 'custom_' + genesisHash.toString();
+          let parsedChainType: NetWorkGroup = 'UNKNOWN';
+
+          if (chainType) {
+            if (chainType.type === 'Development') {
+              parsedChainType = 'TEST_NET';
+            } else if (chainType.type === 'Live') {
+              parsedChainType = 'MAIN_NET';
+            }
+          }
+
+          // handle result
+          if (existedNetwork) {
+            if (existedNetwork.genesisHash !== genesisHash) {
+              result.error = NETWORK_ERROR.PROVIDER_NOT_SAME_NETWORK;
+
+              return result;
+            } else { // no need to validate genesisHash
+              result = {
+                success: true,
+                key: networkKey,
+                genesisHash,
+                ss58Prefix,
+                networkGroup: [parsedChainType],
+                chain: chain ? chain.toString() : '',
+                ethChainId
+              };
+            }
+          } else {
+            const { conflictChain: genesisConflictChain, conflictKey: genesisConflictKey, error: genesisError } = this.validateGenesisHash(genesisHash);
+
+            if (genesisError === NETWORK_ERROR.NONE) { // check genesisHash ok
+              result = {
+                success: true,
+                key: networkKey,
+                genesisHash,
+                ss58Prefix,
+                networkGroup: [parsedChainType],
+                chain: chain ? chain.toString() : '',
+                ethChainId
+              };
+            } else {
+              result.error = genesisError;
+              result.conflictKey = genesisConflictKey;
+              result.conflictChain = genesisConflictChain;
+            }
           }
 
           await api.api.disconnect();

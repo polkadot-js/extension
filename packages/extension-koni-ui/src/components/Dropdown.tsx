@@ -90,6 +90,7 @@ function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options
               menuPortalTarget={document.body}
               menuPosition='fixed'
               onChange={handleChange}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onCreateOption={onCreate}
               options={transformOptions}
               placeholder=''

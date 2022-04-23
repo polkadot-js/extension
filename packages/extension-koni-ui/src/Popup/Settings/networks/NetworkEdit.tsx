@@ -84,11 +84,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [isEthereum, setIsEthereum] = useState(data.isEthereum || false);
   const [showMore, setShowMore] = useState(false);
 
-  const [providerKey, setProviderKey] = useState(data.currentProvider);
-  const [allProviders, setAllProviders] = useState(getAllProviders(data));
-
-  console.log(networkInfo);
-
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
     () => {
@@ -157,30 +152,32 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const onSelectProvider = useCallback((val: any) => {
     const providerKey = val as string;
 
-    if (!getAllProviderKeys(data).includes(providerKey)) {
-      if (data.customProviders) {
-        const currentCustomProviders = data.customProviders;
-        const providerLength = Object.values(data.customProviders).length;
+    if (!getAllProviderKeys(networkInfo).includes(providerKey)) {
+      if (networkInfo.customProviders) {
+        const currentCustomProviders = networkInfo.customProviders;
+        const providerLength = Object.values(networkInfo.customProviders).length;
 
         currentCustomProviders[`custom_${providerLength}`] = providerKey;
 
         setNetworkInfo({
           ...networkInfo,
+          currentProvider: `custom_${providerLength}`,
           customProviders: currentCustomProviders
         });
       } else {
-        console.log('create custom providers')
-        // TODO: set providerKey
-        // validate provider
         setNetworkInfo({
           ...networkInfo,
+          currentProvider: 'custom',
           customProviders: { custom: providerKey }
         });
       }
     } else {
-      setProviderKey(providerKey);
+      setNetworkInfo({
+        ...networkInfo,
+        currentProvider: providerKey
+      });
     }
-  }, [data, networkInfo]);
+  }, [networkInfo]);
 
   const toggleEthereum = useCallback((val: boolean) => {
     setIsEthereum(val);
@@ -300,8 +297,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
                 allowAdd={true}
                 label={'Provider URL (*)'}
                 onChange={onSelectProvider}
-                options={allProviders}
-                value={providerKey}
+                options={getAllProviders(networkInfo)}
+                value={networkInfo.currentProvider}
               />
             </div>
         }

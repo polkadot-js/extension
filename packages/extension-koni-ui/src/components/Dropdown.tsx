@@ -73,7 +73,7 @@ function Dropdown ({ allowAdd, className, label, onChange, options, value }: Pro
               options={transformOptions}
               placeholder=''
               styles={customStyles}
-              value={transformOptions.filter((obj: { value: string }) => obj.value === selectedValue)}
+              value={transformOptions.filter((obj: { value: string }) => obj.value === value)}
             />
             : <Select
               className='dropdown-wrapper'

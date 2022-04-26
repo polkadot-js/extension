@@ -9,9 +9,8 @@ import type { HexString } from '@polkadot/util/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
-import { decodeAddress } from '@polkadot/util-crypto';
 
-import { AccountContext, ActionContext, Address, VerticalSpace, Warning } from '../../../components';
+import { ActionContext, Address, VerticalSpace, Warning } from '../../../components';
 import { useTranslation } from '../../../components/translate';
 import { approveSignSignature } from '../../../messaging';
 import Bytes from '../Bytes';
@@ -48,7 +47,6 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
-  const { accounts } = useContext(AccountContext);
   const { t } = useTranslation();
 
   useEffect((): void => {
@@ -128,6 +126,7 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
           error={error}
           isExternal={isExternal}
           isFirst={isFirst}
+          isSignable
           setError={setError}
           signId={signId}
         />
@@ -135,7 +134,6 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
     );
   } else if (hexBytes !== null) {
     const { address, data } = request.payload as SignerPayloadRaw;
-    const account = accounts.find((account) => decodeAddress(account.address).toString() === decodeAddress(address).toString());
 
     return (
       <>
@@ -145,33 +143,29 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
             isExternal={isExternal}
           />
         </div>
-        {isExternal && !isHardware && account?.genesisHash
-          ? (
-            <Qr
-              address={address}
-              cmd={CMD_SIGN_MESSAGE}
-              genesisHash={account.genesisHash}
-              onSignature={_onSignature}
-              payload={data}
-            />
-          )
-          : (
-            <Bytes
-              bytes={data}
-              url={url}
-            />
-          )
-        }
+        <Bytes
+          bytes={data}
+          url={url}
+        />
         <VerticalSpace />
-        {isHardware && <>
-          <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
-          <VerticalSpace />
-        </>}
+        {isHardware && (
+          <>
+            <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
+            <VerticalSpace />
+          </>
+        )}
+        {isExternal && (
+          <>
+            <Warning>{t('Message signing is not supported for QR wallets.')}</Warning>
+            <VerticalSpace />
+          </>
+        )}
         <SignArea
           buttonText={buttonText}
           error={error}
           isExternal={isExternal}
           isFirst={isFirst}
+          isSignable={!isHardware && !isExternal}
           setError={setError}
           signId={signId}
         />

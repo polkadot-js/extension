@@ -13,14 +13,16 @@ interface Props {
   value: boolean;
   uncheckedLabel: string;
   checkedLabel: string;
+  isDisable?: boolean;
 }
 
-function HorizontalLabelToggle ({ checkedLabel, className, toggleFunc, uncheckedLabel, value }: Props): React.ReactElement<Props> {
+function HorizontalLabelToggle ({ checkedLabel, className, isDisable, toggleFunc, uncheckedLabel, value }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <span className={!value ? 'horizontal-label' : 'horizontal-label unselected-label'}>{uncheckedLabel}</span>
       <Toggle
         className='horizontal-label-toggle'
+        isDisabled={isDisable}
         onChange={toggleFunc}
         value={value}
       />

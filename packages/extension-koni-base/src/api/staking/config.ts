@@ -8,6 +8,7 @@ export enum SUPPORTED_STAKING_CHAIN_NAMES {
   hydradx = 'hydradx'
 }
 
+// TODO: add staking endpoint to networkMap
 export const SUBSQUID_ENDPOINTS: Record<string, string> = {
   [SUPPORTED_STAKING_CHAIN_NAMES.kusama]: 'https://app.gc.subsquid.io/beta/kusama-explorer/v1/graphql',
   [SUPPORTED_STAKING_CHAIN_NAMES.polkadot]: 'https://app.gc.subsquid.io/beta/polkadot-explorer/v1/graphql',

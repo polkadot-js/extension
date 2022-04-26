@@ -7,7 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NETWORK_STATUS, NetWorkGroup, NetworkJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateNetworkRequest, ValidateNetworkResponse } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateNetworkRequest, ValidateNetworkResponse } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -737,41 +737,6 @@ export default class KoniExtension extends Extension {
     return this.getStaking();
   }
 
-  // todo: add custom network metadata to here
-  private networkMetadataList (): NetWorkMetadataDef[] {
-    const result: NetWorkMetadataDef[] = [];
-    const networkMap = state.getNetworkMap();
-
-    Object.keys(networkMap).forEach((networkKey) => {
-      if (networkMap[networkKey].active) {
-        const { active, apiStatus, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = networkMap[networkKey];
-
-        let isAvailable = true;
-
-        // todo: add more logic in further update
-        if (!genesisHash || genesisHash.toLowerCase() === 'unknown') {
-          isAvailable = false;
-        }
-
-        result.push({
-          chain,
-          networkKey,
-          genesisHash,
-          icon: isEthereum ? 'ethereum' : (icon || 'polkadot'),
-          ss58Format,
-          groups,
-          isEthereum: !!isEthereum,
-          paraId,
-          isAvailable,
-          active,
-          apiStatus: apiStatus || NETWORK_STATUS.DISCONNECTED
-        });
-      }
-    });
-
-    return result;
-  }
-
   private apiInit ({ networkKey }: RequestApi): ApiInitStatus {
     const { apisMap } = bWindow.pdotApi;
 
@@ -1272,16 +1237,35 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private disableNetworkMap (networkKey: string): boolean {
+  private disableNetworkMap (networkKey: string): DisableNetworkResponse {
     const currentNetworkMap = this.getNetworkMap();
 
     if (!(networkKey in currentNetworkMap)) {
-      return false;
+      return {
+        success: false
+      };
     }
 
-    state.disableNetworkMap(networkKey);
+    let activeNetworkCount = 0;
 
-    return true;
+    Object.values(currentNetworkMap).forEach((network) => {
+      if (network.active) {
+        activeNetworkCount += 1;
+      }
+    });
+
+    if (activeNetworkCount > 2) { // at least 1 for substrate chain, 1 for eth chain
+      state.disableNetworkMap(networkKey);
+
+      return {
+        success: true
+      };
+    }
+
+    return {
+      success: false,
+      activeNetworkCount
+    };
   }
 
   private enableNetworkMap (networkKey: string): boolean {
@@ -1485,8 +1469,6 @@ export default class KoniExtension extends Extension {
         return this.jsonRestoreV2(request as RequestJsonRestore);
       case 'pri(json.batchRestoreV2)':
         return this.batchRestoreV2(request as RequestBatchRestore);
-      case 'pri(networkMetadata.list)':
-        return this.networkMetadataList();
       case 'pri(chainRegistry.getSubscription)':
         return this.subscribeChainRegistry(id, port);
       case 'pri(nft.getNft)':

@@ -54,6 +54,7 @@ export class KoniSubcription {
 
     state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
 
+    // TODO: add service info
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;

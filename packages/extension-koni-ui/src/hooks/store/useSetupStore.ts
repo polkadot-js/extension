@@ -5,7 +5,6 @@ import useSetupBalance from '@polkadot/extension-koni-ui/hooks/store/useSetupBal
 import useSetupChainRegistry from '@polkadot/extension-koni-ui/hooks/store/useSetupChainRegistry';
 import useSetupCrowdloan from '@polkadot/extension-koni-ui/hooks/store/useSetupCrowdloan';
 import useSetupNetworkMap from '@polkadot/extension-koni-ui/hooks/store/useSetupNetworkMap';
-import useSetupNetworkMetadata from '@polkadot/extension-koni-ui/hooks/store/useSetupNetworkMetadata';
 import useSetupNft from '@polkadot/extension-koni-ui/hooks/store/useSetupNft';
 import useSetupNftCollection from '@polkadot/extension-koni-ui/hooks/store/useSetupNftCollection';
 import useSetupNftTransfer from '@polkadot/extension-koni-ui/hooks/store/useSetupNftTransfer';
@@ -15,7 +14,7 @@ import useSetupStakingReward from '@polkadot/extension-koni-ui/hooks/store/useSe
 import useSetupTransactionHistory from '@polkadot/extension-koni-ui/hooks/store/useSetupTransactionHistory';
 
 export default function useSetupStore (): void {
-  useSetupNetworkMetadata();
+  useSetupNetworkMap();
   useSetupChainRegistry();
   useSetupPrice();
   useSetupBalance();
@@ -26,5 +25,4 @@ export default function useSetupStore (): void {
   useSetupStakingReward();
   useSetupTransactionHistory();
   useSetupNftTransfer();
-  useSetupNetworkMap();
 }

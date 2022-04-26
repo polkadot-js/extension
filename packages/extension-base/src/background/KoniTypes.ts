@@ -262,7 +262,6 @@ export interface NetworkJson {
   currentProvider: string, // Current provider key
   currentProviderMode: 'http' | 'ws' // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
   customProviders?: Record<string, string> // Custom provider map, provider name same with provider map
-  nftProvider?: string // Should be same with provider if is not defined
 
   // Metadata get after connect to provider
   genesisHash: string; // identifier for network
@@ -573,10 +572,15 @@ export interface ApiMap {
   web3: Record<string, Web3>;
 }
 
+export interface DisableNetworkResponse {
+  success: boolean,
+  activeNetworkCount?: number
+}
+
 export interface KoniRequestSignatures {
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(networkMap.enableOne)': [string, boolean];
-  'pri(networkMap.disableOne)': [string, boolean];
+  'pri(networkMap.disableOne)': [string, DisableNetworkResponse];
   'pri(networkMap.removeOne)': [string, boolean];
   'pri(networkMap.upsert)': [NetworkJson, boolean];
   'pri(networkMap.getNetworkMap)': [null, Record<string, NetworkJson>];

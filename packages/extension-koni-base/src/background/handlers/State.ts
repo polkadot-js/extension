@@ -813,6 +813,14 @@ export default class KoniState extends State {
 
       this.networkMap[data.key].chain = data.chain;
 
+      if (data.crowdloanUrl) {
+        this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
+      }
+
+      if (data.coinGeckoKey) {
+        this.networkMap[data.key].coinGeckoKey = data.coinGeckoKey;
+      }
+
       if (data.paraId) {
         this.networkMap[data.key].paraId = data.paraId;
       }
@@ -845,7 +853,7 @@ export default class KoniState extends State {
 
   public removeNetworkMap (networkKey: string) {
     this.disableNetworkMap(networkKey);
-
+    // TODO: disconnect api
     delete this.networkMap[networkKey];
 
     this.networkMapSubject.next(this.networkMap);
@@ -857,6 +865,7 @@ export default class KoniState extends State {
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       delete this.apiMap.web3[networkKey];
     } else {
+      // TODO: check disconnect and deletion
       this.apiMap.dotSama[networkKey].api.disconnect()
         .then((r) => console.log('disconnected from ', networkKey, r))
         .catch(console.error);
@@ -864,6 +873,7 @@ export default class KoniState extends State {
     }
 
     this.networkMap[networkKey].active = false;
+    this.networkMap[networkKey].apiStatus = NETWORK_STATUS.DISCONNECTED;
     this.networkMapSubject.next(this.networkMap);
     this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
@@ -903,6 +913,8 @@ export default class KoniState extends State {
   }
 
   public updateServiceInfo () {
+    // TODO: check difference of apiMap & networkMap
+    // TODO: check provider, networkKey
     this.serviceInfoSubject.next({
       apiMap: this.apiMap,
       networkMap: this.networkMap

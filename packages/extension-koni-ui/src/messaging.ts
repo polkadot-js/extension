@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetworkJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError, ValidateNetworkResponse } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetworkJson, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError, ValidateNetworkResponse } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -343,10 +343,6 @@ export async function subscribeChainRegistry (callback: (map: Record<string, Cha
   return sendMessage('pri(chainRegistry.getSubscription)', null, callback);
 }
 
-export async function getAllNetworkMetadata (): Promise<NetWorkMetadataDef[]> {
-  return sendMessage('pri(networkMetadata.list)');
-}
-
 export async function subscribeHistory (callback: (historyMap: Record<string, TransactionHistoryItemType[]>) => void): Promise<Record<string, TransactionHistoryItemType[]>> {
   return sendMessage('pri(transaction.history.getSubscription)', null, callback);
 }
@@ -437,7 +433,7 @@ export async function removeNetworkMap (networkKey: string): Promise<boolean> {
   return sendMessage('pri(networkMap.removeOne)', networkKey);
 }
 
-export async function disableNetworkMap (networkKey: string): Promise<boolean> {
+export async function disableNetworkMap (networkKey: string): Promise<DisableNetworkResponse> {
   return sendMessage('pri(networkMap.disableOne)', networkKey);
 }
 

@@ -161,6 +161,10 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     }
   }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider]);
 
+  useEffect(() => {
+    setNeedValidate(true);
+  }, [isEthereum]);
+
   const handleCreateProvider = useCallback(async (newProvider: string) => { // handle add provider for network edit
     if (!isValidProvider(newProvider)) {
       show('Provider URL requires http/https or wss prefix');

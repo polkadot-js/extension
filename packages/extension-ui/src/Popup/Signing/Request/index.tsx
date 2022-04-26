@@ -148,15 +148,13 @@ export default function Request ({ account: { accountIndex, addressOffset, isExt
           url={url}
         />
         <VerticalSpace />
-        {isHardware && (
+        {(isHardware || isExternal) && (
           <>
-            <Warning>{t('Message signing is not supported for hardware wallets.')}</Warning>
-            <VerticalSpace />
-          </>
-        )}
-        {isExternal && (
-          <>
-            <Warning>{t('Message signing is not supported for QR wallets.')}</Warning>
+            <Warning>{
+              isHardware
+                ? t('Raw data signing is not supported for hardware wallets.')
+                : t('Raw data signing is not supported for QR wallets.')
+            }</Warning>
             <VerticalSpace />
           </>
         )}

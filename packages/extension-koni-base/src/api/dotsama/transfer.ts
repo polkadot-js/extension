@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseTransfer, TokenInfo, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 // import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
@@ -42,26 +42,35 @@ export async function checkReferenceCount (networkKey: string, address: string):
     : false;
 }
 
-export async function checkSupportTransfer (networkKey: string, token: string): Promise<boolean> {
+export async function checkSupportTransfer (networkKey: string, token: string): Promise<SupportTransferResponse> {
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
+  const result: SupportTransferResponse = {
+    supportTransfer: false,
+    supportTransferAll: false
+  };
 
   if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported)) {
-    return false;
+    return result;
   }
 
   const tokenInfo = await getTokenInfo(networkKey, api, token);
 
-  if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
-    return true;
+  if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
+    result.supportTransfer = true;
+    result.supportTransferAll = false;
+  } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
-    return true;
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   }
 
-  return false;
+  return result;
 }
 
 export async function estimateFee (

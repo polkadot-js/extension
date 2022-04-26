@@ -138,7 +138,8 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   const [reference, setReference] = useState<boolean | null>(null);
   // const [isProtected, setIsProtected] = useState(false);
   const [isAll, setIsAll] = useState(false);
-  const [isTransferSupport, setTransferSupport] = useState<boolean | null>(null);
+  const [[isSupportTransfer, isSupportTransferAll], setTransferSupport] =
+    useState<[boolean, boolean] | [null, null]>([null, null]);
   // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
   const [fee, setFee] = useState<null | string>(null);
@@ -154,9 +155,9 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
   const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, senderFreeBalance, existentialDeposit);
-  const canToggleAll = !!maxTransfer && !reference && !!recipientId;
+  const canToggleAll = !!isSupportTransferAll && !!maxTransfer && !reference && !!recipientId;
   const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
-  const canMakeTransfer = isTransferSupport &&
+  const canMakeTransfer = isSupportTransfer &&
     !recipientPhish &&
     !!recipientId &&
     !isSameAddress &&
@@ -243,13 +244,13 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
     transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).then((res) => {
       if (isSync) {
-        setTransferSupport(res);
+        setTransferSupport([res.supportTransfer, res.supportTransferAll]);
       }
     }).catch((e) => console.log(e));
 
     return () => {
       isSync = false;
-      setTransferSupport(null);
+      setTransferSupport([null, null]);
     };
   }, [selectedNetworkKey, selectedToken]);
 
@@ -365,7 +366,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
               </Warning>
             )}
 
-            {isTransferSupport === false && (
+            {isSupportTransfer === false && (
               <Warning
                 className={'send-fund-warning'}
                 isDanger

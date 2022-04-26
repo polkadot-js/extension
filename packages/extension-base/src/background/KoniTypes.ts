@@ -501,6 +501,11 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
+export interface SupportTransferResponse {
+  supportTransfer: boolean;
+  supportTransferAll: boolean;
+}
+
 export interface RequestFreeBalance {
   address: string,
   networkKey: string,
@@ -576,7 +581,7 @@ export interface KoniRequestSignatures {
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
   'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
-  'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, boolean];
+  'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
   'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
   'pri(subscription.cancel)': [string, boolean];
   'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];

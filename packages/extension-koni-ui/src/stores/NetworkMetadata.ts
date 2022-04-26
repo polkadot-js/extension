@@ -18,7 +18,7 @@ function getNetworkMetadataMap (networkMetaDataItems: NetWorkMetadataDef[]): Rec
 }
 
 const initialState = getNetworkMetadataMap(chains);
-
+// TODO: delete this state
 const networkMetadataSlice = createSlice({
   initialState,
   name: 'networkMetadata',

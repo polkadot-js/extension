@@ -17,7 +17,7 @@ import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
 
-import allChains from './util/chains';
+import { _getKnownHashes } from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {
@@ -167,6 +167,9 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
     return null;
   }
 
+  const chains = await getNetworkMap();
+  const parsedChains = _getKnownHashes(chains);
+
   let request = getSavedMeta(genesisHash);
 
   if (!request) {
@@ -179,7 +182,7 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   if (def) {
     return metadataExpand(def, isPartial);
   } else if (isPartial) {
-    const chain = allChains.find((chain) => chain.genesisHash === genesisHash);
+    const chain = parsedChains.find((chain) => chain.genesisHash === genesisHash);
 
     if (chain) {
       return metadataExpand({

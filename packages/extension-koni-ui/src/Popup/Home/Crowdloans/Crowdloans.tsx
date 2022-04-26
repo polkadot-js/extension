@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BigN from 'bignumber.js';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NetWorkGroup, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { CrowdloanContributeValueType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
 import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 
@@ -42,67 +43,57 @@ function getGroupDisplayName (groups: NetWorkGroup[]): string {
   return '';
 }
 
-function getCrowdloanUrl (networkKey: string) {
-  return NETWORKS[networkKey].crowdloanUrl;
-}
-
-function getItem (
-  networkKey: string,
-  contributeValueInfo: CrowdloanContributeValueType,
-  networkMetadata: NetWorkMetadataDef
-): CrowdloanItemType {
-  const groupDisplayName = getGroupDisplayName(networkMetadata.groups);
-  const { balanceValue,
-    convertedBalanceValue,
-    symbol } = contributeValueInfo.contribute;
-
-  return {
-    contribute: balanceValue,
-    contributeToUsd: convertedBalanceValue,
-    logo: getLogoByNetworkKey(networkKey),
-    networkDisplayName: networkMetadata.chain,
-    networkKey,
-    symbol,
-    groupDisplayName,
-    paraState: contributeValueInfo.paraState,
-    crowdloanUrl: getCrowdloanUrl(networkKey)
-  };
-}
-
-function getItems (
-  networkKeys: string[],
-  crowdloanContributeMap: Record<string, CrowdloanContributeValueType>,
-  networkMetadataMap: Record<string, NetWorkMetadataDef>,
-  includeZeroBalance = false): CrowdloanItemType[] {
-  const result: CrowdloanItemType[] = [];
-
-  networkKeys.forEach((n) => {
-    const networkMetadata = networkMetadataMap[n];
-
-    if (!networkMetadata) {
-      return;
-    }
-
-    const contributeValueInfo: CrowdloanContributeValueType = crowdloanContributeMap[n] ||
-      {
-        contribute: {
-          balanceValue: new BigN(0),
-          convertedBalanceValue: new BigN(0),
-          symbol: 'Unit'
-        }
-      };
-
-    if (!includeZeroBalance && !BN_ZERO.lt(new BigN(contributeValueInfo.contribute.balanceValue))) {
-      return;
-    }
-
-    result.push(getItem(n, contributeValueInfo, networkMetadata));
-  });
-
-  return result;
-}
-
 function Wrapper ({ className, crowdloanContributeMap, networkKeys, networkMetadataMap }: Props): React.ReactElement<Props> {
+  const { networkMap } = useSelector((state: RootState) => state);
+
+  const getItem = useCallback((networkKey: string, contributeValueInfo: CrowdloanContributeValueType, networkMetadata: NetWorkMetadataDef): CrowdloanItemType => {
+    const groupDisplayName = getGroupDisplayName(networkMetadata.groups);
+    const { balanceValue,
+      convertedBalanceValue,
+      symbol } = contributeValueInfo.contribute;
+
+    return {
+      contribute: balanceValue,
+      contributeToUsd: convertedBalanceValue,
+      logo: getLogoByNetworkKey(networkKey),
+      networkDisplayName: networkMetadata.chain,
+      networkKey,
+      symbol,
+      groupDisplayName,
+      paraState: contributeValueInfo.paraState,
+      crowdloanUrl: networkMap[networkKey].crowdloanUrl
+    };
+  }, [networkMap]);
+
+  const getItems = useCallback((networkKeys: string[], crowdloanContributeMap: Record<string, CrowdloanContributeValueType>, networkMetadataMap: Record<string, NetWorkMetadataDef>, includeZeroBalance = false): CrowdloanItemType[] => {
+    const result: CrowdloanItemType[] = [];
+
+    networkKeys.forEach((n) => {
+      const networkMetadata = networkMetadataMap[n];
+
+      if (!networkMetadata) {
+        return;
+      }
+
+      const contributeValueInfo: CrowdloanContributeValueType = crowdloanContributeMap[n] ||
+        {
+          contribute: {
+            balanceValue: new BigN(0),
+            convertedBalanceValue: new BigN(0),
+            symbol: 'Unit'
+          }
+        };
+
+      if (!includeZeroBalance && !BN_ZERO.lt(new BigN(contributeValueInfo.contribute.balanceValue))) {
+        return;
+      }
+
+      result.push(getItem(n, contributeValueInfo, networkMetadata));
+    });
+
+    return result;
+  }, [getItem]);
+
   const items: CrowdloanItemType[] = getItems(networkKeys, crowdloanContributeMap, networkMetadataMap);
 
   if (!items.length) {

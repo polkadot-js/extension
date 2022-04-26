@@ -1,14 +1,14 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {NETWORK_STATUS, NetworkJson, NetWorkMetadataDef} from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { NETWORK_STATUS, NetworkJson, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 
-function getKnownHashes (): NetWorkMetadataDef[] {
+function getDefaultHashes (): NetWorkMetadataDef[] {
   const result: NetWorkMetadataDef[] = [];
 
-  Object.keys(NETWORKS).forEach((networkKey) => {
-    const { chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = NETWORKS[networkKey];
+  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
+    const { active, apiStatus, chain, genesisHash, groups, icon, isEthereum, paraId, ss58Format } = PREDEFINED_NETWORKS[networkKey];
 
     let isAvailable = true;
 
@@ -27,14 +27,15 @@ function getKnownHashes (): NetWorkMetadataDef[] {
       isEthereum: !!isEthereum,
       paraId,
       isAvailable,
-      active: true
+      active,
+      apiStatus: apiStatus || NETWORK_STATUS.DISCONNECTED
     });
   });
 
   return result;
 }
 
-const knowHashes: NetWorkMetadataDef[] = getKnownHashes();
+const knowHashes: NetWorkMetadataDef[] = getDefaultHashes();
 
 const hashes = [...knowHashes];
 

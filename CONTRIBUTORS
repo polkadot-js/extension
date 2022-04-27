@@ -1,4 +1,4 @@
-     503	Jaco                          	Drop support for QR signing (#1053)
+     504	Jaco                          	Bump @polkadot/dev (#1054)
       82	Thibaut Sardan                	Add account filtering feature (#832)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

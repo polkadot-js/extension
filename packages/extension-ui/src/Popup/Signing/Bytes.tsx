@@ -3,6 +3,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import type { ThemeProps } from '../../types';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
@@ -33,18 +34,31 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
         </tr>
         <tr>
           <td className='label'>{t<string>('bytes')}</td>
-          <td className='data'>{text}</td>
+          <td className='data'><div className="pre">{text}</div></td>
         </tr>
       </tbody>
     </table>
   );
 }
 
-export default styled(Bytes)`
+export default styled(Bytes)(({ theme }: ThemeProps)=>`
   border: 0;
   display: block;
   font-size: 0.75rem;
   margin-top: 0.75rem;
+
+  .pre {
+    font-family: inherit;
+    font-size: 0.75rem;
+    margin: 0;
+    white-space: pre;
+    overflow: auto;
+    max-height: 150px;
+    border: 1px solid ${theme.boxBorderColor};
+    background: ${theme.boxBackground};
+    line-height: ${theme.boxLineHeight};
+    padding: 5px;
+  }
 
   td.data {
     max-width: 0;
@@ -53,12 +67,6 @@ export default styled(Bytes)`
     text-overflow: ellipsis;
     vertical-align: middle;
     width: 100%;
-
-    pre {
-      font-family: inherit;
-      font-size: 0.75rem;
-      margin: 0;
-    }
   }
 
   td.label {
@@ -68,4 +76,4 @@ export default styled(Bytes)`
     vertical-align: middle;
     white-space: nowrap;
   }
-`;
+`);

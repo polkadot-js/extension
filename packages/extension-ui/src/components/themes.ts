@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const darkTheme = {
-  accountBackground: '#1A1B20',
   accountDotsIconColor: '#8E8E8E',
   addAccountImageBackground: '#1A1B20',
   backButtonBackground: '#3A3B41',
@@ -12,6 +11,8 @@ const darkTheme = {
   bodyColor: '#20222A',
   borderRadius: '4px',
   boxBorderColor: '#303030',
+  boxBackground: '#1A1B20',
+  boxLineHeight: '1rem',
   boxMargin: '0.75rem 0',
   boxPadding: '0 0.25rem',
   boxShadow: 'rgba(0, 0, 0, 0.86)',
@@ -50,13 +51,13 @@ export declare type Theme = typeof darkTheme;
 
 const lightTheme: Theme = {
   ...darkTheme,
-  accountBackground: '#FFFFFF',
   addAccountImageBackground: '#FFF',
   backButtonBackground: '#D7D7D7',
   backButtonBackgroundHover: '#d7d7d7ad',
   backButtonTextColor: '#454545',
   background: '#FAFAFA',
   bodyColor: '#FFFFFF',
+  boxBackground: '#FFFFFF',
   boxBorderColor: '#DADFEA',
   boxShadow: 'rgba(0, 0, 0, 0.3)',
   buttonBackgroundDanger: '#DC2222',

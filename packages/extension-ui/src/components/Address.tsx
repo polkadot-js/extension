@@ -306,7 +306,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 }
 
 export default styled(Address)(({ theme }: ThemeProps) => `
-  background: ${theme.accountBackground};
+  background: ${theme.boxBackground};
   border: 1px solid ${theme.boxBorderColor};
   box-sizing: border-box;
   border-radius: 4px;

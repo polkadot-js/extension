@@ -6,9 +6,18 @@ import { Subject } from 'rxjs';
 import { NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
+import { recoverWeb3Api, web3Map } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import {
+  CRON_AUTO_RECOVER_DOTSAMA_INTERVAL,
+  CRON_AUTO_RECOVER_WEB3_INTERVAL,
+  CRON_REFRESH_HISTORY_INTERVAL,
+  CRON_REFRESH_NFT_INTERVAL,
+  CRON_REFRESH_PRICE_INTERVAL,
+  CRON_REFRESH_STAKING_REWARD_INTERVAL,
+  DOTSAMA_MAX_CONTINUE_RETRY
+} from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -56,6 +65,7 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+    this.addCron('recoverWeb3', this.recoverWeb3Api, CRON_AUTO_RECOVER_WEB3_INTERVAL, false);
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
@@ -93,6 +103,18 @@ export class KoniCron {
 
       this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
     });
+  }
+
+  recoverWeb3Api () {
+    console.log('recover web3 in progress');
+
+    for (const [key, web3] of Object.entries(web3Map)) {
+      web3.eth.net.isListening()
+        .catch(() => {
+          console.log('recovered web3 for', key);
+          recoverWeb3Api(key);
+        });
+    }
   }
 
   refreshPrice () {

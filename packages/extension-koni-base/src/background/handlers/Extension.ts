@@ -1087,8 +1087,6 @@ export default class KoniExtension extends Extension {
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       const feeString = estimatedFee.toString() + ' ' + NETWORKS[networkKey].nativeToken;
 
-      console.log('web3 transfer fee', feeString);
-
       return {
         tx: rawTransaction,
         estimatedFee: feeString

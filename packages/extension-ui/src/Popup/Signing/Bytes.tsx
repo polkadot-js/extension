@@ -67,6 +67,7 @@ export default styled(Bytes)(({ theme }: ThemeProps)=>`
         white-space: pre;
         overflow: auto;
         max-height: calc(100vh - 480px);
+        min-height: ${theme.boxLineHeight};
         border: 1px solid ${theme.boxBorderColor};
         background: ${theme.boxBackground};
         line-height: ${theme.boxLineHeight};

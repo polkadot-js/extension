@@ -7,13 +7,7 @@ import Web3 from 'web3';
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS, { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { CF_IPFS_GATEWAY, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
-import {
-  ASTAR_SUPPORTED_NFT_CONTRACTS,
-  ContractInfo,
-  MOONBASE_SUPPORTED_NFT_CONTRACTS,
-  MOONBEAM_SUPPORTED_NFT_CONTRACTS,
-  MOONRIVER_SUPPORTED_NFT_CONTRACTS
-} from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
+import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
@@ -33,8 +27,6 @@ export class Web3NftApi extends BaseNftApi {
       this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
     } else if (chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
       this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
-    } else {
-      this.targetContracts = MOONBASE_SUPPORTED_NFT_CONTRACTS;
     }
   }
 

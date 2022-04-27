@@ -286,10 +286,11 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     chain: 'Moonbase Alpha',
     genesisHash: '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527',
     ss58Format: 1287,
-    provider: 'wss://moonbeam-alpha.api.onfinality.io/public-ws',
+    provider: 'wss://wss.api.moonbase.moonbeam.network',
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
-    isEthereum: true
+    isEthereum: true,
+    decimals: 18
   },
   efinity: {
     chain: 'Efinity',

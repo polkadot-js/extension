@@ -35,7 +35,6 @@ export enum SUPPORTED_NFT_NETWORKS {
   bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonriver = 'moonriver',
-  moonbase = 'moonbase',
   astarEvm = 'astarEvm',
 }
 

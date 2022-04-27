@@ -46,8 +46,6 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
       return new Web3NftApi(useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.astarEvm:
       return new Web3NftApi(useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.moonbase:
-      return new Web3NftApi(useAddresses, chain);
   }
 
   return null;

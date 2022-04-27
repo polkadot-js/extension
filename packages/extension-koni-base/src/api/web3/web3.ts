@@ -29,6 +29,16 @@ export const connectWeb3Apis = (networks = EVM_NETWORKS): Record<string, Web3> =
   return apiMap;
 };
 
+export const recoverWeb3Api = (networkKey: string, networks = EVM_NETWORKS) => {
+  const provider = networks[networkKey].provider;
+
+  if (provider.startsWith('ws')) {
+    web3Map[networkKey] = new Web3(new Web3.providers.WebsocketProvider(provider));
+  } else if (provider.startsWith('http')) {
+    web3Map[networkKey] = new Web3(new Web3.providers.HttpProvider(provider));
+  }
+};
+
 export const web3Map = connectWeb3Apis();
 
 export const getWeb3Api = (networkKey: string) => {

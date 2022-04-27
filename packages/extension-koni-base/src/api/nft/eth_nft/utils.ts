@@ -97,6 +97,13 @@ export const MOONBEAM_SUPPORTED_NFT_CONTRACTS = [
   // },
 ];
 
+export const MOONBASE_SUPPORTED_NFT_CONTRACTS = [
+  {
+    name: 'test',
+    smartContract: '0x2953ea6f45fb189f1d33820d67c001ba287f6419'
+  }
+];
+
 enum MOONRIVER_NFT_CONTRACT_NAME {
   ZOOMBIES = 'Zoombies',
   TREASURE_LAND = 'treasureland.dego',

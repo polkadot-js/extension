@@ -13,12 +13,12 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@polkadot/extension-koni-ui/util';
-import getNetworkInfoByGenesisHash from '@polkadot/extension-koni-ui/util/getNetworkInfoByGenesisHash';
 
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';
@@ -49,13 +49,35 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
     genesisHash: recodedGenesis,
     isEthereum,
     prefix }, setRecoded] = useState<Recoded>(defaultRecoded);
-  const networkInfo = getNetworkInfoByGenesisHash(genesisHash || recodedGenesis);
+  const networkMap = useSelector((state: RootState) => state.networkMap);
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
   const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
 
   const _isAccountAll = address && isAccountAll(address);
+
+  const getNetworkInfoByGenesisHash = useCallback((hash?: string | null): NetworkJson | null => {
+    if (!hash) {
+      return null;
+    }
+
+    for (const n in networkMap) {
+      if (!Object.prototype.hasOwnProperty.call(networkMap, n)) {
+        continue;
+      }
+
+      const networkInfo = networkMap[n];
+
+      if (networkInfo.genesisHash === hash) {
+        return networkInfo;
+      }
+    }
+
+    return null;
+  }, [networkMap]);
+
+  const networkInfo = getNetworkInfoByGenesisHash(genesisHash || recodedGenesis);
 
   useEffect((): void => {
     if (!address) {

@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
+import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { Ledger } from '@polkadot/hw-ledger';
+import { selectableNetworks } from '@polkadot/networks';
 import { Network } from '@polkadot/networks/types';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import ledgerChains from '../util/legerChains';
 import useTranslation from './useTranslation';
 
 interface StateBase {
@@ -26,10 +29,6 @@ interface State extends StateBase {
   warning: string | null;
 }
 
-function getNetwork (genesisHash: string): Network | undefined {
-  return ledgerChains.find(({ genesisHash: [hash] }) => hash === genesisHash);
-}
-
 function getState (): StateBase {
   const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
@@ -39,20 +38,45 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string): Ledger {
+function getNetwork (genesisHash: string, ledgerChains: Network[]): Network | undefined {
+  return ledgerChains.find(({ genesisHash: [hash] }) => hash === genesisHash);
+}
+
+function retrieveLedger (genesis: string, ledgerChains: Network[]): Ledger {
   let ledger: Ledger | null = null;
 
   const { isLedgerCapable } = getState();
 
   assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
 
-  const def = getNetwork(genesis);
+  const def = getNetwork(genesis, ledgerChains);
 
   assert(def, 'There is no known Ledger app available for this chain');
 
   ledger = new Ledger('webusb', def.network);
 
   return ledger;
+}
+
+function getSupportedLedger (networkMap: Record<string, NetworkJson>) {
+  const result: Network[] = [];
+  const supportedLedgerNetwork = selectableNetworks
+    .filter((network) => network.hasLedgerSupport);
+
+  const networkInfoItems = Object.values(networkMap);
+
+  supportedLedgerNetwork.forEach((n) => {
+    const counterPathInfo = networkInfoItems.find((ni) => n.genesisHash.includes(ni.genesisHash));
+
+    if (counterPathInfo) {
+      result.push({
+        ...n,
+        displayName: counterPathInfo.chain
+      });
+    }
+  });
+
+  return result;
 }
 
 export function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
@@ -63,6 +87,12 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { networkMap } = useSelector((state: RootState) => state);
+
+  const ledgerChains = useMemo(() => {
+    return getSupportedLedger(networkMap);
+  }, [networkMap]);
+
   const ledger = useMemo(() => {
     setError(null);
     setIsLocked(false);
@@ -77,14 +107,14 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
       }
 
       try {
-        return retrieveLedger(genesis);
+        return retrieveLedger(genesis, ledgerChains);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [genesis, refreshLock]);
+  }, [genesis, ledgerChains, refreshLock]);
 
   useEffect(() => {
     if (!ledger || !genesis) {
@@ -103,7 +133,7 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         setAddress(res.address);
       }).catch((e: Error) => {
         setIsLoading(false);
-        const { network } = getNetwork(genesis) || { network: 'unknown network' };
+        const { network } = getNetwork(genesis, ledgerChains) || { network: 'unknown network' };
 
         const warningMessage = e.message.includes('Code: 26628')
           ? t<string>('Is your ledger locked?')

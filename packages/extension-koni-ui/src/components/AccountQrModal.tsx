@@ -6,9 +6,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useMemo, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import QRCode from 'react-qr-code';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import Link from '@polkadot/extension-koni-ui/components/Link';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
@@ -16,6 +16,7 @@ import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { editAccount } from '@polkadot/extension-koni-ui/messaging';
 import HeaderEditName from '@polkadot/extension-koni-ui/partials/HeaderEditName';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getLogoByNetworkKey, getScanExplorerAddressInfoUrl, isSupportScanExplorer, toShort } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
@@ -50,6 +51,7 @@ function AccountQrModal ({ accountName, address, className,
   const { show } = useToast();
   const [editedName, setName] = useState<string | undefined | null>(accountName);
   const [{ isEditing }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
+  const networkMap = useSelector((state: RootState) => state.networkMap);
 
   const _toggleEdit = useCallback(
     (): void => {
@@ -74,10 +76,10 @@ function AccountQrModal ({ accountName, address, className,
   );
 
   const formatted = useMemo(() => {
-    const networkInfo = NETWORKS[networkKey];
+    const networkInfo = networkMap[networkKey];
 
     return reformatAddress(address, networkPrefix, networkInfo?.isEthereum);
-  }, [address, networkPrefix, networkKey]);
+  }, [networkMap, networkKey, address, networkPrefix]);
 
   return (
     <Modal className={className}>

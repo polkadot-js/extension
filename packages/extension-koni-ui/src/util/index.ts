@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
@@ -32,7 +32,7 @@ export function findAccountByAddress (accounts: AccountJson[], _address: string)
   ) || null;
 }
 
-export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetWorkInfo | null, type?: KeypairType): Recoded {
+export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetworkJson | null, type?: KeypairType): Recoded {
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);
   const prefix = networkInfo ? networkInfo.ss58Format : 42;

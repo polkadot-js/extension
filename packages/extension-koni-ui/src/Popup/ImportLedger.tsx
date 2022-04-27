@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import { useGetSupportedLedger } from '@polkadot/extension-koni-ui/util/legerChains';
 import settings from '@polkadot/ui-settings';
 
 import { AccountInfoEl, ActionContext, Button, ButtonArea, Dropdown, Warning } from '../components';
@@ -14,7 +15,6 @@ import useTranslation from '../hooks/useTranslation';
 import { createAccountHardware } from '../messaging';
 import { Header, Name } from '../partials';
 import { ThemeProps } from '../types';
-import ledgerChains from '../util/legerChains';
 
 interface AccOption {
   text: string;
@@ -42,6 +42,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
+  const ledgerChains = useGetSupportedLedger();
 
   useEffect(() => {
     if (address) {

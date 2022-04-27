@@ -7,7 +7,8 @@ module.exports = {
   ...base,
   ignorePatterns: [
     ...base.ignorePatterns,
-    "i18next-scanner.config.js"
+    'jest/**/*',
+    'i18next-scanner.config.js'
   ],
   parserOptions: {
     ...base.parserOptions,

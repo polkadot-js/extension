@@ -4,7 +4,7 @@
 import type { ThemeProps } from '../types';
 
 import React, { useCallback, useState } from 'react';
-import Select from 'react-select';
+import Select, { ActionMeta, SingleValue } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 import styled from 'styled-components';
 
@@ -28,10 +28,8 @@ function Dropdown ({ allowAdd, className, handleCreate, label, onChange, options
   const [loading, setLoading] = useState(false);
 
   const handleChange = useCallback(
-    ({ value }): void => {
-      if (typeof value === 'string') {
-        value = value.trim();
-      }
+    (newValue: SingleValue<{ label: string; value: string; }>, actionMeta: ActionMeta<{ label: string; value: string; }>): void => {
+      const value = newValue?.value.trim() || '';
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       onChange && onChange(value);

@@ -151,21 +151,47 @@ function getUnsupportedResponse (): ResponseTransfer {
   };
 }
 
-function updateResponseTxResult (response: ResponseTransfer, record: EventRecord): void {
+function updateResponseTxResult (
+  networkKey: string,
+  tokenInfo: undefined | TokenInfo,
+  response: ResponseTransfer,
+  records: EventRecord[]): void {
   if (!response.txResult) {
     response.txResult = { change: '0' };
   }
 
-  if ((record.event.section === 'balances' &&
-    record.event.method.toLowerCase() === 'transfer')) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    response.txResult.change = record.event.data[2]?.toString() || '0';
-  }
+  let isFeeUseMainTokenSymbol = true;
 
-  if (record.event.section === 'balances' &&
-    record.event.method.toLowerCase() === 'withdraw') {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    response.txResult.fee = record.event.data[1]?.toString();
+  for (let index = 0; index < records.length; index++) {
+    const record = records[index];
+
+    if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken) {
+      if (record.event.section === 'currencies' &&
+        record.event.method.toLowerCase() === 'transferred') {
+        if (index === 0) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          response.txResult.fee = record.event.data[3]?.toString() || '0';
+          response.txResult.feeSymbol = tokenInfo.symbol;
+
+          isFeeUseMainTokenSymbol = false;
+        } else {
+          response.txResult.change = record.event.data[3]?.toString() || '0';
+          response.txResult.changeSymbol = tokenInfo.symbol;
+        }
+      }
+    } else {
+      if ((record.event.section === 'balances' &&
+        record.event.method.toLowerCase() === 'transfer')) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        response.txResult.change = record.event.data[2]?.toString() || '0';
+      }
+    }
+
+    if (isFeeUseMainTokenSymbol && record.event.section === 'balances' &&
+      record.event.method.toLowerCase() === 'withdraw') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      response.txResult.fee = record.event.data[1]?.toString() || '0';
+    }
   }
 }
 
@@ -192,18 +218,7 @@ export async function makeTransfer (
 
   if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
     if (transferAll) {
-      // todo: perform transferring all balance for 'karura', 'acala', 'acala_testnet'
-
-      // const freeBalanceString = await getFreeBalance(networkKey, fromAddress, tokenInfo.symbol);
-      //
-      // const paymentInfo = await api.tx.currencies
-      //   .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, freeBalanceString)
-      //   .paymentInfo(fromKeypair);
-      //
-      // const transferringValue = (new BN(freeBalanceString)).sub(paymentInfo.partialFee);
-      //
-      // transfer = api.tx.currencies
-      //   .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, transferringValue.toString());
+      // currently Acala, Karura, Acala testnet do not have transfer all method for sub token
     } else if (value) {
       transfer = api.tx.currencies
         .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value);
@@ -237,8 +252,8 @@ export async function makeTransfer (
     data: {}
   };
 
-  function updateResponseByEvents (response: ResponseTransfer, events: EventRecord[]) {
-    events.forEach((record) => {
+  function updateResponseByEvents (response: ResponseTransfer, records: EventRecord[]) {
+    records.forEach((record) => {
       const { event: { method, section, data: [error, info] } } = record;
 
       // @ts-ignore
@@ -282,9 +297,9 @@ export async function makeTransfer (
       } else if (isSuccess) {
         response.step = TransferStep.SUCCESS;
       }
-
-      updateResponseTxResult(response, record);
     });
+
+    updateResponseTxResult(networkKey, tokenInfo, response, records);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -427,7 +427,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
       {isShowTxModal && (
         <AuthTransaction
           balanceFormat={balanceFormat}
-          fee={fee}
+          fee={!fee || fee === '0' ? null : fee}
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

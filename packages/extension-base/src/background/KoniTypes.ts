@@ -329,9 +329,12 @@ export interface BackgroundWindow extends Window {
 export interface TransactionHistoryItemType {
   time: number;
   networkKey: string;
-  token?: string; // if undefined => native token
   change: string;
+  changeSymbol?: string; // if undefined => native token
   fee?: string;
+  feeSymbol?: string;
+  // if undefined => native token, sometime "fee" uses different token than "change"
+  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
   extrinsicHash: string
@@ -459,7 +462,9 @@ export enum TransferStep {
 
 type TxResultType = {
   change: string;
+  changeSymbol?: string;
   fee?: string;
+  feeSymbol?: string;
 }
 
 export interface ResponseTransfer {

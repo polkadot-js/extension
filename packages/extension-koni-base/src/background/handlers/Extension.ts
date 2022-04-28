@@ -1053,9 +1053,10 @@ export default class KoniExtension extends Extension {
         state.setTransactionHistory(address, networkKey, {
           time: Date.now(),
           networkKey,
-          token,
           change: res.txResult.change,
+          changeSymbol: res.txResult.changeSymbol,
           fee: res.txResult.fee,
+          feeSymbol: res.txResult.feeSymbol,
           isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
           action: 'send',
           extrinsicHash: res.extrinsicHash

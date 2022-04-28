@@ -138,7 +138,9 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
                   ss58Format: -1,
                   chain: resp.chain,
                   isEthereum,
-                  ethChainId: resp.ethChainId
+                  ethChainId: resp.ethChainId,
+                  nativeToken: resp.nativeToken,
+                  decimals: resp.decimal
                 });
               } else {
                 setNetworkInfo({
@@ -151,7 +153,9 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
                   currentProviderMode: provider.startsWith('http') ? 'http' : 'ws',
                   genesisHash: resp.genesisHash,
                   ss58Format: parseInt(resp.ss58Prefix),
-                  chain: resp.chain
+                  chain: resp.chain,
+                  nativeToken: resp.nativeToken,
+                  decimals: resp.decimal
                 });
               }
             }
@@ -354,16 +358,19 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           value={networkInfo?.paraId?.toString() || ''}
         />
 
-        <div className={'toggle-container'}>
-          <div>Ethereum chain</div>
-          <HorizontalLabelToggle
-            checkedLabel={''}
-            className='info'
-            toggleFunc={toggleEthereum}
-            uncheckedLabel={''}
-            value={isEthereum}
-          />
-        </div>
+        {
+          mode === 'create' &&
+          <div className={'toggle-container'}>
+            <div>Ethereum chain</div>
+            <HorizontalLabelToggle
+              checkedLabel={''}
+              className='info'
+              toggleFunc={toggleEthereum}
+              uncheckedLabel={''}
+              value={isEthereum}
+            />
+          </div>
+        }
 
         {
           isEthereum &&

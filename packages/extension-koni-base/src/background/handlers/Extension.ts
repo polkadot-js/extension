@@ -1312,6 +1312,9 @@ export default class KoniExtension extends Extension {
         if (res !== null) { // test connection ok
           // get all necessary information
           const api = res as ApiProps;
+          const { chainDecimals, chainTokens } = api.api.registry;
+          const defaultToken = chainTokens[0];
+          const defaultDecimal = chainDecimals[0];
           const genesisHash = api.api.genesisHash?.toHex();
           const ss58Prefix = api.api?.consts?.system?.ss58Prefix?.toString();
           let chainType: ChainType;
@@ -1371,7 +1374,9 @@ export default class KoniExtension extends Extension {
                 ss58Prefix,
                 networkGroup: [parsedChainType],
                 chain: chain ? chain.toString() : '',
-                ethChainId
+                ethChainId,
+                nativeToken: defaultToken,
+                decimal: defaultDecimal
               };
             }
           } else {
@@ -1385,7 +1390,9 @@ export default class KoniExtension extends Extension {
                 ss58Prefix,
                 networkGroup: [parsedChainType],
                 chain: chain ? chain.toString() : '',
-                ethChainId
+                ethChainId,
+                nativeToken: defaultToken,
+                decimal: defaultDecimal
               };
             } else {
               result.error = genesisError;

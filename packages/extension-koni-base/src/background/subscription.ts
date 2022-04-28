@@ -74,6 +74,12 @@ export class KoniSubcription {
         console.log('subscribe serviceInfo', serviceInfo);
       }
     });
+
+    state.subscribeNetworkMap().subscribe({
+      next: (networkMap) => {
+        console.log('update apiMap here', networkMap);
+      }
+    });
   }
 
   detectAddresses (currentAccountAddress: string) {

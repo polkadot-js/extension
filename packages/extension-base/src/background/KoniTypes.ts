@@ -16,6 +16,7 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 export interface ServiceInfo {
   networkMap: Record<string, NetworkJson>;
   apiMap: ApiMap;
+  isLock?: boolean;
   addresses?: string[];
 }
 
@@ -284,17 +285,6 @@ export interface NetworkJson {
   blockExplorer?: string, // Link to block scanner to check transaction with extrinsic hash // user input
   dependencies?: string[] // Auto active network in dependencies if current network is activated
 
-  // Support features
-  getBalanceMethod?: 'SUBSTRATE' | 'SUBSTRATE_TOKEN' | 'EVM' | 'ERC20'; // How to get balance
-  sendFundMethod?: 'SUBSTRATE' | 'EVM';
-  getTokenMethod?: 'SUBSTRATE_TOKENS' | 'ERC20'; // How to get tokens
-  sendTokenMethod?: 'SUBSTRATE' | 'ERC20';
-  sendXCMTokens?: 'SUBSTRATE_XTOKENS' | 'EVM_XTOKENS' | 'RAW_XCM';
-  getStakingMethod?: 'SUBSTRATE';
-  getCrowdloanMethod?: 'POLKADOT' | 'DOTSAMA' | 'CUSTOM'; // This method is required paraId, custom network can not select custom method
-  getNFTMethod?: 'ERC721' | 'CUSTOM';
-  sendNFTMethod?: 'ERC721' | 'CUSTOM';
-
   apiStatus?: NETWORK_STATUS;
 }
 
@@ -555,6 +545,8 @@ export interface ValidateNetworkResponse {
   networkGroup: NetWorkGroup[],
   chain: string,
   ethChainId: number,
+  nativeToken?: string,
+  decimal?: number
 
   error?: NETWORK_ERROR,
   conflictChain?: string,

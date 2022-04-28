@@ -183,6 +183,8 @@ export default class KoniState extends State {
 
   private apiMap: ApiMap = { dotSama: {}, web3: {} };
 
+  private serviceInfoSubject = new Subject<ServiceInfo>();
+
   // Todo: Persist data to balanceStore later
   // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
@@ -223,8 +225,6 @@ export default class KoniState extends State {
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
   private chainRegistrySubject = new Subject<Record<string, ChainRegistry>>();
-
-  private serviceInfoSubject = new Subject<ServiceInfo>();
 
   private lazyMap: Record<string, unknown> = {};
 
@@ -809,9 +809,15 @@ export default class KoniState extends State {
         this.networkMap[data.key].currentProviderMode = data.currentProvider.startsWith('ws') ? 'ws' : 'http';
       }
 
-      // TODO: update other fields
-
       this.networkMap[data.key].chain = data.chain;
+
+      if (data.nativeToken) {
+        this.networkMap[data.key].nativeToken = data.nativeToken;
+      }
+
+      if (data.decimals) {
+        this.networkMap[data.key].decimals = data.decimals;
+      }
 
       if (data.crowdloanUrl) {
         this.networkMap[data.key].crowdloanUrl = data.crowdloanUrl;
@@ -857,8 +863,8 @@ export default class KoniState extends State {
     delete this.networkMap[networkKey];
 
     this.networkMapSubject.next(this.networkMap);
-    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
   }
 
   public disableNetworkMap (networkKey: string) {
@@ -875,8 +881,8 @@ export default class KoniState extends State {
     this.networkMap[networkKey].active = false;
     this.networkMap[networkKey].apiStatus = NETWORK_STATUS.DISCONNECTED;
     this.networkMapSubject.next(this.networkMap);
-    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
   }
 
   public enableNetworkMap (networkKey: string) {
@@ -888,16 +894,16 @@ export default class KoniState extends State {
 
     this.networkMap[networkKey].active = true;
     this.networkMapSubject.next(this.networkMap);
-    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
   }
 
   public updateNetworkStatus (networkKey: string, status: NETWORK_STATUS) {
     this.networkMap[networkKey].apiStatus = status;
 
     this.networkMapSubject.next(this.networkMap);
-    this.updateServiceInfo();
     this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
   }
 
   public getApiMap () {

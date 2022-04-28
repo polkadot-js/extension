@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ThemeProps } from '../../types';
+
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import type { ThemeProps } from '../../types';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
@@ -41,7 +42,7 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Bytes)(({ theme }: ThemeProps)=>`
+export default styled(Bytes)(({ theme }: ThemeProps) => `
   border: 0;
   display: block;
   font-size: 0.75rem;
@@ -54,13 +55,13 @@ export default styled(Bytes)(({ theme }: ThemeProps)=>`
     text-overflow: ellipsis;
     vertical-align: middle;
     width: 100%;
-    padding: 5px;
+    padding: 0.15rem;
 
     &.pre {
       padding: 0px;
       
       div {
-        padding: 5px;
+        padding: 0.15rem;
         font-family: inherit;
         font-size: 0.75rem;
         margin: 0;

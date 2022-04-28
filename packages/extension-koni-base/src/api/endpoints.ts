@@ -299,7 +299,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     provider: 'wss://wss.api.moonbase.moonbeam.network',
     groups: ['TEST_NET'],
     nativeToken: 'DEV',
-    isEthereum: true
+    isEthereum: true,
+    decimals: 18
   },
   efinity: {
     chain: 'Efinity',

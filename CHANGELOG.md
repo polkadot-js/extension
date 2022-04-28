@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.3.6 (Koni)
+Build date: Apr 22, 2022.
+Update:
+- Split background.js and extension.js into multi file for loading faster and can be submit to Firefox store (#80)
+- Update Centrifuge Parachain info (#203)
+- Support ERC20 tokens of Moonfit on Moonbase (#201)
+
 ## 0.3.5 (Koni)
 Build date: Apr 18, 2022.
 Bug Fixed:

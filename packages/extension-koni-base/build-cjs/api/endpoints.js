@@ -150,9 +150,9 @@ const NETWORKS = {
   },
   centrifuge: {
     chain: 'Centrifuge',
-    genesisHash: '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82',
+    genesisHash: '0x67dddf2673b69e5f875f6f25277495834398eafd67f492e09f3f3345e003d1b5',
     ss58Format: 36,
-    provider: 'wss://centrifuge-parachain.api.onfinality.io/public-ws',
+    provider: 'wss://fullnode.centrifuge.io',
     groups: ['POLKADOT_PARACHAIN'],
     paraId: 2031,
     nativeToken: 'CFG',

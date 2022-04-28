@@ -1,13 +1,13 @@
      465	Jaco                          	0.42.5 (#969)
      193	Nam Phạm                      	fix ipfs gateway for Astar NFT
-     168	AnhMTV                        	Release version 0.3.5
+     176	AnhMTV                        	Add support ERC20 tokens of Moonfit on Moonbase
       82	Thibaut Sardan                	Add account filtering feature (#832)
       79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
       42	lw                            	# update balance display
-      34	Hieu Dao                      	[CI Skip]Issue 117: Update xctoken logo
-      21	lw-cdm                        	
+      35	Hieu Dao                      	Update Centrifuge Parachain info #203
+      24	lw-cdm                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined

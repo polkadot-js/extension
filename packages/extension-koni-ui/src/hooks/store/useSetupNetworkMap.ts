@@ -8,7 +8,6 @@ import { subscribeNetworkMap } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateNetworkMap (data: Record<string, NetworkJson>): void {
-  console.log(data);
   store.dispatch({ type: 'networkMap/update', payload: data });
 }
 

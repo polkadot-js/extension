@@ -5,7 +5,6 @@ import { ApiPromise } from '@polkadot/api';
 import { ChainRegistry, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@polkadot/extension-koni-base/api/predefineChainTokens';
-import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { BN, bnToHex } from '@polkadot/util';
 
 const cacheRegistryMap: Record<string, ChainRegistry> = {};
@@ -127,16 +126,16 @@ export async function getTokenInfo (networkKey: string, api: ApiPromise, token: 
   return tokenMap[token];
 }
 
-export function initChainRegistrySubscription () {
-  Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
-    getRegistry(networkKey, api)
-      .then((rs) => {
-        state.setChainRegistryItem(networkKey, rs);
-      })
-      .catch(console.error);
-  });
-}
-
-export function initNetworkMapStore () {
-
-}
+// deprecated
+// export function initChainRegistrySubscription () {
+//   const apiMap = state.getApiMap();
+//
+//   Object.entries(apiMap.dotSama).forEach(([networkKey, { api }]) => {
+//     getRegistry(networkKey, api)
+//       .then((rs) => {
+//         console.log('chainRegistry here', rs);
+//         state.setChainRegistryItem(networkKey, rs);
+//       })
+//       .catch(console.error);
+//   });
+// }

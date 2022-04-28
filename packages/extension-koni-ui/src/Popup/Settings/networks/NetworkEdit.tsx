@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NETWORK_ERROR, NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import {isUrl, isValidProvider} from '@polkadot/extension-koni-base/utils/utils';
+import { isUrl, isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';

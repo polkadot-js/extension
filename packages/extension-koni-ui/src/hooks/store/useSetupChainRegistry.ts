@@ -8,6 +8,7 @@ import { subscribeChainRegistry } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateChainRegistry (map: Record<string, ChainRegistry>): void {
+  console.log('chain registry', map);
   store.dispatch({ type: 'chainRegistry/update', payload: map });
 }
 

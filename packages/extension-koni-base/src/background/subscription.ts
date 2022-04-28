@@ -4,11 +4,11 @@
 import { take } from 'rxjs';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiProps, NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { getAllSubsquidStaking } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
-import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
+import { nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -59,26 +59,24 @@ export class KoniSubcription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address);
+        this.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama);
       }
 
-      state.subscribeCurrentAccount().subscribe({
-        next: ({ address }) => {
-          this.subscribeBalancesAndCrowdloans(address);
+      state.subscribeServiceInfo().subscribe({
+        next: (serviceInfo) => {
+          const { address } = serviceInfo.currentAccountInfo;
+
+          state.initChainRegistry();
+          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama);
         }
       });
-    });
 
-    state.subscribeServiceInfo().subscribe({
-      next: (serviceInfo) => {
-        console.log('subscribe serviceInfo', serviceInfo);
-      }
-    });
-
-    state.subscribeNetworkMap().subscribe({
-      next: (networkMap) => {
-        console.log('update apiMap here', networkMap);
-      }
+      // state.subscribeCurrentAccount().subscribe({
+      //   next: ({ address }) => {
+      //     console.log('address here', address);
+      //     this.subscribeBalancesAndCrowdloans(address);
+      //   }
+      // });
     });
   }
 
@@ -95,21 +93,21 @@ export class KoniSubcription {
     });
   }
 
-  subscribeBalancesAndCrowdloans (address: string) {
+  subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>) {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
     state.resetBalanceMap();
     state.resetCrowdloanMap();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.unsubBalances = this.initBalanceSubscription(addresses);
-        this.unsubCrowdloans = this.initCrowdloanSubscription(addresses);
+        this.unsubBalances = this.initBalanceSubscription(addresses, dotSamaApiMap);
+        this.unsubCrowdloans = this.initCrowdloanSubscription(addresses, dotSamaApiMap);
       })
       .catch(console.error);
   }
 
-  initBalanceSubscription (addresses: string[]) {
-    const subscriptionPromises = subscribeBalance(addresses, dotSamaAPIMap, (networkKey, rs) => {
+  initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+    const subscriptionPromises = subscribeBalance(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);
     });
 
@@ -122,8 +120,8 @@ export class KoniSubcription {
     };
   }
 
-  initCrowdloanSubscription (addresses: string[]) {
-    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaAPIMap, (networkKey, rs) => {
+  initCrowdloanSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+    const subscriptionPromise = subscribeCrowdloan(addresses, dotSamaApiMap, (networkKey, rs) => {
       state.setCrowdloanItem(networkKey, rs);
     });
 

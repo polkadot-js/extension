@@ -6,9 +6,9 @@ import { Subject } from 'rxjs';
 import { NETWORK_STATUS, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
-import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -55,7 +55,6 @@ export class KoniCron {
 
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
-    // this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
     this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
     this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
     state.getCurrentAccount((currentAccountInfo) => {
@@ -83,18 +82,19 @@ export class KoniCron {
     });
   }
 
-  recoverAPI () {
-    state.getCurrentAccount(({ address }) => {
-      console.log('Auto recovering API');
-      Object.values(dotSamaAPIMap).forEach((apiProp) => {
-        if (apiProp.apiRetry && apiProp.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
-          apiProp.recoverConnect && apiProp.recoverConnect();
-        }
-      });
-
-      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
-    });
-  }
+  // deprecated
+  // recoverAPI () {
+  //   state.getCurrentAccount(({ address }) => {
+  //     console.log('Auto recovering API');
+  //     Object.values(dotSamaAPIMap).forEach((apiProp) => {
+  //       if (apiProp.apiRetry && apiProp.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
+  //         apiProp.recoverConnect && apiProp.recoverConnect();
+  //       }
+  //     });
+  //
+  //     this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama);
+  //   });
+  // }
 
   recoverApiMap () {
     const apiMap = state.getApiMap();
@@ -111,6 +111,10 @@ export class KoniCron {
           state.refreshWeb3Api(key);
         });
     }
+
+    state.getCurrentAccount(({ address }) => {
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama);
+    });
   }
 
   updateApiMapStatus () {

@@ -5,7 +5,6 @@ import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes'
 import { MessageTypes, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama';
-import { initChainRegistrySubscription } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { NftHandler } from '@polkadot/extension-koni-base/api/nft';
 import KoniExtension from '@polkadot/extension-koni-base/background/handlers/Extension';
@@ -14,7 +13,9 @@ import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();
-state.initNetworkMapStore();
+
+state.initNetworkStates();
+
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
@@ -37,9 +38,6 @@ function getRpcsMap (): Record<string, string> {
 }
 
 export const rpcsMap: Record<string, string> = getRpcsMap();
-
-// Load registry and fill to state
-initChainRegistrySubscription();
 
 state.updateServiceInfo();
 

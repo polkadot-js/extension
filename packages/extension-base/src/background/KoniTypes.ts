@@ -17,7 +17,7 @@ export interface ServiceInfo {
   networkMap: Record<string, NetworkJson>;
   apiMap: ApiMap;
   isLock?: boolean;
-  addresses?: string[];
+  currentAccountInfo: CurrentAccountInfo;
 }
 
 export enum ApiInitStatus {

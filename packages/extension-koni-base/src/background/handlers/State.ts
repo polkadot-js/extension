@@ -10,6 +10,7 @@ import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
+import { getRegistry } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
@@ -121,8 +122,8 @@ export default class KoniState extends State {
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
-  // init default value for networkMap (first time only)
-  public initNetworkMapStore () {
+  // init networkMap, apiMap and chainRegistry (first time only)
+  public initNetworkStates () {
     this.networkMapStore.get('NetworkMap', (storedNetworkMap) => {
       if (!storedNetworkMap) { // first time init extension
         this.networkMapStore.set('NetworkMap', PREDEFINED_NETWORKS);
@@ -175,6 +176,8 @@ export default class KoniState extends State {
           }
         }
       }
+
+      this.initChainRegistry();
     });
   }
 
@@ -621,6 +624,7 @@ export default class KoniState extends State {
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+    this.updateServiceInfo();
   }
 
   public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {
@@ -710,6 +714,17 @@ export default class KoniState extends State {
     this.chainRegistryMap[networkKey] = registry;
     this.lazyNext('setChainRegistry', () => {
       this.chainRegistrySubject.next(this.getChainRegistryMap());
+    });
+  }
+
+  public initChainRegistry () {
+    this.chainRegistryMap = {};
+    Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
+      getRegistry(networkKey, api)
+        .then((rs) => {
+          this.setChainRegistryItem(networkKey, rs);
+        })
+        .catch(console.error);
     });
   }
 
@@ -915,9 +930,12 @@ export default class KoniState extends State {
   }
 
   public updateServiceInfo () {
-    this.serviceInfoSubject.next({
-      apiMap: this.apiMap,
-      networkMap: this.networkMap
+    this.currentAccountStore.get('CurrentAccountInfo', (value) => {
+      this.serviceInfoSubject.next({
+        apiMap: this.apiMap,
+        networkMap: this.networkMap,
+        currentAccountInfo: value
+      });
     });
   }
 }

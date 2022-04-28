@@ -798,6 +798,14 @@ export default class KoniState extends State {
     return this.priceStore.getSubject();
   }
 
+  public getNetworkMap () {
+    return this.networkMap;
+  }
+
+  public subscribeNetworkMap () {
+    return this.networkMapStore.getSubject();
+  }
+
   public upsertNetworkMap (data: NetworkJson): void {
     if (data.key in this.networkMap) { // update provider for existed network
       if (data.customProviders) {
@@ -844,22 +852,13 @@ export default class KoniState extends State {
       this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
     }
 
-    this.updateServiceInfo();
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
+    this.updateServiceInfo();
   }
 
-  public getNetworkMap () {
-    return this.networkMap;
-  }
-
-  public subscribeNetworkMap () {
-    return this.networkMapStore.getSubject();
-  }
-
-  public removeNetworkMap (networkKey: string) {
-    this.disableNetworkMap(networkKey);
-    // TODO: disconnect api
+  public async removeNetworkMap (networkKey: string) {
+    await this.disableNetworkMap(networkKey);
     delete this.networkMap[networkKey];
 
     this.networkMapSubject.next(this.networkMap);
@@ -867,14 +866,11 @@ export default class KoniState extends State {
     this.updateServiceInfo();
   }
 
-  public disableNetworkMap (networkKey: string) {
+  public async disableNetworkMap (networkKey: string) {
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       delete this.apiMap.web3[networkKey];
     } else {
-      // TODO: check disconnect and deletion
-      this.apiMap.dotSama[networkKey].api.disconnect()
-        .then((r) => console.log('disconnected from ', networkKey, r))
-        .catch(console.error);
+      await this.apiMap.dotSama[networkKey].api.disconnect();
       delete this.apiMap.dotSama[networkKey];
     }
 
@@ -919,8 +915,6 @@ export default class KoniState extends State {
   }
 
   public updateServiceInfo () {
-    // TODO: check difference of apiMap & networkMap
-    // TODO: check provider, networkKey
     this.serviceInfoSubject.next({
       apiMap: this.apiMap,
       networkMap: this.networkMap

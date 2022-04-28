@@ -169,10 +169,10 @@ export default class KoniState extends State {
 
       for (const [key, network] of Object.entries(this.networkMap)) {
         if (network.active) {
+          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network));
+
           if (network.isEthereum && network.isEthereum) {
             this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(network));
-          } else {
-            this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network));
           }
         }
       }
@@ -861,10 +861,10 @@ export default class KoniState extends State {
       this.networkMap[data.key] = data;
     }
 
+    this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
+
     if (data.isEthereum && data.isEthereum) {
       this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
-    } else {
-      this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
     }
 
     this.networkMapSubject.next(this.networkMap);
@@ -882,11 +882,11 @@ export default class KoniState extends State {
   }
 
   public async disableNetworkMap (networkKey: string) {
+    await this.apiMap.dotSama[networkKey].api.disconnect();
+    delete this.apiMap.dotSama[networkKey];
+
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       delete this.apiMap.web3[networkKey];
-    } else {
-      await this.apiMap.dotSama[networkKey].api.disconnect();
-      delete this.apiMap.dotSama[networkKey];
     }
 
     this.networkMap[networkKey].active = false;
@@ -897,10 +897,10 @@ export default class KoniState extends State {
   }
 
   public enableNetworkMap (networkKey: string) {
+    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
+
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
-    } else {
-      this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
     }
 
     this.networkMap[networkKey].active = true;

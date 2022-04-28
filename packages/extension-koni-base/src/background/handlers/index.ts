@@ -17,7 +17,6 @@ state.initNetworkStates();
 
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
-// export const dotSamaAPIMap = connectDotSamaApis();
 export const nftHandler = new NftHandler(state.getApiMap().dotSama);
 
 function getRpcsMap (): Record<string, string> {

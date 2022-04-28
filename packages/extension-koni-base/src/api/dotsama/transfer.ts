@@ -179,6 +179,12 @@ function updateResponseTxResult (
           response.txResult.changeSymbol = tokenInfo.symbol;
         }
       }
+    } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo) {
+      if (record.event.section === 'tokens' &&
+        record.event.method.toLowerCase() === 'transfer') {
+        response.txResult.change = record.event.data[3]?.toString() || '0';
+        response.txResult.changeSymbol = tokenInfo.symbol;
+      }
     } else {
       if ((record.event.section === 'balances' &&
         record.event.method.toLowerCase() === 'transfer')) {

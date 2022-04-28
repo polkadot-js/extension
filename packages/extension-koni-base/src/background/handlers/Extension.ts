@@ -17,7 +17,7 @@ import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
 import { getWeb3Api, initWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { dotSamaAPIMap, rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
+import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { isValidProvider, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { createPair } from '@polkadot/keyring';
@@ -861,6 +861,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
+    const dotSamaApiMap = state.getApiMap().dotSama;
     const errors = [] as Array<TransferError>;
     let keypair: KeyringPair | undefined;
     let transferValue;
@@ -903,7 +904,7 @@ export default class KoniExtension extends Extension {
     let tokenInfo: TokenInfo | undefined;
 
     if (token) {
-      const tokenInfo = await getTokenInfo(networkKey, dotSamaAPIMap[networkKey].api, token);
+      const tokenInfo = await getTokenInfo(networkKey, dotSamaApiMap[networkKey].api, token);
 
       if (!tokenInfo) {
         errors.push({

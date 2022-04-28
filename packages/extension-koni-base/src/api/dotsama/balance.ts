@@ -12,7 +12,7 @@ import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-bas
 import { getRegistry, getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { getEVMBalance } from '@polkadot/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
@@ -378,7 +378,8 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
 }
 
 export async function getFreeBalance (networkKey: string, address: string, token?: string): Promise<string> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const dotSamaApiMap = state.getApiMap().dotSama;
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
   if (token) {

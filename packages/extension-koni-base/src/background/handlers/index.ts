@@ -4,12 +4,11 @@
 import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
 import { MessageTypes, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import connectDotSamaApis from '@polkadot/extension-koni-base/api/dotsama';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { NftHandler } from '@polkadot/extension-koni-base/api/nft';
 import KoniExtension from '@polkadot/extension-koni-base/background/handlers/Extension';
 import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
 import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
+import { getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();
@@ -18,20 +17,21 @@ state.initNetworkStates();
 
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
-export const dotSamaAPIMap = connectDotSamaApis();
-export const nftHandler = new NftHandler(dotSamaAPIMap);
+// export const dotSamaAPIMap = connectDotSamaApis();
+export const nftHandler = new NftHandler(state.getApiMap().dotSama);
 
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};
+  const networkMap = state.getNetworkMap();
 
-  Object.keys(NETWORKS).forEach((networkKey) => {
-    const networkInfo = NETWORKS[networkKey];
+  Object.keys(networkMap).forEach((networkKey) => {
+    const networkInfo = networkMap[networkKey];
 
     if (!networkInfo.genesisHash || networkInfo.genesisHash.toLowerCase() === 'unknown') {
       return;
     }
 
-    result[networkKey] = networkInfo.provider;
+    result[networkKey] = getCurrentProvider(networkMap[networkKey]);
   });
 
   return result;
@@ -45,7 +45,7 @@ export function initBackgroundWindow (keyring: any) {
   (window as any as BackgroundWindow).pdotApi = {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     keyring,
-    apisMap: dotSamaAPIMap
+    apisMap: state.getApiMap().dotSama
   };
 }
 

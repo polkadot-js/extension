@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseTransfer, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
-import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { EventRecord, SignedBlockWithJustifications } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 
 export async function estimateFee (networkKey: string, fromKeypair: KeyringPair | undefined, to: string, value: string | undefined, transferAll: boolean): Promise<string> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const dotSamaApiMap = state.getApiMap().dotSama;
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
 
   if (fromKeypair === undefined) {
     return '0';
@@ -28,7 +29,8 @@ export async function estimateFee (networkKey: string, fromKeypair: KeyringPair 
 }
 
 export async function makeTransfer (networkKey: string, to: string, fromKeypair: KeyringPair, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void): Promise<void> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const dotSamaApiMap = state.getApiMap().dotSama;
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   // @ts-ignore
   const { nonce } = await api.query.system.account(fromKeypair.address);

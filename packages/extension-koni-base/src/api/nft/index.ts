@@ -24,11 +24,11 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
       return new KaruraNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.acala:
       return new AcalaNftApi(api, useAddresses, chain);
-    case SUPPORTED_NFT_NETWORKS.rmrk:
+    case SUPPORTED_NFT_NETWORKS.kusama:
       // eslint-disable-next-line no-case-declarations
       const rmrkNftApi = new RmrkNftApi();
 
-      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.rmrk);
+      rmrkNftApi.setChain(SUPPORTED_NFT_NETWORKS.kusama);
       rmrkNftApi.setAddresses(useAddresses);
 
       return rmrkNftApi;
@@ -52,7 +52,7 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
 }
 
 export class NftHandler {
-  apiPromises: Record<string, any>[] = [];
+  apiProps: Record<string, any>[] = [];
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
   total = 0;
@@ -63,8 +63,18 @@ export class NftHandler {
     }
 
     for (const item in SUPPORTED_NFT_NETWORKS) {
-      this.apiPromises.push({ chain: item, api: dotSamaAPIMap[item] });
+      this.apiProps.push({ chain: item, api: dotSamaAPIMap[item] });
     }
+  }
+
+  setApiProps (dotSamaAPIMap: Record<string, ApiProps>) {
+    const _apiProps: Record<string, any>[] = [];
+
+    for (const item in SUPPORTED_NFT_NETWORKS) {
+      _apiProps.push({ chain: item, api: dotSamaAPIMap[item] });
+    }
+
+    this.apiProps = _apiProps;
   }
 
   setAddresses (addresses: string[]) {
@@ -85,7 +95,7 @@ export class NftHandler {
       if (this.handlers.length <= 0) { // setup connections for first time use
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
 
-        this.apiPromises.forEach(({ api: apiPromise, chain }) => {
+        this.apiProps.forEach(({ api: apiPromise, chain }) => {
           const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument

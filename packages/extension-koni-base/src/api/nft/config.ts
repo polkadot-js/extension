@@ -28,7 +28,7 @@ export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',
-  rmrk = 'rmrk',
+  kusama = 'kusama',
   statemine = 'statemine',
   uniqueNft = 'uniqueNft',
   quartz = 'quartz',

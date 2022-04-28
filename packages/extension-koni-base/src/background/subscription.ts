@@ -54,7 +54,6 @@ export class KoniSubcription {
 
     state.fetchCrowdloanFundMap().then(console.log).catch(console.error);
 
-    // TODO: add service info
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
@@ -70,13 +69,6 @@ export class KoniSubcription {
           this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama);
         }
       });
-
-      // state.subscribeCurrentAccount().subscribe({
-      //   next: ({ address }) => {
-      //     console.log('address here', address);
-      //     this.subscribeBalancesAndCrowdloans(address);
-      //   }
-      // });
     });
   }
 
@@ -135,15 +127,15 @@ export class KoniSubcription {
     };
   }
 
-  subscribeNft (address: string) {
+  subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses);
+        this.initNftSubscription(addresses, dotSamaApiMap);
       })
       .catch(console.error);
   }
 
-  initNftSubscription (addresses: string[]) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -159,6 +151,7 @@ export class KoniSubcription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
+      nftHandler.setApiProps(dotSamaApiMap);
       nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         (data) => {
@@ -184,7 +177,6 @@ export class KoniSubcription {
 
     await getAllSubsquidStaking(addresses, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
-      console.log('set staking item', rs);
     })
       .then((result) => {
         state.setStakingReward(result);

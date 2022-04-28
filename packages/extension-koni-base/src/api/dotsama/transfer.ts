@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 // import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
@@ -29,6 +30,11 @@ function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefC
 }
 
 export async function checkReferenceCount (networkKey: string, address: string): Promise<boolean> {
+  // todo: need update if ethereumChains is dynamic
+  if (ethereumChains.includes(networkKey)) {
+    return false;
+  }
+
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -43,6 +49,14 @@ export async function checkReferenceCount (networkKey: string, address: string):
 }
 
 export async function checkSupportTransfer (networkKey: string, token: string): Promise<SupportTransferResponse> {
+  // todo: need update if ethereumChains is dynamic
+  if (ethereumChains.includes(networkKey)) {
+    return {
+      supportTransfer: true,
+      supportTransferAll: true
+    };
+  }
+
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;

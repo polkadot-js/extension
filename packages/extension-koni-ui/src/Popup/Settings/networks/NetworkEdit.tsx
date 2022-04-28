@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NETWORK_ERROR, NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import { isValidProvider } from '@polkadot/extension-koni-base/utils/utils';
+import {isUrl, isValidProvider} from '@polkadot/extension-koni-base/utils/utils';
 import { ActionContext, Button, ButtonArea, Dropdown, HorizontalLabelToggle, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
@@ -83,6 +83,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [validateError, setValidateError] = useState<NETWORK_ERROR>(NETWORK_ERROR.NONE);
   const [isEthereum, setIsEthereum] = useState(data.isEthereum || false);
   const [showMore, setShowMore] = useState(false);
+  const [isValidBlockExplorer, setIsValidBlockExplorer] = useState(true);
+  const [isValidCrowdloanUrl, setIsValidCrowdloanUrl] = useState(true);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -300,6 +302,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [networkInfo]);
 
   const onChangeCrowdloanUrl = useCallback((val: string) => {
+    if (!isUrl(val) && val !== '') {
+      setIsValidCrowdloanUrl(false);
+    } else {
+      setIsValidCrowdloanUrl(true);
+    }
+
     setNetworkInfo({
       ...networkInfo,
       crowdloanUrl: val
@@ -307,6 +315,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [networkInfo]);
 
   const onChangeExplorer = useCallback((val: string) => {
+    if (!isUrl(val) && val !== '') {
+      setIsValidBlockExplorer(false);
+    } else {
+      setIsValidBlockExplorer(true);
+    }
+
     setNetworkInfo({
       ...networkInfo,
       blockExplorer: val
@@ -401,12 +415,18 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
               onChange={onChangeExplorer}
               value={networkInfo?.blockExplorer || ''}
             />
+            {
+              !isValidBlockExplorer && <div className={'invalid-input'}>Block explorer must be an URL</div>
+            }
 
             <InputWithLabel
               label={t<string>('Crowdloan Url (Optional)')}
               onChange={onChangeCrowdloanUrl}
               value={networkInfo?.crowdloanUrl || ''}
             />
+            {
+              !isValidCrowdloanUrl && <div className={'invalid-input'}>Crowdloan URL must be an URL</div>
+            }
 
             <InputWithLabel
               label={t<string>('Coingecko key (Optional)')}
@@ -430,7 +450,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            isDisabled={(!isProviderConnected || !_isValidProvider || !networkInfo.chain || networkInfo.chain.length <= 0) && !isCurrentEndpoint}
+            isDisabled={(!isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain.length <= 0) && !isCurrentEndpoint}
             onClick={_onSaveNetwork}
           >
             {t<string>('Save')}

@@ -119,7 +119,7 @@ export async function getERC20TransactionObject (assetAddress: string, networkKe
   const estimateFee = parseInt(gasPrice) * gasLimit;
 
   if (transferAll) {
-    transferValue = new BN(freeAmount).add(new BN(estimateFee).neg()).toString();
+    transferValue = new BN(freeAmount).toString();
     transactionObject.data = generateTransferData(to, transferValue);
   }
 

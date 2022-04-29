@@ -330,10 +330,10 @@ export interface TransactionHistoryItemType {
   time: number;
   networkKey: string;
   change: string;
-  changeSymbol?: string; // if undefined => native token
+  changeSymbol?: string; // if undefined => main token
   fee?: string;
   feeSymbol?: string;
-  // if undefined => native token, sometime "fee" uses different token than "change"
+  // if undefined => main token, sometime "fee" uses different token than "change"
   // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
@@ -449,7 +449,8 @@ export interface ResponseCheckTransfer {
   errors?: Array<TransferError>,
   fromAccountFree: string,
   toAccountFree: string,
-  estimateFee?: string
+  estimateFee?: string,
+  feeSymbol?: string // if undefined => use main token
 }
 
 export enum TransferStep {

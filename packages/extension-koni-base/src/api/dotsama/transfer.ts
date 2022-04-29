@@ -93,9 +93,13 @@ export async function estimateFee (
   to: string, value: string | undefined,
   transferAll: boolean,
   tokenInfo?: TokenInfo
-): Promise<string> {
+): Promise<[string, string | undefined]> {
+  let fee = '0';
+  // eslint-disable-next-line
+  let feeSymbol = undefined;
+
   if (fromKeypair === undefined) {
-    return '0';
+    return [fee, feeSymbol];
   }
 
   const apiProps = await dotSamaAPIMap[networkKey].isReady;
@@ -105,8 +109,7 @@ export async function estimateFee (
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
 
   if (['karura', 'acala', 'acala_testnet'].includes(networkKey) && tokenInfo && !tokenInfo.isMainToken && isTxCurrenciesSupported) {
-    // todo: perform calculating transaction fee for 'karura', 'acala', 'acala_testnet'
-
+    // Note: currently 'karura', 'acala', 'acala_testnet' do not support transfer all
     // if (transferAll) {
     //   const freeBalanceString = await getFreeBalance(networkKey, fromKeypair.address, tokenInfo.symbol);
     //
@@ -115,40 +118,40 @@ export async function estimateFee (
     //     .paymentInfo(fromKeypair);
     //
     //   return paymentInfo.partialFee.toString();
-    // } else if (value) {
-    //   const paymentInfo = await api.tx.currencies
-    //     .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value)
-    //     .paymentInfo(fromKeypair);
-    //
-    //   return paymentInfo.partialFee.toString();
-    // }
+    if (value) {
+      const paymentInfo = await api.tx.currencies
+        .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, value)
+        .paymentInfo(fromKeypair);
+
+      fee = paymentInfo.partialFee.toString();
+    }
   } else if (['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey) && tokenInfo && isTxTokensSupported) {
     if (transferAll) {
       const paymentInfo = await api.tx.tokens
         .transferAll(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, false)
         .paymentInfo(fromKeypair);
 
-      return paymentInfo.partialFee.toString();
+      fee = paymentInfo.partialFee.toString();
     } else if (value) {
       const paymentInfo = await api.tx.tokens
         .transfer(to, tokenInfo.specialOption || { Token: tokenInfo.symbol }, new BN(value))
         .paymentInfo(fromKeypair);
 
-      return paymentInfo.partialFee.toString();
+      fee = paymentInfo.partialFee.toString();
     }
   } else if (isTxBalancesSupported && (!tokenInfo || tokenInfo.isMainToken)) {
     if (transferAll) {
       const paymentInfo = await api.tx.balances.transferAll(to, false).paymentInfo(fromKeypair);
 
-      return paymentInfo.partialFee.toString();
+      fee = paymentInfo.partialFee.toString();
     } else if (value) {
       const paymentInfo = await api.tx.balances.transfer(to, new BN(value)).paymentInfo(fromKeypair);
 
-      return paymentInfo.partialFee.toString();
+      fee = paymentInfo.partialFee.toString();
     }
   }
 
-  return '0';
+  return [fee, feeSymbol];
 }
 
 function getUnsupportedResponse (): ResponseTransfer {

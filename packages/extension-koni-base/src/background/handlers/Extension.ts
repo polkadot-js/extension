@@ -995,6 +995,7 @@ export default class KoniExtension extends Extension {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
 
     let fee = '0';
+    let feeSymbol;
     let fromAccountFree = '0';
     let toAccountFree = '0';
 
@@ -1012,7 +1013,7 @@ export default class KoniExtension extends Extension {
       }
     } else {
       // Estimate with DotSama API
-      [fee, fromAccountFree, toAccountFree] = await Promise.all(
+      [[fee, feeSymbol], fromAccountFree, toAccountFree] = await Promise.all(
         [
           estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, tokenInfo),
           getFreeBalance(networkKey, from, token),
@@ -1038,7 +1039,8 @@ export default class KoniExtension extends Extension {
       errors,
       fromAccountFree: fromAccountFree,
       toAccountFree: toAccountFree,
-      estimateFee: fee
+      estimateFee: fee,
+      feeSymbol
     } as ResponseCheckTransfer;
   }
 

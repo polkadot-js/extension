@@ -20,12 +20,11 @@ interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
   requestPayload: RequestCheckTransfer;
-  fee: string | null;
-  balanceFormat: [number, string];
+  feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
   onChangeResult: (txResult: TransferResultType) => void;
 }
 
-function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ className, feeInfo: [fee, feeDecimal, feeSymbol], onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -138,7 +137,7 @@ function AuthTransaction ({ balanceFormat, className, fee, onCancel, onChangeRes
           {!!fee && (
             <Trans i18nKey='feesForSubmission'>
                 Fees of <span className='highlight'>
-                {formatBalance(new BN(fee), { withSiFull: true, decimals: balanceFormat[0], withUnit: balanceFormat[1] })}
+                {formatBalance(new BN(fee), { withSiFull: true, decimals: feeDecimal, withUnit: feeSymbol })}
               </span> will be applied to the submission
             </Trans>
           )}

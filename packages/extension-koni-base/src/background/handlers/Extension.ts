@@ -980,7 +980,7 @@ export default class KoniExtension extends Extension {
         });
       }
 
-      if (isEthereumAddress(from) && isEthereumAddress(to) && !(tokenInfo?.erc20Address)) {
+      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.erc20Address)) {
         errors.push({
           code: TransferErrorCode.INVALID_TOKEN,
           message: 'Not found ERC20 address for this token'

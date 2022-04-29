@@ -167,8 +167,8 @@ export const subscanByNetworkKey: Record<string, string> = {
   kusama: 'https://kusama.subscan.io',
   // 'litentry': 'https://litentry.subscan.io',
   // 'manta': 'https://manta.subscan.io',
-  moonbeam: 'https://moonbeam.subscan.io',
-  moonriver: 'https://moonriver.subscan.io',
+  // moonbeam: 'https://moonbeam.subscan.io',
+  // moonriver: 'https://moonriver.subscan.io',
   // 'nodle': 'https://nodle.subscan.io',
   parallel: 'https://parallel.subscan.io',
   // 'phala': 'https://phala.subscan.io',
@@ -189,7 +189,7 @@ export const subscanByNetworkKey: Record<string, string> = {
   westend: 'https://westend.subscan.io',
   rococo: 'https://rococo.subscan.io',
   robonomics: 'https://robonomics.subscan.io',
-  moonbase: 'https://moonbase.subscan.io',
+  // moonbase: 'https://moonbase.subscan.io',
   dolphin: 'https://dolphin.subscan.io/',
   encointer: 'https://encointer.subscan.io/',
   chainx: 'https://chainx.subscan.io/',
@@ -200,12 +200,14 @@ export const moonbeamScanUrl = 'https://moonbeam.moonscan.io';
 
 export const moonriverScanUrl = 'https://moonriver.moonscan.io';
 
+export const moonbaseScanUrl = 'https://moonbase.moonscan.io';
+
 export function isSupportSubscan (networkKey: string): boolean {
   return !!subscanByNetworkKey[networkKey];
 }
 
 export function isSupportScanExplorer (networkKey: string): boolean {
-  return ['moonbeam', 'moonriver'].includes(networkKey) || isSupportSubscan(networkKey);
+  return ['moonbeam', 'moonriver', 'moonbase'].includes(networkKey) || isSupportSubscan(networkKey);
 }
 
 export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: string): string {
@@ -215,6 +217,10 @@ export function getScanExplorerTransactionHistoryUrl (networkKey: string, hash: 
 
   if (networkKey === 'moonriver') {
     return `${moonriverScanUrl}/tx/${hash}`;
+  }
+
+  if (networkKey === 'moonbase') {
+    return `${moonbaseScanUrl}/tx/${hash}`;
   }
 
   return `${subscanByNetworkKey[networkKey]}/extrinsic/${hash}`;
@@ -227,6 +233,10 @@ export function getScanExplorerAddressInfoUrl (networkKey: string, address: stri
 
   if (networkKey === 'moonriver') {
     return `${moonriverScanUrl}/address/${address}`;
+  }
+
+  if (networkKey === 'moonbase') {
+    return `${moonbaseScanUrl}/address/${address}`;
   }
 
   return `${subscanByNetworkKey[networkKey]}/account/${address}`;

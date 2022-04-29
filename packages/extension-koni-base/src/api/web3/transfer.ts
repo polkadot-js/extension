@@ -32,8 +32,20 @@ export async function handleTransfer (transactionObject: TransactionConfig, netw
       //   callback(response);
       // })
       .on('receipt', function (receipt: TransactionReceipt) {
-        console.log('receipt', receipt);
+
         response.step = TransferStep.SUCCESS;
+        // response.txResult = {
+        //   change:
+        // }
+        callback(response);
+      }).catch((e) => {
+        response.step = TransferStep.ERROR;
+        response.errors?.push({
+          code: TransferErrorCode.TRANSFER_ERROR,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+          message: e.message
+        });
+        callback(response);
       });
   } catch (error) {
     response.step = TransferStep.ERROR;
@@ -43,6 +55,7 @@ export async function handleTransfer (transactionObject: TransactionConfig, netw
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       message: error.message
     });
+    callback(response);
   }
 }
 

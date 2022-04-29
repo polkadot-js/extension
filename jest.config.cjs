@@ -6,9 +6,7 @@ const config = require('@polkadot/dev/config/jest.cjs');
 module.exports = {
   ...config,
   modulePathIgnorePatterns: [
-    ...config.modulePathIgnorePatterns,
-    '<rootDir>/packages/extension/',
-    '<rootDir>/packages/extension-ui/'
+    ...config.modulePathIgnorePatterns
   ],
   moduleNameMapper: {
     '@polkadot/extension-(base|chains|compat-metamask|dapp|inject|mocks|koni-base|koni-ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',

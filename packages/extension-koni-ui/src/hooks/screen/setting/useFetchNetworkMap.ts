@@ -27,5 +27,17 @@ export default function useFetchNetworkMap () {
     }
   }
 
-  return { parsedNetworkMap, isEthereum };
+  const sorted = Object.entries(parsedNetworkMap)
+    .sort(([, networkMap], [, _networkMap]) => {
+      if (networkMap.active && !_networkMap.active) {
+        return -1;
+      } else if (!networkMap.active && _networkMap.active) {
+        return 1;
+      }
+
+      return 0;
+    })
+    .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+  return { parsedNetworkMap: sorted, isEthereum };
 }

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
@@ -22,12 +22,25 @@ function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
 
   const { isEthereum, parsedNetworkMap: networkMap } = useFetchNetworkMap();
+  const [searchString, setSearchString] = useState('');
 
-  const _onChangeFilter = useCallback(() => {
-    console.log(123);
+  const filterNetwork = useCallback(() => {
+    const _filteredNetworkMap: Record<string, NetworkJson> = {};
+
+    Object.entries(networkMap).forEach(([key, network]) => {
+      if (network.chain.toLowerCase().includes(searchString)) {
+        _filteredNetworkMap[key] = network;
+      }
+    });
+
+    return _filteredNetworkMap;
+  }, [networkMap, searchString]);
+
+  const filteredNetworkMap = filterNetwork();
+
+  const _onChangeFilter = useCallback((val: string) => {
+    setSearchString(val);
   }, []);
-
-  const filteredNetwork = '';
 
   const handleAddNetwork = useCallback(() => {
     const item: NetworkJson = {
@@ -58,7 +71,7 @@ function Networks ({ className }: Props): React.ReactElement {
           className='networks__input-filter'
           onChange={_onChangeFilter}
           placeholder={t<string>('Search network...')}
-          value={filteredNetwork}
+          value={searchString}
           withReset
         />
       </Header>
@@ -73,7 +86,7 @@ function Networks ({ className }: Props): React.ReactElement {
       </div>
 
       <div className='networks-list'>
-        {Object.values(networkMap).map((item, index) => <NetworkItem
+        {Object.values(filteredNetworkMap).map((item, index) => <NetworkItem
           item={item}
           key={index}
         />)}
@@ -113,10 +126,13 @@ export default styled(Networks)(({ theme }: Props) => `
     justify-content: center;
     align-items: center;
     margin-top: 30px;
+    margin-bottom: 15px;
   }
 
   .networks__input-filter {
-    padding: 0 15px 15px;
+    margin-bottom: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
   }
 
   .networks__btn {

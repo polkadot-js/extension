@@ -23,7 +23,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
     nativeToken: 'DOT',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'polkadot'
   },
   kusama: {
     key: 'kusama',
@@ -47,7 +48,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     groups: ['RELAY_CHAIN'],
     nativeToken: 'KSM',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'kusama'
   },
   westend: {
     key: 'westend',
@@ -101,7 +103,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProviderMode: 'ws',
     nativeToken: 'UNIT',
     groups: ['TEST_NET'],
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'rmrk'
   },
   statemint: {
     key: 'statemint',
@@ -143,7 +146,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2000,
     nativeToken: 'ACA',
     crowdloanUrl: 'https://distribution.acala.network/',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'acala'
   },
   moonbeam: {
     key: 'moonbeam',
@@ -163,7 +167,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     isEthereum: true,
     nativeToken: 'GLMR',
     crowdloanUrl: 'https://moonbeam.foundation/moonbeam-crowdloan/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'moonbeam'
   },
   astar: {
     key: 'astar',
@@ -182,7 +187,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2006,
     nativeToken: 'ASTR',
     crowdloanUrl: 'https://crowdloan.astar.network/#/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'astar'
   },
   parallel: {
     key: 'parallel',
@@ -218,7 +224,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2002,
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'clover-finance'
   },
   hydradx: {
     key: 'hydradx',
@@ -251,7 +258,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     currentProvider: 'OnFinality',
     groups: ['MAIN_NET'],
     nativeToken: 'EDG',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'edgeware'
   },
   centrifuge: {
     key: 'centrifuge',
@@ -268,7 +276,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2031,
     nativeToken: 'CFG',
     crowdloanUrl: 'https://centrifuge.io/parachain/crowdloan/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'centrifuge'
   },
   interlay: {
     key: 'interlay',
@@ -303,7 +312,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2011,
     nativeToken: 'EQ',
     crowdloanUrl: 'https://equilibrium.io/en/crowdloan#bid',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'equilibrium'
   },
   nodle: {
     key: 'nodle',
@@ -338,7 +348,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2003,
     nativeToken: 'RING',
     crowdloanUrl: 'https://darwinia.network/plo_contribute',
-    decimals: 9
+    decimals: 9,
+    coinGeckoKey: 'darwinia-network-native-token'
   },
   manta: {
     key: 'manta',
@@ -446,7 +457,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     groups: ['MAIN_NET'],
     nativeToken: 'AZERO',
     crowdloanUrl: 'https://contribute.alephzero.org/',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'aleph-zero'
   },
   alephTest: {
     key: 'alephTest',
@@ -511,7 +523,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2021,
     nativeToken: 'EFI',
     crowdloanUrl: 'https://enjin.io/efinity-crowdloan',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'efinity'
   },
   composableFinance: {
     key: 'composableFinance',
@@ -545,7 +558,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2013,
     nativeToken: 'LIT',
     crowdloanUrl: 'https://crowdloan.litentry.com/',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'litentry'
   },
   phala: {
     key: 'phala',
@@ -562,7 +576,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2035,
     nativeToken: 'PHA',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'pha'
   },
   crust: {
     key: 'crust',
@@ -580,7 +595,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2008,
     nativeToken: 'CRU',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'crust-network'
   },
   coinversation: {
     key: 'coinversation',
@@ -597,7 +613,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2027,
     nativeToken: 'CTO',
     crowdloanUrl: 'https://www.coinversation.io/joinus',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'coinversation'
   },
   statemine: {
     key: 'statemine',
@@ -639,7 +656,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2000,
     nativeToken: 'KAR',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'karura'
   },
   moonriver: {
     key: 'moonriver',
@@ -660,7 +678,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     isEthereum: true,
     nativeToken: 'MOVR',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'moonriver'
   },
   shiden: {
     key: 'shiden',
@@ -680,7 +699,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2007,
     nativeToken: 'SDN',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'shiden'
   },
   khala: {
     key: 'khala',
@@ -718,7 +738,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2001,
     nativeToken: 'BNC',
     crowdloanUrl: 'https://bifrost.app/vcrowdloan',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'bifrost-native-coin'
   },
   bifrost_testnet: {
     key: 'bifrost_testnet',
@@ -752,7 +773,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2086,
     nativeToken: 'KILT',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'kilt-protocol'
   },
   calamari: {
     key: 'calamari',
@@ -770,7 +792,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2084,
     nativeToken: 'KMA',
     crowdloanUrl: 'https://calamari.network/',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'calamari-network'
   },
   basilisk: {
     key: 'basilisk',
@@ -806,7 +829,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2088,
     nativeToken: 'AIR',
     crowdloanUrl: 'https://centrifuge.io/altair/crowdloan/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'altair'
   },
   heiko: {
     key: 'heiko',
@@ -842,7 +866,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2092,
     nativeToken: 'KINT',
     crowdloanUrl: 'https://kintsugi.interlay.io/',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'kintsugi'
   },
   picasso: {
     key: 'picasso',
@@ -859,7 +884,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2087,
     nativeToken: 'PICA',
     crowdloanUrl: 'https://crowdloan.composable.finance/',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'picasso-network'
   },
   pioneer: {
     key: 'pioneer',
@@ -897,7 +923,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2095,
     nativeToken: 'QTZ',
     crowdloanUrl: 'https://unique.network/quartz/crowdloan/',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'quartz'
   },
   genshiro: {
     key: 'genshiro',
@@ -914,7 +941,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2024,
     nativeToken: 'GENS',
     crowdloanUrl: 'https://genshiro.equilibrium.io/en',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'genshiro'
   },
   subsocial: {
     key: 'subsocial',
@@ -965,7 +993,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2016,
     nativeToken: 'SKU',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 10
+    decimals: 10,
+    coinGeckoKey: 'sakura'
   },
   shadow: {
     key: 'shadow',
@@ -982,7 +1011,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2012,
     nativeToken: 'CSM',
     crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'crust-storage-market'
   },
   uniqueNft: {
     key: 'uniqueNft',
@@ -1015,7 +1045,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2048,
     nativeToken: 'XRT',
     crowdloanUrl: 'https://robonomics.network/kusama-slot/',
-    decimals: 9
+    decimals: 9,
+    coinGeckoKey: 'robonomics-network'
   },
   integritee: {
     key: 'integritee',
@@ -1032,7 +1063,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2015,
     nativeToken: 'TEER',
     crowdloanUrl: 'https://crowdloan.integritee.network/',
-    decimals: 12
+    decimals: 12,
+    coinGeckoKey: 'integritee'
   },
   crab: {
     key: 'crab',
@@ -1049,7 +1081,8 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     paraId: 2105,
     nativeToken: 'CRAB',
     crowdloanUrl: 'https://crab.network/plo',
-    decimals: 18
+    decimals: 18,
+    coinGeckoKey: 'darwinia-crab-network'
   },
   pichiu: {
     key: 'pichiu',

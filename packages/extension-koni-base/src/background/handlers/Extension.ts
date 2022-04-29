@@ -1247,26 +1247,32 @@ export default class KoniExtension extends Extension {
       };
     }
 
-    let activeNetworkCount = 0;
-
-    Object.values(currentNetworkMap).forEach((network) => {
-      if (network.active) {
-        activeNetworkCount += 1;
-      }
-    });
-
-    if (activeNetworkCount > 2) { // at least 1 for substrate chain, 1 for eth chain
-      await state.disableNetworkMap(networkKey);
-
-      return {
-        success: true
-      };
-    }
+    await state.disableNetworkMap(networkKey);
 
     return {
-      success: false,
-      activeNetworkCount
+      success: true
     };
+
+    // let activeNetworkCount = 0;
+    //
+    // Object.values(currentNetworkMap).forEach((network) => {
+    //   if (network.active) {
+    //     activeNetworkCount += 1;
+    //   }
+    // });
+    //
+    // if (activeNetworkCount > 2) { // at least 1 for substrate chain, 1 for eth chain
+    //   await state.disableNetworkMap(networkKey);
+    //
+    //   return {
+    //     success: true
+    //   };
+    // }
+    //
+    // return {
+    //   success: false,
+    //   activeNetworkCount
+    // };
   }
 
   private enableNetworkMap (networkKey: string): boolean {

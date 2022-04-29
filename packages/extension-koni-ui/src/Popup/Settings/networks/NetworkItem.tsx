@@ -20,24 +20,18 @@ interface Props extends ThemeProps {
 function NetworkItem ({ className, item }: Props): React.ReactElement {
   const { show } = useToast();
 
-  const handleShowConfirm = useCallback((resp: boolean, activeNetworkCount?: number | undefined) => {
+  const handleShowConfirm = useCallback((resp: boolean) => {
     if (resp) {
       show(`${item.chain} has ${item.active ? 'disconnected' : 'connected'} successfully`);
     } else {
-      console.log('activeNetworkCount', activeNetworkCount);
-
-      if (activeNetworkCount && activeNetworkCount <= 2) {
-        show('At least 1 chain needs to be active');
-      } else {
-        show(`${item.chain} has failed to ${item.active ? 'disconnect' : 'connect'}`);
-      }
+      show(`${item.chain} has failed to ${item.active ? 'disconnect' : 'connect'}`);
     }
   }, [item, show]);
 
   const toggleActive = useCallback((val: boolean) => {
     if (!val) {
       disableNetworkMap(item.key)
-        .then(({ activeNetworkCount, success }) => handleShowConfirm(success, activeNetworkCount))
+        .then(({ success }) => handleShowConfirm(success))
         .catch(console.error);
     } else {
       enableNetworkMap(item.key)

@@ -19,6 +19,7 @@
        1	David Hawig                   	Update README.md (#403)
        1	f00                           	fix(authorize): long urls pushes the cta down (#1005)
        1	Forrest                       	Add Web3AccountsOptions to web3FromAddress function (#617)
+       1	hamidra                       	Present the correct signing data in the signing page (#1055)
        1	itsonal                       	add new language - Urdu (#847)
        1	KarishmaBothara               	Added code to support custom signed extension/user extension (#670)
        1	Marcel Jackisch               	Minor changes to readme (#376)

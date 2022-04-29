@@ -37,7 +37,7 @@ export default function useFetchNetworkMap () {
 
       return 0;
     })
-    .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+    .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}) as Record<string, NetworkJson>;
 
   return { parsedNetworkMap: sorted, isEthereum };
 }

@@ -7,7 +7,9 @@ import styled from 'styled-components';
 import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
 import { InputFilter, Link } from '@polkadot/extension-koni-ui/components';
 import useFetchNetworkMap from '@polkadot/extension-koni-ui/hooks/screen/setting/useFetchNetworkMap';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { disableAllNetwork, enableAllNetwork, resetDefaultNetwork } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import NetworkItem from '@polkadot/extension-koni-ui/Popup/Settings/networks/NetworkItem';
 import { store } from '@polkadot/extension-koni-ui/stores';
@@ -20,6 +22,7 @@ interface Props extends ThemeProps {
 
 function Networks ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const { show } = useToast();
 
   const { isEthereum, parsedNetworkMap: networkMap } = useFetchNetworkMap();
   const [searchString, setSearchString] = useState('');
@@ -59,6 +62,42 @@ function Networks ({ className }: Props): React.ReactElement {
     store.dispatch({ type: 'networkConfigParams/update', payload: { data: item, mode: 'create' } as NetworkConfigParams });
   }, [isEthereum]);
 
+  const handleDisableAll = useCallback(() => {
+    disableAllNetwork()
+      .then((resp) => {
+        if (resp) {
+          show('All networks are disabled');
+        } else {
+          show('An error has occurred. Please try again later');
+        }
+      })
+      .catch(console.error);
+  }, [show]);
+
+  const handleEnableAll = useCallback(() => {
+    enableAllNetwork()
+      .then((resp) => {
+        if (resp) {
+          show('All networks are enabled');
+        } else {
+          show('An error has occurred. Please try again later');
+        }
+      })
+      .catch(console.error);
+  }, [show]);
+
+  const handleResetDefault = useCallback(() => {
+    resetDefaultNetwork()
+      .then((resp) => {
+        if (resp) {
+          show('Networks have been reset to default setting');
+        } else {
+          show('An error has occurred. Please try again later');
+        }
+      })
+      .catch(console.error);
+  }, [show]);
+
   return (
     <div className={className}>
       <Header
@@ -77,11 +116,23 @@ function Networks ({ className }: Props): React.ReactElement {
       </Header>
 
       <div className='networks__button-area'>
-        <div className='networks__btn networks__disconnect-btn'>
+        <div
+          className='networks__btn networks__disconnect-btn'
+          onClick={handleDisableAll}
+        >
           {t<string>('Disconnect All')}
         </div>
-        <div className='networks__btn networks__connect-btn'>
+        <div
+          className='networks__btn networks__connect-btn'
+          onClick={handleEnableAll}
+        >
           {t<string>('Connect All')}
+        </div>
+        <div
+          className='networks__btn networks__connect-btn'
+          onClick={handleResetDefault}
+        >
+          {t<string>('Reset to default')}
         </div>
       </div>
 

@@ -7,7 +7,7 @@ import { NftCollection, NftItem, RMRK_VER } from '@polkadot/extension-base/backg
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { isUrl, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 
-import { KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, RMRK_PINATA_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
+import { CF_IPFS_GATEWAY, KANARIA_ENDPOINT, KANARIA_EXTERNAL_SERVER, SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V1_ENDPOINT, SINGULAR_V1_EXTERNAL_SERVER, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT, SINGULAR_V2_EXTERNAL_SERVER } from '../config';
 
 enum RMRK_SOURCE {
   BIRD_KANARIA = 'bird_kanaria',
@@ -63,10 +63,10 @@ export class RmrkNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://ipfs/')) {
-      return RMRK_PINATA_SERVER + input;
+      return CF_IPFS_GATEWAY + input;
     }
 
-    return RMRK_PINATA_SERVER + input.split('ipfs://ipfs/')[1];
+    return CF_IPFS_GATEWAY + input.split('ipfs://ipfs/')[1];
   }
 
   private async getMetadata (metadataUrl: string): Promise<NFTMetadata | undefined> {

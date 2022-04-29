@@ -570,6 +570,9 @@ export interface DisableNetworkResponse {
 }
 
 export interface KoniRequestSignatures {
+  'pri(networkMap.disableAll)': [null, boolean];
+  'pri(networkMap.enableAll)': [null, boolean];
+  'pri(networkMap.resetDefault)': [null, boolean];
   'pri(apiMap.validate)': [ValidateNetworkRequest, ValidateNetworkResponse];
   'pri(networkMap.enableOne)': [string, boolean];
   'pri(networkMap.disableOne)': [string, DisableNetworkResponse];

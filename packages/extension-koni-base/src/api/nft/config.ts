@@ -19,7 +19,7 @@ export const SINGULAR_V2_EXTERNAL_SERVER = 'https://singular.app/collectibles/';
 
 export const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
 
-export const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
+export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
 export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
 

@@ -4,7 +4,7 @@
 import fetch from 'cross-fetch';
 
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { CLOUDFLARE_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
+import { CLOUDFLARE_PINATA_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
 import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -44,10 +44,10 @@ export class KaruraNftApi extends BaseNftApi {
     }
 
     if (!input.includes('ipfs://')) {
-      return CLOUDFLARE_SERVER + input;
+      return CLOUDFLARE_PINATA_SERVER + input;
     }
 
-    return CLOUDFLARE_SERVER + input.split('ipfs://')[1];
+    return CLOUDFLARE_PINATA_SERVER + input.split('ipfs://')[1];
   }
 
   /**
@@ -173,7 +173,7 @@ const getKaruraMetadata = (metadataUrl: string) => {
     return null;
   }
 
-  url = CLOUDFLARE_SERVER + metadataUrl + '/metadata.json';
+  url = CLOUDFLARE_PINATA_SERVER + metadataUrl + '/metadata.json';
 
   return fetch(url, {
     method: 'GET',

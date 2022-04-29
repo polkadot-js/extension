@@ -1426,6 +1426,24 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  private enableAllNetwork (): boolean {
+    state.enableAllNetworks();
+
+    return true;
+  }
+
+  private async disableAllNetwork (): Promise<boolean> {
+    await state.disableAllNetworks();
+
+    return true;
+  }
+
+  private async resetDefaultNetwork (): Promise<boolean> {
+    await state.resetDefaultNetwork();
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1535,6 +1553,12 @@ export default class KoniExtension extends Extension {
         return this.enableNetworkMap(request as string);
       case 'pri(apiMap.validate)':
         return await this.validateNetwork(request as ValidateNetworkRequest);
+      case 'pri(networkMap.disableAll)':
+        return this.disableAllNetwork();
+      case 'pri(networkMap.enableAll)':
+        return this.enableAllNetwork();
+      case 'pri(networkMap.resetDefault)':
+        return this.resetDefaultNetwork();
       default:
         return super.handle(id, type, request, port);
     }

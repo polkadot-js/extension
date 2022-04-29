@@ -10,6 +10,7 @@ import ChainRegistryReducer from './ChainRegistry';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
+import NetworkConfigParamsReducer from './NetworkConfigParams';
 import NetworkMapReducer from './NetworkMap';
 import NetworkMetadataReducer from './NetworkMetadata';
 import NftReducer from './Nft';
@@ -20,7 +21,6 @@ import StakingRewardReducer from './StakingReward';
 import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
-import NetworkConfigParamsReducer from './NetworkConfigParams';
 
 const reducers = {
   networkConfigParams: NetworkConfigParamsReducer,

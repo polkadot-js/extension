@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {faCog, faExpand, faInfoCircle, faList, faLock, faPlug, faQrcode} from '@fortawesome/free-solid-svg-icons';
+import { faCog, faExpand, faInfoCircle, faList, faLock, faPlug, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';

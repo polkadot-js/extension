@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { ThemeProps } from '../../types';
+
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -33,14 +35,14 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
         </tr>
         <tr>
           <td className='label'>{t<string>('bytes')}</td>
-          <td className='data'>{text}</td>
+          <td className='data pre'><div>{text}</div></td>
         </tr>
       </tbody>
     </table>
   );
 }
 
-export default styled(Bytes)`
+export default styled(Bytes)(({ theme }: ThemeProps) => `
   border: 0;
   display: block;
   font-size: 0.75rem;
@@ -53,11 +55,24 @@ export default styled(Bytes)`
     text-overflow: ellipsis;
     vertical-align: middle;
     width: 100%;
+    padding: 0.15rem;
 
-    pre {
-      font-family: inherit;
-      font-size: 0.75rem;
-      margin: 0;
+    &.pre {
+      padding: 0px;
+      
+      div {
+        padding: 0.15rem;
+        font-family: inherit;
+        font-size: 0.75rem;
+        margin: 0;
+        white-space: pre;
+        overflow: auto;
+        max-height: calc(100vh - 480px);
+        min-height: ${theme.boxLineHeight};
+        border: 1px solid ${theme.boxBorderColor};
+        background: ${theme.boxBackground};
+        line-height: ${theme.boxLineHeight};
+      }
     }
   }
 
@@ -68,4 +83,4 @@ export default styled(Bytes)`
     vertical-align: middle;
     white-space: nowrap;
   }
-`;
+`);

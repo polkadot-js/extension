@@ -157,7 +157,14 @@ export class KoniCron {
   }
 
   refreshPrice () {
-    getTokenPrice()
+    const activeNetworks: string[] = [];
+
+    Object.values(state.getNetworkMap()).forEach((network) => {
+      if (network.active && network.coinGeckoKey) {
+        activeNetworks.push(network.coinGeckoKey);
+      }
+    });
+    getTokenPrice(activeNetworks)
       .then((rs) => {
         state.setPrice(rs, () => {
           console.log('Get Token Price From CoinGecko');

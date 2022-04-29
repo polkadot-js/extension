@@ -4,26 +4,26 @@
 import axios from 'axios';
 
 import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 
-const alternativeNameMap: Record<string, string> = {
-  bifrost: 'bifrost-native-coin',
-  calamari: 'calamari-network',
-  crab: 'darwinia-crab-network',
-  crust: 'crust-network',
-  aleph: 'aleph-zero',
-  darwinia: 'darwinia-network-native-token',
-  kilt: 'kilt-protocol',
-  kintsugi: 'kintsugi',
-  parallel: 'paralink-network',
-  phala: 'pha',
-  picasso: 'pica',
-  robonomics: 'robonomics-network',
-  shadow: 'crust-storage-market',
-  'sora-substrate': 'sora',
-  astarEvm: 'astar',
-  shidenEvm: 'shiden'
-};
+// const alternativeNameMap: Record<string, string> = {
+//   bifrost: 'bifrost-native-coin',
+//   calamari: 'calamari-network',
+//   crab: 'darwinia-crab-network',
+//   crust: 'crust-network',
+//   aleph: 'aleph-zero',
+//   darwinia: 'darwinia-network-native-token',
+//   kilt: 'kilt-protocol',
+//   kintsugi: 'kintsugi',
+//   parallel: 'paralink-network',
+//   phala: 'pha',
+//   picasso: 'pica',
+//   robonomics: 'robonomics-network',
+//   shadow: 'crust-storage-market',
+//   'sora-substrate': 'sora',
+//   astarEvm: 'astar',
+//   shidenEvm: 'shiden'
+// };
 
 interface GeckoItem {
   id: string,
@@ -32,24 +32,13 @@ interface GeckoItem {
   symbol: string
 }
 
-export const getTokenPrice = async (chains: Array<string> = Object.keys(NETWORKS), currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (chains: Array<string> = Object.keys(PREDEFINED_NETWORKS), currency = 'usd'): Promise<PriceJson> => {
   try {
     const inverseMap: Record<string, string> = {};
-    const finalChains = chains.map((chain) => {
-      const alterKey = alternativeNameMap[chain];
 
-      if (alterKey) {
-        inverseMap[alterKey] = chain;
+    chains.push(...['ausd', 'tai', 'kolibri-usd', 'zenlink-network-token']);
 
-        return alterKey;
-      } else {
-        return chain;
-      }
-    });
-
-    finalChains.push(...['ausd', 'tai', 'kolibri-usd', 'zenlink-network-token']);
-
-    const chainsStr = finalChains.join(',');
+    const chainsStr = chains.join(',');
     const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${chainsStr}`);
 
     if (res.status !== 200) {

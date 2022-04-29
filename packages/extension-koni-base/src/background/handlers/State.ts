@@ -796,7 +796,15 @@ export default class KoniState extends State {
       if (this.priceStoreReady) {
         update(rs);
       } else {
-        getTokenPrice()
+        const activeNetworks: string[] = [];
+
+        Object.values(this.networkMap).forEach((network) => {
+          if (network.active && network.coinGeckoKey) {
+            activeNetworks.push(network.coinGeckoKey);
+          }
+        });
+
+        getTokenPrice(activeNetworks)
           .then((rs) => {
             this.setPrice(rs);
             update(rs);

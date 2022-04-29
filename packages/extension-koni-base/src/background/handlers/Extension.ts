@@ -16,7 +16,7 @@ import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dot
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
-import { getWeb3Api, initWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import { initWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { isValidProvider, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
@@ -932,8 +932,9 @@ export default class KoniExtension extends Extension {
     let toAccountFree = '0';
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
+      // @ts-ignore
       [fromAccountFree, toAccountFree] = await Promise.all(
-        [getFreeBalance(networkKey, from, token), getFreeBalance(networkKey, to, token)]
+        [getFreeBalance(networkKey, from, state.getApiMap().web3), token, getFreeBalance(networkKey, to, state.getApiMap().web3, token)]
       );
       const txVal: string = transferAll ? fromAccountFree : (value || '0');
 
@@ -946,7 +947,7 @@ export default class KoniExtension extends Extension {
     } else {
       // Estimate with DotSama API
       [fee, fromAccountFree, toAccountFree] = await Promise.all(
-        [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+        [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from, state.getApiMap().web3), getFreeBalance(networkKey, to, state.getApiMap().web3)]
       );
     }
 
@@ -1026,7 +1027,8 @@ export default class KoniExtension extends Extension {
     const tokenId = params.tokenId as string;
 
     try {
-      const web3 = getWeb3Api(networkKey);
+      const web3ApiMap = state.getApiMap().web3;
+      const web3 = web3ApiMap[networkKey];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const contract = new web3.eth.Contract(TestERC721Contract, contractAddress);
 
@@ -1098,7 +1100,8 @@ export default class KoniExtension extends Extension {
     }
 
     try {
-      const web3 = getWeb3Api(networkKey);
+      const web3ApiMap = state.getApiMap().web3;
+      const web3 = web3ApiMap[networkKey];
 
       const common = Common.forCustomChain('mainnet', {
         name: networkKey,

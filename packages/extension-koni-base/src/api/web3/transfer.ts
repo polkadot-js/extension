@@ -4,11 +4,13 @@
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { ResponseTransfer, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
-import { getERC20Contract, getWeb3Api } from '@polkadot/extension-koni-base/api/web3/web3';
+import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { BN } from '@polkadot/util';
 
 export async function handleTransfer (transactionObject: TransactionConfig, networkKey: string, privateKey: string, callback: (data: ResponseTransfer) => void) {
-  const web3Api = getWeb3Api(networkKey);
+  const web3ApiMap = state.getApiMap().web3;
+  const web3Api = web3ApiMap[networkKey];
   const signedTransaction = await web3Api.eth.accounts.signTransaction(transactionObject, privateKey);
   const response: ResponseTransfer = {
     step: TransferStep.READY,
@@ -47,7 +49,8 @@ export async function handleTransfer (transactionObject: TransactionConfig, netw
 }
 
 export async function getEVMTransactionObject (networkKey: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string]> {
-  const web3Api = getWeb3Api(networkKey);
+  const web3ApiMap = state.getApiMap().web3;
+  const web3Api = web3ApiMap[networkKey];
   const gasPrice = await web3Api.eth.getGasPrice();
   const transactionObject = {
     gasPrice: gasPrice,
@@ -71,8 +74,9 @@ export async function makeEVMTransfer (networkKey: string, to: string, privateKe
 }
 
 export async function getERC20TransactionObject (assetAddress: string, networkKey: string, from: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string]> {
-  const web3Api = getWeb3Api(networkKey);
-  const erc20Contract = getERC20Contract(networkKey, assetAddress);
+  const web3ApiMap = state.getApiMap().web3;
+  const web3Api = web3ApiMap[networkKey];
+  const erc20Contract = getERC20Contract(networkKey, assetAddress, web3ApiMap);
 
   let freeAmount = new BN(0);
   let transferValue = value;

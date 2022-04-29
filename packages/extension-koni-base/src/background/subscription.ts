@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { take } from 'rxjs';
+import Web3 from 'web3';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { ApiProps, NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
@@ -58,7 +59,7 @@ export class KoniSubscription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama);
+        this.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama, state.getApiMap().web3);
       }
 
       state.subscribeServiceInfo().subscribe({
@@ -68,7 +69,7 @@ export class KoniSubscription {
           const { address } = serviceInfo.currentAccountInfo;
 
           state.initChainRegistry();
-          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama);
+          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, state.getApiMap().web3);
         }
       });
     });
@@ -87,21 +88,21 @@ export class KoniSubscription {
     });
   }
 
-  subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>) {
+  subscribeBalancesAndCrowdloans (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
     this.unsubBalances && this.unsubBalances();
     this.unsubCrowdloans && this.unsubCrowdloans();
     state.resetBalanceMap();
     state.resetCrowdloanMap();
     this.detectAddresses(address)
       .then((addresses) => {
-        this.unsubBalances = this.initBalanceSubscription(addresses, dotSamaApiMap);
+        this.unsubBalances = this.initBalanceSubscription(addresses, dotSamaApiMap, web3ApiMap);
         this.unsubCrowdloans = this.initCrowdloanSubscription(addresses, dotSamaApiMap);
       })
       .catch(console.error);
   }
 
-  initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
-    const subscriptionPromises = subscribeBalance(addresses, dotSamaApiMap, (networkKey, rs) => {
+  initBalanceSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
+    const subscriptionPromises = subscribeBalance(addresses, dotSamaApiMap, web3ApiMap, (networkKey, rs) => {
       state.setBalanceItem(networkKey, rs);
     });
 

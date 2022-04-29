@@ -17,10 +17,10 @@ export const SUBSQUID_ENDPOINTS: Record<string, string> = {
 };
 
 export const SUPPORTED_STAKING_CHAINS = [
-  SUPPORTED_STAKING_CHAIN_NAMES.polkadot,
-  SUPPORTED_STAKING_CHAIN_NAMES.kusama,
-  SUPPORTED_STAKING_CHAIN_NAMES.astar,
-  SUPPORTED_STAKING_CHAIN_NAMES.hydradx
+  SUPPORTED_STAKING_CHAIN_NAMES.polkadot as string,
+  SUPPORTED_STAKING_CHAIN_NAMES.kusama as string,
+  SUPPORTED_STAKING_CHAIN_NAMES.astar as string,
+  SUPPORTED_STAKING_CHAIN_NAMES.hydradx as string
 ];
 
 export const SUBQUERY_ENDPOINTS: Record<string, string> = {

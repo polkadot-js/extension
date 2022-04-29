@@ -5,7 +5,7 @@ import axios from 'axios';
 
 import { APIItemState, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@polkadot/extension-koni-base/api/staking/config';
+import { SUBSQUID_ENDPOINTS } from '@polkadot/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
 interface RewardResponseItem {
@@ -172,10 +172,10 @@ const getSubsquidStaking = async (accounts: string[], chain: string, callback: (
   }
 };
 
-export const getAllSubsquidStaking = async (accounts: string[], callback: (networkKey: string, rs: StakingItem) => void): Promise<StakingRewardJson> => {
+export const getAllSubsquidStaking = async (accounts: string[], activeNetworks: string[], callback: (networkKey: string, rs: StakingItem) => void): Promise<StakingRewardJson> => {
   let rewardList: StakingRewardItem[] = [];
 
-  const rewardItems = await Promise.all(SUPPORTED_STAKING_CHAINS.map(async (network) => {
+  const rewardItems = await Promise.all(activeNetworks.map(async (network) => {
     return await getSubsquidStaking(accounts, network, callback);
   }));
 

@@ -176,8 +176,16 @@ export class KoniSubscription {
 
   async subscribeStakingReward (address: string) {
     const addresses = await this.detectAddresses(address);
+    const networkMap = state.getNetworkMap();
+    const activeNetworks: string[] = [];
 
-    await getAllSubsquidStaking(addresses, (networkKey, rs) => {
+    Object.entries(networkMap).forEach(([key, network]) => {
+      if (network.active) {
+        activeNetworks.push(key);
+      }
+    });
+
+    await getAllSubsquidStaking(addresses, activeNetworks, (networkKey, rs) => {
       state.setStakingItem(networkKey, rs);
     })
       .then((result) => {

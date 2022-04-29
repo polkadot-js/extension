@@ -145,33 +145,45 @@ function transformGrOptions (options: AccountOption[]) {
 
 // eslint-disable-next-line no-empty-pattern
 function InputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, networkPrefix, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
-  const [lastValue, setInputAddressLastValue] = useState('');
   const inputAddressRef = useRef(null);
   const [options, setOptions] = useState<AccountOption[]>([]);
-  const [subscriptionId, setSubscriptionId] = useState<string>('');
-
-  const handleGetAccountsInputAddress = (data: OptionInputAddress) => {
-    const { options } = data;
-    const addressList = options[type].map((acc) => ({ value: acc.value, text: acc.name, name: acc.name, key: acc.key }));
-
-    setOptions(addressList);
-  };
+  const defaultLastValue = getLastValue(type) || '';
+  const [lastValue, setInputAddressLastValue] = useState(defaultLastValue);
 
   useEffect(() => {
-    subscribeAccountsInputAddress(handleGetAccountsInputAddress)
-      .then((id) => setSubscriptionId(id))
+    let isSync = true;
+    let subscriptionId = '';
+
+    subscribeAccountsInputAddress((data: OptionInputAddress) => {
+      if (isSync) {
+        const { options } = data;
+        const addressList = options[type].map((acc) => ({
+          value: acc.value,
+          text: acc.name,
+          name: acc.name,
+          key: acc.key
+        }));
+
+        setOptions(addressList);
+      }
+    })
+      .then((id) => {
+        if (isSync) {
+          subscriptionId = id;
+        } else {
+          cancelSubscription(id).catch((e) => console.log('Error when cancel subscription', e));
+        }
+      })
       .catch(console.error);
 
     return () => {
-      cancelSubscription(subscriptionId).catch((e) => console.log('Error when cancel subscription', e));
+      isSync = false;
+
+      if (subscriptionId) {
+        cancelSubscription(subscriptionId).catch((e) => console.log('Error when cancel subscription', e));
+      }
     };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    setInputAddressLastValue(getLastValue(type));
-  }, [lastValue, type]);
+  }, [type]);
 
   const getFiltered = (): Option[] => {
     return !optionsAll

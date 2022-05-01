@@ -71,7 +71,9 @@ export class NftHandler {
     const _apiProps: Record<string, any>[] = [];
 
     for (const item in SUPPORTED_NFT_NETWORKS) {
-      _apiProps.push({ chain: item, api: dotSamaAPIMap[item] });
+      if (item in dotSamaAPIMap) {
+        _apiProps.push({ chain: item, api: dotSamaAPIMap[item] });
+      }
     }
 
     this.apiProps = _apiProps;

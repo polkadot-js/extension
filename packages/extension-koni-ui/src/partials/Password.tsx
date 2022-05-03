@@ -11,11 +11,14 @@ import { allOf, isNotShorterThan, isSameAs, Validator } from '../util/validators
 interface Props {
   isFocussed?: boolean;
   onChange: (password: string | null) => void;
+  onFocusPasswordInput?: (value: string) => void;
+  onFocusRepeatPasswordInput?: (value: string) => void;
+  onScrollToError?: () => void;
 }
 
 const MIN_LENGTH = 6;
 
-export default function Password ({ isFocussed, onChange }: Props): React.ReactElement<Props> {
+export default function Password ({ isFocussed, onChange, onFocusPasswordInput, onFocusRepeatPasswordInput, onScrollToError }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
@@ -33,11 +36,12 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   return (
     <>
       <ValidatedInput
-
         component={InputWithLabel}
         data-input-password
         isFocused={isFocussed}
         label={t<string>('A new password for this account')}
+        onFocus={onFocusPasswordInput}
+        onScrollToError={onScrollToError}
         onValidatedChange={setPass1}
         type='password'
         validator={isFirstPasswordValid}
@@ -47,6 +51,8 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
           component={InputWithLabel}
           data-input-repeat-password
           label={t<string>('Repeat password for verification')}
+          onFocus={onFocusRepeatPasswordInput}
+          onScrollToError={onScrollToError}
           onValidatedChange={setPass2}
           type='password'
           validator={isSecondPasswordValid(pass1)}

@@ -309,7 +309,9 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
       isShowTxResult: false,
       txError: undefined
     });
-  }, []);
+    setSenderValue(defaultValue);
+    setRecipientId(null);
+  }, [defaultValue.address, defaultValue.networkKey, defaultValue.token]);
 
   const _onChangeResult = useCallback((txResult: TransferResultType) => {
     setTxResult(txResult);

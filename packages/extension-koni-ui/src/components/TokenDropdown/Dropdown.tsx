@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
@@ -10,8 +12,6 @@ import { TokenItemType } from '@polkadot/extension-koni-ui/components/types';
 import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 interface WrapperProps {
   className?: string;

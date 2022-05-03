@@ -32,7 +32,6 @@ export async function handleTransfer (transactionObject: TransactionConfig, netw
       //   callback(response);
       // })
       .on('receipt', function (receipt: TransactionReceipt) {
-
         response.step = TransferStep.SUCCESS;
         // response.txResult = {
         //   change:

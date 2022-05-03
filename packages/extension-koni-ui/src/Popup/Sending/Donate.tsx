@@ -240,7 +240,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
 
     transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).then((res) => {
       if (isSync) {
-        setTransferSupport(res);
+        setTransferSupport(res.supportTransfer);
       }
     }).catch((e) => console.log(e));
 

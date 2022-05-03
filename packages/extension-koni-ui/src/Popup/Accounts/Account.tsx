@@ -15,7 +15,7 @@ import { AccountContext, AccountInfoEl, ActionContext } from '@polkadot/extensio
 import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
+import { saveAccountAllLogo, saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@polkadot/extension-koni-ui/util';
@@ -86,18 +86,12 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
 
     reader.onload = function () {
       if (currentAccount) {
-        const accountInfo = {
-          address: currentAccount.address,
-          isShowBalance: false,
-          allAccountLogo: reader.result as string
-        } as CurrentAccountInfo;
+        const accountAllLogo = reader.result as string;
 
-        saveCurrentAccountAddress(accountInfo, () => {
-          triggerAccountsSubscription().catch((e: any) => {
-            console.error('There is a problem when trigger Accounts Subscription', e);
-          });
+        saveAccountAllLogo(accountAllLogo, () => {
+          console.log('Avatar has changed');
         }).catch((e) => {
-          console.error('There is a problem when set Current Account', e);
+          console.error('There is a problem when set Account All Logo', e);
         });
       }
     };

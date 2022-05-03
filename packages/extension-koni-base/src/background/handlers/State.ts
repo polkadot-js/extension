@@ -5,7 +5,28 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountRefMap,
+  APIItemState,
+  AuthRequestV2,
+  BalanceItem,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanItem,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  NftCollection,
+  NftCollectionJson,
+  NftItem,
+  NftJson,
+  NftTransferExtra,
+  PriceJson, RequestSettingsType,
+  ResultResolver,
+  StakingItem,
+  StakingJson,
+  StakingRewardJson,
+  TransactionHistoryItemType
+} from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -17,6 +38,7 @@ import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquer
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
+import SettingsStore from '@polkadot/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
@@ -71,6 +93,7 @@ export default class KoniState extends State {
 
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
+  private readonly settingsStore = new SettingsStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
@@ -517,6 +540,18 @@ export default class KoniState extends State {
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+  }
+
+  public getSettings (update: (value: RequestSettingsType) => void): void {
+    this.settingsStore.get('Settings', update);
+  }
+
+  public setSettings (data: RequestSettingsType, callback?: () => void): void {
+    this.settingsStore.set('Settings', data, callback);
+  }
+
+  public subscribeSettingsSubject (): Subject<RequestSettingsType> {
+    return this.settingsStore.getSubject();
   }
 
   public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {

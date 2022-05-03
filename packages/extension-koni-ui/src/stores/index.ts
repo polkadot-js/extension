@@ -5,12 +5,12 @@ import { configureStore } from '@reduxjs/toolkit/dist';
 
 import AllAccountReducer from './AllAccount';
 import BalanceReducer from './Balance';
-import BalanceStatusReducer from './BalanceStatus';
 import ChainRegistryReducer from './ChainRegistry';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
 import NetworkMetadataReducer from './NetworkMetadata';
+import SettingsReducer from './Settings';
 import NftReducer from './Nft';
 import NftCollectionReducer from './NftCollection';
 import PriceReducer from './Price';
@@ -35,8 +35,8 @@ const reducers = {
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
   networkMetadata: NetworkMetadataReducer,
-  balanceStatus: BalanceStatusReducer,
-  allAccount: AllAccountReducer
+  allAccount: AllAccountReducer,
+  settings: SettingsReducer
 };
 
 export const store = configureStore({

@@ -93,7 +93,7 @@ function AccountMenuSettings ({ changeAccountCallback, className, closeSetting, 
         <InputFilter
           className='account-menu-settings__input-filter'
           onChange={_onChangeFilter}
-          placeholder={t<string>('Search by name or network...')}
+          placeholder={t<string>('Search by name...')}
           value={filter}
           withReset
         />

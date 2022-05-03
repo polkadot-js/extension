@@ -7,7 +7,9 @@ import React, { useCallback, useContext, useRef, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
 
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { Label, Theme } from '@polkadot/extension-koni-ui/components';
+import { TokenTransformOptionType } from '@polkadot/extension-koni-ui/components/TokenDropdown/types';
 import { TokenItemType } from '@polkadot/extension-koni-ui/components/types';
 import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -31,7 +33,6 @@ interface Props {
   options: TokenItemType[];
   value?: string;
   ci?: React.ReactNode;
-  filterOptions?: (candidate: {label: string, value: string}, input: string) => boolean;
 }
 
 function DropdownWrapper ({ className, formatOptLabel, onChange, options, value }: WrapperProps): React.ReactElement<WrapperProps> {
@@ -88,8 +89,8 @@ function DropdownWrapper ({ className, formatOptLabel, onChange, options, value 
   );
 }
 
-function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChange, options, value }: Props): React.ReactElement<Props> {
-  const transformOptions = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}`, networkKey: t.networkKey }));
+function Dropdown ({ className, getFormatOptLabel, label, onChange, options, value }: Props): React.ReactElement<Props> {
+  const transformOptions: TokenTransformOptionType[] = options.map((t) => ({ label: t.token, value: `${t.token}|${t.networkKey}`, networkKey: t.networkKey, networkName: NETWORKS[t.networkKey].chain }));
   const [selectedValue, setSelectedValue] = useState(value);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
@@ -108,13 +109,18 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
     return getFormatOptLabel && getFormatOptLabel(label, value, networkKey);
   }, [getFormatOptLabel]);
 
-  const filterOption = useCallback((candidate: { label: string; value: string }, input: string) => {
-    if (filterOptions) {
-      return filterOptions(candidate, input);
+  const filterOption = useCallback((candidate: { label: string; value: string, data: TokenTransformOptionType }, input: string) => {
+    if (input) {
+      const query = input.trim();
+      const queryLower = query.toLowerCase();
+      const isMatches = (candidate.label.toLowerCase() && candidate.label.toLowerCase().includes(queryLower)) ||
+        (candidate.data.networkName.toLowerCase() && candidate.data.networkName.toLowerCase().includes(queryLower));
+
+      return !!isMatches;
     }
 
-    return false;
-  }, [filterOptions]);
+    return true;
+  }, []);
 
   const customStyles = {
     option (base: any, { isSelected }: any) {
@@ -187,7 +193,7 @@ function Dropdown ({ className, filterOptions, getFormatOptLabel, label, onChang
           autoFocus
           className='token-dropdown-dropdown-wrapper'
           classNamePrefix='token-dropdown-dropdown'
-          filterOption={filterOptions && filterOption}
+          filterOption={filterOption}
           formatOptionLabel={getFormatOptLabel && formatOptionLabel}
           isSearchable
           menuIsOpen

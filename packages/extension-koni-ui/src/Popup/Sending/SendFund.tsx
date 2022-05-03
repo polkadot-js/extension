@@ -311,7 +311,13 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     });
     setSenderValue(defaultValue);
     setRecipientId(null);
-  }, [defaultValue.address, defaultValue.networkKey, defaultValue.token]);
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [
+    defaultValue.address,
+    defaultValue.networkKey,
+    defaultValue.token
+  ]);
 
   const _onChangeResult = useCallback((txResult: TransferResultType) => {
     setTxResult(txResult);

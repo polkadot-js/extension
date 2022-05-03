@@ -17,7 +17,7 @@ state.initNetworkStates();
 
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
-export const nftHandler = new NftHandler(state.getApiMap().dotSama);
+export const nftHandler = new NftHandler(state.getApiMap().dotSama, [], state.getApiMap().web3);
 
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};

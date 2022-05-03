@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Web3 from 'web3';
+
 import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
@@ -15,15 +17,15 @@ import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
 
-function createNftApi (chain: string, api: ApiProps | null, addresses: string[]): BaseNftApi | null {
+function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
   const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
 
   switch (chain) {
     case SUPPORTED_NFT_NETWORKS.karura:
-      return new KaruraNftApi(api, useAddresses, chain);
+      return new KaruraNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.acala:
-      return new AcalaNftApi(api, useAddresses, chain);
+      return new AcalaNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.kusama:
       // eslint-disable-next-line no-case-declarations
       const rmrkNftApi = new RmrkNftApi();
@@ -33,19 +35,29 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
 
       return rmrkNftApi;
     case SUPPORTED_NFT_NETWORKS.statemine:
-      return new StatemineNftApi(api, useAddresses, chain);
+      return new StatemineNftApi(apiProps, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.uniqueNft:
-      return new UniqueNftApi(api, useAddresses, chain);
+      return new UniqueNftApi(apiProps, useAddresses, chain);
     // case SUPPORTED_NFT_NETWORKS.quartz:
     //   return new QuartzNftApi(api, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.bitcountry:
-      return new BitCountryNftApi(api, useAddresses, chain);
+      return new BitCountryNftApi(apiProps, useAddresses, chain);
+  }
+
+  return null;
+}
+
+function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]): BaseNftApi | null {
+  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
+  const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+
+  switch (chain) {
     case SUPPORTED_NFT_NETWORKS.moonbeam:
-      return new Web3NftApi(useAddresses, chain);
+      return new Web3NftApi(web3, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.moonriver:
-      return new Web3NftApi(useAddresses, chain);
+      return new Web3NftApi(web3, useAddresses, chain);
     case SUPPORTED_NFT_NETWORKS.astarEvm:
-      return new Web3NftApi(useAddresses, chain);
+      return new Web3NftApi(web3, useAddresses, chain);
   }
 
   return null;
@@ -53,11 +65,16 @@ function createNftApi (chain: string, api: ApiProps | null, addresses: string[])
 
 export class NftHandler {
   apiProps: Record<string, any>[] = [];
+  web3ApiMap: Record<string, Web3> = {};
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
   total = 0;
+  needSetupApi = true;
 
-  constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
+  // TODO: process change handlers (add, delete)
+  // TODO: pass web3 api
+
+  constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[], web3ApiMap?: Record<string, Web3>) {
     if (addresses) {
       this.addresses = addresses;
     }
@@ -65,6 +82,15 @@ export class NftHandler {
     for (const item in SUPPORTED_NFT_NETWORKS) {
       this.apiProps.push({ chain: item, api: dotSamaAPIMap[item] });
     }
+
+    if (web3ApiMap) {
+      this.web3ApiMap = web3ApiMap;
+    }
+  }
+
+  setWeb3ApiMap (web3ApiMap: Record<string, Web3>) {
+    this.web3ApiMap = web3ApiMap;
+    this.needSetupApi = true;
   }
 
   setApiProps (dotSamaAPIMap: Record<string, ApiProps>) {
@@ -77,6 +103,7 @@ export class NftHandler {
     }
 
     this.apiProps = _apiProps;
+    this.needSetupApi = true;
   }
 
   setAddresses (addresses: string[]) {
@@ -94,20 +121,31 @@ export class NftHandler {
 
   private setupApi () {
     try {
-      if (this.handlers.length <= 0) { // setup connections for first time use
+      if (this.needSetupApi) { // setup connections for first time use
+        this.handlers = [];
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
 
         this.apiProps.forEach(({ api: apiPromise, chain }) => {
           const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const handler = createNftApi(chain, apiPromise as ApiProps, useAddresses);
+          const handler = createSubstrateNftApi(chain, apiPromise as ApiProps, useAddresses);
 
           if (handler && !this.handlers.includes(handler)) {
             this.handlers.push(handler);
           }
         });
 
+        Object.entries(this.web3ApiMap).forEach(([chain, web3]) => {
+          const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+          const handler = createWeb3NftApi(chain, web3, useAddresses);
+
+          if (handler && !this.handlers.includes(handler)) {
+            this.handlers.push(handler);
+          }
+        });
+
+        this.needSetupApi = false;
         // console.log(`${this.handlers.length} nft connected`);
       }
     } catch (e) {

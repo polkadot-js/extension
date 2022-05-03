@@ -5,7 +5,6 @@ import fetch from 'cross-fetch';
 import Web3 from 'web3';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS, { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
 import { CF_IPFS_GATEWAY, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@polkadot/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
@@ -14,12 +13,13 @@ import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export class Web3NftApi extends BaseNftApi {
-  web3: Web3 | null = null;
   targetContracts: ContractInfo[] | undefined;
   isConnected = false;
 
-  constructor (addresses: string[], chain: string) {
+  constructor (web3: Web3 | null, addresses: string[], chain: string) {
     super(undefined, addresses, chain);
+
+    this.web3 = web3;
 
     if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) {
       this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
@@ -30,13 +30,13 @@ export class Web3NftApi extends BaseNftApi {
     }
   }
 
-  connectWeb3 () {
-    if (this.chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
-      this.web3 = new Web3(new Web3.providers.WebsocketProvider(NETWORKS.astar.provider));
-    } else {
-      this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
-    }
-  }
+  // connectWeb3 () {
+  //   if (this.chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
+  //     this.web3 = new Web3(new Web3.providers.WebsocketProvider(NETWORKS.astar.provider));
+  //   } else {
+  //     this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
+  //   }
+  // }
 
   override parseUrl (input: string): string | undefined {
     if (!input) {
@@ -178,7 +178,6 @@ export class Web3NftApi extends BaseNftApi {
 
   public async fetchNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<number> {
     try {
-      this.connectWeb3();
       await this.handleNfts(updateItem, updateCollection, updateReady);
     } catch (e) {
       return 0;

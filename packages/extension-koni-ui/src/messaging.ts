@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -80,6 +80,18 @@ export async function showAccount (address: string, isShowing: boolean): Promise
 
 export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddress, callback: (data: CurrentAccountInfo) => void): Promise<boolean> {
   return sendMessage('pri(currentAccount.saveAddress)', data, callback);
+}
+
+export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.changeBalancesVisibility)', null, callback);
+}
+
+export async function saveAccountAllLogo (accountAllLogo: string, callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAccountAllLogo)', accountAllLogo, callback);
+}
+
+export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
+  return sendMessage('pri(currentAccount.subscribeSettings)', data, callback);
 }
 
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {

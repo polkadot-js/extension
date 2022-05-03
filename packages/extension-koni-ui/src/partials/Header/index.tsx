@@ -66,11 +66,9 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const [isShowModal, setShowModal] = useState(false);
-  const currentAccount = useSelector((state: RootState) => state.currentAccount.account);
-  const { isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
-  const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
+  const { currentAccount: { account }, currentNetwork: { isEthereum, networkPrefix }, settings: { accountAllLogo } } = useSelector((state: RootState) => state);
   const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
-  const chain = useMetadata(currentAccount?.genesisHash, true);
+  const chain = useMetadata(account?.genesisHash, true);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const { accounts } = useContext(AccountContext);
@@ -84,30 +82,30 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     []
   );
 
-  const genesisOptions = getGenesisOptionsByAddressType(currentAccount?.address, accounts, useGenesisHashOptions());
-  const _isAccountAll = currentAccount && isAccountAll(currentAccount.address);
+  const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
+  const _isAccountAll = account && isAccountAll(account.address);
 
   useEffect((): void => {
-    if (!currentAccount) {
+    if (!account) {
       return;
     }
 
-    if (!currentAccount.address) {
+    if (!account.address) {
       setFormattedAddress(null);
 
       return;
     }
 
-    if (isAccountAll(currentAccount.address)) {
+    if (isAccountAll(account.address)) {
       setFormattedAddress(accountAllRecoded.formatted);
 
       return;
     }
 
-    const formattedAddress = reformatAddress(currentAccount.address, networkPrefix, isEthereum);
+    const formattedAddress = reformatAddress(account.address, networkPrefix, isEthereum);
 
     setFormattedAddress(formattedAddress);
-  }, [currentAccount, currentAccount?.address, networkPrefix, isEthereum]);
+  }, [account, account?.address, networkPrefix, isEthereum]);
 
   useEffect(() => {
     let isSync = true;
@@ -147,13 +145,13 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     (async () => {
       let networkSelected;
 
-      if (!currentAccount || !currentAccount?.genesisHash) {
+      if (!account || !account?.genesisHash) {
         networkSelected = genesisOptions[0];
       } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === currentAccount.genesisHash);
+        networkSelected = genesisOptions.find((opt) => opt.value === account.genesisHash);
 
         if (!networkSelected) {
-          await tieAccount(currentAccount.address, null);
+          await tieAccount(account.address, null);
           networkSelected = genesisOptions[0];
         }
       }
@@ -174,13 +172,13 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     return () => {
       isSync = false;
     };
-  }, [currentAccount, currentAccount?.genesisHash, _isAccountAll, genesisOptions]);
+  }, [account, account?.genesisHash, _isAccountAll, genesisOptions]);
 
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
       let networkKey = '';
 
-      if (currentAccount) {
+      if (account) {
         genesisHash = genesisHash || '';
         const currentNetwork = genesisOptions.find((opt) => opt.value === genesisHash);
 
@@ -188,7 +186,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
       }
 
       return networkKey;
-    }, [currentAccount, genesisOptions]
+    }, [account, genesisOptions]
   );
 
   const _toggleZeroBalances = useCallback(
@@ -200,16 +198,16 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   );
 
   const theme = (
-    currentAccount?.type === 'ethereum'
+    account?.type === 'ethereum'
       ? 'ethereum'
       : (chain?.icon || 'polkadot')
   ) as IconTheme;
 
   const _onChangeGenesis = useCallback(
     async (genesisHash: string, networkPrefix: number, icon: string, networkKey: string, isEthereum: boolean): Promise<void> => {
-      if (currentAccount) {
-        if (!isAccountAll(currentAccount.address)) {
-          await tieAccount(currentAccount.address, genesisHash || null);
+      if (account) {
+        if (!isAccountAll(account.address)) {
+          await tieAccount(account.address, genesisHash || null);
         } else {
           window.localStorage.setItem('accountAllNetworkGenesisHash', genesisHash);
         }
@@ -228,7 +226,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
       setShowBalanceDetail && setShowBalanceDetail(false);
       setShowNetworkSelect(false);
     },
-    [currentAccount, setShowBalanceDetail]
+    [account, setShowBalanceDetail]
   );
 
   useOutsideClick(setRef, (): void => {
@@ -264,21 +262,21 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
 
   const confirmConnectAcc = useCallback(
     () => {
-      currentAccount && currentAccount.address && showAccount(currentAccount?.address, false).then(
+      account && account.address && showAccount(account?.address, false).then(
         () => setShowModal(false)).catch(console.error);
     },
-    [currentAccount]
+    [account]
   );
 
   const _toggleVisibility = useCallback(
     () => {
-      if (currentAccount && currentAccount.isHidden) {
-        currentAccount.address && showAccount(currentAccount?.address, true).catch(console.error);
+      if (account && account.isHidden) {
+        account.address && showAccount(account?.address, true).catch(console.error);
       } else {
         setShowModal(true);
       }
     },
-    [currentAccount]
+    [account]
   );
 
   return (
@@ -334,13 +332,13 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
                 className={`setting-icon-wrapper ${isSettingsOpen ? 'pointer-events-none' : ''}`}
                 onClick={_toggleSettings}
               >
-                {!!currentAccount && !!currentAccount.address
+                {!!account && !!account.address
                   ? _isAccountAll
-                    ? allAccountLogo
+                    ? accountAllLogo
                       ? <img
                         alt='all-account-icon'
                         className='header__all-account-icon'
-                        src={allAccountLogo}
+                        src={accountAllLogo}
                       />
                       : <img
                         alt='all-account-icon'
@@ -355,7 +353,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
                         prefix={networkPrefix}
                         showLogo
                         size={46}
-                        value={formattedAddress || currentAccount?.address}
+                        value={formattedAddress || account?.address}
                       />
                     )
                   : (
@@ -400,9 +398,9 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
 
         />
         }
-        {isContainDetailHeader && currentAccount &&
+        {isContainDetailHeader && account &&
           <DetailHeader
-            currentAccount={currentAccount}
+            currentAccount={account}
             formatted={formattedAddress}
             isShowZeroBalances={isShowZeroBalances}
             popupTheme={popupTheme}

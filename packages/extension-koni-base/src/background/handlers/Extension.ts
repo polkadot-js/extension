@@ -1007,9 +1007,9 @@ export default class KoniExtension extends Extension {
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll);
+        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll);
       } else {
-        [, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
+        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
       }
     } else {
       // Estimate with DotSama API
@@ -1056,7 +1056,7 @@ export default class KoniExtension extends Extension {
           time: Date.now(),
           networkKey,
           change: res.txResult.change,
-          changeSymbol: res.txResult.changeSymbol,
+          changeSymbol: res.txResult.changeSymbol || token,
           fee: res.txResult.fee,
           feeSymbol: res.txResult.feeSymbol,
           isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),

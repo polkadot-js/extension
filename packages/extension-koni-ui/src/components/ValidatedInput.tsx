@@ -18,14 +18,22 @@ type Props<T extends BasicProps> = T & {
   className?: string;
   component: React.ComponentType<T>;
   defaultValue?: string;
+  onFocus?: (value: string) => void;
   onValidatedChange: (value: string | null) => void;
   validator: Validator<string>;
+  onScrollToError?: () => void;
 }
 
-function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
+function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onFocus, onScrollToError, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState(defaultValue || '');
   const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
   const isMounted = useIsMounted();
+
+  useEffect(() => {
+    if (Result.isError(validationResult)) {
+      onScrollToError && onScrollToError();
+    }
+  }, [onScrollToError, validationResult]);
 
   useEffect(() => {
     if (defaultValue) {
@@ -55,6 +63,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
         {...props as unknown as T}
         isError={Result.isError(validationResult)}
         onChange={setValue}
+        onFocus={onFocus}
         value={value}
       />
       {Result.isError(validationResult) && (

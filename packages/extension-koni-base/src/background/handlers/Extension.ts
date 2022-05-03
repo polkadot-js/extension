@@ -7,7 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -110,8 +110,6 @@ export default class KoniExtension extends Extension {
       state.getCurrentAccount((accountInfo) => {
         if (accountInfo) {
           accountsWithCurrentAddress.currentAddress = accountInfo.address;
-          accountsWithCurrentAddress.isShowBalance = accountInfo.isShowBalance;
-          accountsWithCurrentAddress.allAccountLogo = accountInfo.allAccountLogo;
         }
 
         cb(accountsWithCurrentAddress);
@@ -342,7 +340,76 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private _saveCurrentAccountAddress (address: string, isShowBalance?: boolean, allAccountLogo?: string, callback?: () => void) {
+  private getSettings (): Promise<RequestSettingsType> {
+    return new Promise<RequestSettingsType>((resolve, reject) => {
+      state.getSettings((rs) => {
+        resolve(rs);
+      });
+    });
+  }
+
+  private toggleBalancesVisibility (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(currentAccount.changeBalancesVisibility)'>(id, port);
+
+    state.getSettings((value) => {
+      const updateValue = {
+        ...value,
+        isShowBalance: !value.isShowBalance
+      };
+
+      state.setSettings(updateValue, () => {
+        // eslint-disable-next-line node/no-callback-literal
+        cb(updateValue);
+      });
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private async subscribeSettings (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(currentAccount.subscribeSettings)'>(id, port);
+
+    const balancesVisibilitySubscription = state.subscribeSettingsSubject().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      balancesVisibilitySubscription.unsubscribe();
+    });
+
+    return await this.getSettings();
+  }
+
+  private saveAccountAllLogo (data: string, id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(currentAccount.saveAccountAllLogo)'>(id, port);
+
+    state.getSettings((value) => {
+      const updateValue = {
+        ...value,
+        accountAllLogo: data
+      };
+
+      state.setSettings(updateValue, () => {
+        // eslint-disable-next-line node/no-callback-literal
+        cb(updateValue);
+      });
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private _saveCurrentAccountAddress (address: string, callback?: () => void) {
     state.getCurrentAccount((accountInfo) => {
       if (!accountInfo) {
         accountInfo = {
@@ -350,11 +417,6 @@ export default class KoniExtension extends Extension {
         };
       } else {
         accountInfo.address = address;
-        accountInfo.isShowBalance = !!isShowBalance;
-
-        if (allAccountLogo) {
-          accountInfo.allAccountLogo = allAccountLogo;
-        }
       }
 
       state.setCurrentAccount(accountInfo, callback);
@@ -364,7 +426,7 @@ export default class KoniExtension extends Extension {
   private saveCurrentAccountAddress (data: RequestCurrentAccountAddress, id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(currentAccount.saveAddress)'>(id, port);
 
-    this._saveCurrentAccountAddress(data.address, data.isShowBalance, data.allAccountLogo, () => {
+    this._saveCurrentAccountAddress(data.address, () => {
       cb(data);
     });
 
@@ -519,7 +581,7 @@ export default class KoniExtension extends Extension {
       addressDict[type] = address;
       const newAccountName = type === 'ethereum' ? `${name} - EVM` : name;
 
-      this._saveCurrentAccountAddress(address, false, '', () => {
+      this._saveCurrentAccountAddress(address, () => {
         keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
         this._addAddressToAuthList(address);
       });
@@ -618,7 +680,7 @@ export default class KoniExtension extends Extension {
 
     const address = childPair.address;
 
-    this._saveCurrentAccountAddress(address, false, '', () => {
+    this._saveCurrentAccountAddress(address, () => {
       keyring.addPair(childPair, password);
       this._addAddressToAuthList(address);
     });
@@ -631,7 +693,7 @@ export default class KoniExtension extends Extension {
 
     if (isPasswordValidated) {
       try {
-        this._saveCurrentAccountAddress(address, false, '', () => {
+        this._saveCurrentAccountAddress(address, () => {
           keyring.restoreAccount(file, password);
           this._addAddressToAuthList(address);
         });
@@ -648,7 +710,7 @@ export default class KoniExtension extends Extension {
 
     if (isPasswordValidated) {
       try {
-        this._saveCurrentAccountAddress(address, false, '', () => {
+        this._saveCurrentAccountAddress(address, () => {
           keyring.restoreAccounts(file, password);
         });
       } catch (error) {
@@ -1322,6 +1384,12 @@ export default class KoniExtension extends Extension {
         return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
         return this.saveCurrentAccountAddress(request as RequestCurrentAccountAddress, id, port);
+      case 'pri(currentAccount.changeBalancesVisibility)':
+        return this.toggleBalancesVisibility(id, port);
+      case 'pri(currentAccount.subscribeSettings)':
+        return this.subscribeSettings(id, port);
+      case 'pri(currentAccount.saveAccountAllLogo)':
+        return this.saveAccountAllLogo(request as string, id, port);
       case 'pri(price.getPrice)':
         return await this.getPrice();
       case 'pri(price.getSubscription)':

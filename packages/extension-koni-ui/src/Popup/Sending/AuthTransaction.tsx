@@ -7,7 +7,7 @@ import React, { useCallback, useState } from 'react';
 import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
-import { RequestCheckTransfer, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { RequestCheckTransfer, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
@@ -40,16 +40,6 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimal, feeSymbol], on
   const _doStart = useCallback(
     (): void => {
       setBusy(true);
-
-      onChangeResult({
-        isShowTxResult: true,
-        isTxSuccess: false,
-        txError: [{
-          code: 'transferError' as TransferErrorCode,
-          data: { 123: 456 },
-          message: '123'
-        }]
-      });
 
       makeTransfer({
         ...requestPayload,

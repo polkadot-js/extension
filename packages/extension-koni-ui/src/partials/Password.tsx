@@ -13,7 +13,7 @@ interface Props {
   onChange: (password: string | null) => void;
   onFocusPasswordInput?: (value: string) => void;
   onFocusRepeatPasswordInput?: (value: string) => void;
-  onScrollToError: () => void;
+  onScrollToError?: () => void;
 }
 
 const MIN_LENGTH = 6;

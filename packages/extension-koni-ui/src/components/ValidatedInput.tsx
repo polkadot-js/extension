@@ -21,7 +21,7 @@ type Props<T extends BasicProps> = T & {
   onFocus?: (value: string) => void;
   onValidatedChange: (value: string | null) => void;
   validator: Validator<string>;
-  onScrollToError: () => void;
+  onScrollToError?: () => void;
 }
 
 function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onFocus, onScrollToError, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
@@ -31,7 +31,7 @@ function ValidatedInput<T extends Record<string, unknown>> ({ className, compone
 
   useEffect(() => {
     if (Result.isError(validationResult)) {
-      onScrollToError();
+      onScrollToError && onScrollToError();
     }
   }, [onScrollToError, validationResult]);
 

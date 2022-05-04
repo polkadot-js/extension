@@ -71,7 +71,7 @@ export function getMainTokenInfo (networkKey: string, chainRegistryMap: Record<s
   return Object.values(chainRegistryMap[networkKey].tokenMap).find((t) => t.isMainToken) as TokenInfo;
 }
 
-export default function getDefaultValue (
+export function getDefaultValue (
   networkKey: string,
   isCurrentNetworkInfoReady: boolean,
   address: string | undefined,
@@ -92,4 +92,8 @@ export default function getDefaultValue (
     networkKey: defaultToken[0],
     token: defaultToken[1]
   };
+}
+
+export function isContainGasRequiredExceedsError (message: string): boolean {
+  return message.toLowerCase().includes('gas required exceeds');
 }

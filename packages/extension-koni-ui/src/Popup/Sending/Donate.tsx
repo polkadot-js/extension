@@ -19,7 +19,7 @@ import { checkTransfer, transferCheckReferenceCount, transferCheckSupporting, tr
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
 import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
-import getDefaultValue, { getBalanceFormat, getMainTokenInfo, getMaxTransferAndNoFees } from '@polkadot/extension-koni-ui/Popup/Sending/utils';
+import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@polkadot/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
 import { checkAddress } from '@polkadot/phishing';
@@ -103,10 +103,12 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
     (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
   const isNotSameAddressType = (isEthereumAddress(senderId) && !!recipientId && !isEthereumAddress(recipientId)) ||
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
+  const [isGasRequiredExceedsError, setGasRequiredExceedsError] = useState<boolean>(false);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
   const [noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
   const valueToTransfer = amount?.toString() || '0';
   const canMakeTransfer = isSupportTransfer &&
+    !isGasRequiredExceedsError &&
     !recipientPhish &&
     !!recipientId &&
     !isSameAddress &&
@@ -132,13 +134,18 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
             rs.feeSymbol
           ]);
         }
-      }).catch((e) => {
-        console.log('There is problem when checkTransfer', e);
+      }).catch((e: Error) => {
+        if (isContainGasRequiredExceedsError(e.message) && isSync) {
+          setGasRequiredExceedsError(true);
+        } else {
+          console.log('There is problem when checkTransfer', e);
+        }
       });
     }
 
     return () => {
       isSync = false;
+      setGasRequiredExceedsError(false);
     };
   }, [amount, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
 
@@ -322,6 +329,15 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
                 isDanger
               >
                 {t<string>('The amount you want to transfer is greater than your available balance.')}
+              </Warning>
+            )}
+
+            {!isSameAddress && isGasRequiredExceedsError && (
+              <Warning
+                className={'send-fund-warning'}
+                isDanger
+              >
+                {t<string>('The main token ({{mainToken}}) free balance of the sender is not enough to perform this transaction', { replace: { mainToken: mainTokenInfo.symbol } })}
               </Warning>
             )}
 

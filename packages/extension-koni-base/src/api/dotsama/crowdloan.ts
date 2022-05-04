@@ -6,7 +6,7 @@ import axios from 'axios';
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
 import { APIItemState, ApiProps, CrowdloanItem } from '@polkadot/extension-base/background/KoniTypes';
 import registry from '@polkadot/extension-koni-base/api/dotsama/typeRegistry';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { BN } from '@polkadot/util';
@@ -73,7 +73,7 @@ export const subcribleAcalaContributeInterval = (polkadotAddresses: string[], ca
 };
 
 // Get All crowdloan
-export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = NETWORKS) {
+export async function subscribeCrowdloan (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: CrowdloanItem) => void, networks = PREDEFINED_NETWORKS) {
   const unsubMap: Record<string, any> = {};
 
   if (dotSamaAPIMap.polkadot && dotSamaAPIMap.kusama) {

@@ -84,20 +84,6 @@ export class KoniCron {
     });
   }
 
-  // deprecated
-  // recoverAPI () {
-  //   state.getCurrentAccount(({ address }) => {
-  //     console.log('Auto recovering API');
-  //     Object.values(dotSamaAPIMap).forEach((apiProp) => {
-  //       if (apiProp.apiRetry && apiProp.apiRetry > DOTSAMA_MAX_CONTINUE_RETRY) {
-  //         apiProp.recoverConnect && apiProp.recoverConnect();
-  //       }
-  //     });
-  //
-  //     this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama);
-  //   });
-  // }
-
   recoverApiMap () {
     const apiMap = state.getApiMap();
 

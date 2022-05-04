@@ -4,7 +4,7 @@
 import { gql } from '@apollo/client';
 
 import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 // eslint-disable-next-line import-newlines/enforce
 import { DotSamaHistory,
 // eslint-disable-next-line camelcase
@@ -85,7 +85,7 @@ export const fetchDotSamaHistory = (address: string, callBack: (historyMap: Reco
 
   const historyMap: Record<string, TransactionHistoryItemType[]> = {};
 
-  Object.entries(NETWORKS).forEach(([networkKey, networkInfo]) => {
+  Object.entries(PREDEFINED_NETWORKS).forEach(([networkKey, networkInfo]) => {
     if (!HistoryApiMap[networkKey]) {
       state.getTransactionHistory(address, networkKey, (items) => {
         if (isHistoryChange(networkKey, items)) {

@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APIItemState, ApiProps, NetWorkInfo, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { APIItemState, ApiProps, NetworkJson, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -17,10 +17,10 @@ interface LedgerData {
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
-  polkadot: NETWORKS.polkadot,
-  kusama: NETWORKS.kusama,
-  hydradx: NETWORKS.hydradx,
-  acala: NETWORKS.acala
+  polkadot: PREDEFINED_NETWORKS.polkadot,
+  kusama: PREDEFINED_NETWORKS.kusama,
+  hydradx: PREDEFINED_NETWORKS.hydradx,
+  acala: PREDEFINED_NETWORKS.acala
   // astar: NETWORKS.astar,
   // moonbeam: NETWORKS.moonbeam
 };
@@ -34,11 +34,11 @@ function parseStakingBalance (balance: number, chain: string): number {
   if (chain === 'hydradx') {
     return balance;
   } else {
-    return toUnit(balance, NETWORKS[chain].decimals as number);
+    return toUnit(balance, PREDEFINED_NETWORKS[chain].decimals as number);
   }
 }
 
-export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
+export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetworkJson> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: PromiseMapping[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
@@ -77,20 +77,20 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
 
         if (totalBalance > 0) {
           stakingItem = {
-            name: NETWORKS[chain].chain,
+            name: PREDEFINED_NETWORKS[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
-            nativeToken: NETWORKS[chain].nativeToken,
-            unit: unit || NETWORKS[chain].nativeToken,
+            nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
+            unit: unit || PREDEFINED_NETWORKS[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         } else {
           stakingItem = {
-            name: NETWORKS[chain].chain,
+            name: PREDEFINED_NETWORKS[chain].chain,
             chainId: chain,
             balance: parsedTotal.toString(),
-            nativeToken: NETWORKS[chain].nativeToken,
-            unit: unit || NETWORKS[chain].nativeToken,
+            nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
+            unit: unit || PREDEFINED_NETWORKS[chain].nativeToken,
             state: APIItemState.READY
           } as StakingItem;
         }

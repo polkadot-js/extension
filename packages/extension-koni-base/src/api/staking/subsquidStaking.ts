@@ -4,7 +4,7 @@
 import axios from 'axios';
 
 import { APIItemState, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@polkadot/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@polkadot/extension-koni-base/utils/utils';
 
@@ -62,7 +62,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string, callback: (
     const parsedResult: StakingAmount = {};
 
     const rewards = await Promise.all(accounts.map(async (account) => {
-      const parsedAccount = reformatAddress(account, NETWORKS[chain].ss58Format);
+      const parsedAccount = reformatAddress(account, PREDEFINED_NETWORKS[chain].ss58Format);
       const result: Record<string, any> = {};
 
       const resp = await axios({ url: SUBSQUID_ENDPOINTS[chain],
@@ -109,48 +109,48 @@ const getSubsquidStaking = async (accounts: string[], chain: string, callback: (
 
       if (reward.totalReward) {
         if (parsedResult.totalReward) {
-          parsedResult.totalReward += toUnit(reward.totalReward, NETWORKS[chain].decimals as number);
+          parsedResult.totalReward += toUnit(reward.totalReward, PREDEFINED_NETWORKS[chain].decimals as number);
         } else {
-          parsedResult.totalReward = toUnit(reward.totalReward, NETWORKS[chain].decimals as number);
+          parsedResult.totalReward = toUnit(reward.totalReward, PREDEFINED_NETWORKS[chain].decimals as number);
         }
       }
 
       if (reward.totalSlash) {
         if (parsedResult.totalSlash) {
-          parsedResult.totalSlash += toUnit(reward.totalSlash, NETWORKS[chain].decimals as number);
+          parsedResult.totalSlash += toUnit(reward.totalSlash, PREDEFINED_NETWORKS[chain].decimals as number);
         } else {
-          parsedResult.totalSlash = toUnit(reward.totalSlash, NETWORKS[chain].decimals as number);
+          parsedResult.totalSlash = toUnit(reward.totalSlash, PREDEFINED_NETWORKS[chain].decimals as number);
         }
       }
 
       if (reward.totalBond) {
         if (parsedResult.totalBond) {
-          parsedResult.totalBond += toUnit(reward.totalBond, NETWORKS[chain].decimals as number);
+          parsedResult.totalBond += toUnit(reward.totalBond, PREDEFINED_NETWORKS[chain].decimals as number);
         } else {
-          parsedResult.totalBond = toUnit(reward.totalBond, NETWORKS[chain].decimals as number);
+          parsedResult.totalBond = toUnit(reward.totalBond, PREDEFINED_NETWORKS[chain].decimals as number);
         }
       }
 
       if (reward.latestReward) {
         if (parsedResult.latestReward) {
-          parsedResult.latestReward += toUnit(reward.latestReward, NETWORKS[chain].decimals as number);
+          parsedResult.latestReward += toUnit(reward.latestReward, PREDEFINED_NETWORKS[chain].decimals as number);
         } else {
-          parsedResult.latestReward = toUnit(reward.latestReward, NETWORKS[chain].decimals as number);
+          parsedResult.latestReward = toUnit(reward.latestReward, PREDEFINED_NETWORKS[chain].decimals as number);
         }
       }
     }
 
     callback(chain, {
-      name: NETWORKS[chain].chain,
+      name: PREDEFINED_NETWORKS[chain].chain,
       chainId: chain,
       balance: parsedResult.totalBond ? parsedResult.totalBond.toString() : '0',
-      nativeToken: NETWORKS[chain].nativeToken,
-      unit: NETWORKS[chain].nativeToken,
+      nativeToken: PREDEFINED_NETWORKS[chain].nativeToken,
+      unit: PREDEFINED_NETWORKS[chain].nativeToken,
       state: APIItemState.READY
     } as StakingItem);
 
     return {
-      name: NETWORKS[chain].chain,
+      name: PREDEFINED_NETWORKS[chain].chain,
       chainId: chain,
       totalReward: parsedResult.totalReward ? parsedResult.totalReward.toString() : '0',
       latestReward: parsedResult.latestReward ? parsedResult.latestReward.toString() : '0',
@@ -162,7 +162,7 @@ const getSubsquidStaking = async (accounts: string[], chain: string, callback: (
     console.log(`error getting ${chain} staking reward from subsquid`, e);
 
     return {
-      name: NETWORKS[chain].chain,
+      name: PREDEFINED_NETWORKS[chain].chain,
       chainId: chain,
       totalReward: '0',
       latestReward: '0',

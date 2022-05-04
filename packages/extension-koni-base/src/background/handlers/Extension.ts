@@ -13,7 +13,6 @@ import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
 import { initWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
@@ -1025,6 +1024,7 @@ export default class KoniExtension extends Extension {
   private async evmNftGetTransaction ({ networkKey, params, recipientAddress, senderAddress }: EvmNftTransactionRequest): Promise<EvmNftTransaction> {
     const contractAddress = params.contractAddress as string;
     const tokenId = params.tokenId as string;
+    const networkMap = state.getNetworkMap();
 
     try {
       const web3ApiMap = state.getApiMap().web3;
@@ -1057,9 +1057,9 @@ export default class KoniExtension extends Extension {
         data: contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).encodeABI()
       };
       // @ts-ignore
-      const estimatedFee = (gasLimit * parseFloat(gasPriceGwei)) / (10 ** NETWORKS[networkKey].decimals);
+      const estimatedFee = (gasLimit * parseFloat(gasPriceGwei)) / (10 ** networkMap[networkKey].decimals);
       // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-      const feeString = estimatedFee.toString() + ' ' + NETWORKS[networkKey].nativeToken;
+      const feeString = estimatedFee.toString() + ' ' + networkMap[networkKey].nativeToken;
 
       return {
         tx: rawTransaction,

@@ -11,7 +11,6 @@ import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getRegistry } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
@@ -29,7 +28,7 @@ import { assert } from '@polkadot/util';
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
 
-  Object.keys(NETWORKS).forEach((networkKey) => {
+  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
     balanceMap[networkKey] = {
       state: APIItemState.PENDING,
       free: '0',
@@ -47,9 +46,9 @@ function generateDefaultStakingMap () {
 
   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
     stakingMap[networkKey] = {
-      name: NETWORKS[networkKey].chain,
+      name: PREDEFINED_NETWORKS[networkKey].chain,
       chainId: networkKey,
-      nativeToken: NETWORKS[networkKey].nativeToken,
+      nativeToken: PREDEFINED_NETWORKS[networkKey].nativeToken,
       state: APIItemState.PENDING
     } as StakingItem;
   });
@@ -60,7 +59,7 @@ function generateDefaultStakingMap () {
 function generateDefaultCrowdloanMap () {
   const crowdloanMap: Record<string, CrowdloanItem> = {};
 
-  Object.keys(NETWORKS).forEach((networkKey) => {
+  Object.keys(PREDEFINED_NETWORKS).forEach((networkKey) => {
     crowdloanMap[networkKey] = {
       state: APIItemState.PENDING,
       contribute: '0'

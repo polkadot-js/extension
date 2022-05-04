@@ -1137,6 +1137,7 @@ export default class KoniExtension extends Extension {
     }
   }
 
+  // TODO: update chainID from networkMap
   private async evmNftSubmitTransaction (id: string, port: chrome.runtime.Port, { networkKey, password, rawTransaction, recipientAddress, senderAddress }: EvmNftSubmitTransaction): Promise<EvmNftTransactionResponse> {
     const updateState = createSubscription<'pri(evmNft.submitTransaction)'>(id, port);
     let parsedPrivateKey = '';

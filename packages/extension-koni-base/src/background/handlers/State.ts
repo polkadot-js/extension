@@ -22,7 +22,7 @@ import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
 import SettingsStore from '@polkadot/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
-import { convertFundStatus, getCurrentProvider, getNftProvider } from '@polkadot/extension-koni-base/utils/utils';
+import { convertFundStatus, getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
@@ -171,10 +171,6 @@ export default class KoniState extends State {
 
           if (network.isEthereum && network.isEthereum) {
             this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(network));
-
-            if (network.key === 'astar') {
-              this.apiMap.web3.astarEvm = initWeb3Api(getNftProvider(this.networkMap[key]));
-            }
           }
         }
       }
@@ -902,10 +898,6 @@ export default class KoniState extends State {
 
     if (data.isEthereum && data.isEthereum) {
       this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
-
-      if (data.key === 'astar') {
-        this.apiMap.web3.astarEvm = initWeb3Api(getNftProvider(this.networkMap.astar));
-      }
     }
 
     this.networkMapSubject.next(this.networkMap);
@@ -928,10 +920,6 @@ export default class KoniState extends State {
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       delete this.apiMap.web3[networkKey];
-
-      if (networkKey === 'astar') {
-        delete this.apiMap.web3.astarEvm;
-      }
     }
 
     this.networkMap[networkKey].active = false;
@@ -949,10 +937,6 @@ export default class KoniState extends State {
 
         if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
           delete this.apiMap.web3[key];
-
-          if (key === 'astar') {
-            delete this.apiMap.web3.astarEvm;
-          }
         }
 
         this.networkMap[key].active = false;
@@ -970,10 +954,6 @@ export default class KoniState extends State {
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
-
-      if (networkKey === 'astar') {
-        this.apiMap.web3.astarEvm = initWeb3Api(getNftProvider(this.networkMap[networkKey]));
-      }
     }
 
     this.networkMap[networkKey].active = true;
@@ -989,10 +969,6 @@ export default class KoniState extends State {
 
         if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
           this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
-
-          if (key === 'astar') {
-            this.apiMap.web3.astarEvm = initWeb3Api(getNftProvider(this.networkMap[key]));
-          }
         }
 
         this.networkMap[key].active = true;
@@ -1018,10 +994,6 @@ export default class KoniState extends State {
 
           if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
             delete this.apiMap.web3[key];
-
-            if (key === 'astar') {
-              delete this.apiMap.web3.astarEvm;
-            }
           }
 
           this.networkMap[key].active = false;
@@ -1048,10 +1020,6 @@ export default class KoniState extends State {
 
   public refreshWeb3Api (key: string) {
     this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
-
-    if (key === 'astar') {
-      this.apiMap.web3.astarEvm = initWeb3Api(getNftProvider(this.networkMap[key]));
-    }
   }
 
   public subscribeServiceInfo () {

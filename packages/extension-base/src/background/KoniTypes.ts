@@ -277,6 +277,8 @@ export interface NetworkJson {
   isEthereum?: boolean; // Only show network with isEthereum=true when select one EVM account // user input
   ethChainId?: number;
 
+  isHybrid?: boolean;
+
   // Native token information
   nativeToken?: string;
   decimals?: number;

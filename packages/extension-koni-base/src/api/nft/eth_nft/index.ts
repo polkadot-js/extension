@@ -66,11 +66,11 @@ export class Web3NftApi extends BaseNftApi {
       };
     }
 
-    if (data.compiler) {
-      propertiesMap.compiler = {
-        value: data.compiler as string
-      };
-    }
+    // if (data.compiler) {
+    //   propertiesMap.compiler = {
+    //     value: data.compiler as string
+    //   };
+    // }
 
     return {
       name: data.name as string | undefined,
@@ -78,7 +78,7 @@ export class Web3NftApi extends BaseNftApi {
       description: data.description as string | undefined,
       properties: propertiesMap,
       external_url: data.external_url as string | undefined,
-      chain: this.chain === 'astarEvm' ? 'astar' : this.chain
+      chain: this.chain
     } as NftItem;
   }
 
@@ -150,7 +150,7 @@ export class Web3NftApi extends BaseNftApi {
         collectionId: smartContract,
         collectionName,
         image: collectionImage || undefined,
-        chain: this.chain === 'astarEvm' ? 'astar' : this.chain
+        chain: this.chain
       } as NftCollection;
 
       updateCollection(nftCollection);

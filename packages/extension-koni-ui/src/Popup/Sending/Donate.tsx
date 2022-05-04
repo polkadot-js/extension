@@ -5,7 +5,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AccountContext, Warning } from '@polkadot/extension-koni-ui/components';
@@ -79,14 +79,44 @@ function getBalanceFormat (networkKey: string, token: string, chainRegistryMap: 
   return [tokenInfo.decimals, tokenInfo.symbol];
 }
 
-function getMaxTransferAndNoFees (fee: string | null, senderFreeBalance: string, existentialDeposit: string): [BN | null, boolean] {
-  const partialFee = fee ? new BN(fee) : new BN('0');
+function getPartialFee (fee: string | null, feeSymbol: string | null | undefined, selectedToken: string, mainTokenSymbol: string): BN {
+  if (!fee) {
+    return new BN('0');
+  }
+
+  if (feeSymbol) {
+    if (feeSymbol !== selectedToken) {
+      return new BN('0');
+    }
+  } else {
+    // feeSymbol is null or undefined => use mainTokenSymbol
+    if (selectedToken !== mainTokenSymbol) {
+      return new BN('0');
+    }
+  }
+
+  return new BN(fee);
+}
+
+function getMaxTransferAndNoFees (
+  fee: string | null,
+  feeSymbol: string | null | undefined,
+  selectedToken: string,
+  mainTokenSymbol: string,
+  senderFreeBalance: string,
+  existentialDeposit: string): [BN | null, boolean] {
+  const partialFee = getPartialFee(fee, feeSymbol, selectedToken, mainTokenSymbol);
   const adjFee = partialFee.muln(110).div(BN_HUNDRED);
   const maxTransfer = (new BN(senderFreeBalance)).sub(adjFee);
 
   return maxTransfer.gt(new BN(existentialDeposit))
     ? [maxTransfer, false]
     : [null, true];
+}
+
+function getMainTokenInfo (networkKey: string, chainRegistryMap: Record<string, ChainRegistry>): TokenInfo {
+  // chainRegistryMap always has main token
+  return Object.values(chainRegistryMap[networkKey].tokenMap).find((t) => t.isMainToken) as TokenInfo;
 }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
@@ -136,25 +166,31 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
   const [recipientPhish, setRecipientPhish] = useState<string | null>(null);
   const [reference, setReference] = useState<boolean | null>(null);
   // const [isProtected, setIsProtected] = useState(false);
-  const [isTransferSupport, setTransferSupport] = useState<boolean | null>(null);
+  const [[isSupportTransfer], setTransferSupport] =
+    useState<[boolean, boolean] | [null, null]>([null, null]);
   // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
-  const [fee, setFee] = useState<null | string>(null);
   const [txResult, setTxResult] = useState<TransferResultType>({ isShowTxResult: false, isTxSuccess: false });
   const { isShowTxResult } = txResult;
   const senderFreeBalance = useFreeBalance(selectedNetworkKey, senderId, selectedToken);
   const recipientFreeBalance = useFreeBalance(selectedNetworkKey, recipientId, selectedToken);
-  const balanceFormat = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
+  const balanceFormat: [number, string] = getBalanceFormat(selectedNetworkKey, selectedToken, chainRegistryMap);
+  const mainTokenInfo = getMainTokenInfo(selectedNetworkKey, chainRegistryMap);
+  const [[fee, feeSymbol], setFeeInfo] = useState<[string | null, string | null | undefined]>([null, null]);
+  const feeDecimal: number | null = feeSymbol
+    ? feeSymbol === selectedToken
+      ? balanceFormat[0]
+      : getBalanceFormat(selectedNetworkKey, feeSymbol, chainRegistryMap)[0]
+    : null;
   const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
   const isNotSameAddressAndTokenType = (isEthereumAddress(senderId) && !ethereumChains.includes(selectedNetworkKey)) ||
     (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
   const isNotSameAddressType = (isEthereumAddress(senderId) && !!recipientId && !isEthereumAddress(recipientId)) ||
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, senderFreeBalance, existentialDeposit);
-  const canToggleAll = !!maxTransfer && !reference && !!recipientId;
-  const valueToTransfer = canToggleAll ? maxTransfer.toString() : (amount?.toString() || '0');
-  const canMakeTransfer = isTransferSupport &&
+  const [noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
+  const valueToTransfer = amount?.toString() || '0';
+  const canMakeTransfer = isSupportTransfer &&
     !recipientPhish &&
     !!recipientId &&
     !isSameAddress &&
@@ -175,7 +211,10 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
         value: valueToTransfer
       }).then((rs) => {
         if (isSync) {
-          setFee(rs.estimateFee || null);
+          setFeeInfo([
+            rs.estimateFee && rs.estimateFee !== '0' ? rs.estimateFee : null,
+            rs.feeSymbol
+          ]);
         }
       }).catch((e) => {
         console.log('There is problem when checkTransfer', e);
@@ -218,7 +257,8 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
       isSync = false;
       setRecipientPhish(null);
     };
-  }, [recipientId]);
+  }
+  , [recipientId]);
 
   useEffect(() => {
     let isSync = true;
@@ -240,13 +280,13 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
 
     transferCheckSupporting({ networkKey: selectedNetworkKey, token: selectedToken }).then((res) => {
       if (isSync) {
-        setTransferSupport(res.supportTransfer);
+        setTransferSupport([res.supportTransfer, res.supportTransferAll]);
       }
     }).catch((e) => console.log(e));
 
     return () => {
       isSync = false;
-      setTransferSupport(null);
+      setTransferSupport([null, null]);
     };
   }, [selectedNetworkKey, selectedToken]);
 
@@ -266,7 +306,15 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
       isShowTxResult: false,
       txError: undefined
     });
-  }, []);
+    setSenderValue(defaultValue);
+    setRecipientId(null);
+  },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [
+    defaultValue.address,
+    defaultValue.networkKey,
+    defaultValue.token
+  ]);
 
   const _onChangeResult = useCallback((txResult: TransferResultType) => {
     setTxResult(txResult);
@@ -334,7 +382,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               </Warning>
             )}
 
-            {isTransferSupport === false && (
+            {isSupportTransfer === false && (
               <Warning
                 className={'send-fund-warning'}
                 isDanger
@@ -395,7 +443,11 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
       {isShowTxModal && (
         <AuthTransaction
           balanceFormat={balanceFormat}
-          fee={fee}
+          feeInfo={[
+            fee,
+            feeDecimal || mainTokenInfo.decimals,
+            feeSymbol || mainTokenInfo.symbol
+          ]}
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

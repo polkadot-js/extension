@@ -3,11 +3,12 @@
 
 import { options } from '@acala-network/api';
 
-import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
+import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 import { inJestTest } from '@polkadot/extension-koni-base/utils/utils';
+import {ScProvider, WellKnownChain} from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
@@ -101,10 +102,27 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
   };
 }
 
+function getWellKnownChain (chain = 'polkadot') {
+  switch (chain) {
+    case 'kusama':
+      return WellKnownChain.ksmcc3;
+    case 'polkadot':
+      return WellKnownChain.polkadot;
+    case 'rococo':
+      return WellKnownChain.rococo_v2_1;
+    case 'westend':
+      return WellKnownChain.westend2;
+    default:
+      return chain;
+  }
+}
+
 export function initApi (networkKey: string, apiUrl: string): ApiProps {
   const registry = new TypeRegistry();
 
-  const provider = apiUrl.startsWith('http') ? new HttpProvider(apiUrl) : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
+  const provider = apiUrl.startsWith('light://')
+    ? new ScProvider(getWellKnownChain(apiUrl.replace('light://substrate-connect/', '')))
+    : new WsProvider(apiUrl, DOTSAMA_AUTO_CONNECT_MS);
 
   const apiOption = { provider, typesBundle, typesChain: typesChain };
 

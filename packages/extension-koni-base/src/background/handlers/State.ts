@@ -141,11 +141,8 @@ export default class KoniState extends State {
             }
 
             mergedNetworkMap[key].active = storedNetwork.active;
-
-            if (storedNetwork.customProviders && Object.keys(storedNetwork.customProviders).includes(storedNetwork.currentProvider)) {
-              mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
-              mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
-            }
+            mergedNetworkMap[key].currentProvider = storedNetwork.currentProvider;
+            mergedNetworkMap[key].currentProviderMode = mergedNetworkMap[key].currentProvider.startsWith('http') ? 'http' : 'ws';
           } else {
             if (Object.keys(PREDEFINED_GENESIS_HASHES).includes(storedNetwork.genesisHash)) { // merge networks with same genesis hash
               // @ts-ignore
@@ -852,7 +849,7 @@ export default class KoniState extends State {
     return this.networkMapStore.getSubject();
   }
 
-  public upsertNetworkMap (data: NetworkJson): void {
+  public async upsertNetworkMap (data: NetworkJson): Promise<void> {
     if (data.key in this.networkMap) { // update provider for existed network
       if (data.customProviders) {
         this.networkMap[data.key].customProviders = data.customProviders;
@@ -890,6 +887,15 @@ export default class KoniState extends State {
       }
     } else { // insert
       this.networkMap[data.key] = data;
+    }
+
+    if (data.key in this.apiMap.dotSama) {
+      await this.apiMap.dotSama[data.key].api.disconnect();
+      delete this.apiMap.dotSama[data.key];
+    }
+
+    if (data.isEthereum && data.key in this.apiMap.web3) {
+      delete this.apiMap.web3[data.key];
     }
 
     this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));

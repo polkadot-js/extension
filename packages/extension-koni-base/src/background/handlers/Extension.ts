@@ -1281,9 +1281,9 @@ export default class KoniExtension extends Extension {
     return { error, conflictKey, conflictChain };
   }
 
-  private upsertNetworkMap (data: NetworkJson): boolean {
+  private async upsertNetworkMap (data: NetworkJson): Promise<boolean> {
     try {
-      state.upsertNetworkMap(data);
+      await state.upsertNetworkMap(data);
 
       return true;
     } catch (e) {
@@ -1613,7 +1613,7 @@ export default class KoniExtension extends Extension {
       case 'pri(networkMap.getSubscription)':
         return this.subscribeNetworkMap(id, port);
       case 'pri(networkMap.upsert)':
-        return this.upsertNetworkMap(request as NetworkJson);
+        return await this.upsertNetworkMap(request as NetworkJson);
       case 'pri(networkMap.getNetworkMap)':
         return this.getNetworkMap();
       case 'pri(networkMap.disableOne)':

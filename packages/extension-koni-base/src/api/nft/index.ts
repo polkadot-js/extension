@@ -71,9 +71,6 @@ export class NftHandler {
   total = 0;
   needSetupApi = true;
 
-  // TODO: process change handlers (add, delete)
-  // TODO: pass web3 api
-
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[], web3ApiMap?: Record<string, Web3>) {
     if (addresses) {
       this.addresses = addresses;

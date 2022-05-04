@@ -54,11 +54,12 @@ export class KoniCron {
   }
 
   init () {
-    this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
-    this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
-    this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
     state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo) {
+      if (currentAccountInfo && (Object.keys(state.getApiMap().dotSama).length !== 0 || Object.keys(state.getApiMap().web3).length !== 0)) {
+        this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+        this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
+        this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
@@ -76,9 +77,19 @@ export class KoniCron {
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
 
-          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap), CRON_REFRESH_NFT_INTERVAL);
-          this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-          this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+          this.removeCron('refreshPrice');
+          this.removeCron('checkStatusApiMap');
+          this.removeCron('recoverApiMap');
+
+          if (Object.keys(serviceInfo.apiMap.dotSama).length !== 0 || Object.keys(serviceInfo.apiMap.web3).length !== 0) { // only add cron job if there's at least 1 active network
+            this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
+            this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
+            this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+
+            this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap), CRON_REFRESH_NFT_INTERVAL);
+            this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+            this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
+          }
         }
       });
     });

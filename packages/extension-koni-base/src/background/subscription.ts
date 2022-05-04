@@ -63,7 +63,6 @@ export class KoniSubscription {
       }
 
       state.subscribeServiceInfo().subscribe({
-        // TODO: consider canceling all subscription and cron job when there's no network connected
         next: (serviceInfo) => {
           console.log('serviceInfo update', serviceInfo);
           const { address } = serviceInfo.currentAccountInfo;

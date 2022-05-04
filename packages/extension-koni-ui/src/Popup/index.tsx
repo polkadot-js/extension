@@ -81,6 +81,14 @@ function updateCurrentAccount (currentAcc: AccountJson): void {
   store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
+const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'ring'];
+
+function getRandomVariant (): string {
+  const random = Math.floor(Math.random() * 5);
+
+  return VARIANTS[random];
+}
+
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
@@ -92,6 +100,12 @@ export default function Popup (): React.ReactElement {
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const browser = Bowser.getParser(window.navigator.userAgent);
+
+  if (!window.localStorage.getItem('randomVariant')) {
+    const randomVariant = getRandomVariant();
+
+    window.localStorage.setItem('randomVariant', randomVariant);
+  }
 
   if (!!browser.getBrowser() && !!browser.getBrowser().name && !!browser.getOS().name) {
     window.localStorage.setItem('browserInfo', browser.getBrowser().name as string);

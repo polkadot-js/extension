@@ -122,7 +122,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<AddAccount />);
   }
 
-  if (!currentAccount) {
+  if (!currentAccount || !currentNetwork.isReady) {
     return (<></>);
   }
 

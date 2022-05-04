@@ -8,26 +8,26 @@ import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 export default function useFetchNetworkMap () {
   const { currentAccount, networkMap } = useSelector((state: RootState) => state);
-  const parsedNetworkMap: Record<string, NetworkJson> = {};
-  let isEthereum = false;
+  // const parsedNetworkMap: Record<string, NetworkJson> = {};
+  // let isEthereum = false;
 
-  if (currentAccount?.account?.type === 'ethereum') {
-    isEthereum = true;
+  // if (currentAccount?.account?.type === 'ethereum') {
+  //   isEthereum = true;
+  //
+  //   for (const [key, network] of Object.entries(networkMap)) {
+  //     if (network.isEthereum && network.isEthereum) {
+  //       parsedNetworkMap[key] = network;
+  //     }
+  //   }
+  // } else {
+  //   for (const [key, network] of Object.entries(networkMap)) {
+  //     if (!network.isEthereum || (network.isEthereum && !network.isEthereum)) {
+  //       parsedNetworkMap[key] = network;
+  //     }
+  //   }
+  // }
 
-    for (const [key, network] of Object.entries(networkMap)) {
-      if (network.isEthereum && network.isEthereum) {
-        parsedNetworkMap[key] = network;
-      }
-    }
-  } else {
-    for (const [key, network] of Object.entries(networkMap)) {
-      if (!network.isEthereum || (network.isEthereum && !network.isEthereum)) {
-        parsedNetworkMap[key] = network;
-      }
-    }
-  }
-
-  const sorted = Object.entries(parsedNetworkMap)
+  const sorted = Object.entries(networkMap)
     .sort(([, networkMap], [, _networkMap]) => {
       if (networkMap.active && !_networkMap.active) {
         return -1;
@@ -39,5 +39,5 @@ export default function useFetchNetworkMap () {
     })
     .reduce((r, [k, v]) => ({ ...r, [k]: v }), {}) as Record<string, NetworkJson>;
 
-  return { parsedNetworkMap: sorted, isEthereum };
+  return { parsedNetworkMap: sorted, isEthereum: currentAccount?.account?.type === 'ethereum' };
 }

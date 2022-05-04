@@ -240,8 +240,8 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
 
   .token-dropdown__dropdown {
     position: absolute;
-    right: 0;
-    top: 100%;
+    right: -2px;
+    top: 108%;
     z-index: 100;
   }
 

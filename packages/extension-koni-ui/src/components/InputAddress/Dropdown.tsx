@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { ActionMeta, SingleValue } from 'react-select';
 import AsyncSelect from 'react-select/async';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import { DropdownOptionType, DropdownTransformGroupOptionType, DropdownTransformOptionType } from '@polkadot/extension-base/background/KoniTypes';
-import { Label } from '@polkadot/extension-koni-ui/components';
+import { Label, Theme } from '@polkadot/extension-koni-ui/components';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
@@ -31,6 +31,7 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const [selectedValue, setSelectedValue] = useState(value);
   const grDeps = defaultOptions.toString();
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect(() => {
     if (isSetDefaultValue) {
@@ -60,19 +61,54 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
   }, [getFormatOptLabel]);
 
   const customStyles = {
-    option: (base: any) => {
+    option: (base: any, { isSelected }: any) => {
+      const isDarkTheme = themeContext.id === 'dark';
+      const color = isDarkTheme ? '#888888' : '#7B8098';
+      const hoverBgc = isDarkTheme ? 'rgba(255, 255, 255, 0.05)' : 'rgba(17, 17, 17, 0.08)';
+      const hoverColor = isDarkTheme ? '#FFFFFF' : '#00072D';
+
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
         textAlign: 'left',
         fontFamily: 'Lexend',
-        fontSize: '15px'
+        fontSize: '15px',
+        color: color,
+        backgroundColor: isSelected ? hoverBgc : 'transparent',
+        ':hover': {
+          backgroundColor: hoverBgc,
+          color: hoverColor
+        },
+        ':active': {
+          backgroundColor: hoverBgc
+        }
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    menuList: (base: any) => ({ ...base, maxHeight: '200px', zIndex: 15 }),
+    menuList: (base: any) => {
+      const backgroundColor = themeContext.id === 'dark' ? '#181E42' : '#FFFFFF';
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return {
+        ...base,
+        backgroundColor: `${backgroundColor}`,
+        maxHeight: '200px',
+        zIndex: 15
+      };
+    },
+    menu: (base: any) => {
+      const borderColor = themeContext.id === 'dark' ? '#212845' : '#EEEEEE';
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return {
+        ...base,
+        width: '428px',
+        left: '-2px',
+        border: `2px solid ${borderColor}`
+      };
+    },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     group: (base: any) => ({ ...base, paddingTop: '0' }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return

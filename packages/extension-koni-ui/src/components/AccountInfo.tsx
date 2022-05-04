@@ -15,7 +15,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import { RootState } from '@polkadot/extension-koni-ui/stores';

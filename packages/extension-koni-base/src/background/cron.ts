@@ -3,7 +3,7 @@
 
 import { Subject } from 'rxjs';
 
-import { ApiMap, NETWORK_STATUS, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiMap, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
@@ -61,7 +61,7 @@ export class KoniCron {
       if (currentAccountInfo) {
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
+        this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address, state.getNetworkMap()), CRON_REFRESH_HISTORY_INTERVAL);
       }
 
       state.subscribeServiceInfo().subscribe({
@@ -78,7 +78,7 @@ export class KoniCron {
 
           this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap), CRON_REFRESH_NFT_INTERVAL);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-          this.addCron('refreshHistory', this.refreshHistory(address), CRON_REFRESH_HISTORY_INTERVAL);
+          this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
         }
       });
     });
@@ -195,10 +195,10 @@ export class KoniCron {
     };
   }
 
-  refreshHistory (address: string) {
+  refreshHistory (address: string, networkMap: Record<string, NetworkJson>) {
     return () => {
       console.log('Refresh History state');
-      fetchDotSamaHistory(address, (historyMap) => {
+      fetchDotSamaHistory(address, networkMap, (historyMap) => {
         console.log('--- historyMap ---', historyMap);
         state.setHistory(historyMap);
       });

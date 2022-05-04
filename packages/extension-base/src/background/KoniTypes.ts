@@ -281,6 +281,7 @@ export type CurrentNetworkInfo = {
   icon: string;
   genesisHash: string;
   isEthereum: boolean;
+  isReady?: boolean; // check if current network info is lifted from initial state
 }
 
 export type TokenInfo = {

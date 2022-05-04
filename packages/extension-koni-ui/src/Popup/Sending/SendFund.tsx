@@ -56,8 +56,13 @@ function getDefaultToken (networkKey: string, chainRegistryMap: Record<string, C
   return networkKey === 'all' ? [firstNetworkKey, token] : [networkKey, token];
 }
 
-function getDefaultValue (networkKey: string, address: string | undefined, chainRegistryMap: Record<string, ChainRegistry>, accounts: AccountJson[]): SenderInputAddressType | null {
-  if (!address) {
+function getDefaultValue (
+  networkKey: string,
+  isCurrentNetworkInfoReady: boolean,
+  address: string | undefined,
+  chainRegistryMap: Record<string, ChainRegistry>,
+  accounts: AccountJson[]): SenderInputAddressType | null {
+  if (!address || !isCurrentNetworkInfoReady) {
     return null;
   }
 
@@ -125,9 +130,9 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
-    currentNetwork: { networkKey } } = useSelector((state: RootState) => state);
+    currentNetwork: { isReady: isCurrentNetworkInfoReady, networkKey } } = useSelector((state: RootState) => state);
 
-  const defaultValue = getDefaultValue(networkKey, account?.address, chainRegistryMap, accounts);
+  const defaultValue = getDefaultValue(networkKey, !!isCurrentNetworkInfoReady, account?.address, chainRegistryMap, accounts);
 
   return (
     <div className={className}>

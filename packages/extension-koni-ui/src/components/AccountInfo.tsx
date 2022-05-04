@@ -55,6 +55,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
   const displayName = accountName || t('<unknown>');
   const { settings: { accountAllLogo } } = useSelector((state: RootState) => state);
   const randomVariant = window.localStorage.getItem('randomVariant') as 'beam' | 'marble' | 'pixel' | 'sunset' | 'ring';
+  const randomNameForLogo = window.localStorage.getItem('randomNameForLogo') as string;
   const _isAccountAll = address && isAccountAll(address);
 
   useEffect((): void => {
@@ -134,7 +135,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
             : <div className='account-info__all-account-icon'>
               <Avatar
                 colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
-                name='sub-wallet'
+                name={randomNameForLogo}
                 size={34}
                 variant={randomVariant}
               />

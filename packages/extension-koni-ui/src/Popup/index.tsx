@@ -81,10 +81,10 @@ function updateCurrentAccount (currentAcc: AccountJson): void {
   store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
-const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'ring'];
+const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
 
 function getRandomVariant (): string {
-  const random = Math.floor(Math.random() * 5);
+  const random = Math.floor(Math.random() * 6);
 
   return VARIANTS[random];
 }
@@ -101,10 +101,11 @@ export default function Popup (): React.ReactElement {
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const browser = Bowser.getParser(window.navigator.userAgent);
 
-  if (!window.localStorage.getItem('randomVariant')) {
+  if (!window.localStorage.getItem('randomVariant') || !window.localStorage.getItem('randomNameForLogo')) {
     const randomVariant = getRandomVariant();
 
     window.localStorage.setItem('randomVariant', randomVariant);
+    window.localStorage.setItem('randomNameForLogo', `${Date.now()}`);
   }
 
   if (!!browser.getBrowser() && !!browser.getBrowser().name && !!browser.getOS().name) {

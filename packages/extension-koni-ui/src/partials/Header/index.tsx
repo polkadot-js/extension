@@ -85,6 +85,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
   const _isAccountAll = account && isAccountAll(account.address);
   const randomVariant = window.localStorage.getItem('randomVariant') as 'beam' | 'marble' | 'pixel' | 'sunset' | 'ring';
+  const randomNameForLogo = window.localStorage.getItem('randomNameForLogo') as string;
 
   useEffect((): void => {
     if (!account) {
@@ -344,7 +345,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
                       : <div className='header__all-account-icon'>
                         <Avatar
                           colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
-                          name='sub-wallet'
+                          name={randomNameForLogo}
                           size={46}
                           variant={randomVariant}
                         />

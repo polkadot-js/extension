@@ -9,6 +9,7 @@ import useSetupNft from '@polkadot/extension-koni-ui/hooks/store/useSetupNft';
 import useSetupNftCollection from '@polkadot/extension-koni-ui/hooks/store/useSetupNftCollection';
 import useSetupNftTransfer from '@polkadot/extension-koni-ui/hooks/store/useSetupNftTransfer';
 import useSetupPrice from '@polkadot/extension-koni-ui/hooks/store/useSetupPrice';
+import useSetupSettings from '@polkadot/extension-koni-ui/hooks/store/useSetupSettings';
 import useSetupStaking from '@polkadot/extension-koni-ui/hooks/store/useSetupStaking';
 import useSetupStakingReward from '@polkadot/extension-koni-ui/hooks/store/useSetupStakingReward';
 import useSetupTransactionHistory from '@polkadot/extension-koni-ui/hooks/store/useSetupTransactionHistory';
@@ -25,4 +26,5 @@ export default function useSetupStore (): void {
   useSetupStakingReward();
   useSetupTransactionHistory();
   useSetupNftTransfer();
+  useSetupSettings();
 }

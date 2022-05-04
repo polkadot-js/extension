@@ -184,6 +184,15 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
               {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
             </Warning>
           )}
+
+          {!!error && !!seed && (
+            <Warning
+              className='seed-and-path__error'
+              isDanger
+            >
+              {error}
+            </Warning>
+          )}
           {selectedAccType === SUBSTRATE_ACCOUNT_TYPE && seed &&
             <Dropdown
               className='seed-and-path__genesis-selection'
@@ -205,15 +214,6 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
               value={evmGenesis}
             />
           }
-
-          {!!error && !!seed && (
-            <Warning
-              className='seed-and-path__error'
-              isDanger
-            >
-              {error}
-            </Warning>
-          )}
         </div>
       </div>
       <ButtonArea>

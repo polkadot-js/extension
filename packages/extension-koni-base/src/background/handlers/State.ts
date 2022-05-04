@@ -20,6 +20,7 @@ import { initWeb3Api } from '@polkadot/extension-koni-base/api/web3/web3';
 import { CurrentAccountStore, NetworkMapStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
+import SettingsStore from '@polkadot/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus, getCurrentProvider, getNftProvider } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
@@ -115,6 +116,7 @@ export default class KoniState extends State {
   private readonly networkMapStore = new NetworkMapStore(); // persist custom networkMap by user
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
+  private readonly settingsStore = new SettingsStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
@@ -628,6 +630,24 @@ export default class KoniState extends State {
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
     this.updateServiceInfo();
+  }
+
+  public getSettings (update: (value: RequestSettingsType) => void): void {
+    this.settingsStore.get('Settings', (value) => {
+      if (!value) {
+        update({ isShowBalance: false, accountAllLogo: '' });
+      } else {
+        update(value);
+      }
+    });
+  }
+
+  public setSettings (data: RequestSettingsType, callback?: () => void): void {
+    this.settingsStore.set('Settings', data, callback);
+  }
+
+  public subscribeSettingsSubject (): Subject<RequestSettingsType> {
+    return this.settingsStore.getSubject();
   }
 
   public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {

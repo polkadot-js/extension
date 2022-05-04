@@ -190,6 +190,7 @@ export default styled(Settings)(({ theme }: Props) => `
     display: flex;
     align-items: center;
     padding: 11px;
+    opacity: 1;
 
     .svg-inline--fa {
       color: ${theme.iconNeutralColor};

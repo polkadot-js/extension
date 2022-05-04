@@ -53,7 +53,7 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
-  const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
+  const { settings: { accountAllLogo } } = useSelector((state: RootState) => state);
 
   const _isAccountAll = address && isAccountAll(address);
 
@@ -147,11 +147,11 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
     <div className={className}>
       <div className='account-info-row'>
         {_isAccountAll
-          ? allAccountLogo
+          ? accountAllLogo
             ? <img
               alt='all-account-icon'
               className='account-info__all-account-icon'
-              src={allAccountLogo}
+              src={accountAllLogo}
             />
             : <img
               alt='all-account-icon'

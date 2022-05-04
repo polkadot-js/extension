@@ -155,9 +155,7 @@ export class KoniSubscription {
       } as NftTransferExtra);
       nftHandler.setApiProps(dotSamaApiMap);
       nftHandler.setWeb3ApiMap(web3ApiMap);
-      nftHandler.setAddresses([
-        '0xd476908976a29e3c0C23925974B9abfCaDA3c30B'
-      ]);
+      nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         (data) => {
           state.updateNft(data);

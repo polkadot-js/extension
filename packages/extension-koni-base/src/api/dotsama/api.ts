@@ -8,7 +8,7 @@ import { ApiProps, ApiState } from '@polkadot/extension-base/background/KoniType
 import { ethereumChains, typesBundle, typesChain } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 import { inJestTest } from '@polkadot/extension-koni-base/utils/utils';
-import {ScProvider, WellKnownChain} from '@polkadot/rpc-provider/substrate-connect';
+import { ScProvider, WellKnownChain } from '@polkadot/rpc-provider/substrate-connect';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';

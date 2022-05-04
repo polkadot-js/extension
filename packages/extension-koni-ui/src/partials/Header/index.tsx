@@ -5,11 +5,11 @@ import type { ThemeProps } from '../../types';
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Avatar from 'boring-avatars';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
-import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
@@ -80,6 +80,8 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
 
   const genesisOptions = getGenesisOptionsByAddressType(account?.address, accounts, useGenesisHashOptions());
   const _isAccountAll = account && isAccountAll(account.address);
+  const randomVariant = window.localStorage.getItem('randomVariant') as 'beam' | 'marble' | 'pixel' | 'sunset' | 'ring';
+  const randomNameForLogo = window.localStorage.getItem('randomNameForLogo') as string;
 
   useEffect((): void => {
     if (!account) {
@@ -267,11 +269,15 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
                         className='header__all-account-icon'
                         src={accountAllLogo}
                       />
-                      : <img
-                        alt='all-account-icon'
-                        className='header__all-account-icon'
-                        src={allAccountLogoDefault}
-                      />
+                      : <div className='header__all-account-icon'>
+                        <Avatar
+                          colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
+                          name={randomNameForLogo}
+                          size={46}
+                          variant={randomVariant}
+                        />
+                      </div>
+
                     : (
                       <Identicon
                         className='identityIcon'
@@ -621,6 +627,9 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     width: 54px;
     min-width: 54px;
     height: 54px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: 2px solid ${theme.checkDotColor};
     padding: 2px;
     border-radius: 50%;

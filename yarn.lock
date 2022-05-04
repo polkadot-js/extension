@@ -3652,6 +3652,7 @@ __metadata:
     "@types/store": 2.0.2
     "@types/styled-components": ^5.1.19
     "@wojtekmaj/enzyme-adapter-react-17": ^0.6.6
+    boring-avatars: ^1.6.3
     bowser: ^2.11.0
     classnames: ^2.3.1
     enzyme: ^3.11.0
@@ -7642,6 +7643,13 @@ __metadata:
   version: 3.2.0
   resolution: "boolean@npm:3.2.0"
   checksum: fb29535b8bf710ef45279677a86d14f5185d604557204abd2ca5fa3fb2a5c80e04d695c8dbf13ab269991977a79bb6c04b048220a6b2a3849853faa94f4a7d77
+  languageName: node
+  linkType: hard
+
+"boring-avatars@npm:^1.6.3":
+  version: 1.6.3
+  resolution: "boring-avatars@npm:1.6.3"
+  checksum: 51dde5d80153f2bb4fa45d3486fed1ec48bd3d15417de25ad501cb4c8340b096e9547f7e81f0e6b3f213575ec21e464096efb891dcb6c771603d6b643af0684b
   languageName: node
   linkType: hard
 

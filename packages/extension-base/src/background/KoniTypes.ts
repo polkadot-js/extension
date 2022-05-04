@@ -253,16 +253,17 @@ export interface NetWorkInfo {
 
 export interface NetworkJson {
   // General Informations
-  key: string, // Key of network in NetworkMap
+  key: string; // Key of network in NetworkMap
   chain: string; // Name of the network
   icon?: string; // Icon name, available with known network
-  active: boolean, // Network is active or not
+  active: boolean; // Network is active or not
 
   // Provider Informations
-  providers: Record<string, string> // Predefined provider map
-  currentProvider: string, // Current provider key
-  currentProviderMode: 'http' | 'ws' // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
-  customProviders?: Record<string, string> // Custom provider map, provider name same with provider map
+  providers: Record<string, string>; // Predefined provider map
+  currentProvider: string; // Current provider key
+  currentProviderMode: 'http' | 'ws'; // Current provider mode, compute depend on provider protocol. the feature need to know this to decide use subscribe or cronjob to use this features.
+  customProviders?: Record<string, string>; // Custom provider map, provider name same with provider map
+  nftProvider?: string;
 
   // Metadata get after connect to provider
   genesisHash: string; // identifier for network
@@ -281,9 +282,9 @@ export interface NetworkJson {
   decimals?: number;
 
   // Other informations
-  coinGeckoKey?: string, // Provider key to get token price from CoinGecko // user input
-  blockExplorer?: string, // Link to block scanner to check transaction with extrinsic hash // user input
-  dependencies?: string[] // Auto active network in dependencies if current network is activated
+  coinGeckoKey?: string; // Provider key to get token price from CoinGecko // user input
+  blockExplorer?: string; // Link to block scanner to check transaction with extrinsic hash // user input
+  dependencies?: string[]; // Auto active network in dependencies if current network is activated
 
   apiStatus?: NETWORK_STATUS;
 }

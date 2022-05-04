@@ -175,11 +175,13 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     chain: 'Astar',
     genesisHash: '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6',
     ss58Format: 5,
+    nftProvider: 'OnFinality',
     providers: {
       Astar: 'wss://rpc.astar.network',
       OnFinality: 'wss://astar.api.onfinality.io/public-ws',
       Dwellir: 'wss://astar-rpc.dwellir.com'
     },
+    isEthereum: true,
     active: false,
     currentProviderMode: 'ws',
     currentProvider: 'OnFinality',

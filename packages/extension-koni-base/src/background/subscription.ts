@@ -130,15 +130,15 @@ export class KoniSubscription {
     };
   }
 
-  subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>) {
+  subscribeNft (address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses, dotSamaApiMap);
+        this.initNftSubscription(addresses, dotSamaApiMap, web3ApiMap);
       })
       .catch(console.error);
   }
 
-  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -155,6 +155,7 @@ export class KoniSubscription {
         selectedNftCollection
       } as NftTransferExtra);
       nftHandler.setApiProps(dotSamaApiMap);
+      nftHandler.setWeb3ApiMap(web3ApiMap);
       nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         (data) => {

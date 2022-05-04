@@ -146,7 +146,7 @@ export class NftHandler {
         });
 
         this.needSetupApi = false;
-        // console.log(`${this.handlers.length} nft connected`);
+        console.log(`${this.handlers.length} nft connected`, this.handlers);
       }
     } catch (e) {
       console.error('error setting up nft handlers', e);

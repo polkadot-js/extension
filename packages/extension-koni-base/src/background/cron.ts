@@ -3,7 +3,7 @@
 
 import { Subject } from 'rxjs';
 
-import { ApiProps, NETWORK_STATUS, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiMap, NETWORK_STATUS, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
 import { state } from '@polkadot/extension-koni-base/background/handlers';
@@ -59,7 +59,7 @@ export class KoniCron {
     this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap().dotSama), CRON_REFRESH_NFT_INTERVAL);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getApiMap()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
       }
@@ -76,7 +76,7 @@ export class KoniCron {
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
 
-          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap.dotSama), CRON_REFRESH_NFT_INTERVAL);
+          this.addCron('refreshNft', this.refreshNft(address, serviceInfo.apiMap), CRON_REFRESH_NFT_INTERVAL);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshHistory', this.refreshHistory(address), CRON_REFRESH_HISTORY_INTERVAL);
         }
@@ -173,10 +173,10 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft (address: string, dotSamaApiMap: Record<string, ApiProps>) {
+  refreshNft (address: string, apiMap: ApiMap) {
     return () => {
       console.log('Refresh Nft state');
-      this.subscriptions.subscribeNft(address, dotSamaApiMap);
+      this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3);
     };
   }
 

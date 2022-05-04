@@ -228,3 +228,11 @@ export const getCurrentProvider = (data: NetworkJson) => {
     return data.providers[data.currentProvider];
   }
 };
+
+export const getNftProvider = (data: NetworkJson) => {
+  if (data.nftProvider) {
+    return data.providers[data.nftProvider];
+  }
+
+  return '';
+};

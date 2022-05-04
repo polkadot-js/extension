@@ -30,14 +30,6 @@ export class Web3NftApi extends BaseNftApi {
     }
   }
 
-  // connectWeb3 () {
-  //   if (this.chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
-  //     this.web3 = new Web3(new Web3.providers.WebsocketProvider(NETWORKS.astar.provider));
-  //   } else {
-  //     this.web3 = new Web3(new Web3.providers.WebsocketProvider(EVM_NETWORKS[this.chain as string].provider));
-  //   }
-  // }
-
   override parseUrl (input: string): string | undefined {
     if (!input) {
       return undefined;
@@ -86,7 +78,7 @@ export class Web3NftApi extends BaseNftApi {
       description: data.description as string | undefined,
       properties: propertiesMap,
       external_url: data.external_url as string | undefined,
-      chain: this.chain
+      chain: this.chain === 'astarEvm' ? 'astar' : this.chain
     } as NftItem;
   }
 
@@ -95,7 +87,7 @@ export class Web3NftApi extends BaseNftApi {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     const contract = new this.web3.eth.Contract(ERC721Contract, smartContract);
     let ownItem = false;
 
@@ -158,7 +150,7 @@ export class Web3NftApi extends BaseNftApi {
         collectionId: smartContract,
         collectionName,
         image: collectionImage || undefined,
-        chain: this.chain
+        chain: this.chain === 'astarEvm' ? 'astar' : this.chain
       } as NftCollection;
 
       updateCollection(nftCollection);

@@ -41,7 +41,7 @@ export enum SUPPORTED_NFT_NETWORKS {
 export enum SUPPORTED_TRANSFER_CHAIN_NAME {
   moonbeam = 'moonbeam',
   moonbase = 'moonbase',
-  astarEvm = 'astarEvm',
+  astarEvm = 'astar',
   moonriver = 'moonriver',
   shiden = 'shiden',
   shibuya = 'shibuya'

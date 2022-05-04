@@ -62,7 +62,7 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
   bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonbase = 'moonbase',
-  astarEvm = 'astarEvm',
+  astarEvm = 'astar',
   moonriver = 'moonriver',
   shiden = 'shiden',
   shibuya = 'shibuya'

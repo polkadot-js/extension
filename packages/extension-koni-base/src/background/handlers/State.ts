@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -14,9 +14,11 @@ import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/stak
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
+import { DEFAULT_EVM_TOKENS } from '@polkadot/extension-koni-base/api/web3/defaultEvmToken';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
+import CustomEvmTokenStore from '@polkadot/extension-koni-base/stores/CustomEvmToken';
 import SettingsStore from '@polkadot/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
@@ -70,6 +72,7 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private readonly evmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly settingsStore = new SettingsStore();
@@ -80,6 +83,9 @@ export default class KoniState extends State {
   // private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
+
+  private evmTokenState: CustomEvmToken[] = [];
+  private evmTokenSubject = new Subject<CustomEvmToken[]>();
 
   // private nftStoreReady = false;
   // private stakingStoreReady = false;
@@ -139,6 +145,19 @@ export default class KoniState extends State {
 
     this.lazyMap[key] = lazy;
   };
+
+  public initEvmTokenState () {
+    this.evmTokenStore.get('EvmToken', (storedEvmTokens) => {
+      if (!storedEvmTokens) {
+        this.evmTokenState = DEFAULT_EVM_TOKENS;
+        this.evmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
+      } else {
+        this.evmTokenState = storedEvmTokens;
+      }
+
+      this.evmTokenSubject.next(this.evmTokenState);
+    });
+  }
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
     return this.#authRequestsV2[id];
@@ -712,5 +731,39 @@ export default class KoniState extends State {
 
   public subscribePrice () {
     return this.priceStore.getSubject();
+  }
+
+  public subscribeEvmToken () {
+    return this.evmTokenSubject;
+  }
+
+  public getEvmToken () {
+    return this.evmTokenState;
+  }
+
+  public upsertEvmToken (data: CustomEvmToken) {
+    let isExist = false;
+
+    for (const token of this.evmTokenState) {
+      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+        isExist = true;
+        break;
+      }
+    }
+
+    if (!isExist) {
+      this.evmTokenState.push(data);
+    } else {
+      this.evmTokenState = this.evmTokenState.map((token) => {
+        if (token.smartContract === data.smartContract) {
+          return data;
+        }
+
+        return token;
+      });
+    }
+
+    this.evmTokenSubject.next(this.evmTokenState);
+    this.evmTokenStore.set('EvmToken', this.evmTokenState);
   }
 }

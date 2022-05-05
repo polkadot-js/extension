@@ -480,7 +480,18 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
+export interface CustomEvmToken {
+  name?: string,
+  smartContract: string,
+  symbol?: string,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
+  type: 'erc20' | 'erc721'
+}
+
 export interface KoniRequestSignatures {
+  'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
+  'pri(evmTokenState.getEvmTokenState)': [null, CustomEvmToken[]];
+  'pri(evmTokenState.getSubscription)': [null, CustomEvmToken[], CustomEvmToken[]];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];

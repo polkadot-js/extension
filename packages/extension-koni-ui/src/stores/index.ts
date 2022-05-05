@@ -19,8 +19,10 @@ import StakingRewardReducer from './StakingReward';
 import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
+import EvmTokenReducer from './EvmToken';
 
 const reducers = {
+  evmToken: EvmTokenReducer,
   transferNftExtra: TransferNftExtraReducer,
   transferNftParams: TransferNftParamsReducer,
   stakingReward: StakingRewardReducer,

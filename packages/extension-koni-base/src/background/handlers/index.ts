@@ -19,6 +19,8 @@ export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
 export const nftHandler = new NftHandler(dotSamaAPIMap);
 
+state.initEvmTokenState();
+
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};
 

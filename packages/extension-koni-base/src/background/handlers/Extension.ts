@@ -7,7 +7,52 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  ApiInitStatus,
+  BackgroundWindow,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  CustomEvmToken,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmNftTransactionResponse,
+  NetWorkMetadataDef,
+  NftCollection,
+  NftCollectionJson,
+  NftItem,
+  NftJson,
+  NftTransferExtra,
+  PriceJson,
+  RequestAccountCreateSuriV2,
+  RequestAccountExportPrivateKey,
+  RequestApi,
+  RequestAuthorization,
+  RequestAuthorizationPerAccount,
+  RequestAuthorizeApproveV2,
+  RequestCheckTransfer,
+  RequestForgetSite,
+  RequestNftForceUpdate,
+  RequestSeedCreateV2,
+  RequestSeedValidateV2,
+  RequestSettingsType,
+  RequestTransactionHistoryAdd,
+  RequestTransfer,
+  ResponseAccountCreateSuriV2,
+  ResponseAccountExportPrivateKey,
+  ResponseCheckTransfer,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  StakingJson,
+  StakingRewardJson,
+  TokenInfo,
+  TransactionHistoryItemType,
+  TransferError,
+  TransferErrorCode,
+  TransferStep
+} from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -1229,6 +1274,33 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
+  private subscribeEvmTokenState (id: string, port: chrome.runtime.Port): CustomEvmToken[] {
+    const cb = createSubscription<'pri(evmTokenState.getSubscription)'>(id, port);
+
+    const evmTokenSubscription = state.subscribeEvmToken().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      evmTokenSubscription.unsubscribe();
+    });
+
+    return state.getEvmToken();
+  }
+
+  private getEvmTokenState () {
+    return state.getEvmToken();
+  }
+
+  private upsertEvmToken (data: CustomEvmToken) {
+    state.upsertEvmToken(data);
+
+    return true;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1332,6 +1404,12 @@ export default class KoniExtension extends Extension {
         return this.evmNftGetTransaction(request as EvmNftTransactionRequest);
       case 'pri(evmNft.submitTransaction)':
         return this.evmNftSubmitTransaction(id, port, request as EvmNftSubmitTransaction);
+      case 'pri(evmTokenState.getSubscription)':
+        return this.subscribeEvmTokenState(id, port);
+      case 'pri(evmTokenState.getEvmTokenState)':
+        return this.getEvmTokenState();
+      case 'pri(evmTokenState.upsertEvmTokenState)':
+        return this.upsertEvmToken(request as CustomEvmToken);
       default:
         return super.handle(id, type, request, port);
     }

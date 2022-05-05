@@ -277,7 +277,7 @@ export async function makeTransfer (
 
   function updateResponseByEvents (response: ResponseTransfer, records: EventRecord[]) {
     records.forEach((record) => {
-      const { event: { method, section, data: [error, info] } } = record;
+      const { event: { method, section, data: [error] } } = record;
 
       // @ts-ignore
       const isFailed = section === 'system' && method === 'ExtrinsicFailed';
@@ -302,8 +302,7 @@ export async function makeTransfer (
           response.data = {
             section,
             method,
-            message: errorMessage,
-            info
+            message: errorMessage
           };
           response.errors?.push({
             code: TransferErrorCode.TRANSFER_ERROR,

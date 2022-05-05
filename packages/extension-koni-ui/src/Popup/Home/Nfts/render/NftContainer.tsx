@@ -15,6 +15,7 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 import NftCollectionPreview from './NftCollectionPreview';
+import {Link} from "@polkadot/extension-koni-ui/components";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -131,10 +132,10 @@ function NftContainer (
 
       {/* @ts-ignore */}
       {!loading && !showCollectionDetail && totalItems > 0 &&
-      <div className={'total-title'}>
-        {/* @ts-ignore */}
-        {totalItems} NFT{totalItems > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
-      </div>
+        <div className={'total-title'}>
+          {/* @ts-ignore */}
+          {totalItems} NFT{totalItems > 1 && 's'} from {totalCollection} collection{totalCollection > 1 && 's'}
+        </div>
       }
 
       {
@@ -199,17 +200,19 @@ function NftContainer (
         </div>
       }
 
-      {/* {!loading && */}
-      {/*  <div className={'footer'}> */}
-      {/*    <div>Don't see your tokens?</div> */}
-      {/*    <div> */}
-      {/*      <span */}
-      {/*        className={'link'} */}
-      {/*        onClick={() => _onChangeState()} */}
-      {/*      >Refresh list</span> or <span className={'link'}>import tokens</span> */}
-      {/*    </div> */}
-      {/*  </div> */}
-      {/* } */}
+      {!loading &&
+        <div className={'footer'}>
+          <div>Don&apos;t see your tokens?</div>
+          <div>
+            <Link
+              className={'link'}
+              to='/account/import-evm-nft'
+            >
+              Import token
+            </Link>
+          </div>
+        </div>
+      }
     </div>
   );
 }
@@ -261,7 +264,7 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
   }
 
   .footer {
-    margin-top: 20px;
+    margin-top: 10px;
     margin-bottom: 10px;
     width: 100%;
     color: #9196AB;
@@ -269,6 +272,7 @@ export default React.memo(styled(NftContainer)(({ theme }: Props) => `
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    font-size: 14px;
   }
 
   .link {

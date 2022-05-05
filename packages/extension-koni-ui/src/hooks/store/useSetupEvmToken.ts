@@ -8,7 +8,6 @@ import { subscribeEvmToken } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateEvmTokenState (data: CustomEvmToken[]): void {
-  console.log(data);
   store.dispatch({ type: 'evmToken/update', payload: { evmTokenList: data } });
 }
 

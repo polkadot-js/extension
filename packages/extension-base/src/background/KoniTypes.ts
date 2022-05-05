@@ -484,6 +484,7 @@ export interface CustomEvmToken {
   name?: string,
   smartContract: string,
   symbol?: string,
+  decimals?: number,
   chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
   type: 'erc20' | 'erc721'
 }

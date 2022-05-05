@@ -145,6 +145,7 @@ function Networks ({ className }: Props): React.ReactElement {
 
       <div className={'add-network-container'}>
         <Link
+          className={'add-network-link'}
           onClick={handleAddNetwork}
           to='/account/config-network'
         >
@@ -162,13 +163,18 @@ export default styled(Networks)(({ theme }: Props) => `
   flex-direction: column;
   height: 100%;
 
+  .add-network-link {
+    opacity: 1;
+  }
+
   .add-network-button {
     width: 100%;
     cursor: pointer;
     text-align: center;
     padding: 12px 20px;
     border-radius: 8px;
-    background-color: ${theme.buttonBackground}
+    background-color: ${theme.buttonBackground};
+    opacity: 1;
   }
 
   .add-network-container {

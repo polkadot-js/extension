@@ -375,7 +375,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         {
           mode === 'create' &&
           <div className={'toggle-container'}>
-            <div>Ethereum chain</div>
+            <div>EVM chain</div>
             <HorizontalLabelToggle
               checkedLabel={''}
               className='info'

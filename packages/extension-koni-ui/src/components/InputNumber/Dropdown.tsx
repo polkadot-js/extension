@@ -127,7 +127,9 @@ export default React.memo(styled(Dropdown)(({ theme }: ThemeProps) => `
   }
 
   .input-number-dropdown-dropdown__control {
-    background: ${theme.dropdownBackground};
+    background: ${theme.background};
+    cursor: pointer;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.15);
     align-items: center;
     border: 0;
     border-radius: 8px;
@@ -136,14 +138,9 @@ export default React.memo(styled(Dropdown)(({ theme }: ThemeProps) => `
     justify-content: space-between;
     min-height: 54px;
     position: relative;
-    box-shadow: none;
     padding-left: 6px;
     font-weight: 500;
     cursor: inherit;
-  }
-
-  .input-number-dropdown-dropdown__control:hover {
-    box-shadow: none;
   }
 
   .input-number-dropdown-dropdown__indicator-separator {

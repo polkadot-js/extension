@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { ActionMeta, SingleValue } from 'react-select';
 import AsyncSelect from 'react-select/async';
-import styled from 'styled-components';
+import styled, { ThemeContext } from 'styled-components';
 
 import { DropdownOptionType, DropdownTransformGroupOptionType, DropdownTransformOptionType } from '@polkadot/extension-base/background/KoniTypes';
-import { Label } from '@polkadot/extension-koni-ui/components';
+import { Label, Theme } from '@polkadot/extension-koni-ui/components';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
@@ -31,6 +31,7 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
   const transformOptions = options.map((t) => ({ label: t.text, value: t.value }));
   const [selectedValue, setSelectedValue] = useState(value);
   const grDeps = defaultOptions.toString();
+  const themeContext = useContext(ThemeContext as React.Context<Theme>);
 
   useEffect(() => {
     if (isSetDefaultValue) {
@@ -60,23 +61,61 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
   }, [getFormatOptLabel]);
 
   const customStyles = {
-    option: (base: any) => {
+    option: (base: any, { isSelected }: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
         textAlign: 'left',
         fontFamily: 'Lexend',
-        fontSize: '15px'
+        padding: '8px 16px',
+        fontSize: '15px',
+        cursor: 'pointer',
+        color: themeContext.textColor,
+        fontWeight: isSelected ? 500 : 400,
+        backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent'
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    menuList: (base: any) => ({ ...base, maxHeight: '200px', zIndex: 15 }),
+    menuList: (base: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return {
+        ...base,
+        maxHeight: '200px',
+        zIndex: 15,
+        paddingTop: 0,
+        paddingBottom: 0
+      };
+    },
+    menu: (base: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return {
+        ...base,
+        width: '428px',
+        left: '-2px',
+        boxShadow: themeContext.boxShadow2,
+        background: themeContext.background,
+        borderRadius: '8px'
+      };
+    },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    group: (base: any) => ({ ...base, paddingTop: '0' }),
+    group: (base: any) => ({
+      ...base,
+      paddingTop: 0,
+      paddingBottom: 0
+    }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    groupHeading: (base: any) => ({ ...base, textAlign: 'left', padding: '8px 12px', fontSize: '15px', fontFamily: 'Lexend', marginBottom: '0' })
+    groupHeading: (base: any) => ({
+      ...base,
+      textAlign: 'left',
+      padding: '8px 16px',
+      fontSize: '15px',
+      fontFamily: 'Lexend',
+      marginBottom: '0',
+      color: themeContext.textColor,
+      backgroundColor: themeContext.background
+    })
   };
 
   return (
@@ -95,7 +134,7 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
           isSearchable
           loadOptions={loadOptions}
           menuPlacement={'auto'}
-          menuPortalTarget={document.querySelector('body')}
+          menuPortalTarget={document.querySelector('main')}
           menuPosition='fixed'
           onChange={handleChange}
           placeholder=''
@@ -120,8 +159,8 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     height: 40px;
     border-radius: 50%;
     background: ${theme.backgroundAccountAddress};
-    top: 16px;
-    left: 16px;
+    top: 11px;
+    left: 12px;
     z-index: 1;
   }
 
@@ -140,7 +179,7 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     border-radius: 8px;
     width: 100%;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: 0;
     box-sizing: border-box;
     display: flex;
     font-family: ${theme.fontFamily};
@@ -148,13 +187,13 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
   }
 
   .input-address-dropdown__control:hover {
-    border: 1px solid transparent;
     box-shadow: none;
   }
 
   .input-address-dropdown__input-container {
     padding-top: 28px;
-    padding-left: 48px;
+    padding-left: 50px;
+    color: ${theme.textColor2};
   }
 
   .input-address-dropdown__input {
@@ -176,10 +215,6 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     display: none;
   }
 
-  .input-address-dropdown__input-container {
-    color: ${theme.textColor2};
-  }
-
   .input-address-dropdown__menu-portal {
     text-align: left;
     font-size: 15px;
@@ -189,5 +224,4 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     text-align: left;
     font-family: ${theme.fontFamily};
   }
-
 `));

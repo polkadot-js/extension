@@ -136,11 +136,16 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             rs.estimateFee && rs.estimateFee !== '0' ? rs.estimateFee : null,
             rs.feeSymbol
           ]);
+          setGasRequiredExceedsError(false);
         }
       }).catch((e: Error) => {
         if (isContainGasRequiredExceedsError(e.message) && isSync) {
           setGasRequiredExceedsError(true);
         } else {
+          if (isSync) {
+            setGasRequiredExceedsError(false);
+          }
+
           console.log('There is problem when checkTransfer', e);
         }
       });
@@ -148,7 +153,6 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
 
     return () => {
       isSync = false;
-      setGasRequiredExceedsError(false);
     };
   }, [amount, canToggleAll, isAll, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
 
@@ -273,7 +277,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
               ? (
                 <InputBalance
                   autoFocus
-                  className={'send-fund-balance-item'}
+                  className={'send-fund-amount-input'}
                   decimals={balanceFormat[0]}
                   defaultValue={maxTransfer}
                   help={t<string>('The full account balance to be transferred, minus the transaction fees')}
@@ -286,7 +290,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
               : (
                 <InputBalance
                   autoFocus
-                  className={'send-fund-balance-item'}
+                  className={'send-fund-amount-input'}
                   decimals={balanceFormat[0]}
                   help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
                   isError={false}
@@ -455,8 +459,9 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     display: block;
   }
 
-  .send-fund-balance-item {
+  .send-fund-amount-input {
     margin-bottom: 10px;
+    margin-top: 20px;
   }
 
   .send-fund-toggle {

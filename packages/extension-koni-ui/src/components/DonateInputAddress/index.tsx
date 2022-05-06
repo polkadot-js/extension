@@ -380,15 +380,15 @@ export default React.memo(styled(DonateInputAddress)(({ theme }: ThemeProps) => 
     line-height: 26px;
     color: ${theme.textColor};
     font-weight: 500;
-    padding-left: 48px;
+    padding-left: 50px;
     padding-top: 24px;
   }
 
   .key-pair__icon {
     position: absolute;
-    width: 44px;
-    height: 44px;
-    padding: 2px;
+    width: 42px;
+    height: 42px;
+    background: ${theme.backgroundAccountAddress};
   }
 
   .key-pair__icon .icon {

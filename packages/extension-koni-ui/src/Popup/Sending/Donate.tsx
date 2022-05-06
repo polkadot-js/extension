@@ -105,7 +105,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const [isGasRequiredExceedsError, setGasRequiredExceedsError] = useState<boolean>(false);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const [noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
+  const [, noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
   const valueToTransfer = amount?.toString() || '0';
   const canMakeTransfer = isSupportTransfer &&
     !isGasRequiredExceedsError &&
@@ -133,11 +133,16 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
             rs.estimateFee && rs.estimateFee !== '0' ? rs.estimateFee : null,
             rs.feeSymbol
           ]);
+          setGasRequiredExceedsError(false);
         }
       }).catch((e: Error) => {
         if (isContainGasRequiredExceedsError(e.message) && isSync) {
           setGasRequiredExceedsError(true);
         } else {
+          if (isSync) {
+            setGasRequiredExceedsError(false);
+          }
+
           console.log('There is problem when checkTransfer', e);
         }
       });
@@ -145,7 +150,6 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
 
     return () => {
       isSync = false;
-      setGasRequiredExceedsError(false);
     };
   }, [amount, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
 
@@ -268,7 +272,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
 
             <InputBalance
               autoFocus
-              className={'send-fund-balance-item'}
+              className={'send-fund-amount-input'}
               decimals={balanceFormat[0]}
               help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
               isError={false}
@@ -424,8 +428,9 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
     display: block;
   }
 
-  .send-fund-balance-item {
+  .send-fund-amount-input {
     margin-bottom: 10px;
+    margin-top: 20px;
   }
 
   .send-fund-toggle {

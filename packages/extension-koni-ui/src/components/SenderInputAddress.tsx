@@ -164,4 +164,14 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
       width: 180px !important;
     }
   }
+
+  .format-balance__value {
+    font-weight: 400;
+    font-size: 14px;
+    color: ${theme.textColor};
+  }
+
+  .format-balance__postfix {
+    color: ${theme.textColor2};
+  }
 `);

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {CustomEvmToken} from "@polkadot/extension-base/background/KoniTypes";
+import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
 
@@ -37,6 +37,7 @@ export enum SUPPORTED_NFT_NETWORKS {
   bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonriver = 'moonriver',
+  moonbase = 'moonbase',
   astarEvm = 'astarEvm',
 }
 
@@ -67,7 +68,7 @@ export const TRANSFER_CHAIN_ID = {
   [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string]: 81
 };
 
-export interface EvmContract {
+export interface EvmContracts {
   astarEvm: CustomEvmToken[];
   moonbeam: CustomEvmToken[];
   moonriver: CustomEvmToken[];

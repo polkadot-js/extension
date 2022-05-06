@@ -20,7 +20,7 @@ state.initEvmTokenState();
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
-export const nftHandler = new NftHandler(dotSamaAPIMap, state.getErc721Tokens());
+export const nftHandler = new NftHandler(dotSamaAPIMap);
 
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};

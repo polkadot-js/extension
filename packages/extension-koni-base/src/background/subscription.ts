@@ -150,6 +150,7 @@ export class KoniSubcription {
       } as NftTransferExtra);
       nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
+        state.getErc721Tokens(),
         (data) => {
           state.updateNft(data);
         },

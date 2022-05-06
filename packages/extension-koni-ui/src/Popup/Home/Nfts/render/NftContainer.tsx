@@ -200,7 +200,7 @@ function NftContainer (
         </div>
       }
 
-      {!loading &&
+      {!loading && !showCollectionDetail && !showItemDetail &&
         <div className={'footer'}>
           <div>Don&apos;t see your NFTs?</div>
           <div>

@@ -84,6 +84,17 @@ export default class KoniState extends State {
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
+  public initEvmTokenState () {
+    this.evmTokenStore.get('EvmToken', (storedEvmTokens) => {
+      if (!storedEvmTokens) {
+        this.evmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
+        this.evmTokenState = DEFAULT_EVM_TOKENS;
+      } else {
+        this.evmTokenState = storedEvmTokens;
+      }
+    });
+  }
+
   private evmTokenState: CustomEvmToken[] = [];
   private evmTokenSubject = new Subject<CustomEvmToken[]>();
 
@@ -145,19 +156,6 @@ export default class KoniState extends State {
 
     this.lazyMap[key] = lazy;
   };
-
-  public initEvmTokenState () {
-    this.evmTokenStore.get('EvmToken', (storedEvmTokens) => {
-      if (!storedEvmTokens) {
-        this.evmTokenState = DEFAULT_EVM_TOKENS;
-        this.evmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
-      } else {
-        this.evmTokenState = storedEvmTokens;
-      }
-
-      this.evmTokenSubject.next(this.evmTokenState);
-    });
-  }
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
     return this.#authRequestsV2[id];

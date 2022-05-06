@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { ApiProps, CustomEvmToken, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
 import { BitCountryNftApi } from '@polkadot/extension-koni-base/api/nft/bit.country';
-import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
+import { EvmContract, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
 import { Web3NftApi } from '@polkadot/extension-koni-base/api/nft/eth_nft';
 import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
@@ -56,8 +56,14 @@ export class NftHandler {
   handlers: BaseNftApi[] = [];
   addresses: string[] = [];
   total = 0;
+  evmContracts: EvmContract = {
+    astarEvm: [],
+    moonbase: [],
+    moonbeam: [],
+    moonriver: []
+  };
 
-  constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
+  constructor (dotSamaAPIMap: Record<string, ApiProps>, evmTokens: CustomEvmToken[], addresses?: string[]) {
     if (addresses) {
       this.addresses = addresses;
     }
@@ -65,6 +71,16 @@ export class NftHandler {
     for (const item in SUPPORTED_NFT_NETWORKS) {
       this.apiPromises.push({ chain: item, api: dotSamaAPIMap[item] });
     }
+
+    console.log('nft evm contract input', evmTokens);
+
+    for (const token of evmTokens) {
+      if (token.type === 'erc721') {
+        this.evmContracts[token.chain].push(token);
+      }
+    }
+
+    console.log('nft evm contract', this.evmContracts);
   }
 
   setAddresses (addresses: string[]) {

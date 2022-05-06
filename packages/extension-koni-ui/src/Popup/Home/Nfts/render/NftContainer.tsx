@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { Link } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
@@ -15,7 +16,6 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 import NftCollectionPreview from './NftCollectionPreview';
-import {Link} from "@polkadot/extension-koni-ui/components";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -202,13 +202,13 @@ function NftContainer (
 
       {!loading &&
         <div className={'footer'}>
-          <div>Don&apos;t see your tokens?</div>
+          <div>Don&apos;t see your NFTs?</div>
           <div>
             <Link
               className={'link'}
               to='/account/import-evm-nft'
             >
-              Import token
+              Import NFTs
             </Link>
           </div>
         </div>

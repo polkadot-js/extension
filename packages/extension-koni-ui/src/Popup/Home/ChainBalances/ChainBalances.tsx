@@ -7,6 +7,7 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
+import { Link } from '@polkadot/extension-koni-ui/components';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceDetailItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem';
 import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
@@ -218,9 +219,14 @@ function ChainBalances ({ address,
                   {t<string>("Don't see your token?")}
                 </div>
                 <div className='chain-balances-container__footer-row-2'>
-                  <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div>
-                  <span>&nbsp;{t<string>('or')}&nbsp;</span>
-                  <div className='chain-balances-container__footer-action'>{t<string>('import tokens')}</div>
+                  {/* <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div> */}
+                  {/* <span>&nbsp;{t<string>('or')}&nbsp;</span> */}
+                  <Link
+                    className='chain-balances-container__footer-action'
+                    to={'/account/import-evm-token'}
+                  >
+                    {t<string>('Import tokens')}
+                  </Link>
                 </div>
               </div>
             </div>
@@ -261,15 +267,13 @@ export default React.memo(styled(ChainBalances)(({ theme }: Props) => `
     align-items: center;
     justify-content: center;
     color: ${theme.textColor2};
-    display: none;
+    font-size: 14px;
   }
 
   .chain-balances-container__footer-row-2 {
     display: flex;
-  }
+    justify-content: center;
 
-  .chain-balances-container__footer-row-2 {
-    display: flex;
   }
 
   .chain-balances-container__footer-action {

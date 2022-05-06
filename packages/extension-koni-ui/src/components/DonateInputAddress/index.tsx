@@ -376,7 +376,7 @@ export default React.memo(styled(DonateInputAddress)(({ theme }: ThemeProps) => 
     white-space: nowrap;
     padding-right: 16px;
     flex: 1;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 26px;
     color: ${theme.textColor};
     font-weight: 500;

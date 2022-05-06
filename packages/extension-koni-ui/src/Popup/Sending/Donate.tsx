@@ -280,6 +280,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               label={t<string>('amount')}
               onChange={setAmount}
               placeholder={'0'}
+              siSymbol={balanceFormat[1]}
             />
 
             {!!recipientPhish && (

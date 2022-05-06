@@ -72,7 +72,10 @@ function Dropdown ({ className, defaultOptions, defaultValue, getFormatOptLabel,
         cursor: 'pointer',
         color: themeContext.textColor,
         fontWeight: isSelected ? 500 : 400,
-        backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent'
+        backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent',
+        ':active': {
+          backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent'
+        }
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -191,13 +194,14 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
   }
 
   .input-address-dropdown__input-container {
-    padding-top: 28px;
+    padding-top: 26px;
     padding-left: 50px;
     color: ${theme.textColor2};
   }
 
   .input-address-dropdown__input {
     max-width: 350px;
+    font-size: 16px;
   }
 
   .input-address-dropdown__single-value {

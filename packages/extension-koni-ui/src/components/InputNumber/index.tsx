@@ -4,10 +4,11 @@
 import type { SiDef } from '@polkadot/util/types';
 import type { BitLength } from '../types';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
+import Dropdown from '@polkadot/extension-koni-ui/components/InputNumber/Dropdown';
 import Input, { KEYS_PRE } from '@polkadot/extension-koni-ui/components/InputNumber/Input';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -37,17 +38,13 @@ interface Props {
   placeholder?: string;
   siDefault?: SiDef;
   value?: BN | null | string;
+  siSymbol?: string;
+  siDecimals?: number;
 }
 
 const DEFAULT_BITLENGTH = BitLengthOption.NORMAL_NUMBERS as BitLength;
 
-export class TokenUnit {
-  public static abbr = 'Unit';
-
-  public static setAbbr (abbr: string = TokenUnit.abbr): void {
-    TokenUnit.abbr = abbr;
-  }
-}
+const DEFAULT_TOKEN_UNIT = 'Unit';
 
 function getGlobalMaxValue (bitLength?: number): BN {
   return BN_TWO.pow(new BN(bitLength || DEFAULT_BITLENGTH)).isub(BN_ONE);
@@ -61,6 +58,15 @@ function getRegex (isDecimal: boolean): RegExp {
       ? `^(0|[1-9]\\d*)(\\${decimal}\\d*)?$`
       : '^(0|[1-9]\\d*)$'
   );
+}
+
+function getSiOptions (symbol: string, decimals?: number): { text: string; value: string }[] {
+  return formatBalance.getOptions(decimals).map(({ power, text, value }): { text: string; value: string } => ({
+    text: power === 0
+      ? symbol
+      : text,
+    value
+  }));
 }
 
 function getSiPowers (si: SiDef | null, decimals: number): [BN, number, number] {
@@ -176,12 +182,13 @@ function getValues (value: BN | string = '', si: SiDef | null, bitLength: BitLen
     : getValuesFromString(value, si, bitLength, isZeroable, decimals, maxValue);
 }
 
-function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, children, className = '', defaultValue, help, isFull, isSi, isDisabled, isError = false, isWarning, isZeroable = true, label, labelExtra, maxLength, maxValue, onChange, onEnter, onEscape, placeholder, siDefault, value: propsValue }: Props): React.ReactElement<Props> {
+function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, children, className = '', defaultValue, siDecimals, help, isFull, isSi, isDisabled, siSymbol, isError = false, isWarning, isZeroable = true, label, labelExtra, maxLength, maxValue, onChange, onEnter, onEscape, placeholder, siDefault, value: propsValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const si = isSi
-    ? siDefault || formatBalance.findSi('-')
-    : null
-  ;
+  const [si, setSi] = useState<SiDef | null>(() =>
+    isSi
+      ? siDefault || formatBalance.findSi('-')
+      : null
+  );
 
   const [[value, valueBn, isValid], setValues] = useState<[string, BN, boolean]>(() =>
     getValues(propsValue || defaultValue, si, bitLength, isZeroable, decimals, maxValue)
@@ -217,6 +224,12 @@ function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, chil
       setValues(getFormattedValuesFromString(false, value, si, bitLength, isZeroable, decimals, maxValue));
     },
     [bitLength, isZeroable, maxValue, si, decimals, value]
+  );
+
+  const siOptions = useMemo(
+    () => getSiOptions(siSymbol || DEFAULT_TOKEN_UNIT, decimals),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [decimals, siSymbol]
   );
 
   useEffect((): void => {
@@ -263,6 +276,16 @@ function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, chil
     [si]
   );
 
+  const _onSelectSiUnit = useCallback(
+    (siUnit: string): void => {
+      const si = formatBalance.findSi(siUnit);
+
+      setSi(si);
+      _onChangeWithSi(value, si);
+    },
+    [_onChangeWithSi, value]
+  );
+
   // Same as the number of digits, which means it can still overflow, i.e.
   // for u8 we allow 3, which could be 999 (however 2 digits will limit to only 99,
   // so this is more-or-less the lesser of evils without a max-value check)
@@ -293,6 +316,23 @@ function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, chil
       type='text'
       value={value}
     >
+      {!!si && (
+        <Dropdown
+          className='input-number-dropdown'
+          isDisabled={isDisabled}
+          onChange={
+            isDisabled
+              ? undefined
+              : _onSelectSiUnit
+          }
+          options={siOptions}
+          value={
+            isDisabled && siDefault
+              ? siDefault.value
+              : si.value
+          }
+        />
+      )}
       {children}
     </Input>
   );
@@ -326,6 +366,14 @@ export default React.memo(styled(InputNumber)(({ theme }: ThemeProps) => `
   .ui--Input > input:focus {
     border: 0;
     background: transparent;
+  }
+
+  .input-number-dropdown {
+    position: absolute;
+    right: 6px;
+    margin: auto 0;
+    top: 6px;
+    bottom: 6px;
   }
 
   .buttons {

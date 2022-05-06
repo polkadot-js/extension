@@ -76,11 +76,11 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
 
   .receiver-input-address__address {
     position: absolute;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 26px;
     color: ${theme.textColor2};
     right: 16px;
-    top: 32px;
+    top: 30px;
     pointer-events: none;
   }
 

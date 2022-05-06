@@ -86,7 +86,7 @@ export default styled(ConfirmModal)(({ theme }: Props) => `
   }
 
   .confirm-modal__message {
-    padding-top: 28px;
+    padding-top: 26px;
     padding-bottom: 28px;
     font-weight: 500;
     font-size: 18px;

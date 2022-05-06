@@ -163,7 +163,7 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     border-radius: 50%;
     background: ${theme.backgroundAccountAddress};
     top: 11px;
-    left: 12px;
+    left: 10px;
     z-index: 1;
   }
 
@@ -227,5 +227,11 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
   .input-address-dropdown__menu-notice--no-options {
     text-align: left;
     font-family: ${theme.fontFamily};
+  }
+
+  .input-address-dropdown__control--menu-is-open {
+    .key-pair {
+      opacity: 0.5;
+    }
   }
 `));

@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -72,7 +72,7 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
-  private readonly evmTokenStore = new CustomEvmTokenStore();
+  private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
   private readonly settingsStore = new SettingsStore();
@@ -85,18 +85,20 @@ export default class KoniState extends State {
   private readonly transactionHistoryStore = new TransactionHistoryStore();
 
   public initEvmTokenState () {
-    this.evmTokenStore.get('EvmToken', (storedEvmTokens) => {
+    this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
       if (!storedEvmTokens) {
-        this.evmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
+        this.customEvmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
         this.evmTokenState = DEFAULT_EVM_TOKENS;
       } else {
         this.evmTokenState = storedEvmTokens;
       }
+
+      this.evmTokenSubject.next(this.evmTokenState);
     });
   }
 
-  private evmTokenState: CustomEvmToken[] = [];
-  private evmTokenSubject = new Subject<CustomEvmToken[]>();
+  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
+  private evmTokenSubject = new Subject<EvmTokenJson>();
 
   // private nftStoreReady = false;
   // private stakingStoreReady = false;
@@ -735,14 +737,22 @@ export default class KoniState extends State {
     return this.evmTokenSubject;
   }
 
-  public getEvmToken () {
+  public getEvmTokenState () {
     return this.evmTokenState;
+  }
+
+  public getErc20Tokens () {
+    return this.evmTokenState.erc20;
+  }
+
+  public getErc721Tokens () {
+    return this.evmTokenState.erc721;
   }
 
   public upsertEvmToken (data: CustomEvmToken) {
     let isExist = false;
 
-    for (const token of this.evmTokenState) {
+    for (const token of this.evmTokenState[data.type]) {
       if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
         isExist = true;
         break;
@@ -750,9 +760,9 @@ export default class KoniState extends State {
     }
 
     if (!isExist) {
-      this.evmTokenState.push(data);
+      this.evmTokenState[data.type].push(data);
     } else {
-      this.evmTokenState = this.evmTokenState.map((token) => {
+      this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
         if (token.smartContract === data.smartContract) {
           return data;
         }
@@ -762,6 +772,6 @@ export default class KoniState extends State {
     }
 
     this.evmTokenSubject.next(this.evmTokenState);
-    this.evmTokenStore.set('EvmToken', this.evmTokenState);
+    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
   }
 }

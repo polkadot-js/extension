@@ -3,12 +3,12 @@
 
 import { useEffect } from 'react';
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
+import { EvmTokenJson } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeEvmToken } from '@polkadot/extension-koni-ui/messaging';
 import { store } from '@polkadot/extension-koni-ui/stores';
 
-function updateEvmTokenState (data: CustomEvmToken[]): void {
-  store.dispatch({ type: 'evmToken/update', payload: { evmTokenList: data } });
+function updateEvmTokenState (data: EvmTokenJson): void {
+  store.dispatch({ type: 'evmToken/update', payload: data });
 }
 
 export default function useSetupEvmToken (): void {

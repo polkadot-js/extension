@@ -21,7 +21,7 @@ import {
   EvmNftSubmitTransaction,
   EvmNftTransaction,
   EvmNftTransactionRequest,
-  EvmNftTransactionResponse,
+  EvmNftTransactionResponse, EvmTokenJson,
   NetWorkMetadataDef,
   NftCollectionJson,
   NftJson,
@@ -471,11 +471,11 @@ export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction,
   return sendMessage('pri(evmNft.submitTransaction)', request, callback);
 }
 
-export async function subscribeEvmToken (callback: (data: CustomEvmToken[]) => void): Promise<CustomEvmToken[]> {
+export async function subscribeEvmToken (callback: (data: EvmTokenJson) => void): Promise<EvmTokenJson> {
   return sendMessage('pri(evmTokenState.getSubscription)', null, callback);
 }
 
-export async function getEvmTokenState (): Promise<CustomEvmToken[]> {
+export async function getEvmTokenState (): Promise<EvmTokenJson> {
   return sendMessage('pri(evmTokenState.getEvmTokenState)', null);
 }
 

@@ -7,52 +7,7 @@ import { Transaction } from 'ethereumjs-tx';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import {
-  AccountsWithCurrentAddress,
-  ApiInitStatus,
-  BackgroundWindow,
-  BalanceJson,
-  ChainRegistry,
-  CrowdloanJson,
-  CustomEvmToken,
-  EvmNftSubmitTransaction,
-  EvmNftTransaction,
-  EvmNftTransactionRequest,
-  EvmNftTransactionResponse,
-  NetWorkMetadataDef,
-  NftCollection,
-  NftCollectionJson,
-  NftItem,
-  NftJson,
-  NftTransferExtra,
-  PriceJson,
-  RequestAccountCreateSuriV2,
-  RequestAccountExportPrivateKey,
-  RequestApi,
-  RequestAuthorization,
-  RequestAuthorizationPerAccount,
-  RequestAuthorizeApproveV2,
-  RequestCheckTransfer,
-  RequestForgetSite,
-  RequestNftForceUpdate,
-  RequestSeedCreateV2,
-  RequestSeedValidateV2,
-  RequestSettingsType,
-  RequestTransactionHistoryAdd,
-  RequestTransfer,
-  ResponseAccountCreateSuriV2,
-  ResponseAccountExportPrivateKey,
-  ResponseCheckTransfer,
-  ResponseSeedCreateV2,
-  ResponseSeedValidateV2,
-  StakingJson,
-  StakingRewardJson,
-  TokenInfo,
-  TransactionHistoryItemType,
-  TransferError,
-  TransferErrorCode,
-  TransferStep
-} from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -1274,7 +1229,7 @@ export default class KoniExtension extends Extension {
     return txState;
   }
 
-  private subscribeEvmTokenState (id: string, port: chrome.runtime.Port): CustomEvmToken[] {
+  private subscribeEvmTokenState (id: string, port: chrome.runtime.Port): EvmTokenJson {
     const cb = createSubscription<'pri(evmTokenState.getSubscription)'>(id, port);
 
     const evmTokenSubscription = state.subscribeEvmToken().subscribe({
@@ -1288,11 +1243,11 @@ export default class KoniExtension extends Extension {
       evmTokenSubscription.unsubscribe();
     });
 
-    return state.getEvmToken();
+    return state.getEvmTokenState();
   }
 
   private getEvmTokenState () {
-    return state.getEvmToken();
+    return state.getEvmTokenState();
   }
 
   private upsertEvmToken (data: CustomEvmToken) {

@@ -489,10 +489,15 @@ export interface CustomEvmToken {
   type: 'erc20' | 'erc721'
 }
 
+export interface EvmTokenJson {
+  erc20: CustomEvmToken[],
+  erc721: CustomEvmToken[]
+}
+
 export interface KoniRequestSignatures {
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
-  'pri(evmTokenState.getEvmTokenState)': [null, CustomEvmToken[]];
-  'pri(evmTokenState.getSubscription)': [null, CustomEvmToken[], CustomEvmToken[]];
+  'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
+  'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];

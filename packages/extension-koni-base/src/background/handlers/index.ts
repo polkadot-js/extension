@@ -14,11 +14,13 @@ import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();
+
 state.initEvmTokenState();
+
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
 export const dotSamaAPIMap = connectDotSamaApis();
-export const nftHandler = new NftHandler(dotSamaAPIMap, state.getEvmToken());
+export const nftHandler = new NftHandler(dotSamaAPIMap, state.getErc721Tokens());
 
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};

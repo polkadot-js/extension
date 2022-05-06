@@ -3,10 +3,11 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { EvmTokenJson } from '@polkadot/extension-koni-ui/stores/types';
+import { EvmTokenJson } from '@polkadot/extension-base/background/KoniTypes';
 
 const initialState = {
-  evmTokenList: []
+  erc721: [],
+  erc20: []
 } as EvmTokenJson;
 
 const evmTokenSlice = createSlice({
@@ -16,7 +17,8 @@ const evmTokenSlice = createSlice({
     update (state, action: PayloadAction<EvmTokenJson>) {
       const payload = action.payload;
 
-      state.evmTokenList = payload.evmTokenList;
+      state.erc20 = payload.erc20;
+      state.erc721 = payload.erc721;
     }
   }
 });

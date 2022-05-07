@@ -34,31 +34,36 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   const [isSearchOpen, setShowSearch] = useState(false);
   const [filter, setFilter] = useState('');
   const { t } = useTranslation();
-  const addRef = useRef(null);
-  const setRef = useRef(null);
+  const addIconRef = useRef(null);
+  const addMenuRef = useRef(null);
+  const setIconRef = useRef(null);
+  const setMenuRef = useRef(null);
 
-  useOutsideClick(addRef, (): void => {
+  useOutsideClick([addIconRef, addMenuRef], (): void => {
     isAddOpen && setShowAdd(!isAddOpen);
   });
 
-  useOutsideClick(setRef, (): void => {
+  useOutsideClick([setIconRef, setMenuRef], (): void => {
     isSettingsOpen && setShowSettings(!isSettingsOpen);
   });
 
   const _toggleAdd = useCallback(
-    (): void => setShowAdd((isAddOpen) => !isAddOpen),
+    () => setShowAdd((isAddOpen) => !isAddOpen),
     []
   );
 
   const _toggleSettings = useCallback(
-    (): void => setShowSettings((isSettingsOpen) => !isSettingsOpen),
+    () => setShowSettings((isSettingsOpen) => !isSettingsOpen),
     []
   );
 
-  const _onChangeFilter = useCallback((filter: string) => {
-    setFilter(filter);
-    onFilter && onFilter(filter);
-  }, [onFilter]);
+  const _onChangeFilter = useCallback(
+    (filter: string) => {
+      setFilter(filter);
+      onFilter && onFilter(filter);
+    },
+    [onFilter]
+  );
 
   const _toggleSearch = useCallback(
     (): void => {
@@ -120,6 +125,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
             <div
               className='popupToggle'
               onClick={_toggleAdd}
+              ref={addIconRef}
             >
               <FontAwesomeIcon
                 className={`plusIcon ${isAddOpen ? 'selected' : ''}`}
@@ -133,6 +139,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
               className='popupToggle'
               data-toggle-settings
               onClick={_toggleSettings}
+              ref={setIconRef}
             >
               <FontAwesomeIcon
                 className={`cogIcon ${isSettingsOpen ? 'selected' : ''}`}
@@ -143,10 +150,10 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
           )}
         </div>
         {isAddOpen && (
-          <MenuAdd reference={addRef} />
+          <MenuAdd reference={addMenuRef} />
         )}
         {isSettingsOpen && (
-          <MenuSettings reference={setRef} />
+          <MenuSettings reference={setMenuRef} />
         )}
         {children}
       </div>

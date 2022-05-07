@@ -104,10 +104,11 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [moveMenuUp, setIsMovedMenu] = useState(false);
-  const actionsRef = useRef<HTMLDivElement>(null);
+  const actIconRef = useRef<HTMLDivElement>(null);
+  const actMenuRef = useRef<HTMLDivElement>(null);
   const { show } = useToast();
 
-  useOutsideClick(actionsRef, () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
+  useOutsideClick([actIconRef, actMenuRef], () => (showActionsMenu && setShowActionsMenu(!showActionsMenu)));
 
   useEffect((): void => {
     if (!address) {
@@ -130,8 +131,8 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   useEffect(() => {
     if (!showActionsMenu) {
       setIsMovedMenu(false);
-    } else if (actionsRef.current) {
-      const { bottom } = actionsRef.current.getBoundingClientRect();
+    } else if (actMenuRef.current) {
+      const { bottom } = actMenuRef.current.getBoundingClientRect();
 
       if (bottom > ACCOUNTS_SCREEN_HEIGHT) {
         setIsMovedMenu(true);
@@ -283,6 +284,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             <div
               className='settings'
               onClick={_onClick}
+              ref={actIconRef}
             >
               <Svg
                 className={`detailsIcon ${showActionsMenu ? 'active' : ''}`}
@@ -292,7 +294,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             {showActionsMenu && (
               <Menu
                 className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
-                reference={actionsRef}
+                reference={actMenuRef}
               >
                 {actions}
               </Menu>

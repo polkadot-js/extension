@@ -494,6 +494,11 @@ export interface EvmTokenJson {
   erc721: CustomEvmToken[]
 }
 
+export interface _ServiceInfo {
+  currentAccount: CurrentAccountInfo,
+  chainRegistry: Record<string, ChainRegistry>;
+}
+
 export interface KoniRequestSignatures {
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
   'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];

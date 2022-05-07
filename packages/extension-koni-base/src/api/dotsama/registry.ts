@@ -8,7 +8,7 @@ import { PREDEFINE_TOKEN_DATA_MAP } from '@polkadot/extension-koni-base/api/pred
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { BN, bnToHex } from '@polkadot/util';
 
-const cacheRegistryMap: Record<string, ChainRegistry> = {};
+export const cacheRegistryMap: Record<string, ChainRegistry> = {};
 
 export async function getMoonAssets (api: ApiPromise) {
   await api.isReady;

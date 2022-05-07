@@ -5,10 +5,11 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { cacheRegistryMap } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
@@ -138,6 +139,7 @@ export default class KoniState extends State {
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
+  private _serviceInfoSubject = new Subject<_ServiceInfo>();
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -648,6 +650,26 @@ export default class KoniState extends State {
     });
   }
 
+  public upsertCustomEvmToken (tokenData: CustomEvmToken) {
+    const chainRegistry = this.chainRegistryMap[tokenData.chain];
+
+    if (tokenData.symbol && !(tokenData.symbol in chainRegistry.tokenMap)) {
+      chainRegistry.tokenMap[tokenData.symbol] = {
+        isMainToken: false,
+        symbol: tokenData.symbol,
+        name: tokenData.symbol,
+        erc20Address: tokenData.smartContract,
+        decimals: tokenData.decimals
+      } as TokenInfo;
+    }
+
+    cacheRegistryMap[tokenData.chain] = chainRegistry;
+
+    this.lazyNext('setChainRegistry', () => {
+      this.chainRegistrySubject.next(this.getChainRegistryMap());
+    });
+  }
+
   public subscribeChainRegistryMap () {
     return this.chainRegistrySubject;
   }
@@ -761,6 +783,7 @@ export default class KoniState extends State {
 
     if (!isExist) {
       this.evmTokenState[data.type].push(data);
+      this.upsertCustomEvmToken(data);
     } else {
       this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
         if (token.smartContract === data.smartContract) {
@@ -773,5 +796,16 @@ export default class KoniState extends State {
 
     this.evmTokenSubject.next(this.evmTokenState);
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+  }
+
+  public subscribeServiceInfo_ () {
+    return this._serviceInfoSubject;
+  }
+
+  public updateServiceInfo_ (currentAccount: CurrentAccountInfo, chainRegistry: Record<string, ChainRegistry>) {
+    this._serviceInfoSubject.next({
+      currentAccount,
+      chainRegistry
+    });
   }
 }

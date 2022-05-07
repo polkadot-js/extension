@@ -3,12 +3,13 @@
 
 import { RefObject, useCallback, useEffect } from 'react';
 
-export default function useOutsideClick (ref: RefObject<HTMLDivElement>, callback: () => void): void {
+export default function useOutsideClick (refs: RefObject<HTMLDivElement>[], callback: () => void): void {
   const handleClick = useCallback((e: MouseEvent): void => {
-    if (ref.current && !ref.current.contains(e.target as HTMLInputElement)) {
-      callback();
-    }
-  }, [callback, ref]);
+    refs.every(({ current }) =>
+      current &&
+      !current.contains(e.target as HTMLInputElement)
+    ) && callback();
+  }, [callback, refs]);
 
   useEffect(() => {
     document.addEventListener('click', handleClick);

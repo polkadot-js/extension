@@ -26,7 +26,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   const _toggleDropdown = useCallback(() => setDropdownVisible(!isDropdownVisible), [isDropdownVisible]);
   const _selectParent = useCallback((newParent: string) => () => onSelect(newParent), [onSelect]);
 
-  useOutsideClick(ref, _hideDropdown);
+  useOutsideClick([ref], _hideDropdown);
 
   return (
     <div className={className}>

@@ -71,8 +71,6 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
   const [errorArr, setErrorArr] = useState<string[]>([]);
   const networkPrefix = NETWORKS[requestPayload.networkKey].ss58Format;
 
-  console.log('123', requestPayload);
-
   const _onCancel = useCallback(() => {
     onCancel();
   },

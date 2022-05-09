@@ -9,7 +9,7 @@ export const SINGULAR_V2_ENDPOINT = 'https://singular.app/api/rmrk2/account/';
 
 export const KANARIA_ENDPOINT = 'https://kanaria.rmrk.app/api/rmrk2/';
 
-export const RMRK_PINATA_SERVER = 'https://rmrk.mypinata.cloud/ipfs/';
+export const RMRK_PINATA_SERVER = 'https://rmrk.mypinata.cloud/ipfs/'; // deprecated
 
 export const SINGULAR_V1_COLLECTION_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/collection/';
 

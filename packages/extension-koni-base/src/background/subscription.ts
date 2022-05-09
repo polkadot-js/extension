@@ -4,7 +4,7 @@
 import { take } from 'rxjs';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import {CustomEvmToken, NftTransferExtra} from '@polkadot/extension-base/background/KoniTypes';
+import { CustomEvmToken, NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { getAllSubsquidStaking } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';

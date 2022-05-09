@@ -36,7 +36,6 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
 
   const handleVideoError = useCallback(() => {
     setImageError(true);
-    setShowImage(true);
   }, []);
 
   const getItemImage = useCallback(() => {

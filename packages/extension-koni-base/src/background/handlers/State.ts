@@ -652,10 +652,27 @@ export default class KoniState extends State {
     });
   }
 
-  public upsertCustomEvmToken (tokenData: CustomEvmToken) {
+  public upsertChainRegistry (tokenData: CustomEvmToken) {
     const chainRegistry = this.chainRegistryMap[tokenData.chain];
+    let tokenKey = '';
 
-    if (tokenData.symbol && !(tokenData.symbol in chainRegistry.tokenMap)) {
+    for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+      if (token.erc20Address === tokenData.smartContract) {
+        tokenKey = key;
+        break;
+      }
+    }
+
+    if (tokenKey !== '') {
+      chainRegistry.tokenMap[tokenKey] = {
+        isMainToken: false,
+        symbol: tokenData.symbol,
+        name: tokenData.name,
+        erc20Address: tokenData.smartContract,
+        decimals: tokenData.decimals
+      } as TokenInfo;
+    } else {
+      // @ts-ignore
       chainRegistry.tokenMap[tokenData.symbol] = {
         isMainToken: false,
         symbol: tokenData.symbol,
@@ -788,7 +805,6 @@ export default class KoniState extends State {
 
     if (!isExist) {
       this.evmTokenState[data.type].push(data);
-      this.upsertCustomEvmToken(data);
     } else {
       this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
         if (token.smartContract === data.smartContract) {
@@ -797,6 +813,10 @@ export default class KoniState extends State {
 
         return token;
       });
+    }
+
+    if (data.type === 'erc20') {
+      this.upsertChainRegistry(data);
     }
 
     this.evmTokenSubject.next(this.evmTokenState);

@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { ActionContext, Button, ButtonArea, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { upsertEvmToken } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -35,9 +36,19 @@ function EvmTokenEdit ({ className }: Props): React.ReactElement {
 
   const _onEditToken = useCallback(() => {
     if (isValidDecimals && isValidSymbol) {
-      _goBack();
+      upsertEvmToken(tokenInfo)
+        .then((resp) => {
+          if (resp) {
+            show('Your changes are saved successfully');
+          } else {
+            show('An error has occurred. Please try again later');
+          }
+
+          _goBack();
+        })
+        .catch(console.error);
     }
-  }, [_goBack, isValidDecimals, isValidSymbol]);
+  }, [_goBack, isValidDecimals, isValidSymbol, show, tokenInfo]);
 
   const onChangeName = useCallback((val: string) => {
     setTokenInfo({

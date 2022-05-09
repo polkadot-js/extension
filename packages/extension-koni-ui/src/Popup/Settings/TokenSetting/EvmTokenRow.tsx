@@ -7,7 +7,6 @@ import styled from 'styled-components';
 import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
 import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
 import Link from '@polkadot/extension-koni-ui/components/Link';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import { store } from '@polkadot/extension-koni-ui/stores';
 import { TokenConfigParams } from '@polkadot/extension-koni-ui/stores/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -18,8 +17,6 @@ interface Props extends ThemeProps {
 }
 
 function EvmTokenRow ({ className, item }: Props): React.ReactElement {
-  const { show } = useToast();
-
   const updateTokenEditParams = useCallback(() => {
     store.dispatch({ type: 'tokenConfigParams/update', payload: { data: item } as TokenConfigParams });
   }, [item]);

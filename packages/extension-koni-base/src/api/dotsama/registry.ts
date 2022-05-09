@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiPromise } from '@polkadot/api';
-import { ChainRegistry, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, CustomEvmToken, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@polkadot/extension-koni-base/api/predefineChainTokens';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
@@ -68,7 +68,7 @@ export async function getForeignToken (api: ApiPromise) {
   return tokenMap;
 }
 
-export const getRegistry = async (networkKey: string, api: ApiPromise) => {
+export const getRegistry = async (networkKey: string, api: ApiPromise, customErc20Tokens?: CustomEvmToken[]) => {
   const cached = cacheRegistryMap[networkKey];
 
   if (cached) {
@@ -110,6 +110,20 @@ export const getRegistry = async (networkKey: string, api: ApiPromise) => {
     Object.assign(tokenMap, moonTokens);
   }
 
+  if (customErc20Tokens) {
+    for (const erc20Token of customErc20Tokens) {
+      if (erc20Token.chain === networkKey && erc20Token.symbol && !(erc20Token.symbol in tokenMap)) {
+        tokenMap[erc20Token.symbol] = {
+          erc20Address: erc20Token.smartContract,
+          isMainToken: false,
+          name: erc20Token.symbol,
+          symbol: erc20Token.symbol,
+          decimals: erc20Token.decimals as number
+        } as TokenInfo;
+      }
+    }
+  }
+
   const chainRegistry = {
     chainDecimals,
     chainTokens,
@@ -128,11 +142,13 @@ export async function getTokenInfo (networkKey: string, api: ApiPromise, token: 
 }
 
 export function initChainRegistrySubscription () {
-  Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
-    getRegistry(networkKey, api)
-      .then((rs) => {
-        state.setChainRegistryItem(networkKey, rs);
-      })
-      .catch(console.error);
+  state.getEvmTokenStore(({ erc20 }) => {
+    Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
+      getRegistry(networkKey, api, erc20)
+        .then((rs) => {
+          state.setChainRegistryItem(networkKey, rs);
+        })
+        .catch(console.error);
+    });
   });
 }

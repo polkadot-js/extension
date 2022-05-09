@@ -495,8 +495,9 @@ export interface EvmTokenJson {
 }
 
 export interface _ServiceInfo {
-  currentAccount: CurrentAccountInfo,
+  currentAccount: string,
   chainRegistry: Record<string, ChainRegistry>;
+  customErc721Registry: CustomEvmToken[];
 }
 
 export interface KoniRequestSignatures {

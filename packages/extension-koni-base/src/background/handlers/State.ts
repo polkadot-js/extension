@@ -540,6 +540,8 @@ export default class KoniState extends State {
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+
+    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
   }
 
   public getSettings (update: (value: RequestSettingsType) => void): void {
@@ -664,10 +666,7 @@ export default class KoniState extends State {
     }
 
     cacheRegistryMap[tokenData.chain] = chainRegistry;
-
-    this.lazyNext('setChainRegistry', () => {
-      this.chainRegistrySubject.next(this.getChainRegistryMap());
-    });
+    this.chainRegistrySubject.next(this.getChainRegistryMap());
   }
 
   public subscribeChainRegistryMap () {
@@ -771,6 +770,12 @@ export default class KoniState extends State {
     return this.evmTokenState.erc721;
   }
 
+  public getEvmTokenStore (callback: (data: EvmTokenJson) => void) {
+    return this.customEvmTokenStore.get('EvmToken', (data) => {
+      callback(data);
+    });
+  }
+
   public upsertEvmToken (data: CustomEvmToken) {
     let isExist = false;
 
@@ -796,16 +801,20 @@ export default class KoniState extends State {
 
     this.evmTokenSubject.next(this.evmTokenState);
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
   }
 
   public subscribeServiceInfo_ () {
     return this._serviceInfoSubject;
   }
 
-  public updateServiceInfo_ (currentAccount: CurrentAccountInfo, chainRegistry: Record<string, ChainRegistry>) {
-    this._serviceInfoSubject.next({
-      currentAccount,
-      chainRegistry
+  public updateServiceInfo_ (chainRegistry: Record<string, ChainRegistry>, customErc721Registry: CustomEvmToken[]) {
+    this.currentAccountStore.get('CurrentAccountInfo', (value) => {
+      this._serviceInfoSubject.next({
+        currentAccount: value.address,
+        chainRegistry,
+        customErc721Registry
+      });
     });
   }
 }

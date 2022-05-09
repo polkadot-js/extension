@@ -29,6 +29,10 @@ export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 
 export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
 
+export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
+
+export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',

@@ -20,8 +20,10 @@ import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
 import EvmTokenReducer from './EvmToken';
+import TokenConfigReducer from './TokenConfigParams';
 
 const reducers = {
+  tokenConfigParams: TokenConfigReducer,
   evmToken: EvmTokenReducer,
   transferNftExtra: TransferNftExtraReducer,
   transferNftParams: TransferNftParamsReducer,

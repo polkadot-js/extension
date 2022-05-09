@@ -64,7 +64,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
       setIsValidSymbol(true);
     }
 
-    setSymbol(val.toUpperCase());
+    setSymbol(val);
   }, []);
 
   const onChangeDecimals = useCallback((val: string) => {

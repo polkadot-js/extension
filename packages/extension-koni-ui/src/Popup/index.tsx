@@ -48,6 +48,8 @@ import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
 import ImportEvmNft from "@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft";
+import EvmTokenSetting from "@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting";
+import EvmTokenEdit from "@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit";
 
 const startSettings = uiSettings.get();
 
@@ -242,6 +244,8 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
                           <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
                           <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
+                          <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
+                          <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

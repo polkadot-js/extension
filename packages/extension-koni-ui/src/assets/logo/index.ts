@@ -250,7 +250,7 @@ const LogosMap: Record<string, string> = {
   bill: require('./bill.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   chaos: require('./chaosdao.jpeg'),
-   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   chrwna: require('./chrwna.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcrmrk: require('./rmrk.jpg'),

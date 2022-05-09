@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
+import { UNIQUE_SCAN_ENDPOINT } from '@polkadot/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import {UNIQUE_SCAN_ENDPOINT} from "@polkadot/extension-koni-base/api/nft/config";
 
 interface NftData {
   collection_id: number;
@@ -43,7 +43,7 @@ export class UniqueNftApiV2 extends BaseNftApi {
         await this.getNftByAccount(address);
       }));
     } catch (e) {
-      console.error(`Failed to fetch ${this.chain} nft`, e);
+      console.error(`Failed to fetch ${this.chain as string} nft`, e);
     }
   }
 

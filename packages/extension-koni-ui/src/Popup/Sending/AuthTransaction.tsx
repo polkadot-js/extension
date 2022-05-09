@@ -4,27 +4,64 @@
 
 // eslint-disable-next-line header/header
 import React, { useCallback, useState } from 'react';
-import { Trans } from 'react-i18next';
 import styled from 'styled-components';
 
 import { RequestCheckTransfer, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
+import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@polkadot/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
-import { BN, formatBalance } from '@polkadot/util';
+import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
   onCancel: () => void;
   requestPayload: RequestCheckTransfer;
   feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
+  balanceFormat: [number, string]; // decimal, symbol
   onChangeResult: (txResult: TransferResultType) => void;
 }
 
-function AuthTransaction ({ className, feeInfo: [fee, feeDecimal, feeSymbol], onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
+type RenderTotalArg = {
+  fee: string | null,
+  feeDecimals: number,
+  feeSymbol: string,
+  amount?: string,
+  amountDecimals: number,
+  amountSymbol: string
+}
+
+function renderTotal (arg: RenderTotalArg) {
+  const { amount, amountDecimals, amountSymbol, fee, feeDecimals, feeSymbol } = arg;
+
+  if (feeDecimals === amountDecimals && feeSymbol === amountSymbol) {
+    return (
+      <FormatBalance
+        format={[feeDecimals, feeSymbol]}
+        value={new BN(fee || '0').add(new BN(amount || '0'))}
+      />
+    );
+  }
+
+  return (
+    <>
+      <FormatBalance
+        format={[feeDecimals, feeSymbol]}
+        value={new BN(fee || '0')}
+      />
+      <span className={'value-separator'}>+</span>
+      <FormatBalance
+        format={[amountDecimals, amountSymbol]}
+        value={new BN(amount || '0')}
+      />
+    </>
+  );
+}
+
+function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -134,17 +171,43 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimal, feeSymbol], on
         </div>
 
         <div className='auth-transaction-body'>
-          {!!fee && (
-            <Trans i18nKey='feesForSubmission'>
-                Fees of <span className='highlight'>
-                {formatBalance(new BN(fee), { withSiFull: true, decimals: feeDecimal, withUnit: feeSymbol })}
-              </span> will be applied to the submission
-            </Trans>
-          )}
+          <div>
+            <div>Amount</div>
+            <div>
+              <FormatBalance
+                format={balanceFormat}
+                value={requestPayload.value}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div>Estimated fee</div>
+            <div>
+              <FormatBalance
+                format={[feeDecimals, feeSymbol]}
+                value={fee}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div>Total (Amount + Fee)</div>
+            <div>
+              {renderTotal({
+                fee,
+                feeDecimals,
+                feeSymbol,
+                amount: requestPayload.value,
+                amountDecimals: balanceFormat[0],
+                amountSymbol: balanceFormat[1]
+              })}
+            </div>
+          </div>
 
           <InputWithLabel
             isError={isKeyringErr}
-            label={t<string>('Password')}
+            label={t<string>('Unlock account with password')}
             onChange={_onChangePass}
             type='password'
             value={password}

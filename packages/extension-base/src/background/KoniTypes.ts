@@ -287,8 +287,16 @@ export interface AccountsWithCurrentAddress {
 
 export interface CurrentAccountInfo {
   address: string;
-  isShowBalance?: boolean;
-  allAccountLogo?: string;
+}
+
+export interface RequestSettingsType {
+  isShowBalance: boolean;
+  accountAllLogo: string;
+}
+
+export interface ResponseSettingsType {
+  isShowBalance: boolean;
+  accountAllLogo: string;
 }
 
 export interface RandomTestRequest {
@@ -390,6 +398,7 @@ export type RequestPrice = null
 export type RequestSubscribePrice = null
 export type RequestBalance = null
 export type RequestSubscribeBalance = null
+export type RequestSubscribeBalancesVisibility = null
 export type RequestCrowdloan = null
 export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
@@ -514,6 +523,9 @@ export interface KoniRequestSignatures {
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
+  'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
+  'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
+  'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];

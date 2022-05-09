@@ -1,15 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ChainRegistry, CurrentAccountInfo, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { ChainRegistry, CurrentNetworkInfo, NftCollection as _NftCollection, NftItem as _NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 import crowdloans from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans.svg';
 import crowdloansActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/crowdloans-active.svg';
@@ -22,7 +20,6 @@ import stakingActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/stak
 import transfers from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@polkadot/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
 import { AccountContext, AccountQrModal, Link } from '@polkadot/extension-koni-ui/components';
-import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
 import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 import useAccountBalance from '@polkadot/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
@@ -30,9 +27,9 @@ import useFetchNft from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchN
 import useFetchStaking from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@polkadot/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
+import BalancesVisibility from '@polkadot/extension-koni-ui/Popup/Home/BalancesVisibility';
 import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
 import StakingContainer from '@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
@@ -171,7 +168,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { balanceStatus: { isShowBalance }, networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
+  const { networkMetadata: networkMetadataMap, settings: { isShowBalance } } = useSelector((state: RootState) => state);
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
@@ -243,25 +240,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     return getTabHeaderItems(address, t);
   }, [address, t]);
 
-  const _toggleBalances = useCallback(() => {
-    const accountInfo = {
-      address: address,
-      isShowBalance: !isShowBalance
-    } as CurrentAccountInfo;
-
-    saveCurrentAccountAddress(accountInfo, () => {
-      triggerAccountsSubscription().catch((e) => {
-        console.error('There is a problem when trigger Accounts Subscription', e);
-      });
-    }).catch((e) => {
-      console.error('There is a problem when set Current Account', e);
-    });
-  }, [address, isShowBalance]);
-
-  const _backToHome = useCallback(() => {
-    setShowBalanceDetail(false);
-  }, [setShowBalanceDetail]);
-
   const onChangeAccount = useCallback((address: string) => {
     setShowBalanceDetail(false);
   }, []);
@@ -283,21 +261,11 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
       <div className={'home-action-block'}>
         <div className='account-total-balance'>
-          <div
-            className={'account-total-btn'}
-            data-for={trigger}
-            data-tip={true}
-            onClick={_toggleBalances}
-          >
-            {isShowBalance
-              ? <BalanceVal
-                startWithSymbol
-                symbol={'$'}
-                value={isShowBalanceDetail ? selectedNetworkBalance : totalBalanceValue}
-              />
-              : <span>*********</span>
-            }
-          </div>
+          <BalancesVisibility
+            isShowBalanceDetail={isShowBalanceDetail}
+            selectedNetworkBalance={selectedNetworkBalance}
+            totalBalanceValue={totalBalanceValue}
+          />
         </div>
 
         {!_isAccountAll && (
@@ -360,20 +328,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           </div>
         )}
       </div>
-
-      {isShowBalanceDetail &&
-        <div
-          className='home__back-btn'
-          onClick={_backToHome}
-        >
-          <FontAwesomeIcon
-            className='home__back-icon'
-            // @ts-ignore
-            icon={faArrowLeft}
-          />
-          <span>{t<string>('Back to home')}</span>
-        </div>
-      }
 
       <div className={'home-tab-contents'}>
         {activatedTab === 1 && (
@@ -514,20 +468,4 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   .home__account-qr-modal .subwallet-modal {
     max-width: 460px;
   }
-
-
-  .home__back-btn {
-    color: ${theme.buttonTextColor2};
-    font-size: 15px;
-    line-height: 26px;
-    font-weight: 500;
-    margin-left: 25px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-
-  .home__back-icon {
-    padding-right: 7px;
-  }
-
 `));

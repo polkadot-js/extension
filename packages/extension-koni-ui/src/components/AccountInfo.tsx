@@ -8,12 +8,12 @@ import type { Recoded, ThemeProps } from '../types';
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Avatar from 'boring-avatars';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import allAccountLogoDefault from '@polkadot/extension-koni-ui/assets/all-account-icon.svg';
 import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -53,8 +53,9 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
   const { show } = useToast();
   const accountName = name || account?.name;
   const displayName = accountName || t('<unknown>');
-  const allAccountLogo = useSelector((state: RootState) => state.allAccount.allAccountLogo);
-
+  const { settings: { accountAllLogo } } = useSelector((state: RootState) => state);
+  const randomVariant = window.localStorage.getItem('randomVariant') as 'beam' | 'marble' | 'pixel' | 'sunset' | 'ring';
+  const randomNameForLogo = window.localStorage.getItem('randomNameForLogo') as string;
   const _isAccountAll = address && isAccountAll(address);
 
   useEffect((): void => {
@@ -125,17 +126,20 @@ function AccountInfo ({ address, className, genesisHash, iconSize = 32, isExtern
     <div className={className}>
       <div className='account-info-row'>
         {_isAccountAll
-          ? allAccountLogo
+          ? accountAllLogo
             ? <img
               alt='all-account-icon'
               className='account-info__all-account-icon'
-              src={allAccountLogo}
+              src={accountAllLogo}
             />
-            : <img
-              alt='all-account-icon'
-              className='account-info__all-account-icon'
-              src={allAccountLogoDefault}
-            />
+            : <div className='account-info__all-account-icon'>
+              <Avatar
+                colors={['#5F545C', '#EB7072', '#F5BA90', '#F5E2B8', '#A2CAA5']}
+                name={randomNameForLogo}
+                size={34}
+                variant={randomVariant}
+              />
+            </div>
           : <Identicon
             className='account-info-identity-icon'
             iconTheme={iconTheme}
@@ -252,6 +256,9 @@ export default styled(AccountInfo)(({ theme }: ThemeProps) => `
     margin-right: 10px;
     padding: 2px;
     border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .account-info-address-display .svg-inline--fa {

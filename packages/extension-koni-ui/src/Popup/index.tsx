@@ -81,12 +81,12 @@ function updateCurrentAccount (currentAcc: AccountJson): void {
   store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
-function updateBalanceStatus (isShowBalance: boolean): void {
-  store.dispatch({ type: 'balanceStatus/update', payload: { isShowBalance: isShowBalance } });
-}
+const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
 
-function updateAllAccount (allAccountLogo: string): void {
-  store.dispatch({ type: 'allAccount/update', payload: { allAccountLogo: allAccountLogo } });
+function getRandomVariant (): string {
+  const random = Math.floor(Math.random() * 6);
+
+  return VARIANTS[random];
 }
 
 export default function Popup (): React.ReactElement {
@@ -100,6 +100,13 @@ export default function Popup (): React.ReactElement {
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const browser = Bowser.getParser(window.navigator.userAgent);
+
+  if (!window.localStorage.getItem('randomVariant') || !window.localStorage.getItem('randomNameForLogo')) {
+    const randomVariant = getRandomVariant();
+
+    window.localStorage.setItem('randomVariant', randomVariant);
+    window.localStorage.setItem('randomNameForLogo', `${Date.now()}`);
+  }
 
   if (!!browser.getBrowser() && !!browser.getBrowser().name && !!browser.getOS().name) {
     window.localStorage.setItem('browserInfo', browser.getBrowser().name as string);
@@ -119,7 +126,7 @@ export default function Popup (): React.ReactElement {
 
   // @ts-ignore
   const handleGetAccountsWithCurrentAddress = (data: AccountsWithCurrentAddress) => {
-    const { accounts, allAccountLogo, currentAddress, isShowBalance } = data;
+    const { accounts, currentAddress } = data;
 
     setAccounts(accounts);
 
@@ -141,9 +148,6 @@ export default function Popup (): React.ReactElement {
         updateCurrentAccount(selectedAcc);
       }
     }
-
-    allAccountLogo && updateAllAccount(allAccountLogo);
-    updateBalanceStatus(!!isShowBalance);
   };
 
   useEffect((): void => {

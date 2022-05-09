@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { TFunction } from 'react-i18next';
@@ -242,10 +240,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     return getTabHeaderItems(address, t);
   }, [address, t]);
 
-  const _backToHome = useCallback(() => {
-    setShowBalanceDetail(false);
-  }, [setShowBalanceDetail]);
-
   const onChangeAccount = useCallback((address: string) => {
     setShowBalanceDetail(false);
   }, []);
@@ -316,20 +310,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           </Link>
         </div>
       </div>
-
-      {isShowBalanceDetail &&
-        <div
-          className='home__back-btn'
-          onClick={_backToHome}
-        >
-          <FontAwesomeIcon
-            className='home__back-icon'
-            // @ts-ignore
-            icon={faArrowLeft}
-          />
-          <span>{t<string>('Back to home')}</span>
-        </div>
-      }
 
       <div className={'home-tab-contents'}>
         {activatedTab === 1 && (
@@ -470,20 +450,4 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   .home__account-qr-modal .subwallet-modal {
     max-width: 460px;
   }
-
-
-  .home__back-btn {
-    color: ${theme.buttonTextColor2};
-    font-size: 15px;
-    line-height: 26px;
-    font-weight: 500;
-    margin-left: 25px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-
-  .home__back-icon {
-    padding-right: 7px;
-  }
-
 `));

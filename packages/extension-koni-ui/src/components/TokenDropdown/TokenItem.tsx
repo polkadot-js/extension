@@ -37,6 +37,8 @@ export default React.memo(styled(TokenItem)(({ theme }: ThemeProps) => `
   .token-item__symbol {
     font-size: 18px;
     line-height: 26px;
+    color: ${theme.textColor};
+
   }
 
   .token-item__chain {

@@ -329,10 +329,9 @@ export default React.memo(styled(DonateInputAddress)(({ theme }: ThemeProps) => 
   }
 
   .input-address__dropdown {
-    border: 2px solid #212845;
+    border: 2px solid ${theme.boxBorderColor};
     border-radius: 8px;
-    position: relative;
-    margin-bottom: 10px;
+    height: 72px;
   }
 
   .format-balance {

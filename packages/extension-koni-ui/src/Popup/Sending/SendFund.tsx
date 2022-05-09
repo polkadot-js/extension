@@ -467,7 +467,8 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   }
 
   .send-fund-toggle {
-    margin-bottom: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
   }
 
   .submit-btn-wrapper {

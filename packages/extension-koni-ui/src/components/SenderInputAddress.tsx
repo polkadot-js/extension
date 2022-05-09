@@ -126,9 +126,6 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
 }
 
 export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
-  border: 2px solid ${theme.boxBorderColor};
-  height: 72px;
-  border-radius: 8px;
   position: relative;
   margin-bottom: 10px;
 
@@ -138,8 +135,12 @@ export default styled(SenderInputAddress)(({ theme }: ThemeProps) => `
     line-height: 26px;
     color: ${theme.textColor2};
     right: 70px;
-    top: 30px;
+    top: 36px;
     pointer-events: none;
+  }
+
+  .sender-input-address .key-pair__address {
+    display: none;
   }
 
   .sender-input-address__balance {

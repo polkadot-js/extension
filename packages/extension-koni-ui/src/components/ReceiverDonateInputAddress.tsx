@@ -76,7 +76,7 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
     line-height: 26px;
     color: ${theme.textColor2};
     right: 16px;
-    top: 30px;
+    top: 36px;
     pointer-events: none;
   }
 
@@ -84,6 +84,10 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
     .input-address-dropdown__input {
       width: 220px !important;
     }
+  }
+
+  .receive-input-address .key-pair__address {
+    display: none;
   }
 
   .receiver-input-address__balance {

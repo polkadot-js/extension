@@ -274,7 +274,7 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
   return (
     <div className={className}>
       <Dropdown
-        className='input-address__dropdown'
+        className={`input-address__dropdown ${isDisabled ? 'is-disabled' : ''}`}
         defaultOptions={transformGrOptions(options)}
         defaultValue={defaultValue}
         getFormatOptLabel={formatOptionLabel}
@@ -391,11 +391,18 @@ export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
     padding-top: 24px;
   }
 
-  &.isDisabled {
+  .input-address__dropdown {
+    border: 2px solid ${theme.boxBorderColor};
+    border-radius: 8px;
+    height: 72px;
+  }
+
+  .input-address__dropdown.is-disabled {
     border-style: dashed;
   }
 
   .input-address__dropdown-label-help {
+    font-size: 15px;
     z-index: 1;
   }
 

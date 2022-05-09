@@ -43,7 +43,7 @@ function applyFormat (value: Compact<any> | BN | string, [decimals, token]: [num
     const minor = rest.substr(0, 4);
     const unit = rest.substr(4);
 
-    return <>{major}.<span className='format-balance__postfix'>{minor}</span><span
+    return <><span className='format-balance__front-part'>{major}.<span className='format-balance__postfix'>{minor}</span></span><span
       className='format-balance__unit'
     >{unit}{unit ? unitPost : ` ${unitPost}`}</span>{labelPost || ''}</>;
   }

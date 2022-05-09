@@ -167,6 +167,10 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     z-index: 1;
   }
 
+  .input-address-dropdown-wrapper {
+    height: 100%;
+  }
+
   .label-wrapper {
     margin-bottom: 0;
   }
@@ -209,10 +213,6 @@ export default React.memo(styled(Dropdown)(({ theme }: Props) => `
     font-size: 14px;
     line-height: 24px;
     font-weight: 400;
-  }
-
-  .input-address-dropdown__single-value .key-pair__address {
-    display: none;
   }
 
   .input-address-dropdown__indicator-separator {

@@ -124,25 +124,20 @@ function Dropdown ({ className, getFormatOptLabel, label, onChange, options, val
 
   const customStyles = {
     option (base: any, { isSelected }: any) {
-      const isDarkTheme = themeContext.id === 'dark';
-      const color = isDarkTheme ? '#888888' : '#7B8098';
-      const hoverBgc = isDarkTheme ? 'rgba(255, 255, 255, 0.05)' : 'rgba(17, 17, 17, 0.08)';
-      const hoverColor = isDarkTheme ? '#FFFFFF' : '#00072D';
-
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
         textAlign: 'left',
         fontFamily: 'Lexend',
         fontSize: '15px',
-        color: color,
-        backgroundColor: isSelected ? hoverBgc : 'transparent',
+        color: themeContext.textColor2,
+        cursor: 'pointer',
+        backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent',
         ':hover': {
-          backgroundColor: hoverBgc,
-          color: hoverColor
+          color: themeContext.textColor
         },
         ':active': {
-          backgroundColor: hoverBgc
+          backgroundColor: isSelected ? themeContext.backgroundAccountAddress : 'transparent'
         }
       };
     },
@@ -150,31 +145,27 @@ function Dropdown ({ className, getFormatOptLabel, label, onChange, options, val
     noOptionsMessage: (base: any) => ({ ...base, textAlign: 'left', fontFamily: 'Lexend', fontSize: '15px' }),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     menu: (base: any) => {
-      const borderColor = themeContext.id === 'dark' ? '#212845' : '#EEEEEE';
-
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
         width: '240px',
         right: 0,
         marginTop: '0',
-        borderTopLeftRadius: '0',
-        borderTopRightRadius: '0',
         borderBottomLeftRadius: '8px',
-        borderBottomRightRadius: '8px',
-        border: `2px solid ${borderColor}`
+        borderBottomRightRadius: '8px'
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     menuList: (base: any) => {
-      const backgroundColor = themeContext.id === 'dark' ? '#181E42' : '#FFFFFF';
-
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
         maxHeight: '200px',
         zIndex: 15,
-        backgroundColor: `${backgroundColor}`
+        boxShadow: themeContext.boxShadow2,
+        backgroundColor: themeContext.background,
+        borderBottomLeftRadius: '8px',
+        borderBottomRightRadius: '8px'
       };
     },
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -198,7 +189,7 @@ function Dropdown ({ className, getFormatOptLabel, label, onChange, options, val
           isSearchable
           menuIsOpen
           menuPlacement={'auto'}
-          menuPortalTarget={document.querySelector('body')}
+          menuPortalTarget={document.querySelector('main')}
           menuPosition='fixed'
           onChange={handleChange}
           options={transformOptions}
@@ -217,7 +208,7 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
   position: relative;
 
   .dropdown-wrapper-item {
-    height: 68px;
+    height: 72px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -251,9 +242,9 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
 
   .token-dropdown-dropdown__control {
     align-items: center;
-    background-color: ${theme.popupBackground};
-    border: 2px solid ${theme.boxBorderColor};
-    border-bottom: none;
+    background-color: ${theme.background};
+    // border: 2px solid ${theme.boxBorderColor};
+    border: none;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     border-bottom-left-radius: 0;
@@ -265,13 +256,7 @@ export default React.memo(styled(DropdownWrapper)(({ theme }: ThemeProps) => `
     min-height: 48px;
     position: relative;
     min-width: 240px;
-    box-shadow: none;
-  }
-
-  .token-dropdown-dropdown__control:hover {
-    border: 2px solid ${theme.boxBorderColor};
-    border-bottom: none;
-    box-shadow: none;
+    box-shadow: ${theme.boxShadow2};
   }
 
   .token-dropdown-dropdown__input-container {

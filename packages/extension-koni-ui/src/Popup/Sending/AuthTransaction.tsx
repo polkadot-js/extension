@@ -7,9 +7,11 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 import { RequestCheckTransfer, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
+import InputAddress from '@polkadot/extension-koni-ui/components/InputAddress';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@polkadot/extension-koni-ui/messaging';
@@ -67,6 +69,9 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
+  const networkPrefix = NETWORKS[requestPayload.networkKey].ss58Format;
+
+  console.log('123', requestPayload);
 
   const _onCancel = useCallback(() => {
     onCancel();
@@ -171,9 +176,21 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
         </div>
 
         <div className='auth-transaction-body'>
-          <div>
-            <div>Amount</div>
-            <div>
+          <InputAddress
+            className={'auth-transaction__input-address'}
+            defaultValue={requestPayload.from}
+            help={t<string>('The account you will send funds from.')}
+            isDisabled={true}
+            isSetDefaultValue={true}
+            label={t<string>('Send from address')}
+            networkPrefix={networkPrefix}
+            type='account'
+            withEllipsis
+          />
+
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Amount</div>
+            <div className='auth-transaction__info-value'>
               <FormatBalance
                 format={balanceFormat}
                 value={requestPayload.value}
@@ -181,9 +198,9 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
             </div>
           </div>
 
-          <div>
-            <div>Estimated fee</div>
-            <div>
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Estimated fee</div>
+            <div className='auth-transaction__info-value'>
               <FormatBalance
                 format={[feeDecimals, feeSymbol]}
                 value={fee}
@@ -191,9 +208,9 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
             </div>
           </div>
 
-          <div>
-            <div>Total (Amount + Fee)</div>
-            <div>
+          <div className='auth-transaction__info'>
+            <div className='auth-transaction__info-text'>Total (Amount + Fee)</div>
+            <div className='auth-transaction__info-value'>
               {renderTotal({
                 fee,
                 feeDecimals,
@@ -204,6 +221,8 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
               })}
             </div>
           </div>
+
+          <div className='auth-transaction__separator' />
 
           <InputWithLabel
             isError={isKeyringErr}
@@ -305,5 +324,56 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     margin-bottom: -15px;
     margin-right: -15px;
     background-color: ${theme.background};
+  }
+
+  .auth-transaction__input-address {
+    margin-bottom: 14px;
+  }
+
+  .auth-transaction__info {
+    display: flex;
+    width: 100%;
+    padding: 4px 0;
+    flex-wrap: wrap;
+  }
+
+  .auth-transaction__info-text, auth-transaction__info-value {
+    font-size: 15px;
+    line-height: 26px;
+    font-weight: 500;
+  }
+
+  .auth-transaction__info-text {
+    color: ${theme.textColor2};
+    flex: 1;
+  }
+
+  .auth-transaction__info-value {
+    color: ${theme.textColor};
+    flex: 1;
+    text-align: right;
+  }
+
+  .auth-transaction__info-value .format-balance__front-part {
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 160px;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .auth-transaction__separator {
+    padding-top: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid ${theme.menuItemsBorder};
+  }
+
+  .auth-transaction__info-value .value-separator {
+    margin: 0 4px;
+  }
+
+  .auth-transaction__info-value .format-balance {
+    display: inline-block;
   }
 `));

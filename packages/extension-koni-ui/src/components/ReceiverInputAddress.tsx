@@ -48,6 +48,7 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', network
         isSetDefaultValue={false}
         label={t<string>('Send to address')}
         // isDisabled={!!propRecipientId}
+        networkPrefix={networkPrefix}
         onChange={onChangeReceiveAddress}
         type='allPlus'
         withEllipsis
@@ -68,9 +69,6 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', network
 }
 
 export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
-  border: 2px solid ${theme.boxBorderColor};
-  height: 72px;
-  border-radius: 8px;
   position: relative;
   margin-bottom: 10px;
 
@@ -80,8 +78,12 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
     line-height: 26px;
     color: ${theme.textColor2};
     right: 16px;
-    top: 30px;
+    top: 36px;
     pointer-events: none;
+  }
+
+  .receive-input-address .key-pair__address {
+    display: none;
   }
 
   .receive-input-address {

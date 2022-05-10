@@ -12,7 +12,7 @@ import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-bas
 import { getRegistry, getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import { getEVMBalance } from '@polkadot/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
+import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
@@ -90,7 +90,7 @@ function subscribeERC20Interval (addresses: string[], networkKey: string, api: A
     callback && callback(networkKey, originBalanceItem);
   };
 
-  getRegistry(networkKey, api).then(({ tokenMap }) => {
+  getRegistry(networkKey, api, state.getErc20Tokens()).then(({ tokenMap }) => {
     tokenList = Object.values(tokenMap).filter(({ erc20Address }) => (!!erc20Address));
     tokenList.forEach(({ erc20Address, symbol }) => {
       if (erc20Address) {

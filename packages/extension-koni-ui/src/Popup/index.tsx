@@ -20,11 +20,15 @@ import Rendering from '@polkadot/extension-koni-ui/Popup/Rendering';
 import Donate from '@polkadot/extension-koni-ui/Popup/Sending/Donate';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/SendFund';
 // import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
+import ImportEvmNft from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft';
+import ImportEvmToken from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
 import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit';
 import Networks from '@polkadot/extension-koni-ui/Popup/Settings/Networks';
 import { updateCurrentAccount } from '@polkadot/extension-koni-ui/stores/updater';
+import EvmTokenEdit from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit';
+import EvmTokenSetting from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';
@@ -237,6 +241,10 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
+                          <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
+                          <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
+                          <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
+                          <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

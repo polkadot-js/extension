@@ -30,7 +30,7 @@ interface Token {
 
 export class KaruraNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps | null, addresses: string[], chain?: string) {
+  constructor (api: ApiProps | null, addresses: string[], chain: string) {
     super(api, addresses, chain);
   }
 

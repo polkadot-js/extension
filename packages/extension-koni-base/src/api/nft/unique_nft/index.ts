@@ -24,7 +24,7 @@ interface Token {
 
 export default class UniqueNftApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
-  constructor (api: ApiProps | null, addresses: string[], chain?: string) {
+  constructor (api: ApiProps | null, addresses: string[], chain: string) {
     super(api, addresses, chain);
   }
 

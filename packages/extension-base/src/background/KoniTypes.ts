@@ -517,6 +517,32 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
+export interface CustomEvmToken {
+  name?: string,
+  smartContract: string,
+  symbol?: string,
+  decimals?: number,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
+  type: 'erc20' | 'erc721'
+}
+
+export interface EvmTokenJson {
+  erc20: CustomEvmToken[],
+  erc721: CustomEvmToken[]
+}
+
+export interface _ServiceInfo {
+  currentAccount: string,
+  chainRegistry: Record<string, ChainRegistry>;
+  customErc721Registry: CustomEvmToken[];
+}
+
+export interface DeleteEvmTokenParams {
+  smartContract: string,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
+  type: 'erc20' | 'erc721'
+}
+
 export interface SupportTransferResponse {
   supportTransfer: boolean;
   supportTransferAll: boolean;
@@ -548,6 +574,10 @@ export interface RequestSaveRecentAccount {
 }
 
 export interface KoniRequestSignatures {
+  'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
+  'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
+  'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
+  'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];

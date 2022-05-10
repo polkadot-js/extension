@@ -50,3 +50,9 @@ export const getERC20Contract = (networkKey: string, assetAddress: string, optio
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
   return new web3Map[networkKey].eth.Contract(ERC20Contract.abi, assetAddress, options);
 };
+
+export const getERC721Contract = (networkKey: string, assetAddress: string, options = {}): Contract => {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+  return new web3Map[networkKey].eth.Contract(ERC721Contract, assetAddress, options);
+};

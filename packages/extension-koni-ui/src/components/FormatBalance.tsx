@@ -27,8 +27,8 @@ const K_LENGTH = 3 + 1;
 type LabelPost = string | React.ReactNode
 
 function createElement (prefix: string, postfix: string, unit: string, label: LabelPost = '', isShort = false): React.ReactNode {
-  return <>{`${prefix}${isShort ? '' : '.'}`}{!isShort &&
-  <span className='format-balance__postfix'>{`0000${postfix || ''}`.slice(-4)}</span>}<span
+  return <><span className='format-balance__front-part'>{`${prefix}${isShort ? '' : '.'}`}{!isShort &&
+  <span className='format-balance__postfix'>{`0000${postfix || ''}`.slice(-4)}</span>}</span><span
     className='format-balance__unit'
   > {unit}</span>{label}</>;
 }

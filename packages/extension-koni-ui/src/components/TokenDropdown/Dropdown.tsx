@@ -148,7 +148,7 @@ function Dropdown ({ className, getFormatOptLabel, label, onChange, options, val
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return {
         ...base,
-        width: '240px',
+        width: '100%',
         right: 0,
         marginTop: '0',
         borderBottomLeftRadius: '8px',

@@ -196,9 +196,24 @@ function InputNumber ({ autoFocus, decimals, bitLength = DEFAULT_BITLENGTH, chil
 
   const [isPreKeyDown, setIsPreKeyDown] = useState(false);
 
-  useEffect((): void => {
+  useEffect(() => {
     onChange && onChange(isValid ? valueBn : undefined);
-  }, [isValid, onChange, valueBn]);
+    let isSync = true;
+
+    if (isSync) {
+      const newValues: [string, BN, boolean] = getFormattedValuesFromString(false, value, si, bitLength, isZeroable, decimals, maxValue);
+
+      if (newValues[1].toString() === valueBn.toString()) {
+        onChange && onChange(isValid ? valueBn : undefined);
+      } else {
+        setValues(newValues);
+      }
+    }
+
+    return () => {
+      isSync = false;
+    };
+  }, [isValid, onChange, valueBn, decimals, bitLength, isZeroable, maxValue, si, value]);
 
   const _onChangeWithSi = useCallback(
     (input: string, si: SiDef | null) => setValues(

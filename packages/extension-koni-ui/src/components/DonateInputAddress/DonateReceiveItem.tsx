@@ -53,9 +53,10 @@ function DonateReceiveItem ({ address, className = '', iconName, name, networkPr
             value={formattedAddress}
           />
         }
-
         <div className='key-pair__name'>
-          {getName(formattedAddress, name)}
+          <div className='key-pair__name-txt'>
+            {getName(formattedAddress, name)}
+          </div>
         </div>
         <div className='key-pair__address'>
           {getShortenText(formattedAddress, 9)}
@@ -78,8 +79,15 @@ export default React.memo(styled(DonateReceiveItem)(({ theme }: ThemeProps) => `
   .key-pair__name {
     flex: 1;
     font-size: 15px;
-    color: ${theme.textColor2};
     font-weight: 500;
+    color: ${theme.textColor2};
+  }
+
+  .key-pair__name-txt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    white-space: nowrap;
   }
 
   .key-pair__address {

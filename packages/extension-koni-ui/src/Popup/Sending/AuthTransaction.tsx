@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
@@ -10,6 +9,7 @@ import { RequestCheckTransfer, TransferStep } from '@polkadot/extension-base/bac
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components';
 import Button from '@polkadot/extension-koni-ui/components/Button';
+import DonateInputAddress from '@polkadot/extension-koni-ui/components/DonateInputAddress';
 import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
 import InputAddress from '@polkadot/extension-koni-ui/components/InputAddress';
 import Modal from '@polkadot/extension-koni-ui/components/Modal';
@@ -25,6 +25,7 @@ interface Props extends ThemeProps {
   feeInfo: [string | null, number, string]; // fee, fee decimal, fee symbol
   balanceFormat: [number, string]; // decimal, symbol
   onChangeResult: (txResult: TransferResultType) => void;
+  isDonation?: boolean;
 }
 
 type RenderTotalArg = {
@@ -51,19 +52,19 @@ function renderTotal (arg: RenderTotalArg) {
   return (
     <>
       <FormatBalance
-        format={[feeDecimals, feeSymbol]}
-        value={new BN(fee || '0')}
+        format={[amountDecimals, amountSymbol]}
+        value={new BN(amount || '0')}
       />
       <span className={'value-separator'}>+</span>
       <FormatBalance
-        format={[amountDecimals, amountSymbol]}
-        value={new BN(amount || '0')}
+        format={[feeDecimals, feeSymbol]}
+        value={new BN(fee || '0')}
       />
     </>
   );
 }
 
-function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
+function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, feeSymbol], balanceFormat, onCancel, onChangeResult, requestPayload }: Props): React.ReactElement<Props> | null {
   const { t } = useTranslation();
   const [isBusy, setBusy] = useState(false);
   const [password, setPassword] = useState<string>('');
@@ -116,6 +117,7 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
       })
         .catch((e) => console.log('There is problem when makeTransfer', e));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       password, onChangeResult,
       requestPayload.networkKey,
@@ -177,14 +179,42 @@ function AuthTransaction ({ className, feeInfo: [fee, feeDecimals, feeSymbol], b
           <InputAddress
             className={'auth-transaction__input-address'}
             defaultValue={requestPayload.from}
-            help={t<string>('The account you will send funds from.')}
+            help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
             isDisabled={true}
             isSetDefaultValue={true}
-            label={t<string>('Send from address')}
+            label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}
             networkPrefix={networkPrefix}
             type='account'
             withEllipsis
           />
+
+          {isDonation
+            ? (
+              <DonateInputAddress
+                className={'auth-transaction__input-address'}
+                help={t<string>('The address you want to donate to.')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Donate to address')}
+                networkPrefix={networkPrefix}
+                type='allPlus'
+                withEllipsis
+              />
+            )
+            : (
+              <InputAddress
+                className={'auth-transaction__input-address'}
+                defaultValue={requestPayload.to}
+                help={t<string>('The address you want to send funds to.')}
+                isDisabled={true}
+                isSetDefaultValue={true}
+                label={t<string>('Send to address')}
+                networkPrefix={networkPrefix}
+                type='allPlus'
+                withEllipsis
+              />
+            )
+          }
 
           <div className='auth-transaction__info'>
             <div className='auth-transaction__info-text'>Amount</div>

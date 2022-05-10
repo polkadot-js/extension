@@ -44,10 +44,10 @@ function ReceiverInputAddress ({ balance, balanceFormat, className = '', network
       <DonateInputAddress
         autoPrefill={false}
         className={'receive-input-address'}
-        help={t<string>('Select a contact or paste the address you want to send funds to.')}
+        help={t<string>('Select a contact or paste the address you want to donate to.')}
         isSetDefaultValue={false}
-        label={t<string>('Send to address')}
-        // isDisabled={!!propRecipientId}
+        label={t<string>('Donate to address')}
+        networkPrefix={networkPrefix}
         onChange={onChangeReceiveAddress}
         type='allPlus'
         withEllipsis
@@ -98,5 +98,15 @@ export default styled(ReceiverInputAddress)(({ theme }: ThemeProps) => `
     right: 16px;
     top: 8px;
     pointer-events: none;
+  }
+
+  .format-balance__value {
+    font-weight: 400;
+    font-size: 14px;
+    color: ${theme.textColor};
+  }
+
+  .format-balance__postfix {
+    color: ${theme.textColor2};
   }
 `);

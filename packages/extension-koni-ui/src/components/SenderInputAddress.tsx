@@ -23,6 +23,7 @@ interface Props {
   chainRegistryMap: Record<string, ChainRegistry>;
   balance: string;
   balanceFormat: [number, string];
+  isDonation?: boolean
 }
 
 function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
@@ -45,7 +46,7 @@ function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItem
   return options;
 }
 
-function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, onChange }: Props): React.ReactElement {
+function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, onChange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
@@ -95,9 +96,9 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
       <InputAddress
         className={'sender-input-address'}
         defaultValue={initValue.address}
-        help={t<string>('The account you will send funds from.')}
+        help={t<string>(isDonation ? 'The account you will donate from.' : 'The account you will send funds from.')}
         isSetDefaultValue={true}
-        label={t<string>('Send from account')}
+        label={t<string>(isDonation ? 'Donate from account' : 'Send from account')}
         networkPrefix={networkPrefix}
         onChange={onChangeInputAddress}
         type='account'

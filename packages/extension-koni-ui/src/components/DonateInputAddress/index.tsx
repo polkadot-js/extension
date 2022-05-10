@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
@@ -150,32 +149,41 @@ function DonateInputAddress ({ className = '', defaultValue, filter, help, isDis
   const inputAddressRef = useRef(null);
   const [projectLink, setProjectLink] = useState<string | undefined>('');
   const [options, setOptions] = useState<DonateTransformOptionType[]>([]);
-  const [subscriptionId, setSubscriptionId] = useState<string>('');
-  const donateOptions = Object.values(DONATEINFOS);
   const deps = options.toString();
 
-  const handleGetAccountsInputAddress = (data: OptionInputAddress) => {
-    const { options } = data;
-
-    const donateOptions = Object.values(DONATEINFOS);
-    const accountList = [];
-
-    accountList.push(options.account[0]);
-    const allPlusAccountList: DonateTransformOptionType[] = accountList.concat(donateOptions).concat(options.address);
-
-    setOptions(allPlusAccountList);
-  };
-
   useEffect(() => {
-    subscribeAccountsInputAddress(handleGetAccountsInputAddress)
-      .then((id) => setSubscriptionId(id))
+    let isSync = true;
+    let subscriptionId = '';
+
+    subscribeAccountsInputAddress((data: OptionInputAddress) => {
+      if (isSync) {
+        const { options } = data;
+
+        const donateOptions = Object.values(DONATEINFOS);
+        const accountList = [];
+
+        accountList.push(options.account[0]);
+        const allPlusAccountList: DonateTransformOptionType[] = accountList.concat(donateOptions).concat(options.address);
+
+        setOptions(allPlusAccountList);
+      }
+    })
+      .then((id) => {
+        if (isSync) {
+          subscriptionId = id;
+        } else {
+          cancelSubscription(id).catch((e) => console.log('Error when cancel subscription', e));
+        }
+      })
       .catch(console.error);
 
     return () => {
-      cancelSubscription(subscriptionId).catch((e) => console.log('Error when cancel subscription', e));
-    };
+      isSync = false;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      if (subscriptionId) {
+        cancelSubscription(subscriptionId).catch((e) => console.log('Error when cancel subscription', e));
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -217,7 +225,7 @@ function DonateInputAddress ({ className = '', defaultValue, filter, help, isDis
   const onChangeData = useCallback((address: string): void => {
     !filter && setLastValue(type, address);
     setInputAddressLastValue(getLastValue(type));
-    const selectedOption = donateOptions.find((item) => item.value === address);
+    const selectedOption = options.find((item) => item.value === address);
 
     setProjectLink(selectedOption?.link);
     onChange && onChange(
@@ -225,6 +233,7 @@ function DonateInputAddress ({ className = '', defaultValue, filter, help, isDis
         ? transformToAccountId(address)
         : null
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deps, filter, onChange, type]);
 
   const loadOptions = useCallback((input: string, callback: (options: DropdownTransformGroupOptionType[]) => void) => {
@@ -258,24 +267,24 @@ function DonateInputAddress ({ className = '', defaultValue, filter, help, isDis
     }
   }, [options]);
 
-  // @ts-ignore
   const formatOptionLabel = useCallback((label: string, value: string) => {
-    const selectedOption = donateOptions.find((item) => item.value === value);
+    const selectedOption = options.find((item) => item.value === value);
 
     return (
       <DonateReceiveItem
         address={value}
         iconName={selectedOption?.icon}
-        name={label}
+        name={selectedOption?.name || label}
         networkPrefix={networkPrefix}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deps, networkPrefix]);
 
   return (
     <div className={className}>
       <Dropdown
-        className='input-address__dropdown'
+        className={`input-address__dropdown ${isDisabled ? 'is-disabled' : ''}`}
         defaultOptions={transformGrOptions(options)}
         defaultValue={defaultValue}
         getFormatOptLabel={formatOptionLabel}
@@ -332,6 +341,10 @@ export default React.memo(styled(DonateInputAddress)(({ theme }: ThemeProps) => 
     border: 2px solid ${theme.boxBorderColor};
     border-radius: 8px;
     height: 72px;
+  }
+
+  .input-address__dropdown.is-disabled {
+    border-style: dashed;
   }
 
   .format-balance {
@@ -429,6 +442,7 @@ export default React.memo(styled(DonateInputAddress)(({ theme }: ThemeProps) => 
     line-height: 26px;
     color: ${theme.textColor2};
     margin-bottom: 10px;
+    margin-top: 10px;
 
     > span {
       text-overflow: ellipsis;

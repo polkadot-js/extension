@@ -259,6 +259,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               chainRegistryMap={chainRegistryMap}
               className=''
               initValue={defaultValue}
+              isDonation
               onChange={setSenderValue}
             />
 
@@ -385,6 +386,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
             feeDecimal || mainTokenInfo.decimals,
             feeSymbol || mainTokenInfo.symbol
           ]}
+          isDonation
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{

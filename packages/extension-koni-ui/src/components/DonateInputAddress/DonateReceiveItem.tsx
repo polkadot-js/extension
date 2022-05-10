@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { isUndefined } from '@polkadot/util';
@@ -16,6 +17,7 @@ interface Props {
   address: string;
   className?: string;
   networkPrefix: number;
+  iconName?: string;
   style?: Record<string, string>;
 }
 
@@ -27,7 +29,7 @@ function getName (address: string, name?: string): string {
   return isUndefined(name) ? address.length > 15 ? getShortenText(address) : address : name;
 }
 
-function KeyPair ({ address, className = '', name, networkPrefix }: Props): React.ReactElement<Props> {
+function DonateReceiveItem ({ address, className = '', iconName, name, networkPrefix }: Props): React.ReactElement<Props> {
   let formattedAddress = '';
   const icon = isEthereumAddress(address) ? 'ethereum' : 'polkadot';
 
@@ -38,12 +40,19 @@ function KeyPair ({ address, className = '', name, networkPrefix }: Props): Reac
   return (
     <div className={className}>
       <div className={'key-pair'}>
-        <Identicon
-          className='key-pair__icon'
-          iconTheme={icon as IconTheme}
-          prefix={networkPrefix}
-          value={formattedAddress}
-        />
+        {iconName
+          ? <img
+            alt='logo'
+            className='key-pair__icon'
+            src={getLogoByNetworkKey(iconName)}
+          />
+          : <Identicon
+            className='key-pair__icon'
+            iconTheme={icon as IconTheme}
+            prefix={networkPrefix}
+            value={formattedAddress}
+          />
+        }
         <div className='key-pair__name'>
           <div className='key-pair__name-txt'>
             {getName(formattedAddress, name)}
@@ -57,7 +66,7 @@ function KeyPair ({ address, className = '', name, networkPrefix }: Props): Reac
   );
 }
 
-export default React.memo(styled(KeyPair)(({ theme }: ThemeProps) => `
+export default React.memo(styled(DonateReceiveItem)(({ theme }: ThemeProps) => `
   .key-pair {
     width: 100%;
     height: 100%;
@@ -65,7 +74,6 @@ export default React.memo(styled(KeyPair)(({ theme }: ThemeProps) => `
     align-items: center;
     border-radius: 8px;
     background-color: transparent;
-    display: flex;
   }
 
   .key-pair__name {
@@ -98,6 +106,7 @@ export default React.memo(styled(KeyPair)(({ theme }: ThemeProps) => `
     width: 24px;
     height: 24px;
     margin-right: 16px;
+    border-radius: 50%;
     pointer-events: none;
   }
 

@@ -121,7 +121,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<AddAccount />);
   }
 
-  if (!currentAccount) {
+  if (!currentAccount || !currentNetwork.isReady) {
     return (<></>);
   }
 
@@ -269,8 +269,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           />
         </div>
 
-        {!_isAccountAll && (
-          <div className='home-account-button-container'>
+        <div className='home-account-button-container'>
+          {!_isAccountAll && (
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
@@ -278,31 +278,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
                 tooltipContent={t<string>('Receive')}
               />
             </div>
+          )}
 
-            <Link
-              className={'action-button-wrapper'}
-              to={'/account/send-fund'}
-            >
-              <ActionButton
-                iconSrc={sendIcon}
-                tooltipContent={t<string>('Send')}
-              />
-            </Link>
-
-            <Link
-              className={'action-button-wrapper'}
-              to={'/account/donate'}
-            >
-              <ActionButton
-                iconSrc={donateIcon}
-                tooltipContent={t<string>('Donate')}
-              />
-            </Link>
-          </div>
-        )}
-
-        {_isAccountAll && (
-          <div className='home-account-button-container'>
+          {_isAccountAll && (
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
@@ -310,24 +288,28 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
                 tooltipContent={t<string>('Receive')}
               />
             </div>
+          )}
 
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={sendIcon}
-                isDisabled
-                tooltipContent={t<string>('Send')}
-              />
-            </div>
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/send-fund'}
+          >
+            <ActionButton
+              iconSrc={sendIcon}
+              tooltipContent={t<string>('Send')}
+            />
+          </Link>
 
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={donateIcon}
-                isDisabled
-                tooltipContent={t<string>('Donate')}
-              />
-            </div>
-          </div>
-        )}
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/donate'}
+          >
+            <ActionButton
+              iconSrc={donateIcon}
+              tooltipContent={t<string>('Donate')}
+            />
+          </Link>
+        </div>
       </div>
 
       <div className={'home-tab-contents'}>

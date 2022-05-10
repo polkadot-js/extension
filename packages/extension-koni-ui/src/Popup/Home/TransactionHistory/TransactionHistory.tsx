@@ -68,11 +68,13 @@ function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): Re
     return (<TransactionHistoryEmptyList />);
   }
 
-  return (<TransactionHistory
-    className={className}
-    items={readyItems}
-    registryMap={registryMap}
-  />);
+  return (
+    <TransactionHistory
+      className={className}
+      items={readyItems}
+      registryMap={registryMap}
+    />
+  );
 }
 
 function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {

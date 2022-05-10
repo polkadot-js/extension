@@ -8,6 +8,8 @@ import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscr
 import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
+import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
+import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -250,6 +252,21 @@ export interface DonateInfo {
   link: string;
 }
 
+export interface DropdownOptionType {
+  text: string;
+  value: string;
+}
+
+export interface DropdownTransformOptionType {
+  label: string;
+  value: string;
+}
+
+export interface DropdownTransformGroupOptionType {
+  label: string;
+  options: DropdownTransformOptionType[];
+}
+
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkKey: string;
   groups: NetWorkGroup[];
@@ -264,6 +281,7 @@ export type CurrentNetworkInfo = {
   icon: string;
   genesisHash: string;
   isEthereum: boolean;
+  isReady?: boolean; // check if current network info is lifted from initial state
 }
 
 export type TokenInfo = {
@@ -283,6 +301,10 @@ export interface AccountsWithCurrentAddress {
   currentAddress?: string;
   isShowBalance?: boolean;
   allAccountLogo?: string;
+}
+
+export interface OptionInputAddress {
+  options: KeyringOptions;
 }
 
 export interface CurrentAccountInfo {
@@ -317,7 +339,11 @@ export interface TransactionHistoryItemType {
   time: number;
   networkKey: string;
   change: string;
+  changeSymbol?: string; // if undefined => main token
   fee?: string;
+  feeSymbol?: string;
+  // if undefined => main token, sometime "fee" uses different token than "change"
+  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
   extrinsicHash: string
@@ -419,7 +445,8 @@ export enum TransferErrorCode {
   INVALID_TOKEN = 'invalidToken',
   KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
-  TIMEOUT = 'timeout'
+  TIMEOUT = 'timeout',
+  UNSUPPORTED = 'unsupported'
 }
 
 export type TransferError = {
@@ -432,7 +459,8 @@ export interface ResponseCheckTransfer {
   errors?: Array<TransferError>,
   fromAccountFree: string,
   toAccountFree: string,
-  estimateFee?: string
+  estimateFee?: string,
+  feeSymbol?: string // if undefined => use main token
 }
 
 export enum TransferStep {
@@ -443,12 +471,21 @@ export enum TransferStep {
   ERROR = 'error'
 }
 
+type TxResultType = {
+  change: string;
+  changeSymbol?: string;
+  fee?: string;
+  feeSymbol?: string;
+}
+
 export interface ResponseTransfer {
   step: TransferStep,
   errors?: Array<TransferError>,
   extrinsicHash?: string,
   extrinsicStatus?: string,
-  data?: object
+  data?: object,
+  txResult?: TxResultType,
+  isFinalized?: boolean
 }
 
 export interface EvmNftTransactionRequest {
@@ -519,6 +556,36 @@ export interface ValidateEvmTokenResponse {
   isExist: boolean
 }
 
+export interface SupportTransferResponse {
+  supportTransfer: boolean;
+  supportTransferAll: boolean;
+}
+
+export interface RequestFreeBalance {
+  address: string,
+  networkKey: string,
+  token?: string
+}
+
+export interface RequestTransferCheckReferenceCount {
+  address: string,
+  networkKey: string
+}
+
+export interface RequestTransferCheckSupporting {
+  networkKey: string,
+  token: string
+}
+
+export interface RequestTransferExistentialDeposit {
+  networkKey: string,
+  token: string
+}
+
+export interface RequestSaveRecentAccount {
+  accountId: string;
+}
+
 export interface KoniRequestSignatures {
   'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
   'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
@@ -565,6 +632,8 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
+  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
   'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
@@ -574,6 +643,11 @@ export interface KoniRequestSignatures {
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
+  'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
+  'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
+  'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
+  'pri(subscription.cancel)': [string, boolean];
+  'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];

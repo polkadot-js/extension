@@ -17,6 +17,7 @@ import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOO
 import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // @ts-ignore
@@ -294,7 +295,7 @@ function subscribeWithAccountMulti (addresses: string[], networkKey: string, net
 
   let unsub2: () => void;
 
-  if (['bifrost', 'acala', 'karura'].includes(networkKey)) {
+  if (['bifrost', 'acala', 'karura', 'acala_testnet'].includes(networkKey)) {
     unsub2 = subscribeTokensBalance(addresses, networkKey, networkAPI.api, balanceItem, (balanceItem) => {
       callback(networkKey, balanceItem);
     });
@@ -383,16 +384,19 @@ export async function getFreeBalance (networkKey: string, address: string, token
 
   if (token) {
     const tokenInfo = await getTokenInfo(networkKey, api, token);
+    const isMainToken = !!(tokenInfo?.isMainToken);
 
-    if (!(tokenInfo?.isMainToken)) {
-      if (moonbeamBaseChains.indexOf(networkKey) > -1 && tokenInfo?.erc20Address) {
+    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+      if (!isMainToken) {
         const contract = getERC20Contract(networkKey, tokenInfo.erc20Address);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const free = await contract.methods.balanceOf(address).call();
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
         return free?.toString() || '0';
-      } else {
+      }
+    } else {
+      if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
         // @ts-ignore
         const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
 
@@ -401,13 +405,82 @@ export async function getFreeBalance (networkKey: string, address: string, token
     }
   }
 
-  if (networkKey === 'kintsugi') {
-    const balance = await api.derive.balances?.all(address);
+  const balance = await api.query.system.account(address) as AccountInfo;
 
-    return balance.freeBalance?.toString() || '0';
+  return balance.data?.free?.toString() || '0';
+}
+
+export async function subscribeFreeBalance (networkKey: string, address: string, token: string | undefined, update: (balance: string) => void): Promise<() => void> {
+  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const api = apiProps.api;
+
+  // todo: Need update the condition if the way to get ethereum chains is dynamic
+  if (ethereumChains.includes(networkKey)) {
+    if (!isEthereumAddress(address)) {
+      update('0');
+
+      return () => undefined;
+    }
   } else {
-    const balance = await api.query.system.account(address) as AccountInfo;
+    if (isEthereumAddress(address)) {
+      update('0');
 
-    return balance.data?.free?.toString() || '0';
+      return () => undefined;
+    }
   }
+
+  if (token) {
+    const tokenInfo = await getTokenInfo(networkKey, api, token);
+    const isMainToken = !!(tokenInfo?.isMainToken);
+
+    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+      if (!isMainToken) {
+        const getFreeBalance = () => {
+          if (!tokenInfo?.erc20Address) {
+            return;
+          }
+
+          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address);
+
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          contract.methods.balanceOf(address).call().then((free) => {
+            // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+            update(free?.toString() || '0');
+          });
+        };
+
+        getFreeBalance();
+        const interval = setInterval(getFreeBalance, MOONBEAM_REFRESH_BALANCE_INTERVAL);
+
+        return () => {
+          clearInterval(interval);
+        };
+      }
+    } else {
+      if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
+        // @ts-ignore
+        const unsub = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }, (balance) => {
+          // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          update(balance.free?.toString() || '0');
+        });
+
+        return () => {
+          // @ts-ignore
+          unsub && unsub();
+        };
+      }
+    }
+  }
+
+  // @ts-ignore
+  const unsub = await api.query.system.account(address, (balance) => {
+    // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    update(balance.data?.free?.toString() || '0');
+  });
+
+  return () => {
+    // @ts-ignore
+    unsub && unsub();
+  };
 }

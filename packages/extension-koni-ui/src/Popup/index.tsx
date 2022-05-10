@@ -15,6 +15,7 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
 import uiSettings from '@polkadot/ui-settings';
 
+import Rendering from '@polkadot/extension-koni-ui/Popup/Rendering';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
@@ -81,10 +82,6 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
     hierarchy,
     master
   };
-}
-
-function updateCurrentAccount (currentAcc: AccountJson): void {
-  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
 const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
@@ -184,7 +181,6 @@ export default function Popup (): React.ReactElement {
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useSetupStore();
@@ -224,6 +220,7 @@ export default function Popup (): React.ReactElement {
                   <MetadataReqContext.Provider value={metaRequests}>
                     <SigningReqContext.Provider value={signRequests}>
                       <ToastProvider>
+                        <Rendering />
                         <Switch>
                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                           <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>

@@ -88,10 +88,8 @@ export default class KoniState extends State {
   public initEvmTokenState () {
     this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
       if (!storedEvmTokens) {
-        console.log('default tokens');
         this.evmTokenState = DEFAULT_EVM_TOKENS;
       } else {
-        console.log('merge tokens');
         const _evmTokenState = DEFAULT_EVM_TOKENS;
 
         for (const storedToken of storedEvmTokens.erc20) {

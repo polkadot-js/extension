@@ -87,12 +87,14 @@ export default React.memo(styled(DonateReceiveItem)(({ theme }: ThemeProps) => `
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 160px;
-    white-space: nowrap;
+    width: 100%;
+    white-space: nowrap
   }
 
   .key-pair__address {
     color: ${theme.textColor2};
     font-weight: 400;
+    white-space: nowrap;
   }
 
   .key-pair:hover {

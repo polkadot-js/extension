@@ -8,7 +8,7 @@ import { Contract } from 'web3-eth-contract';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -58,6 +58,7 @@ export default class KoniExtension extends Extension {
   private cancelSubscriptionMap: Record<string, () => void> = {};
 
   private cancelSubscription (id: string): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     if (isSubscriptionRunning(id)) {
       unsubscribe(id);
     }
@@ -1414,6 +1415,7 @@ export default class KoniExtension extends Extension {
   private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, token, cb);
 
     port.onDisconnect.addListener((): void => {
@@ -1424,14 +1426,17 @@ export default class KoniExtension extends Extension {
   }
 
   private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await checkReferenceCount(networkKey, address);
   }
 
   private async transferCheckSupporting ({ networkKey, token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await checkSupportTransfer(networkKey, token);
   }
 
   private async transferGetExistentialDeposit ({ networkKey, token }: RequestTransferExistentialDeposit): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await getExistentialDeposit(networkKey, token);
   }
 

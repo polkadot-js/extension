@@ -13,9 +13,11 @@ import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@polkadot/extens
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
 import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
+import Rendering from '@polkadot/extension-koni-ui/Popup/Rendering';
+import Donate from '@polkadot/extension-koni-ui/Popup/Sending/Donate';
+import { updateCurrentAccount } from '@polkadot/extension-koni-ui/stores/updater';
 import uiSettings from '@polkadot/ui-settings';
 
-import Rendering from '@polkadot/extension-koni-ui/Popup/Rendering';
 import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
@@ -48,7 +50,6 @@ const TransferNftContainer = React.lazy(() => import('@polkadot/extension-koni-u
 const ImportLedger = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportLedger'));
 const ImportEvmNft = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft'));
 const ImportEvmToken = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken'));
-const Donate = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Sending/old/Donate'));
 const SendFund = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Sending/old/SendFund'));
 const Settings = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting'));

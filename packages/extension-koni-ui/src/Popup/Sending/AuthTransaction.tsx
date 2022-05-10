@@ -192,6 +192,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
             ? (
               <DonateInputAddress
                 className={'auth-transaction__input-address'}
+                defaultValue={requestPayload.to}
                 help={t<string>('The address you want to donate to.')}
                 isDisabled={true}
                 isSetDefaultValue={true}
@@ -334,9 +335,13 @@ export default React.memo(styled(AuthTransaction)(({ theme }: ThemeProps) => `
     height: 40px;
     display: flex;
     align-items: center;
-    color: #04C1B7;
-    font-weight: 500;
+    color: ${theme.buttonTextColor2};
     cursor: pointer;
+    opacity: 0.85;
+  }
+
+  .auth-transaction-header__close-btn:hover {
+    opacity: 1;
   }
 
   .auth-transaction-header__close-btn.-disabled {

@@ -95,7 +95,8 @@ const darkTheme = {
   crowdloanActiveStatus: '#F7A21B',
   crowdloanFailStatus: '#F5000E',
   extensionBorder: '#030E45',
-  accountAuthorizeRequest: '#151A30'
+  accountAuthorizeRequest: '#151A30',
+  dropdownBackground: '#020412'
 };
 
 export declare type Theme = typeof darkTheme;
@@ -156,7 +157,8 @@ const lightTheme: Theme = {
   toggleInactiveThumbBoxShadow: '0px 0px 4px rgba(0, 0, 0, 0.25)',
   scrollBarThumb: 'rgba(0, 0, 0, .25)',
   extensionBorder: '#EDEDED',
-  accountAuthorizeRequest: '#F5F5F5'
+  accountAuthorizeRequest: '#F5F5F5',
+  dropdownBackground: '#020412'
 };
 
 export const themes = {

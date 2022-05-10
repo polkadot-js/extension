@@ -10,9 +10,8 @@ import { AccountContext, Warning } from '@polkadot/extension-koni-ui/components'
 import Button from '@polkadot/extension-koni-ui/components/Button';
 import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
-import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
+import ReceiverDonateInputAddress from '@polkadot/extension-koni-ui/components/ReceiverDonateInputAddress';
 import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
-import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
 import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
 import { SenderInputAddressType } from '@polkadot/extension-koni-ui/components/types';
 import useFreeBalance from '@polkadot/extension-koni-ui/hooks/screen/sending/useFreeBalance';
@@ -54,11 +53,11 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSearch
         showSettings
         showSubHeader
-        subHeaderName={t<string>('Send fund')}
+        subHeaderName={t<string>('Donate')}
       />
       {accounts && accounts.length && account && defaultValue
         ? (
-          <SendFund
+          <Donate
             className='send-fund-container'
             defaultValue={defaultValue}
             theme={theme}
@@ -70,7 +69,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   );
 }
 
-function SendFund ({ className, defaultValue }: ContentProps): React.ReactElement {
+function Donate ({ className, defaultValue }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
   const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
@@ -83,8 +82,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
   const [recipientPhish, setRecipientPhish] = useState<string | null>(null);
   const [reference, setReference] = useState<boolean | null>(null);
   // const [isProtected, setIsProtected] = useState(false);
-  const [isAll, setIsAll] = useState(false);
-  const [[isSupportTransfer, isSupportTransferAll], setTransferSupport] =
+  const [[isSupportTransfer], setTransferSupport] =
     useState<[boolean, boolean] | [null, null]>([null, null]);
   // const [[maxTransfer, noFees], setMaxTransfer] = useState<[BN | null, boolean]>([null, false]);
   const [existentialDeposit, setExistentialDeposit] = useState<string>('0');
@@ -107,9 +105,8 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     (!isEthereumAddress(senderId) && !!recipientId && isEthereumAddress(recipientId));
   const [isGasRequiredExceedsError, setGasRequiredExceedsError] = useState<boolean>(false);
   const amountGtAvailableBalance = amount && senderFreeBalance && amount.gt(new BN(senderFreeBalance));
-  const [maxTransfer, noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
-  const canToggleAll = !!isSupportTransferAll && !!maxTransfer && !reference && !!recipientId;
-  const valueToTransfer = canToggleAll && isAll ? maxTransfer.toString() : (amount?.toString() || '0');
+  const [, noFees] = getMaxTransferAndNoFees(fee, feeSymbol, selectedToken, mainTokenInfo.symbol, senderFreeBalance, existentialDeposit);
+  const valueToTransfer = amount?.toString() || '0';
   const canMakeTransfer = isSupportTransfer &&
     !isGasRequiredExceedsError &&
     !recipientPhish &&
@@ -127,7 +124,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
         networkKey: selectedNetworkKey,
         from: senderId,
         to: recipientId,
-        transferAll: canToggleAll && isAll,
+        transferAll: false,
         token: selectedToken,
         value: valueToTransfer
       }).then((rs) => {
@@ -154,7 +151,7 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
     return () => {
       isSync = false;
     };
-  }, [amount, canToggleAll, isAll, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
+  }, [amount, recipientId, selectedNetworkKey, selectedToken, senderId, valueToTransfer]);
 
   useEffect(() => {
     let isSync = true;
@@ -262,10 +259,11 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
               chainRegistryMap={chainRegistryMap}
               className=''
               initValue={defaultValue}
+              isDonation
               onChange={setSenderValue}
             />
 
-            <ReceiverInputAddress
+            <ReceiverDonateInputAddress
               balance={recipientFreeBalance}
               balanceFormat={balanceFormat}
               className={''}
@@ -273,47 +271,18 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
               onchange={setRecipientId}
             />
 
-            {canToggleAll && isAll
-              ? (
-                <InputBalance
-                  autoFocus
-                  className={'send-fund-amount-input'}
-                  decimals={balanceFormat[0]}
-                  defaultValue={maxTransfer}
-                  help={t<string>('The full account balance to be transferred, minus the transaction fees')}
-                  isDisabled
-                  key={maxTransfer?.toString()}
-                  label={t<string>('transferable minus fees')}
-                  siDecimals={balanceFormat[0]}
-                  siSymbol={balanceFormat[1]}
-                />
-              )
-              : (
-                <InputBalance
-                  autoFocus
-                  className={'send-fund-amount-input'}
-                  decimals={balanceFormat[0]}
-                  help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
-                  isError={false}
-                  isZeroable
-                  label={t<string>('amount')}
-                  onChange={setAmount}
-                  placeholder={'0'}
-                  siSymbol={balanceFormat[1]}
-                />
-              )
-            }
-
-            {canToggleAll && (
-              <div className={'send-fund-toggle'}>
-                <Toggle
-                  className='typeToggle'
-                  label={t<string>('Transfer the full account balance, reap the sender')}
-                  onChange={setIsAll}
-                  value={isAll}
-                />
-              </div>
-            )}
+            <InputBalance
+              autoFocus
+              className={'send-fund-amount-input'}
+              decimals={balanceFormat[0]}
+              help={t<string>('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 milli is equivalent to sending 0.001.')}
+              isError={false}
+              isZeroable
+              label={t<string>('amount')}
+              onChange={setAmount}
+              placeholder={'0'}
+              siSymbol={balanceFormat[1]}
+            />
 
             {!!recipientPhish && (
               <Warning
@@ -417,13 +386,14 @@ function SendFund ({ className, defaultValue }: ContentProps): React.ReactElemen
             feeDecimal || mainTokenInfo.decimals,
             feeSymbol || mainTokenInfo.symbol
           ]}
+          isDonation
           onCancel={_onCancelTx}
           onChangeResult={_onChangeResult}
           requestPayload={{
             networkKey: selectedNetworkKey,
             from: senderId,
             to: recipientId,
-            transferAll: canToggleAll && isAll,
+            transferAll: false,
             token: selectedToken,
             value: valueToTransfer
           }}
@@ -467,8 +437,7 @@ export default React.memo(styled(Wrapper)(({ theme }: Props) => `
   }
 
   .send-fund-toggle {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
 
   .submit-btn-wrapper {

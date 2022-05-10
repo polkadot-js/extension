@@ -6,13 +6,13 @@ import { Transaction } from 'ethereumjs-tx';
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
-import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
+import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
@@ -25,7 +25,7 @@ import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
-import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { SingleAddress, SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert, BN, hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { base64Decode, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
@@ -54,6 +54,22 @@ const ACCOUNT_ALL_JSON: AccountJson = {
 };
 
 export default class KoniExtension extends Extension {
+  private cancelSubscriptionMap: Record<string, () => void> = {};
+
+  private cancelSubscription (id: string): boolean {
+    if (isSubscriptionRunning(id)) {
+      unsubscribe(id);
+    }
+
+    if (this.cancelSubscriptionMap[id]) {
+      this.cancelSubscriptionMap[id]();
+
+      delete this.cancelSubscriptionMap[id];
+    }
+
+    return true;
+  }
+
   public decodeAddress = (key: string | Uint8Array, ignoreChecksum?: boolean, ss58Format?: Prefix): Uint8Array => {
     return keyring.decodeAddress(key, ignoreChecksum, ss58Format);
   };
@@ -106,6 +122,29 @@ export default class KoniExtension extends Extension {
     });
 
     return true;
+  }
+
+  private accountsGetAll (id: string, port: chrome.runtime.Port): string {
+    const cb = createSubscription<'pri(accounts.subscribeAccountsInputAddress)'>(id, port);
+    const subscription = keyring.keyringOption.optionsSubject.subscribe((options): void => {
+      const optionsInputAddress: OptionInputAddress = {
+        options
+      };
+
+      cb(optionsInputAddress);
+    });
+
+    this.cancelSubscriptionMap[id] = subscription.unsubscribe;
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return id;
+  }
+
+  private saveRecentAccountId ({ accountId }: RequestSaveRecentAccount): SingleAddress {
+    return keyring.saveRecent(accountId);
   }
 
   private triggerAccountsSubscription (): boolean {
@@ -994,7 +1033,7 @@ export default class KoniExtension extends Extension {
     let tokenInfo: TokenInfo | undefined;
 
     if (token) {
-      const tokenInfo = await getTokenInfo(networkKey, dotSamaAPIMap[networkKey].api, token);
+      tokenInfo = await getTokenInfo(networkKey, dotSamaAPIMap[networkKey].api, token);
 
       if (!tokenInfo) {
         errors.push({
@@ -1003,7 +1042,7 @@ export default class KoniExtension extends Extension {
         });
       }
 
-      if (isEthereumAddress(from) && isEthereumAddress(to) && !(tokenInfo?.erc20Address)) {
+      if (isEthereumAddress(from) && isEthereumAddress(to) && !tokenInfo?.isMainToken && !(tokenInfo?.erc20Address)) {
         errors.push({
           code: TransferErrorCode.INVALID_TOKEN,
           message: 'Not found ERC20 address for this token'
@@ -1018,6 +1057,7 @@ export default class KoniExtension extends Extension {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
 
     let fee = '0';
+    let feeSymbol;
     let fromAccountFree = '0';
     let toAccountFree = '0';
 
@@ -1029,14 +1069,18 @@ export default class KoniExtension extends Extension {
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll);
+        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll);
       } else {
-        [, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
+        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
       }
     } else {
       // Estimate with DotSama API
-      [fee, fromAccountFree, toAccountFree] = await Promise.all(
-        [estimateFee(networkKey, fromKeyPair, to, value, !!transferAll), getFreeBalance(networkKey, from), getFreeBalance(networkKey, to)]
+      [[fee, feeSymbol], fromAccountFree, toAccountFree] = await Promise.all(
+        [
+          estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, tokenInfo),
+          getFreeBalance(networkKey, from, token),
+          getFreeBalance(networkKey, to, token)
+        ]
       );
     }
 
@@ -1057,23 +1101,52 @@ export default class KoniExtension extends Extension {
       errors,
       fromAccountFree: fromAccountFree,
       toAccountFree: toAccountFree,
-      estimateFee: fee
+      estimateFee: fee,
+      feeSymbol
     } as ResponseCheckTransfer;
   }
 
+  private makeTransferCallback (
+    address: string,
+    networkKey: string,
+    token: string | undefined,
+    portCallback: (res: ResponseTransfer) => void): (res: ResponseTransfer) => void {
+    return (res: ResponseTransfer) => {
+      // !res.isFinalized to prevent duplicate action
+      if (!res.isFinalized && res.txResult && res.extrinsicHash) {
+        state.setTransactionHistory(address, networkKey, {
+          time: Date.now(),
+          networkKey,
+          change: res.txResult.change,
+          changeSymbol: res.txResult.changeSymbol || token,
+          fee: res.txResult.fee,
+          feeSymbol: res.txResult.feeSymbol,
+          isSuccess: res.step.valueOf() === TransferStep.SUCCESS.valueOf(),
+          action: 'send',
+          extrinsicHash: res.extrinsicHash
+        });
+      }
+
+      portCallback(res);
+    };
+  }
+
   private async makeTransfer (id: string, port: chrome.runtime.Port, { from, networkKey, password, to, token, transferAll, value }: RequestTransfer): Promise<Array<TransferError>> {
-    const callback = createSubscription<'pri(accounts.transfer)'>(id, port);
+    const cb = createSubscription<'pri(accounts.transfer)'>(id, port);
     const [errors, fromKeyPair, , tokenInfo] = await this.validateTransfer(networkKey, token, from, to, password, value, transferAll);
 
-    if (errors.length > 0) {
+    if (errors.length) {
       setTimeout(() => {
-        unsubscribe(id);
+        this.cancelSubscription(id);
       }, 500);
+
+      // todo: add condition to lock KeyPair (for example: not remember password)
+      fromKeyPair && fromKeyPair.lock();
 
       return errors;
     }
 
-    if (fromKeyPair && errors.length === 0) {
+    if (fromKeyPair) {
       let transferProm: Promise<void> | undefined;
 
       if (isEthereumAddress(from) && isEthereumAddress(to)) {
@@ -1081,26 +1154,41 @@ export default class KoniExtension extends Extension {
         const { privateKey } = this.accountExportPrivateKey({ address: from, password });
 
         if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-          transferProm = makeERC20Transfer(tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll, callback);
+          transferProm = makeERC20Transfer(
+            tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll,
+            this.makeTransferCallback(from, networkKey, token, cb)
+          );
         } else {
-          transferProm = makeEVMTransfer(networkKey, to, privateKey, value || '0', !!transferAll, callback);
+          transferProm = makeEVMTransfer(
+            networkKey, to, privateKey, value || '0', !!transferAll,
+            this.makeTransferCallback(from, networkKey, token, cb)
+          );
         }
       } else {
         // Make transfer with Dotsama API
-        transferProm = makeTransfer(networkKey, to, fromKeyPair, value || '0', !!transferAll, callback);
+        transferProm = makeTransfer(
+          networkKey, to, fromKeyPair, value || '0', !!transferAll, tokenInfo,
+          this.makeTransferCallback(from, networkKey, token, cb)
+        );
       }
 
       transferProm.then(() => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.log(`Start transfer ${transferAll ? 'all' : value} from ${from} to ${to}`);
+
+        // todo: add condition to lock KeyPair
+        fromKeyPair.lock();
       })
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,node/no-callback-literal,@typescript-eslint/no-unsafe-member-access
-          callback({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
+          cb({ step: TransferStep.ERROR, errors: [({ code: TransferErrorCode.TRANSFER_ERROR, message: e.message })] });
           console.error('Transfer error', e);
           setTimeout(() => {
             unsubscribe(id);
           }, 500);
+
+          // todo: add condition to lock KeyPair
+          fromKeyPair.lock();
         });
     }
 
@@ -1262,6 +1350,30 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
+    const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
+
+    this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, token, cb);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return id;
+  }
+
+  private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
+    return await checkReferenceCount(networkKey, address);
+  }
+
+  private async transferCheckSupporting ({ networkKey, token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
+    return await checkSupportTransfer(networkKey, token);
+  }
+
+  private async transferGetExistentialDeposit ({ networkKey, token }: RequestTransferExistentialDeposit): Promise<string> {
+    return await getExistentialDeposit(networkKey, token);
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1297,6 +1409,10 @@ export default class KoniExtension extends Extension {
         return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':
         return this.accountsGetAllWithCurrentAddress(id, port);
+      case 'pri(accounts.subscribeAccountsInputAddress)':
+        return this.accountsGetAll(id, port);
+      case 'pri(accounts.saveRecent)':
+        return this.saveRecentAccountId(request as RequestSaveRecentAccount);
       case 'pri(accounts.triggerSubscription)':
         return this.triggerAccountsSubscription();
       case 'pri(currentAccount.saveAddress)':
@@ -1373,6 +1489,16 @@ export default class KoniExtension extends Extension {
         return this.upsertEvmToken(request as CustomEvmToken);
       case 'pri(evmTokenState.deleteMany)':
         return this.deleteEvmToken(request as DeleteEvmTokenParams[]);
+      case 'pri(transfer.checkReferenceCount)':
+        return await this.transferCheckReferenceCount(request as RequestTransferCheckReferenceCount);
+      case 'pri(transfer.checkSupporting)':
+        return await this.transferCheckSupporting(request as RequestTransferCheckSupporting);
+      case 'pri(transfer.getExistentialDeposit)':
+        return await this.transferGetExistentialDeposit(request as RequestTransferExistentialDeposit);
+      case 'pri(freeBalance.subscribe)':
+        return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
+      case 'pri(subscription.cancel)':
+        return this.cancelSubscription(request as string);
       default:
         return super.handle(id, type, request, port);
     }

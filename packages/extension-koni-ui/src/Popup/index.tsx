@@ -16,16 +16,19 @@ import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingCont
 import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
 import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer';
 import ImportLedger from '@polkadot/extension-koni-ui/Popup/ImportLedger';
+// import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import ImportEvmNft from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft';
 import ImportEvmToken from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken';
-import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
-import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
+import Rendering from '@polkadot/extension-koni-ui/Popup/Rendering';
+import Donate from '@polkadot/extension-koni-ui/Popup/Sending/Donate';
+import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
 import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit';
 import Networks from '@polkadot/extension-koni-ui/Popup/Settings/Networks';
 import EvmTokenEdit from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit';
 import EvmTokenSetting from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting';
+import { updateCurrentAccount } from '@polkadot/extension-koni-ui/stores/updater';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';
@@ -79,10 +82,6 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
     hierarchy,
     master
   };
-}
-
-function updateCurrentAccount (currentAcc: AccountJson): void {
-  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
 const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
@@ -182,7 +181,6 @@ export default function Popup (): React.ReactElement {
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useSetupStore();
@@ -222,6 +220,7 @@ export default function Popup (): React.ReactElement {
                   <MetadataReqContext.Provider value={metaRequests}>
                     <SigningReqContext.Provider value={signRequests}>
                       <ToastProvider>
+                        <Rendering />
                         <Switch>
                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                           <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>

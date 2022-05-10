@@ -91,7 +91,39 @@ export default class KoniState extends State {
         this.customEvmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
         this.evmTokenState = DEFAULT_EVM_TOKENS;
       } else {
-        this.evmTokenState = storedEvmTokens;
+        const _evmTokenState = DEFAULT_EVM_TOKENS;
+
+        for (const storedToken of storedEvmTokens.erc20) {
+          let exist = false;
+
+          for (const defaultToken of DEFAULT_EVM_TOKENS.erc20) {
+            if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+              exist = true;
+              break;
+            }
+          }
+
+          if (!exist) {
+            _evmTokenState.erc20.push(storedToken);
+          }
+        }
+
+        for (const storedToken of storedEvmTokens.erc721) {
+          let exist = false;
+
+          for (const defaultToken of DEFAULT_EVM_TOKENS.erc721) {
+            if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+              exist = true;
+              break;
+            }
+          }
+
+          if (!exist) {
+            _evmTokenState.erc721.push(storedToken);
+          }
+        }
+
+        this.evmTokenState = _evmTokenState;
       }
 
       this.evmTokenSubject.next(this.evmTokenState);

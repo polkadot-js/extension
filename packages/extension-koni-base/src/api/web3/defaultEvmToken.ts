@@ -103,12 +103,6 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       type: 'erc721'
     }
     // {
-    //   name: 'The Flighters',
-    //   smartContract: '0xF786d99c00EA512e1a8dD41aa99488B819a992D8',
-    //   chain: 'moonbeam',
-    //   type: 'erc721'
-    // },
-    // {
     //   name: 'AstarBots',
     //   smartContract: '0x2af8a3eeab86545d6bb2f6bae7c4ab6b6d1141b8',
     //   chain: 'astarEvm',

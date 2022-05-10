@@ -49,8 +49,6 @@ export class UniqueNftApiV2 extends BaseNftApi {
     return result?.data?.tokens as NftData[];
   }
 
-  private async
-
   public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     let allNfts: Record<string | number, any>[] = [];
 

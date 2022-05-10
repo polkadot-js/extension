@@ -177,6 +177,44 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
   };
 }
 
+export async function web3ExtensionAccountsSubscribe (extensions: string[], cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
+  if (!web3EnablePromise) {
+    return throwError('web3ExtensionAccountsSubscribe');
+  }
+
+  const accounts: Record<string, InjectedAccount[]> = {};
+
+  const triggerUpdate = (): void | Promise<void> =>
+    cb(
+      Object.entries(accounts).reduce(
+        (result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
+          result.push(...mapAccounts(source, list, ss58Format));
+
+          return result;
+        },
+        []
+      )
+    );
+
+  const unsubs = (await web3EnablePromise).filter(
+    ({ name: source }) => extensions.includes(source)
+  ).map(
+    ({ accounts: { subscribe }, name: source }): Unsubcall =>
+      subscribe((result): void => {
+        accounts[source] = result;
+
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        triggerUpdate();
+      })
+  );
+
+  return (): void => {
+    unsubs.forEach((unsub): void => {
+      unsub();
+    });
+  };
+}
+
 // find a specific provider based on the name
 export async function web3FromSource (source: string): Promise<InjectedExtension> {
   if (!web3EnablePromise) {

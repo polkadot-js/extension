@@ -4,6 +4,7 @@
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { Link } from '@polkadot/extension-koni-ui/components';
@@ -12,13 +13,12 @@ import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useF
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
 import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import NftCollectionPreview from './NftCollectionPreview';
-import {useSelector} from "react-redux";
-import {RootState} from "@polkadot/extension-koni-ui/stores";
-import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props extends ThemeProps {
   className?: string;

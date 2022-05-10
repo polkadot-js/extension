@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {CustomEvmToken, NftItem, TransactionHistoryItemType} from '@polkadot/extension-base/background/KoniTypes';
+import { CustomEvmToken, NftItem, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 
 export type CurrentAccountType = {

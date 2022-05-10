@@ -15,14 +15,17 @@ import { canDerive } from '@polkadot/extension-base/utils';
 import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
 import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
 import TransferNftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer';
-import ImportEvmToken from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken';
 import ImportLedger from '@polkadot/extension-koni-ui/Popup/ImportLedger';
+import ImportEvmNft from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft';
+import ImportEvmToken from '@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken';
 import Donate from '@polkadot/extension-koni-ui/Popup/Sending/old/Donate';
 import SendFund from '@polkadot/extension-koni-ui/Popup/Sending/old/SendFund';
 import Settings from '@polkadot/extension-koni-ui/Popup/Settings';
 import GeneralSetting from '@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting';
 import NetworkEdit from '@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit';
 import Networks from '@polkadot/extension-koni-ui/Popup/Settings/Networks';
+import EvmTokenEdit from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit';
+import EvmTokenSetting from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';
@@ -47,9 +50,6 @@ import PhishingDetected from './PhishingDetected';
 import RestoreJson from './RestoreJson';
 import Signing from './Signing';
 import Welcome from './Welcome';
-import ImportEvmNft from "@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft";
-import EvmTokenSetting from "@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting";
-import EvmTokenEdit from "@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit";
 
 const startSettings = uiSettings.get();
 

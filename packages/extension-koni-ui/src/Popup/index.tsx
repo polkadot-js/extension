@@ -50,7 +50,7 @@ const TransferNftContainer = React.lazy(() => import('@polkadot/extension-koni-u
 const ImportLedger = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportLedger'));
 const ImportEvmNft = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft'));
 const ImportEvmToken = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken'));
-const SendFund = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Sending/old/SendFund'));
+const SendFund = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Sending/SendFund'));
 const Settings = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting'));
 const NetworkEdit = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit'));

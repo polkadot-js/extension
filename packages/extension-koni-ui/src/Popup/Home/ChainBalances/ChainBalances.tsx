@@ -118,6 +118,10 @@ function ChainBalances ({ address,
     setShowBalanceDetail(true);
   }, [setShowBalanceDetail]);
 
+  const _backToHome = useCallback(() => {
+    setShowBalanceDetail(false);
+  }, [setShowBalanceDetail]);
+
   const toggleBalanceDetail = useCallback((networkKey: string) => {
     if (networkKey === selectedNetworkKey) {
       setSelectedNetworkKey('');
@@ -245,6 +249,7 @@ function ChainBalances ({ address,
           <>
             <ChainBalanceDetail
               accountInfo={selectedInfo}
+              backToHome={_backToHome}
               balanceInfo={selectedBalanceInfo}
               setQrModalOpen={setQrModalOpen}
               setQrModalProps={setQrModalProps}
@@ -252,7 +257,6 @@ function ChainBalances ({ address,
           </>
         )
       }
-
     </div>
   );
 }

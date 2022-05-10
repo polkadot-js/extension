@@ -27,10 +27,10 @@ export class UniqueNftApiV2 extends BaseNftApi {
     };
   }
 
-  private static parseNftCollectionRequest (address: string) {
+  private static parseNftCollectionRequest (collectionId: string) {
     return {
       // eslint-disable-next-line
-      query: `query MyQuery { tokens(where: {owner: {_eq: \"${address}\"}}) { collection_id id data } }`
+      query: `query MyQuery { collections(where: {collection_id: {_eq: \"${collectionId}\"}}) { collection_id name } }`
     };
   }
 

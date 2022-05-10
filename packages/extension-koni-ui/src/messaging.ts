@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
@@ -456,6 +456,10 @@ export async function upsertEvmToken (data: CustomEvmToken): Promise<boolean> {
 
 export async function deleteEvmTokens (data: DeleteEvmTokenParams[]) {
   return sendMessage('pri(evmTokenState.deleteMany)', data);
+}
+
+export async function validateEvmToken (data: ValidateEvmTokenRequest) {
+  return sendMessage('pri(evmTokenState.validateEvmToken)', data);
 }
 
 export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {

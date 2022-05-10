@@ -522,7 +522,7 @@ export interface CustomEvmToken {
   smartContract: string,
   symbol?: string,
   decimals?: number,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
   type: 'erc20' | 'erc721'
 }
 
@@ -539,8 +539,21 @@ export interface _ServiceInfo {
 
 export interface DeleteEvmTokenParams {
   smartContract: string,
-  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
   type: 'erc20' | 'erc721'
+}
+
+export interface ValidateEvmTokenRequest {
+  smartContract: string,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  type: 'erc20' | 'erc721'
+}
+
+export interface ValidateEvmTokenResponse {
+  name: string,
+  symbol: string,
+  decimals?: number,
+  isExist: boolean
 }
 
 export interface SupportTransferResponse {
@@ -574,6 +587,7 @@ export interface RequestSaveRecentAccount {
 }
 
 export interface KoniRequestSignatures {
+  'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
   'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
   'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];

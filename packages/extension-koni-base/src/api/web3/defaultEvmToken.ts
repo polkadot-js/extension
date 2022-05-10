@@ -37,12 +37,6 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       type: 'erc721'
     },
     {
-      name: 'The Flighters',
-      smartContract: '0xF786d99c00EA512e1a8dD41aa99488B819a992D8',
-      chain: 'moonbeam',
-      type: 'erc721'
-    },
-    {
       name: 'GlmrPunks',
       smartContract: '0x25714FcBc4bE731B95AE86483EF97ef6C3deB5Ce',
       chain: 'moonbeam',
@@ -73,15 +67,9 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       type: 'erc721'
     },
     {
-      name: 'Astar Kevin',
-      smartContract: '0xd311c9a8ff0d5045039a8723b20df36b42bd1554',
-      chain: 'astarEvm',
-      type: 'erc721'
-    },
-    {
-      name: 'AstarBots',
-      smartContract: '0x2af8a3eeab86545d6bb2f6bae7c4ab6b6d1141b8',
-      chain: 'astarEvm',
+      name: 'Moonriver NFT Quest',
+      smartContract: '0x79c8C73F85ec794f570aa7B768568a7fEdB294f8',
+      chain: 'moonriver',
       type: 'erc721'
     },
     {
@@ -103,12 +91,6 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       type: 'erc721'
     },
     {
-      name: 'Astar Invisible Friends',
-      smartContract: '0xdf8567bf301ce9b29e284f4de585D8eE782b1158',
-      chain: 'astarEvm',
-      type: 'erc721'
-    },
-    {
       name: 'Astarnaut',
       smartContract: '0xf008371a7EeD0AB54FDd975fE0d0f66fEFBA3415',
       chain: 'astarEvm',
@@ -120,6 +102,30 @@ export const DEFAULT_EVM_TOKENS: EvmTokenJson = {
       chain: 'astarEvm',
       type: 'erc721'
     }
+    // {
+    //   name: 'The Flighters',
+    //   smartContract: '0xF786d99c00EA512e1a8dD41aa99488B819a992D8',
+    //   chain: 'moonbeam',
+    //   type: 'erc721'
+    // },
+    // {
+    //   name: 'AstarBots',
+    //   smartContract: '0x2af8a3eeab86545d6bb2f6bae7c4ab6b6d1141b8',
+    //   chain: 'astarEvm',
+    //   type: 'erc721'
+    // },
+    // {
+    //   name: 'Astar Invisible Friends',
+    //   smartContract: '0xdf8567bf301ce9b29e284f4de585D8eE782b1158',
+    //   chain: 'astarEvm',
+    //   type: 'erc721'
+    // },
+    // {
+    //   name: 'Astar Kevin',
+    //   smartContract: '0xd311c9a8ff0d5045039a8723b20df36b42bd1554',
+    //   chain: 'astarEvm',
+    //   type: 'erc721'
+    // },
     // {
     //   name: 'Moonbeam BAYC',
     //   smartContract: '0x47B261a3DF3EBD6B36092Ac551Ce1B44F0e477b9',

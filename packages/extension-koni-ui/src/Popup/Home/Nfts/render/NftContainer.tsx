@@ -16,6 +16,9 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 import NftCollectionPreview from './NftCollectionPreview';
+import {useSelector} from "react-redux";
+import {RootState} from "@polkadot/extension-koni-ui/stores";
+import {isEthereumAddress} from "@polkadot/util-crypto";
 
 interface Props extends ThemeProps {
   className?: string;
@@ -72,6 +75,10 @@ function NftContainer (
     setShowCollectionDetail(true);
     setChosenCollection(data);
   }, [setChosenCollection, setShowCollectionDetail]);
+
+  const { currentAccount: { account: currentAccount } } = useSelector((state: RootState) => state);
+
+  const isEthAccount = isEthereumAddress(currentAccount?.address);
 
   useEffect(() => {
     if (!showTransferredCollection && selectedNftCollection) { // show collection after transfer
@@ -200,7 +207,7 @@ function NftContainer (
         </div>
       }
 
-      {!loading && !showCollectionDetail && !showItemDetail &&
+      {!loading && !showCollectionDetail && !showItemDetail && isEthAccount &&
         <div className={'footer'}>
           <div>Don&apos;t see your NFTs?</div>
           <div>

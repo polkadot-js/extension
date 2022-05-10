@@ -5,7 +5,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
@@ -820,6 +820,52 @@ export default class KoniState extends State {
     }
 
     this.evmTokenSubject.next(this.evmTokenState);
+    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+  }
+
+  public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
+    const _evmTokenState: EvmTokenJson = this.evmTokenState;
+    let needUpdateChainRegistry = false;
+
+    for (const targetToken of targetTokens) {
+      for (let index = 0; index < _evmTokenState.erc20.length; index++) {
+        if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
+          _evmTokenState.erc20.splice(index, 1);
+          needUpdateChainRegistry = true;
+        }
+      }
+    }
+
+    if (needUpdateChainRegistry) {
+      for (const targetToken of targetTokens) {
+        const chainRegistry = this.chainRegistryMap[targetToken.chain];
+        let deleteKey = '';
+
+        for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+          if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
+            deleteKey = key;
+          }
+        }
+
+        delete chainRegistry.tokenMap[deleteKey];
+        this.chainRegistryMap[targetToken.chain] = chainRegistry;
+        cacheRegistryMap[targetToken.chain] = chainRegistry;
+      }
+    }
+
+    for (const targetToken of targetTokens) {
+      for (let index = 0; index < _evmTokenState.erc721.length; index++) {
+        if (_evmTokenState.erc721[index].smartContract === targetToken.smartContract && _evmTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
+          _evmTokenState.erc721.splice(index, 1);
+          needUpdateChainRegistry = true;
+        }
+      }
+    }
+
+    this.evmTokenState = _evmTokenState;
+    this.evmTokenSubject.next(this.evmTokenState);
+    this.chainRegistrySubject.next(this.getChainRegistryMap());
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
     this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
   }

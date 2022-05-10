@@ -4,6 +4,7 @@
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
@@ -12,10 +13,12 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import ChainBalanceDetailItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem';
 import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
 import { hasAnyChildTokenBalance } from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/utils';
+import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import ChainBalanceDetail from '../ChainBalances/ChainBalanceDetail/ChainBalanceDetail';
 
@@ -106,6 +109,9 @@ function ChainBalances ({ address,
   const [listWidth, setListWidth] = useState<number>(452);
   const selectedInfo = accountInfoByNetworkMap[selectedNetworkKey];
   const selectedBalanceInfo = networkBalanceMaps[selectedNetworkKey];
+  const { currentAccount: { account: currentAccount } } = useSelector((state: RootState) => state);
+
+  const isEthAccount = isEthereumAddress(currentAccount?.address);
 
   const _openBalanceDetail = useCallback((networkKey: string) => {
     setSelectedNetworkKey(networkKey);
@@ -213,23 +219,26 @@ function ChainBalances ({ address,
             >
               {networkKeys.map((networkKey) => renderChainBalanceItem(networkKey))}
             </div>
-            <div className='chain-balances-container__footer'>
-              <div>
-                <div className='chain-balances-container__footer-row-1'>
-                  {t<string>("Don't see your token?")}
-                </div>
-                <div className='chain-balances-container__footer-row-2'>
-                  {/* <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div> */}
-                  {/* <span>&nbsp;{t<string>('or')}&nbsp;</span> */}
-                  <Link
-                    className='chain-balances-container__footer-action'
-                    to={'/account/import-evm-token'}
-                  >
-                    {t<string>('Import tokens')}
-                  </Link>
+            {
+              isEthAccount &&
+              <div className='chain-balances-container__footer'>
+                <div>
+                  <div className='chain-balances-container__footer-row-1'>
+                    {t<string>("Don't see your token?")}
+                  </div>
+                  <div className='chain-balances-container__footer-row-2'>
+                    {/* <div className='chain-balances-container__footer-action'>{t<string>('Refresh list')}</div> */}
+                    {/* <span>&nbsp;{t<string>('or')}&nbsp;</span> */}
+                    <Link
+                      className='chain-balances-container__footer-action'
+                      to={'/account/import-evm-token'}
+                    >
+                      {t<string>('Import tokens')}
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            }
           </>
         )
         : (

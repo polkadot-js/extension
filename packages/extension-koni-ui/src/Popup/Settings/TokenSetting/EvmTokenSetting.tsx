@@ -4,10 +4,13 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
-import { InputFilter } from '@polkadot/extension-koni-ui/components';
+import { CustomEvmToken, DeleteEvmTokenParams } from '@polkadot/extension-base/background/KoniTypes';
+import { Button, ButtonArea, InputFilter } from '@polkadot/extension-koni-ui/components';
+import Modal from '@polkadot/extension-koni-ui/components/Modal';
 import useFetchEvmToken from '@polkadot/extension-koni-ui/hooks/screen/setting/useFetchEvmToken';
+import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
+import { deleteEvmTokens } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import EvmTokenRow from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenRow';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -18,9 +21,12 @@ interface Props extends ThemeProps {
 
 function EvmTokenSetting ({ className }: Props): React.ReactElement {
   const { t } = useTranslation();
+  const { show } = useToast();
 
   const allEvmTokens = useFetchEvmToken();
   const [searchString, setSearchString] = useState('');
+  const [selectedTokens, setSelectedTokens] = useState<DeleteEvmTokenParams[]>([]);
+  const [showModal, setShowModal] = useState(false);
 
   const _onChangeFilter = useCallback((val: string) => {
     setSearchString(val);
@@ -37,6 +43,52 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
 
     return _filteredTokens;
   }, [allEvmTokens, searchString]);
+
+  const handleSelected = useCallback((data: DeleteEvmTokenParams) => {
+    setSelectedTokens([
+      ...selectedTokens,
+      data
+    ]);
+  }, [selectedTokens]);
+
+  const handleUnselected = useCallback((data: DeleteEvmTokenParams) => {
+    const _selectedTokens = [];
+
+    for (const token of selectedTokens) {
+      if (token.smartContract !== data.smartContract && token.type !== data.smartContract && token.chain !== data.chain) {
+        _selectedTokens.push(token);
+      }
+    }
+
+    setSelectedTokens(_selectedTokens);
+  }, [selectedTokens]);
+
+  const handleShowModal = useCallback(() => {
+    if (selectedTokens.length === 0) {
+      show(t<string>('At least 1 token must be selected'));
+    } else {
+      setShowModal(true);
+    }
+  }, [selectedTokens.length, show, t]);
+
+  const handleDelete = useCallback(() => {
+    deleteEvmTokens(selectedTokens)
+      .then((resp) => {
+        if (resp) {
+          show('Your changes are saved successfully');
+        } else {
+          show('An error has occurred. Please try again later');
+        }
+
+        setShowModal(false);
+        setSelectedTokens([]);
+      })
+      .catch(console.error);
+  }, [selectedTokens, show]);
+
+  const handleHideModal = useCallback(() => {
+    setShowModal(false);
+  }, []);
 
   const filteredTokens = filterToken();
 
@@ -58,18 +110,49 @@ function EvmTokenSetting ({ className }: Props): React.ReactElement {
       </Header>
 
       <div className='networks__button-area'>
-        <div className='networks__btn networks__disconnect-btn'>
+        <div
+          className='networks__btn networks__disconnect-btn'
+          onClick={handleShowModal}
+        >
           {t<string>('Delete Tokens')}
         </div>
       </div>
 
       <div className='networks-list'>
-        {filteredTokens.map((item, index) => <EvmTokenRow
+        {filteredTokens.map((item) => <EvmTokenRow
+          handleSelected={handleSelected}
+          handleUnselected={handleUnselected}
           item={item}
-          key={index}
+          key={item.smartContract.concat(item.chain)}
         />)}
       </div>
 
+      {
+        showModal &&
+        <Modal
+          className={'confirm-delete-modal'}
+        >
+          <div>
+            <span className={'delete-title'}>Confirm deletion ?</span>
+            <ButtonArea
+              className={'delete-button-area'}
+            >
+              <Button
+                className='network-edit-button'
+                onClick={handleHideModal}
+              >
+                <span>{t<string>('Cancel')}</span>
+              </Button>
+              <Button
+                className='network-edit-button'
+                onClick={handleDelete}
+              >
+                {t<string>('Confirm')}
+              </Button>
+            </ButtonArea>
+          </div>
+        </Modal>
+      }
     </div>
   );
 }
@@ -78,6 +161,29 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  .delete-button-area {
+    margin-top: 20px;
+  }
+
+  .network-edit-button:first-child {
+    margin-right: 8px;
+    background-color: ${theme.buttonBackground1};
+
+    span {
+      color: ${theme.buttonTextColor2};
+    }
+  }
+
+  .delete-title {
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .confirm-delete-modal .subwallet-modal {
+    max-width: 460px;
+    padding: 20px;
+  }
 
   .networks__input-filter {
     padding: 0 15px 15px;

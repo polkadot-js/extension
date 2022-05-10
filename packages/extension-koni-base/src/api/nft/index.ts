@@ -89,6 +89,13 @@ export class NftHandler {
   }
 
   private setEvmContracts (evmContracts: CustomEvmToken[]) {
+    this.evmContracts = {
+      astarEvm: [],
+      moonbase: [],
+      moonbeam: [],
+      moonriver: []
+    };
+
     for (const contract of evmContracts) {
       this.evmContracts[contract.chain].push(contract);
     }

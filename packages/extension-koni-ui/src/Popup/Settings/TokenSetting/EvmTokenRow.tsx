@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
+import { CustomEvmToken, DeleteEvmTokenParams } from '@polkadot/extension-base/background/KoniTypes';
 import Checkbox from '@polkadot/extension-koni-ui/components/Checkbox';
 import Link from '@polkadot/extension-koni-ui/components/Link';
 import { store } from '@polkadot/extension-koni-ui/stores';
@@ -14,12 +14,34 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 interface Props extends ThemeProps {
   className?: string;
   item: CustomEvmToken;
+  handleSelected: (val: DeleteEvmTokenParams) => void;
+  handleUnselected: (val: DeleteEvmTokenParams) => void;
 }
 
-function EvmTokenRow ({ className, item }: Props): React.ReactElement {
+function EvmTokenRow ({ className, handleSelected, handleUnselected, item }: Props): React.ReactElement {
+  const [isCheck, setIsChecked] = useState(false);
+
   const updateTokenEditParams = useCallback(() => {
     store.dispatch({ type: 'tokenConfigParams/update', payload: { data: item } as TokenConfigParams });
   }, [item]);
+
+  const handleCheck = useCallback((checked: boolean) => {
+    setIsChecked(checked);
+
+    if (checked) {
+      handleSelected({
+        smartContract: item.smartContract,
+        chain: item.chain,
+        type: item.type
+      });
+    } else {
+      handleUnselected({
+        smartContract: item.smartContract,
+        chain: item.chain,
+        type: item.type
+      });
+    }
+  }, [handleSelected, handleUnselected, item.chain, item.smartContract, item.type]);
 
   return (
     <div
@@ -28,9 +50,10 @@ function EvmTokenRow ({ className, item }: Props): React.ReactElement {
     >
       <div className='network-item__top-content'>
         <Checkbox
-          checked={false}
+          checked={isCheck}
           className={'checkbox-container'}
           label={''}
+          onChange={handleCheck}
         />
         <Link
           className={'link-edit'}

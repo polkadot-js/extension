@@ -63,7 +63,6 @@ export class KoniSubcription {
 
       state.subscribeServiceInfo_().subscribe({
         next: ({ currentAccount: address }) => {
-          console.log('state subscribe balance');
           this.subscribeBalancesAndCrowdloans(address);
         }
       });

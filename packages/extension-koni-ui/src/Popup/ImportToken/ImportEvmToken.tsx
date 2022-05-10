@@ -148,7 +148,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <InputWithLabel
-          label={'Token Symbol'}
+          label={'Token Symbol (*)'}
           onChange={onChangeSymbol}
           value={symbol}
         />
@@ -168,7 +168,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'add-token-container'}>
           <Button
             className={'add-token-button'}
-            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === ''}
+            isDisabled={!isValidSymbol || !isValidDecimals || !isValidContract || contractAddress === '' || symbol === ''}
             onClick={handleAddToken}
           >
             Add Custom Token

@@ -500,7 +500,14 @@ export interface _ServiceInfo {
   customErc721Registry: CustomEvmToken[];
 }
 
+export interface DeleteEvmTokenParams {
+  smartContract: string,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase',
+  type: 'erc20' | 'erc721'
+}
+
 export interface KoniRequestSignatures {
+  'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
   'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
   'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];

@@ -125,7 +125,6 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
 
   const handleVideoError = useCallback(() => {
     setImageError(true);
-    setShowImage(true);
   }, []);
 
   const handleOnClick = useCallback(() => {

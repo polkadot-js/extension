@@ -3,7 +3,7 @@
 
 import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { RMRK_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
+import { PINATA_IPFS_GATEWAY } from '@polkadot/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
@@ -93,7 +93,7 @@ export const parseIpfsLink = (ipfsLink: string) => {
     return ipfsLink;
   }
 
-  return RMRK_PINATA_SERVER + ipfsLink.split('ipfs://ipfs/')[1];
+  return PINATA_IPFS_GATEWAY + ipfsLink.split('ipfs://ipfs/')[1];
 };
 
 export function hexToStr (buf: string): string {

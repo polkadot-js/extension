@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
 import { ActionContext, Button, Dropdown, InputWithLabel } from '@polkadot/extension-koni-ui/components';
 import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { upsertEvmToken } from '@polkadot/extension-koni-ui/messaging';
+import { upsertEvmToken, validateEvmToken } from '@polkadot/extension-koni-ui/messaging';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -32,6 +32,10 @@ const CHAIN_OPTIONS = [
   {
     text: 'Moonbase Alpha',
     value: 'moonbase'
+  },
+  {
+    text: 'Shiden',
+    value: 'shidenEvm'
   }
 ];
 
@@ -48,14 +52,41 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   const { show } = useToast();
 
   const onChangeContractAddress = useCallback((val: string) => {
-    if (!isEthereumAddress(val) && val !== '') {
-      setIsValidContract(false);
-    } else {
-      setIsValidContract(true);
-    }
-
     setContractAddress(val);
   }, []);
+
+  useEffect(() => {
+    if (contractAddress !== '') {
+      if (!isEthereumAddress(contractAddress)) {
+        setIsValidContract(false);
+        show('Invalid EVM contract address');
+      } else {
+        validateEvmToken({
+          smartContract: contractAddress,
+          // @ts-ignore
+          chain,
+          type: 'erc20'
+        })
+          .then((resp) => {
+            if (resp.isExist) {
+              show('This token has already been added');
+              setIsValidContract(false);
+            } else {
+              setSymbol(resp.symbol);
+
+              if (resp.decimals) {
+                setDecimals(resp.decimals.toString());
+              }
+
+              setIsValidContract(true);
+            }
+          })
+          .catch(() => {
+            show('Invalid contract for the selected chain');
+          });
+      }
+    }
+  }, [contractAddress, chain, show]);
 
   const onChangeSymbol = useCallback((val: string) => {
     if (val.length > 11 && val !== '') {
@@ -134,9 +165,6 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
           onChange={onChangeContractAddress}
           value={contractAddress}
         />
-        {
-          !isValidContract && <div className={'invalid-input'}>Invalid EVM contract address</div>
-        }
 
         <div style={{ marginTop: '12px' }}>
           <Dropdown

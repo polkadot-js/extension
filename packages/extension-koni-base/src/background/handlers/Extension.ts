@@ -3,11 +3,12 @@
 
 import Common from '@ethereumjs/common';
 import { Transaction } from 'ethereumjs-tx';
+import { Contract } from 'web3-eth-contract';
 
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
@@ -16,7 +17,7 @@ import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialD
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
-import { getWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
+import { getERC20Contract, getERC721Contract, getWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
 import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
@@ -57,6 +58,7 @@ export default class KoniExtension extends Extension {
   private cancelSubscriptionMap: Record<string, () => void> = {};
 
   private cancelSubscription (id: string): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     if (isSubscriptionRunning(id)) {
       unsubscribe(id);
     }
@@ -1350,9 +1352,70 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
+  private async validateEvmToken (data: ValidateEvmTokenRequest): Promise<ValidateEvmTokenResponse> {
+    const evmTokenState = state.getEvmTokenState();
+    let isExist = false;
+
+    for (const token of evmTokenState[data.type]) {
+      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+        isExist = true;
+        break;
+      }
+    }
+
+    if (isExist) {
+      return {
+        name: '',
+        symbol: '',
+        isExist
+      };
+    }
+
+    let tokenContract: Contract;
+    let name: string;
+    let decimals: number | undefined;
+    let symbol: string;
+
+    if (data.type === 'erc721') {
+      tokenContract = getERC721Contract(data.chain, data.smartContract);
+
+      const [_name, _symbol] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.name().call() as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.symbol().call() as string
+      ]);
+
+      name = _name;
+      symbol = _symbol;
+    } else {
+      tokenContract = getERC20Contract(data.chain, data.smartContract);
+      const [_name, _decimals, _symbol] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.name().call() as string,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.decimals().call() as number,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+        tokenContract.methods.symbol().call() as string
+      ]);
+
+      name = _name;
+      decimals = _decimals;
+      symbol = _symbol;
+    }
+
+    return {
+      name,
+      decimals,
+      symbol,
+      isExist
+    };
+  }
+
   private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<string> {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
     this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, token, cb);
 
     port.onDisconnect.addListener((): void => {
@@ -1363,14 +1426,17 @@ export default class KoniExtension extends Extension {
   }
 
   private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await checkReferenceCount(networkKey, address);
   }
 
   private async transferCheckSupporting ({ networkKey, token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await checkSupportTransfer(networkKey, token);
   }
 
   private async transferGetExistentialDeposit ({ networkKey, token }: RequestTransferExistentialDeposit): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
     return await getExistentialDeposit(networkKey, token);
   }
 
@@ -1499,6 +1565,8 @@ export default class KoniExtension extends Extension {
         return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
       case 'pri(subscription.cancel)':
         return this.cancelSubscription(request as string);
+      case 'pri(evmTokenState.validateEvmToken)':
+        return await this.validateEvmToken(request as ValidateEvmTokenRequest);
       default:
         return super.handle(id, type, request, port);
     }

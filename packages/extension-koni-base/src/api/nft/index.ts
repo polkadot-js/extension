@@ -62,7 +62,8 @@ export class NftHandler {
     astarEvm: [],
     moonbase: [],
     moonbeam: [],
-    moonriver: []
+    moonriver: [],
+    shidenEvm: []
   };
 
   constructor (dotSamaAPIMap: Record<string, ApiProps>, addresses?: string[]) {
@@ -93,7 +94,8 @@ export class NftHandler {
       astarEvm: [],
       moonbase: [],
       moonbeam: [],
-      moonriver: []
+      moonriver: [],
+      shidenEvm: []
     };
 
     for (const contract of evmContracts) {

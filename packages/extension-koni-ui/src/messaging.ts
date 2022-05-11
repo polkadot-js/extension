@@ -91,6 +91,10 @@ export async function saveAccountAllLogo (accountAllLogo: string, callback: (dat
   return sendMessage('pri(currentAccount.saveAccountAllLogo)', accountAllLogo, callback);
 }
 
+export async function saveTheme (theme: 'light' | 'dark', callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveTheme)', theme, callback);
+}
+
 export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
   return sendMessage('pri(currentAccount.subscribeSettings)', data, callback);
 }

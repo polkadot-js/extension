@@ -372,23 +372,6 @@ export default class KoniExtension extends Extension {
     return true;
   }
 
-  private async subscribeSettings (id: string, port: chrome.runtime.Port) {
-    const cb = createSubscription<'pri(currentAccount.subscribeSettings)'>(id, port);
-
-    const balancesVisibilitySubscription = state.subscribeSettingsSubject().subscribe({
-      next: (rs) => {
-        cb(rs);
-      }
-    });
-
-    port.onDisconnect.addListener((): void => {
-      unsubscribe(id);
-      balancesVisibilitySubscription.unsubscribe();
-    });
-
-    return await this.getSettings();
-  }
-
   private saveAccountAllLogo (data: string, id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(currentAccount.saveAccountAllLogo)'>(id, port);
 
@@ -409,6 +392,45 @@ export default class KoniExtension extends Extension {
     });
 
     return true;
+  }
+
+  private saveTheme (data: 'light' | 'dark', id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(currentAccount.saveTheme)'>(id, port);
+
+    state.getSettings((value) => {
+      const updateValue = {
+        ...value,
+        theme: data
+      };
+
+      state.setSettings(updateValue, () => {
+        // eslint-disable-next-line node/no-callback-literal
+        cb(updateValue);
+      });
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+    });
+
+    return true;
+  }
+
+  private async subscribeSettings (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(currentAccount.subscribeSettings)'>(id, port);
+
+    const balancesVisibilitySubscription = state.subscribeSettingsSubject().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      balancesVisibilitySubscription.unsubscribe();
+    });
+
+    return await this.getSettings();
   }
 
   private _saveCurrentAccountAddress (address: string, callback?: () => void) {
@@ -1489,6 +1511,8 @@ export default class KoniExtension extends Extension {
         return this.subscribeSettings(id, port);
       case 'pri(currentAccount.saveAccountAllLogo)':
         return this.saveAccountAllLogo(request as string, id, port);
+      case 'pri(currentAccount.saveTheme)':
+        return this.saveTheme(request as 'light' | 'dark', id, port);
       case 'pri(price.getPrice)':
         return await this.getPrice();
       case 'pri(price.getSubscription)':

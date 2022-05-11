@@ -35,14 +35,15 @@ export default React.memo(styled(TokenItem)(({ theme }: ThemeProps) => `
   align-items: center;
 
   .token-item__symbol {
-    font-size: 18px;
-    line-height: 26px;
+    font-size: 16px;
+    line-height: 20px;
     color: ${theme.textColor};
-
+    font-weight: 500;
   }
 
   .token-item__chain {
     font-size: 12px;
+    line-height: 20px;
   }
 
   .token-item-logo {

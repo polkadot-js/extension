@@ -45,7 +45,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   }
 
   useEffect((): void => {
-    createSeedV2(undefined, undefined, keyTypes)
+    createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
       .then((response): void => {
         // @ts-ignore
         setAddress(response.addressMap[SUBSTRATE_ACCOUNT_TYPE]);
@@ -54,19 +54,19 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       })
       .catch(console.error);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dep]);
+  }, []);
 
   useEffect((): void => {
     if (seed) {
-      validateSeedV2(seed, keyTypes)
-        .then(({ addressMap, seed }) => {
+      validateSeedV2(seed, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+        .then(({ addressMap }) => {
           setAddress(addressMap[SUBSTRATE_ACCOUNT_TYPE]);
           setEvmAddress(addressMap[EVM_ACCOUNT_TYPE]);
         })
         .catch(console.error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dep, seed]);
+  }, [seed]);
 
   const _onCreate = useCallback(
     (name: string, password: string): void => {

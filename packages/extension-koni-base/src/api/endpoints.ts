@@ -5,6 +5,16 @@ import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
 import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
 
 const NETWORKS: Record<string, NetWorkInfo> = {
+  acala_testnet: {
+    chain: 'Acala Mandala TC7',
+    genesisHash: '0x5c562e6300954998233c9a40b6b86f3028977e6d32d0da1af207738d19f98c1b',
+    icon: 'polkadot',
+    ss58Format: 42,
+    provider: 'wss://node-6870830370282213376.rz.onfinality.io/ws?apikey=0f273197-e4d5-45e2-b23e-03b015cb7000',
+    groups: ['TEST_NET'],
+    nativeToken: 'ACA',
+    decimals: 12
+  },
   polkadot: {
     chain: 'Polkadot Relay Chain',
     genesisHash: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',

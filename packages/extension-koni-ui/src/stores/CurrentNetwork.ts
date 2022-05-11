@@ -20,6 +20,10 @@ const currentNetworkSlice = createSlice({
     update (state, action: PayloadAction<CurrentNetworkInfo>) {
       const payload = action.payload;
 
+      if (!state.isReady) {
+        state.isReady = true;
+      }
+
       state.networkPrefix = payload.networkPrefix;
       state.icon = payload.icon;
       state.genesisHash = payload.genesisHash;

@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { setNotification } from '@polkadot/extension-koni-ui/messaging';
+import { saveTheme, setNotification } from '@polkadot/extension-koni-ui/messaging';
 import Header from '@polkadot/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@polkadot/extension-koni-ui/util/getLanguageOptions';
 import settings from '@polkadot/ui-settings';
@@ -41,7 +41,11 @@ function GeneralSetting ({ className }: Props): React.ReactElement {
   );
 
   const _onChangeTheme = useCallback(
-    (checked: boolean): void => setTheme(checked ? 'dark' : 'light'),
+    (checked: boolean): void => {
+      saveTheme(checked ? 'dark' : 'light', () => {
+        setTheme(checked ? 'dark' : 'light');
+      }).catch((e) => console.log('There is problem when saveTheme', e));
+    },
     [setTheme]
   );
 

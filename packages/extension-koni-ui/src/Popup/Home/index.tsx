@@ -30,8 +30,6 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import BalancesVisibility from '@polkadot/extension-koni-ui/Popup/Home/BalancesVisibility';
-import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
-import StakingContainer from '@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
@@ -43,9 +41,12 @@ import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
 import ChainBalances from './ChainBalances/ChainBalances';
-import Crowdloans from './Crowdloans/Crowdloans';
-import TransactionHistory from './TransactionHistory/TransactionHistory';
-import ActionButton from './ActionButton';
+
+const NftContainer = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer'));
+const StakingContainer = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer'));
+const Crowdloans = React.lazy(() => import('./Crowdloans/Crowdloans'));
+const ActionButton = React.lazy(() => import('./ActionButton'));
+const TransactionHistory = React.lazy(() => import('./TransactionHistory/TransactionHistory'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -120,7 +121,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<AddAccount />);
   }
 
-  if (!currentAccount) {
+  if (!currentAccount || !currentNetwork.isReady) {
     return (<></>);
   }
 
@@ -268,8 +269,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           />
         </div>
 
-        {!_isAccountAll && (
-          <div className='home-account-button-container'>
+        <div className='home-account-button-container'>
+          {!_isAccountAll && (
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
@@ -277,31 +278,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
                 tooltipContent={t<string>('Receive')}
               />
             </div>
+          )}
 
-            <Link
-              className={'action-button-wrapper'}
-              to={'/account/send-fund'}
-            >
-              <ActionButton
-                iconSrc={sendIcon}
-                tooltipContent={t<string>('Send')}
-              />
-            </Link>
-
-            <Link
-              className={'action-button-wrapper'}
-              to={'/account/donate'}
-            >
-              <ActionButton
-                iconSrc={donateIcon}
-                tooltipContent={t<string>('Donate')}
-              />
-            </Link>
-          </div>
-        )}
-
-        {_isAccountAll && (
-          <div className='home-account-button-container'>
+          {_isAccountAll && (
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
@@ -309,24 +288,28 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
                 tooltipContent={t<string>('Receive')}
               />
             </div>
+          )}
 
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={sendIcon}
-                isDisabled
-                tooltipContent={t<string>('Send')}
-              />
-            </div>
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/send-fund'}
+          >
+            <ActionButton
+              iconSrc={sendIcon}
+              tooltipContent={t<string>('Send')}
+            />
+          </Link>
 
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={donateIcon}
-                isDisabled
-                tooltipContent={t<string>('Donate')}
-              />
-            </div>
-          </div>
-        )}
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/donate'}
+          >
+            <ActionButton
+              iconSrc={donateIcon}
+              tooltipContent={t<string>('Donate')}
+            />
+          </Link>
+        </div>
       </div>
 
       <div className={'home-tab-contents'}>

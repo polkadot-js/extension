@@ -4,10 +4,14 @@
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, ResponseAuthorizeList, SeedLengths } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@polkadot/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
+import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
+import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
+import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
+import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -250,6 +254,21 @@ export interface DonateInfo {
   link: string;
 }
 
+export interface DropdownOptionType {
+  text: string;
+  value: string;
+}
+
+export interface DropdownTransformOptionType {
+  label: string;
+  value: string;
+}
+
+export interface DropdownTransformGroupOptionType {
+  label: string;
+  options: DropdownTransformOptionType[];
+}
+
 export interface NetWorkMetadataDef extends MetadataDefBase {
   networkKey: string;
   groups: NetWorkGroup[];
@@ -264,6 +283,7 @@ export type CurrentNetworkInfo = {
   icon: string;
   genesisHash: string;
   isEthereum: boolean;
+  isReady?: boolean; // check if current network info is lifted from initial state
 }
 
 export type TokenInfo = {
@@ -285,6 +305,10 @@ export interface AccountsWithCurrentAddress {
   allAccountLogo?: string;
 }
 
+export interface OptionInputAddress {
+  options: KeyringOptions;
+}
+
 export interface CurrentAccountInfo {
   address: string;
 }
@@ -292,11 +316,13 @@ export interface CurrentAccountInfo {
 export interface RequestSettingsType {
   isShowBalance: boolean;
   accountAllLogo: string;
+  theme: ThemeTypes;
 }
 
 export interface ResponseSettingsType {
   isShowBalance: boolean;
   accountAllLogo: string;
+  theme: ThemeTypes;
 }
 
 export interface RandomTestRequest {
@@ -317,7 +343,11 @@ export interface TransactionHistoryItemType {
   time: number;
   networkKey: string;
   change: string;
+  changeSymbol?: string; // if undefined => main token
   fee?: string;
+  feeSymbol?: string;
+  // if undefined => main token, sometime "fee" uses different token than "change"
+  // ex: sub token (DOT, AUSD, KSM, ...) of Acala, Karaura uses main token to pay fee
   isSuccess: boolean;
   action: 'send' | 'received';
   extrinsicHash: string
@@ -368,7 +398,32 @@ export interface RequestAccountCreateSuriV2 {
   genesisHash?: string | null;
   password: string;
   suri: string;
-  types?: Array<KeypairType>
+  types?: Array<KeypairType>;
+  isAllowed: boolean;
+}
+
+export interface RequestDeriveCreateV2 {
+  name: string;
+  genesisHash?: string | null;
+  suri: string;
+  parentAddress: string;
+  parentPassword: string;
+  password: string;
+  isAllowed: boolean;
+}
+
+export interface RequestJsonRestoreV2 {
+  file: KeyringPair$Json;
+  password: string;
+  address: string;
+  isAllowed: boolean;
+}
+
+export interface RequestBatchRestoreV2 {
+  file: KeyringPairs$Json;
+  password: string;
+  accountsInfo: ResponseJsonGetAccountInfo[];
+  isAllowed: boolean;
 }
 
 export interface ResponseSeedCreateV2 {
@@ -404,6 +459,7 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
+export type ThemeTypes = 'light' | 'dark'
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -419,7 +475,8 @@ export enum TransferErrorCode {
   INVALID_TOKEN = 'invalidToken',
   KEYRING_ERROR = 'keyringError',
   TRANSFER_ERROR = 'transferError',
-  TIMEOUT = 'timeout'
+  TIMEOUT = 'timeout',
+  UNSUPPORTED = 'unsupported'
 }
 
 export type TransferError = {
@@ -432,7 +489,8 @@ export interface ResponseCheckTransfer {
   errors?: Array<TransferError>,
   fromAccountFree: string,
   toAccountFree: string,
-  estimateFee?: string
+  estimateFee?: string,
+  feeSymbol?: string // if undefined => use main token
 }
 
 export enum TransferStep {
@@ -443,12 +501,21 @@ export enum TransferStep {
   ERROR = 'error'
 }
 
+type TxResultType = {
+  change: string;
+  changeSymbol?: string;
+  fee?: string;
+  feeSymbol?: string;
+}
+
 export interface ResponseTransfer {
   step: TransferStep,
   errors?: Array<TransferError>,
   extrinsicHash?: string,
   extrinsicStatus?: string,
-  data?: object
+  data?: object,
+  txResult?: TxResultType,
+  isFinalized?: boolean
 }
 
 export interface EvmNftTransactionRequest {
@@ -480,7 +547,81 @@ export interface EvmNftTransactionResponse {
   isSendingSelf: boolean
 }
 
+export interface CustomEvmToken {
+  name?: string,
+  smartContract: string,
+  symbol?: string,
+  decimals?: number,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  type: 'erc20' | 'erc721'
+}
+
+export interface EvmTokenJson {
+  erc20: CustomEvmToken[],
+  erc721: CustomEvmToken[]
+}
+
+export interface _ServiceInfo {
+  currentAccount: string,
+  chainRegistry: Record<string, ChainRegistry>;
+  customErc721Registry: CustomEvmToken[];
+}
+
+export interface DeleteEvmTokenParams {
+  smartContract: string,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  type: 'erc20' | 'erc721'
+}
+
+export interface ValidateEvmTokenRequest {
+  smartContract: string,
+  chain: 'astarEvm' | 'moonbeam' | 'moonriver' | 'moonbase' | 'shidenEvm',
+  type: 'erc20' | 'erc721'
+}
+
+export interface ValidateEvmTokenResponse {
+  name: string,
+  symbol: string,
+  decimals?: number,
+  isExist: boolean
+}
+
+export interface SupportTransferResponse {
+  supportTransfer: boolean;
+  supportTransferAll: boolean;
+}
+
+export interface RequestFreeBalance {
+  address: string,
+  networkKey: string,
+  token?: string
+}
+
+export interface RequestTransferCheckReferenceCount {
+  address: string,
+  networkKey: string
+}
+
+export interface RequestTransferCheckSupporting {
+  networkKey: string,
+  token: string
+}
+
+export interface RequestTransferExistentialDeposit {
+  networkKey: string,
+  token: string
+}
+
+export interface RequestSaveRecentAccount {
+  accountId: string;
+}
+
 export interface KoniRequestSignatures {
+  'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
+  'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
+  'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];
+  'pri(evmTokenState.getEvmTokenState)': [null, EvmTokenJson];
+  'pri(evmTokenState.getSubscription)': [null, EvmTokenJson, EvmTokenJson];
   'pri(evmNft.submitTransaction)': [EvmNftSubmitTransaction, EvmNftTransactionResponse, EvmNftTransactionResponse];
   'pri(evmNft.getTransaction)': [EvmNftTransactionRequest, EvmNftTransaction];
   'pri(nftTransfer.setNftTransfer)': [NftTransferExtra, boolean];
@@ -516,20 +657,28 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
-  'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
-  'pri(json.restoreV2)': [RequestJsonRestore, void];
-  'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
+  'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
+  'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
+  'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
+  'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];
+  'pri(accounts.saveRecent)': [RequestSaveRecentAccount, SingleAddress];
   'pri(accounts.triggerSubscription)': [null, boolean];
   'pri(currentAccount.saveAddress)': [RequestCurrentAccountAddress, boolean, CurrentAccountInfo];
   'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
   'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
   'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
+  'pri(currentAccount.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];
+  'pri(transfer.checkReferenceCount)': [RequestTransferCheckReferenceCount, boolean];
+  'pri(transfer.checkSupporting)': [RequestTransferCheckSupporting, SupportTransferResponse];
+  'pri(transfer.getExistentialDeposit)': [RequestTransferExistentialDeposit, string];
+  'pri(subscription.cancel)': [string, boolean];
+  'pri(freeBalance.subscribe)': [RequestFreeBalance, string, string];
   'pub(utils.getRandom)': [RandomTestRequest, number];
   'pub(accounts.listV2)': [RequestAccountList, InjectedAccount[]];
   'pub(accounts.subscribeV2)': [RequestAccountSubscribe, boolean, InjectedAccount[]];

@@ -4,7 +4,7 @@
 import { take } from 'rxjs';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
+import { CustomEvmToken, NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
 import { getAllSubsquidStaking } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
@@ -61,8 +61,8 @@ export class KoniSubcription {
         this.subscribeBalancesAndCrowdloans(address);
       }
 
-      state.subscribeCurrentAccount().subscribe({
-        next: ({ address }) => {
+      state.subscribeServiceInfo_().subscribe({
+        next: ({ currentAccount: address }) => {
           this.subscribeBalancesAndCrowdloans(address);
         }
       });
@@ -87,6 +87,7 @@ export class KoniSubcription {
     this.unsubCrowdloans && this.unsubCrowdloans();
     state.resetBalanceMap();
     state.resetCrowdloanMap();
+    console.log('state reset balances');
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubBalances = this.initBalanceSubscription(addresses);
@@ -124,15 +125,15 @@ export class KoniSubcription {
     };
   }
 
-  subscribeNft (address: string) {
+  subscribeNft (address: string, customErc721Registry: CustomEvmToken[]) {
     this.detectAddresses(address)
       .then((addresses) => {
-        this.initNftSubscription(addresses);
+        this.initNftSubscription(addresses, customErc721Registry);
       })
       .catch(console.error);
   }
 
-  initNftSubscription (addresses: string[]) {
+  initNftSubscription (addresses: string[], customErc721Registry: CustomEvmToken[]) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {
@@ -150,6 +151,7 @@ export class KoniSubcription {
       } as NftTransferExtra);
       nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
+        customErc721Registry,
         (data) => {
           state.updateNft(data);
         },

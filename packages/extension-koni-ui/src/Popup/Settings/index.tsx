@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faCog, faExpand, faInfoCircle, faList, faLock, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faCoins, faExpand, faInfoCircle, faList, faLock, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -86,6 +86,17 @@ function Settings ({ className }: Props): React.ReactElement {
           {/* @ts-ignore */}
           <FontAwesomeIcon icon={faList} />
           <div className='menu-setting-item__text'>{t<string>('Manage Website Access')}</div>
+          {/* @ts-ignore */}
+          <div className='menu-setting-item__toggle' />
+        </Link>
+
+        <Link
+          className='menu-setting-item'
+          to='/account/evm-token-setting'
+        >
+          {/* @ts-ignore */}
+          <FontAwesomeIcon icon={faCoins} />
+          <div className='menu-setting-item__text'>{t<string>('Manage EVM Tokens')}</div>
           {/* @ts-ignore */}
           <div className='menu-setting-item__toggle' />
         </Link>

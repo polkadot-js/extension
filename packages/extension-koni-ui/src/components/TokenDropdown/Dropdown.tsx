@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
@@ -7,13 +7,13 @@ import React, { useCallback, useContext, useRef, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled, { ThemeContext } from 'styled-components';
 
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { Label, Theme } from '@polkadot/extension-koni-ui/components';
-import { TokenTransformOptionType } from '@polkadot/extension-koni-ui/components/TokenDropdown/types';
-import { TokenItemType } from '@polkadot/extension-koni-ui/components/types';
-import useOutsideClick from '@polkadot/extension-koni-ui/hooks/useOutsideClick';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { Label, Theme } from '@subwallet/extension-koni-ui/components';
+import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/TokenDropdown/types';
+import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
 
 interface WrapperProps {
   className?: string;

@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
+import type { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
@@ -9,10 +9,10 @@ import type { HexString } from '@polkadot/util/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import Qr from '@polkadot/extension-koni-ui/Popup/Signing/Qr';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import Qr from '@subwallet/extension-koni-ui/Popup/Signing/Qr';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 

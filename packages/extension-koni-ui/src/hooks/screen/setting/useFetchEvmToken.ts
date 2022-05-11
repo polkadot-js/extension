@@ -1,10 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { useSelector } from 'react-redux';
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 
 export default function useFetchEvmToken (): CustomEvmToken[] {
   const { evmToken } = useSelector((state: RootState) => state);

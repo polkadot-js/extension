@@ -1,11 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { TokenItemType } from '@polkadot/extension-koni-ui/components/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 
 import Dropdown from './Dropdown';
 import TokenItem from './TokenItem';

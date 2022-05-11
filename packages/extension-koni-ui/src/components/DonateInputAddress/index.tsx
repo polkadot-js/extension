@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
@@ -9,15 +9,15 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
-import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@polkadot/extension-base/background/KoniTypes';
-import DONATEINFOS from '@polkadot/extension-koni-base/api/donate';
-import DonateReceiveItem from '@polkadot/extension-koni-ui/components/DonateInputAddress/DonateReceiveItem';
-import Dropdown from '@polkadot/extension-koni-ui/components/InputAddress/Dropdown';
-import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@polkadot/extension-koni-ui/messaging';
-import createItem from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress/createItem';
-import LabelHelp from '@polkadot/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { toAddress } from '@polkadot/extension-koni-ui/util';
+import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@subwallet/extension-base/background/KoniTypes';
+import DONATEINFOS from '@subwallet/extension-koni-base/api/donate';
+import DonateReceiveItem from '@subwallet/extension-koni-ui/components/DonateInputAddress/DonateReceiveItem';
+import Dropdown from '@subwallet/extension-koni-ui/components/InputAddress/Dropdown';
+import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@subwallet/extension-koni-ui/messaging';
+import createItem from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputAddress/createItem';
+import LabelHelp from '@subwallet/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toAddress } from '@subwallet/extension-koni-ui/util';
 import { keyring } from '@polkadot/ui-keyring';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 

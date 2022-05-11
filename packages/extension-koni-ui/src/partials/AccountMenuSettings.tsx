@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -9,15 +9,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
-import InputFilter from '@polkadot/extension-koni-ui/components/InputFilter';
-import Link from '@polkadot/extension-koni-ui/components/Link';
-import Menu from '@polkadot/extension-koni-ui/components/Menu';
-import MenuSettingItem from '@polkadot/extension-koni-ui/components/MenuSettingItem';
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
-import { useLedger } from '@polkadot/extension-koni-ui/hooks/useLedger';
-import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
-import AccountsTree from '@polkadot/extension-koni-ui/Popup/Accounts/AccountsTree';
+import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
+import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
+import Link from '@subwallet/extension-koni-ui/components/Link';
+import Menu from '@subwallet/extension-koni-ui/components/Menu';
+import MenuSettingItem from '@subwallet/extension-koni-ui/components/MenuSettingItem';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
+import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import AccountsTree from '@subwallet/extension-koni-ui/Popup/Accounts/AccountsTree';
 
 import { AccountContext, MediaContext, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';

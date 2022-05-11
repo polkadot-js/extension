@@ -1,12 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import fetch from 'cross-fetch';
 
-import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { BIT_COUNTRY_SERVER, SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
-import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
+import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BIT_COUNTRY_SERVER, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 
 interface AssetId {
   classId: string | number,

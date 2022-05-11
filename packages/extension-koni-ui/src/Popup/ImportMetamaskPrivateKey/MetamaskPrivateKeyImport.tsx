@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
@@ -10,9 +10,9 @@ import type { AccountInfo } from '.';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
-import { Password } from '@polkadot/extension-koni-ui/partials';
-import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
+import { validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
+import { Password } from '@subwallet/extension-koni-ui/partials';
+import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import { objectSpread } from '@polkadot/util';
 
 import { AccountInfoEl, ButtonArea, NextStepButton, TextAreaWithLabel, Warning } from '../../components';

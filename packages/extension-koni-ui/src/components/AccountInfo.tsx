@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IconTheme } from '@polkadot/react-identicon/types';
@@ -14,11 +14,11 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
-import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@polkadot/extension-koni-ui/util';
-import getNetworkInfoByGenesisHash from '@polkadot/extension-koni-ui/util/getNetworkInfoByGenesisHash';
+import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
+import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@subwallet/extension-koni-ui/util';
+import getNetworkInfoByGenesisHash from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
 
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';

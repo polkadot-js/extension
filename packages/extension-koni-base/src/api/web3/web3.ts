@@ -1,10 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 
-import { EVM_NETWORKS } from '@polkadot/extension-koni-base/api/endpoints';
+import { EVM_NETWORKS } from '@subwallet/extension-koni-base/api/endpoints';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const ERC20Contract = require('./api-helper/ERC20Contract.json');

@@ -6,8 +6,8 @@ import ReactDOM from 'react-dom';
 import ReactTooltip from 'react-tooltip';
 import styled, { ThemeContext } from 'styled-components';
 
-import { Theme } from '@polkadot/extension-koni-ui/components';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { Theme } from '@subwallet/extension-koni-ui/components';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 
 function rootElement () {
   return typeof document === 'undefined'

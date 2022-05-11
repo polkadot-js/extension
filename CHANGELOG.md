@@ -281,7 +281,7 @@ Changes:
 
 Changes:
 
-- Ensure `@polkadot/extension-mocks` is correctly listed as devDependency
+- Ensure `@subwallet/extension-mocks` is correctly listed as devDependency
 
 
 ## 0.42.3 Dec 27, 2021

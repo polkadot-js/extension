@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -6,23 +6,23 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { isValidAddress } from '@polkadot/extension-koni-base/utils/utils';
-import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
-import { ActionContext, Spinner } from '@polkadot/extension-koni-ui/components';
-import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { Header } from '@polkadot/extension-koni-ui/partials';
-import paramsHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
-import transferHandler from '@polkadot/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
-import AuthTransfer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
-import TransferResult from '@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
-import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import InputAddress from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress';
-import useApi from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useApi';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { CurrentAccountType } from '@polkadot/extension-koni-ui/stores/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
+import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
+import { ActionContext, Spinner } from '@subwallet/extension-koni-ui/components';
+import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import { Header } from '@subwallet/extension-koni-ui/partials';
+import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
+import transferHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
+import AuthTransfer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
+import TransferResult from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
+import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import InputAddress from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputAddress';
+import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;

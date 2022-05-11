@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { DeriveBalancesAll } from '@polkadot/api-derive/types';
@@ -7,7 +7,7 @@ import type { AccountId, AccountIndex, Address } from '@polkadot/types/interface
 import React from 'react';
 
 import { ApiPromise } from '@polkadot/api';
-import { useCall } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall';
+import { useCall } from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useCall';
 
 import FormatBalance from './FormatBalance';
 

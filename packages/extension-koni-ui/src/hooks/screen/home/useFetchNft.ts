@@ -1,12 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { useSelector } from 'react-redux';
 
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { NftType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
-import { _NftCollection } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { NftType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 
 export default function useFetchNft (page: number, networkKey: string, gridSize: number): NftType {
   const { nft: nftReducer, nftCollection: nftCollectionReducer } = useSelector((state: RootState) => state);

@@ -1,3 +1,3 @@
-# @polkadot/extension-koni-ui
+# @subwallet/extension-koni-ui
 
-UI for the `@polkadot/extension`
+UI for the `@subwallet/extension`

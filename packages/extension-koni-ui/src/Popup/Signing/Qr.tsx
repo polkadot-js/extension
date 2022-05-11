@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
@@ -7,7 +7,7 @@ import type { HexString } from '@polkadot/util/types';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { wrapBytes } from '@polkadot/extension-dapp/wrapBytes';
+import { wrapBytes } from '@subwallet/extension-dapp/wrapBytes';
 import { QrDisplayPayload, QrScanSignature } from '@polkadot/react-qr';
 
 import { Button } from '../../components';

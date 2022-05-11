@@ -1,13 +1,13 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext, useMemo } from 'react';
 
-import { AccountContext } from '@polkadot/extension-koni-ui/components';
-import InputWithLabel from '@polkadot/extension-koni-ui/components/InputWithLabel';
-import ValidatedInput from '@polkadot/extension-koni-ui/components/ValidatedInput';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { isNotShorterThan } from '@polkadot/extension-koni-ui/util/validators';
+import { AccountContext } from '@subwallet/extension-koni-ui/components';
+import InputWithLabel from '@subwallet/extension-koni-ui/components/InputWithLabel';
+import ValidatedInput from '@subwallet/extension-koni-ui/components/ValidatedInput';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { isNotShorterThan } from '@subwallet/extension-koni-ui/util/validators';
 
 interface Props {
   address?: string;

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
@@ -6,10 +6,10 @@ import React, { useCallback, useState } from 'react';
 import LazyLoad from 'react-lazyload';
 import styled from 'styled-components';
 
-import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
-import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import { _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
+import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import { _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 
 interface Props {
   className?: string;

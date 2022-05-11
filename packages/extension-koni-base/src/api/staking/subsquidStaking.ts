@@ -1,12 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import axios from 'axios';
 
-import { APIItemState, StakingItem, StakingRewardItem, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@polkadot/extension-koni-base/api/staking/config';
-import { reformatAddress, toUnit } from '@polkadot/extension-koni-base/utils/utils';
+import { APIItemState, StakingItem, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { SUBSQUID_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
+import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
 
 interface RewardResponseItem {
   smartContract: string;

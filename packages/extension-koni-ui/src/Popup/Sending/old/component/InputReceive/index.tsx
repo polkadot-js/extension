@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { KeyringOption$Type, KeyringOptions, KeyringSectionOption, KeyringSectionOptions } from '@polkadot/ui-keyring/options/types';
@@ -8,10 +8,10 @@ import React from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
-import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
-import DONATEINFOS from '@polkadot/extension-koni-base/api/donate';
-import { withMulti, withObservable } from '@polkadot/extension-koni-ui/Popup/Sending/old/api/hoc';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+import DONATEINFOS from '@subwallet/extension-koni-base/api/donate';
+import { withMulti, withObservable } from '@subwallet/extension-koni-ui/Popup/Sending/old/api/hoc';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 import { isNull, isUndefined } from '@polkadot/util';
 

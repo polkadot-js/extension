@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-chains authors & contributors
+// Copyright 2019-2022 @subwallet/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef } from '@subwallet/extension-inject/types';
 import type { Registry } from '@polkadot/types/types';
 
 export interface Chain {

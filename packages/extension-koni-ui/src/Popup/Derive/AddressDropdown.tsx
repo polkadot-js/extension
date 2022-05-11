@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
@@ -6,7 +6,7 @@ import type { ThemeProps } from '../../types';
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import AccountInfo from '@polkadot/extension-koni-ui/components/AccountInfo';
+import AccountInfo from '@subwallet/extension-koni-ui/components/AccountInfo';
 
 import arrow from '../../assets/arrow-down.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';

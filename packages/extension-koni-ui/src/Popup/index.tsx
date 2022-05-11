@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import * as Bowser from 'bowser';
@@ -9,13 +9,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { Route, Switch } from 'react-router';
 
-import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
-import { canDerive } from '@polkadot/extension-base/utils';
-import useSetupStore from '@polkadot/extension-koni-ui/hooks/store/useSetupStore';
-import Rendering from '@polkadot/extension-koni-ui/Popup/Rendering';
-import Donate from '@polkadot/extension-koni-ui/Popup/Sending/Donate';
-import { updateCurrentAccount } from '@polkadot/extension-koni-ui/stores/updater';
+import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
+import { canDerive } from '@subwallet/extension-base/utils';
+import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
+import Rendering from '@subwallet/extension-koni-ui/Popup/Rendering';
+import Donate from '@subwallet/extension-koni-ui/Popup/Sending/Donate';
+import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';
@@ -27,8 +27,8 @@ import { buildHierarchy } from '../util/buildHierarchy';
 // import Home from './Home';
 
 const Home = React.lazy(() => import('./Home'));
-const EvmTokenEdit = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
-const EvmTokenSetting = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
+const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
+const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
 const Welcome = React.lazy(() => import('./Welcome'));
 const Signing = React.lazy(() => import('./Signing'));
 const RestoreJson = React.lazy(() => import('./RestoreJson'));
@@ -43,16 +43,16 @@ const Derive = React.lazy(() => import('./Derive'));
 const CreateAccount = React.lazy(() => import('./CreateAccount'));
 const Authorize = React.lazy(() => import('./Authorize'));
 const AuthList = React.lazy(() => import('./AuthManagement'));
-const Networks = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/Networks'));
-const LoadingContainer = React.lazy(() => import('@polkadot/extension-koni-ui/components/LoadingContainer'));
-const TransferNftContainer = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
-const ImportLedger = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportLedger'));
-const ImportEvmNft = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmNft'));
-const ImportEvmToken = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/ImportToken/ImportEvmToken'));
-const SendFund = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Sending/SendFund'));
-const Settings = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings'));
-const GeneralSetting = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/GeneralSetting'));
-const NetworkEdit = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/NetworkEdit'));
+const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Networks'));
+const LoadingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/components/LoadingContainer'));
+const TransferNftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
+const ImportLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportLedger'));
+const ImportEvmNft = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportEvmNft'));
+const ImportEvmToken = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportEvmToken'));
+const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/SendFund'));
+const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+const NetworkEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkEdit'));
 
 const startSettings = uiSettings.get();
 

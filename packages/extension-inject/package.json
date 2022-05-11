@@ -6,7 +6,7 @@
   "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension-inject#readme",
   "license": "Apache-2.0",
   "maintainers": [],
-  "name": "@polkadot/extension-inject",
+  "name": "@subwallet/extension-inject",
   "repository": {
     "directory": "packages/extension-inject",
     "type": "git",

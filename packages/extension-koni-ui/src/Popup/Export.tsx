@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Theme, ThemeProps } from '../types';
@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
 
-import cloneLogo from '@polkadot/extension-koni-ui/assets/clone.svg';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import Header from '@polkadot/extension-koni-ui/partials/Header';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
+import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import Header from '@subwallet/extension-koni-ui/partials/Header';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 
 import { AccountInfoEl, ActionBar, ActionContext, ActionText, Button, InputWithLabel, Label, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';

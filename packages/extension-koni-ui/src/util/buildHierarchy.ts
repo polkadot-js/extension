@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
 
-import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
 
 import getNetworkMap from './getNetworkMap';
 

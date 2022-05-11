@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SubmittableExtrinsic } from '@polkadot/api/promise/types';
@@ -10,10 +10,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { ApiPromise } from '@polkadot/api';
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
-import { useCall } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useCall';
-import { useIsMountedRef } from '@polkadot/extension-koni-ui/Popup/Sending/old/hook/useIsMountedRef';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
+import Warning from '@subwallet/extension-koni-ui/components/Warning';
+import { useCall } from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useCall';
+import { useIsMountedRef } from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useIsMountedRef';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN, formatBalance, isFunction } from '@polkadot/util';
 
 interface Props extends ThemeProps {

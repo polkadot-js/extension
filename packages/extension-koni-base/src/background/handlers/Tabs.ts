@@ -1,15 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedAccount } from '@polkadot/extension-inject/types';
+import type { InjectedAccount } from '@subwallet/extension-inject/types';
 
-import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import Tabs from '@polkadot/extension-base/background/handlers/Tabs';
-import { RandomTestRequest } from '@polkadot/extension-base/background/KoniTypes';
-import { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@polkadot/extension-base/background/types';
-import { canDerive } from '@polkadot/extension-base/utils';
-import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
+import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
+import Tabs from '@subwallet/extension-base/background/handlers/Tabs';
+import { RandomTestRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { MessageTypes, RequestAccountList, RequestAuthorizeTab, RequestTypes, ResponseTypes } from '@subwallet/extension-base/background/types';
+import { canDerive } from '@subwallet/extension-base/utils';
+import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { assert } from '@polkadot/util';

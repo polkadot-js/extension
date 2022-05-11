@@ -1,28 +1,28 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { AccountContext, Warning } from '@polkadot/extension-koni-ui/components';
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import InputBalance from '@polkadot/extension-koni-ui/components/InputBalance';
-import LoadingContainer from '@polkadot/extension-koni-ui/components/LoadingContainer';
-import ReceiverInputAddress from '@polkadot/extension-koni-ui/components/ReceiverInputAddress';
-import SenderInputAddress from '@polkadot/extension-koni-ui/components/SenderInputAddress';
-import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
-import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
-import { SenderInputAddressType } from '@polkadot/extension-koni-ui/components/types';
-import useFreeBalance from '@polkadot/extension-koni-ui/hooks/screen/sending/useFreeBalance';
-import { checkTransfer, transferCheckReferenceCount, transferCheckSupporting, transferGetExistentialDeposit } from '@polkadot/extension-koni-ui/messaging';
-import Header from '@polkadot/extension-koni-ui/partials/Header';
-import AuthTransaction from '@polkadot/extension-koni-ui/Popup/Sending/AuthTransaction';
-import SendFundResult from '@polkadot/extension-koni-ui/Popup/Sending/SendFundResult';
-import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@polkadot/extension-koni-ui/Popup/Sending/utils';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
+import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { AccountContext, Warning } from '@subwallet/extension-koni-ui/components';
+import Button from '@subwallet/extension-koni-ui/components/Button';
+import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
+import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
+import ReceiverInputAddress from '@subwallet/extension-koni-ui/components/ReceiverInputAddress';
+import SenderInputAddress from '@subwallet/extension-koni-ui/components/SenderInputAddress';
+import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
+import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
+import { SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
+import useFreeBalance from '@subwallet/extension-koni-ui/hooks/screen/sending/useFreeBalance';
+import { checkTransfer, transferCheckReferenceCount, transferCheckSupporting, transferGetExistentialDeposit } from '@subwallet/extension-koni-ui/messaging';
+import Header from '@subwallet/extension-koni-ui/partials/Header';
+import AuthTransaction from '@subwallet/extension-koni-ui/Popup/Sending/AuthTransaction';
+import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundResult';
+import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import { checkAddress } from '@polkadot/phishing';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';

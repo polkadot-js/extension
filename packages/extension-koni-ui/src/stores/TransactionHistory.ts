@@ -1,10 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import { TransactionHistoryReducerType } from '@polkadot/extension-koni-ui/stores/types';
+import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionHistoryReducerType } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = { historyMap: {} } as TransactionHistoryReducerType;
 

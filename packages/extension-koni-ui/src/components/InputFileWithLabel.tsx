@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
@@ -7,7 +7,7 @@ import React, { createRef, useCallback, useState } from 'react';
 import Dropzone, { DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
 
-import Label from '@polkadot/extension-koni-ui/components/Label';
+import Label from '@subwallet/extension-koni-ui/components/Label';
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 
 import useTranslation from '../hooks/useTranslation';

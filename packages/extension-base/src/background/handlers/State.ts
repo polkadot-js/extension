@@ -1,14 +1,14 @@
-// Copyright 2019-2022 @polkadot/extension-bg authors & contributors
+// Copyright 2019-2022 @subwallet/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { getId } from '@polkadot/extension-base/utils/getId';
-import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
+import { getId } from '@subwallet/extension-base/utils/getId';
+import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
 import { knownGenesis } from '@polkadot/networks/defaults';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';

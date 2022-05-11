@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import BigN from 'bignumber.js';
 
-import { CrowdloanParaState } from '@polkadot/extension-base/background/KoniTypes';
+import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
 
 export type CrowdloanItemType = {
   networkKey: string;

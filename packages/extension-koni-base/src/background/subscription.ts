@@ -1,15 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { take } from 'rxjs';
 
-import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { CustomEvmToken, NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
-import { subscribeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
-import { subscribeCrowdloan } from '@polkadot/extension-koni-base/api/dotsama/crowdloan';
-import { getAllSubsquidStaking } from '@polkadot/extension-koni-base/api/staking/subsquidStaking';
-import { dotSamaAPIMap, nftHandler, state } from '@polkadot/extension-koni-base/background/handlers';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
+import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
+import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
+import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
+import { dotSamaAPIMap, nftHandler, state } from '@subwallet/extension-koni-base/background/handlers';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 

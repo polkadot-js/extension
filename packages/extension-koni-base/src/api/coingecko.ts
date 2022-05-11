@@ -1,10 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import axios from 'axios';
 
-import { PriceJson } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
+import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 
 const alternativeNameMap: Record<string, string> = {
   bifrost: 'bifrost-native-coin',

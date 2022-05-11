@@ -1,10 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { useEffect, useState } from 'react';
 
-import { ApiInitStatus, ApiProps, BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
-import { initApi } from '@polkadot/extension-koni-ui/messaging';
+import { ApiInitStatus, ApiProps, BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+import { initApi } from '@subwallet/extension-koni-ui/messaging';
 import { formatBalance } from '@polkadot/util';
 
 import { TokenUnit } from '../component/InputNumber';

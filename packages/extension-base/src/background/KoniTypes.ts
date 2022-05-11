@@ -9,9 +9,9 @@ import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/typ
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
-import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
+import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 

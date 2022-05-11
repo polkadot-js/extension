@@ -81,4 +81,5 @@ export interface EvmContracts {
   moonbeam: CustomEvmToken[];
   moonriver: CustomEvmToken[];
   moonbase: CustomEvmToken[];
+  shidenEvm: CustomEvmToken[];
 }

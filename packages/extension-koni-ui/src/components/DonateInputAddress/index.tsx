@@ -1,16 +1,18 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// eslint-disable-next-line header/header
 import type { KeyringOption$Type, KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
-import type { Option } from './types';
+import type { DonateTransformOptionType, Option } from './types';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
 import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@polkadot/extension-base/background/KoniTypes';
+import DONATEINFOS from '@polkadot/extension-koni-base/api/donate';
+import DonateReceiveItem from '@polkadot/extension-koni-ui/components/DonateInputAddress/DonateReceiveItem';
 import Dropdown from '@polkadot/extension-koni-ui/components/InputAddress/Dropdown';
-import KeyPair from '@polkadot/extension-koni-ui/components/InputAddress/KeyPair';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@polkadot/extension-koni-ui/messaging';
 import createItem from '@polkadot/extension-koni-ui/Popup/Sending/old/component/InputAddress/createItem';
 import LabelHelp from '@polkadot/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
@@ -18,8 +20,6 @@ import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { toAddress } from '@polkadot/extension-koni-ui/util';
 import { keyring } from '@polkadot/ui-keyring';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
-
-import { AccountOption } from './types';
 
 interface Props {
   className?: string;
@@ -122,11 +122,11 @@ function dedupe (options: Option[]): Option[] {
   }, []);
 }
 
-function getTransformOptions (options: AccountOption[]): DropdownTransformOptionType[] {
-  return options.map((t) => ({ label: t.text, value: t.value || '' }));
+function getTransformOptions (options: Option[]): DropdownTransformOptionType[] {
+  return options.map((t) => ({ label: t.name, value: t.value || '' }));
 }
 
-function transformGrOptions (options: AccountOption[]) {
+function transformGrOptions (options: Option[]) {
   const transformGrOptions: DropdownTransformGroupOptionType[] = [];
   const transformOptions = getTransformOptions(options);
   let index = 0;
@@ -144,11 +144,12 @@ function transformGrOptions (options: AccountOption[]) {
 }
 
 // eslint-disable-next-line no-empty-pattern
-function InputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, networkPrefix, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
+function DonateInputAddress ({ className = '', defaultValue, filter, help, isDisabled, isSetDefaultValue, label, networkPrefix, onChange, optionsAll, type = DEFAULT_TYPE, withEllipsis }: Props): React.ReactElement {
+  const [lastValue, setInputAddressLastValue] = useState('');
   const inputAddressRef = useRef(null);
-  const [options, setOptions] = useState<AccountOption[]>([]);
-  const defaultLastValue = getLastValue(type) || '';
-  const [lastValue, setInputAddressLastValue] = useState(defaultLastValue);
+  const [projectLink, setProjectLink] = useState<string | undefined>('');
+  const [options, setOptions] = useState<DonateTransformOptionType[]>([]);
+  const deps = options.toString();
 
   useEffect(() => {
     let isSync = true;
@@ -157,14 +158,14 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
     subscribeAccountsInputAddress((data: OptionInputAddress) => {
       if (isSync) {
         const { options } = data;
-        const addressList = options[type].map((acc) => ({
-          value: acc.value,
-          text: acc.name,
-          name: acc.name,
-          key: acc.key
-        }));
 
-        setOptions(addressList);
+        const donateOptions = Object.values(DONATEINFOS);
+        const accountList = [];
+
+        accountList.push(options.account[0]);
+        const allPlusAccountList: DonateTransformOptionType[] = accountList.concat(donateOptions).concat(options.address);
+
+        setOptions(allPlusAccountList);
       }
     })
       .then((id) => {
@@ -183,7 +184,11 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
         cancelSubscription(subscriptionId).catch((e) => console.log('Error when cancel subscription', e));
       }
     };
-  }, [type]);
+  }, []);
+
+  useEffect(() => {
+    setInputAddressLastValue(getLastValue(type));
+  }, [lastValue, type]);
 
   const getFiltered = (): Option[] => {
     return !optionsAll
@@ -220,19 +225,22 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
   const onChangeData = useCallback((address: string): void => {
     !filter && setLastValue(type, address);
     setInputAddressLastValue(getLastValue(type));
+    const selectedOption = options.find((item) => item.value === address);
 
+    setProjectLink(selectedOption?.link);
     onChange && onChange(
       address
         ? transformToAccountId(address)
         : null
     );
-  }, [filter, onChange, type]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deps, filter, onChange, type]);
 
   const loadOptions = useCallback((input: string, callback: (options: DropdownTransformGroupOptionType[]) => void) => {
     if (input) {
       const query = input.trim();
       const queryLower = query.toLowerCase();
-      const matches = options.filter((item) => !item.value || (item.value && (item.text.toLowerCase().includes(queryLower) || item.value.toLowerCase().includes(queryLower))));
+      const matches = options.filter((item) => !item.value || (item.value && (item.name.toLowerCase().includes(queryLower) || item.value.toLowerCase().includes(queryLower))));
       const matchesWithoutHeader = matches.filter((match) => match.value !== null);
 
       if (!matchesWithoutHeader.length) {
@@ -242,7 +250,6 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
           saveRecentAccountId(accountId.toString()).then((res) => {
             matches.push({
               key: res.option.key,
-              text: res.option.name,
               value: res.option.value,
               name: res.option.name
             });
@@ -260,16 +267,19 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
     }
   }, [options]);
 
-  // @ts-ignore
   const formatOptionLabel = useCallback((label: string, value: string) => {
+    const selectedOption = options.find((item) => item.value === value);
+
     return (
-      <KeyPair
+      <DonateReceiveItem
         address={value}
-        name={label}
+        iconName={selectedOption?.icon}
+        name={selectedOption?.name || label}
         networkPrefix={networkPrefix}
       />
     );
-  }, [networkPrefix]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deps, networkPrefix]);
 
   return (
     <div className={className}>
@@ -293,14 +303,22 @@ function InputAddress ({ className = '', defaultValue, filter, help, isDisabled,
         className='input-address__dropdown-label-help'
         help={help}
       />}</label>
-      <div>
-
-      </div>
+      {projectLink && (
+        <a
+          className='input-receive-project-link'
+          href={projectLink}
+          rel='noreferrer'
+          target='_blank'
+        >
+          <span>{projectLink}</span>
+        </a>
+      )
+      }
     </div>
   );
 }
 
-export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
+export default React.memo(styled(DonateInputAddress)(({ theme }: ThemeProps) => `
   position: relative;
 
   > label {
@@ -317,6 +335,16 @@ export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
     margin-right: 10px;
     top: 8px;
     left: 60px;
+  }
+
+  .input-address__dropdown {
+    border: 2px solid ${theme.boxBorderColor};
+    border-radius: 8px;
+    height: 72px;
+  }
+
+  .input-address__dropdown.is-disabled {
+    border-style: dashed;
   }
 
   .format-balance {
@@ -391,22 +419,35 @@ export default React.memo(styled(InputAddress)(({ theme }: ThemeProps) => `
     padding-top: 24px;
   }
 
-  .input-address__dropdown {
-    border: 2px solid ${theme.boxBorderColor};
-    border-radius: 8px;
-    height: 72px;
-  }
-
-  .input-address__dropdown.is-disabled {
+  &.isDisabled {
     border-style: dashed;
   }
 
   .input-address__dropdown-label-help {
-    font-size: 15px;
     z-index: 1;
   }
 
   .dropdown__option .input-address__address-list-label {
     pointer-events: none;
+  }
+
+  .input-receive-project-link {
+    background-color: ${theme.backgroundAccountAddress};
+    height: 48px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    line-height: 26px;
+    color: ${theme.textColor2};
+    margin-bottom: 10px;
+    margin-top: 10px;
+
+    > span {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
   }
   `));

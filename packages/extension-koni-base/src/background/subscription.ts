@@ -149,7 +149,7 @@ export class KoniSubcription {
         forceUpdate: false,
         selectedNftCollection
       } as NftTransferExtra);
-      nftHandler.setAddresses(['yGHYKu5ezC7KSDzS33wFvthME8Fiyzw3JUZg67vQqqnDjeeGU']);
+      nftHandler.setAddresses(addresses);
       nftHandler.handleNfts(
         customErc721Registry,
         (data) => {

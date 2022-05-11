@@ -40,22 +40,56 @@ function getContainerClassName (item: TransactionHistoryItemType, extraClass = '
   return className;
 }
 
+type DecimalsAndSymbolInfo = {
+  changeDecimals: number;
+  changeSymbol: string;
+  feeDecimals: number;
+  feeSymbol: string;
+}
+
+function getDecimalsAndSymbolInfo (item: TransactionHistoryItemType, registry: ChainRegistry): DecimalsAndSymbolInfo {
+  const result: DecimalsAndSymbolInfo = {} as DecimalsAndSymbolInfo;
+
+  if (item.changeSymbol) {
+    result.changeDecimals = registry.tokenMap[item.changeSymbol].decimals;
+    result.changeSymbol = item.changeSymbol;
+  } else {
+    result.changeDecimals = registry.chainDecimals[0];
+    result.changeSymbol = registry.chainTokens[0];
+  }
+
+  if (item.feeSymbol) {
+    result.feeDecimals = registry.tokenMap[item.feeSymbol].decimals;
+    result.feeSymbol = item.feeSymbol;
+  } else {
+    result.feeDecimals = registry.chainDecimals[0];
+    result.feeSymbol = registry.chainTokens[0];
+  }
+
+  return result;
+}
+
 function TransactionHistoryItem ({ className,
   isSupportScanExplorer = false,
   item,
   registry }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [trigger] = useState(() => `transaction-history-item-${++tooltipId}`);
-  const transactionValue = getBalances({
+  const { changeDecimals,
+    changeSymbol,
+    feeDecimals,
+    feeSymbol } = getDecimalsAndSymbolInfo(item, registry);
+
+  const changeValue = getBalances({
     balance: item.change,
-    decimals: registry.chainDecimals[0],
-    symbol: registry.chainTokens[0]
+    decimals: changeDecimals,
+    symbol: changeSymbol
   });
 
-  const transactionFee = getBalances({
+  const feeValue = getBalances({
     balance: item.fee || '',
-    decimals: registry.chainDecimals[0],
-    symbol: registry.chainTokens[0]
+    decimals: feeDecimals,
+    symbol: feeSymbol
   });
 
   const containerClassName = getContainerClassName(item, className);
@@ -109,8 +143,8 @@ function TransactionHistoryItem ({ className,
             <span>{item.action === 'received' ? '+' : '-'}</span>
 
             <BalanceVal
-              symbol={registry.chainTokens[0]}
-              value={transactionValue.balanceValue}
+              symbol={changeSymbol}
+              value={changeValue.balanceValue}
             />
           </div>
 
@@ -118,8 +152,8 @@ function TransactionHistoryItem ({ className,
             !!item.fee && (<div className='history-item__fee'>
               <span className={'history-item__fee-label'}>{t<string>('Fee:')}</span>
               <BalanceVal
-                symbol={registry.chainTokens[0]}
-                value={transactionFee.balanceValue}
+                symbol={feeSymbol}
+                value={feeValue.balanceValue}
               />
             </div>)
           }

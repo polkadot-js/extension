@@ -49,7 +49,7 @@ function Address ({ className, onChange, onEnter, passwordError, requestAddress 
   return (
     <div className={className}>
       <InputAddress
-        className='full'
+        className='auth-transaction-input-address'
         defaultValue={requestAddress}
         isDisabled
         isInput
@@ -79,12 +79,18 @@ function Address ({ className, onChange, onEnter, passwordError, requestAddress 
   );
 }
 
-export default React.memo(styled(Address)(() => `
+export default React.memo(styled(Address)(({ theme }: ThemeProps) => `
   .sending-address-password-wrapper {
     margin-top: 10px;
   }
 
   .sending-address-warning {
     margin-top: 10px;
+  }
+
+  .auth-transaction-input-address {
+    border-radius: 8px;
+    border: 2px dashed ${theme.boxBorderColor};
+    height: 72px;
   }
 `));

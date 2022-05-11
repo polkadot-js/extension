@@ -18,5 +18,5 @@ const transactionHistorySlice = createSlice({
   }
 });
 
-export const { update: updateCurrentAccount } = transactionHistorySlice.actions;
+export const { update: updateTransactionHistory } = transactionHistorySlice.actions;
 export default transactionHistorySlice.reducer;

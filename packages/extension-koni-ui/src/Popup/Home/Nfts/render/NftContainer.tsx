@@ -11,14 +11,14 @@ import { Link } from '@polkadot/extension-koni-ui/components';
 import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
 import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
-import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import NftCollectionPreview from './NftCollectionPreview';
+const NftCollection = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection'));
+const NftCollectionPreview = React.lazy(() => import('./NftCollectionPreview'));
 
 interface Props extends ThemeProps {
   className?: string;

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransferError } from '@polkadot/extension-base/background/KoniTypes';
 import { AccountJson } from '@polkadot/extension-base/background/types';
 
 import { Theme } from './components/themes';
@@ -49,6 +50,13 @@ export interface TxResult {
   isShowTxResult: boolean;
   isTxSuccess: boolean;
   txError?: Error | null;
+  extrinsicHash?: string;
+}
+
+export interface TransferResultType {
+  isShowTxResult: boolean;
+  isTxSuccess: boolean;
+  txError?: Array<TransferError>;
   extrinsicHash?: string;
 }
 

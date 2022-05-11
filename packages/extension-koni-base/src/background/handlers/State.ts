@@ -88,7 +88,6 @@ export default class KoniState extends State {
   public initEvmTokenState () {
     this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
       if (!storedEvmTokens) {
-        this.customEvmTokenStore.set('EvmToken', DEFAULT_EVM_TOKENS);
         this.evmTokenState = DEFAULT_EVM_TOKENS;
       } else {
         const _evmTokenState = DEFAULT_EVM_TOKENS;
@@ -126,6 +125,7 @@ export default class KoniState extends State {
         this.evmTokenState = _evmTokenState;
       }
 
+      this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
       this.evmTokenSubject.next(this.evmTokenState);
     });
   }

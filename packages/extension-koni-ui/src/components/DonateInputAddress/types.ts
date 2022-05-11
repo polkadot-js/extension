@@ -16,6 +16,20 @@ export interface DropdownOption {
 
 export interface Option extends KeyringSectionOption {
   className?: string;
+  text?: React.ReactNode;
+  icon?: string;
+  link?: string;
+}
+
+export interface DonateTransformOptionType extends KeyringSectionOption {
+  className?: string;
+  icon?: string;
+  link?: string;
+}
+
+export interface DonateTransformGroupOptionType {
+  label: string;
+  options: DonateTransformOptionType[];
 }
 
 export interface InputAddressProps {

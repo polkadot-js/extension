@@ -316,11 +316,13 @@ export interface CurrentAccountInfo {
 export interface RequestSettingsType {
   isShowBalance: boolean;
   accountAllLogo: string;
+  theme: ThemeTypes;
 }
 
 export interface ResponseSettingsType {
   isShowBalance: boolean;
   accountAllLogo: string;
+  theme: ThemeTypes;
 }
 
 export interface RandomTestRequest {
@@ -457,6 +459,7 @@ export type RequestSubscribeCrowdloan = null
 export type RequestSubscribeNft = null
 export type RequestSubscribeStaking = null
 export type RequestSubscribeStakingReward = null
+export type ThemeTypes = 'light' | 'dark'
 export type RequestNftForceUpdate = {
   collectionId: string,
   nft: NftItem,
@@ -666,6 +669,7 @@ export interface KoniRequestSignatures {
   'pri(currentAccount.changeBalancesVisibility)': [null, boolean, ResponseSettingsType];
   'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
   'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
+  'pri(currentAccount.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
   'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];

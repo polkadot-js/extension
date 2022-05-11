@@ -579,7 +579,7 @@ export default class KoniState extends State {
   public getSettings (update: (value: RequestSettingsType) => void): void {
     this.settingsStore.get('Settings', (value) => {
       if (!value) {
-        update({ isShowBalance: false, accountAllLogo: '' });
+        update({ isShowBalance: false, accountAllLogo: '', theme: 'dark' });
       } else {
         update(value);
       }

@@ -1,4 +1,7 @@
-import {UniqueNftApiV2} from "@polkadot/extension-koni-base/api/nft/unique_nft/uniqueNftV2";
+// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { UniqueNftApiV2 } from '@polkadot/extension-koni-base/api/nft/unique_nft/uniqueNftV2';
 
 jest.setTimeout(50000);
 
@@ -18,6 +21,6 @@ describe('test DotSama APIs', () => {
       },
       (ready) => {
         console.log(ready);
-      })
+      });
   });
 });

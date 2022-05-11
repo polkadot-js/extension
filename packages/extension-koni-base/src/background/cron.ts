@@ -98,12 +98,17 @@ export class KoniCron {
   }
 
   recoverWeb3Api () {
+    console.log('check web3 connection');
+
     for (const [key, web3] of Object.entries(web3Map)) {
       web3.eth.net.isListening()
         .catch(() => {
+          console.log('web3 disconnected', key);
           recoverWeb3Api(key);
         });
     }
+
+    console.log('check web3 connection done');
   }
 
   refreshPrice () {

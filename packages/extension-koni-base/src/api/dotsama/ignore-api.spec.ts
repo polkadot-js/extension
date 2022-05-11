@@ -4,6 +4,7 @@
 import { ApiProps } from '@subwallet/extension-base/background/KoniTypes';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama/api';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+
 import { AccountInfo } from '@polkadot/types/interfaces';
 
 jest.setTimeout(50000);

@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
-import styled from 'styled-components';
-
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
+import React from 'react';
+import styled from 'styled-components';
 
 interface Props {
   className: string;

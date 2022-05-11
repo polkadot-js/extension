@@ -5,10 +5,10 @@ import type { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/type
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
 import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types';
 
-import { BehaviorSubject } from 'rxjs';
-
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@subwallet/extension-chains';
+import { BehaviorSubject } from 'rxjs';
+
 import { knownGenesis } from '@polkadot/networks/defaults';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';

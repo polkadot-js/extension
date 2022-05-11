@@ -3,11 +3,10 @@
 
 import type { ThemeProps } from '../types';
 
+import { networkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import React, { useCallback, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import styled from 'styled-components';
-
-import { networkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 
 import Label from './Label';
 

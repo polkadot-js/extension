@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BigN from 'bignumber.js';
-
 import { CrowdloanParaState, StakingItem, StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { BalanceValueType } from '@subwallet/extension-koni-ui/util';
 import { BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
+import BigN from 'bignumber.js';
 
 export type CrowdloanContributeValueType = {
   paraState?: CrowdloanParaState;

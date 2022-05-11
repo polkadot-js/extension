@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
-import styled from 'styled-components';
-
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React from 'react';
+import styled from 'styled-components';
 
 const StakingRow = React.lazy(() => import('./StakingRow'));
 const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));

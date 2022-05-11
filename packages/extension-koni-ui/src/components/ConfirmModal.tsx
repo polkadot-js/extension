@@ -3,13 +3,12 @@
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
-import styled from 'styled-components';
-
 import confirmIcon from '@subwallet/extension-koni-ui/assets/confirmIcon.png';
 import { Button, Modal } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;

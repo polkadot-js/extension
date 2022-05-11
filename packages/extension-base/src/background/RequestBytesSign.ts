@@ -7,6 +7,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { RequestSign } from './types';
 
 import { wrapBytes } from '@subwallet/extension-dapp/wrapBytes';
+
 import { TypeRegistry } from '@polkadot/types';
 import { u8aToHex } from '@polkadot/util';
 

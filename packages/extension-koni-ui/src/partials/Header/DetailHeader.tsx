@@ -1,11 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useRef, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import moreButtonDark from '@subwallet/extension-koni-ui/assets/dots-three-vertical-dark.svg';
@@ -22,6 +17,10 @@ import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useRef, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string,

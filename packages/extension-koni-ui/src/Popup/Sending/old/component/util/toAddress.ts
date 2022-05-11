@@ -3,6 +3,7 @@
 
 // import { keyring } from '@polkadot/ui-keyring';
 import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+
 import { assert, hexToU8a, isHex } from '@polkadot/util';
 import { ethereumEncode } from '@polkadot/util-crypto';
 

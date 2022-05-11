@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect } from 'react';
-
 import { CrowdloanJson } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { useEffect } from 'react';
 
 function updateCrowdloan (crowdloan: CrowdloanJson): void {
   store.dispatch({ type: 'crowdloan/update', payload: crowdloan });

@@ -3,11 +3,10 @@
 
 import type { ThemeProps } from '../types';
 
-import React from 'react';
-import styled from 'styled-components';
-
 import danger from '@subwallet/extension-koni-ui/assets/danger.svg';
 import warning from '@subwallet/extension-koni-ui/assets/warning.svg';
+import React from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   children: React.ReactNode;

@@ -4,13 +4,13 @@
 import type { KeyringOption$Type, KeyringOptions, KeyringSectionOption, KeyringSectionOptions } from '@polkadot/ui-keyring/options/types';
 import type { Option } from './types';
 
+import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+import { withMulti, withObservable } from '@subwallet/extension-koni-ui/Popup/Sending/old/api/hoc';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import store from 'store';
 import styled from 'styled-components';
 
-import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
-import { withMulti, withObservable } from '@subwallet/extension-koni-ui/Popup/Sending/old/api/hoc';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 import { isNull, isUndefined } from '@polkadot/util';
 

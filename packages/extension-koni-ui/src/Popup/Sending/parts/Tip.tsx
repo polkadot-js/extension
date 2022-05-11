@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import InputBalance from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputBalance';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+
 import { BN, BN_ZERO } from '@polkadot/util';
 
 interface Props extends ThemeProps {

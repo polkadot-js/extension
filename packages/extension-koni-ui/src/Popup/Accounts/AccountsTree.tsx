@@ -3,9 +3,8 @@
 
 import type { AccountWithChildren } from '@subwallet/extension-base/background/types';
 
-import React from 'react';
-
 import Account from '@subwallet/extension-koni-ui/Popup/Accounts/Account';
+import React from 'react';
 
 interface Props extends AccountWithChildren {
   parentName?: string;

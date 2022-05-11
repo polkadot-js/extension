@@ -6,13 +6,13 @@ import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import Qr from '@subwallet/extension-koni-ui/Popup/Signing/Qr';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import styled from 'styled-components';
+
 import { TypeRegistry } from '@polkadot/types';
 import { decodeAddress } from '@polkadot/util-crypto';
 

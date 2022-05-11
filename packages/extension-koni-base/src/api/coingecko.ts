@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import axios from 'axios';
-
 import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import axios from 'axios';
 
 const alternativeNameMap: Record<string, string> = {
   bifrost: 'bifrost-native-coin',

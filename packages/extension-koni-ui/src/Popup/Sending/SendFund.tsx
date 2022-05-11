@@ -1,10 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { AccountContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
@@ -23,6 +19,10 @@ import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundR
 import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
 import { checkAddress } from '@polkadot/phishing';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';

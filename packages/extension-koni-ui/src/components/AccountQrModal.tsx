@@ -3,11 +3,6 @@
 
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useMemo, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import QRCode from 'react-qr-code';
-import styled from 'styled-components';
-
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import Link from '@subwallet/extension-koni-ui/components/Link';
@@ -19,6 +14,11 @@ import HeaderEditName from '@subwallet/extension-koni-ui/partials/HeaderEditName
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey, getScanExplorerAddressInfoUrl, isSupportScanExplorer, toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import React, { useCallback, useMemo, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import QRCode from 'react-qr-code';
+import styled from 'styled-components';
+
 import { IconTheme } from '@polkadot/react-identicon/types';
 
 import cloneLogo from '../assets/clone.svg';

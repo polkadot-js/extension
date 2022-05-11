@@ -1,15 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
+import React, { useContext, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 function Rendering (): React.ReactElement {
   const { accounts } = useContext(AccountContext);

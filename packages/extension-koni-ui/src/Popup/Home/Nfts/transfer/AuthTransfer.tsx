@@ -1,10 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { BackgroundWindow, RequestNftForceUpdate } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
@@ -19,6 +15,9 @@ import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Sending/old/typ
 import { cacheUnlock } from '@subwallet/extension-koni-ui/Popup/Sending/old/util';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
 const { keyring } = bWindow.pdotApi;

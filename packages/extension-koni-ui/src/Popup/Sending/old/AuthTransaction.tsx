@@ -3,11 +3,6 @@
 
 import type { SignerOptions } from '@polkadot/api/submittable/types';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
-import { ApiPromise, SubmittableResult } from '@polkadot/api';
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
 import { Button } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -21,6 +16,11 @@ import AccountSigner from '@subwallet/extension-koni-ui/Popup/Sending/old/signer
 import { AddressProxy, TxHandler } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
 import { cacheUnlock } from '@subwallet/extension-koni-ui/Popup/Sending/old/util';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
+
+import { ApiPromise, SubmittableResult } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { assert, BN_ZERO } from '@polkadot/util';
 import { addressEq } from '@polkadot/util-crypto';

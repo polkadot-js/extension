@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan, DotSamaCrowdloan_crowdloans_nodes, DotSamaCrowdloanVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';

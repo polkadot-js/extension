@@ -3,10 +3,9 @@
 
 import type { ThemeProps } from '../../types';
 
+import AccountInfo from '@subwallet/extension-koni-ui/components/AccountInfo';
 import React, { useCallback, useContext, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
-import AccountInfo from '@subwallet/extension-koni-ui/components/AccountInfo';
 
 import arrow from '../../assets/arrow-down.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';

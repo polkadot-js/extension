@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { options } from '@acala-network/api';
-
-import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
 import { ethereumChains, typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { inJestTest } from '@subwallet/extension-koni-base/utils/utils';
+
+import { ApiPromise, HttpProvider, WsProvider } from '@polkadot/api';
 import { TypeRegistry } from '@polkadot/types/create';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';

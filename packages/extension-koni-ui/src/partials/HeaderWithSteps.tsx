@@ -5,12 +5,11 @@ import type { ThemeProps } from '../types';
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
-import styled from 'styled-components';
-
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import React from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;

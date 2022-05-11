@@ -4,10 +4,6 @@
 import type { KeyringOption$Type, KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 import type { Option } from './types';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import store from 'store';
-import styled from 'styled-components';
-
 import { DropdownTransformGroupOptionType, DropdownTransformOptionType, OptionInputAddress } from '@subwallet/extension-base/background/KoniTypes';
 import Dropdown from '@subwallet/extension-koni-ui/components/InputAddress/Dropdown';
 import KeyPair from '@subwallet/extension-koni-ui/components/InputAddress/KeyPair';
@@ -16,6 +12,10 @@ import createItem from '@subwallet/extension-koni-ui/Popup/Sending/old/component
 import LabelHelp from '@subwallet/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toAddress } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import store from 'store';
+import styled from 'styled-components';
+
 import { keyring } from '@polkadot/ui-keyring';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 

@@ -3,10 +3,6 @@
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import useFetchNftExtra from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
 import EmptyList from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
@@ -14,6 +10,10 @@ import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Hom
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const NftCollection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftCollection'));

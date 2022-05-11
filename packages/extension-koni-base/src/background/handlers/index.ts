@@ -11,6 +11,7 @@ import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
 import KoniExtension from '@subwallet/extension-koni-base/background/handlers/Extension';
 import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
 import KoniTabs from '@subwallet/extension-koni-base/background/handlers/Tabs';
+
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();

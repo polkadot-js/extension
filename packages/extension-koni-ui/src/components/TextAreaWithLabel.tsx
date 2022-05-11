@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback } from 'react';
-
 import Label from '@subwallet/extension-koni-ui/components/Label';
 import { TextArea } from '@subwallet/extension-koni-ui/components/TextInputs';
+import React, { useCallback } from 'react';
 
 interface Props {
   className?: string;

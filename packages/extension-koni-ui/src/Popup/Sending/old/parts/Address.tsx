@@ -1,13 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import { Warning } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 import InputAddress from '../component/InputAddress';
 import Password from './Password';

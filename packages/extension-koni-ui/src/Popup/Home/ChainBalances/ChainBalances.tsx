@@ -1,12 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BigN from 'bignumber.js';
-import CN from 'classnames';
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
 import { Link } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
@@ -16,6 +10,12 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
+import BigN from 'bignumber.js';
+import CN from 'classnames';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const ChainBalanceDetail = React.lazy(() => import('../ChainBalances/ChainBalanceDetail/ChainBalanceDetail'));

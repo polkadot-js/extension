@@ -3,10 +3,9 @@
 
 import type { IconName } from '@fortawesome/fontawesome-svg-core';
 
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-
-import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 
 import Icon from './Icon';
 

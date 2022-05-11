@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect } from 'react';
-
 import { ChainRegistry } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeChainRegistry } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { useEffect } from 'react';
 
 function updateChainRegistry (map: Record<string, ChainRegistry>): void {
   console.log('ChainRegistry', map);

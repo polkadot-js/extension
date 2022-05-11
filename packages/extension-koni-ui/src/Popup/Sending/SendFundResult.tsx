@@ -1,9 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
-
 import { TransferError } from '@subwallet/extension-base/background/KoniTypes';
 import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
@@ -12,6 +9,8 @@ import Button from '@subwallet/extension-koni-ui/components/Button';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useContext } from 'react';
+import styled from 'styled-components';
 
 export interface Props extends ThemeProps {
   className?: string;

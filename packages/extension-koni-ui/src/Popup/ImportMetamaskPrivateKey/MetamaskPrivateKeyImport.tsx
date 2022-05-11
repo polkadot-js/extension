@@ -7,12 +7,12 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-
 import { validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { Password } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
 import { objectSpread } from '@polkadot/util';
 
 import { AccountInfoEl, ButtonArea, NextStepButton, TextAreaWithLabel, Warning } from '../../components';

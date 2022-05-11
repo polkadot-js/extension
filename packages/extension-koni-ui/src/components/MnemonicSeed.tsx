@@ -3,11 +3,10 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { MouseEventHandler } from 'react';
-import styled from 'styled-components';
-
 import ActionText from '@subwallet/extension-koni-ui/components/ActionText';
 import TextAreaWithLabel from '@subwallet/extension-koni-ui/components/TextAreaWithLabel';
+import React, { MouseEventHandler } from 'react';
+import styled from 'styled-components';
 
 import clone from '../assets/clone.svg';
 import download from '../assets/icon/download.svg';

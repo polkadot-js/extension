@@ -3,8 +3,9 @@
 
 import type { DeriveAccountInfo } from '@polkadot/api-derive/types';
 
-import { ApiPromise } from '@polkadot/api';
 import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+
+import { ApiPromise } from '@polkadot/api';
 // import { keyring } from '@polkadot/ui-keyring';
 import { isFunction } from '@polkadot/util';
 

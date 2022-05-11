@@ -3,11 +3,10 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { createGlobalStyle, ThemeProvider } from 'styled-components';
-
 import { ResponseSettingsType, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
 import { saveTheme, subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
+import React, { useCallback, useEffect, useState } from 'react';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 // FIXME We should not import from index when this one is imported there as well
 import { chooseTheme, Main, themes, ThemeSwitchContext } from '.';

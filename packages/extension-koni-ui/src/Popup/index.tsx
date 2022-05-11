@@ -4,11 +4,6 @@
 import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import * as Bowser from 'bowser';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Provider } from 'react-redux';
-import { Route, Switch } from 'react-router';
-
 import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
@@ -16,6 +11,11 @@ import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStor
 import Rendering from '@subwallet/extension-koni-ui/Popup/Rendering';
 import Donate from '@subwallet/extension-koni-ui/Popup/Sending/Donate';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
+import * as Bowser from 'bowser';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Provider } from 'react-redux';
+import { Route, Switch } from 'react-router';
+
 import uiSettings from '@polkadot/ui-settings';
 
 import { ErrorBoundary } from '../components';

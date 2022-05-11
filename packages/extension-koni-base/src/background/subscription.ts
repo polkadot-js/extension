@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { take } from 'rxjs';
-
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
@@ -10,6 +8,8 @@ import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/c
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { dotSamaAPIMap, nftHandler, state } from '@subwallet/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { take } from 'rxjs';
+
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 

@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
-import { Transaction } from 'ethereumjs-tx';
-import { Contract } from 'web3-eth-contract';
-
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
@@ -21,6 +18,9 @@ import { getERC20Contract, getERC721Contract, getWeb3Api, TestERC721Contract } f
 import { dotSamaAPIMap, rpcsMap, state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
+import { Transaction } from 'ethereumjs-tx';
+import { Contract } from 'web3-eth-contract';
+
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';

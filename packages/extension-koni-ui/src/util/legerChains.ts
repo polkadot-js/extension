@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+
 import { selectableNetworks } from '@polkadot/networks';
 import { Network } from '@polkadot/networks/types';
 

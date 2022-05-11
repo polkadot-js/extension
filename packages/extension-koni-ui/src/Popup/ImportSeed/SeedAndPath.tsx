@@ -7,12 +7,12 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-
 import RadioStatus from '@subwallet/extension-koni-ui/components/RadioStatus';
 import { validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
 import { objectSpread } from '@polkadot/util';
 
 import { AccountInfoEl, ButtonArea, Checkbox, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';

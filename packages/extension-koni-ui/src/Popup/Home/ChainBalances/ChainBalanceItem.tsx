@@ -1,11 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import BigN from 'bignumber.js';
-import React, { useCallback } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import styled from 'styled-components';
-
 import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
 import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
@@ -15,6 +10,10 @@ import { getTotalConvertedBalanceValue, hasAnyChildTokenBalance } from '@subwall
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BN_ZERO, isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
+import BigN from 'bignumber.js';
+import React, { useCallback } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import styled from 'styled-components';
 
 import { Loading } from '../../../components';
 

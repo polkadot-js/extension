@@ -5,6 +5,7 @@ import { ChainRegistry, TokenInfo } from '@subwallet/extension-base/background/K
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+
 import { BN, BN_HUNDRED } from '@polkadot/util';
 
 function getDefaultAddress (address: string, accounts: AccountJson[]): string {

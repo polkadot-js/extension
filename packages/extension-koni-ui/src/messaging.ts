@@ -16,6 +16,7 @@ import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
+
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
 import allChains from './util/chains';

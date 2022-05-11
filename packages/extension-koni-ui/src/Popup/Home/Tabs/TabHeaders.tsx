@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-
 import TabHeaderItem from '@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaderItem';
 import { TabHeaderItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;

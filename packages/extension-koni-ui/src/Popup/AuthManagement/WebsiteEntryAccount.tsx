@@ -3,13 +3,12 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
 import { changeAuthorizationPerAcc } from '@subwallet/extension-koni-ui/messaging';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;

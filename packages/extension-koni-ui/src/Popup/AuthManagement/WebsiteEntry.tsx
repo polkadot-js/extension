@@ -3,14 +3,13 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useState } from 'react';
-import styled from 'styled-components';
-
 import { AuthUrlInfo, AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountContext } from '@subwallet/extension-koni-ui/components';
 import { forgetSite } from '@subwallet/extension-koni-ui/messaging';
 import WebsiteEntryAccount from '@subwallet/extension-koni-ui/Popup/AuthManagement/WebsiteEntryAccount';
 import { waitForElement } from '@subwallet/extension-koni-ui/util/dom';
+import React, { useCallback, useContext, useState } from 'react';
+import styled from 'styled-components';
 
 import useTranslation from '../../hooks/useTranslation';
 

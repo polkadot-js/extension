@@ -5,14 +5,13 @@ import '@subwallet/extension-mocks/chrome';
 
 import type { SigningRequest } from '@subwallet/extension-base/background/types';
 
+import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import { configure, mount, ReactWrapper } from 'enzyme';
 import { EventEmitter } from 'events';
 import React, { useState } from 'react';
 import { act } from 'react-dom/test-utils';
 import { ThemeProvider } from 'styled-components';
-
-import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
 
 import { ActionContext, Button, Input, SigningReqContext, themes } from '../../components';
 import * as messaging from '../../messaging';

@@ -3,11 +3,11 @@
 
 import type { SiDef } from '@polkadot/util/types';
 
+import { BitLengthOption } from '@subwallet/extension-koni-ui/components/constants';
+import { BitLength } from '@subwallet/extension-koni-ui/components/types';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { BitLengthOption } from '@subwallet/extension-koni-ui/components/constants';
-import { BitLength } from '@subwallet/extension-koni-ui/components/types';
 import { Registry } from '@polkadot/types/types';
 import { BN, formatBalance, isUndefined } from '@polkadot/util';
 

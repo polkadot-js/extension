@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useEffect, useState } from 'react';
-
 import { cancelSubscription, subscribeFreeBalance } from '@subwallet/extension-koni-ui/messaging';
+import { useEffect, useState } from 'react';
 
 export default function useFreeBalance (networkKey: string | undefined | null, address: string | undefined | null, token: string | undefined | null): string {
   const [balance, setBalance] = useState<string>('0');

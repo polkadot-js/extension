@@ -3,13 +3,12 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback } from 'react';
-import styled from 'styled-components';
-
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
 
 import { Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

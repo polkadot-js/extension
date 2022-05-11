@@ -6,9 +6,6 @@ import type { ThemeProps } from '../types';
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCog, faFileUpload, faKey, faPlusCircle, faQrcode, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useState } from 'react';
-import styled from 'styled-components';
-
 import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
 import Link from '@subwallet/extension-koni-ui/components/Link';
@@ -18,6 +15,8 @@ import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/useLedger';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import AccountsTree from '@subwallet/extension-koni-ui/Popup/Accounts/AccountsTree';
+import React, { useCallback, useContext, useState } from 'react';
+import styled from 'styled-components';
 
 import { AccountContext, MediaContext, Svg } from '../components';
 import useTranslation from '../hooks/useTranslation';

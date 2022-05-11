@@ -3,12 +3,11 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
-
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import ButtonArea from '@subwallet/extension-koni-ui/components/ButtonArea';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import React, { useCallback, useContext } from 'react';
+import styled from 'styled-components';
 
 import logo from '../assets/sub-wallet-logo.svg';
 import { ActionContext } from '../components';

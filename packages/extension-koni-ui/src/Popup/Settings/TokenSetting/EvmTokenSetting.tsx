@@ -1,9 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
-
 import { CustomEvmToken, DeleteEvmTokenParams } from '@subwallet/extension-base/background/KoniTypes';
 import { Button, ButtonArea, InputFilter } from '@subwallet/extension-koni-ui/components';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
@@ -14,6 +11,8 @@ import { deleteEvmTokens } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import EvmTokenRow from '@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenRow';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;

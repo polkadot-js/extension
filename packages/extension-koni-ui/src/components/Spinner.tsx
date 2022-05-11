@@ -3,10 +3,9 @@
 
 import type { ThemeProps } from '../types';
 
+import { AssetImageMap } from '@subwallet/extension-koni-ui/assets';
 import React from 'react';
 import styled from 'styled-components';
-
-import { AssetImageMap } from '@subwallet/extension-koni-ui/assets';
 
 interface Props extends ThemeProps {
   className?: string;

@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import fetch from 'cross-fetch';
-
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { UNIQUE_SCAN_ENDPOINT } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import fetch from 'cross-fetch';
 
 interface NftData {
   collection_id: number;

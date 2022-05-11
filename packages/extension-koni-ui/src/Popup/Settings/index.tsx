@@ -3,9 +3,6 @@
 
 import { faCog, faCoins, faExpand, faInfoCircle, faList, faLock, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import { Link } from '@subwallet/extension-koni-ui/components';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
@@ -13,6 +10,9 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
+
 import settings from '@polkadot/ui-settings';
 
 interface Props extends ThemeProps {

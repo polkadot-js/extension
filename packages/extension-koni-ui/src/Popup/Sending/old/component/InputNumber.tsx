@@ -4,12 +4,12 @@
 import type { SiDef } from '@polkadot/util/types';
 import type { BitLength } from './types';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-
 import { BitLengthOption } from '@subwallet/extension-koni-ui/components/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
+
 import { Registry } from '@polkadot/types/types';
 import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn, isUndefined } from '@polkadot/util';
 

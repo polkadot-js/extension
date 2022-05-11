@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
-import React, { useCallback, useState } from 'react';
-import styled from 'styled-components';
-
 import { RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
@@ -16,6 +13,9 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useState } from 'react';
+import styled from 'styled-components';
+
 import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {

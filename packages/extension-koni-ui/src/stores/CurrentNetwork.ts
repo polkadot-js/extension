@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
 import { CurrentNetworkInfo } from '@subwallet/extension-base/background/KoniTypes';
 
 const initialState: CurrentNetworkInfo = {

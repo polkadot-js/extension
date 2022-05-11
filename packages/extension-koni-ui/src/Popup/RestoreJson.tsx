@@ -5,11 +5,11 @@ import type { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/backg
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 
+import Header from '@subwallet/extension-koni-ui/partials/Header';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import Header from '@subwallet/extension-koni-ui/partials/Header';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { u8aToString } from '@polkadot/util';
 
 import { AccountContext, AccountInfoEl, ActionContext, Button, ButtonArea, Checkbox, InputFileWithLabel, InputWithLabel, Theme, Warning } from '../components';

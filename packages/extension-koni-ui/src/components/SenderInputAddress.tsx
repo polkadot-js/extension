@@ -1,9 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
-
 import { ChainRegistry } from '@subwallet/extension-base/background/KoniTypes';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
@@ -12,6 +9,8 @@ import { SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toShort } from '@subwallet/extension-koni-ui/util';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import InputAddress from './InputAddress';
 import TokenDropdown from './TokenDropdown';

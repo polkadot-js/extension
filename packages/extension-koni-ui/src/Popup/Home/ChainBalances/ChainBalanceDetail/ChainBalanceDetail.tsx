@@ -3,12 +3,11 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
-
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import styled from 'styled-components';
 
 import ChainBalanceChildrenItem from '../ChainBalanceDetail/ChainBalanceChildrenItem';
 import ChainBalanceDetailItem from '../ChainBalanceDetail/ChainBalanceDetailItem';

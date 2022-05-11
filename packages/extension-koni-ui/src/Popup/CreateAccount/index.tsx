@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
+import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
-import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';

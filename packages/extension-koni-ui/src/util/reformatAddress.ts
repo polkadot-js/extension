@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
+
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
 
 export default function reformatAddress (address: string, networkPrefix: number, isEthereum = false): string {

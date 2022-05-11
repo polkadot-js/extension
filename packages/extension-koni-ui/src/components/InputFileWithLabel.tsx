@@ -3,11 +3,11 @@
 
 import type { ThemeProps } from '../types';
 
+import Label from '@subwallet/extension-koni-ui/components/Label';
 import React, { createRef, useCallback, useState } from 'react';
 import Dropzone, { DropzoneRef } from 'react-dropzone';
 import styled from 'styled-components';
 
-import Label from '@subwallet/extension-koni-ui/components/Label';
 import { formatNumber, hexToU8a, isHex, u8aToString } from '@polkadot/util';
 
 import useTranslation from '../hooks/useTranslation';

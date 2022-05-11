@@ -12,6 +12,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { CurrentNetworkInfo, KoniRequestSignatures } from '@subwallet/extension-base/background/KoniTypes';
+
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-
 import { TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 // eslint-disable-next-line import-newlines/enforce

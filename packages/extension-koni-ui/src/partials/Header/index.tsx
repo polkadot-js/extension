@@ -5,11 +5,6 @@ import type { ThemeProps } from '../../types';
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Avatar from 'boring-avatars';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled, { ThemeContext } from 'styled-components';
-
 import ExpandDarkIcon from '@subwallet/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@subwallet/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
@@ -27,6 +22,11 @@ import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/update
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+import Avatar from 'boring-avatars';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled, { ThemeContext } from 'styled-components';
+
 import { IconTheme } from '@polkadot/react-identicon/types';
 
 import defaultAvatar from '../../assets/default-avatar.svg';

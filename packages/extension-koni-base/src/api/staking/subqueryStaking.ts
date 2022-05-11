@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import axios from 'axios';
-
 import { APIItemState, StakingRewardItem, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import { SUBQUERY_ENDPOINTS, SUPPORTED_STAKING_CHAINS } from '@subwallet/extension-koni-base/api/staking/config';
 import { reformatAddress, toUnit } from '@subwallet/extension-koni-base/utils/utils';
+import axios from 'axios';
 
 interface StakingResponseItem {
   id: string,

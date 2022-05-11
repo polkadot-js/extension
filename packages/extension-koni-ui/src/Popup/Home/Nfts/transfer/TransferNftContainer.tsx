@@ -1,11 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
-import { ApiPromise } from '@polkadot/api';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
 import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
@@ -23,6 +18,11 @@ import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+
+import { ApiPromise } from '@polkadot/api';
 
 interface Props extends ThemeProps {
   className?: string;

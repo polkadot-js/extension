@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Subject } from 'rxjs';
-
 import { CustomEvmToken, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
@@ -10,6 +8,7 @@ import { recoverWeb3Api, web3Map } from '@subwallet/extension-koni-base/api/web3
 import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@subwallet/extension-koni-base/background/subscription';
 import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
+import { Subject } from 'rxjs';
 
 export class KoniCron {
   subscriptions: KoniSubcription;

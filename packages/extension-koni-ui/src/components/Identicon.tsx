@@ -3,11 +3,11 @@
 
 import type { IconTheme } from '@polkadot/react-identicon/types';
 
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import Icon from '@polkadot/react-identicon';
 
 interface Props {

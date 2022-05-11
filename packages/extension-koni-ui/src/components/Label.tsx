@@ -3,11 +3,10 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useState } from 'react';
-import styled from 'styled-components';
-
 import warning from '@subwallet/extension-koni-ui/assets/warning.svg';
 import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
 interface Props {
   children: React.ReactNode;

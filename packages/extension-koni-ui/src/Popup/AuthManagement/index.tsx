@@ -3,12 +3,11 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import { AuthUrlInfo, AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import ConfirmModal from '@subwallet/extension-koni-ui/components/ConfirmModal';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 import useTranslation from '../../hooks/useTranslation';
 import { changeAuthorization, changeAuthorizationAll, forgetAllSite, getAuthListV2 } from '../../messaging';

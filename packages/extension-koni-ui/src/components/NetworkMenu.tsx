@@ -3,9 +3,6 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-
 import { NetWorkGroup } from '@subwallet/extension-base/background/KoniTypes';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import InputFilter from '@subwallet/extension-koni-ui/components/InputFilter';
@@ -14,6 +11,8 @@ import useGenesisHashOptions, { networkSelectOption } from '@subwallet/extension
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
 
 interface Props extends ThemeProps {
   className?: string;

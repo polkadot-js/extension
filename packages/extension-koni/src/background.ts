@@ -13,6 +13,7 @@ import { AccountsStore } from '@subwallet/extension-base/stores';
 import { KoniCron } from '@subwallet/extension-koni-base/background/cron';
 import handlers, { initBackgroundWindow } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@subwallet/extension-koni-base/background/subscription';
+
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';

@@ -3,10 +3,6 @@
 
 import type { AccountJson } from '@subwallet/extension-base/background/types';
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import changeAvatar from '@subwallet/extension-koni-ui/assets/icon/camera.svg';
@@ -19,6 +15,9 @@ import { saveAccountAllLogo, saveCurrentAccountAddress, triggerAccountsSubscript
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 interface Props extends AccountJson {
   className?: string;

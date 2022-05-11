@@ -5,11 +5,11 @@
 // eslint-disable-next-line header/header
 import type { ThemeProps } from '../../types';
 
+import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import check from '@subwallet/extension-koni-ui/assets/check.svg';
-import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 interface Props extends ThemeProps {

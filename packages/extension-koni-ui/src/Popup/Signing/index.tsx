@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useContext, useEffect, useState } from 'react';
-
 import { Header } from '@subwallet/extension-koni-ui/partials';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { LoadingContainer, SigningReqContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

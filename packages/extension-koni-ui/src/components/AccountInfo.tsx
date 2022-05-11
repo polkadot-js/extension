@@ -8,17 +8,16 @@ import type { Recoded, ThemeProps } from '../types';
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCodeBranch, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Avatar from 'boring-avatars';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import cloneLogo from '@subwallet/extension-koni-ui/assets/clone.svg';
 import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { accountAllRecoded, defaultRecoded, isAccountAll, recodeAddress } from '@subwallet/extension-koni-ui/util';
 import getNetworkInfoByGenesisHash from '@subwallet/extension-koni-ui/util/getNetworkInfoByGenesisHash';
+import Avatar from 'boring-avatars';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 import useToast from '../hooks/useToast';
 import useTranslation from '../hooks/useTranslation';

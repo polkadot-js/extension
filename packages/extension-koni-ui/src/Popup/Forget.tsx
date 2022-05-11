@@ -3,14 +3,13 @@
 
 import type { ThemeProps } from '../types';
 
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router';
 import styled, { ThemeContext } from 'styled-components';
-
-import { AccountJson } from '@subwallet/extension-base/background/types';
-import { RootState, store } from '@subwallet/extension-koni-ui/stores';
-import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 
 import { AccountContext, AccountInfoEl, ActionBar, ActionContext, ActionText, Button, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';

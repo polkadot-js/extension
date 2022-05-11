@@ -3,10 +3,6 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useState } from 'react';
-import { useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
@@ -18,6 +14,9 @@ import { RootState, store } from '@subwallet/extension-koni-ui/stores';
 import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 
 import logo from '../../../../assets/sub-wallet-logo.svg';
 

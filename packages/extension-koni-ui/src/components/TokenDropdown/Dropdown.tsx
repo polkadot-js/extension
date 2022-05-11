@@ -3,10 +3,6 @@
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useRef, useState } from 'react';
-import Select, { ActionMeta, SingleValue } from 'react-select';
-import styled, { ThemeContext } from 'styled-components';
-
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import { Label, Theme } from '@subwallet/extension-koni-ui/components';
 import { TokenTransformOptionType } from '@subwallet/extension-koni-ui/components/TokenDropdown/types';
@@ -14,6 +10,9 @@ import { TokenItemType } from '@subwallet/extension-koni-ui/components/types';
 import useOutsideClick from '@subwallet/extension-koni-ui/hooks/useOutsideClick';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getLogoByNetworkKey } from '@subwallet/extension-koni-ui/util';
+import React, { useCallback, useContext, useRef, useState } from 'react';
+import Select, { ActionMeta, SingleValue } from 'react-select';
+import styled, { ThemeContext } from 'styled-components';
 
 interface WrapperProps {
   className?: string;

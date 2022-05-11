@@ -1,13 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useCallback, useContext, useState } from 'react';
-import Select, { ActionMeta, SingleValue } from 'react-select';
-import styled, { ThemeContext } from 'styled-components';
-
 import { DropdownOptionType, DropdownTransformOptionType } from '@subwallet/extension-base/background/KoniTypes';
 import { Theme } from '@subwallet/extension-koni-ui/components';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import React, { useCallback, useContext, useState } from 'react';
+import Select, { ActionMeta, SingleValue } from 'react-select';
+import styled, { ThemeContext } from 'styled-components';
 
 interface Props {
   className?: string;

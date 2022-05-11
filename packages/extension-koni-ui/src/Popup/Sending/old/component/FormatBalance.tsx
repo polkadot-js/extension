@@ -4,10 +4,10 @@
 import type { Compact } from '@polkadot/types';
 import type { Registry } from '@polkadot/types/types';
 
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { BN, BN_ZERO, formatBalance } from '@polkadot/util';
 
 interface Props {

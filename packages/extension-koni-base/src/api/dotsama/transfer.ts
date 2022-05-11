@@ -6,6 +6,7 @@ import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-h
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 // import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { dotSamaAPIMap } from '@subwallet/extension-koni-base/background/handlers';
+
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';

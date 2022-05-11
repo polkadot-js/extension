@@ -3,12 +3,11 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
-
 import { AccountWithChildren } from '@subwallet/extension-base/background/types';
 import Link from '@subwallet/extension-koni-ui/components/Link';
 import getNetworkMap from '@subwallet/extension-koni-ui/util/getNetworkMap';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import { AccountContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

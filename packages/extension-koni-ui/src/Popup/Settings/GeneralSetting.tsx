@@ -3,12 +3,12 @@
 
 import type { ThemeProps } from '../../types';
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-
 import { saveTheme, setNotification } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
 import getLanguageOptions from '@subwallet/extension-koni-ui/util/getLanguageOptions';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import styled, { ThemeContext } from 'styled-components';
+
 import settings from '@polkadot/ui-settings';
 
 import { Dropdown, HorizontalLabelToggle, MenuItem, themes, ThemeSwitchContext } from '../../components';

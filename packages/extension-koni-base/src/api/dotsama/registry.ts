@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiPromise } from '@polkadot/api';
 import { ChainRegistry, CustomEvmToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@subwallet/extension-koni-base/api/predefineChainTokens';
 import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
+
+import { ApiPromise } from '@polkadot/api';
 import { BN, bnToHex } from '@polkadot/util';
 
 export const cacheRegistryMap: Record<string, ChainRegistry> = {};

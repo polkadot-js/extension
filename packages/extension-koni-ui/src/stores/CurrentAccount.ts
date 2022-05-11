@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 

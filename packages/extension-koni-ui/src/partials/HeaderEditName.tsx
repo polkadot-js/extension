@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useMemo } from 'react';
-
 import InputWithLabel from '@subwallet/extension-koni-ui/components/InputWithLabel';
 import ValidatedInput2 from '@subwallet/extension-koni-ui/components/ValidatedInput2';
+import React, { useMemo } from 'react';
 
 import useTranslation from '../hooks/useTranslation';
 import { isNotShorterThan } from '../util/validators';

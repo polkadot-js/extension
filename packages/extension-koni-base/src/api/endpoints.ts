@@ -124,6 +124,15 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support'
   },
+  sakura: {
+    chain: 'Sakura',
+    genesisHash: '0x7b0f142a9299b0886595992f8cac58814c8956de6a31c77caca95db01370fc2c',
+    ss58Format: 42,
+    provider: 'wss://rpc.sakura.clover.finance',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2016,
+    nativeToken: 'SKU'
+  },
   hydradx: {
     chain: 'HydraDX',
     genesisHash: '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc',

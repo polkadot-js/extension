@@ -8,8 +8,8 @@ import { Contract } from 'web3-eth-contract';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestFreeBalance, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
 import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
@@ -561,11 +561,11 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private _addAddressToAuthList (address: string): void {
+  private _addAddressToAuthList (address: string, isAllowed: boolean): void {
     state.getAuthorize((value) => {
       if (value && Object.keys(value).length) {
         Object.keys(value).forEach((url) => {
-          value[url].isAllowedMap[address] = false;
+          value[url].isAllowedMap[address] = isAllowed;
         });
 
         state.setAuthorize(value);
@@ -573,7 +573,21 @@ export default class KoniExtension extends Extension {
     });
   }
 
-  private async accountsCreateSuriV2 ({ genesisHash, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
+  private _addAddressesToAuthList (addresses: string[], isAllowed: boolean): void {
+    state.getAuthorize((value) => {
+      if (value && Object.keys(value).length) {
+        Object.keys(value).forEach((url) => {
+          addresses.forEach((address) => {
+            value[url].isAllowedMap[address] = isAllowed;
+          });
+        });
+
+        state.setAuthorize(value);
+      }
+    });
+  }
+
+  private async accountsCreateSuriV2 ({ genesisHash, isAllowed, name, password, suri: _suri, types }: RequestAccountCreateSuriV2): Promise<ResponseAccountCreateSuriV2> {
     const addressDict = {} as Record<KeypairType, string>;
 
     types?.forEach((type) => {
@@ -585,7 +599,7 @@ export default class KoniExtension extends Extension {
 
       this._saveCurrentAccountAddress(address, () => {
         keyring.addUri(suri, password, { genesisHash, name: newAccountName }, type);
-        this._addAddressToAuthList(address);
+        this._addAddressToAuthList(address, isAllowed);
       });
     });
 
@@ -672,7 +686,7 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private derivationCreateV2 ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
+  private derivationCreateV2 ({ genesisHash, isAllowed, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreateV2): boolean {
     const childPair = this.deriveV2(parentAddress, suri, parentPassword, {
       genesisHash,
       name,
@@ -684,20 +698,20 @@ export default class KoniExtension extends Extension {
 
     this._saveCurrentAccountAddress(address, () => {
       keyring.addPair(childPair, password);
-      this._addAddressToAuthList(address);
+      this._addAddressToAuthList(address, isAllowed);
     });
 
     return true;
   }
 
-  private jsonRestoreV2 ({ address, file, password }: RequestJsonRestore): void {
+  private jsonRestoreV2 ({ address, file, isAllowed, password }: RequestJsonRestoreV2): void {
     const isPasswordValidated = this.validatePassword(file, password);
 
     if (isPasswordValidated) {
       try {
         this._saveCurrentAccountAddress(address, () => {
           keyring.restoreAccount(file, password);
-          this._addAddressToAuthList(address);
+          this._addAddressToAuthList(address, isAllowed);
         });
       } catch (error) {
         throw new Error((error as Error).message);
@@ -707,13 +721,15 @@ export default class KoniExtension extends Extension {
     }
   }
 
-  private batchRestoreV2 ({ address, file, password }: RequestBatchRestore): void {
+  private batchRestoreV2 ({ accountsInfo, file, isAllowed, password }: RequestBatchRestoreV2): void {
+    const addressList: string[] = accountsInfo.map((acc) => acc.address);
     const isPasswordValidated = this.validatedAccountsPassword(file, password);
 
     if (isPasswordValidated) {
       try {
-        this._saveCurrentAccountAddress(address, () => {
+        this._saveCurrentAccountAddress(addressList[0], () => {
           keyring.restoreAccounts(file, password);
+          this._addAddressesToAuthList(addressList, isAllowed);
         });
       } catch (error) {
         throw new Error((error as Error).message);
@@ -1464,7 +1480,7 @@ export default class KoniExtension extends Extension {
       case 'pri(authorize.listV2)':
         return this.getAuthListV2();
       case 'pri(accounts.create.suriV2)':
-        return await this.accountsCreateSuriV2(request as RequestAccountCreateSuri);
+        return await this.accountsCreateSuriV2(request as RequestAccountCreateSuriV2);
       case 'pri(accounts.forget)':
         return await this.accountsForgetOverride(request as RequestAccountForget);
       case 'pri(seed.createV2)':
@@ -1502,11 +1518,11 @@ export default class KoniExtension extends Extension {
       case 'pri(crowdloan.getSubscription)':
         return this.subscribeCrowdloan(id, port);
       case 'pri(derivation.createV2)':
-        return this.derivationCreateV2(request as RequestDeriveCreate);
+        return this.derivationCreateV2(request as RequestDeriveCreateV2);
       case 'pri(json.restoreV2)':
-        return this.jsonRestoreV2(request as RequestJsonRestore);
+        return this.jsonRestoreV2(request as RequestJsonRestoreV2);
       case 'pri(json.batchRestoreV2)':
-        return this.batchRestoreV2(request as RequestBatchRestore);
+        return this.batchRestoreV2(request as RequestBatchRestoreV2);
       case 'pri(networkMetadata.list)':
         return this.networkMetadataList();
       case 'pri(chainRegistry.getSubscription)':

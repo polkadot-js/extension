@@ -4,12 +4,14 @@
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, ResponseAuthorizeList, SeedLengths } from '@polkadot/extension-base/background/types';
+import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@polkadot/extension-base/background/types';
 import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
+import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 import { KeyringOptions } from '@polkadot/ui-keyring/options/types';
+import { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import { BN } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
@@ -394,7 +396,32 @@ export interface RequestAccountCreateSuriV2 {
   genesisHash?: string | null;
   password: string;
   suri: string;
-  types?: Array<KeypairType>
+  types?: Array<KeypairType>;
+  isAllowed: boolean;
+}
+
+export interface RequestDeriveCreateV2 {
+  name: string;
+  genesisHash?: string | null;
+  suri: string;
+  parentAddress: string;
+  parentPassword: string;
+  password: string;
+  isAllowed: boolean;
+}
+
+export interface RequestJsonRestoreV2 {
+  file: KeyringPair$Json;
+  password: string;
+  address: string;
+  isAllowed: boolean;
+}
+
+export interface RequestBatchRestoreV2 {
+  file: KeyringPairs$Json;
+  password: string;
+  accountsInfo: ResponseJsonGetAccountInfo[];
+  isAllowed: boolean;
 }
 
 export interface ResponseSeedCreateV2 {
@@ -627,9 +654,9 @@ export interface KoniRequestSignatures {
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];
-  'pri(derivation.createV2)': [RequestDeriveCreate, boolean];
-  'pri(json.restoreV2)': [RequestJsonRestore, void];
-  'pri(json.batchRestoreV2)': [RequestBatchRestore, void];
+  'pri(derivation.createV2)': [RequestDeriveCreateV2, boolean];
+  'pri(json.restoreV2)': [RequestJsonRestoreV2, void];
+  'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
   'pri(accounts.subscribeWithCurrentAddress)': [RequestAccountSubscribe, boolean, AccountsWithCurrentAddress];
   'pri(accounts.subscribeAccountsInputAddress)': [RequestAccountSubscribe, string, OptionInputAddress];

@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import fetch from 'cross-fetch';
+
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
 import { UNIQUE_SCAN_ENDPOINT } from '@polkadot/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
@@ -26,22 +28,39 @@ export class UniqueNftApiV2 extends BaseNftApi {
     };
   }
 
+  // private static parseNftCollectionRequest (collectionId: string) {
+  //   return {
+  //     // eslint-disable-next-line
+  //     query: `query MyQuery { collections(where: {collection_id: {_eq: \"${collectionId}\"}}) { collection_id name } }`
+  //   };
+  // }
+
   private async getNftByAccount (address: string) {
-    return await fetch(this.endpoint, {
+    const resp = await fetch(this.endpoint, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(UniqueNftApiV2.parseNftRequest(address))
-    })
-      .then((res) => res.json()) as NftData;
+    });
+
+    const result = await resp.json() as Record<string, any>;
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return result?.data?.tokens as NftData[];
   }
 
   public async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+    let allNfts: Record<string | number, any>[] = [];
+
     try {
       await Promise.all(this.addresses.map(async (address) => {
-        await this.getNftByAccount(address);
+        const nfts = await this.getNftByAccount(address);
+
+        allNfts = allNfts.concat(nfts);
       }));
+
+      console.log('allNfts', allNfts);
     } catch (e) {
       console.error(`Failed to fetch ${this.chain as string} nft`, e);
     }

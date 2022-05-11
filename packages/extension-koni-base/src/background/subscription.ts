@@ -87,7 +87,6 @@ export class KoniSubcription {
     this.unsubCrowdloans && this.unsubCrowdloans();
     state.resetBalanceMap();
     state.resetCrowdloanMap();
-    console.log('state reset balances');
     this.detectAddresses(address)
       .then((addresses) => {
         this.unsubBalances = this.initBalanceSubscription(addresses);

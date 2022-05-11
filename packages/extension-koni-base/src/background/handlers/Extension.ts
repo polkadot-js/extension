@@ -1394,10 +1394,24 @@ export default class KoniExtension extends Extension {
     const evmTokenState = state.getEvmTokenState();
     let isExist = false;
 
+    // check exist in evmTokenState
     for (const token of evmTokenState[data.type]) {
-      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
         isExist = true;
         break;
+      }
+    }
+
+    if (!isExist && data.type === 'erc20') {
+      // check exist in chainRegistry
+      const chainRegistryMap = state.getChainRegistryMap();
+      const tokenMap = chainRegistryMap[data.chain].tokenMap;
+
+      for (const token of Object.values(tokenMap)) {
+        if (token?.erc20Address?.toLowerCase() === data.smartContract.toLowerCase()) {
+          isExist = true;
+          break;
+        }
       }
     }
 

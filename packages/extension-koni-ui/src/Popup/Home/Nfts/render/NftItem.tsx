@@ -188,18 +188,25 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
                   src={getItemImage()}
                   style={{ borderRadius: '5px' }}
                 />
-                : <video
-                  autoPlay
-                  height='416'
-                  loop={true}
-                  onError={handleVideoError}
-                  width='100%'
-                >
-                  <source
-                    src={getItemImage()}
-                    type='video/mp4'
+                : !imageError
+                  ? <video
+                    autoPlay
+                    height='416'
+                    loop={true}
+                    onError={handleVideoError}
+                    width='100%'
+                  >
+                    <source
+                      src={getItemImage()}
+                      type='video/mp4'
+                    />
+                  </video>
+                  : <img
+                    alt={'default-img'}
+                    className={'item-img'}
+                    src={logo}
+                    style={{ borderRadius: '5px' }}
                   />
-                </video>
             }
           </div>
 

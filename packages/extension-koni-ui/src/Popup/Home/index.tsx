@@ -30,7 +30,13 @@ import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@polkadot/extension-koni-ui/partials';
 import AddAccount from '@polkadot/extension-koni-ui/Popup/Accounts/AddAccount';
 import BalancesVisibility from '@polkadot/extension-koni-ui/Popup/Home/BalancesVisibility';
+// Containers should not be imported lazily
+import ChainBalances from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances';
+import Crowdloans from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans';
+import NftContainer from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
+import StakingContainer from '@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@polkadot/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
+import TransactionHistory from '@polkadot/extension-koni-ui/Popup/Home/TransactionHistory/TransactionHistory';
 import { TabHeaderItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -40,13 +46,8 @@ import buyIcon from '../../assets/buy-icon.svg';
 import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
-import ChainBalances from './ChainBalances/ChainBalances';
 
-const NftContainer = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftContainer'));
-const StakingContainer = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Staking/StakingContainer'));
-const Crowdloans = React.lazy(() => import('./Crowdloans/Crowdloans'));
 const ActionButton = React.lazy(() => import('./ActionButton'));
-const TransactionHistory = React.lazy(() => import('./TransactionHistory/TransactionHistory'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;

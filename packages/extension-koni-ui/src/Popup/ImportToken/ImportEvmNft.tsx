@@ -45,6 +45,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
   const [chain, setChain] = useState(CHAIN_OPTIONS[0].value);
 
   const [isValidContract, setIsValidContract] = useState(true);
+  const [isValidName, setIsValidName] = useState(true);
   const { show } = useToast();
 
   const onAction = useContext(ActionContext);
@@ -83,12 +84,19 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
           })
           .catch(() => {
             show('Invalid contract for the selected chain');
+            setIsValidContract(false);
           });
       }
     }
   }, [contractAddress, chain, show]);
 
   const onChangeName = useCallback((val: string) => {
+    if (val.split(' ').join('') === '') {
+      setIsValidName(false);
+    } else {
+      setIsValidName(true);
+    }
+
     setName(val);
   }, []);
 
@@ -149,7 +157,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
         </div>
 
         <InputWithLabel
-          label={'NFT Collection Name'}
+          label={'NFT Collection Name (*)'}
           onChange={onChangeName}
           value={name}
         />
@@ -157,7 +165,7 @@ function ImportEvmNft ({ className = '' }: Props): React.ReactElement<Props> {
         <div className={'add-token-container'}>
           <Button
             className={'add-token-button'}
-            isDisabled={!isValidContract || contractAddress === ''}
+            isDisabled={!isValidContract || !isValidName || contractAddress === '' || name === ''}
             onClick={handleAddToken}
           >
             Add NFT collection

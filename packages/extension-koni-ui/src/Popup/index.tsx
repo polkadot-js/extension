@@ -24,10 +24,9 @@ import ToastProvider from '../components/Toast/ToastProvider';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-// import ExportAll from './ExportAll';
-import Home from './Home';
+// import Home from './Home';
 
-// import EvmTokenEdit from '@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit';
+const Home = React.lazy(() => import('./Home'));
 const EvmTokenEdit = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
 const EvmTokenSetting = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
 const Welcome = React.lazy(() => import('./Welcome'));

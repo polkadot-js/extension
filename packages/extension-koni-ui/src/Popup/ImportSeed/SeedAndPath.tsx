@@ -15,7 +15,7 @@ import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
 import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { objectSpread } from '@polkadot/util';
 
-import { AccountInfoEl, ButtonArea, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
+import { AccountInfoEl, ButtonArea, Checkbox, Dropdown, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { Theme } from '../../types';
@@ -30,12 +30,14 @@ interface Props {
   type: KeypairType;
   account: AccountInfo | null;
   evmAccount: AccountInfo | null;
+  isConnectWhenImport: boolean;
+  onConnectWhenImport: (isConnectWhenImport: boolean) => void;
   name: string | null;
   evmName: string | null;
   setSelectedGenesis: (genesis: string) => void;
 }
 
-function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name, onAccountChange, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
+function SeedAndPath ({ account, className, evmAccount, evmName, isConnectWhenImport, keyTypes, name, onAccountChange, onConnectWhenImport, onEvmAccountChange, onNextStep, onSelectAccountImported, setSelectedGenesis, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
@@ -214,6 +216,12 @@ function SeedAndPath ({ account, className, evmAccount, evmName, keyTypes, name,
               value={evmGenesis}
             />
           }
+
+          <Checkbox
+            checked={isConnectWhenImport}
+            label={t<string>('Auto connect to all DApp after importing')}
+            onChange={onConnectWhenImport}
+          />
         </div>
       </div>
       <ButtonArea>

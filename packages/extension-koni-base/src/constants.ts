@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export const CRON_REFRESH_PRICE_INTERVAL = 30000;
+export const CRON_REFRESH_PRICE_INTERVAL = 900000;
 export const DOTSAMA_API_TIMEOUT = 30000;
 export const DOTSAMA_AUTO_CONNECT_MS = 3000;
 export const DOTSAMA_MAX_CONTINUE_RETRY = 9;

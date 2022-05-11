@@ -594,16 +594,6 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     nativeToken: 'ZTG',
     crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
   },
-  sakura: {
-    chain: 'Sakura',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    provider: 'PROVIDER',
-    groups: ['KUSAMA_PARACHAIN'],
-    paraId: 2016,
-    nativeToken: 'SKU',
-    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
-  },
   shadow: {
     chain: 'Crust Shadow',
     genesisHash: '0xd4c0c08ca49dc7c680c3dac71a7c0703e5b222f4b6c03fe4c5219bb8f22c18dc',

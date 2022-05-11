@@ -1,0 +1,81 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UNIQUE_SCAN_ENDPOINT = exports.UNIQUE_IPFS_GATEWAY = exports.TRANSFER_CHAIN_ID = exports.SUPPORTED_TRANSFER_EVM_CHAIN = exports.SUPPORTED_TRANSFER_CHAIN_NAME = exports.SUPPORTED_NFT_NETWORKS = exports.SINGULAR_V2_EXTERNAL_SERVER = exports.SINGULAR_V2_ENDPOINT = exports.SINGULAR_V2_COLLECTION_ENDPOINT = exports.SINGULAR_V1_EXTERNAL_SERVER = exports.SINGULAR_V1_ENDPOINT = exports.SINGULAR_V1_COLLECTION_ENDPOINT = exports.RMRK_PINATA_SERVER = exports.QUARTZ_SCAN_ENDPOINT = exports.PINATA_IPFS_GATEWAY = exports.KANARIA_EXTERNAL_SERVER = exports.KANARIA_ENDPOINT = exports.CLOUDFLARE_SERVER = exports.CF_IPFS_GATEWAY = exports.BIT_COUNTRY_SERVER = void 0;
+// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
+exports.SINGULAR_V1_ENDPOINT = SINGULAR_V1_ENDPOINT;
+const SINGULAR_V2_ENDPOINT = 'https://singular.app/api/rmrk2/account/';
+exports.SINGULAR_V2_ENDPOINT = SINGULAR_V2_ENDPOINT;
+const KANARIA_ENDPOINT = 'https://kanaria.rmrk.app/api/rmrk2/';
+exports.KANARIA_ENDPOINT = KANARIA_ENDPOINT;
+const RMRK_PINATA_SERVER = 'https://rmrk.mypinata.cloud/ipfs/'; // deprecated
+
+exports.RMRK_PINATA_SERVER = RMRK_PINATA_SERVER;
+const SINGULAR_V1_COLLECTION_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/collection/';
+exports.SINGULAR_V1_COLLECTION_ENDPOINT = SINGULAR_V1_COLLECTION_ENDPOINT;
+const SINGULAR_V2_COLLECTION_ENDPOINT = 'https://singular.app/api/rmrk2/collection/';
+exports.SINGULAR_V2_COLLECTION_ENDPOINT = SINGULAR_V2_COLLECTION_ENDPOINT;
+const SINGULAR_V1_EXTERNAL_SERVER = 'https://singular.rmrk.app/collectibles/';
+exports.SINGULAR_V1_EXTERNAL_SERVER = SINGULAR_V1_EXTERNAL_SERVER;
+const SINGULAR_V2_EXTERNAL_SERVER = 'https://singular.app/collectibles/';
+exports.SINGULAR_V2_EXTERNAL_SERVER = SINGULAR_V2_EXTERNAL_SERVER;
+const KANARIA_EXTERNAL_SERVER = 'https://kanaria.rmrk.app/catalogue/';
+exports.KANARIA_EXTERNAL_SERVER = KANARIA_EXTERNAL_SERVER;
+const CLOUDFLARE_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
+exports.CLOUDFLARE_SERVER = CLOUDFLARE_SERVER;
+const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
+exports.BIT_COUNTRY_SERVER = BIT_COUNTRY_SERVER;
+const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
+exports.CF_IPFS_GATEWAY = CF_IPFS_GATEWAY;
+const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
+exports.PINATA_IPFS_GATEWAY = PINATA_IPFS_GATEWAY;
+const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
+exports.UNIQUE_SCAN_ENDPOINT = UNIQUE_SCAN_ENDPOINT;
+const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
+exports.QUARTZ_SCAN_ENDPOINT = QUARTZ_SCAN_ENDPOINT;
+const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
+exports.UNIQUE_IPFS_GATEWAY = UNIQUE_IPFS_GATEWAY;
+let SUPPORTED_NFT_NETWORKS;
+exports.SUPPORTED_NFT_NETWORKS = SUPPORTED_NFT_NETWORKS;
+
+(function (SUPPORTED_NFT_NETWORKS) {
+  SUPPORTED_NFT_NETWORKS["karura"] = "karura";
+  SUPPORTED_NFT_NETWORKS["acala"] = "acala";
+  SUPPORTED_NFT_NETWORKS["rmrk"] = "rmrk";
+  SUPPORTED_NFT_NETWORKS["statemine"] = "statemine";
+  SUPPORTED_NFT_NETWORKS["uniqueNft"] = "uniqueNft";
+  SUPPORTED_NFT_NETWORKS["quartz"] = "quartz";
+  SUPPORTED_NFT_NETWORKS["bitcountry"] = "bitcountry";
+  SUPPORTED_NFT_NETWORKS["moonbeam"] = "moonbeam";
+  SUPPORTED_NFT_NETWORKS["moonriver"] = "moonriver";
+  SUPPORTED_NFT_NETWORKS["moonbase"] = "moonbase";
+  SUPPORTED_NFT_NETWORKS["astarEvm"] = "astarEvm";
+})(SUPPORTED_NFT_NETWORKS || (exports.SUPPORTED_NFT_NETWORKS = SUPPORTED_NFT_NETWORKS = {}));
+
+let SUPPORTED_TRANSFER_CHAIN_NAME;
+exports.SUPPORTED_TRANSFER_CHAIN_NAME = SUPPORTED_TRANSFER_CHAIN_NAME;
+
+(function (SUPPORTED_TRANSFER_CHAIN_NAME) {
+  SUPPORTED_TRANSFER_CHAIN_NAME["moonbeam"] = "moonbeam";
+  SUPPORTED_TRANSFER_CHAIN_NAME["moonbase"] = "moonbase";
+  SUPPORTED_TRANSFER_CHAIN_NAME["astarEvm"] = "astarEvm";
+  SUPPORTED_TRANSFER_CHAIN_NAME["moonriver"] = "moonriver";
+  SUPPORTED_TRANSFER_CHAIN_NAME["shiden"] = "shiden";
+  SUPPORTED_TRANSFER_CHAIN_NAME["shibuya"] = "shibuya";
+})(SUPPORTED_TRANSFER_CHAIN_NAME || (exports.SUPPORTED_TRANSFER_CHAIN_NAME = SUPPORTED_TRANSFER_CHAIN_NAME = {}));
+
+const SUPPORTED_TRANSFER_EVM_CHAIN = [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase, SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam, SUPPORTED_TRANSFER_CHAIN_NAME.moonriver, SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm, SUPPORTED_TRANSFER_CHAIN_NAME.shiden, SUPPORTED_TRANSFER_CHAIN_NAME.shibuya];
+exports.SUPPORTED_TRANSFER_EVM_CHAIN = SUPPORTED_TRANSFER_EVM_CHAIN;
+const TRANSFER_CHAIN_ID = {
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase]: 1287,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam]: 1284,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.moonriver]: 1285,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm]: 592,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.shiden]: 336,
+  [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya]: 81
+};
+exports.TRANSFER_CHAIN_ID = TRANSFER_CHAIN_ID;

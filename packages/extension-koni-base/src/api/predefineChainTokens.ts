@@ -190,20 +190,6 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   moonbase: {
-    MFG: {
-      isMainToken: false,
-      symbol: 'MFG',
-      erc20Address: '0xb161B2DA48DE283ec22BaFbC36E5551c892629A2',
-      decimals: 18,
-      name: 'MFG'
-    },
-    MFR: {
-      isMainToken: false,
-      symbol: 'MFR',
-      erc20Address: '0xd7D798825F4e0BC340F6eE38282f2a0455226A87',
-      decimals: 18,
-      name: 'MFR'
-    },
     xcBNC: {
       isMainToken: false,
       symbol: 'xcBNC',

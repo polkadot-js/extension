@@ -7,7 +7,7 @@ import { ResponseTransfer, TransferErrorCode, TransferStep } from '@polkadot/ext
 import { getERC20Contract, getWeb3Api } from '@polkadot/extension-koni-base/api/web3/web3';
 import { BN } from '@polkadot/util';
 
-export async function handleTransfer (transactionObject: TransactionConfig, networkKey: string, privateKey: string, callback: (data: ResponseTransfer) => void) {
+export async function handleTransfer (transactionObject: TransactionConfig, changeValue: string, networkKey: string, privateKey: string, callback: (data: ResponseTransfer) => void) {
   const web3Api = getWeb3Api(networkKey);
   const signedTransaction = await web3Api.eth.accounts.signTransaction(transactionObject, privateKey);
   const response: ResponseTransfer = {
@@ -32,8 +32,20 @@ export async function handleTransfer (transactionObject: TransactionConfig, netw
       //   callback(response);
       // })
       .on('receipt', function (receipt: TransactionReceipt) {
-        console.log('receipt', receipt);
         response.step = TransferStep.SUCCESS;
+        response.txResult = {
+          change: changeValue || '0',
+          fee: (receipt.gasUsed * receipt.effectiveGasPrice).toString()
+        };
+        callback(response);
+      }).catch((e) => {
+        response.step = TransferStep.ERROR;
+        response.errors?.push({
+          code: TransferErrorCode.TRANSFER_ERROR,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+          message: e.message
+        });
+        callback(response);
       });
   } catch (error) {
     response.step = TransferStep.ERROR;
@@ -43,10 +55,11 @@ export async function handleTransfer (transactionObject: TransactionConfig, netw
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       message: error.message
     });
+    callback(response);
   }
 }
 
-export async function getEVMTransactionObject (networkKey: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string]> {
+export async function getEVMTransactionObject (networkKey: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string, string]> {
   const web3Api = getWeb3Api(networkKey);
   const gasPrice = await web3Api.eth.getGasPrice();
   const transactionObject = {
@@ -61,16 +74,16 @@ export async function getEVMTransactionObject (networkKey: string, to: string, v
 
   transactionObject.value = transferAll ? new BN(value).add(new BN(estimateFee).neg()) : value;
 
-  return [transactionObject, estimateFee.toString()];
+  return [transactionObject, transactionObject.value.toString(), estimateFee.toString()];
 }
 
 export async function makeEVMTransfer (networkKey: string, to: string, privateKey: string, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void): Promise<void> {
-  const [transactionObject] = await getEVMTransactionObject(networkKey, to, value, transferAll);
+  const [transactionObject, changeValue] = await getEVMTransactionObject(networkKey, to, value, transferAll);
 
-  await handleTransfer(transactionObject, networkKey, privateKey, callback);
+  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, callback);
 }
 
-export async function getERC20TransactionObject (assetAddress: string, networkKey: string, from: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string]> {
+export async function getERC20TransactionObject (assetAddress: string, networkKey: string, from: string, to: string, value: string, transferAll: boolean): Promise<[TransactionConfig, string, string]> {
   const web3Api = getWeb3Api(networkKey);
   const erc20Contract = getERC20Contract(networkKey, assetAddress);
 
@@ -106,15 +119,15 @@ export async function getERC20TransactionObject (assetAddress: string, networkKe
   const estimateFee = parseInt(gasPrice) * gasLimit;
 
   if (transferAll) {
-    transferValue = new BN(freeAmount).add(new BN(estimateFee).neg()).toString();
+    transferValue = new BN(freeAmount).toString();
     transactionObject.data = generateTransferData(to, transferValue);
   }
 
-  return [transactionObject, estimateFee.toString()];
+  return [transactionObject, transferValue, estimateFee.toString()];
 }
 
 export async function makeERC20Transfer (assetAddress: string, networkKey: string, from: string, to: string, privateKey: string, value: string, transferAll: boolean, callback: (data: ResponseTransfer) => void) {
-  const [transactionObject] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll);
+  const [transactionObject, changeValue] = await getERC20TransactionObject(assetAddress, networkKey, from, to, value, transferAll);
 
-  await handleTransfer(transactionObject, networkKey, privateKey, callback);
+  await handleTransfer(transactionObject, changeValue, networkKey, privateKey, callback);
 }

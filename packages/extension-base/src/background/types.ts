@@ -188,8 +188,6 @@ export interface RequestMetadataApprove {
 
 export interface RequestCurrentAccountAddress {
   address: string;
-  isShowBalance?: boolean;
-  allAccountLogo?: string;
 }
 
 export interface RequestMetadataReject {

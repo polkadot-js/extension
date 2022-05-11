@@ -3,11 +3,14 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
+import { ResponseSettingsType, ThemeTypes } from '@polkadot/extension-base/background/KoniTypes';
+import { saveTheme, subscribeSettings } from '@polkadot/extension-koni-ui/messaging';
+
 // FIXME We should not import from index when this one is imported there as well
-import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '.';
+import { chooseTheme, Main, themes, ThemeSwitchContext } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -18,12 +21,32 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
   const [theme, setTheme] = useState(chooseTheme());
 
   const switchTheme = useCallback(
-    (theme: AvailableThemes): void => {
+    (theme: ThemeTypes): void => {
       localStorage.setItem('theme', theme);
       setTheme(theme);
     },
     []
   );
+
+  useEffect(() => {
+    const _switchTheme = (data: ResponseSettingsType) => {
+      if (!data.theme) {
+        const theme = localStorage.getItem('theme');
+
+        saveTheme(theme as ThemeTypes, () => {
+          console.log('theme', theme);
+        }).catch(() => console.log('There is problem when initTheme'));
+      } else {
+        if (data.theme !== localStorage.getItem('theme')) {
+          switchTheme(data.theme);
+        }
+      }
+    };
+
+    subscribeSettings(null, _switchTheme)
+      .then(_switchTheme)
+      .catch((e) => console.log('There is problem when subscribeSettings', e));
+  }, [switchTheme]);
 
   const _theme = themes[theme];
 

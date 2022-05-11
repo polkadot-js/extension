@@ -7,7 +7,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
@@ -38,6 +38,7 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const dep = keyTypes.toString();
   const [password, setPassword] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // No need to validate an empty seed
@@ -73,6 +74,26 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
     },
     [name, password, onCreate]
   );
+
+  const _onChange = useCallback(
+    (password: string | null) => {
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      setPassword(password);
+    },
+    []
+  );
+
+  const _onFocusPasswordInput = useCallback(() => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, []);
+
+  const _onFocusRepeatPasswordInput = useCallback(() => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, []);
+
+  const _onScrollToError = useCallback(() => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, []);
 
   return (
     <div className={className}>
@@ -111,7 +132,12 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
               {error}
             </Warning>
           )}
-          <Password onChange={setPassword} />
+          <Password
+            onChange={_onChange}
+            onFocusPasswordInput={_onFocusPasswordInput}
+            onFocusRepeatPasswordInput={_onFocusRepeatPasswordInput}
+            onScrollToError={_onScrollToError}
+          />
         </div>
       </div>
       <ButtonArea>
@@ -123,6 +149,7 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
           {t<string>('Add the account with the supplied private key')}
         </NextStepButton>
       </ButtonArea>
+      <div ref={ref} />
     </div>
   );
 }

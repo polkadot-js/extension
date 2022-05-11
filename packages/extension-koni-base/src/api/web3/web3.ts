@@ -29,6 +29,16 @@ export const connectWeb3Apis = (networks = EVM_NETWORKS): Record<string, Web3> =
   return apiMap;
 };
 
+export const recoverWeb3Api = (networkKey: string, networks = EVM_NETWORKS) => {
+  const provider = networks[networkKey].provider;
+
+  if (provider.startsWith('ws')) {
+    web3Map[networkKey] = new Web3(new Web3.providers.WebsocketProvider(provider));
+  } else if (provider.startsWith('http')) {
+    web3Map[networkKey] = new Web3(new Web3.providers.HttpProvider(provider));
+  }
+};
+
 export const web3Map = connectWeb3Apis();
 
 export const getWeb3Api = (networkKey: string) => {
@@ -39,4 +49,10 @@ export const getERC20Contract = (networkKey: string, assetAddress: string, optio
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
   return new web3Map[networkKey].eth.Contract(ERC20Contract.abi, assetAddress, options);
+};
+
+export const getERC721Contract = (networkKey: string, assetAddress: string, options = {}): Contract => {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+  return new web3Map[networkKey].eth.Contract(ERC721Contract, assetAddress, options);
 };

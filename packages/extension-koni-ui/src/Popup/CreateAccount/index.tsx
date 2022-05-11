@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -33,6 +31,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   const [address, setAddress] = useState<null | string>(null);
   const [evmAddress, setEvmAddress] = useState<null | string>(null);
   const [seed, setSeed] = useState<null | string>(null);
+  const [isConnectWhenCreate, setConnectWhenCreate] = useState(true);
   const { accounts } = useContext(AccountContext);
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
   const name = `Account ${accountsWithoutAll.length + 1}`;
@@ -46,7 +45,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
   }
 
   useEffect((): void => {
-    createSeedV2(undefined, undefined, keyTypes)
+    createSeedV2(undefined, undefined, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
       .then((response): void => {
         // @ts-ignore
         setAddress(response.addressMap[SUBSTRATE_ACCOUNT_TYPE]);
@@ -54,17 +53,19 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
         setSeed(response.seed);
       })
       .catch(console.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect((): void => {
     if (seed) {
-      validateSeedV2(seed, keyTypes)
-        .then(({ addressMap, seed }) => {
+      validateSeedV2(seed, [SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE])
+        .then(({ addressMap }) => {
           setAddress(addressMap[SUBSTRATE_ACCOUNT_TYPE]);
           setEvmAddress(addressMap[EVM_ACCOUNT_TYPE]);
         })
         .catch(console.error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seed]);
 
   const _onCreate = useCallback(
@@ -72,7 +73,7 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
       // this should always be the case
       if (name && password && seed) {
         setIsBusy(true);
-        createAccountSuriV2(name, password, seed, keyTypes, genesisHash)
+        createAccountSuriV2(name, password, seed, isConnectWhenCreate, keyTypes, genesisHash)
           .then((response) => {
             window.localStorage.setItem('popupNavigation', '/');
             onAction('/');
@@ -83,7 +84,8 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
           });
       }
     },
-    [genesisHash, onAction, seed, dep]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isConnectWhenCreate, genesisHash, onAction, seed, dep]
   );
 
   const _onNextStep = useCallback(
@@ -112,7 +114,9 @@ function CreateAccount ({ className, defaultClassName }: Props): React.ReactElem
                 address={address}
                 evmAddress={evmAddress}
                 evmName={evmName}
+                isConnectWhenCreate={isConnectWhenCreate}
                 name={name}
+                onConnectWhenCreate={setConnectWhenCreate}
                 onNextStep={_onNextStep}
                 onSelectAccountCreated={setKeyTypes}
                 seed={seed}

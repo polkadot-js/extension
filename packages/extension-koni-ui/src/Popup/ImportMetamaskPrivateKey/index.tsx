@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -48,7 +46,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, keyTypes)
+      createAccountSuriV2(name, password, account.suri, false, keyTypes)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -58,6 +56,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
           console.error(error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, onAction, dep]);
 
   return (

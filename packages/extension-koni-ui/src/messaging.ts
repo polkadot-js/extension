@@ -10,12 +10,13 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, PriceJson, RequestCheckTransfer, RequestNftForceUpdate, RequestSubscribeBalance, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, TransactionHistoryItemType, TransferError } from '@polkadot/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest } from '@polkadot/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@polkadot/extension-base/background/types';
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { MetadataDef } from '@polkadot/extension-inject/types';
+import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
 import allChains from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
@@ -82,6 +83,22 @@ export async function saveCurrentAccountAddress (data: RequestCurrentAccountAddr
   return sendMessage('pri(currentAccount.saveAddress)', data, callback);
 }
 
+export async function toggleBalancesVisibility (callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.changeBalancesVisibility)', null, callback);
+}
+
+export async function saveAccountAllLogo (accountAllLogo: string, callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveAccountAllLogo)', accountAllLogo, callback);
+}
+
+export async function saveTheme (theme: ThemeTypes, callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveTheme)', theme, callback);
+}
+
+export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
+  return sendMessage('pri(currentAccount.subscribeSettings)', data, callback);
+}
+
 export async function tieAccount (address: string, genesisHash: string | null): Promise<boolean> {
   return sendMessage('pri(accounts.tie)', { address, genesisHash });
 }
@@ -146,8 +163,8 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createAccountSuriV2 (name: string, password: string, suri: string, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
-  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types });
+export async function createAccountSuriV2 (name: string, password: string, suri: string, isAllowed: boolean, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
+  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types, isAllowed });
 }
 
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
@@ -213,6 +230,14 @@ export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void):
 
 export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWithCurrentAddress) => void): Promise<boolean> {
   return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
+}
+
+export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<string> {
+  return sendMessage('pri(accounts.subscribeAccountsInputAddress)', null, cb);
+}
+
+export async function saveRecentAccountId (accountId: string): Promise<SingleAddress> {
+  return sendMessage('pri(accounts.saveRecent)', { accountId });
 }
 
 export async function triggerAccountsSubscription (): Promise<boolean> {
@@ -283,8 +308,8 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
   return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
-export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
-  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri });
+export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null, isAllowed: boolean): Promise<boolean> {
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri, isAllowed });
 }
 
 export async function windowOpen (path: AllowedPath): Promise<boolean> {
@@ -303,12 +328,12 @@ export async function batchRestore (file: KeyringPairs$Json, password: string, a
   return sendMessage('pri(json.batchRestore)', { file, password, address });
 }
 
-export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string): Promise<void> {
-  return sendMessage('pri(json.restoreV2)', { file, password, address });
+export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string, isAllowed: boolean): Promise<void> {
+  return sendMessage('pri(json.restoreV2)', { file, password, address, isAllowed });
 }
 
-export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
-  return sendMessage('pri(json.batchRestoreV2)', { file, password, address });
+export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, accountsInfo: ResponseJsonGetAccountInfo[], isAllowed: boolean): Promise<void> {
+  return sendMessage('pri(json.batchRestoreV2)', { file, password, accountsInfo, isAllowed });
 }
 
 export async function setNotification (notification: string): Promise<boolean> {
@@ -419,4 +444,44 @@ export async function evmNftGetTransaction (request: EvmNftTransactionRequest): 
 
 export async function evmNftSubmitTransaction (request: EvmNftSubmitTransaction, callback: (data: EvmNftTransactionResponse) => void): Promise<EvmNftTransactionResponse> {
   return sendMessage('pri(evmNft.submitTransaction)', request, callback);
+}
+
+export async function subscribeEvmToken (callback: (data: EvmTokenJson) => void): Promise<EvmTokenJson> {
+  return sendMessage('pri(evmTokenState.getSubscription)', null, callback);
+}
+
+export async function getEvmTokenState (): Promise<EvmTokenJson> {
+  return sendMessage('pri(evmTokenState.getEvmTokenState)', null);
+}
+
+export async function upsertEvmToken (data: CustomEvmToken): Promise<boolean> {
+  return sendMessage('pri(evmTokenState.upsertEvmTokenState)', data);
+}
+
+export async function deleteEvmTokens (data: DeleteEvmTokenParams[]) {
+  return sendMessage('pri(evmTokenState.deleteMany)', data);
+}
+
+export async function validateEvmToken (data: ValidateEvmTokenRequest) {
+  return sendMessage('pri(evmTokenState.validateEvmToken)', data);
+}
+
+export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {
+  return sendMessage('pri(transfer.checkReferenceCount)', request);
+}
+
+export async function transferCheckSupporting (request: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
+  return sendMessage('pri(transfer.checkSupporting)', request);
+}
+
+export async function transferGetExistentialDeposit (request: RequestTransferExistentialDeposit): Promise<string> {
+  return sendMessage('pri(transfer.getExistentialDeposit)', request);
+}
+
+export async function cancelSubscription (request: string): Promise<boolean> {
+  return sendMessage('pri(subscription.cancel)', request);
+}
+
+export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
+  return sendMessage('pri(freeBalance.subscribe)', request, callback);
 }

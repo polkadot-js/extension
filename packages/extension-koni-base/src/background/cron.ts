@@ -3,12 +3,13 @@
 
 import { Subject } from 'rxjs';
 
-import { NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
+import { CustomEvmToken, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
+import { recoverWeb3Api, web3Map } from '@polkadot/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, state } from '@polkadot/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@polkadot/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubcription;
@@ -56,16 +57,17 @@ export class KoniCron {
   init () {
     this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
     this.addCron('recoverAPI', this.recoverAPI, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
+    this.addCron('recoverWeb3', this.recoverWeb3Api, CRON_AUTO_RECOVER_WEB3_INTERVAL, false);
 
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
-        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address), CRON_REFRESH_NFT_INTERVAL);
+        this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
         this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
         this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
       }
 
-      state.subscribeCurrentAccount().subscribe({
-        next: ({ address }) => {
+      state.subscribeServiceInfo_().subscribe({
+        next: ({ currentAccount: address, customErc721Registry }) => {
           this.resetNft();
           this.resetNftTransferMeta();
           this.resetStakingReward();
@@ -74,7 +76,7 @@ export class KoniCron {
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
 
-          this.addCron('refreshNft', this.refreshNft(address), CRON_REFRESH_NFT_INTERVAL);
+          this.addCron('refreshNft', this.refreshNft(address, customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
           this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
           this.addCron('refreshHistory', this.refreshHistory(address), CRON_REFRESH_HISTORY_INTERVAL);
         }
@@ -95,6 +97,20 @@ export class KoniCron {
     });
   }
 
+  recoverWeb3Api () {
+    console.log('check web3 connection');
+
+    for (const [key, web3] of Object.entries(web3Map)) {
+      web3.eth.net.isListening()
+        .catch(() => {
+          console.log('web3 disconnected', key);
+          recoverWeb3Api(key);
+        });
+    }
+
+    console.log('check web3 connection done');
+  }
+
   refreshPrice () {
     getTokenPrice()
       .then((rs) => {
@@ -105,10 +121,10 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft (address: string) {
+  refreshNft (address: string, customErc721Registry: CustomEvmToken[]) {
     return () => {
       console.log('Refresh Nft state');
-      this.subscriptions.subscribeNft(address);
+      this.subscriptions.subscribeNft(address, customErc721Registry);
     };
   }
 

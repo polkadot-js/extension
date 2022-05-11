@@ -10,7 +10,7 @@ import {Webhook} from "discord-webhook-node";
 
 console.log('$ polkadot-ci-ghact-build', process.argv.slice(2).join(' '));
 
-const discordHook = new Webhook(`https://discordapp.com/api/webhooks/${process.env.DISCORD_WEBHOOK_ID}/${process.env.DISCORD_WEBHOOK_TOKEN}`);
+const discordHook = new Webhook(process.env.DISCORD_WEBHOOK);
 
 function runClean () {
   execSync('yarn polkadot-dev-clean-build');

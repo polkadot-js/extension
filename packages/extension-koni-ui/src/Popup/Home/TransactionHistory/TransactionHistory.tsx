@@ -8,8 +8,8 @@ import { ChainRegistry, TransactionHistoryItemType } from '@polkadot/extension-b
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
 
-import TransactionHistoryEmptyList from './EmptyList';
-import TransactionHistoryItem from './TransactionHistoryItem';
+const TransactionHistoryItem = React.lazy(() => import('./TransactionHistoryItem'));
+const TransactionHistoryEmptyList = React.lazy(() => import('./EmptyList'));
 
 interface Props extends ThemeProps {
   className?: string;
@@ -68,11 +68,13 @@ function Wrapper ({ className, historyMap, networkKey, registryMap }: Props): Re
     return (<TransactionHistoryEmptyList />);
   }
 
-  return (<TransactionHistory
-    className={className}
-    items={readyItems}
-    registryMap={registryMap}
-  />);
+  return (
+    <TransactionHistory
+      className={className}
+      items={readyItems}
+      registryMap={registryMap}
+    />
+  );
 }
 
 function TransactionHistory ({ className, items, registryMap }: ContentProp): React.ReactElement<ContentProp> {

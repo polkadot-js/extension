@@ -5,18 +5,22 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 import { getId } from '@polkadot/extension-base/utils/getId';
 import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
+import { cacheRegistryMap } from '@polkadot/extension-koni-base/api/dotsama/registry';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
 import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
 import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
+import { DEFAULT_EVM_TOKENS } from '@polkadot/extension-koni-base/api/web3/defaultEvmToken';
 import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
 import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
+import CustomEvmTokenStore from '@polkadot/extension-koni-base/stores/CustomEvmToken';
+import SettingsStore from '@polkadot/extension-koni-base/stores/Settings';
 import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
 import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
@@ -69,8 +73,10 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
+  private readonly settingsStore = new SettingsStore();
   private readonly accountRefStore = new AccountRefStore();
   private readonly authorizeStore = new AuthorizeStore();
   readonly #authRequestsV2: Record<string, AuthRequestV2> = {};
@@ -78,6 +84,54 @@ export default class KoniState extends State {
   // private readonly stakingStore = new StakingStore();
   private priceStoreReady = false;
   private readonly transactionHistoryStore = new TransactionHistoryStore();
+
+  public initEvmTokenState () {
+    this.customEvmTokenStore.get('EvmToken', (storedEvmTokens) => {
+      if (!storedEvmTokens) {
+        this.evmTokenState = DEFAULT_EVM_TOKENS;
+      } else {
+        const _evmTokenState = DEFAULT_EVM_TOKENS;
+
+        for (const storedToken of storedEvmTokens.erc20) {
+          let exist = false;
+
+          for (const defaultToken of DEFAULT_EVM_TOKENS.erc20) {
+            if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+              exist = true;
+              break;
+            }
+          }
+
+          if (!exist) {
+            _evmTokenState.erc20.push(storedToken);
+          }
+        }
+
+        for (const storedToken of storedEvmTokens.erc721) {
+          let exist = false;
+
+          for (const defaultToken of DEFAULT_EVM_TOKENS.erc721) {
+            if (defaultToken.smartContract === storedToken.smartContract && defaultToken.chain === storedToken.chain) {
+              exist = true;
+              break;
+            }
+          }
+
+          if (!exist) {
+            _evmTokenState.erc721.push(storedToken);
+          }
+        }
+
+        this.evmTokenState = _evmTokenState;
+      }
+
+      this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+      this.evmTokenSubject.next(this.evmTokenState);
+    });
+  }
+
+  private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
+  private evmTokenSubject = new Subject<EvmTokenJson>();
 
   // private nftStoreReady = false;
   // private stakingStoreReady = false;
@@ -117,6 +171,7 @@ export default class KoniState extends State {
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
+  private _serviceInfoSubject = new Subject<_ServiceInfo>();
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -517,6 +572,26 @@ export default class KoniState extends State {
 
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
+
+    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+  }
+
+  public getSettings (update: (value: RequestSettingsType) => void): void {
+    this.settingsStore.get('Settings', (value) => {
+      if (!value) {
+        update({ isShowBalance: false, accountAllLogo: '', theme: 'dark' });
+      } else {
+        update(value);
+      }
+    });
+  }
+
+  public setSettings (data: RequestSettingsType, callback?: () => void): void {
+    this.settingsStore.set('Settings', data, callback);
+  }
+
+  public subscribeSettingsSubject (): Subject<RequestSettingsType> {
+    return this.settingsStore.getSubject();
   }
 
   public subscribeCurrentAccount (): Subject<CurrentAccountInfo> {
@@ -609,6 +684,40 @@ export default class KoniState extends State {
     });
   }
 
+  public upsertChainRegistry (tokenData: CustomEvmToken) {
+    const chainRegistry = this.chainRegistryMap[tokenData.chain];
+    let tokenKey = '';
+
+    for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+      if (token.erc20Address === tokenData.smartContract) {
+        tokenKey = key;
+        break;
+      }
+    }
+
+    if (tokenKey !== '') {
+      chainRegistry.tokenMap[tokenKey] = {
+        isMainToken: false,
+        symbol: tokenData.symbol,
+        name: tokenData.name,
+        erc20Address: tokenData.smartContract,
+        decimals: tokenData.decimals
+      } as TokenInfo;
+    } else {
+      // @ts-ignore
+      chainRegistry.tokenMap[tokenData.symbol] = {
+        isMainToken: false,
+        symbol: tokenData.symbol,
+        name: tokenData.symbol,
+        erc20Address: tokenData.smartContract,
+        decimals: tokenData.decimals
+      } as TokenInfo;
+    }
+
+    cacheRegistryMap[tokenData.chain] = chainRegistry;
+    this.chainRegistrySubject.next(this.getChainRegistryMap());
+  }
+
   public subscribeChainRegistryMap () {
     return this.chainRegistrySubject;
   }
@@ -692,5 +801,118 @@ export default class KoniState extends State {
 
   public subscribePrice () {
     return this.priceStore.getSubject();
+  }
+
+  public subscribeEvmToken () {
+    return this.evmTokenSubject;
+  }
+
+  public getEvmTokenState () {
+    return this.evmTokenState;
+  }
+
+  public getErc20Tokens () {
+    return this.evmTokenState.erc20;
+  }
+
+  public getErc721Tokens () {
+    return this.evmTokenState.erc721;
+  }
+
+  public getEvmTokenStore (callback: (data: EvmTokenJson) => void) {
+    return this.customEvmTokenStore.get('EvmToken', (data) => {
+      callback(data);
+    });
+  }
+
+  public upsertEvmToken (data: CustomEvmToken) {
+    let isExist = false;
+
+    for (const token of this.evmTokenState[data.type]) {
+      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+        isExist = true;
+        break;
+      }
+    }
+
+    if (!isExist) {
+      this.evmTokenState[data.type].push(data);
+    } else {
+      this.evmTokenState[data.type] = this.evmTokenState[data.type].map((token) => {
+        if (token.smartContract === data.smartContract) {
+          return data;
+        }
+
+        return token;
+      });
+    }
+
+    if (data.type === 'erc20') {
+      this.upsertChainRegistry(data);
+    }
+
+    this.evmTokenSubject.next(this.evmTokenState);
+    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+  }
+
+  public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
+    const _evmTokenState: EvmTokenJson = this.evmTokenState;
+    let needUpdateChainRegistry = false;
+
+    for (const targetToken of targetTokens) {
+      for (let index = 0; index < _evmTokenState.erc20.length; index++) {
+        if (_evmTokenState.erc20[index].smartContract === targetToken.smartContract && _evmTokenState.erc20[index].chain === targetToken.chain && targetToken.type === 'erc20') {
+          _evmTokenState.erc20.splice(index, 1);
+          needUpdateChainRegistry = true;
+        }
+      }
+    }
+
+    if (needUpdateChainRegistry) {
+      for (const targetToken of targetTokens) {
+        const chainRegistry = this.chainRegistryMap[targetToken.chain];
+        let deleteKey = '';
+
+        for (const [key, token] of Object.entries(chainRegistry.tokenMap)) {
+          if (token.erc20Address === targetToken.smartContract && targetToken.type === 'erc20') {
+            deleteKey = key;
+          }
+        }
+
+        delete chainRegistry.tokenMap[deleteKey];
+        this.chainRegistryMap[targetToken.chain] = chainRegistry;
+        cacheRegistryMap[targetToken.chain] = chainRegistry;
+      }
+    }
+
+    for (const targetToken of targetTokens) {
+      for (let index = 0; index < _evmTokenState.erc721.length; index++) {
+        if (_evmTokenState.erc721[index].smartContract === targetToken.smartContract && _evmTokenState.erc721[index].chain === targetToken.chain && targetToken.type === 'erc721') {
+          _evmTokenState.erc721.splice(index, 1);
+          needUpdateChainRegistry = true;
+        }
+      }
+    }
+
+    this.evmTokenState = _evmTokenState;
+    this.evmTokenSubject.next(this.evmTokenState);
+    this.chainRegistrySubject.next(this.getChainRegistryMap());
+    this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
+    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+  }
+
+  public subscribeServiceInfo_ () {
+    return this._serviceInfoSubject;
+  }
+
+  public updateServiceInfo_ (chainRegistry: Record<string, ChainRegistry>, customErc721Registry: CustomEvmToken[]) {
+    this.currentAccountStore.get('CurrentAccountInfo', (value) => {
+      this._serviceInfoSubject.next({
+        currentAccount: value.address,
+        chainRegistry,
+        customErc721Registry
+      });
+    });
   }
 }

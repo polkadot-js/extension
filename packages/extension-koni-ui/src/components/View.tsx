@@ -3,8 +3,10 @@
 
 import type { ThemeProps } from '../types';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
+
+import { subscribeSettings } from '@polkadot/extension-koni-ui/messaging';
 
 // FIXME We should not import from index when this one is imported there as well
 import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '.';
@@ -24,6 +26,18 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
     },
     []
   );
+
+  useEffect(() => {
+    subscribeSettings(null, (data) => {
+      if (data.theme !== localStorage.getItem('theme')) {
+        switchTheme(data.theme);
+      }
+    }).then((data) => {
+      if (data.theme !== localStorage.getItem('theme')) {
+        switchTheme(data.theme);
+      }
+    }).catch((e) => console.log('There is problem when subscribeSettings', e));
+  }, [switchTheme]);
 
   const _theme = themes[theme];
 

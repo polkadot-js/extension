@@ -266,7 +266,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     ss58Format: 42,
     provider: 'wss://ws.azero.dev/',
     groups: ['MAIN_NET'],
-    nativeToken: 'AZERO'
+    nativeToken: 'AZERO',
+    decimals: 12
   },
   alephTest: {
     chain: 'Aleph Zero Testnet',

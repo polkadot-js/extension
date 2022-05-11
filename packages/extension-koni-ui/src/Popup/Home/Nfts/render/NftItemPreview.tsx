@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
+// @ts-ignore
+import LazyLoad from 'react-lazyload';
 import styled from 'styled-components';
 
 import logo from '@polkadot/extension-koni-ui/assets/sub-wallet-logo.svg';
@@ -60,30 +62,41 @@ function NftItemPreview ({ className, collectionImage, data, onClick }: Props): 
             loading &&
             <Spinner className={'img-spinner'} />
           }
-          {
-            showImage
-              ? <img
-                alt={'collection-thumbnail'}
-                className={'collection-thumbnail'}
-                onError={handleImageError}
-                onLoad={handleOnLoad}
-                src={getItemImage()}
-                style={{ borderRadius: '5px 5px 0 0' }}
-              />
-              : <video
-                autoPlay
-                height='124'
-                loop={true}
-                muted
-                onError={handleVideoError}
-                width='124'
-              >
-                <source
+          <LazyLoad
+            scrollContainer={'.home-tab-contents'}
+          >
+            {
+              showImage
+                ? <img
+                  alt={'collection-thumbnail'}
+                  className={'collection-thumbnail'}
+                  onError={handleImageError}
+                  onLoad={handleOnLoad}
                   src={getItemImage()}
-                  type='video/mp4'
+                  style={{ borderRadius: '5px 5px 0 0' }}
                 />
-              </video>
-          }
+                : !imageError
+                  ? <video
+                    autoPlay
+                    height='124'
+                    loop={true}
+                    muted
+                    onError={handleVideoError}
+                    width='124'
+                  >
+                    <source
+                      src={getItemImage()}
+                      type='video/mp4'
+                    />
+                  </video>
+                  : <img
+                    alt={'default-img'}
+                    className={'collection-thumbnail'}
+                    src={logo}
+                    style={{ borderRadius: '5px 5px 0 0' }}
+                  />
+            }
+          </LazyLoad>
         </div>
 
         <div className={'collection-title'}>

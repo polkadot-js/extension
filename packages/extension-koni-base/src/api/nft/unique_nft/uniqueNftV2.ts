@@ -1,5 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
 import fetch from 'cross-fetch';
 
 import { NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
@@ -27,12 +28,12 @@ export class UniqueNftApiV2 extends BaseNftApi {
     };
   }
 
-  private static parseNftCollectionRequest (collectionId: string) {
-    return {
-      // eslint-disable-next-line
-      query: `query MyQuery { collections(where: {collection_id: {_eq: \"${collectionId}\"}}) { collection_id name } }`
-    };
-  }
+  // private static parseNftCollectionRequest (collectionId: string) {
+  //   return {
+  //     // eslint-disable-next-line
+  //     query: `query MyQuery { collections(where: {collection_id: {_eq: \"${collectionId}\"}}) { collection_id name } }`
+  //   };
+  // }
 
   private async getNftByAccount (address: string) {
     const resp = await fetch(this.endpoint, {

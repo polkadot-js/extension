@@ -8,12 +8,12 @@ import styled from 'styled-components';
 import { NetWorkGroup, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
 import { CrowdloanContributeValueType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
-import CrowdloanItem from '@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@polkadot/extension-koni-ui/Popup/Home/types';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN_ZERO, getLogoByNetworkKey } from '@polkadot/extension-koni-ui/util';
 
-import CrowdloanEmptyList from './EmptyList';
+const CrowdloanEmptyList = React.lazy(() => import('./EmptyList'));
+const CrowdloanItem = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem'));
 
 interface Props extends ThemeProps {
   className?: string;

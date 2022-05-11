@@ -10,8 +10,6 @@ import styled from 'styled-components';
 import { NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
 import { Link } from '@polkadot/extension-koni-ui/components';
 import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import ChainBalanceDetailItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem';
-import ChainBalanceItem from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem';
 import { hasAnyChildTokenBalance } from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/utils';
 import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { ThemeProps } from '@polkadot/extension-koni-ui/types';
@@ -20,7 +18,9 @@ import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import ChainBalanceDetail from '../ChainBalances/ChainBalanceDetail/ChainBalanceDetail';
+const ChainBalanceDetail = React.lazy(() => import('../ChainBalances/ChainBalanceDetail/ChainBalanceDetail'));
+const ChainBalanceItem = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceItem'));
+const ChainBalanceDetailItem = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/ChainBalances/ChainBalanceDetail/ChainBalanceDetailItem'));
 
 interface Props extends ThemeProps {
   address: string;

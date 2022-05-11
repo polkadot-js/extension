@@ -7,8 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { Link } from '@polkadot/extension-koni-ui/components';
-import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
+import Link from '@polkadot/extension-koni-ui/components/Link';
 import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
 import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
 import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
@@ -19,6 +18,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const NftCollection = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection'));
 const NftCollectionPreview = React.lazy(() => import('./NftCollectionPreview'));
+const Spinner = React.lazy(() => import('@polkadot/extension-koni-ui/components/Spinner'));
 
 interface Props extends ThemeProps {
   className?: string;

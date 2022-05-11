@@ -186,7 +186,9 @@ export default styled(EvmTokenSetting)(({ theme }: Props) => `
   }
 
   .networks__input-filter {
-    padding: 0 15px 15px;
+    margin-bottom: 15px;
+    margin-left: 15px;
+    margin-right: 15px;
   }
 
   .networks__btn {

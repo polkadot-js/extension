@@ -1395,7 +1395,7 @@ export default class KoniExtension extends Extension {
     let isExist = false;
 
     for (const token of evmTokenState[data.type]) {
-      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
         isExist = true;
         break;
       }

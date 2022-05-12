@@ -20,7 +20,7 @@ const MetadataReqContext = React.createContext<MetadataRequest[]>([]);
 const SettingsContext = React.createContext<SettingsStruct>(settings.get());
 const SigningReqContext = React.createContext<SigningRequest[]>([]);
 const ThemeSwitchContext = React.createContext<(theme: AvailableThemes) => void>(noop);
-const ToastContext = React.createContext<({show: (message: string) => void, setToastError: (isError: boolean) => void})>({ show: noop, setToastError: noop });
+const ToastContext = React.createContext<({show: (message: string, isError?: boolean) => void})>({ show: noop });
 
 export {
   AccountContext,

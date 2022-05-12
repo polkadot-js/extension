@@ -37,7 +37,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
-  const { setToastError, show } = useToast();
+  const { show } = useToast();
 
   useEffect((): void => {
     if (currentAccount?.address === address) {
@@ -109,10 +109,9 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
         updateAvatar(event.target.files[0]);
       } else {
-        setToastError(true);
-        show(t('File is too large (limited 500KB)'));
+        show(t('File is too large (limited 500KB)'), true);
       }
-    }, [updateAvatar, setToastError, show, t]);
+    }, [updateAvatar, show, t]);
 
   const onSelectImg = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();

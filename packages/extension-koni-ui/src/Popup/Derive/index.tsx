@@ -1,12 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
-
-import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

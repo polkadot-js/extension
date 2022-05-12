@@ -1,13 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
 
+import warning from '@subwallet/extension-koni-ui/assets/warning.svg';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-
-import warning from '@polkadot/extension-koni-ui/assets/warning.svg';
-import Tooltip from '@polkadot/extension-koni-ui/components/Tooltip';
 
 interface Props {
   children: React.ReactNode;

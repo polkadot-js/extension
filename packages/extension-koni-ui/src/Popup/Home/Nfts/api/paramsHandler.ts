@@ -1,8 +1,8 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { SUPPORTED_TRANSFER_CHAIN_NAME } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
+import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { SUPPORTED_TRANSFER_CHAIN_NAME } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 
 const RMRK_PREFIX = 'RMRK';
 const RMRK_OP_TYPE = 'SEND';

@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ERC20Contract, web3Map } from '@polkadot/extension-koni-base/api/web3/web3';
+import { ERC20Contract, web3Map } from '@subwallet/extension-koni-base/api/web3/web3';
 
 describe('test web3 APIs', () => {
   const exampleAddress = '0x4deFD3781271F92fA7dc47c97DB576bb3c916e6C';

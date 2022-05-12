@@ -1,24 +1,24 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Link from '@subwallet/extension-koni-ui/components/Link';
+import useFetchNftExtra from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
+import EmptyList from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
+import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import Link from '@polkadot/extension-koni-ui/components/Link';
-import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
-import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
-import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-const NftCollection = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection'));
+const NftCollection = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftCollection'));
 const NftCollectionPreview = React.lazy(() => import('./NftCollectionPreview'));
-const Spinner = React.lazy(() => import('@polkadot/extension-koni-ui/components/Spinner'));
+const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
 
 interface Props extends ThemeProps {
   className?: string;

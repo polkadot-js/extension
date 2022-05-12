@@ -1,13 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Password from '@subwallet/extension-koni-ui/components/Password';
+import Toggle from '@subwallet/extension-koni-ui/components/Toggle';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import Password from '@polkadot/extension-koni-ui/components/Password';
-import Toggle from '@polkadot/extension-koni-ui/components/Toggle';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 const UNLOCK_MINS = 15;
 

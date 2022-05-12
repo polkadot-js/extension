@@ -1,10 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson } from '@polkadot/extension-base/background/types';
-import { SenderInputAddressType } from '@polkadot/extension-koni-ui/components/types';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util';
+import { ChainRegistry, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { SenderInputAddressType } from '@subwallet/extension-koni-ui/components/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
+
 import { BN, BN_HUNDRED } from '@polkadot/util';
 
 function getDefaultAddress (address: string, accounts: AccountJson[]): string {

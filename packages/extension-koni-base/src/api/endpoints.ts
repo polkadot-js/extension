@@ -1,8 +1,8 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetWorkInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
+import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 
 const NETWORKS: Record<string, NetWorkInfo> = {
   acala_testnet: {
@@ -133,6 +133,15 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2002,
     nativeToken: 'CLV',
     crowdloanUrl: 'https://lucky.clover.finance/?type=support'
+  },
+  sakura: {
+    chain: 'Sakura',
+    genesisHash: '0x7b0f142a9299b0886595992f8cac58814c8956de6a31c77caca95db01370fc2c',
+    ss58Format: 42,
+    provider: 'wss://rpc.sakura.clover.finance',
+    groups: ['KUSAMA_PARACHAIN'],
+    paraId: 2016,
+    nativeToken: 'SKU'
   },
   hydradx: {
     chain: 'HydraDX',
@@ -584,16 +593,6 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2101,
     nativeToken: 'ZTG',
     crowdloanUrl: 'https://crowdloan.zeitgeist.pm/'
-  },
-  sakura: {
-    chain: 'Sakura',
-    genesisHash: 'UNKNOWN',
-    ss58Format: -1,
-    provider: 'PROVIDER',
-    groups: ['KUSAMA_PARACHAIN'],
-    paraId: 2016,
-    nativeToken: 'SKU',
-    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
   },
   shadow: {
     chain: 'Crust Shadow',

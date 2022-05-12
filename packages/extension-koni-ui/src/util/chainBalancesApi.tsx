@@ -1,10 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isEmptyArray } from '@subwallet/extension-koni-ui/util/common';
 import axios from 'axios';
 import BigN from 'bignumber.js';
-
-import { isEmptyArray } from '@polkadot/extension-koni-ui/util/common';
 
 import { AccountInfoItem, BalanceInfo, BalanceSubInfo } from './types';
 

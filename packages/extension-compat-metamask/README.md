@@ -1,3 +1,3 @@
-# @polkadot/extension-metamask-compat
+# @subwallet/extension-metamask-compat
 
 An optional metamask-compatible layer

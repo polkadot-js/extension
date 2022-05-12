@@ -182,11 +182,10 @@ export default styled(Request)(({ theme }: Props) => `
 
   .authorize-request__btn:first-child {
     background-color: ${theme.buttonBackground1};
-    color: ${theme.textColor3};
     margin-right: 8px;
 
     span {
-      color: ${theme.textColor3};
+      color: ${theme.buttonTextColor2};
     }
   }
 

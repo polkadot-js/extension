@@ -94,7 +94,7 @@ export default styled(Request)(({ theme }: ThemeProps) => `
     margin-right: 8px;
 
     span {
-      color: ${theme.textColor3};
+      color: ${theme.buttonTextColor2};
     }
   }
 

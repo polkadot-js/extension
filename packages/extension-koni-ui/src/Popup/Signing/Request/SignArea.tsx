@@ -160,7 +160,7 @@ export default styled(SignArea)(({ theme }: Props) => `
     margin-right: 8px;
 
     span {
-      color: ${theme.textColor3};
+      color: ${theme.buttonTextColor2};
     }
   }
 

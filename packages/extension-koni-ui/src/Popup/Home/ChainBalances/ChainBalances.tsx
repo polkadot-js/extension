@@ -28,9 +28,10 @@ interface Props extends ThemeProps {
   currentNetworkKey: string;
   isShowBalanceDetail: boolean;
   isShowZeroBalances: boolean;
-  networkKeys: string[];
   networkBalanceMaps: Record<string, BalanceInfo>;
+  networkKeys: string[];
   networkMetadataMap: Record<string, NetWorkMetadataDef>;
+  setIsExportModalOpen: (visible: boolean) => void;
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
@@ -38,8 +39,8 @@ interface Props extends ThemeProps {
     iconTheme: string,
     showExportButton: boolean
   }) => void;
-  setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
   setSelectedNetworkBalance?: (networkBalance: BigN) => void;
+  setShowBalanceDetail: (isShowBalanceDetail: boolean) => void;
 }
 
 function isAllowToShow (
@@ -96,6 +97,7 @@ function ChainBalances ({ address,
   networkBalanceMaps,
   networkKeys,
   networkMetadataMap,
+  setIsExportModalOpen,
   setQrModalOpen,
   setQrModalProps,
   setSelectedNetworkBalance,
@@ -151,6 +153,7 @@ function ChainBalances ({ address,
           isLoading={!balanceInfo}
           isShowDetail={info.networkKey === selectedNetworkKey}
           key={info.key}
+          setIsExportModalOpen={setIsExportModalOpen}
           setQrModalOpen={setQrModalOpen}
           setQrModalProps={setQrModalProps}
           toggleBalanceDetail={toggleBalanceDetail}
@@ -164,6 +167,7 @@ function ChainBalances ({ address,
         balanceInfo={balanceInfo}
         isLoading={!balanceInfo}
         key={info.key}
+        setIsExportModalOpen={setIsExportModalOpen}
         setQrModalOpen={setQrModalOpen}
         setQrModalProps={setQrModalProps}
         setSelectedNetworkBalance={setSelectedNetworkBalance}
@@ -202,6 +206,10 @@ function ChainBalances ({ address,
   useEffect(() => {
     handlerResize();
     window.addEventListener('resize', handlerResize);
+
+    return () => {
+      window.removeEventListener('resize', handlerResize);
+    };
   }, []);
 
   useEffect(() => {

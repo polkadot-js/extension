@@ -74,6 +74,7 @@ const darkTheme = {
   textColor2: '#7B8098',
   textColor3: colors.primary2,
   textColorDanger: '#FF8686',
+  textColorFilter2: 'invert(55%) sepia(15%) saturate(461%) hue-rotate(192deg) brightness(89%) contrast(88%)',
   checkDotColor: colors.primary1,
   iconHoverColor: colors.primary2,
   chainTextColor: '#ED843D',

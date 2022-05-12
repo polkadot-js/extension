@@ -44,6 +44,7 @@ import styled from 'styled-components';
 import buyIcon from '../../assets/buy-icon.svg';
 import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
+import ExportAccountQrModal from '@subwallet/extension-koni-ui/components/ExportAccountQrModal';
 // import swapIcon from '../../assets/swap-icon.svg';
 
 const ActionButton = React.lazy(() => import('./ActionButton'));
@@ -156,6 +157,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     window.localStorage.getItem('show_zero_balances') === '1'
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
   const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
@@ -233,6 +235,10 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
 
   const _closeQrModal = useCallback(() => {
     setQrModalOpen(false);
+  }, []);
+
+  const _closeExportModal = useCallback(() => {
+    setIsExportModalOpen(false);
   }, []);
 
   const _isAccountAll = isAccountAll(address);
@@ -322,6 +328,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
             networkBalanceMaps={networkBalanceMaps}
             networkKeys={showedNetworks}
             networkMetadataMap={networkMetadataMap}
+            setIsExportModalOpen={setIsExportModalOpen}
             setQrModalOpen={setQrModalOpen}
             setQrModalProps={setQrModalProps}
             setSelectedNetworkBalance={setSelectedNetworkBalance}
@@ -396,6 +403,19 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           networkKey={qrModalNetworkKey}
           networkPrefix={qrModalNetworkPrefix}
           showExportButton={qrModalShowExportButton}
+        />
+      )}
+
+      {isExportModalOpen && (
+        <ExportAccountQrModal
+          accountName={currentAccount.name}
+          address={address}
+          className='home__account-qr-modal'
+          closeModal={_closeExportModal}
+          iconTheme={qrModalIconTheme}
+          networkKey={qrModalNetworkKey}
+          networkPrefix={qrModalNetworkPrefix}
+          publicKey={currentAccount.genesisHash}
         />
       )}
 

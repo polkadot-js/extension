@@ -5,6 +5,7 @@ import { SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/Creat
 import React, { useCallback, useContext, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
+import QrScanner from '@subwallet/extension-koni-ui/components/QrScanner';
 import { QrScanAddress } from '@polkadot/react-qr';
 
 import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, NextStepButton, Theme } from '../components';
@@ -83,6 +84,7 @@ function ImportQr ({ className }: Props): React.ReactElement<Props> {
         subHeaderName={t<string>('Scan Address Qr')}
       />
       <div className={account && account.isAddress ? 'import-qr-content -with-padding' : 'import-qr-content'}>
+        <QrScanner onScan={() => {}} />
         {!account && (
           <div>
             <QrScanAddress onScan={_setAccount} />

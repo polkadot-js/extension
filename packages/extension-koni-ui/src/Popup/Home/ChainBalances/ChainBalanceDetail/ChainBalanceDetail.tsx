@@ -17,6 +17,7 @@ interface Props extends ThemeProps {
   balanceInfo: BalanceInfo;
   backToHome: () => void;
   className?: string;
+  setIsExportModalOpen: (visible: boolean) => void;
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
@@ -26,7 +27,7 @@ interface Props extends ThemeProps {
   }) => void;
 }
 
-function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
+function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, setIsExportModalOpen, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
   const ref = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -66,6 +67,7 @@ function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, 
         balanceInfo={balanceInfo}
         isLoading={!balanceInfo}
         isShowDetail={accountInfo.networkKey === selectedNetworkKey}
+        setIsExportModalOpen={setIsExportModalOpen}
         setQrModalOpen={setQrModalOpen}
         setQrModalProps={setQrModalProps}
         toggleBalanceDetail={toggleBalanceDetail}

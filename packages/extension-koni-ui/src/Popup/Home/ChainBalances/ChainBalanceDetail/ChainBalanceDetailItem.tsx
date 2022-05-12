@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
+import uploadIcon from '@subwallet/extension-koni-ui/assets/icon/upload.svg';
 import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
@@ -12,7 +13,7 @@ import { isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
 import { waitForElement } from '@subwallet/extension-koni-ui/util/dom';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import CN from 'classnames';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
@@ -23,6 +24,7 @@ interface Props extends ThemeProps {
   accountInfo: AccountInfoByNetwork;
   balanceInfo: BalanceInfo;
   isLoading: boolean;
+  setIsExportModalOpen: (visible: boolean) => void;
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
     networkPrefix: number,
@@ -35,16 +37,21 @@ interface Props extends ThemeProps {
 }
 
 function ChainBalanceDetailItem ({ accountInfo,
-  balanceInfo,
-  className,
-  isLoading,
-  isShowDetail,
-  setQrModalOpen,
-  setQrModalProps,
-  toggleBalanceDetail }: Props): React.ReactElement<Props> {
+                                   balanceInfo,
+                                   className,
+                                   isLoading,
+                                   isShowDetail,
+                                   setIsExportModalOpen,
+                                   setQrModalOpen,
+                                   setQrModalProps,
+                                   toggleBalanceDetail }: Props): React.ReactElement<Props> {
   const { address, formattedAddress, networkIconTheme, networkKey, networkPrefix } = accountInfo;
+  const _isAccountAll = useMemo((): boolean => {
+    return isAccountAll(address);
+  }, [address]);
   const { show } = useToast();
   const { t } = useTranslation();
+
   const _onCopy = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     show(t('Copied'));
@@ -73,7 +80,16 @@ function ChainBalanceDetailItem ({ accountInfo,
     setQrModalOpen(true);
   }, [networkIconTheme, networkKey, networkPrefix, setQrModalOpen, setQrModalProps]);
 
-  const _isAccountAll = isAccountAll(address);
+  const _openExportQr = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    setQrModalProps({
+      networkPrefix: networkPrefix,
+      networkKey: networkKey,
+      iconTheme: networkIconTheme,
+      showExportButton: false
+    });
+    setIsExportModalOpen(true);
+  }, [networkIconTheme, networkKey, networkPrefix, setIsExportModalOpen, setQrModalProps]);
 
   return (
     <div
@@ -111,6 +127,12 @@ function ChainBalanceDetailItem ({ accountInfo,
                     className='chain-balance-item__receive'
                     onClick={_openQr}
                     src={receivedIcon}
+                  />
+                  <img
+                    alt='receive'
+                    className='chain-balance-item__export'
+                    onClick={_openExportQr}
+                    src={uploadIcon}
                   />
                 </>
               )}
@@ -276,6 +298,14 @@ export default React.memo(styled(ChainBalanceDetailItem)(({ theme }: Props) => `
     height: 16px;
     margin-left: 12px;
     cursor: pointer;
+  }
+
+  .chain-balance-item__export{
+    width: 16px;
+    height: 16px;
+    margin-left: 12px;
+    cursor: pointer;
+    filter: ${theme.textColorFilter2};
   }
 
   .chain-balance-item__toggle {

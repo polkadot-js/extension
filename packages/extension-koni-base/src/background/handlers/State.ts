@@ -338,7 +338,10 @@ export default class KoniState extends State {
       };
 
       this.updateIconAuthV2();
-      this.popupOpen();
+
+      if (Object.keys(this.#authRequestsV2).length < 2) {
+        this.popupOpen();
+      }
     });
   }
 

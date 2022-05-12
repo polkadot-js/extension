@@ -7,7 +7,7 @@ import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery
 import { recoverWeb3Api, web3Map } from '@subwallet/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@subwallet/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_NFT_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { Subject } from 'rxjs';
 
 export class KoniCron {

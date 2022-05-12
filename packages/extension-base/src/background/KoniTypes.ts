@@ -88,6 +88,11 @@ export interface StakingJson {
   details: Record<string, StakingItem>
 }
 
+export interface StakingStoreJson {
+  bonded: Record<string, StakingItem>,
+  reward: Array<StakingRewardItem>
+}
+
 export interface PriceJson {
   ready?: boolean,
   currency: string,
@@ -149,6 +154,11 @@ export interface NftJson {
 
 export interface NftCollectionJson {
   ready: boolean;
+  nftCollectionList: Array<NftCollection>;
+}
+
+export interface NftStoreJson {
+  nftList: Array<NftItem>;
   nftCollectionList: Array<NftCollection>;
 }
 
@@ -618,6 +628,8 @@ export interface RequestSaveRecentAccount {
 }
 
 export interface KoniRequestSignatures {
+  'pri('
+  'pri(staking.fetchStaking)': [null, boolean];
   'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
   'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];

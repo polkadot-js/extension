@@ -13,12 +13,15 @@ import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registr
 import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
 import { TRANSFER_CHAIN_ID } from '@subwallet/extension-koni-base/api/nft/config';
+import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
+import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { getERC20Contract, getERC721Contract, getWeb3Api, TestERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, rpcsMap, state } from '@subwallet/extension-koni-base/background/handlers/index';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Transaction } from 'ethereumjs-tx';
+import { take } from 'rxjs';
 import { Contract } from 'web3-eth-contract';
 
 import { createPair } from '@polkadot/keyring';
@@ -1492,6 +1495,45 @@ export default class KoniExtension extends Extension {
     return await getExistentialDeposit(networkKey, token);
   }
 
+  private detectAddresses (currentAccountAddress: string) {
+    return new Promise<Array<string>>((resolve) => {
+      if (currentAccountAddress === ALL_ACCOUNT_KEY) {
+        accountsObservable.subject.pipe(take(1))
+          .subscribe((accounts: SubjectInfo): void => {
+            resolve([...Object.keys(accounts)]);
+          });
+      } else {
+        return resolve([currentAccountAddress]);
+      }
+    });
+  }
+
+  private async fetchStakingData () {
+    const currentAccountInfo = state.getCurrentAccountState();
+    const addresses = await this.detectAddresses(currentAccountInfo.address);
+
+    await getAllSubsquidStaking(addresses, (networkKey, rs) => {
+      state.setStakingItem(networkKey, rs);
+      console.log('set staking item', rs);
+    })
+      .then((result) => {
+        state.setStakingReward(result);
+        console.log('set staking reward state done', result);
+      })
+      .catch(console.error);
+
+    return true;
+  }
+
+  private fetchHistoryData () {
+    const currentAccountInfo = state.getCurrentAccountState();
+
+    fetchDotSamaHistory(currentAccountInfo.address, (historyMap) => {
+      console.log('--- historyMap ---', historyMap);
+      state.setHistory(historyMap);
+    });
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public override async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
@@ -1621,6 +1663,8 @@ export default class KoniExtension extends Extension {
         return this.cancelSubscription(request as string);
       case 'pri(evmTokenState.validateEvmToken)':
         return await this.validateEvmToken(request as ValidateEvmTokenRequest);
+      case 'pri(staking.fetchStaking)':
+        return await this.fetchStakingData();
       default:
         return super.handle(id, type, request, port);
     }

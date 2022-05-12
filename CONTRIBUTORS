@@ -1,6 +1,6 @@
      465	Jaco                          	0.42.5 (#969)
      238	Nam Phạm                      	update validate evm token
-     197	AnhMTV                        	Fix eslint after change packages name
+     198	AnhMTV                        	Enable publish packages to npm (#169). Add discord hook to notify actions on branch master.
      122	quangdo                       	fix bug hide account in Create screen
      102	lw-cdm                        	Remove unused logo referent
       82	Thibaut Sardan                	Add account filtering feature (#832)

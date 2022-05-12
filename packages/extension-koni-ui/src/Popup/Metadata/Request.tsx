@@ -90,11 +90,11 @@ export default styled(Request)(({ theme }: ThemeProps) => `
   }
 
   .metadata-request__btn:first-child {
-    background-color: #181E42;
+    background-color: ${theme.buttonBackground1};
     margin-right: 8px;
 
     span {
-      color: ${theme.buttonTextColor2};
+      color: ${theme.textColor3};
     }
   }
 

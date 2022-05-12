@@ -5,6 +5,6 @@ import { useContext } from 'react';
 
 import { ToastContext } from '../components/contexts';
 
-export default function useToast (): {show: (message: string) => void, setToastError: (isError: boolean) => void} {
+export default function useToast (): {show: (message: string, isError?: boolean) => void} {
   return useContext(ToastContext);
 }

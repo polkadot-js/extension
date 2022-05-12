@@ -258,12 +258,8 @@ export default class KoniState extends State {
       const isAllowed = result === true;
 
       if (accounts && accounts.length) {
-        Object.keys(isAllowedMap).forEach((address) => {
-          if (accounts.includes(address)) {
-            isAllowedMap[address] = true;
-          } else {
-            isAllowedMap[address] = false;
-          }
+        accounts.forEach((acc) => {
+          isAllowedMap[acc] = true;
         });
       } else {
         // eslint-disable-next-line no-return-assign

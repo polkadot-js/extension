@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getSubsquidStakingReward } from '@polkadot/extension-koni-base/api/subsquid/subsquid';
+import { getSubsquidStakingReward } from '@subwallet/extension-koni-base/api/subsquid/subsquid';
 
 jest.setTimeout(50000);
 

@@ -1,12 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { APIItemState, StakingItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { StakingDataType, StakingType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
-
-import { APIItemState, StakingItem } from '@polkadot/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { StakingDataType, StakingType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 export default function useFetchStaking (networkKey: string): StakingType {
   const { price: priceReducer, staking: stakingReducer, stakingReward: stakingRewardReducer } = useSelector((state: RootState) => state);

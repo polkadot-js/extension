@@ -1,15 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
+import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import { Header } from '@subwallet/extension-koni-ui/partials';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
-import { ActionContext, Button, Dropdown, InputWithLabel } from '@polkadot/extension-koni-ui/components';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { upsertEvmToken, validateEvmToken } from '@polkadot/extension-koni-ui/messaging';
-import { Header } from '@polkadot/extension-koni-ui/partials';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {

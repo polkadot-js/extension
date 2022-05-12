@@ -1,11 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
-// import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
-import { dotSamaAPIMap } from '@polkadot/extension-koni-base/background/handlers';
+import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+// import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { dotSamaAPIMap } from '@subwallet/extension-koni-base/background/handlers';
+
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';

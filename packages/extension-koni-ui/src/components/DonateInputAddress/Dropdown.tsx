@@ -1,16 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
+import { DropdownOptionType, DropdownTransformGroupOptionType, DropdownTransformOptionType } from '@subwallet/extension-base/background/KoniTypes';
+import { Label, Theme } from '@subwallet/extension-koni-ui/components';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { ActionMeta, SingleValue } from 'react-select';
 import AsyncSelect from 'react-select/async';
 import styled, { ThemeContext } from 'styled-components';
-
-import { DropdownOptionType, DropdownTransformGroupOptionType, DropdownTransformOptionType } from '@polkadot/extension-base/background/KoniTypes';
-import { Label, Theme } from '@polkadot/extension-koni-ui/components';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;

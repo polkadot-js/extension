@@ -1,3 +1,3 @@
-# @polkadot/extension
+# @subwallet/extension
 
 A signing extension

@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UniqueNftApiV2 } from '@polkadot/extension-koni-base/api/nft/unique_nft/uniqueNftV2';
+import { UniqueNftApiV2 } from '@subwallet/extension-koni-base/api/nft/unique_nft/uniqueNftV2';
 
 jest.setTimeout(50000);
 

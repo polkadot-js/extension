@@ -1,17 +1,17 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SiDef } from '@polkadot/util/types';
 import type { BitLength } from '../types';
 
+import { BitLengthOption } from '@subwallet/extension-koni-ui/components/constants';
+import Dropdown from '@subwallet/extension-koni-ui/components/InputNumber/Dropdown';
+import Input, { KEYS_PRE } from '@subwallet/extension-koni-ui/components/InputNumber/Input';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { BitLengthOption } from '@polkadot/extension-koni-ui/components/constants';
-import Dropdown from '@polkadot/extension-koni-ui/components/InputNumber/Dropdown';
-import Input, { KEYS_PRE } from '@polkadot/extension-koni-ui/components/InputNumber/Input';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { BN, BN_ONE, BN_TEN, BN_TWO, BN_ZERO, formatBalance, isBn } from '@polkadot/util';
 
 interface Props {

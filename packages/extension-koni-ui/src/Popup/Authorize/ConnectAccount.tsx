@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
 import type { ThemeProps } from '../../types';
 
+import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import { AccountInfoEl } from '@subwallet/extension-koni-ui/components';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import check from '@polkadot/extension-koni-ui/assets/check.svg';
-import { AccountInfoEl } from '@polkadot/extension-koni-ui/components';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 interface Props extends ThemeProps {

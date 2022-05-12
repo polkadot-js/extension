@@ -1,21 +1,21 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
+import { RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { InputWithLabel, Warning } from '@subwallet/extension-koni-ui/components';
+import Button from '@subwallet/extension-koni-ui/components/Button';
+import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
+import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
+import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import Modal from '@subwallet/extension-koni-ui/components/Modal';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { RequestCheckTransfer, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { InputWithLabel, Warning } from '@polkadot/extension-koni-ui/components';
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import DonateInputAddress from '@polkadot/extension-koni-ui/components/DonateInputAddress';
-import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
-import InputAddress from '@polkadot/extension-koni-ui/components/InputAddress';
-import Modal from '@polkadot/extension-koni-ui/components/Modal';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { makeTransfer } from '@polkadot/extension-koni-ui/messaging';
-import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
 import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {

@@ -263,9 +263,6 @@ export async function makeTransfer (
     }
   }
 
-
-  console.log('transfer here', transfer);
-
   if (!transfer) {
     callback(getUnsupportedResponse());
 

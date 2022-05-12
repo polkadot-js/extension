@@ -58,12 +58,12 @@ export class KoniSubcription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        // this.subscribeBalancesAndCrowdloans(address);
+        this.subscribeBalancesAndCrowdloans(address);
       }
 
       state.subscribeServiceInfo_().subscribe({
         next: ({ currentAccount: address }) => {
-          // this.subscribeBalancesAndCrowdloans(address);
+          this.subscribeBalancesAndCrowdloans(address);
         }
       });
     });

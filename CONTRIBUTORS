@@ -1,12 +1,12 @@
      465	Jaco                          	0.42.5 (#969)
      238	Nam Phạm                      	update validate evm token
-     195	AnhMTV                        	Release version 0.4.0
+     197	AnhMTV                        	Fix eslint after change packages name
      122	quangdo                       	fix bug hide account in Create screen
      102	lw-cdm                        	Remove unused logo referent
       82	Thibaut Sardan                	Add account filtering feature (#832)
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
-      39	lw-cdm                        	
+      40	lw-cdm                        	
       37	Hieu Dao                      	Update Sakura Parachain
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

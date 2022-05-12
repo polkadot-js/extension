@@ -1,12 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useGetSupportedLedger } from '@subwallet/extension-koni-ui/util/legerChains';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { useGetSupportedLedger } from '@polkadot/extension-koni-ui/util/legerChains';
 import settings from '@polkadot/ui-settings';
 
 import { AccountInfoEl, ActionContext, Button, ButtonArea, Dropdown, Warning } from '../components';

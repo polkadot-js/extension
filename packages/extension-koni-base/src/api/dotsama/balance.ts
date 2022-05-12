@@ -1,6 +1,14 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ethereumChains, moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
+import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
+import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-koni-base/constants';
+import { categoryAddresses, sumBN } from '@subwallet/extension-koni-base/utils/utils';
 import { Observable } from 'rxjs';
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
@@ -8,14 +16,6 @@ import { Contract } from 'web3-eth-contract';
 import { ApiPromise } from '@polkadot/api';
 import { UnsubscribePromise } from '@polkadot/api/types';
 import { DeriveBalancesAll } from '@polkadot/api-derive/types';
-import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { ethereumChains, moonbeamBaseChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { getRegistry, getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import { getEVMBalance } from '@polkadot/extension-koni-base/api/web3/balance';
-import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { state } from '@polkadot/extension-koni-base/background/handlers';
-import { ASTAR_REFRESH_BALANCE_INTERVAL, IGNORE_GET_SUBSTRATE_FEATURES_LIST, MOONBEAM_REFRESH_BALANCE_INTERVAL } from '@polkadot/extension-koni-base/constants';
-import { categoryAddresses, sumBN } from '@polkadot/extension-koni-base/utils/utils';
 import { AccountInfo } from '@polkadot/types/interfaces';
 import { BN } from '@polkadot/util';
 

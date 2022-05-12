@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export enum SUPPORTED_STAKING_CHAIN_NAMES {

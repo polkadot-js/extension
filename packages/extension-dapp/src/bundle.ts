@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-dapp authors & contributors
+// Copyright 2019-2022 @subwallet/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import type { Injected, InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedExtensionInfo, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@subwallet/extension-inject/types';
 
 import { u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';

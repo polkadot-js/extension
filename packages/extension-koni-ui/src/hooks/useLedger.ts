@@ -1,11 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { Ledger } from '@polkadot/hw-ledger';
 import { selectableNetworks } from '@polkadot/networks';
 import { Network } from '@polkadot/networks/types';

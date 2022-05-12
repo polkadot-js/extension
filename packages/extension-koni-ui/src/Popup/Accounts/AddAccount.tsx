@@ -1,15 +1,14 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
 
+import Button from '@subwallet/extension-koni-ui/components/Button';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
+import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import Header from '@subwallet/extension-koni-ui/partials/Header';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
-import { windowOpen } from '@polkadot/extension-koni-ui/messaging';
-import Header from '@polkadot/extension-koni-ui/partials/Header';
 
 import { Link } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

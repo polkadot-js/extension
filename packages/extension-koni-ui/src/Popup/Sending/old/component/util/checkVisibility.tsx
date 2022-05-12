@@ -1,10 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { DeriveAccountInfo } from '@polkadot/api-derive/types';
 
+import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+
 import { ApiPromise } from '@polkadot/api';
-import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
 // import { keyring } from '@polkadot/ui-keyring';
 import { isFunction } from '@polkadot/util';
 

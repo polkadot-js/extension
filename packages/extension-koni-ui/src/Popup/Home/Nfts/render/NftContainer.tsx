@@ -1,18 +1,17 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import useFetchNftExtra from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
+import EmptyList from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
+import NftCollection from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
+import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import useFetchNftExtra from '@polkadot/extension-koni-ui/hooks/screen/home/useFetchNftTransferExtra';
-import EmptyList from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/EmptyList';
-import NftCollection from '@polkadot/extension-koni-ui/Popup/Home/Nfts/render/NftCollection';
-import { _NftCollection, _NftItem } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { NFT_PER_ROW } from '@polkadot/extension-koni-ui/util';
 
 import NftCollectionPreview from './NftCollectionPreview';
 

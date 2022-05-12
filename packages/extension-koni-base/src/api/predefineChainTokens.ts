@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {

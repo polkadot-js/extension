@@ -1,12 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
+import { setNftTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { _NftCollection } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
-
-import { NftTransferExtra } from '@polkadot/extension-base/background/KoniTypes';
-import { setNftTransfer } from '@polkadot/extension-koni-ui/messaging';
-import { _NftCollection } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 function updateNftTransfer (nftData: NftTransferExtra): void {
   setNftTransfer(nftData).catch(console.error);

@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MetadataDef } from '@polkadot/extension-inject/types';
+import { MetadataDef } from '@subwallet/extension-inject/types';
 
 const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 

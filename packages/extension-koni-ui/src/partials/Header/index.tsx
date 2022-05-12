@@ -1,33 +1,33 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../../types';
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { CurrentNetworkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import ExpandDarkIcon from '@subwallet/extension-koni-ui/assets/icon/expand-dark.svg';
+import ExpandLightIcon from '@subwallet/extension-koni-ui/assets/icon/expand-light.svg';
+import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
+import ConfirmModal from '@subwallet/extension-koni-ui/components/ConfirmModal';
+import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import NetworkMenu from '@subwallet/extension-koni-ui/components/NetworkMenu';
+import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
+import useMetadata from '@subwallet/extension-koni-ui/hooks/useMetadata';
+import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
+import DetailHeader from '@subwallet/extension-koni-ui/partials/Header/DetailHeader';
+import SubHeader from '@subwallet/extension-koni-ui/partials/Header/SubHeader';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
+import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
+import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
+import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import Avatar from 'boring-avatars';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
-import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
-import ExpandDarkIcon from '@polkadot/extension-koni-ui/assets/icon/expand-dark.svg';
-import ExpandLightIcon from '@polkadot/extension-koni-ui/assets/icon/expand-light.svg';
-import { AccountContext, Link } from '@polkadot/extension-koni-ui/components';
-import ConfirmModal from '@polkadot/extension-koni-ui/components/ConfirmModal';
-import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
-import NetworkMenu from '@polkadot/extension-koni-ui/components/NetworkMenu';
-import useGenesisHashOptions from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
-import useMetadata from '@polkadot/extension-koni-ui/hooks/useMetadata';
-import { showAccount, tieAccount, windowOpen } from '@polkadot/extension-koni-ui/messaging';
-import AccountMenuSettings from '@polkadot/extension-koni-ui/partials/AccountMenuSettings';
-import DetailHeader from '@polkadot/extension-koni-ui/partials/Header/DetailHeader';
-import SubHeader from '@polkadot/extension-koni-ui/partials/Header/SubHeader';
-import { RootState, store } from '@polkadot/extension-koni-ui/stores';
-import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@polkadot/extension-koni-ui/util';
-import { getLogoByGenesisHash } from '@polkadot/extension-koni-ui/util/logoByGenesisHashMap';
-import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
 
 import defaultAvatar from '../../assets/default-avatar.svg';

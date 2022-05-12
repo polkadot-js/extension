@@ -1,14 +1,13 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
+import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getScanExplorerTransactionHistoryUrl } from '@subwallet/extension-koni-ui/util';
 import React from 'react';
 import styled from 'styled-components';
-
-import failStatus from '@polkadot/extension-koni-ui/assets/fail-status.svg';
-import successStatus from '@polkadot/extension-koni-ui/assets/success-status.svg';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl } from '@polkadot/extension-koni-ui/util';
 
 interface Props extends ThemeProps {
   className?: string;

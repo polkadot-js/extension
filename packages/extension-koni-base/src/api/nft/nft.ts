@@ -1,11 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
+import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
-
-import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { CLOUDFLARE_PINATA_SERVER } from '@polkadot/extension-koni-base/api/nft/config';
-import { isUrl } from '@polkadot/extension-koni-base/utils/utils';
 
 export abstract class BaseNftApi {
   chain: string | null = null;

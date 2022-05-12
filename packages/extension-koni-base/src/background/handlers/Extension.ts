@@ -1,24 +1,24 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
+import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
+import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { createSubscription, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
+import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
+import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
+import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { estimateFee, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { TRANSFER_CHAIN_ID } from '@subwallet/extension-koni-base/api/nft/config';
+import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
+import { initWeb3Api, TestERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { rpcsMap, state } from '@subwallet/extension-koni-base/background/handlers/index';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { isValidProvider, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Transaction } from 'ethereumjs-tx';
 
-import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
-import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { createSubscription, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestCheckTransfer, RequestForgetSite, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateNetworkRequest, ValidateNetworkResponse } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
-import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
-import { getFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
-import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import { estimateFee, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
-import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
-import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
-import { initWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { isValidProvider, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';

@@ -1,10 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps } from '@polkadot/extension-base/background/KoniTypes';
-import { initApi } from '@polkadot/extension-koni-base/api/dotsama/api';
-import { PREDEFINED_NETWORKS } from '@polkadot/extension-koni-base/api/predefinedNetworks';
-import { getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
+import { ApiProps } from '@subwallet/extension-base/background/KoniTypes';
+import { initApi } from '@subwallet/extension-koni-base/api/dotsama/api';
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
 
 export * from './api';
 

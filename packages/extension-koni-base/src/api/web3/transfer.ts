@@ -1,11 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ResponseTransfer, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import { ResponseTransfer, TransferErrorCode, TransferStep } from '@polkadot/extension-base/background/KoniTypes';
-import { getERC20Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { state } from '@polkadot/extension-koni-base/background/handlers';
 import { BN } from '@polkadot/util';
 
 export async function handleTransfer (transactionObject: TransactionConfig, networkKey: string, privateKey: string, callback: (data: ResponseTransfer) => void) {

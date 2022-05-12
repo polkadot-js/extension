@@ -1,14 +1,14 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import Identicon from '@polkadot/extension-koni-ui/components/Identicon';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { isUndefined } from '@polkadot/util';
 

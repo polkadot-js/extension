@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef } from '@subwallet/extension-inject/types';
 
 import { EXTENSION_PREFIX } from '../defaults';
 import BaseStore from './Base';

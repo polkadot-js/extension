@@ -1,10 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
-
-import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 
 export default function useFetchNetworkMap () {
   const { currentAccount, networkMap } = useSelector((state: RootState) => state);

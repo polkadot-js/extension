@@ -1,20 +1,19 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import cloneIcon from '@subwallet/extension-koni-ui/assets/clone.svg';
+import receivedIcon from '@subwallet/extension-koni-ui/assets/receive-icon.svg';
+import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { getTotalConvertedBalanceValue, hasAnyChildTokenBalance } from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/utils';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { BN_ZERO, isAccountAll, toShort } from '@subwallet/extension-koni-ui/util';
+import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import BigN from 'bignumber.js';
 import React, { useCallback } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
-
-import cloneIcon from '@polkadot/extension-koni-ui/assets/clone.svg';
-import receivedIcon from '@polkadot/extension-koni-ui/assets/receive-icon.svg';
-import { BalanceVal } from '@polkadot/extension-koni-ui/components/balance';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { getTotalConvertedBalanceValue, hasAnyChildTokenBalance } from '@polkadot/extension-koni-ui/Popup/Home/ChainBalances/utils';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { BN_ZERO, isAccountAll, toShort } from '@polkadot/extension-koni-ui/util';
-import { AccountInfoByNetwork, BalanceInfo } from '@polkadot/extension-koni-ui/util/types';
 
 import { Loading } from '../../../components';
 

@@ -1,14 +1,13 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ApiMap, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
+import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
+import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@subwallet/extension-koni-base/constants';
 import { Subject } from 'rxjs';
-
-import { ApiMap, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@polkadot/extension-base/background/KoniTypes';
-import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { fetchDotSamaHistory } from '@polkadot/extension-koni-base/api/subquery/history';
-import { state } from '@polkadot/extension-koni-base/background/handlers';
-import { KoniSubscription } from '@polkadot/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_GET_API_MAP_STATUS, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_PRICE_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL } from '@polkadot/extension-koni-base/constants';
 
 export class KoniCron {
   subscriptions: KoniSubscription;

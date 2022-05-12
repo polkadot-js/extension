@@ -1,16 +1,16 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountId, AccountIndex, Address } from '@polkadot/types/interfaces';
 
+import { ChainRegistry } from '@subwallet/extension-base/background/KoniTypes';
 import React from 'react';
 
-import { ChainRegistry } from '@polkadot/extension-base/background/KoniTypes';
 import { BN } from '@polkadot/util';
 
 import FormatBalance from './FormatBalance';
 
-// import {useApi, useCall} from "@polkadot/extension-koni-ui/hooks/SendFundHooks";
+// import {useApi, useCall} from "@subwallet/extension-koni-ui/hooks/SendFundHooks";
 
 interface Props {
   children?: React.ReactNode;

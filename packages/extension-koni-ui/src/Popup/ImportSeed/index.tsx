@@ -1,14 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // eslint-disable-next-line header/header
+import HeaderWithSteps from '@subwallet/extension-koni-ui/partials/HeaderWithSteps';
+import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import HeaderWithSteps from '@polkadot/extension-koni-ui/partials/HeaderWithSteps';
-import { EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AccountContext, ActionContext } from '../../components';

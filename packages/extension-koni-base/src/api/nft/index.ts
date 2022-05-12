@@ -1,21 +1,20 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ApiProps, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
+import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
+import { SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { Web3NftApi } from '@subwallet/extension-koni-base/api/nft/eth_nft';
+import { KaruraNftApi } from '@subwallet/extension-koni-base/api/nft/karura_nft';
+import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
+import { RmrkNftApi } from '@subwallet/extension-koni-base/api/nft/rmrk_nft';
+import StatemineNftApi from '@subwallet/extension-koni-base/api/nft/statemine_nft';
+import UniqueNftApi from '@subwallet/extension-koni-base/api/nft/unique_nft';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
+import { categoryAddresses } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
-
-import { ApiProps, NftCollection, NftItem } from '@polkadot/extension-base/background/KoniTypes';
-import { ethereumChains } from '@polkadot/extension-koni-base/api/dotsama/api-helper';
-import { AcalaNftApi } from '@polkadot/extension-koni-base/api/nft/acala_nft';
-import { BitCountryNftApi } from '@polkadot/extension-koni-base/api/nft/bit.country';
-import { SUPPORTED_NFT_NETWORKS } from '@polkadot/extension-koni-base/api/nft/config';
-import { Web3NftApi } from '@polkadot/extension-koni-base/api/nft/eth_nft';
-import { KaruraNftApi } from '@polkadot/extension-koni-base/api/nft/karura_nft';
-import { BaseNftApi } from '@polkadot/extension-koni-base/api/nft/nft';
-import { RmrkNftApi } from '@polkadot/extension-koni-base/api/nft/rmrk_nft';
-import StatemineNftApi from '@polkadot/extension-koni-base/api/nft/statemine_nft';
-import UniqueNftApi from '@polkadot/extension-koni-base/api/nft/unique_nft';
-import { state } from '@polkadot/extension-koni-base/background/handlers';
-import { categoryAddresses } from '@polkadot/extension-koni-base/utils/utils';
 
 function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);

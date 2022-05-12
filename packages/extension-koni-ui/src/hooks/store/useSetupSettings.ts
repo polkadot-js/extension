@@ -1,11 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ResponseSettingsType } from '@subwallet/extension-base/background/KoniTypes';
+import { subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
+import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
-
-import { ResponseSettingsType } from '@polkadot/extension-base/background/KoniTypes';
-import { subscribeSettings } from '@polkadot/extension-koni-ui/messaging';
-import { store } from '@polkadot/extension-koni-ui/stores';
 
 function updateSettings (settings: ResponseSettingsType): void {
   store.dispatch({ type: 'settings/update', payload: settings });

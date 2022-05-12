@@ -1,23 +1,22 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { ActionContext } from '@subwallet/extension-koni-ui/components';
+import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
+import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
+import { RootState, store } from '@subwallet/extension-koni-ui/stores';
+import { TransferNftParams } from '@subwallet/extension-koni-ui/stores/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { CurrentNetworkInfo, NetWorkMetadataDef } from '@polkadot/extension-base/background/KoniTypes';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { ActionContext } from '@polkadot/extension-koni-ui/components';
-import Spinner from '@polkadot/extension-koni-ui/components/Spinner';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { tieAccount } from '@polkadot/extension-koni-ui/messaging';
-import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@polkadot/extension-koni-ui/Popup/Home/Nfts/types';
-import { RootState, store } from '@polkadot/extension-koni-ui/stores';
-import { TransferNftParams } from '@polkadot/extension-koni-ui/stores/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 import logo from '../../../../assets/sub-wallet-logo.svg';
 

@@ -1,16 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { HorizontalLabelToggle, Link } from '@subwallet/extension-koni-ui/components';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import { disableNetworkMap, enableNetworkMap } from '@subwallet/extension-koni-ui/messaging';
+import { store } from '@subwallet/extension-koni-ui/stores';
+import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-
-import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import { HorizontalLabelToggle, Link } from '@polkadot/extension-koni-ui/components';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { disableNetworkMap, enableNetworkMap } from '@polkadot/extension-koni-ui/messaging';
-import { store } from '@polkadot/extension-koni-ui/stores';
-import { NetworkConfigParams } from '@polkadot/extension-koni-ui/stores/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 interface Props extends ThemeProps {
   className?: string;

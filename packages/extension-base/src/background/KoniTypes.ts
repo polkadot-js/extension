@@ -1,13 +1,13 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
+import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, ResponseAuthorizeList, SeedLengths } from '@subwallet/extension-base/background/types';
+import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, ResponseAuthorizeList, SeedLengths } from '@polkadot/extension-base/background/types';
-import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';

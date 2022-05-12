@@ -1,13 +1,13 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Compact } from '@polkadot/types';
 import type { Registry } from '@polkadot/types/types';
 
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
 import { BN, BN_ZERO, formatBalance } from '@polkadot/util';
 
 interface Props {

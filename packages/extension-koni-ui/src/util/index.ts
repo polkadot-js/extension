@@ -1,14 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NetworkJson } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
-import { NetworkSelectOption } from '@polkadot/extension-koni-ui/hooks/useGenesisHashOptions';
-import { Recoded } from '@polkadot/extension-koni-ui/types';
-import { isAccountAll } from '@polkadot/extension-koni-ui/util/accountAll';
-import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AccountWithChildren } from '@subwallet/extension-base/background/types';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
+import { NetworkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
+import { Recoded } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/util/accountAll';
+import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
+
 import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
 

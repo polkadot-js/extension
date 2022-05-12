@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';

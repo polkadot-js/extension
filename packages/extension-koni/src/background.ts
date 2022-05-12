@@ -1,18 +1,19 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // Runs in the extension background, handling all keyring access
 
-import '@polkadot/extension-inject/crossenv';
+import '@subwallet/extension-inject/crossenv';
 
-import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
+import type { RequestSignatures, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 
-import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
-import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import { AccountsStore } from '@polkadot/extension-base/stores';
-import { KoniCron } from '@polkadot/extension-koni-base/background/cron';
-import handlers, { initBackgroundWindow } from '@polkadot/extension-koni-base/background/handlers';
-import { KoniSubscription } from '@polkadot/extension-koni-base/background/subscription';
+import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
+import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { AccountsStore } from '@subwallet/extension-base/stores';
+import { KoniCron } from '@subwallet/extension-koni-base/background/cron';
+import handlers, { initBackgroundWindow } from '@subwallet/extension-koni-base/background/handlers';
+import { KoniSubscription } from '@subwallet/extension-koni-base/background/subscription';
+
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';

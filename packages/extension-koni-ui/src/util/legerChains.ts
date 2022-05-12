@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useSelector } from 'react-redux';
 
-import { RootState } from '@polkadot/extension-koni-ui/stores';
 import { selectableNetworks } from '@polkadot/networks';
 import { Network } from '@polkadot/networks/types';
 

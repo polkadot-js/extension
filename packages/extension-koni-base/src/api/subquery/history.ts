@@ -1,17 +1,16 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { gql } from '@apollo/client';
-
-import { NetworkJson, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
+import { NetworkJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 // eslint-disable-next-line import-newlines/enforce
 import { DotSamaHistory,
 // eslint-disable-next-line camelcase
   DotSamaHistory_historyElements_nodes,
-  DotSamaHistoryVariables } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
-import { newApolloClient } from '@polkadot/extension-koni-base/api/subquery/subquery';
-import { state } from '@polkadot/extension-koni-base/background/handlers';
-import { isAccountAll, reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
+  DotSamaHistoryVariables } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaHistory';
+import { newApolloClient } from '@subwallet/extension-koni-base/api/subquery/subquery';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 
 export const HistoryApiMap: Record<string, string> = {
   polkadot: 'https://api.subquery.network/sq/nova-wallet/nova-westend',

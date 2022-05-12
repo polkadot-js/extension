@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 const path = require('path');
@@ -129,7 +129,7 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
     resolve: {
       alias: packages.reduce((alias, p) => ({
         ...alias,
-        [`@polkadot/${p}`]: path.resolve(__dirname, `../${p}/src`)
+        [`@subwallet/${p}`]: path.resolve(__dirname, `../${p}/src`)
       }), {
         ...alias,
         'react/jsx-runtime': require.resolve('react/jsx-runtime')

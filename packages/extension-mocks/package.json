@@ -6,7 +6,7 @@
   "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/extension-mocks#readme",
   "license": "Apache-2.0",
   "maintainers": [],
-  "name": "@polkadot/extension-mocks",
+  "name": "@subwallet/extension-mocks",
   "repository": {
     "directory": "packages/extension-mocks",
     "type": "git",

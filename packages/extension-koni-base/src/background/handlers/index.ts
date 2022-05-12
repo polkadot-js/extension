@@ -1,14 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BackgroundWindow } from '@polkadot/extension-base/background/KoniTypes';
-import { MessageTypes, TransportRequestMessage } from '@polkadot/extension-base/background/types';
-import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import { NftHandler } from '@polkadot/extension-koni-base/api/nft';
-import KoniExtension from '@polkadot/extension-koni-base/background/handlers/Extension';
-import KoniState from '@polkadot/extension-koni-base/background/handlers/State';
-import KoniTabs from '@polkadot/extension-koni-base/background/handlers/Tabs';
-import { getCurrentProvider } from '@polkadot/extension-koni-base/utils/utils';
+import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
+import { MessageTypes, TransportRequestMessage } from '@subwallet/extension-base/background/types';
+import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
+import { NftHandler } from '@subwallet/extension-koni-base/api/nft';
+import KoniExtension from '@subwallet/extension-koni-base/background/handlers/Extension';
+import KoniState from '@subwallet/extension-koni-base/background/handlers/State';
+import KoniTabs from '@subwallet/extension-koni-base/background/handlers/Tabs';
+import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
+
 import { assert } from '@polkadot/util';
 
 export const state = new KoniState();

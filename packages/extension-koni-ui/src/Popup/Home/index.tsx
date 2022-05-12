@@ -20,7 +20,6 @@ import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
 import useFetchStaking from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchStaking';
 import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useShowedNetworks';
-import handleUpdateData from '@subwallet/extension-koni-ui/hooks/screen/home/handleUpdateData';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import AddAccount from '@subwallet/extension-koni-ui/Popup/Accounts/AddAccount';
@@ -198,16 +197,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   const nftGridSize = parseNftGridSize();
   const { loading: loadingNft, nftList, totalCollection, totalItems } = useFetchNft(nftPage, networkKey, nftGridSize);
   const { data: stakingData, loading: loadingStaking, priceMap: stakingPriceMap } = useFetchStaking(networkKey);
-
-  useEffect(() => {
-    async function _handleUpdateData () {
-      await handleUpdateData();
-    }
-
-    _handleUpdateData()
-      .then()
-      .catch(console.error);
-  }, []);
 
   const handleNftPage = useCallback((page: number) => {
     setNftPage(page);

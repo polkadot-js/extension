@@ -486,7 +486,3 @@ export async function cancelSubscription (request: string): Promise<boolean> {
 export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
   return sendMessage('pri(freeBalance.subscribe)', request, callback);
 }
-
-export async function fetchStakingData (): Promise<boolean> {
-  return sendMessage('pri(staking.fetchStaking)', null);
-}

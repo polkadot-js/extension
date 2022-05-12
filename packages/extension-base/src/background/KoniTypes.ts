@@ -628,8 +628,6 @@ export interface RequestSaveRecentAccount {
 }
 
 export interface KoniRequestSignatures {
-  'pri('
-  'pri(staking.fetchStaking)': [null, boolean];
   'pri(evmTokenState.validateEvmToken)': [ValidateEvmTokenRequest, ValidateEvmTokenResponse];
   'pri(evmTokenState.deleteMany)': [DeleteEvmTokenParams[], boolean];
   'pri(evmTokenState.upsertEvmTokenState)': [CustomEvmToken, boolean];

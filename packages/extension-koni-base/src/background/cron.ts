@@ -7,7 +7,7 @@ import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery
 import { recoverWeb3Api, web3Map } from '@subwallet/extension-koni-base/api/web3/web3';
 import { dotSamaAPIMap, state } from '@subwallet/extension-koni-base/background/handlers';
 import { KoniSubcription } from '@subwallet/extension-koni-base/background/subscription';
-import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_NFT_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
+import { CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, CRON_AUTO_RECOVER_WEB3_INTERVAL, CRON_REFRESH_HISTORY_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { Subject } from 'rxjs';
 
 export class KoniCron {
@@ -61,23 +61,23 @@ export class KoniCron {
     state.getCurrentAccount((currentAccountInfo) => {
       if (currentAccountInfo) {
         this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, state.getErc721Tokens()), CRON_REFRESH_NFT_INTERVAL);
-        // this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-        // this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
+        this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+        this.addCron('refreshHistory', this.refreshHistory(currentAccountInfo.address), CRON_REFRESH_HISTORY_INTERVAL);
       }
 
       state.subscribeServiceInfo_().subscribe({
         next: ({ currentAccount: address, customErc721Registry }) => {
           this.resetNft();
           this.resetNftTransferMeta();
-          // this.resetStakingReward();
-          // this.resetHistory();
+          this.resetStakingReward();
+          this.resetHistory();
           this.removeCron('refreshNft');
-          // this.removeCron('refreshStakingReward');
-          // this.removeCron('refreshHistory');
+          this.removeCron('refreshStakingReward');
+          this.removeCron('refreshHistory');
 
           this.addCron('refreshNft', this.refreshNft(address, customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
-          // this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-          // this.addCron('refreshHistory', this.refreshHistory(address), CRON_REFRESH_HISTORY_INTERVAL);
+          this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
+          this.addCron('refreshHistory', this.refreshHistory(address), CRON_REFRESH_HISTORY_INTERVAL);
         }
       });
     });
@@ -92,7 +92,7 @@ export class KoniCron {
         }
       });
 
-      // this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address);
     });
   }
 

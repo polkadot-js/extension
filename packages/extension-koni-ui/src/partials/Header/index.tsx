@@ -8,15 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ExpandDarkIcon from '@subwallet/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@subwallet/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
-import ConfirmModal from '@subwallet/extension-koni-ui/components/ConfirmModal';
-import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-import NetworkMenu from '@subwallet/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
-import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
-import DetailHeader from '@subwallet/extension-koni-ui/partials/Header/DetailHeader';
-import SubHeader from '@subwallet/extension-koni-ui/partials/Header/SubHeader';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -33,6 +27,13 @@ import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
+
+const NetworkMenu = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkMenu'));
+const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
+const ConfirmModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/ConfirmModal'));
+const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
+const DetailHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/DetailHeader'));
+const AccountMenuSettings = React.lazy(() => import('@subwallet/extension-koni-ui/partials/AccountMenuSettings'));
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;
@@ -57,7 +58,7 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+export function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);

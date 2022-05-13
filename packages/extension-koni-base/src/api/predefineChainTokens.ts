@@ -90,22 +90,28 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   karura: {
-    KUSD: {
-      isMainToken: false,
-      symbol: 'KUSD',
-      name: 'KUSD',
-      decimals: 12
-    },
-    KSM: {
-      isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 12
-    },
     LKSM: {
       isMainToken: false,
       symbol: 'LKSM',
       name: 'LKSM',
+      decimals: 12
+    },
+    KMA: {
+      isMainToken: false,
+      symbol: 'KMA',
+      name: 'KMA',
+      decimals: 12
+    },
+    taiKSM: {
+      isMainToken: false,
+      symbol: 'taiKSM',
+      name: 'taiKSM',
+      decimals: 12
+    },
+    TEER: {
+      isMainToken: false,
+      symbol: 'TEER',
+      name: 'TEER',
       decimals: 12
     },
     BNC: {
@@ -114,11 +120,35 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'BNC',
       decimals: 12
     },
-    VSKSM: {
+    TAI: {
       isMainToken: false,
-      symbol: 'VSKSM',
-      name: 'VSKSM',
+      symbol: 'TAI',
+      name: 'TAI',
       decimals: 12
+    },
+    HKO: {
+      isMainToken: false,
+      symbol: 'HKO',
+      name: 'HKO',
+      decimals: 12
+    },
+    KICO: {
+      isMainToken: false,
+      symbol: 'KICO',
+      name: 'KICO',
+      decimals: 14
+    },
+    QTZ: {
+      isMainToken: false,
+      symbol: 'QTZ',
+      name: 'Quartz',
+      decimals: 18
+    },
+    NEER: {
+      isMainToken: false,
+      symbol: 'NEER',
+      name: 'NEER',
+      decimals: 18
     },
     PHA: {
       isMainToken: false,
@@ -126,10 +156,58 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'PHA',
       decimals: 12
     },
+    ARIS: {
+      isMainToken: false,
+      symbol: 'ARIS',
+      name: 'ARIS',
+      decimals: 8
+    },
     KINT: {
       isMainToken: false,
       symbol: 'KINT',
       name: 'KINT',
+      decimals: 12
+    },
+    RMRK: {
+      isMainToken: false,
+      symbol: 'RMRK',
+      name: 'RMRK',
+      decimals: 10
+    },
+    CSM: {
+      isMainToken: false,
+      symbol: 'CSM',
+      name: 'CSM',
+      decimals: 12
+    },
+    VSKSM: {
+      isMainToken: false,
+      symbol: 'VSKSM',
+      name: 'VSKSM',
+      decimals: 12
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 6
+    },
+    KSM: {
+      isMainToken: false,
+      symbol: 'KSM',
+      name: 'KSM',
+      decimals: 12
+    },
+    aUSD: {
+      isMainToken: false,
+      symbol: 'aUSD',
+      name: 'aUSD',
+      decimals: 12
+    },
+    BSX: {
+      isMainToken: false,
+      symbol: 'BSX',
+      name: 'BSX',
       decimals: 12
     },
     KBTC: {
@@ -138,11 +216,23 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'KBTC',
       decimals: 8
     },
-    TAI: {
+    AIR: {
       isMainToken: false,
-      symbol: 'TAI',
-      name: 'TAI',
-      decimals: 12
+      symbol: 'AIR',
+      name: 'AIR',
+      decimals: 18
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 6
+    },
+    MOVR: {
+      isMainToken: false,
+      symbol: 'MOVR',
+      name: 'MOVR',
+      decimals: 18
     }
   },
   bifrost: {

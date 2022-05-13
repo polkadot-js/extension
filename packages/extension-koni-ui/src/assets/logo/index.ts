@@ -17,6 +17,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   altair: require('./altair.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  air: require('./altair.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astar: require('./astar.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astarEvm: require('./astar.png'),
@@ -86,6 +88,8 @@ const LogosMap: Record<string, string> = {
   parallel: require('./parallel.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   phala: require('./phala.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pha: require('./phala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   picasso: require('./picasso.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -266,6 +270,12 @@ const LogosMap: Record<string, string> = {
   xcbnc: require('./bifrost.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcausd: require('./ausd.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kma: require('./kms.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  taiKSM: require('./taiKSM.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bsx: require('./bsx.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

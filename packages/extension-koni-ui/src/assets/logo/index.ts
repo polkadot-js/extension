@@ -277,7 +277,17 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bsx: require('./bsx.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  PolarisDAO: require('./polarisdao.png'),
+  polarisdao: require('./polarisdao.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  arsw: require('./arthswaplogo.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  oru: require('./orulogo.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  srs: require('./siriusfinance.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  atid: require('./astrid_dao.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  lay: require('./starlay.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

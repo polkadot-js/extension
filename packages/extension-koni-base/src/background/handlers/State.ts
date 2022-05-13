@@ -275,7 +275,6 @@ export default class KoniState extends State {
   private stakingRewardSubject = new Subject<StakingRewardJson>();
   private historyMap: Record<string, TransactionHistoryItemType[]> = {};
   private historySubject = new Subject<Record<string, TransactionHistoryItemType[]>>();
-  private _serviceInfoSubject = new Subject<_ServiceInfo>(); // TODO: merge this with serviceInfo
 
   // Todo: persist data to store later
   private chainRegistryMap: Record<string, ChainRegistry> = {};
@@ -676,7 +675,6 @@ export default class KoniState extends State {
   public setCurrentAccount (data: CurrentAccountInfo, callback?: () => void): void {
     this.currentAccountStore.set('CurrentAccountInfo', data, callback);
 
-    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
     this.updateServiceInfo();
   }
 
@@ -976,7 +974,7 @@ export default class KoniState extends State {
 
     this.evmTokenSubject.next(this.evmTokenState);
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
-    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
+    this.updateServiceInfo();
   }
 
   public deleteEvmTokens (targetTokens: DeleteEvmTokenParams[]) {
@@ -1022,21 +1020,7 @@ export default class KoniState extends State {
     this.evmTokenSubject.next(this.evmTokenState);
     this.chainRegistrySubject.next(this.getChainRegistryMap());
     this.customEvmTokenStore.set('EvmToken', this.evmTokenState);
-    this.updateServiceInfo_(this.chainRegistryMap, this.getErc721Tokens());
-  }
-
-  public subscribeServiceInfo_ () {
-    return this._serviceInfoSubject;
-  }
-
-  public updateServiceInfo_ (chainRegistry: Record<string, ChainRegistry>, customErc721Registry: CustomEvmToken[]) {
-    this.currentAccountStore.get('CurrentAccountInfo', (value) => {
-      this._serviceInfoSubject.next({
-        currentAccount: value.address,
-        chainRegistry,
-        customErc721Registry
-      });
-    });
+    this.updateServiceInfo();
   }
 
   public getNetworkMap () {
@@ -1241,7 +1225,9 @@ export default class KoniState extends State {
       this.serviceInfoSubject.next({
         networkMap: this.networkMap,
         apiMap: this.apiMap,
-        currentAccountInfo: value
+        currentAccountInfo: value,
+        chainRegistry: this.chainRegistryMap,
+        customErc721Registry: this.getErc721Tokens()
       });
     });
   }

@@ -71,13 +71,6 @@ export class KoniSubscription {
           this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
         }
       });
-
-      state.subscribeServiceInfo_().subscribe({
-        next: ({ currentAccount: address }) => {
-          // TODO: merge this
-          // this.subscribeBalancesAndCrowdloans(address);
-        }
-      });
     });
   }
 

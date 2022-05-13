@@ -22,6 +22,8 @@ export interface ServiceInfo {
   apiMap: ApiMap;
   isLock?: boolean;
   currentAccountInfo: CurrentAccountInfo;
+  chainRegistry: Record<string, ChainRegistry>;
+  customErc721Registry: CustomEvmToken[];
 }
 
 export enum ApiInitStatus {

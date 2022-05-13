@@ -151,8 +151,6 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   unique_network: require('./unique.network.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  pha: require('./phala.svg'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bnc: require('./bnc.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   kbtc: require('./kbtc.png'),

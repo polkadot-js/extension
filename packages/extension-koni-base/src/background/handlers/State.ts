@@ -46,7 +46,7 @@ function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
 
   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
-    if (stakingMap[networkKey]) {
+    if (NETWORKS[networkKey]) {
       stakingMap[networkKey] = {
         name: NETWORKS[networkKey].chain,
         chainId: networkKey,

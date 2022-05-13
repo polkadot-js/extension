@@ -17,6 +17,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   altair: require('./altair.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  air: require('./altair.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astar: require('./astar.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   astarEvm: require('./astar.png'),
@@ -87,6 +89,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   phala: require('./phala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  pha: require('./phala.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   picasso: require('./picasso.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   pichiu: require('./pichiu.png'),
@@ -146,8 +150,6 @@ const LogosMap: Record<string, string> = {
   bitcountry: require('./bitcountry.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   unique_network: require('./unique.network.svg'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  pha: require('./phala.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bnc: require('./bnc.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -266,6 +268,24 @@ const LogosMap: Record<string, string> = {
   xcbnc: require('./bifrost.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcausd: require('./ausd.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  kma: require('./kma.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  taiKSM: require('./taiKSM.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  bsx: require('./bsx.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  polarisdao: require('./polarisdao.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  arsw: require('./arthswaplogo.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  oru: require('./orulogo.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  srs: require('./siriusfinance.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  atid: require('./astrid_dao.svg'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  lay: require('./starlay.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };

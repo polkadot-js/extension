@@ -277,6 +277,8 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   bsx: require('./bsx.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  PolarisDAO: require('./polarisdao.png'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   default: require('./default.svg')
 };
 

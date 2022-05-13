@@ -156,10 +156,10 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'PHA',
       decimals: 12
     },
-    ARIS: {
+    PolarisDAO: {
       isMainToken: false,
       symbol: 'ARIS',
-      name: 'ARIS',
+      name: 'PolarisDAO',
       decimals: 8
     },
     KINT: {

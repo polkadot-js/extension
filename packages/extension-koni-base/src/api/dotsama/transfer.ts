@@ -13,7 +13,7 @@ import { BN } from '@polkadot/util';
 // TODO: consider pass state.getApiMap() as a param
 
 export async function getExistentialDeposit (networkKey: string, token: string): Promise<string> {
-  const dotSamaApiMap = state.getApiMap().dotSama;
+  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -38,7 +38,7 @@ export async function checkReferenceCount (networkKey: string, address: string):
     return false;
   }
 
-  const dotSamaApiMap = state.getApiMap().dotSama;
+  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -61,7 +61,7 @@ export async function checkSupportTransfer (networkKey: string, token: string): 
     };
   }
 
-  const dotSamaApiMap = state.getApiMap().dotSama;
+  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
@@ -107,7 +107,7 @@ export async function estimateFee (
     return [fee, feeSymbol];
   }
 
-  const dotSamaApiMap = state.getApiMap().dotSama;
+  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
@@ -233,7 +233,7 @@ export async function makeTransfer (
   tokenInfo: undefined | TokenInfo,
   callback: (data: ResponseTransfer) => void
 ): Promise<void> {
-  const dotSamaApiMap = state.getApiMap().dotSama;
+  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const fromAddress = fromKeypair.address;

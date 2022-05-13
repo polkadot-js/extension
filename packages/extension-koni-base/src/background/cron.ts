@@ -54,7 +54,7 @@ export class KoniCron {
 
   init () {
     state.getCurrentAccount((currentAccountInfo) => {
-      if (currentAccountInfo && (Object.keys(state.getApiMap().dotSama).length !== 0 || Object.keys(state.getApiMap().web3).length !== 0)) {
+      if (currentAccountInfo && (Object.keys(state.getDotSamaApiMap()).length !== 0 || Object.keys(state.getWeb3ApiMap()).length !== 0)) {
         this.addCron('refreshPrice', this.refreshPrice, CRON_REFRESH_PRICE_INTERVAL);
         this.addCron('checkStatusApiMap', this.updateApiMapStatus, CRON_GET_API_MAP_STATUS);
         this.addCron('recoverApiMap', this.recoverApiMap, CRON_AUTO_RECOVER_DOTSAMA_INTERVAL, false);
@@ -119,7 +119,7 @@ export class KoniCron {
     }
 
     state.getCurrentAccount(({ address }) => {
-      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama, state.getApiMap().web3);
+      this.subscriptions?.subscribeBalancesAndCrowdloans && this.subscriptions.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
     });
   }
 

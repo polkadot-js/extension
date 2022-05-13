@@ -1,7 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { faCog, faCoins, faExpand, faInfoCircle, faList, faLock, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faCog } from '@fortawesome/free-solid-svg-icons/faCog';
+import { faCoins } from '@fortawesome/free-solid-svg-icons/faCoins';
+import { faExpand } from '@fortawesome/free-solid-svg-icons/faExpand';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle';
+import { faList } from '@fortawesome/free-solid-svg-icons/faList';
+import { faLock } from '@fortawesome/free-solid-svg-icons/faLock';
+import { faPlug } from '@fortawesome/free-solid-svg-icons/faPlug';
+import { faQrcode } from '@fortawesome/free-solid-svg-icons/faQrcode';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import check from '@subwallet/extension-koni-ui/assets/check.svg';
 import { Link } from '@subwallet/extension-koni-ui/components';

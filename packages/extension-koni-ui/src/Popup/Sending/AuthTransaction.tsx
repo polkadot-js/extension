@@ -2,19 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestCheckTransfer, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import Button from '@subwallet/extension-koni-ui/components/Button';
+import DonateInputAddress from '@subwallet/extension-koni-ui/components/DonateInputAddress';
+import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
+import InputAddress from '@subwallet/extension-koni-ui/components/InputAddress';
+import InputWithLabel from '@subwallet/extension-koni-ui/components/InputWithLabel';
 import Modal from '@subwallet/extension-koni-ui/components/Modal';
-import Output from '@subwallet/extension-koni-ui/components/Output';
-import { useToggle } from '@subwallet/extension-koni-ui/hooks/useToggle';
+import Warning from '@subwallet/extension-koni-ui/components/Warning';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import Address from '@subwallet/extension-koni-ui/Popup/Sending/parts/Address';
-import Tip from '@subwallet/extension-koni-ui/Popup/Sending/parts/Tip';
-import Transaction from '@subwallet/extension-koni-ui/Popup/Sending/parts/Transaction';
-import { AddressProxy, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
-import { BN_ZERO } from '@polkadot/util';
+import { BN } from '@polkadot/util';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -68,7 +70,7 @@ function AuthTransaction ({ className, isDonation, feeInfo: [fee, feeDecimals, f
   const [password, setPassword] = useState<string>('');
   const [isKeyringErr, setKeyringErr] = useState<boolean>(false);
   const [errorArr, setErrorArr] = useState<string[]>([]);
-  const networkPrefix = NETWORKS[requestPayload.networkKey].ss58Format;
+  const networkPrefix = PREDEFINED_NETWORKS[requestPayload.networkKey].ss58Format;
 
   const _onCancel = useCallback(() => {
     onCancel();

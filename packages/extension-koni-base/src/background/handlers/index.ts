@@ -19,7 +19,7 @@ state.initEvmTokenState(); // TODO: move this into initNetwork
 
 export const extension = new KoniExtension(state);
 export const tabs = new KoniTabs(state);
-export const nftHandler = new NftHandler(state.getApiMap().dotSama, [], state.getApiMap().web3);
+export const nftHandler = new NftHandler(state.getDotSamaApiMap(), [], state.getWeb3ApiMap());
 
 function getRpcsMap (): Record<string, string> {
   const result: Record<string, string> = {};
@@ -46,7 +46,7 @@ export function initBackgroundWindow (keyring: any) {
   (window as any as BackgroundWindow).pdotApi = {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     keyring,
-    apisMap: state.getApiMap().dotSama
+    apisMap: state.getDotSamaApiMap()
   };
 }
 

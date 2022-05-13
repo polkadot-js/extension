@@ -43,7 +43,6 @@ const Derive = React.lazy(() => import('./Derive'));
 const CreateAccount = React.lazy(() => import('./CreateAccount'));
 const Authorize = React.lazy(() => import('./Authorize'));
 const AuthList = React.lazy(() => import('./AuthManagement'));
-const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Networks'));
 const LoadingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/components/LoadingContainer'));
 const TransferNftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
 const ImportLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportLedger'));

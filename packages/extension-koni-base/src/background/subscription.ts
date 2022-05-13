@@ -59,7 +59,7 @@ export class KoniSubscription {
       if (currentAccountInfo) {
         const { address } = currentAccountInfo;
 
-        this.subscribeBalancesAndCrowdloans(address, state.getApiMap().dotSama, state.getApiMap().web3);
+        this.subscribeBalancesAndCrowdloans(address, state.getDotSamaApiMap(), state.getWeb3ApiMap());
       }
 
       state.subscribeServiceInfo().subscribe({
@@ -68,7 +68,7 @@ export class KoniSubscription {
           const { address } = serviceInfo.currentAccountInfo;
 
           state.initChainRegistry();
-          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, state.getApiMap().web3);
+          this.subscribeBalancesAndCrowdloans(address, serviceInfo.apiMap.dotSama, serviceInfo.apiMap.web3);
         }
       });
 
@@ -144,7 +144,7 @@ export class KoniSubscription {
       .catch(console.error);
   }
 
-  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, , customErc721Registry: CustomEvmToken[]) {
+  initNftSubscription (addresses: string[], dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, customErc721Registry: CustomEvmToken[]) {
     const { cronUpdate, forceUpdate, selectedNftCollection } = state.getNftTransfer();
 
     if (forceUpdate && !cronUpdate) {

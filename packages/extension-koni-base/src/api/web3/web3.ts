@@ -48,8 +48,8 @@ export const initWeb3Api = (provider: string) => {
   }
 };
 
-export const getERC721Contract = (networkKey: string, assetAddress: string, options = {}): Contract => {
+export const getERC721Contract = (networkKey: string, assetAddress: string, web3ApiMap: Record<string, Web3>, options = {}): Contract => {
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
-  return new web3Map[networkKey].eth.Contract(ERC721Contract, assetAddress, options);
+  return new web3ApiMap[networkKey].eth.Contract(ERC721Contract, assetAddress, options);
 };

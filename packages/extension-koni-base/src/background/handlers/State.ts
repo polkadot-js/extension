@@ -3,13 +3,12 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
-import { cacheRegistryMap } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
-import { getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { cacheRegistryMap, getRegistry } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { PREDEFINED_GENESIS_HASHES, PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/staking';
 // eslint-disable-next-line camelcase
@@ -1215,6 +1214,14 @@ export default class KoniState extends State {
 
     this.networkMapSubject.next(this.networkMap);
     this.networkMapStore.set('NetworkMap', this.networkMap);
+  }
+
+  public getDotSamaApiMap () {
+    return this.apiMap.dotSama;
+  }
+
+  public getWeb3ApiMap () {
+    return this.apiMap.web3;
   }
 
   public getApiMap () {

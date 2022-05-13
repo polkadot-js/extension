@@ -5,12 +5,12 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountCreateSuri, RequestAccountForget, RequestAuthorizeReject, RequestBatchRestore, RequestCurrentAccountAddress, RequestDeriveCreate, RequestJsonRestore, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
+import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
-import { getFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { estimateFee, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
 import { TRANSFER_CHAIN_ID } from '@subwallet/extension-koni-base/api/nft/config';
 import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
 import { initWeb3Api, TestERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
@@ -1001,7 +1001,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
-    const dotSamaApiMap = state.getApiMap().dotSama;
+    const dotSamaApiMap = state.getDotSamaApiMap().dotSama;
     const errors = [] as Array<TransferError>;
     let keypair: KeyringPair | undefined;
     let transferValue;
@@ -1075,7 +1075,7 @@ export default class KoniExtension extends Extension {
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // @ts-ignore
       [fromAccountFree, toAccountFree] = await Promise.all(
-        [getFreeBalance(networkKey, from, state.getApiMap().web3), token, getFreeBalance(networkKey, to, state.getApiMap().web3, token)]
+        [getFreeBalance(networkKey, from, state.getWeb3ApiMap()), token, getFreeBalance(networkKey, to, state.getWeb3ApiMap(), token)]
       );
       const txVal: string = transferAll ? fromAccountFree : (value || '0');
 
@@ -1217,7 +1217,7 @@ export default class KoniExtension extends Extension {
     const networkMap = state.getNetworkMap();
 
     try {
-      const web3ApiMap = state.getApiMap().web3;
+      const web3ApiMap = state.getDotSamaApiMap().web3;
       const web3 = web3ApiMap[networkKey];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const contract = new web3.eth.Contract(TestERC721Contract, contractAddress);
@@ -1290,7 +1290,7 @@ export default class KoniExtension extends Extension {
     }
 
     try {
-      const web3ApiMap = state.getApiMap().web3;
+      const web3ApiMap = state.getDotSamaApiMap().web3;
       const web3 = web3ApiMap[networkKey];
 
       const common = Common.forCustomChain('mainnet', {

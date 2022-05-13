@@ -380,7 +380,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
 }
 
 export async function getFreeBalance (networkKey: string, address: string, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
-  const dotSamaApiMap = state.getApiMap().dotSama;
+  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -412,7 +412,8 @@ export async function getFreeBalance (networkKey: string, address: string, web3A
 }
 
 export async function subscribeFreeBalance (networkKey: string, address: string, token: string | undefined, update: (balance: string) => void): Promise<() => void> {
-  const apiProps = await dotSamaAPIMap[networkKey].isReady;
+  const dotSamaApiMap = state.getDotSamaApiMap();
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
   // todo: Need update the condition if the way to get ethereum chains is dynamic

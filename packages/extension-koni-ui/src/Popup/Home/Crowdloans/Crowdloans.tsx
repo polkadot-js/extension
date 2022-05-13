@@ -3,7 +3,6 @@
 
 import { NetWorkGroup, NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanContributeValueType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
-import CrowdloanItem from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem';
 import { CrowdloanItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

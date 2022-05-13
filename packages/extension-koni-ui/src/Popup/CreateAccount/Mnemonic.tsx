@@ -19,6 +19,8 @@ interface Props extends ThemeProps {
   address?: string;
   evmAddress?: string,
   evmName?: string,
+  isConnectWhenCreate: boolean,
+  onConnectWhenCreate: (isConnectWhenCreate: boolean) => void;
   name?: string;
   className?: string;
   onSelectAccountCreated?: (keyTypes: KeypairType[]) => void
@@ -35,7 +37,7 @@ const onCopy = (): void => {
   document.execCommand('copy');
 };
 
-function Mnemonic ({ address, className, evmAddress, evmName, name, onNextStep, onSelectAccountCreated, seed }: Props): React.ReactElement<Props> {
+function Mnemonic ({ address, className, evmAddress, evmName, isConnectWhenCreate, name, onConnectWhenCreate, onNextStep, onSelectAccountCreated, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [isMnemonicSaved, setIsMnemonicSaved] = useState(false);
   const [isNormalAccountSelected, setNormalAccountSelected] = useState(false);
@@ -135,6 +137,12 @@ function Mnemonic ({ address, className, evmAddress, evmName, name, onNextStep, 
               checked={isMnemonicSaved}
               label={t<string>('I have saved my mnemonic seed safely.')}
               onChange={setIsMnemonicSaved}
+            />
+
+            <Checkbox
+              checked={isConnectWhenCreate}
+              label={t<string>('Auto connect to all DApp after creating')}
+              onChange={onConnectWhenCreate}
             />
           </div>
         </div>

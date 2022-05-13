@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiMap, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiMap, CustomEvmToken, NETWORK_STATUS, NetworkJson, NftTransferExtra, StakingRewardJson } from '@subwallet/extension-base/background/KoniTypes';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
 import { fetchDotSamaHistory } from '@subwallet/extension-koni-base/api/subquery/history';
 import { state } from '@subwallet/extension-koni-base/background/handlers';
@@ -68,11 +68,11 @@ export class KoniCron {
         next: (serviceInfo) => {
           const { address } = serviceInfo.currentAccountInfo;
 
-          this.resetNft();
+          // this.resetNft();
           this.resetNftTransferMeta();
           this.resetStakingReward();
           this.resetHistory();
-          this.removeCron('refreshNft');
+          // this.removeCron('refreshNft');
           this.removeCron('refreshStakingReward');
           this.removeCron('refreshHistory');
 
@@ -89,6 +89,14 @@ export class KoniCron {
             this.addCron('refreshStakingReward', this.refreshStakingReward(address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
             this.addCron('refreshHistory', this.refreshHistory(address, serviceInfo.networkMap), CRON_REFRESH_HISTORY_INTERVAL);
           }
+        }
+      });
+
+      state.subscribeServiceInfo_().subscribe({
+        next: ({ currentAccount: address, customErc721Registry }) => {
+          // TODO: merge this
+          this.resetNft();
+          this.addCron('refreshNft', this.refreshNft(address, customErc721Registry), CRON_REFRESH_NFT_INTERVAL);
         }
       });
     });
@@ -169,10 +177,10 @@ export class KoniCron {
       .catch((err) => console.log(err));
   }
 
-  refreshNft (address: string, apiMap: ApiMap) {
+  refreshNft (address: string, apiMap: ApiMap, customErc721Registry: CustomEvmToken[]) {
     return () => {
       console.log('Refresh Nft state');
-      this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3);
+      this.subscriptions.subscribeNft(address, apiMap.dotSama, apiMap.web3, customErc721Registry);
     };
   }
 

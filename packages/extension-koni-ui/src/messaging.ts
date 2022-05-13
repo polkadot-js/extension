@@ -17,6 +17,8 @@ import { getId } from '@subwallet/extension-base/utils/getId';
 import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 
+import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
+
 import { _getKnownHashes } from './util/chains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
@@ -90,6 +92,10 @@ export async function saveAccountAllLogo (accountAllLogo: string, callback: (dat
   return sendMessage('pri(currentAccount.saveAccountAllLogo)', accountAllLogo, callback);
 }
 
+export async function saveTheme (theme: ThemeTypes, callback: (data: RequestSettingsType) => void): Promise<boolean> {
+  return sendMessage('pri(currentAccount.saveTheme)', theme, callback);
+}
+
 export async function subscribeSettings (data: RequestSubscribeBalancesVisibility, callback: (data: ResponseSettingsType) => void): Promise<ResponseSettingsType> {
   return sendMessage('pri(currentAccount.subscribeSettings)', data, callback);
 }
@@ -158,8 +164,8 @@ export async function createAccountSuri (name: string, password: string, suri: s
   return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
 }
 
-export async function createAccountSuriV2 (name: string, password: string, suri: string, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
-  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types });
+export async function createAccountSuriV2 (name: string, password: string, suri: string, isAllowed: boolean, types?: Array<KeypairType>, genesisHash?: string): Promise<ResponseAccountCreateSuriV2> {
+  return sendMessage('pri(accounts.create.suriV2)', { genesisHash, name, password, suri, types, isAllowed });
 }
 
 export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
@@ -230,6 +236,14 @@ export async function subscribeAccountsWithCurrentAddress (cb: (data: AccountsWi
   return sendMessage('pri(accounts.subscribeWithCurrentAddress)', null, cb);
 }
 
+export async function subscribeAccountsInputAddress (cb: (data: OptionInputAddress) => void): Promise<string> {
+  return sendMessage('pri(accounts.subscribeAccountsInputAddress)', null, cb);
+}
+
+export async function saveRecentAccountId (accountId: string): Promise<SingleAddress> {
+  return sendMessage('pri(accounts.saveRecent)', { accountId });
+}
+
 export async function triggerAccountsSubscription (): Promise<boolean> {
   return sendMessage('pri(accounts.triggerSubscription)');
 }
@@ -298,8 +312,8 @@ export async function deriveAccount (parentAddress: string, suri: string, parent
   return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
 }
 
-export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null): Promise<boolean> {
-  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri });
+export async function deriveAccountV2 (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: string | null, isAllowed: boolean): Promise<boolean> {
+  return sendMessage('pri(derivation.createV2)', { genesisHash, name, parentAddress, parentPassword, password, suri, isAllowed });
 }
 
 export async function windowOpen (path: AllowedPath): Promise<boolean> {
@@ -318,12 +332,12 @@ export async function batchRestore (file: KeyringPairs$Json, password: string, a
   return sendMessage('pri(json.batchRestore)', { file, password, address });
 }
 
-export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string): Promise<void> {
-  return sendMessage('pri(json.restoreV2)', { file, password, address });
+export async function jsonRestoreV2 (file: KeyringPair$Json, password: string, address: string, isAllowed: boolean): Promise<void> {
+  return sendMessage('pri(json.restoreV2)', { file, password, address, isAllowed });
 }
 
-export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, address: string): Promise<void> {
-  return sendMessage('pri(json.batchRestoreV2)', { file, password, address });
+export async function batchRestoreV2 (file: KeyringPairs$Json, password: string, accountsInfo: ResponseJsonGetAccountInfo[], isAllowed: boolean): Promise<void> {
+  return sendMessage('pri(json.batchRestoreV2)', { file, password, accountsInfo, isAllowed });
 }
 
 export async function setNotification (notification: string): Promise<boolean> {
@@ -470,4 +484,44 @@ export async function enableAllNetwork (): Promise<boolean> {
 
 export async function resetDefaultNetwork (): Promise<boolean> {
   return sendMessage('pri(networkMap.resetDefault)', null);
+}
+
+export async function subscribeEvmToken (callback: (data: EvmTokenJson) => void): Promise<EvmTokenJson> {
+  return sendMessage('pri(evmTokenState.getSubscription)', null, callback);
+}
+
+export async function getEvmTokenState (): Promise<EvmTokenJson> {
+  return sendMessage('pri(evmTokenState.getEvmTokenState)', null);
+}
+
+export async function upsertEvmToken (data: CustomEvmToken): Promise<boolean> {
+  return sendMessage('pri(evmTokenState.upsertEvmTokenState)', data);
+}
+
+export async function deleteEvmTokens (data: DeleteEvmTokenParams[]) {
+  return sendMessage('pri(evmTokenState.deleteMany)', data);
+}
+
+export async function validateEvmToken (data: ValidateEvmTokenRequest) {
+  return sendMessage('pri(evmTokenState.validateEvmToken)', data);
+}
+
+export async function transferCheckReferenceCount (request: RequestTransferCheckReferenceCount): Promise<boolean> {
+  return sendMessage('pri(transfer.checkReferenceCount)', request);
+}
+
+export async function transferCheckSupporting (request: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
+  return sendMessage('pri(transfer.checkSupporting)', request);
+}
+
+export async function transferGetExistentialDeposit (request: RequestTransferExistentialDeposit): Promise<string> {
+  return sendMessage('pri(transfer.getExistentialDeposit)', request);
+}
+
+export async function cancelSubscription (request: string): Promise<boolean> {
+  return sendMessage('pri(subscription.cancel)', request);
+}
+
+export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
+  return sendMessage('pri(freeBalance.subscribe)', request, callback);
 }

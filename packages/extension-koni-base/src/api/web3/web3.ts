@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { EVM_NETWORKS } from '@subwallet/extension-koni-base/api/endpoints';
 import Web3 from 'web3';
 import { Contract } from 'web3-eth-contract';
 
@@ -45,4 +46,10 @@ export const initWeb3Api = (provider: string) => {
   } else {
     return new Web3(new Web3.providers.WebsocketProvider(provider));
   }
+};
+
+export const getERC721Contract = (networkKey: string, assetAddress: string, options = {}): Contract => {
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
+  return new web3Map[networkKey].eth.Contract(ERC721Contract, assetAddress, options);
 };

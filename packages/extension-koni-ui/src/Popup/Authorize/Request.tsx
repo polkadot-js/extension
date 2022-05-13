@@ -8,7 +8,7 @@ import ConnectAccount from '@subwallet/extension-koni-ui/Popup/Authorize/Connect
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
-import { AccountContext, ActionContext, Button } from '../../components';
+import { AccountContext, ActionContext, Button, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequestV2, rejectAuthRequestV2 } from '../../messaging';
 
@@ -74,25 +74,34 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
           <span className='tab-url'>{stripUrl(url)}</span>
         </a>
       </div>
-      <div className='request-info-choose-account'>
-        {t<string>('Choose the account(s) you’d like to connect')}
-      </div>
-      <div className='request__accounts'>
-        {filteredAccounts.map((acc) => (
-          <ConnectAccount
-            address={acc.address}
-            genesisHash={acc.genesisHash}
-            key={acc.address}
-            name={acc.name}
-            selectAccountCallBack={setSelectedAccounts}
-            selectedAccounts={selectedAccounts}
-            type={acc.type}
-          />
-        ))}
-      </div>
-      <div className='authorize-request__warning'>
-        {t<string>('Make sure you trust this site before connecting')}
-      </div>
+      {filteredAccounts && filteredAccounts.length
+        ? (
+          <>
+            <div className='request-info-choose-account'>
+              {t<string>('Choose the account(s) you’d like to connect')}
+            </div>
+            <div className='request__accounts'>
+              {filteredAccounts.map((acc) => (
+                <ConnectAccount
+                  address={acc.address}
+                  genesisHash={acc.genesisHash}
+                  key={acc.address}
+                  name={acc.name}
+                  selectAccountCallBack={setSelectedAccounts}
+                  selectedAccounts={selectedAccounts}
+                  type={acc.type}
+                />
+              ))}
+            </div>
+            <div className='authorize-request__warning'>
+              {t<string>('Make sure you trust this site before connecting')}
+            </div>
+          </>
+        )
+        : <Warning>
+          {t<string>('You don\'t have any substrate account. Please create, import or restore an account to continue')}
+        </Warning>
+      }
       <div className='authorize-request-bottom-content'>
         <Button
           className='authorize-request__btn'
@@ -172,7 +181,7 @@ export default styled(Request)(({ theme }: Props) => `
   }
 
   .authorize-request__btn:first-child {
-    background-color: #181E42;
+    background-color: ${theme.buttonBackground1};
     margin-right: 8px;
 
     span {

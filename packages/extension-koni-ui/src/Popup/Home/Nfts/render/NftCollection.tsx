@@ -3,13 +3,14 @@
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import NftItem from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItem';
-import NftItemPreview from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview';
 import { _NftCollection, _NftItem } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NFT_PER_ROW } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+const NftItemPreview = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItemPreview'));
+const NftItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftItem'));
 
 interface Props {
   className?: string;

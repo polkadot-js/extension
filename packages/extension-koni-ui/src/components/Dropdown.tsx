@@ -3,6 +3,7 @@
 
 import type { ThemeProps } from '../types';
 
+import { networkSelectOption } from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import React, { useCallback, useState } from 'react';
 import Select, { ActionMeta, SingleValue } from 'react-select';
 import CreatableSelect from 'react-select/creatable';

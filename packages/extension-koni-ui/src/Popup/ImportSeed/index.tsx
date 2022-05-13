@@ -36,6 +36,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
   const [account, setAccount] = useState<AccountInfo | null>(null);
   const [evmAccount, setEvmAccount] = useState<AccountInfo | null>(null);
   const [selectedGenesis, setSelectedGenesis] = useState<string>('');
+  const [isConnectWhenImport, setConnectWhenImport] = useState(true);
   const [keyTypes, setKeyTypes] = useState<Array<KeypairType>>([SUBSTRATE_ACCOUNT_TYPE, EVM_ACCOUNT_TYPE]);
   const dep = keyTypes.toString();
   const accountsWithoutAll = accounts.filter((acc: { address: string; }) => acc.address !== 'ALL');
@@ -53,7 +54,7 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, keyTypes, selectedGenesis)
+      createAccountSuriV2(name, password, account.suri, isConnectWhenImport, keyTypes, selectedGenesis)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -63,7 +64,8 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
           console.error(error);
         });
     }
-  }, [account, selectedGenesis, onAction, dep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnectWhenImport, account, selectedGenesis, onAction, dep]);
 
   const _onNextStep = useCallback(
     () => setStep1(false),
@@ -90,9 +92,11 @@ function ImportSeed ({ className = '' }: Props): React.ReactElement {
             className='import-seed-content-wrapper'
             evmAccount={evmAccount}
             evmName={evmName}
+            isConnectWhenImport={isConnectWhenImport}
             keyTypes={keyTypes}
             name={name}
             onAccountChange={setAccount}
+            onConnectWhenImport={setConnectWhenImport}
             onEvmAccountChange={setEvmAccount}
             onNextStep={_onNextStep}
             onSelectAccountImported={setKeyTypes}

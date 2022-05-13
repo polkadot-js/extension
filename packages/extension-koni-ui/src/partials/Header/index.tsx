@@ -20,6 +20,7 @@ import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMe
 import DetailHeader from '@subwallet/extension-koni-ui/partials/Header/DetailHeader';
 import SubHeader from '@subwallet/extension-koni-ui/partials/Header/SubHeader';
 import { RootState, store } from '@subwallet/extension-koni-ui/stores';
+import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
@@ -49,6 +50,7 @@ interface Props extends ThemeProps {
   subHeaderName?: string;
   showCancelButton?: boolean;
   isWelcomeScreen?: boolean;
+  isShowNetworkSelect?: boolean;
   isShowZeroBalances?: boolean;
   toggleZeroBalances?: () => void;
   changeAccountCallback?: (address: string) => void;
@@ -57,18 +59,14 @@ interface Props extends ThemeProps {
   to?: string;
 }
 
-function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
-  store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });
-}
-
-function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
+function Header ({ changeAccountCallback, children, className = '', isBusy, isContainDetailHeader, isShowNetworkSelect = true, isShowZeroBalances, isWelcomeScreen, setShowBalanceDetail, showBackArrow, showCancelButton, showSubHeader, smallMargin = false, subHeaderName, to, toggleZeroBalances }: Props): React.ReactElement<Props> {
   const [isSettingsOpen, setShowSettings] = useState(false);
   const [isActionOpen, setShowAccountAction] = useState(false);
   const [isNetworkSelectOpen, setShowNetworkSelect] = useState(false);
   const [isShowModal, setShowModal] = useState(false);
-  const { currentAccount: { account }, currentNetwork: { isEthereum, networkPrefix }, settings: { accountAllLogo } } = useSelector((state: RootState) => state);
-  const [localGenesisHash, setLocalGenesisHash] = useState<string>('');
-  const chain = useMetadata(account?.genesisHash, true);
+  const { currentAccount: { account },
+    currentNetwork: { genesisHash, isEthereum, networkPrefix },
+    settings: { accountAllLogo } } = useSelector((state: RootState) => state);
   const [formattedAddress, setFormattedAddress] = useState<string | null>(null);
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
   const { accounts } = useContext(AccountContext);
@@ -109,73 +107,6 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
     setFormattedAddress(formattedAddress);
   }, [account, account?.address, networkPrefix, isEthereum]);
 
-  useEffect(() => {
-    let isSync = true;
-
-    if (_isAccountAll) {
-      let networkSelected;
-      // console.log('genesisOption', genesisOptions);
-      const accountAllNetworkGenesisHash = window.localStorage.getItem('accountAllNetworkGenesisHash');
-
-      if (!accountAllNetworkGenesisHash) {
-        networkSelected = genesisOptions[0];
-      } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === accountAllNetworkGenesisHash);
-
-        if (!networkSelected) {
-          window.localStorage.setItem('accountAllNetworkGenesisHash', '');
-          networkSelected = genesisOptions[0];
-        }
-      }
-
-      if (networkSelected) {
-        // console.log('networkSelected')
-        updateCurrentNetwork({
-          networkPrefix: networkSelected.networkPrefix,
-          icon: networkSelected.icon,
-          genesisHash: networkSelected.value,
-          networkKey: networkSelected.networkKey,
-          isEthereum: networkSelected.isEthereum
-        });
-
-        setLocalGenesisHash(networkSelected.value);
-      }
-
-      return;
-    }
-
-    (async () => {
-      let networkSelected;
-
-      if (!account || !account?.genesisHash) {
-        networkSelected = genesisOptions[0];
-      } else {
-        networkSelected = genesisOptions.find((opt) => opt.value === account.genesisHash);
-
-        if (!networkSelected) {
-          await tieAccount(account.address, null);
-          networkSelected = genesisOptions[0];
-        }
-      }
-
-      if (isSync && networkSelected) {
-        updateCurrentNetwork({
-          networkPrefix: networkSelected.networkPrefix,
-          icon: networkSelected.icon,
-          genesisHash: networkSelected.value,
-          networkKey: networkSelected.networkKey,
-          isEthereum: networkSelected.isEthereum
-        });
-
-        setLocalGenesisHash(networkSelected.value);
-      }
-    })().catch((e) => console.log('error is', e));
-
-    return () => {
-      isSync = false;
-    };
-  }, [account, account?.genesisHash, _isAccountAll, genesisOptions]);
-
   const getNetworkKey = useCallback(
     (genesisHash: string) => {
       let networkKey = '';
@@ -202,7 +133,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
   const theme = (
     account?.type === 'ethereum'
       ? 'ethereum'
-      : (chain?.icon || 'polkadot')
+      : 'polkadot'
   ) as IconTheme;
 
   const _onChangeGenesis = useCallback(
@@ -221,8 +152,6 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
           networkKey,
           isEthereum
         });
-
-        setLocalGenesisHash(genesisHash);
       }
 
       setShowBalanceDetail && setShowBalanceDetail(false);
@@ -310,16 +239,16 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
               />
             </div>)}
             <div
-              className={`network-select-item ${isNetworkSelectOpen ? 'pointer-events-none' : ''}`}
+              className={`network-select-item ${isNetworkSelectOpen ? 'pointer-events-none' : ''} ${isShowNetworkSelect ? '' : 'network-select-disabled'}`}
               onClick={_toggleNetwork}
             >
               <img
                 alt='logo'
                 className={'network-logo'}
-                src={getLogoByGenesisHash(localGenesisHash)}
+                src={getLogoByGenesisHash(genesisHash)}
               />
               <div className='network-select-item__text'>
-                {getNetworkKey(localGenesisHash) || genesisOptions[0].text}
+                {getNetworkKey(genesisHash) || genesisOptions[0].text}
               </div>
               <FontAwesomeIcon
                 className='network-select-item__icon'
@@ -354,7 +283,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
                     : (
                       <Identicon
                         className='identityIcon'
-                        genesisHash={localGenesisHash}
+                        genesisHash={genesisHash}
                         iconTheme={theme}
                         prefix={networkPrefix}
                         showLogo
@@ -376,7 +305,7 @@ function Header ({ changeAccountCallback, children, className = '', isBusy, isCo
 
           {isNetworkSelectOpen && (
             <NetworkMenu
-              currentNetwork={localGenesisHash}
+              currentNetwork={genesisHash}
               genesisOptions={genesisOptions}
               reference={netRef}
               selectNetwork={_onChangeGenesis}
@@ -463,6 +392,12 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   }
 
   .pointer-events-none {
+    pointer-events: none;
+  }
+
+  .network-select-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
     pointer-events: none;
   }
 

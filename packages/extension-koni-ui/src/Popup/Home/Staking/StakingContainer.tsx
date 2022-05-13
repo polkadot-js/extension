@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
-import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
 import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
-import EmptyList from '@subwallet/extension-koni-ui/Popup/Home/Staking/EmptyList';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import styled from 'styled-components';
 
-import StakingRow from './StakingRow';
+const StakingRow = React.lazy(() => import('./StakingRow'));
+const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
+const EmptyList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/EmptyList'));
 
 interface Props extends ThemeProps {
   className?: string;

@@ -18,6 +18,7 @@ interface Props {
 
 function NftCollectionPreview ({ className, data, onClick }: Props): React.ReactElement<Props> {
   const [loading, setLoading] = useState(true);
+  const [showDefaultImage, setShowDefaultImage] = useState(false);
 
   const handleOnLoad = useCallback(() => {
     setLoading(false);
@@ -26,6 +27,11 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
   const handleOnClick = useCallback(() => {
     onClick(data);
   }, [data, onClick]);
+
+  const handleImageError = useCallback(() => {
+    setLoading(false);
+    setShowDefaultImage(true);
+  }, []);
 
   return (
     <div className={className}>
@@ -39,14 +45,26 @@ function NftCollectionPreview ({ className, data, onClick }: Props): React.React
             loading &&
             <Spinner className={'img-spinner'} />
           }
-          <LazyLoad>
-            <img
-              alt={'collection-thumbnail'}
-              className={'collection-thumbnail'}
-              onLoad={handleOnLoad}
-              src={data.image ? data?.image : logo}
-              style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
-            />
+          <LazyLoad
+            scrollContainer={'.home-tab-contents'}
+          >
+            {
+              !showDefaultImage
+                ? <img
+                  alt={'collection-thumbnail'}
+                  className={'collection-thumbnail'}
+                  onError={handleImageError}
+                  onLoad={handleOnLoad}
+                  src={data.image ? data?.image : logo}
+                  style={{ borderRadius: '5px 5px 0 0', opacity: loading ? '0.3' : '1' }}
+                />
+                : <img
+                  alt={'default-img'}
+                  className={'collection-thumbnail'}
+                  src={logo}
+                  style={{ borderRadius: '5px 5px 0 0' }}
+                />
+            }
           </LazyLoad>
         </div>
 

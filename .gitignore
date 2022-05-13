@@ -1,4 +1,5 @@
 build/
+build-cjs/
 coverage/
 node_modules/
 tmp/

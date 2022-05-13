@@ -248,7 +248,7 @@ export default styled(DetailHeader)(({ theme }: Props) => `
     margin-right: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 220px;
+    max-width: 180px;
     overflow: hidden;
   }
 

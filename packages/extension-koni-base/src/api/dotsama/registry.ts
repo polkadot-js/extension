@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainRegistry, CustomEvmToken, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { PREDEFINE_TOKEN_DATA_MAP } from '@subwallet/extension-koni-base/api/predefineChainTokens';
+import { state } from '@subwallet/extension-koni-base/background/handlers';
 
 import { ApiPromise } from '@polkadot/api';
 import { BN, bnToHex } from '@polkadot/util';
 
-const cacheRegistryMap: Record<string, ChainRegistry> = {};
+export const cacheRegistryMap: Record<string, ChainRegistry> = {};
 
 export async function getMoonAssets (api: ApiPromise) {
   await api.isReady;
@@ -68,7 +69,7 @@ export async function getForeignToken (api: ApiPromise) {
   return tokenMap;
 }
 
-export const getRegistry = async (networkKey: string, api: ApiPromise) => {
+export const getRegistry = async (networkKey: string, api: ApiPromise, customErc20Tokens?: CustomEvmToken[]) => {
   const cached = cacheRegistryMap[networkKey];
 
   if (cached) {
@@ -110,6 +111,20 @@ export const getRegistry = async (networkKey: string, api: ApiPromise) => {
     Object.assign(tokenMap, moonTokens);
   }
 
+  if (customErc20Tokens) {
+    for (const erc20Token of customErc20Tokens) {
+      if (erc20Token.chain === networkKey && erc20Token.symbol && !(erc20Token.symbol in tokenMap)) {
+        tokenMap[erc20Token.symbol] = {
+          erc20Address: erc20Token.smartContract,
+          isMainToken: false,
+          name: erc20Token.symbol,
+          symbol: erc20Token.symbol,
+          decimals: erc20Token.decimals as number
+        } as TokenInfo;
+      }
+    }
+  }
+
   const chainRegistry = {
     chainDecimals,
     chainTokens,
@@ -127,16 +142,17 @@ export async function getTokenInfo (networkKey: string, api: ApiPromise, token: 
   return tokenMap[token];
 }
 
-// deprecated
-// export function initChainRegistrySubscription () {
-//   const apiMap = state.getApiMap();
-//
-//   Object.entries(apiMap.dotSama).forEach(([networkKey, { api }]) => {
-//     getRegistry(networkKey, api)
-//       .then((rs) => {
-//         console.log('chainRegistry here', rs);
-//         state.setChainRegistryItem(networkKey, rs);
-//       })
-//       .catch(console.error);
-//   });
-// }
+// move this to koni-state
+export function initChainRegistrySubscription () {
+  state.getEvmTokenStore((evmTokens) => {
+    const erc20Tokens = evmTokens ? evmTokens.erc20 : [];
+
+    Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
+      getRegistry(networkKey, api, erc20Tokens)
+        .then((rs) => {
+          state.setChainRegistryItem(networkKey, rs);
+        })
+        .catch(console.error);
+    });
+  });
+}

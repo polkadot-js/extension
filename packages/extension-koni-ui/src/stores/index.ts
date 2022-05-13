@@ -9,6 +9,7 @@ import ChainRegistryReducer from './ChainRegistry';
 import CrowdloanReducer from './Crowdloan';
 import CurrentAccountReducer from './CurrentAccount';
 import CurrentNetworkReducer from './CurrentNetwork';
+import EvmTokenReducer from './EvmToken';
 import NetworkConfigParamsReducer from './NetworkConfigParams';
 import NetworkMapReducer from './NetworkMap';
 import NetworkMetadataReducer from './NetworkMetadata';
@@ -18,6 +19,7 @@ import PriceReducer from './Price';
 import SettingsReducer from './Settings';
 import StakingReducer from './Staking';
 import StakingRewardReducer from './StakingReward';
+import TokenConfigReducer from './TokenConfigParams';
 import TransactionHistoryReducer from './TransactionHistory';
 import TransferNftExtraReducer from './TransferNftExtra';
 import TransferNftParamsReducer from './TransferNftParams';
@@ -25,6 +27,8 @@ import TransferNftParamsReducer from './TransferNftParams';
 const reducers = {
   networkConfigParams: NetworkConfigParamsReducer,
   networkMap: NetworkMapReducer,
+  tokenConfigParams: TokenConfigReducer,
+  evmToken: EvmTokenReducer,
   transferNftExtra: TransferNftExtraReducer,
   transferNftParams: TransferNftParamsReducer,
   stakingReward: StakingRewardReducer,

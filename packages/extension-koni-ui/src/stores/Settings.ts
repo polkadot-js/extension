@@ -6,7 +6,8 @@ import { ResponseSettingsType } from '@subwallet/extension-base/background/KoniT
 
 const initialState = {
   isShowBalance: false,
-  accountAllLogo: ''
+  accountAllLogo: '',
+  theme: 'dark'
 } as ResponseSettingsType;
 
 const settingsSlice = createSlice({
@@ -18,6 +19,7 @@ const settingsSlice = createSlice({
 
       state.isShowBalance = payload.isShowBalance;
       state.accountAllLogo = payload.accountAllLogo;
+      state.theme = payload.theme;
     }
   }
 });

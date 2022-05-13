@@ -48,7 +48,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
     if (name && password && account) {
       setIsBusy(true);
 
-      createAccountSuriV2(name, password, account.suri, keyTypes)
+      createAccountSuriV2(name, password, account.suri, false, keyTypes)
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -58,6 +58,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
           console.error(error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account, onAction, dep]);
 
   return (

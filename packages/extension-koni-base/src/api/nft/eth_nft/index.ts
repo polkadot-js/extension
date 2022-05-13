@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { CF_IPFS_GATEWAY, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
+import { CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { PINATA_IPFS_GATEWAY, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
 import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@subwallet/extension-koni-base/api/nft/eth_nft/utils';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
@@ -15,19 +15,24 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 export class Web3NftApi extends BaseNftApi {
   targetContracts: ContractInfo[] | undefined;
   isConnected = false;
+  evmContracts: CustomEvmToken[] = [];
 
   constructor (web3: Web3 | null, addresses: string[], chain: string) {
     super(undefined, addresses, chain);
 
     this.web3 = web3;
 
-    if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) {
-      this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
-    } else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) {
-      this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
-    } else if (chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
-      this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
-    }
+    // if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) {
+    //   this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
+    // } else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) {
+    //   this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
+    // } else if (chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
+    //   this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
+    // }
+  }
+
+  setEvmContracts (evmContracts: CustomEvmToken[]) {
+    this.evmContracts = evmContracts;
   }
 
   override parseUrl (input: string): string | undefined {
@@ -40,10 +45,10 @@ export class Web3NftApi extends BaseNftApi {
     }
 
     if (input.includes('ipfs://')) {
-      return CF_IPFS_GATEWAY + input.split('ipfs://')[1];
+      return PINATA_IPFS_GATEWAY + input.split('ipfs://')[1];
     }
 
-    return CF_IPFS_GATEWAY + input.split('ipfs://ipfs/')[1];
+    return PINATA_IPFS_GATEWAY + input.split('ipfs://ipfs/')[1];
   }
 
   private parseMetadata (data: Record<string, any>): NftItem {
@@ -82,7 +87,7 @@ export class Web3NftApi extends BaseNftApi {
     } as NftItem;
   }
 
-  private async getItemsByCollection (smartContract: string, collectionName: string, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
+  private async getItemsByCollection (smartContract: string, collectionName: string | undefined, updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void) {
     if (!this.web3) {
       return;
     }
@@ -113,36 +118,40 @@ export class Web3NftApi extends BaseNftApi {
         itemIndexes.push(i);
       }
 
-      await Promise.all(itemIndexes.map(async (i) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const tokenId = await contract.methods.tokenOfOwnerByIndex(address, i).call() as number;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        const tokenURI = await contract.methods.tokenURI(tokenId).call() as string;
+      try {
+        await Promise.all(itemIndexes.map(async (i) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const tokenId = await contract.methods.tokenOfOwnerByIndex(address, i).call() as number;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+          const tokenURI = await contract.methods.tokenURI(tokenId).call() as string;
 
-        const detailUrl = this.parseUrl(tokenURI);
+          const detailUrl = this.parseUrl(tokenURI);
 
-        if (detailUrl) {
-          try {
-            const itemDetail = await fetch(detailUrl)
-              .then((resp) => resp.json()) as Record<string, any>;
-            const parsedItem = this.parseMetadata(itemDetail);
+          if (detailUrl) {
+            try {
+              const itemDetail = await fetch(detailUrl)
+                .then((resp) => resp.json()) as Record<string, any>;
+              const parsedItem = this.parseMetadata(itemDetail);
 
-            parsedItem.collectionId = smartContract;
-            parsedItem.id = tokenId.toString();
+              parsedItem.collectionId = smartContract;
+              parsedItem.id = tokenId.toString();
 
-            if (parsedItem) {
-              if (parsedItem.image) {
-                collectionImage = parsedItem.image;
+              if (parsedItem) {
+                if (parsedItem.image) {
+                  collectionImage = parsedItem.image;
+                }
+
+                updateItem(parsedItem);
+                ownItem = true;
               }
-
-              updateItem(parsedItem);
-              ownItem = true;
+            } catch (e) {
+              console.error(`error parsing item for ${this.chain as string} nft`, e);
             }
-          } catch (e) {
-            console.error(`error parsing item for ${this.chain as string} nft`, e);
           }
-        }
-      }));
+        }));
+      } catch (e) {
+        console.error('evm nft error', e);
+      }
     }));
 
     if (ownItem) {
@@ -159,11 +168,11 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
-    if (!this.targetContracts) {
+    if (!this.evmContracts) {
       return;
     }
 
-    await Promise.all(this.targetContracts.map(async ({ name, smartContract }) => {
+    await Promise.all(this.evmContracts.map(async ({ name, smartContract }) => {
       return await this.getItemsByCollection(smartContract, name, updateItem, updateCollection, updateReady);
     }));
   }

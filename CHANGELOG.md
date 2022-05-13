@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.4.1 (Koni)
+Build date: May 11, 2022.
+
+Update:
+- Support import ERC20 and ERC721 for EVM Networks (#160)
+- Implement new Send Fund UI with support send tokens, send EVM assets (#32, #143, #118)
+- Add option allow accept all website on create account screen (#198)
+- Update Centrifuge Parachain info (#203)
+- Update logo of $CHRWNA, $CHAO (#193,#195)
+
+Bug Fixed:
+- Fix extension error when entering Substrate's seed phrase but selecting EVM account (#192)
+- Fix bug can not load NFT (#200)
+- Fix bug can not send EVM NFT (#209)
+- Fix bug display incorrect screen when connection is lost (#225)
+- Fix bug and improve some experience (#168)
+- Fix bug not update them when change them from popup view (#228)
+
 ## 0.3.6 (Koni)
 Build date: Apr 22, 2022.
 Update:

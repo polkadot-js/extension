@@ -13,7 +13,8 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import CrowdloanEmptyList from './EmptyList';
+const CrowdloanEmptyList = React.lazy(() => import('./EmptyList'));
+const CrowdloanItem = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans/CrowdloanItem'));
 
 interface Props extends ThemeProps {
   className?: string;

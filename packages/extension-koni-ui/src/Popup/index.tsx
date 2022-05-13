@@ -7,16 +7,10 @@ import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
-import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
-import TransferNftContainer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer';
-import ImportLedger from '@subwallet/extension-koni-ui/Popup/ImportLedger';
-import Donate from '@subwallet/extension-koni-ui/Popup/Sending/old/Donate';
-import SendFund from '@subwallet/extension-koni-ui/Popup/Sending/old/SendFund';
-import Settings from '@subwallet/extension-koni-ui/Popup/Settings';
-import GeneralSetting from '@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting';
-import NetworkCreate from '@subwallet/extension-koni-ui/Popup/Settings/networks/NetworkEdit';
-import Networks from '@subwallet/extension-koni-ui/Popup/Settings/networks/Networks';
+import Rendering from '@subwallet/extension-koni-ui/Popup/Rendering';
+import Donate from '@subwallet/extension-koni-ui/Popup/Sending/Donate';
+import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
@@ -30,22 +24,36 @@ import ToastProvider from '../components/Toast/ToastProvider';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-import AuthList from './AuthManagement';
-import Authorize from './Authorize';
-import CreateAccount from './CreateAccount';
-import Derive from './Derive';
-import Export from './Export';
-// import ExportAll from './ExportAll';
-import Forget from './Forget';
-import Home from './Home';
-import ImportMetamaskPrivateKey from './ImportMetamaskPrivateKey';
-import ImportQr from './ImportQr';
-import ImportSeed from './ImportSeed';
-import Metadata from './Metadata';
-import PhishingDetected from './PhishingDetected';
-import RestoreJson from './RestoreJson';
-import Signing from './Signing';
-import Welcome from './Welcome';
+// import Home from './Home';
+
+const Home = React.lazy(() => import('./Home'));
+const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
+const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
+const Welcome = React.lazy(() => import('./Welcome'));
+const Signing = React.lazy(() => import('./Signing'));
+const RestoreJson = React.lazy(() => import('./RestoreJson'));
+const PhishingDetected = React.lazy(() => import('./PhishingDetected'));
+const Metadata = React.lazy(() => import('./Metadata'));
+const ImportSeed = React.lazy(() => import('./ImportSeed'));
+const ImportQr = React.lazy(() => import('./ImportQr'));
+const ImportMetamaskPrivateKey = React.lazy(() => import('./ImportMetamaskPrivateKey'));
+const Forget = React.lazy(() => import('./Forget'));
+const Export = React.lazy(() => import('./Export'));
+const Derive = React.lazy(() => import('./Derive'));
+const CreateAccount = React.lazy(() => import('./CreateAccount'));
+const Authorize = React.lazy(() => import('./Authorize'));
+const AuthList = React.lazy(() => import('./AuthManagement'));
+const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/Networks'));
+const LoadingContainer = React.lazy(() => import('@subwallet/extension-koni-ui/components/LoadingContainer'));
+const TransferNftContainer = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferNftContainer'));
+const ImportLedger = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportLedger'));
+const ImportEvmNft = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportEvmNft'));
+const ImportEvmToken = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/ImportToken/ImportEvmToken'));
+const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/SendFund'));
+const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
+const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/networks/NetworkEdit'));
+const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/networks/Networks'));
 
 const startSettings = uiSettings.get();
 
@@ -75,10 +83,6 @@ function initAccountContext (accounts: AccountJson[]): AccountsContext {
     hierarchy,
     master
   };
-}
-
-function updateCurrentAccount (currentAcc: AccountJson): void {
-  store.dispatch({ type: 'currentAccount/update', payload: currentAcc });
 }
 
 const VARIANTS = ['beam', 'marble', 'pixel', 'sunset', 'bauhaus', 'ring'];
@@ -178,7 +182,6 @@ export default function Popup (): React.ReactElement {
       setSettingsCtx(settings);
       setCameraOn(settings.camera === 'on');
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useSetupStore();
@@ -218,6 +221,7 @@ export default function Popup (): React.ReactElement {
                   <MetadataReqContext.Provider value={metaRequests}>
                     <SigningReqContext.Provider value={signRequests}>
                       <ToastProvider>
+                        <Rendering />
                         <Switch>
                           <Route path='/auth-list'>{wrapWithErrorBoundary(<AuthList />, 'auth-list')}</Route>
                           <Route path='/account/create'>{wrapWithErrorBoundary(<CreateAccount />, 'account-creation')}</Route>
@@ -238,6 +242,10 @@ export default function Popup (): React.ReactElement {
                           <Route path='/account/send-fund'>{wrapWithErrorBoundary(<SendFund />, 'send-fund')}</Route>
                           <Route path='/account/donate'>{wrapWithErrorBoundary(<Donate />, 'donate')}</Route>
                           <Route path='/account/send-nft'>{wrapWithErrorBoundary(<TransferNftContainer />, 'send-nft')}</Route>
+                          <Route path='/account/import-evm-token'>{wrapWithErrorBoundary(<ImportEvmToken />, 'import-evm-token')}</Route>
+                          <Route path='/account/import-evm-nft'>{wrapWithErrorBoundary(<ImportEvmNft />, 'import-evm-nft')}</Route>
+                          <Route path='/account/evm-token-setting'>{wrapWithErrorBoundary(<EvmTokenSetting />, 'evm-token-setting')}</Route>
+                          <Route path='/account/evm-token-edit'>{wrapWithErrorBoundary(<EvmTokenEdit />, 'evm-token-edit')}</Route>
                           <Route path={`${PHISHING_PAGE_REDIRECT}/:website`}>{wrapWithErrorBoundary(<PhishingDetected />, 'phishing-page-redirect')}</Route>
                           <Route
                             exact

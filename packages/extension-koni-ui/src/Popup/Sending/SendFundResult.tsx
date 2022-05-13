@@ -1,33 +1,22 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransferError } from '@subwallet/extension-base/background/KoniTypes';
 import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { ThemeProps, TxResult } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
 import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 export interface Props extends ThemeProps {
   className?: string;
-  txResult: TxResult;
+  txResult: TransferResultType;
   networkKey: string;
   onResend: () => void
-}
-
-function getErrorMessage (txError?: Error | null): string | null {
-  if (!txError) {
-    return null;
-  }
-
-  if (txError.message) {
-    return txError.message;
-  }
-
-  return null;
 }
 
 function SendFundResult ({ className = '', networkKey, onResend, txResult: { extrinsicHash, isTxSuccess, txError } }: Props): React.ReactElement<Props> {
@@ -61,7 +50,16 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
     );
   };
 
-  const errorMessage = getErrorMessage(txError);
+  const renderErrorMessage = (txError: Array<TransferError>) => {
+    return txError.map((err) => (
+      <div
+        className={'send-fund-result__text-danger'}
+        key={err.code}
+      >
+        {err.message}
+      </div>
+    ));
+  };
 
   return (
     <div className={`send-fund-result-wrapper ${className}`}>
@@ -98,8 +96,8 @@ function SendFundResult ({ className = '', networkKey, onResend, txResult: { ext
               : (t<string>('There was a problem with your request.'))
             }
 
-            {errorMessage && (
-              <div className={'send-fund-result__text-danger'}>{errorMessage}</div>
+            {!!(txError && txError.length) && (
+              renderErrorMessage(txError)
             )}
           </div>
 

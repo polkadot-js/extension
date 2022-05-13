@@ -12,7 +12,7 @@ import styled, { ThemeContext } from 'styled-components';
 
 import { u8aToString } from '@polkadot/util';
 
-import { AccountContext, AccountInfoEl, ActionContext, Button, ButtonArea, InputFileWithLabel, InputWithLabel, Theme, Warning } from '../components';
+import { AccountContext, AccountInfoEl, ActionContext, Button, ButtonArea, Checkbox, InputFileWithLabel, InputWithLabel, Theme, Warning } from '../components';
 import useTranslation from '../hooks/useTranslation';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '../messaging';
 import { DEFAULT_TYPE } from '../util/defaultType';
@@ -30,6 +30,7 @@ function Upload ({ className }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [isBusy, setIsBusy] = useState(false);
   const [accountsInfo, setAccountsInfo] = useState<ResponseJsonGetAccountInfo[]>([]);
+  const [isConnectWhenRestore, setConnectWhenRestore] = useState(true);
   const [password, setPassword] = useState<string>('');
   const [isFileError, setFileError] = useState(false);
   const [requirePassword, setRequirePassword] = useState(false);
@@ -114,7 +115,7 @@ function Upload ({ className }: Props): React.ReactElement {
 
       setIsBusy(true);
 
-      (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo[0].address) : jsonRestoreV2(file, password, accountsInfo[0].address))
+      (isKeyringPairs$Json(file) ? batchRestoreV2(file, password, accountsInfo, isConnectWhenRestore) : jsonRestoreV2(file, password, accountsInfo[0].address, isConnectWhenRestore))
         .then(() => {
           window.localStorage.setItem('popupNavigation', '/');
           onAction('/');
@@ -125,7 +126,7 @@ function Upload ({ className }: Props): React.ReactElement {
             setIsPasswordError(true);
           });
     },
-    [accountsInfo, file, onAction, password, requirePassword]
+    [accountsInfo, file, isConnectWhenRestore, onAction, password, requirePassword]
   );
 
   return (
@@ -188,6 +189,12 @@ function Upload ({ className }: Props): React.ReactElement {
             </div>
           ))}
         </div>
+
+        <Checkbox
+          checked={isConnectWhenRestore}
+          label={t<string>('Auto connect to all DApp after restore')}
+          onChange={setConnectWhenRestore}
+        />
         <ButtonArea className='restore-json-button-area'>
           <Button
             className='restoreButton'

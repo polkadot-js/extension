@@ -3,6 +3,11 @@
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountInfoByNetwork, BalanceInfo } from '@subwallet/extension-koni-ui/util/types';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
@@ -12,6 +17,7 @@ import ChainBalanceDetailItem from '../ChainBalanceDetail/ChainBalanceDetailItem
 interface Props extends ThemeProps {
   accountInfo: AccountInfoByNetwork;
   balanceInfo: BalanceInfo;
+  backToHome: () => void;
   className?: string;
   setQrModalOpen: (visible: boolean) => void;
   setQrModalProps: (props: {
@@ -22,9 +28,10 @@ interface Props extends ThemeProps {
   }) => void;
 }
 
-function ChainBalanceDetail ({ accountInfo, balanceInfo, className, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
+function ChainBalanceDetail ({ accountInfo, backToHome, balanceInfo, className, setQrModalOpen, setQrModalProps }: Props): React.ReactElement<Props> {
   const [selectedNetworkKey, setSelectedNetworkKey] = useState<string>('');
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -43,6 +50,19 @@ function ChainBalanceDetail ({ accountInfo, balanceInfo, className, setQrModalOp
       className={className}
       ref={ref}
     >
+      {accountInfo && balanceInfo &&
+      <div
+        className='chain-balance-detail__back-btn'
+        onClick={backToHome}
+      >
+        <FontAwesomeIcon
+          className='chain-balance-detail__back-icon'
+          // @ts-ignore
+          icon={faArrowLeft}
+        />
+        <span>{t<string>('Back to home')}</span>
+      </div>
+      }
       <ChainBalanceDetailItem
         accountInfo={accountInfo}
         balanceInfo={balanceInfo}
@@ -89,5 +109,19 @@ export default React.memo(styled(ChainBalanceDetail)(({ theme }: Props) => `
       display: block;
       background: ${theme.boxBorderColor};
     }
+  }
+
+  .chain-balance-detail__back-btn {
+    color: ${theme.buttonTextColor2};
+    font-size: 15px;
+    line-height: 26px;
+    font-weight: 500;
+    margin-left: 25px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+
+  .chain-balance-detail__back-icon {
+    padding-right: 7px;
   }
 `));

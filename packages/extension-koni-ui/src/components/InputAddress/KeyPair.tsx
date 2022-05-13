@@ -6,16 +6,17 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { IconTheme } from '@polkadot/react-identicon/types';
 import { isUndefined } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props {
   name?: string;
   address: string;
   className?: string;
+  networkPrefix: number;
   style?: Record<string, string>;
 }
 
@@ -27,12 +28,12 @@ function getName (address: string, name?: string): string {
   return isUndefined(name) ? address.length > 15 ? getShortenText(address) : address : name;
 }
 
-function KeyPair ({ address, className = '', name }: Props): React.ReactElement<Props> {
-  const { icon, isEthereum, networkPrefix } = useSelector((state: RootState) => state.currentNetwork);
+function KeyPair ({ address, className = '', name, networkPrefix }: Props): React.ReactElement<Props> {
   let formattedAddress = '';
+  const icon = isEthereumAddress(address) ? 'ethereum' : 'polkadot';
 
   if (address !== '-') {
-    formattedAddress = reformatAddress(address, networkPrefix, isEthereum);
+    formattedAddress = reformatAddress(address, networkPrefix);
   }
 
   return (
@@ -45,7 +46,9 @@ function KeyPair ({ address, className = '', name }: Props): React.ReactElement<
           value={formattedAddress}
         />
         <div className='key-pair__name'>
-          {getName(formattedAddress, name)}
+          <div className='key-pair__name-txt'>
+            {getName(formattedAddress, name)}
+          </div>
         </div>
         <div className='key-pair__address'>
           {getShortenText(formattedAddress, 9)}
@@ -63,18 +66,28 @@ export default React.memo(styled(KeyPair)(({ theme }: ThemeProps) => `
     align-items: center;
     border-radius: 8px;
     background-color: transparent;
+    display: flex;
   }
 
   .key-pair__name {
     flex: 1;
     font-size: 15px;
-    color: ${theme.textColor2};
     font-weight: 500;
+    color: ${theme.textColor2};
+  }
+
+  .key-pair__name-txt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    width: 100%;
+    white-space: nowrap;
   }
 
   .key-pair__address {
     color: ${theme.textColor2};
     font-weight: 400;
+    white-space: nowrap;
   }
 
   .key-pair:hover {
@@ -88,6 +101,7 @@ export default React.memo(styled(KeyPair)(({ theme }: ThemeProps) => `
     width: 24px;
     height: 24px;
     margin-right: 16px;
+    pointer-events: none;
   }
 
   .key-pair__icon .icon {

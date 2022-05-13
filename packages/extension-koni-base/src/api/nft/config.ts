@@ -1,13 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
+
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
 
 export const SINGULAR_V2_ENDPOINT = 'https://singular.app/api/rmrk2/account/';
 
 export const KANARIA_ENDPOINT = 'https://kanaria.rmrk.app/api/rmrk2/';
 
-export const RMRK_PINATA_SERVER = 'https://rmrk.mypinata.cloud/ipfs/';
+export const RMRK_PINATA_SERVER = 'https://rmrk.mypinata.cloud/ipfs/'; // deprecated
 
 export const SINGULAR_V1_COLLECTION_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/collection/';
 
@@ -25,6 +27,14 @@ export const BIT_COUNTRY_SERVER = 'https://ipfs-cdn.bit.country/';
 
 export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 
+export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
+
+export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
+
+export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
+
+export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',
@@ -35,6 +45,7 @@ export enum SUPPORTED_NFT_NETWORKS {
   bitcountry = 'bitcountry',
   moonbeam = 'moonbeam',
   moonriver = 'moonriver',
+  moonbase = 'moonbase',
   astarEvm = 'astarEvm',
 }
 
@@ -64,3 +75,11 @@ export const TRANSFER_CHAIN_ID = {
   [SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string]: 336,
   [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string]: 81
 };
+
+export interface EvmContracts {
+  astarEvm: CustomEvmToken[];
+  moonbeam: CustomEvmToken[];
+  moonriver: CustomEvmToken[];
+  moonbase: CustomEvmToken[];
+  shidenEvm: CustomEvmToken[];
+}

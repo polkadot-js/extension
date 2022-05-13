@@ -4,3 +4,4 @@
 export { default as PriceStore } from './Price';
 export { default as CurrentAccountStore } from './CurrentAccountStore';
 export { default as NetworkMapStore } from './NetworkMap';
+export { default as CustomEvmTokenStore } from './CustomEvmToken';

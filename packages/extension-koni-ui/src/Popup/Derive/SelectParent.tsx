@@ -6,7 +6,7 @@ import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccou
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, InputWithLabel, Label, NextStepButton, Theme, Warning } from '../../components';
+import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, Theme, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';
 import { validateAccount, validateDerivationPath } from '../../messaging';
 import { nextDerivationPath } from '../../util/nextDerivationPath';
@@ -21,12 +21,14 @@ interface Props {
   onDerivationConfirmed: (derivation: { account: { address: string; suri: string }; parentPassword: string }) => void;
   isBusy: boolean;
   setBusy: (isBusy: boolean) => void;
+  isConnectWhenDerive: boolean;
+  onConnectWhenDerive: (isConnectWhenDerive: boolean) => void;
 }
 
 // match any single slash
 const singleSlashRegex = /([^/]|^)\/([^/]|$)/;
 
-function SelectParent ({ className, isBusy, isLocked, onDerivationConfirmed, parentAddress, parentGenesis, setBusy }: Props): React.ReactElement<Props> {
+function SelectParent ({ className, isBusy, isConnectWhenDerive, isLocked, onConnectWhenDerive, onDerivationConfirmed, parentAddress, parentGenesis, setBusy }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const { accounts, hierarchy } = useContext(AccountContext);
@@ -196,6 +198,11 @@ function SelectParent ({ className, isBusy, isLocked, onDerivationConfirmed, par
           )}
         </div>
 
+        <Checkbox
+          checked={isConnectWhenDerive}
+          label={t<string>('Auto connect to all DApp after importing')}
+          onChange={onConnectWhenDerive}
+        />
         <ButtonArea>
           <NextStepButton
             className='next-step-btn'

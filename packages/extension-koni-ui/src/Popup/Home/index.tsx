@@ -26,9 +26,13 @@ import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import AddAccount from '@subwallet/extension-koni-ui/Popup/Accounts/AddAccount';
 import BalancesVisibility from '@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility';
+// Containers should not be imported lazily
+import ChainBalances from '@subwallet/extension-koni-ui/Popup/Home/ChainBalances/ChainBalances';
+import Crowdloans from '@subwallet/extension-koni-ui/Popup/Home/Crowdloans/Crowdloans';
 import NftContainer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/render/NftContainer';
 import StakingContainer from '@subwallet/extension-koni-ui/Popup/Home/Staking/StakingContainer';
 import TabHeaders from '@subwallet/extension-koni-ui/Popup/Home/Tabs/TabHeaders';
+import TransactionHistory from '@subwallet/extension-koni-ui/Popup/Home/TransactionHistory/TransactionHistory';
 import { TabHeaderItemType } from '@subwallet/extension-koni-ui/Popup/Home/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -43,10 +47,8 @@ import buyIcon from '../../assets/buy-icon.svg';
 import donateIcon from '../../assets/donate-icon.svg';
 import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
-import ChainBalances from './ChainBalances/ChainBalances';
-import Crowdloans from './Crowdloans/Crowdloans';
-import TransactionHistory from './TransactionHistory/TransactionHistory';
-import ActionButton from './ActionButton';
+
+const ActionButton = React.lazy(() => import('./ActionButton'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -121,7 +123,7 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
     return (<AddAccount />);
   }
 
-  if (!currentAccount) {
+  if (!currentAccount || !currentNetwork.isReady) {
     return (<></>);
   }
 
@@ -241,10 +243,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     return getTabHeaderItems(address, t);
   }, [address, t]);
 
-  const _backToHome = useCallback(() => {
-    setShowBalanceDetail(false);
-  }, [setShowBalanceDetail]);
-
   const onChangeAccount = useCallback((address: string) => {
     setShowBalanceDetail(false);
   }, []);
@@ -273,8 +271,8 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           />
         </div>
 
-        {!_isAccountAll && (
-          <div className='home-account-button-container'>
+        <div className='home-account-button-container'>
+          {!_isAccountAll && (
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
@@ -282,31 +280,9 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
                 tooltipContent={t<string>('Receive')}
               />
             </div>
+          )}
 
-            <Link
-              className={'action-button-wrapper'}
-              to={'/account/send-fund'}
-            >
-              <ActionButton
-                iconSrc={sendIcon}
-                tooltipContent={t<string>('Send')}
-              />
-            </Link>
-
-            <Link
-              className={'action-button-wrapper'}
-              to={'/account/donate'}
-            >
-              <ActionButton
-                iconSrc={donateIcon}
-                tooltipContent={t<string>('Donate')}
-              />
-            </Link>
-          </div>
-        )}
-
-        {_isAccountAll && (
-          <div className='home-account-button-container'>
+          {_isAccountAll && (
             <div className='action-button-wrapper'>
               <ActionButton
                 iconSrc={buyIcon}
@@ -314,39 +290,29 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
                 tooltipContent={t<string>('Receive')}
               />
             </div>
+          )}
 
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={sendIcon}
-                isDisabled
-                tooltipContent={t<string>('Send')}
-              />
-            </div>
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/send-fund'}
+          >
+            <ActionButton
+              iconSrc={sendIcon}
+              tooltipContent={t<string>('Send')}
+            />
+          </Link>
 
-            <div className='action-button-wrapper'>
-              <ActionButton
-                iconSrc={donateIcon}
-                isDisabled
-                tooltipContent={t<string>('Donate')}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {isShowBalanceDetail &&
-        <div
-          className='home__back-btn'
-          onClick={_backToHome}
-        >
-          <FontAwesomeIcon
-            className='home__back-icon'
-            // @ts-ignore
-            icon={faArrowLeft}
-          />
-          <span>{t<string>('Back to home')}</span>
+          <Link
+            className={'action-button-wrapper'}
+            to={'/account/donate'}
+          >
+            <ActionButton
+              iconSrc={donateIcon}
+              tooltipContent={t<string>('Donate')}
+            />
+          </Link>
         </div>
-      }
+      </div>
 
       <div className={'home-tab-contents'}>
         {activatedTab === 1 && (
@@ -487,20 +453,4 @@ export default React.memo(styled(Wrapper)(({ theme }: WrapperProps) => `
   .home__account-qr-modal .subwallet-modal {
     max-width: 460px;
   }
-
-
-  .home__back-btn {
-    color: ${theme.buttonTextColor2};
-    font-size: 15px;
-    line-height: 26px;
-    font-weight: 500;
-    margin-left: 25px;
-    cursor: pointer;
-    margin-bottom: 10px;
-  }
-
-  .home__back-icon {
-    padding-right: 7px;
-  }
-
 `));

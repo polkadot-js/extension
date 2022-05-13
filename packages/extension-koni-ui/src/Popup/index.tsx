@@ -8,8 +8,6 @@ import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/exten
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
-import Rendering from '@subwallet/extension-koni-ui/Popup/Rendering';
-import Donate from '@subwallet/extension-koni-ui/Popup/Sending/Donate';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -18,13 +16,11 @@ import { Route, Switch } from 'react-router';
 
 import uiSettings from '@polkadot/ui-settings';
 
-import { ErrorBoundary } from '../components';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts';
 import ToastProvider from '../components/Toast/ToastProvider';
 import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscribeAuthorizeRequestsV2, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging';
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
-// import Home from './Home';
 
 const Home = React.lazy(() => import('./Home'));
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
@@ -53,6 +49,9 @@ const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Set
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
 const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/networks/NetworkEdit'));
 const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/networks/Networks'));
+const Rendering = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Rendering'));
+const Donate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/Donate'));
+const ErrorBoundary = React.lazy(() => import('../components/ErrorBoundary'));
 
 const startSettings = uiSettings.get();
 

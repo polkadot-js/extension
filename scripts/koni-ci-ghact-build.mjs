@@ -9,8 +9,11 @@ import yargs from 'yargs';
 
 import copySync from '@polkadot/dev/scripts/copySync.mjs';
 import execSync from '@polkadot/dev/scripts/execSync.mjs';
+import {Webhook} from "discord-webhook-node";
 
 console.log('$ polkadot-ci-ghact-build', process.argv.slice(2).join(' '));
+
+const discordHook = new Webhook(process.env.DISCORD_WEBHOOK);
 
 const repo = `https://${process.env.GH_PAT}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
 
@@ -137,6 +140,7 @@ function gitPush () {
     if (changes.includes(`## ${version}`)) {
       doGHRelease = true;
     } else if (version.endsWith('.1')) {
+      discordHook.send(`Unable to release, no CHANGELOG entry for ${version}`)
       throw new Error(`Unable to release, no CHANGELOG entry for ${version}`);
     }
   }
@@ -154,6 +158,7 @@ function gitPush () {
 skip-checks: true"`);
 
   execSync(`git push ${repo} HEAD:${process.env.GITHUB_REF}`, true);
+  discordHook.send(`Auto to increase version to ${version} on origin/master`)
 
   if (doGHRelease) {
     const files = process.env.GH_RELEASE_FILES
@@ -161,6 +166,7 @@ skip-checks: true"`);
       : '';
 
     execSync(`yarn polkadot-exec-ghrelease --draft ${files} --yes`);
+    discordHook.send(`Release finished ${version}. Please review and publish!`)
   }
 }
 
@@ -195,4 +201,4 @@ runTest();
 runBuild();
 
 gitPush();
-// loopFunc(npmPublish);
+loopFunc(npmPublish);

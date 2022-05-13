@@ -156,7 +156,7 @@ export default styled(SignArea)(({ theme }: Props) => `
   }
 
   .sign-button:first-child {
-    background-color: #181E42;
+    background-color: ${theme.buttonBackground1};
     margin-right: 8px;
 
     span {

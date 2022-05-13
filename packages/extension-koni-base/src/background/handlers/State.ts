@@ -17,6 +17,7 @@ import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defa
 import { CurrentAccountStore, PriceStore } from '@subwallet/extension-koni-base/stores';
 import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
 import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
+import BalanceStore from '@subwallet/extension-koni-base/stores/Balance';
 import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
 import NftStore from '@subwallet/extension-koni-base/stores/Nft';
 import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
@@ -27,6 +28,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
+import TransactionHistoryStoreV2 from "@subwallet/extension-koni-base/stores/TransactionHistoryV2";
 
 function generateDefaultBalanceMap () {
   const balanceMap: Record<string, BalanceItem> = {};
@@ -75,6 +77,8 @@ function generateDefaultCrowdloanMap () {
 export default class KoniState extends State {
   public readonly authSubjectV2: BehaviorSubject<AuthorizeRequest[]> = new BehaviorSubject<AuthorizeRequest[]>([]);
 
+  private readonly transactionHistoryStoreV2 = new TransactionHistoryStoreV2();
+  private readonly balanceStore = new BalanceStore();
   private readonly customEvmTokenStore = new CustomEvmTokenStore();
   private readonly priceStore = new PriceStore();
   private readonly currentAccountStore = new CurrentAccountStore();
@@ -135,10 +139,6 @@ export default class KoniState extends State {
   private evmTokenState: EvmTokenJson = { erc20: [], erc721: [] };
   private evmTokenSubject = new Subject<EvmTokenJson>();
 
-  // private nftStoreReady = false;
-  // private stakingStoreReady = false;
-  // Todo: Persist data to balanceStore later
-  // private readonly balanceStore = new BalanceStore();
   private balanceMap: Record<string, BalanceItem> = generateDefaultBalanceMap();
   private balanceSubject = new Subject<BalanceJson>();
   private nftState: NftJson = {
@@ -195,6 +195,12 @@ export default class KoniState extends State {
 
     this.lazyMap[key] = lazy;
   };
+
+  private generateStorageKey (prefix: string) {
+    const { address } = this.getCurrentAccountState();
+
+    return `${prefix}_${address}`;
+  }
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {
     return this.#authRequestsV2[id];
@@ -379,11 +385,13 @@ export default class KoniState extends State {
   public setStakingItem (networkKey: string, item: StakingItem): void {
     this.stakingMap[networkKey] = item;
 
-    this.stakingStore.set('staking', {
-      bonded: this.stakingMap,
-      reward: this.stakingRewardState.details
+    this.lazyNext('setStakingItem', () => {
+      this.stakingStore.set(this.generateStorageKey('staking'), {
+        bonded: this.stakingMap,
+        reward: this.stakingRewardState.details
+      });
+      this.stakingSubject.next(this.getStaking());
     });
-    this.stakingSubject.next(this.getStaking());
   }
 
   public setNftTransfer (data: NftTransferExtra, callback?: (data: NftTransferExtra) => void): void {
@@ -477,7 +485,7 @@ export default class KoniState extends State {
       nftList: []
     } as NftJson;
 
-    this.nftStore.set('nft', {
+    this.nftStore.set(this.generateStorageKey('nft'), {
       nftList: this.nftState.nftList,
       nftCollectionList: this.nftCollectionState.nftCollectionList
     });
@@ -491,7 +499,7 @@ export default class KoniState extends State {
       callback(data);
     }
 
-    this.nftStore.set('nft', {
+    this.nftStore.set(this.generateStorageKey('nft'), {
       nftList: this.nftState.nftList,
       nftCollectionList: this.nftCollectionState.nftCollectionList
     });
@@ -505,7 +513,7 @@ export default class KoniState extends State {
       callback(nftData);
     }
 
-    this.nftStore.set('nft', {
+    this.nftStore.set(this.generateStorageKey('nft'), {
       nftList: this.nftState.nftList,
       nftCollectionList: this.nftCollectionState.nftCollectionList
     });
@@ -531,7 +539,7 @@ export default class KoniState extends State {
       callback(stakingRewardData);
     }
 
-    this.stakingStore.set('staking', {
+    this.stakingStore.set(this.generateStorageKey('staking'), {
       bonded: this.stakingMap,
       reward: this.stakingRewardState.details
     });
@@ -656,6 +664,9 @@ export default class KoniState extends State {
     Object.values(this.balanceMap).forEach((balance) => {
       balance.state = APIItemState.PENDING;
     });
+    const { address } = this.getCurrentAccountState();
+
+    this.balanceStore.set(`balance_${address}`, this.getBalance());
     this.balanceSubject.next(this.getBalance());
   }
 
@@ -664,7 +675,7 @@ export default class KoniState extends State {
       staking.state = APIItemState.PENDING;
     });
 
-    this.stakingStore.set('staking', {
+    this.stakingStore.set(this.generateStorageKey('staking'), {
       bonded: this.stakingMap,
       reward: this.stakingRewardState.details
     });
@@ -681,6 +692,7 @@ export default class KoniState extends State {
   public setBalanceItem (networkKey: string, item: BalanceItem) {
     this.balanceMap[networkKey] = item;
     this.lazyNext('setBalanceItem', () => {
+      this.balanceStore.set(this.generateStorageKey('balance'), this.getBalance());
       this.balanceSubject.next(this.getBalance());
     });
   }
@@ -809,7 +821,7 @@ export default class KoniState extends State {
         items.unshift(item);
       }
 
-      this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items, () => {
+      this.transactionHistoryStoreV2.set(this.getTransactionKey(address, networkKey), items, () => {
         callback && callback(items);
       });
     });

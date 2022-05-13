@@ -271,7 +271,7 @@ const LogosMap: Record<string, string> = {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   xcausd: require('./ausd.svg'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  kma: require('./kms.png'),
+  kma: require('./kma.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   taiKSM: require('./taiKSM.png'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

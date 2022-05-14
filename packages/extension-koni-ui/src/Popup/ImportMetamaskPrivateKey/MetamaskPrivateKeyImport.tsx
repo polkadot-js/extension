@@ -1,13 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
-import { validateSeedV2 } from '@subwallet/extension-koni-ui/messaging';
+import { validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { Password } from '@subwallet/extension-koni-ui/partials';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -29,20 +27,26 @@ interface Props {
   name: string;
 }
 
+interface PrivateKeyInfoType {
+  address: string;
+  error: string;
+}
+
 function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [address, setAddress] = useState('');
+  const [{ address, error }, setPrivateKeyInfo] = useState<PrivateKeyInfoType>({ address: '', error: '' });
   const [seed, setSeed] = useState<string | null>(null);
-  const [error, setError] = useState('');
+  const [autoCorrectedSeed, setAutoCorrectedSeed] = useState<string | null>(null);
   const genesis = '';
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const dep = keyTypes.toString();
   const [password, setPassword] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // No need to validate an empty seed
     // we have a dedicated error for this
+    let isSync = true;
+
     if (!seed) {
       onAccountChange(null);
 
@@ -51,22 +55,32 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
 
     const suri = `${seed || ''}`;
 
-    validateSeedV2(seed, keyTypes)
-      .then(({ addressMap, seed }) => {
-        const address = addressMap[EVM_ACCOUNT_TYPE];
+    validateMetamaskPrivateKeyV2(seed, keyTypes)
+      .then(({ addressMap, autoAddPrefix }) => {
+        if (isSync) {
+          const address = addressMap[EVM_ACCOUNT_TYPE];
 
-        setAddress(address);
-        setError('');
-        onAccountChange(
-          objectSpread<AccountInfo>({}, { address, suri, genesis, EVM_ACCOUNT_TYPE })
-        );
+          if (autoAddPrefix) {
+            setAutoCorrectedSeed(`0x${suri}`);
+          }
+
+          setPrivateKeyInfo({ address, error: '' });
+          onAccountChange(
+            objectSpread<AccountInfo>({}, { address, suri, genesis, EVM_ACCOUNT_TYPE })
+          );
+        }
       })
       .catch(() => {
-        setAddress('');
-        onAccountChange(null);
-        setError(t<string>('The private key must be a string of 0x and 64 characters. If it doesn\'t start with 0x, please add it manually.'));
+        if (isSync) {
+          onAccountChange(null);
+          setPrivateKeyInfo({ address: '', error: t<string>('Not a valid private key') });
+        }
       });
-  }, [t, genesis, seed, onAccountChange, type, dep]);
+
+    return () => {
+      isSync = false;
+    };
+  }, [t, genesis, seed, onAccountChange, type, keyTypes]);
 
   const _onCreate = useCallback(
     () => {
@@ -95,6 +109,11 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, []);
 
+  const onChangeSeed = useCallback((text: string | null) => {
+    setAutoCorrectedSeed(null);
+    setSeed(text);
+  }, []);
+
   return (
     <div className={className}>
       <div className='account-info-wrapper'>
@@ -112,9 +131,9 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
             isError={!!error}
             isFocused
             label={t<string>('private key')}
-            onChange={setSeed}
+            onChange={onChangeSeed}
             rowsCount={2}
-            value={seed || ''}
+            value={autoCorrectedSeed || seed || ''}
           />
           {!!error && !seed && (
             <Warning

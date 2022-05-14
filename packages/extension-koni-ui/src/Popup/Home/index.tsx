@@ -14,7 +14,6 @@ import stakingActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/sta
 import transfers from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers.svg';
 import transfersActive from '@subwallet/extension-koni-ui/assets/home-tab-icon/transfers-active.svg';
 import { AccountContext, AccountQrModal, Link } from '@subwallet/extension-koni-ui/components';
-import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
@@ -136,8 +135,6 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   );
 }
 
-let tooltipId = 0;
-
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
@@ -157,7 +154,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
-  const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
     { iconTheme: qrModalIconTheme,
       networkKey: qrModalNetworkKey,
@@ -169,7 +165,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { networkMetadata: networkMetadataMap, settings: { isShowBalance } } = useSelector((state: RootState) => state);
+  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
@@ -398,12 +394,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           showExportButton={qrModalShowExportButton}
         />
       )}
-
-      <Tooltip
-        offset={{ top: 8 }}
-        text={isShowBalance ? 'Hide balance' : 'Show balance'}
-        trigger={trigger}
-      />
     </div>
   );
 }

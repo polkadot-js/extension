@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceVal } from '@subwallet/extension-koni-ui/components/balance';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 import { toggleBalancesVisibility } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -32,21 +33,29 @@ function BalancesVisibility ({ className, isShowBalanceDetail, selectedNetworkBa
   }, []);
 
   return (
-    <div
-      className={className}
-      data-for={trigger}
-      data-tip={true}
-      onClick={_toggleBalances}
-    >
-      {isShowBalance
-        ? <BalanceVal
-          startWithSymbol
-          symbol={'$'}
-          value={isShowBalanceDetail ? selectedNetworkBalance : totalBalanceValue}
-        />
-        : <span>*********</span>
-      }
-    </div>
+    <>
+      <div
+        className={className}
+        data-for={trigger}
+        data-tip={true}
+        onClick={_toggleBalances}
+      >
+        {isShowBalance
+          ? <BalanceVal
+            startWithSymbol
+            symbol={'$'}
+            value={isShowBalanceDetail ? selectedNetworkBalance : totalBalanceValue}
+          />
+          : <span>*********</span>
+        }
+      </div>
+
+      <Tooltip
+        offset={{ top: 4 }}
+        text={isShowBalance ? 'Hide balance' : 'Show balance'}
+        trigger={trigger}
+      />
+    </>
   );
 }
 

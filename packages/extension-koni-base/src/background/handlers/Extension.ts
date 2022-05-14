@@ -694,14 +694,13 @@ export default class KoniExtension extends Extension {
 
   private _checkValidatePrivateKey ({ suri, types }: RequestSeedValidateV2, autoAddPrefix = false): ResponsePrivateKeyValidateV2 {
     const { phrase } = keyExtractSuri(suri);
-    const rs = { isValid: false, autoAddPrefix: autoAddPrefix, addressMap: {} } as ResponsePrivateKeyValidateV2;
+    const rs = { autoAddPrefix: autoAddPrefix, addressMap: {} } as ResponsePrivateKeyValidateV2;
 
     types && types.forEach((type) => {
       rs.addressMap[type] = '';
     });
 
     if (isHex(phrase) && isHex(phrase, 256)) {
-      rs.isValid = true;
       types && types.forEach((type) => {
         rs.addressMap[type] = keyring.createFromUri(getSuri(suri, type), {}, type).address;
       });

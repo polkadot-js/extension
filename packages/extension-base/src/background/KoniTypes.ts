@@ -447,7 +447,6 @@ export interface RequestTransfer extends RequestCheckTransfer {
 
 export interface ResponsePrivateKeyValidateV2 {
   addressMap: Record<KeypairType, string>,
-  isValid: boolean,
   autoAddPrefix: boolean
 }
 

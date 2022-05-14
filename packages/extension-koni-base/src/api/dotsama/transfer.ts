@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
 import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
-import { state } from '@subwallet/extension-koni-base/background/handlers';
 
 import { KeyringPair } from '@polkadot/keyring/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount, EventRecord } from '@polkadot/types/interfaces';
@@ -12,8 +11,7 @@ import { BN } from '@polkadot/util';
 
 // TODO: consider pass state.getApiMap() as a param
 
-export async function getExistentialDeposit (networkKey: string, token: string): Promise<string> {
-  const dotSamaApiMap = state.getDotSamaApiMap();
+export async function getExistentialDeposit (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -32,13 +30,12 @@ function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefC
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
 }
 
-export async function checkReferenceCount (networkKey: string, address: string): Promise<boolean> {
+export async function checkReferenceCount (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>): Promise<boolean> {
   // todo: need update if ethereumChains is dynamic
   if (ethereumChains.includes(networkKey)) {
     return false;
   }
 
-  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -52,7 +49,7 @@ export async function checkReferenceCount (networkKey: string, address: string):
     : false;
 }
 
-export async function checkSupportTransfer (networkKey: string, token: string): Promise<SupportTransferResponse> {
+export async function checkSupportTransfer (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<SupportTransferResponse> {
   // todo: need update if ethereumChains is dynamic
   if (ethereumChains.includes(networkKey)) {
     return {
@@ -61,7 +58,6 @@ export async function checkSupportTransfer (networkKey: string, token: string): 
     };
   }
 
-  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
@@ -97,6 +93,7 @@ export async function estimateFee (
   fromKeypair: KeyringPair | undefined,
   to: string, value: string | undefined,
   transferAll: boolean,
+  dotSamaApiMap: Record<string, ApiProps>,
   tokenInfo?: TokenInfo
 ): Promise<[string, string | undefined]> {
   let fee = '0';
@@ -107,7 +104,6 @@ export async function estimateFee (
     return [fee, feeSymbol];
   }
 
-  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
@@ -230,10 +226,10 @@ export async function makeTransfer (
   fromKeypair: KeyringPair,
   value: string,
   transferAll: boolean,
+  dotSamaApiMap: Record<string, ApiProps>,
   tokenInfo: undefined | TokenInfo,
   callback: (data: ResponseTransfer) => void
 ): Promise<void> {
-  const dotSamaApiMap = state.getDotSamaApiMap();
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const fromAddress = fromKeypair.address;

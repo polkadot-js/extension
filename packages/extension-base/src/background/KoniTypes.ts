@@ -781,7 +781,6 @@ export interface KoniRequestSignatures {
   'pri(currentAccount.subscribeSettings)': [null, ResponseSettingsType, ResponseSettingsType];
   'pri(currentAccount.saveAccountAllLogo)': [string, boolean, ResponseSettingsType];
   'pri(currentAccount.saveTheme)': [ThemeTypes, boolean, ResponseSettingsType];
-  'pri(networkMetadata.list)': [null, NetWorkMetadataDef[]];
   'pri(chainRegistry.getSubscription)': [null, Record<string, ChainRegistry>, Record<string, ChainRegistry>];
   'pri(transaction.history.getSubscription)': [null, Record<string, TransactionHistoryItemType[]>, Record<string, TransactionHistoryItemType[]>];
   'pri(transaction.history.add)': [RequestTransactionHistoryAdd, boolean, TransactionHistoryItemType[]];

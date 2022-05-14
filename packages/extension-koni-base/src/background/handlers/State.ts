@@ -3,7 +3,7 @@
 
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
-import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, APIItemState, ApiMap, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NETWORK_STATUS, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, ServiceInfo, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
 import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';

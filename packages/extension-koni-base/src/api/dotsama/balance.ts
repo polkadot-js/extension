@@ -379,29 +379,29 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
   });
 }
 
-export async function getFreeBalance (networkKey: string, address: string, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
-  const dotSamaApiMap = state.getDotSamaApiMap();
+export async function getFreeBalance (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>, web3ApiMap: Record<string, Web3>, token?: string): Promise<string> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
   if (token) {
     const tokenInfo = await getTokenInfo(networkKey, api, token);
+    const isMainToken = !!(tokenInfo?.isMainToken);
 
-    if (!(tokenInfo?.isMainToken)) {
-      if (ethereumChains.indexOf(networkKey) > -1 && tokenInfo?.erc20Address) {
+    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+      if (!isMainToken) {
         const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         const free = await contract.methods.balanceOf(address).call();
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
         return free?.toString() || '0';
-      } else {
-        if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
-          // @ts-ignore
-          const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
+      }
+    } else {
+      if (!isMainToken || ['kintsugi', 'kintsugi_test', 'interlay'].includes(networkKey)) {
+        // @ts-ignore
+        const balance = await api.query.tokens.accounts(address, tokenInfo?.specialOption || { Token: token }) as TokenBalanceRaw;
 
-          return balance.free?.toString() || '0';
-        }
+        return balance.free?.toString() || '0';
       }
     }
   }
@@ -411,8 +411,13 @@ export async function getFreeBalance (networkKey: string, address: string, web3A
   return balance.data?.free?.toString() || '0';
 }
 
-export async function subscribeFreeBalance (networkKey: string, address: string, token: string | undefined, update: (balance: string) => void): Promise<() => void> {
-  const dotSamaApiMap = state.getDotSamaApiMap();
+export async function subscribeFreeBalance (
+  networkKey: string,
+  address: string,
+  dotSamaApiMap: Record<string, ApiProps>,
+  web3ApiMap: Record<string, Web3>,
+  token: string | undefined,
+  update: (balance: string) => void): Promise<() => void> {
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
@@ -442,7 +447,7 @@ export async function subscribeFreeBalance (networkKey: string, address: string,
             return;
           }
 
-          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address);
+          const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
 
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

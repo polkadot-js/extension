@@ -1001,7 +1001,7 @@ export default class KoniExtension extends Extension {
   }
 
   private async validateTransfer (networkKey: string, token: string | undefined, from: string, to: string, password: string | undefined, value: string | undefined, transferAll: boolean | undefined): Promise<[Array<TransferError>, KeyringPair | undefined, BN | undefined, TokenInfo | undefined]> {
-    const dotSamaApiMap = state.getDotSamaApiMap().dotSama;
+    const dotSamaApiMap = state.getDotSamaApiMap();
     const errors = [] as Array<TransferError>;
     let keypair: KeyringPair | undefined;
     let transferValue;
@@ -1066,6 +1066,8 @@ export default class KoniExtension extends Extension {
 
   private async checkTransfer ({ from, networkKey, to, token, transferAll, value }: RequestCheckTransfer): Promise<ResponseCheckTransfer> {
     const [errors, fromKeyPair, valueNumber, tokenInfo] = await this.validateTransfer(networkKey, token, from, to, undefined, value, transferAll);
+    const dotSamaApiMap = state.getDotSamaApiMap();
+    const web3ApiMap = state.getApiMap().web3;
 
     let fee = '0';
     let feeSymbol;
@@ -1074,24 +1076,25 @@ export default class KoniExtension extends Extension {
 
     if (isEthereumAddress(from) && isEthereumAddress(to)) {
       // @ts-ignore
-      [fromAccountFree, toAccountFree] = await Promise.all(
-        [getFreeBalance(networkKey, from, state.getWeb3ApiMap()), token, getFreeBalance(networkKey, to, state.getWeb3ApiMap(), token)]
-      );
+      [fromAccountFree, toAccountFree] = await Promise.all([
+        getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
+        getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token)
+      ]);
       const txVal: string = transferAll ? fromAccountFree : (value || '0');
 
       // Estimate with EVM API
       if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
-        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll);
+        [,, fee] = await getERC20TransactionObject(tokenInfo.erc20Address, networkKey, from, to, txVal, !!transferAll, web3ApiMap);
       } else {
-        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll);
+        [,, fee] = await getEVMTransactionObject(networkKey, to, txVal, !!transferAll, web3ApiMap);
       }
     } else {
       // Estimate with DotSama API
       [[fee, feeSymbol], fromAccountFree, toAccountFree] = await Promise.all(
         [
-          estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, tokenInfo),
-          getFreeBalance(networkKey, from, token),
-          getFreeBalance(networkKey, to, token)
+          estimateFee(networkKey, fromKeyPair, to, value, !!transferAll, dotSamaApiMap, tokenInfo),
+          getFreeBalance(networkKey, from, dotSamaApiMap, web3ApiMap, token),
+          getFreeBalance(networkKey, to, dotSamaApiMap, web3ApiMap, token)
         ]
       );
     }
@@ -1164,22 +1167,23 @@ export default class KoniExtension extends Extension {
       if (isEthereumAddress(from) && isEthereumAddress(to)) {
         // Make transfer with EVM API
         const { privateKey } = this.accountExportPrivateKey({ address: from, password });
+        const web3ApiMap = state.getApiMap().web3;
 
         if (tokenInfo && !tokenInfo.isMainToken && tokenInfo.erc20Address) {
           transferProm = makeERC20Transfer(
-            tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll,
+            tokenInfo.erc20Address, networkKey, from, to, privateKey, value || '0', !!transferAll, web3ApiMap,
             this.makeTransferCallback(from, networkKey, token, cb)
           );
         } else {
           transferProm = makeEVMTransfer(
-            networkKey, to, privateKey, value || '0', !!transferAll,
+            networkKey, to, privateKey, value || '0', !!transferAll, web3ApiMap,
             this.makeTransferCallback(from, networkKey, token, cb)
           );
         }
       } else {
         // Make transfer with Dotsama API
         transferProm = makeTransfer(
-          networkKey, to, fromKeyPair, value || '0', !!transferAll, tokenInfo,
+          networkKey, to, fromKeyPair, value || '0', !!transferAll, state.getDotSamaApiMap(), tokenInfo,
           this.makeTransferCallback(from, networkKey, token, cb)
         );
       }
@@ -1759,17 +1763,17 @@ export default class KoniExtension extends Extension {
 
   private async transferCheckReferenceCount ({ address, networkKey }: RequestTransferCheckReferenceCount): Promise<boolean> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await checkReferenceCount(networkKey, address);
+    return await checkReferenceCount(networkKey, address, state.getDotSamaApiMap());
   }
 
   private async transferCheckSupporting ({ networkKey, token }: RequestTransferCheckSupporting): Promise<SupportTransferResponse> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await checkSupportTransfer(networkKey, token);
+    return await checkSupportTransfer(networkKey, token, state.getDotSamaApiMap());
   }
 
   private async transferGetExistentialDeposit ({ networkKey, token }: RequestTransferExistentialDeposit): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return
-    return await getExistentialDeposit(networkKey, token);
+    return await getExistentialDeposit(networkKey, token, state.getDotSamaApiMap());
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -1841,8 +1845,6 @@ export default class KoniExtension extends Extension {
         return this.jsonRestoreV2(request as RequestJsonRestoreV2);
       case 'pri(json.batchRestoreV2)':
         return this.batchRestoreV2(request as RequestBatchRestoreV2);
-      case 'pri(networkMetadata.list)':
-        return this.networkMetadataList();
       case 'pri(chainRegistry.getSubscription)':
         return this.subscribeChainRegistry(id, port);
       case 'pri(nft.getNft)':

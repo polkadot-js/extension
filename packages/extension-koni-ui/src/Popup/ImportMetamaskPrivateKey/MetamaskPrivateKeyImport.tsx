@@ -25,6 +25,7 @@ interface Props {
   type: KeypairType;
   account: AccountInfo | null;
   name: string;
+  isBusy: boolean;
 }
 
 interface PrivateKeyInfoType {
@@ -32,7 +33,7 @@ interface PrivateKeyInfoType {
   error: string;
 }
 
-function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
+function MetamaskPrivateKeyImport ({ account, className, isBusy, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, error }, setPrivateKeyInfo] = useState<PrivateKeyInfoType>({ address: '', error: '' });
   const [seed, setSeed] = useState<string | null>(null);
@@ -53,15 +54,15 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
       return;
     }
 
-    const suri = `${seed || ''}`;
-
     validateMetamaskPrivateKeyV2(seed, keyTypes)
       .then(({ addressMap, autoAddPrefix }) => {
         if (isSync) {
           const address = addressMap[EVM_ACCOUNT_TYPE];
+          let suri = `${seed || ''}`;
 
           if (autoAddPrefix) {
-            setAutoCorrectedSeed(`0x${suri}`);
+            suri = `0x${suri}`;
+            setAutoCorrectedSeed(suri);
           }
 
           setPrivateKeyInfo({ address, error: '' });
@@ -141,7 +142,7 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
               isBelowInput
               isDanger
             >
-              {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
+              {t<string>('Private key cannot be empty')}
             </Warning>
           )}
           {!!error && !!seed && (
@@ -162,7 +163,8 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
       <ButtonArea>
         <NextStepButton
           className='next-step-btn'
-          isDisabled={!address || !!error || !seed}
+          isBusy={isBusy}
+          isDisabled={!address || !!error || !seed || !password}
           onClick={_onCreate}
         >
           {t<string>('Add the account with the supplied private key')}

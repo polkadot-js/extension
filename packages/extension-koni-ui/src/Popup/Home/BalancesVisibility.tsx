@@ -9,6 +9,7 @@ import BigN from 'bignumber.js';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import Tooltip from '@subwallet/extension-koni-ui/components/Tooltip';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -32,21 +33,29 @@ function BalancesVisibility ({ className, isShowBalanceDetail, selectedNetworkBa
   }, []);
 
   return (
-    <div
-      className={className}
-      data-for={trigger}
-      data-tip={true}
-      onClick={_toggleBalances}
-    >
-      {isShowBalance
-        ? <BalanceVal
-          startWithSymbol
-          symbol={'$'}
-          value={isShowBalanceDetail ? selectedNetworkBalance : totalBalanceValue}
-        />
-        : <span>*********</span>
-      }
-    </div>
+    <>
+      <div
+        className={className}
+        data-for={trigger}
+        data-tip={true}
+        onClick={_toggleBalances}
+      >
+        {isShowBalance
+          ? <BalanceVal
+            startWithSymbol
+            symbol={'$'}
+            value={isShowBalanceDetail ? selectedNetworkBalance : totalBalanceValue}
+          />
+          : <span>*********</span>
+        }
+      </div>
+
+      <Tooltip
+        offset={{ top: 4 }}
+        text={isShowBalance ? 'Hide balance' : 'Show balance'}
+        trigger={trigger}
+      />
+    </>
   );
 }
 

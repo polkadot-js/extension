@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.43.2 May 15, 2022
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- Display signed data as Ascii (Thanks to https://github.com/hamidra)
+
+Changes:
+
+- Remove all signing via QR (imcompatible)
+- Swap to React 18
+- Upgrade to `@polkadot/api` 8.4.1
+- Updated to `@polkadot/util` 9.2.1
+
+
 ## 0.43.1 Apr 11, 2022
 
 - **Important** Not published to the stores, aligns with latest released packages.

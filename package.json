@@ -10,7 +10,7 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.43.2-8",
+  "version": "0.43.2",
   "workspaces": [
     "packages/*"
   ],
@@ -34,19 +34,19 @@
   },
   "devDependencies": {
     "@babel/core": "^7.17.10",
-    "@polkadot/dev": "^0.66.17",
-    "@types/jest": "^27.5.0",
+    "@polkadot/dev": "^0.66.23",
+    "@types/jest": "^27.5.1",
     "i18next-scanner": "^3.1.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^8.3.2-2",
-    "@polkadot/keyring": "^9.1.1",
-    "@polkadot/networks": "^9.1.1",
-    "@polkadot/types": "^8.3.2-2",
-    "@polkadot/util": "^9.1.1",
-    "@polkadot/util-crypto": "^9.1.1",
-    "@polkadot/x-fetch": "^9.1.1",
+    "@polkadot/api": "^8.4.2",
+    "@polkadot/keyring": "^9.2.1",
+    "@polkadot/networks": "^9.2.1",
+    "@polkadot/types": "^8.4.2",
+    "@polkadot/util": "^9.2.1",
+    "@polkadot/util-crypto": "^9.2.1",
+    "@polkadot/x-fetch": "^9.2.1",
     "babel-core": "^7.0.0-bridge.0",
     "safe-buffer": "^5.2.1",
     "typescript": "^4.6.4"

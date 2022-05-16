@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { PINATA_IPFS_GATEWAY, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
-import { ASTAR_SUPPORTED_NFT_CONTRACTS, ContractInfo, MOONBEAM_SUPPORTED_NFT_CONTRACTS, MOONRIVER_SUPPORTED_NFT_CONTRACTS } from '@subwallet/extension-koni-base/api/nft/eth_nft/utils';
+import { PINATA_IPFS_GATEWAY } from '@subwallet/extension-koni-base/api/nft/config';
 import { BaseNftApi } from '@subwallet/extension-koni-base/api/nft/nft';
 import { ERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
 import { isUrl } from '@subwallet/extension-koni-base/utils/utils';
@@ -13,7 +12,6 @@ import Web3 from 'web3';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export class Web3NftApi extends BaseNftApi {
-  targetContracts: ContractInfo[] | undefined;
   isConnected = false;
   evmContracts: CustomEvmToken[] = [];
 
@@ -21,14 +19,6 @@ export class Web3NftApi extends BaseNftApi {
     super(undefined, addresses, chain);
 
     this.web3 = web3;
-
-    // if (chain === SUPPORTED_NFT_NETWORKS.moonbeam) {
-    //   this.targetContracts = MOONBEAM_SUPPORTED_NFT_CONTRACTS;
-    // } else if (chain === SUPPORTED_NFT_NETWORKS.moonriver) {
-    //   this.targetContracts = MOONRIVER_SUPPORTED_NFT_CONTRACTS;
-    // } else if (chain === SUPPORTED_NFT_NETWORKS.astarEvm) {
-    //   this.targetContracts = ASTAR_SUPPORTED_NFT_CONTRACTS;
-    // }
   }
 
   setEvmContracts (evmContracts: CustomEvmToken[]) {
@@ -168,7 +158,7 @@ export class Web3NftApi extends BaseNftApi {
   }
 
   async handleNfts (updateItem: (data: NftItem) => void, updateCollection: (data: NftCollection) => void, updateReady: (ready: boolean) => void): Promise<void> {
-    if (!this.evmContracts) {
+    if (!this.evmContracts || this.evmContracts.length === 0) {
       return;
     }
 

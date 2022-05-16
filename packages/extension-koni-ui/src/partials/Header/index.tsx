@@ -5,21 +5,13 @@ import type { ThemeProps } from '../../types';
 
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { CurrentNetworkInfo } from '@subwallet/extension-base/background/KoniTypes';
 import ExpandDarkIcon from '@subwallet/extension-koni-ui/assets/icon/expand-dark.svg';
 import ExpandLightIcon from '@subwallet/extension-koni-ui/assets/icon/expand-light.svg';
 import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
-import ConfirmModal from '@subwallet/extension-koni-ui/components/ConfirmModal';
-import Identicon from '@subwallet/extension-koni-ui/components/Identicon';
-import NetworkMenu from '@subwallet/extension-koni-ui/components/NetworkMenu';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
-import useMetadata from '@subwallet/extension-koni-ui/hooks/useMetadata';
 import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
-import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
-import DetailHeader from '@subwallet/extension-koni-ui/partials/Header/DetailHeader';
-import SubHeader from '@subwallet/extension-koni-ui/partials/Header/SubHeader';
-import { RootState, store } from '@subwallet/extension-koni-ui/stores';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import { getLogoByGenesisHash } from '@subwallet/extension-koni-ui/util/logoByGenesisHashMap';
@@ -35,6 +27,13 @@ import defaultAvatar from '../../assets/default-avatar.svg';
 import logo from '../../assets/sub-wallet-logo.svg';
 import useOutsideClick from '../../hooks/useOutsideClick';
 import { Theme } from '../../types';
+
+const ConfirmModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/ConfirmModal'));
+const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
+const NetworkMenu = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkMenu'));
+const AccountMenuSettings = React.lazy(() => import('@subwallet/extension-koni-ui/partials/AccountMenuSettings'));
+const DetailHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/DetailHeader'));
+const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
 
 interface Props extends ThemeProps {
   children?: React.ReactNode;

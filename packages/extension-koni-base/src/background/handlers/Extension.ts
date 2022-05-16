@@ -880,20 +880,20 @@ export default class KoniExtension extends Extension {
   private apiInit ({ networkKey }: RequestApi): ApiInitStatus {
     const { apisMap } = bWindow.pdotApi;
 
+    if (!state.getNetworkMap()[networkKey]) {
+      return ApiInitStatus.NOT_EXIST;
+    }
+
     // eslint-disable-next-line no-prototype-builtins
     if (!rpcsMap.hasOwnProperty(networkKey) || !rpcsMap[networkKey]) {
-      console.log('not support');
-
       return ApiInitStatus.NOT_SUPPORT;
     }
 
     if (apisMap[networkKey]) {
-      console.log('existed');
-
       return ApiInitStatus.ALREADY_EXIST;
     }
 
-    apisMap[networkKey] = initApi(networkKey, rpcsMap[networkKey]);
+    apisMap[networkKey] = initApi(networkKey, rpcsMap[networkKey], state.getNetworkMap()[networkKey].isEthereum);
 
     return ApiInitStatus.SUCCESS;
   }
@@ -1500,7 +1500,7 @@ export default class KoniExtension extends Extension {
 
       if (providerError === NETWORK_ERROR.NONE) { // provider not duplicate
         let networkKey = '';
-        const apiProps = initApi('custom', provider);
+        const apiProps = initApi('custom', provider, isEthereum);
         const timeout = new Promise((resolve) => {
           const id = setTimeout(() => {
             clearTimeout(id);

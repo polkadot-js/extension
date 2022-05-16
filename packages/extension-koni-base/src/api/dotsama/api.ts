@@ -3,7 +3,7 @@
 
 import { options } from '@acala-network/api';
 import { ApiProps, ApiState } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains, typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { typesBundle, typesChain } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { DOTSAMA_AUTO_CONNECT_MS, DOTSAMA_MAX_CONTINUE_RETRY } from '@subwallet/extension-koni-base/constants';
 import { inJestTest } from '@subwallet/extension-koni-base/utils/utils';
 
@@ -79,7 +79,6 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     unit: tokenSymbol[0].toString()
   };
 
-  const isEthereum = ethereumChains.includes(api.runtimeVersion.specName.toString());
   const defaultSection = Object.keys(api.tx)[0];
   const defaultMethod = Object.keys(api.tx[defaultSection])[0];
   const apiDefaultTx = api.tx[defaultSection][defaultMethod];
@@ -92,7 +91,6 @@ async function loadOnReady (registry: Registry, api: ApiPromise): Promise<ApiSta
     apiDefaultTxSudo,
     isApiReady: true,
     isApiReadyOnce: true,
-    isEthereum,
     isDevelopment: isDevelopment,
     specName: api.runtimeVersion.specName.toString(),
     specVersion: api.runtimeVersion.specVersion.toString(),
@@ -117,7 +115,7 @@ function getWellKnownChain (chain = 'polkadot') {
   }
 }
 
-export function initApi (networkKey: string, apiUrl: string): ApiProps {
+export function initApi (networkKey: string, apiUrl: string, isEthereum?: boolean): ApiProps {
   const registry = new TypeRegistry();
 
   const provider = apiUrl.startsWith('light://')
@@ -150,7 +148,7 @@ export function initApi (networkKey: string, apiUrl: string): ApiProps {
     isApiReadyOnce: false,
     isApiInitialized: true,
     isApiReady: false,
-    isEthereum: false,
+    isEthereum,
     registry,
     specName: '',
     specVersion: '',

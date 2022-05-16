@@ -27,7 +27,8 @@ export interface ServiceInfo {
 export enum ApiInitStatus {
   SUCCESS,
   ALREADY_EXIST,
-  NOT_SUPPORT
+  NOT_SUPPORT,
+  NOT_EXIST
 }
 
 export interface AuthRequestV2 extends Resolver<ResultResolver> {

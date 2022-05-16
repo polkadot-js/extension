@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APIItemState, ApiProps, BalanceChildItem, BalanceItem, TokenBalanceRaw, TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains, moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { moonbeamBaseChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getRegistry, getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 import { getEVMBalance } from '@subwallet/extension-koni-base/api/web3/balance';
 import { getERC20Contract } from '@subwallet/extension-koni-base/api/web3/web3';
@@ -353,7 +353,7 @@ export function subscribeBalance (addresses: string[], dotSamaAPIMap: Record<str
 
   return Object.entries(dotSamaAPIMap).map(async ([networkKey, apiProps]) => {
     const networkAPI = await apiProps.isReady;
-    const useAddresses = ethereumChains.indexOf(networkKey) > -1 ? evmAddresses : substrateAddresses;
+    const useAddresses = apiProps.isEthereum ? evmAddresses : substrateAddresses;
 
     if (networkKey === 'astarEvm' || networkKey === 'shidenEvm') {
       return subscribeEVMBalance(networkKey, networkAPI.api, useAddresses, web3ApiMap, callback);
@@ -387,7 +387,7 @@ export async function getFreeBalance (networkKey: string, address: string, dotSa
     const tokenInfo = await getTokenInfo(networkKey, api, token);
     const isMainToken = !!(tokenInfo?.isMainToken);
 
-    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
       if (!isMainToken) {
         const contract = getERC20Contract(networkKey, tokenInfo.erc20Address, web3ApiMap);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -422,7 +422,7 @@ export async function subscribeFreeBalance (
   const api = apiProps.api;
 
   // todo: Need update the condition if the way to get ethereum chains is dynamic
-  if (ethereumChains.includes(networkKey)) {
+  if (apiProps.isEthereum) {
     if (!isEthereumAddress(address)) {
       update('0');
 
@@ -440,7 +440,7 @@ export async function subscribeFreeBalance (
     const tokenInfo = await getTokenInfo(networkKey, api, token);
     const isMainToken = !!(tokenInfo?.isMainToken);
 
-    if (ethereumChains.includes(networkKey) && tokenInfo?.erc20Address) {
+    if (apiProps.isEthereum && tokenInfo?.erc20Address) {
       if (!isMainToken) {
         const getFreeBalance = () => {
           if (!tokenInfo?.erc20Address) {

@@ -170,7 +170,7 @@ export default class KoniState extends State {
 
       for (const [key, network] of Object.entries(this.networkMap)) {
         if (network.active) {
-          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network));
+          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(network), network.isEthereum);
 
           if (network.isEthereum && network.isEthereum) {
             this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(network));
@@ -1043,6 +1043,18 @@ export default class KoniState extends State {
     return this.networkMap;
   }
 
+  public getEthereumChains (): string[] {
+    const result: string[] = [];
+
+    Object.keys(this.networkMap).forEach((k) => {
+      if (this.networkMap[k].isEthereum) {
+        result.push(k);
+      }
+    });
+
+    return result;
+  }
+
   public subscribeNetworkMap () {
     return this.networkMapStore.getSubject();
   }
@@ -1096,7 +1108,7 @@ export default class KoniState extends State {
       delete this.apiMap.web3[data.key];
     }
 
-    this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data));
+    this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data), data.isEthereum);
 
     if (data.isEthereum && data.isEthereum) {
       this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
@@ -1152,7 +1164,7 @@ export default class KoniState extends State {
   }
 
   public enableNetworkMap (networkKey: string) {
-    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]));
+    this.apiMap.dotSama[networkKey] = initApi(networkKey, getCurrentProvider(this.networkMap[networkKey]), this.networkMap[networkKey].isEthereum);
 
     if (this.networkMap[networkKey].isEthereum && this.networkMap[networkKey].isEthereum) {
       this.apiMap.web3[networkKey] = initWeb3Api(getCurrentProvider(this.networkMap[networkKey]));
@@ -1167,7 +1179,7 @@ export default class KoniState extends State {
   public enableAllNetworks () {
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
-        this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]));
+        this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
 
         if (this.networkMap[key].isEthereum && this.networkMap[key].isEthereum) {
           this.apiMap.web3[key] = initWeb3Api(getCurrentProvider(this.networkMap[key]));
@@ -1186,7 +1198,7 @@ export default class KoniState extends State {
     for (const [key, network] of Object.entries(this.networkMap)) {
       if (!network.active) {
         if (key === 'polkadot' || key === 'kusama') {
-          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]));
+          this.apiMap.dotSama[key] = initApi(key, getCurrentProvider(this.networkMap[key]), this.networkMap[key].isEthereum);
           this.networkMap[key].active = true;
         }
       } else {

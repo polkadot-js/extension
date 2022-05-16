@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ApiProps } from '@subwallet/extension-base/background/KoniTypes';
+import { ApiProps, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama/api';
 import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefinedNetworks';
 import { getCurrentProvider } from '@subwallet/extension-koni-base/utils/utils';
@@ -20,17 +20,17 @@ export function getGenesis (name: string): string {
   return `not_available_genesis_hash__${name}`;
 }
 
-export function connectDotSamaApis (networks = PREDEFINED_NETWORKS): Record<string, ApiProps> {
+export function connectDotSamaApis (networks = PREDEFINED_NETWORKS, networkMap: Record<string, NetworkJson>): Record<string, ApiProps> {
   const apisMap: Record<string, ApiProps> = {};
 
   Object.keys(networks).forEach((networkKey) => {
     const network = networks[networkKey];
 
-    if (!network.genesisHash || network.genesisHash.toLowerCase() === 'unknown' || !network.currentProvider) {
+    if (!networkMap[networkKey] || !network.genesisHash || network.genesisHash.toLowerCase() === 'unknown' || !network.currentProvider) {
       return;
     }
 
-    apisMap[networkKey] = initApi(networkKey, getCurrentProvider(network));
+    apisMap[networkKey] = initApi(networkKey, getCurrentProvider(network), networkMap[networkKey].isEthereum);
   });
 
   return apisMap;

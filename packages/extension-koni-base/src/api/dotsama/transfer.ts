@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, ResponseTransfer, SupportTransferResponse, TokenInfo, TransferErrorCode, TransferStep } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
 
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -31,13 +30,12 @@ function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefC
 }
 
 export async function checkReferenceCount (networkKey: string, address: string, dotSamaApiMap: Record<string, ApiProps>): Promise<boolean> {
-  // todo: need update if ethereumChains is dynamic
-  if (ethereumChains.includes(networkKey)) {
-    return false;
-  }
-
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
+
+  if (apiProps.isEthereum) {
+    return false;
+  }
 
   // @ts-ignore
   const accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount = await api.query.system.account(address);
@@ -50,15 +48,15 @@ export async function checkReferenceCount (networkKey: string, address: string, 
 }
 
 export async function checkSupportTransfer (networkKey: string, token: string, dotSamaApiMap: Record<string, ApiProps>): Promise<SupportTransferResponse> {
-  // todo: need update if ethereumChains is dynamic
-  if (ethereumChains.includes(networkKey)) {
+  const apiProps = await dotSamaApiMap[networkKey].isReady;
+
+  if (apiProps.isEthereum) {
     return {
       supportTransfer: true,
       supportTransferAll: true
     };
   }
 
-  const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;

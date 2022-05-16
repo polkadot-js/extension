@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { CLOUDFLARE_PINATA_SERVER } from '@subwallet/extension-koni-base/api/nft/config';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 
@@ -40,8 +39,8 @@ export function reformatAddress (address: string, networkPrefix: number, isEther
   return encodeAddress(publicKey, networkPrefix);
 }
 
-export function filterAddressByNetworkKey (addresses: string[], networkKey: string) {
-  if (ethereumChains.indexOf(networkKey) > -1) {
+export function filterAddressByNetworkKey (addresses: string[], networkKey: string, isEthereum?: boolean) {
+  if (isEthereum) {
     return addresses.filter((address) => {
       return isEthereumAddress(address);
     });

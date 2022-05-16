@@ -13,7 +13,7 @@ describe('test extension base utils', () => {
     // const newAddress = convertEthereumAddress('5CdENHW9om68xs3esPRvWbeUxcYwDXBePJ3fB96gkQgBLC2i', 'moonbase');
     const addresses = ['0x25B12Fe4D6D7ACca1B4035b26b18B4602cA8b10F', '5Dq5eVtCewu7kWpCEDuGEYN7c37nxwmn4UcCn2tEfNso7uLf', '5EXZi1V69J9CymncgsvoaTsTcRRRH2AjKA3D9T1pesT5G839', '5FEdUhBmtK1rYifarmUXYzZhi6fmLbC6SZ7jcNvGuC2gaa2r'];
 
-    expect((filterAddressByNetworkKey(addresses, 'moonriver'))).toEqual(['0x25B12Fe4D6D7ACca1B4035b26b18B4602cA8b10F']);
+    expect((filterAddressByNetworkKey(addresses, 'moonriver', true))).toEqual(['0x25B12Fe4D6D7ACca1B4035b26b18B4602cA8b10F']);
   });
 
   // test('merge provider', () => {

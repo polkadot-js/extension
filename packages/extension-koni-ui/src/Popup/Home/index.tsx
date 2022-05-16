@@ -46,7 +46,6 @@ const ActionButton = React.lazy(() => import('./ActionButton'));
 const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/index'));
 const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
-const Tooltip = React.lazy(() => import('@subwallet/extension-koni-ui/components/Tooltip'));
 const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/AccountQrModal'));
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
 
@@ -138,8 +137,6 @@ function Wrapper ({ className, theme }: WrapperProps): React.ReactElement {
   );
 }
 
-let tooltipId = 0;
-
 function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, network }: Props): React.ReactElement {
   const { icon: iconTheme,
     networkKey,
@@ -159,7 +156,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
   );
   const [isQrModalOpen, setQrModalOpen] = useState<boolean>(false);
   const [selectedNetworkBalance, setSelectedNetworkBalance] = useState<BigN>(BN_ZERO);
-  const [trigger] = useState(() => `home-balances-${++tooltipId}`);
   const [
     { iconTheme: qrModalIconTheme,
       networkKey: qrModalNetworkKey,
@@ -171,7 +167,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { networkMetadata: networkMetadataMap, settings: { isShowBalance } } = useSelector((state: RootState) => state);
+  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 
@@ -400,12 +396,6 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
           showExportButton={qrModalShowExportButton}
         />
       )}
-
-      <Tooltip
-        offset={{ top: 8 }}
-        text={isShowBalance ? 'Hide balance' : 'Show balance'}
-        trigger={trigger}
-      />
     </div>
   );
 }

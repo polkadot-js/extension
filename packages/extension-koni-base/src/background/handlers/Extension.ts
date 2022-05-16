@@ -5,7 +5,7 @@ import Common from '@ethereumjs/common';
 import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountsWithCurrentAddress, ApiInitStatus, ApiProps, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NETWORK_ERROR, NetWorkGroup, NetworkJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse, ValidateNetworkRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
 import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
 import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
@@ -690,6 +690,37 @@ export default class KoniExtension extends Extension {
     });
 
     return rs;
+  }
+
+  private _checkValidatePrivateKey ({ suri, types }: RequestSeedValidateV2, autoAddPrefix = false): ResponsePrivateKeyValidateV2 {
+    const { phrase } = keyExtractSuri(suri);
+    const rs = { autoAddPrefix: autoAddPrefix, addressMap: {} } as ResponsePrivateKeyValidateV2;
+
+    types && types.forEach((type) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      rs.addressMap[type] = '';
+    });
+
+    if (isHex(phrase) && isHex(phrase, 256)) {
+      types && types.forEach((type) => {
+        rs.addressMap[type] = keyring.createFromUri(getSuri(suri, type), {}, type).address;
+      });
+    } else {
+      rs.autoAddPrefix = false;
+      assert(false, 'Not valid private key');
+    }
+
+    return rs;
+  }
+
+  private metamaskPrivateKeyValidateV2 ({ suri, types }: RequestSeedValidateV2): ResponsePrivateKeyValidateV2 {
+    const isValidSuri = suri.startsWith('0x');
+
+    if (isValidSuri) {
+      return this._checkValidatePrivateKey({ suri, types });
+    } else {
+      return this._checkValidatePrivateKey({ suri: `0x${suri}`, types }, true);
+    }
   }
 
   private deriveV2 (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
@@ -1752,7 +1783,7 @@ export default class KoniExtension extends Extension {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, token, cb);
+    this.cancelSubscriptionMap[id] = await subscribeFreeBalance(networkKey, address, state.getDotSamaApiMap(), state.getWeb3ApiMap(), token, cb);
 
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
@@ -1807,6 +1838,8 @@ export default class KoniExtension extends Extension {
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(seed.validateV2)':
         return this.seedValidateV2(request as RequestSeedValidateV2);
+      case 'pri(privateKey.validateV2)':
+        return this.metamaskPrivateKeyValidateV2(request as RequestSeedValidateV2);
       case 'pri(accounts.exportPrivateKey)':
         return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':

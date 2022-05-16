@@ -497,6 +497,11 @@ export interface RequestTransfer extends RequestCheckTransfer {
   password: string;
 }
 
+export interface ResponsePrivateKeyValidateV2 {
+  addressMap: Record<KeypairType, string>,
+  autoAddPrefix: boolean
+}
+
 export type ResponseSeedValidateV2 = ResponseSeedCreateV2
 export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
 export type AccountRef = Array<string>
@@ -767,6 +772,7 @@ export interface KoniRequestSignatures {
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
   'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
+  'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];

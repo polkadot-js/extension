@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "koni-dev-build-ts && yarn build:zip && yarn build:rollup",
-    "build:extra": "yarn build:i18n && yarn build:ui",
+    "build:extra": "yarn build:i18n && yarn build:ui && yarn web-runner:build",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "build:koni-dev": "koni-ci-build-dev",
     "build:release": "koni-ci-ghact-build",
@@ -36,7 +36,9 @@
     "start": "yarn watch",
     "test": "polkadot-dev-run-test --detectOpenHandles --testPathIgnorePatterns='/node_modules/|.*/ignore-.*\\.(test|spec)\\..*'",
     "test:one": "polkadot-dev-run-test --detectOpenHandles",
-    "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
+    "watch": "cd packages/extension-koni && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch",
+    "web-runner:watch": "cd packages/web-runner && yarn webpack-dev-server --config webpack.config.cjs --mode development",
+    "web-runner:build": "cd packages/web-runner && yarn webpack --config webpack.config.cjs --mode production"
   },
   "dependencies": {
     "@types/node": "^17.0.10",

@@ -137,6 +137,7 @@ export const fetchDotSamaHistory = (address: string, networkMap: Record<string, 
         });
 
         if (isHistoryChange(networkKey, items)) {
+          state.setTransactionHistoryV2(address, networkKey, items);
           historyMap[networkKey] = items;
           callBack(historyMap);
         }

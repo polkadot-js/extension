@@ -885,6 +885,10 @@ export default class KoniState extends State {
     });
   }
 
+  public setTransactionHistoryV2 (address: string, networkKey: string, items: TransactionHistoryItemType[]) {
+    this.transactionHistoryStore.set(this.getTransactionKey(address, networkKey), items);
+  }
+
   public setPrice (priceData: PriceJson, callback?: (priceData: PriceJson) => void): void {
     this.priceStore.set('PriceData', priceData, () => {
       if (callback) {

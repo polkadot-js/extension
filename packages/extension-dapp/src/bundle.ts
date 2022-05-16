@@ -203,8 +203,7 @@ export async function web3ExtensionAccountsSubscribe (extensions: string[], cb: 
       subscribe((result): void => {
         accounts[source] = result;
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        triggerUpdate();
+        triggerUpdate()?.catch(() => 'web3ExtensionAccountsSubscribe: suppressed subscription callback error.');
       })
   );
 

@@ -70,6 +70,7 @@ function ImportMetamaskPrivateKey ({ className = '' }: Props): React.ReactElemen
       <MetamaskPrivateKeyImport
         account={account}
         className='import-seed-content-wrapper'
+        isBusy={isBusy}
         keyTypes={KEYTYPES}
         name={name}
         onAccountChange={setAccount}

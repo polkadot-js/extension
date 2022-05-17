@@ -8,7 +8,7 @@ import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 import { disableAllNetwork, enableAllNetwork, resetDefaultNetwork } from '@subwallet/extension-koni-ui/messaging';
 import Header from '@subwallet/extension-koni-ui/partials/Header';
-import NetworkItem from '@subwallet/extension-koni-ui/Popup/Settings/networks/NetworkItem';
+import NetworkItem from '@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkItem';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -30,7 +30,7 @@ function Networks ({ className }: Props): React.ReactElement {
     const _filteredNetworkMap: Record<string, NetworkJson> = {};
 
     Object.entries(networkMap).forEach(([key, network]) => {
-      if (network.chain.toLowerCase().includes(searchString)) {
+      if (network.chain.toLowerCase().includes(searchString.toLowerCase())) {
         _filteredNetworkMap[key] = network;
       }
     });

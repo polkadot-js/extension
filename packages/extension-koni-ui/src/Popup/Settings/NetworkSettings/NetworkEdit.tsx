@@ -84,6 +84,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [showMore, setShowMore] = useState(false);
   const [isValidBlockExplorer, setIsValidBlockExplorer] = useState(true);
   const [isValidCrowdloanUrl, setIsValidCrowdloanUrl] = useState(true);
+  const [isValidChain, setIsValidChain] = useState(true);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -109,6 +110,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   useEffect(() => { // check provider for network creation
     if (provider) {
       if (!isValidProvider(provider)) {
+        show('Provider URL requires http/https or wss prefix');
         _setIsvalidProvider(false);
       } else {
         _setIsvalidProvider(true);
@@ -164,7 +166,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         }
       }
     }
-  }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider]);
+  }, [data, isCurrentEndpoint, isEthereum, needValidate, networkInfo, provider, show]);
 
   useEffect(() => {
     setNeedValidate(true);
@@ -253,6 +255,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   }, [_isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, onAction, show]);
 
   const onChangeChain = useCallback((val: string) => {
+    if (val.split(' ').join('') === '') {
+      setIsValidChain(false);
+    } else {
+      setIsValidChain(true);
+    }
+
     setNetworkInfo({
       ...networkInfo,
       chain: val
@@ -293,6 +301,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     });
   }, [networkInfo]);
 
+  console.log((!isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidChain || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '' || networkInfo.chain.length <= 0) && !isCurrentEndpoint);
+
   const onChangeCoingeckoKey = useCallback((val: string) => {
     setNetworkInfo({
       ...networkInfo,
@@ -302,6 +312,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const onChangeCrowdloanUrl = useCallback((val: string) => {
     if (!isUrl(val) && val !== '') {
+      show('Crowdloan URL must be an URL');
       setIsValidCrowdloanUrl(false);
     } else {
       setIsValidCrowdloanUrl(true);
@@ -311,11 +322,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       ...networkInfo,
       crowdloanUrl: val
     });
-  }, [networkInfo]);
+  }, [networkInfo, show]);
 
   const onChangeExplorer = useCallback((val: string) => {
     if (!isUrl(val) && val !== '') {
       setIsValidBlockExplorer(false);
+      show('Block explorer must be an URL');
     } else {
       setIsValidBlockExplorer(true);
     }
@@ -324,7 +336,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       ...networkInfo,
       blockExplorer: val
     });
-  }, [networkInfo]);
+  }, [networkInfo, show]);
 
   return (
     <>
@@ -353,10 +365,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
                 value={networkInfo.currentProvider}
               />
             </div>
-        }
-
-        {
-          !_isValidProvider && provider !== null && <div className={'invalid-input'}>Provider URL requires http/https or wss prefix</div>
         }
 
         <InputWithLabel
@@ -414,18 +422,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
               onChange={onChangeExplorer}
               value={networkInfo?.blockExplorer || ''}
             />
-            {
-              !isValidBlockExplorer && <div className={'invalid-input'}>Block explorer must be an URL</div>
-            }
 
             <InputWithLabel
               label={t<string>('Crowdloan Url (Optional)')}
               onChange={onChangeCrowdloanUrl}
               value={networkInfo?.crowdloanUrl || ''}
             />
-            {
-              !isValidCrowdloanUrl && <div className={'invalid-input'}>Crowdloan URL must be an URL</div>
-            }
 
             <InputWithLabel
               label={t<string>('Coingecko key (Optional)')}
@@ -449,7 +451,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            isDisabled={(!isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain.length <= 0) && !isCurrentEndpoint}
+            isDisabled={!isValidChain || ((!isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '') && !isCurrentEndpoint)}
             onClick={_onSaveNetwork}
           >
             {t<string>('Save')}

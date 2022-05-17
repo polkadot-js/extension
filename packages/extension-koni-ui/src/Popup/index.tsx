@@ -47,8 +47,8 @@ const ImportEvmToken = React.lazy(() => import('@subwallet/extension-koni-ui/Pop
 const SendFund = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/SendFund'));
 const Settings = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
-const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/networks/NetworkEdit'));
-const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/networks/Networks'));
+const NetworkCreate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/NetworkEdit'));
+const Networks = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/NetworkSettings/Networks'));
 const Rendering = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Rendering'));
 const Donate = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Sending/Donate'));
 const ErrorBoundary = React.lazy(() => import('../components/ErrorBoundary'));

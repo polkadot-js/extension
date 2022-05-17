@@ -91,7 +91,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
     decimals: 12
   },
   rmrk: {
-    key: 'rococo',
+    key: 'rmrk',
     chain: 'RMRK test',
     genesisHash: '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1',
     icon: 'polkadot',

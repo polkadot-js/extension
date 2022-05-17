@@ -109,7 +109,7 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
 }
 
 // retrieve all the accounts across all providers
-export async function web3Accounts ({ accountType, ss58Format, extensions }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ accountType, extensions, ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }

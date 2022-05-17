@@ -18,7 +18,7 @@ import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundR
 import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
-import { getEthereumChains } from '@subwallet/web-runner/util';
+import { getEthereumChains } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -59,7 +59,7 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSubHeader
         subHeaderName={t<string>('Donate')}
       />
-      {accounts && accounts.length && account && !!networkMap[networkKey] && defaultValue
+      {accounts && accounts.length && account && defaultValue
         ? (
           <Donate
             chainRegistryMap={chainRegistryMap}

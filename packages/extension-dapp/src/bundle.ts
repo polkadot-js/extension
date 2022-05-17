@@ -143,7 +143,7 @@ export async function web3Accounts ({ accountType, extensions, ss58Format }: Web
   return accounts;
 }
 
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format, extensions }: Web3AccountsOptions = {}): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { extensions, ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }

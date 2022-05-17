@@ -114,7 +114,8 @@ export interface RequestSignatures {
   'pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
-  'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+  'pub(accounts.subscribe)': [RequestAccountSubscribe, string, InjectedAccount[]];
+  'pub(accounts.unsubscribe)': [RequestAccountUnsubscribe, boolean];
   'pub(authorize.tab)': [RequestAuthorizeTab, null];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
@@ -254,6 +255,10 @@ export interface RequestAccountList {
 }
 
 export type RequestAccountSubscribe = null;
+
+export interface RequestAccountUnsubscribe {
+  id: string;
+}
 
 export interface RequestRpcSend {
   method: string;

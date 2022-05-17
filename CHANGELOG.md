@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## master
+
+Changes:
+
+- Allow for unsubscribe handling on account subscriptions
+- Add error handling for user-supplied account callbacks
+
+
 ## 0.43.2 May 15, 2022
 
 - **Important** Not published to the stores, aligns with latest released packages.

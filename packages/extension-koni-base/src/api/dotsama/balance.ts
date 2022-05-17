@@ -421,7 +421,6 @@ export async function subscribeFreeBalance (
   const apiProps = await dotSamaApiMap[networkKey].isReady;
   const api = apiProps.api;
 
-  // todo: Need update the condition if the way to get ethereum chains is dynamic
   if (apiProps.isEthereum) {
     if (!isEthereumAddress(address)) {
       update('0');

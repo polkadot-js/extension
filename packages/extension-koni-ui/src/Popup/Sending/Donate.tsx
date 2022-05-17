@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
+import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountContext, Warning } from '@subwallet/extension-koni-ui/components';
 import Button from '@subwallet/extension-koni-ui/components/Button';
 import InputBalance from '@subwallet/extension-koni-ui/components/InputBalance';
@@ -18,6 +18,7 @@ import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/SendFundR
 import { getBalanceFormat, getDefaultValue, getMainTokenInfo, getMaxTransferAndNoFees, isContainGasRequiredExceedsError } from '@subwallet/extension-koni-ui/Popup/Sending/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import { getEthereumChains } from '@subwallet/web-runner/util';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -33,6 +34,8 @@ interface Props extends ThemeProps {
 interface ContentProps extends ThemeProps {
   className?: string;
   defaultValue: SenderInputAddressType;
+  networkMap: Record<string, NetworkJson>;
+  chainRegistryMap: Record<string, ChainRegistry>;
 }
 
 function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
@@ -40,7 +43,8 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   const { accounts } = useContext(AccountContext);
   const { chainRegistry: chainRegistryMap,
     currentAccount: { account },
-    currentNetwork: { isReady: isCurrentNetworkInfoReady, networkKey } } = useSelector((state: RootState) => state);
+    currentNetwork: { isReady: isCurrentNetworkInfoReady, networkKey },
+    networkMap } = useSelector((state: RootState) => state);
 
   const defaultValue = getDefaultValue(networkKey, !!isCurrentNetworkInfoReady, account?.address, chainRegistryMap, accounts);
 
@@ -55,11 +59,13 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
         showSubHeader
         subHeaderName={t<string>('Donate')}
       />
-      {accounts && accounts.length && account && defaultValue
+      {accounts && accounts.length && account && !!networkMap[networkKey] && defaultValue
         ? (
           <Donate
+            chainRegistryMap={chainRegistryMap}
             className='send-fund-container'
             defaultValue={defaultValue}
+            networkMap={networkMap}
             theme={theme}
           />
         )
@@ -69,10 +75,9 @@ function Wrapper ({ className = '', theme }: Props): React.ReactElement<Props> {
   );
 }
 
-function Donate ({ className, defaultValue }: ContentProps): React.ReactElement {
+function Donate ({ chainRegistryMap, className, defaultValue, networkMap }: ContentProps): React.ReactElement {
   const { t } = useTranslation();
   const [amount, setAmount] = useState<BN | undefined>(BN_ZERO);
-  const { chainRegistry: chainRegistryMap } = useSelector((state: RootState) => state);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [isShowTxModal, setShowTxModal] = useState<boolean>(false);
   const [{ address: senderId,
@@ -98,6 +103,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
       ? balanceFormat[0]
       : getBalanceFormat(selectedNetworkKey, feeSymbol, chainRegistryMap)[0]
     : null;
+  const ethereumChains = getEthereumChains(networkMap);
   const isSameAddress = !!recipientId && !!senderId && (recipientId === senderId);
   const isNotSameAddressAndTokenType = (isEthereumAddress(senderId) && !ethereumChains.includes(selectedNetworkKey)) ||
     (!isEthereumAddress(senderId) && ethereumChains.includes(selectedNetworkKey));
@@ -260,6 +266,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               className=''
               initValue={defaultValue}
               isDonation
+              networkMap={networkMap}
               onChange={setSenderValue}
             />
 
@@ -268,6 +275,7 @@ function Donate ({ className, defaultValue }: ContentProps): React.ReactElement 
               balanceFormat={balanceFormat}
               className={''}
               networkKey={selectedNetworkKey}
+              networkMap={networkMap}
               onchange={setRecipientId}
             />
 

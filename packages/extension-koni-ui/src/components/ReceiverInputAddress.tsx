@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -18,11 +18,12 @@ interface Props {
   onchange: (address: string) => void;
   balance: string;
   balanceFormat: [number, string];
+  networkMap: Record<string, NetworkJson>;
 }
 
-function ReceiverInputAddress ({ balance, balanceFormat, className = '', networkKey, onchange }: Props): React.ReactElement {
+function ReceiverInputAddress ({ balance, balanceFormat, className = '', networkKey, networkMap, onchange }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const networkPrefix = NETWORKS[networkKey].ss58Format;
+  const networkPrefix = networkMap[networkKey].ss58Format;
   const [receiveAddress, setReceiveAddress] = useState<string>('');
 
   const formattedAddress = useMemo<string>(() => {

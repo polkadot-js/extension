@@ -33,6 +33,18 @@ export function findAccountByAddress (accounts: AccountJson[], _address: string)
   ) || null;
 }
 
+export function getEthereumChains (networkMap: Record<string, NetworkJson>): string[] {
+  const result: string[] = [];
+
+  Object.keys(networkMap).forEach((k) => {
+    if (networkMap[k].isEthereum) {
+      result.push(k);
+    }
+  });
+
+  return result;
+}
+
 export function recodeAddress (address: string, accounts: AccountWithChildren[], networkInfo: NetworkJson | null, type?: KeypairType): Recoded {
   const publicKey = decodeAddress(address);
   const account = findAccountByAddress(accounts, address) || findSubstrateAccount(accounts, publicKey);

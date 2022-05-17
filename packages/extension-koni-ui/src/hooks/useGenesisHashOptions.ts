@@ -6,7 +6,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { getAllNetworkMetadata } from '../messaging';
 import { _getKnownHashes } from '../util/chains';
 import useTranslation from './useTranslation';
 

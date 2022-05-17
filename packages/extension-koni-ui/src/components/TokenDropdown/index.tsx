@@ -8,20 +8,24 @@ import styled from 'styled-components';
 
 import Dropdown from './Dropdown';
 import TokenItem from './TokenItem';
+import { NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { TokenTransformOptionType } from '@subwallet/web-runner/components/TokenDropdown/types';
 
 interface Props {
   className?: string;
   options: TokenItemType[];
   onChangeTokenValue: (tokenValueStr: string) => void;
   value: string;
+  networkMap: Record<string, NetworkJson>;
 }
 
 // eslint-disable-next-line no-empty-pattern
-function TokenDropdown ({ className = '', onChangeTokenValue, options, value }: Props): React.ReactElement {
-  const formatOptLabel = useCallback((label: string, value: string, networkKey: string) => {
+function TokenDropdown ({ className = '', networkMap, onChangeTokenValue, options, value }: Props): React.ReactElement {
+  const formatOptLabel = useCallback(({ label, networkKey, networkName }: TokenTransformOptionType) => {
     return (
       <TokenItem
         networkKey={networkKey}
+        networkName={networkName}
         symbol={label}
       />
     );
@@ -32,6 +36,7 @@ function TokenDropdown ({ className = '', onChangeTokenValue, options, value }: 
       <Dropdown
         className='input-address__dropdown'
         formatOptLabel={formatOptLabel}
+        networkMap={networkMap}
         onChange={onChangeTokenValue}
         options={options}
         value={value}

@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ChainRegistry } from '@subwallet/extension-base/background/KoniTypes';
-import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { ChainRegistry, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
 import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
 import { SenderInputAddressType, TokenItemType } from '@subwallet/extension-koni-ui/components/types';
@@ -22,7 +21,8 @@ interface Props {
   chainRegistryMap: Record<string, ChainRegistry>;
   balance: string;
   balanceFormat: [number, string];
-  isDonation?: boolean
+  isDonation?: boolean;
+  networkMap: Record<string, NetworkJson>;
 }
 
 function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItemType[] {
@@ -45,11 +45,11 @@ function getOptions (chainRegistryMap: Record<string, ChainRegistry>): TokenItem
   return options;
 }
 
-function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, onChange }: Props): React.ReactElement {
+function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, className = '', initValue, isDonation, networkMap, onChange }: Props): React.ReactElement {
   const { t } = useTranslation();
   const [{ address, networkKey, token }, setValue] = useState<SenderInputAddressType>(initValue);
 
-  const networkPrefix = NETWORKS[networkKey].ss58Format;
+  const networkPrefix = networkMap[networkKey].ss58Format;
 
   const formattedAddress = useMemo<string>(() => {
     return reformatAddress(address, networkPrefix);
@@ -117,6 +117,7 @@ function SenderInputAddress ({ balance, balanceFormat, chainRegistryMap, classNa
 
       <TokenDropdown
         className='sender-input-address__token-dropdown'
+        networkMap={networkMap}
         onChangeTokenValue={onChangeTokenValue}
         options={options}
         value={`${token}|${networkKey}`}

@@ -25,6 +25,7 @@ describe('Extension', () => {
   let tabs: Tabs;
   const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   const password = 'passw0rd';
+  const address = '5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX'
 
   async function createExtension (): Promise<Extension> {
     await cryptoWaitReady();
@@ -37,7 +38,8 @@ describe('Extension', () => {
       id: '11',
       isAllowed: true,
       origin: 'example.com',
-      url: 'http://localhost:3000'
+      url: 'http://localhost:3000',
+      authorizedAccounts: [address]
     };
     localStorage.setItem('authUrls', JSON.stringify(authUrls));
     state = new State();

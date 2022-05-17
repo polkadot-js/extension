@@ -10,7 +10,7 @@ import { configure, mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { AuthorizeReqContext, Icon, themes } from '../../components';
+import { AuthorizeReqContext, themes, Warning } from '../../components';
 import { Header } from '../../partials';
 import Request from './Request';
 import Authorize from '.';
@@ -30,7 +30,7 @@ describe('Authorize', () => {
   it('render component', () => {
     const wrapper = mountAuthorize();
 
-    expect(wrapper.find(Header).text()).toBe('Authorize');
+    expect(wrapper.find(Header).text()).toBe('Account connection request');
     expect(wrapper.find(Request).length).toBe(0);
   });
 
@@ -38,7 +38,7 @@ describe('Authorize', () => {
     const wrapper = mountAuthorize([{ id: '1', request: { origin: '???' }, url: 'http://polkadot.org' }]);
 
     expect(wrapper.find(Request).length).toBe(1);
-    expect(wrapper.find(Request).find('.tab-info').text()).toBe('An application, self-identifying as ??? is requesting access from http://polkadot.org.');
+    expect(wrapper.find(Request).find('.warning-message').text()).toBe('An application, self-identifying as ??? is requesting access from http://polkadot.org');
   });
 
   it('render more request but just one accept button', () => {
@@ -47,9 +47,9 @@ describe('Authorize', () => {
       { id: '2', request: { origin: 'abc' }, url: 'http://polkadot.pl' }
     ]);
 
-    expect(wrapper.find(Request).length).toBe(2);
-    expect(wrapper.find(Icon).length).toBe(2);
-    expect(wrapper.find(Request).at(1).find('.tab-info').text()).toBe('An application, self-identifying as abc is requesting access from http://polkadot.pl.');
+     expect(wrapper.find(Request).length).toBe(2);
+    expect(wrapper.find(Warning).length).toBe(2);
+    expect(wrapper.find(Request).at(1).find('.warning-message').text()).toBe('An application, self-identifying as abc is requesting access from http://polkadot.pl');
     expect(wrapper.find('button.acceptButton').length).toBe(1);
   });
 });

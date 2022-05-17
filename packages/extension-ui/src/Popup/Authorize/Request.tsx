@@ -71,7 +71,6 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   return (
     <div className={className}>
-      {isFirst && (
         <Warning className='warningMargin'>
           <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
             <a
@@ -83,7 +82,6 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
             </a>
           </Trans>
         </Warning>
-      )}
       <Checkbox
         checked={areAllAccountsSelected}
         className='accountTree-checkbox'

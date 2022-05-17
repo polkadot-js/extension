@@ -165,8 +165,11 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
       subscribe((result): void => {
         accounts[source] = result;
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        triggerUpdate();
+        try {
+          triggerUpdate()?.catch(console.error);
+        } catch (error) {
+          console.error(error);
+        }
       })
   );
 

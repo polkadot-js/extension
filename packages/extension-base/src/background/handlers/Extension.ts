@@ -166,7 +166,6 @@ export default class Extension {
     }
   }
 
-  // FIXME This looks very much like what we have in Tabs
   private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
@@ -181,14 +180,14 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ id }: RequestAuthorizeApprove): boolean {
+  private authorizeApprove ({ authorizedAccounts, id }: RequestAuthorizeApprove): boolean {
     const queued = this.#state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { resolve } = queued;
 
-    resolve(true);
+    resolve({ authorizedAccounts, result: true });
 
     return true;
   }

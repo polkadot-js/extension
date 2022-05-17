@@ -22,7 +22,7 @@ function Authorize ({ className = '' }: Props): React.ReactElement {
   return (
     <>
       <div className={`${className} ${requests.length === 1 ? 'lastRequest' : ''}`}>
-        <Header text={t<string>('Authorize')} />
+        <Header text={t<string>('Account connection request')} />
         {requests.map(({ id, request, url }, index): React.ReactNode => (
           <Request
             authId={id}

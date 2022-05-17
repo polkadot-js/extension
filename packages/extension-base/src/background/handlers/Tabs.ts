@@ -18,7 +18,7 @@ import { assert, isNumber } from '@polkadot/util';
 import RequestBytesSign from '../RequestBytesSign';
 import RequestExtrinsicSign from '../RequestExtrinsicSign';
 import { withErrorLog } from './helpers';
-import State from './State';
+import State, { AuthRes } from './State';
 import { createSubscription, unsubscribe } from './subscriptions';
 
 function transformAccounts (accounts: SubjectInfo, anyType = false): InjectedAccount[] {
@@ -42,21 +42,33 @@ export default class Tabs {
     this.#state = state;
   }
 
-  private authorize (url: string, request: RequestAuthorizeTab): Promise<boolean> {
+  private filterForAuthorizedAccounts (accounts: InjectedAccount[], url: string): InjectedAccount[] {
+    return accounts.filter(
+      (allAcc) => this.#state.authUrls[this.#state.stripUrl(url)]
+        .authorizedAccounts
+        .includes(allAcc.address)
+    );
+  }
+
+  private authorize (url: string, request: RequestAuthorizeTab): Promise<AuthRes> {
     return this.#state.authorizeUrl(url, request);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private accountsList (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
-    return transformAccounts(accountsObservable.subject.getValue(), anyType);
+  private accountsListAuthorized (url: string, { anyType }: RequestAccountList): InjectedAccount[] {
+    const transformedAccounts = transformAccounts(accountsObservable.subject.getValue(), anyType);
+
+    return this.filterForAuthorizedAccounts(transformedAccounts, url);
   }
 
-  // FIXME This looks very much like what we have in Extension
-  private accountsSubscribe (url: string, id: string, port: chrome.runtime.Port): boolean {
-    const cb = createSubscription<'pub(accounts.subscribe)'>(id, port);
-    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
-      cb(transformAccounts(accounts))
-    );
+  private accountsSubscribeAuthorized (url: string, id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pub(accounts.subscribeAuthorized)'>(id, port);
+    const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void => {
+      const transformedAccounts = transformAccounts(accounts);
+
+      return cb(
+        this.filterForAuthorizedAccounts(transformedAccounts, url)
+      );
+    });
 
     port.onDisconnect.addListener((): void => {
       unsubscribe(id);
@@ -182,11 +194,11 @@ export default class Tabs {
       case 'pub(authorize.tab)':
         return this.authorize(url, request as RequestAuthorizeTab);
 
-      case 'pub(accounts.list)':
-        return this.accountsList(url, request as RequestAccountList);
+      case 'pub(accounts.listAuthorized)':
+        return this.accountsListAuthorized(url, request as RequestAccountList);
 
-      case 'pub(accounts.subscribe)':
-        return this.accountsSubscribe(url, id, port);
+      case 'pub(accounts.subscribeAuthorized)':
+        return this.accountsSubscribeAuthorized(url, id, port);
 
       case 'pub(bytes.sign)':
         return this.bytesSign(url, request as SignerPayloadRaw);

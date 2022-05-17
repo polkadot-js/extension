@@ -3,13 +3,13 @@
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { canDerive } from '@polkadot/extension-base/utils';
 import { ThemeProps } from '@polkadot/extension-ui/types';
 
-import { Address, Dropdown, Link, MenuDivider } from '../../components';
+import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components';
 import useGenesisHashOptions from '../../hooks/useGenesisHashOptions';
 import useTranslation from '../../hooks/useTranslation';
 import { editAccount, tieAccount } from '../../messaging';
@@ -18,6 +18,8 @@ import { Name } from '../../partials';
 interface Props extends AccountJson {
   className?: string;
   parentName?: string;
+  withCheckbox?: boolean;
+  withMenu?: boolean
 }
 
 interface EditState {
@@ -25,11 +27,26 @@ interface EditState {
   toggleActions: number;
 }
 
-function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, type }: Props): React.ReactElement<Props> {
+function Account ({ address, className, genesisHash, isExternal, isHardware, isHidden, name, parentName, suri, type, withCheckbox = false, withMenu = true }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [{ isEditing, toggleActions }, setEditing] = useState<EditState>({ isEditing: false, toggleActions: 0 });
   const [editedName, setName] = useState<string | undefined | null>(name);
+  const [checked, setChecked] = useState(false);
   const genesisOptions = useGenesisHashOptions();
+  const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
+  const isSelected = useMemo(() => selectedAccounts?.includes(address) || false, [address, selectedAccounts]);
+
+  useEffect(() => {
+    setChecked(isSelected);
+  }, [isSelected]);
+
+  const _onCheckboxChange = useCallback(() => {
+    const newList = selectedAccounts?.includes(address)
+      ? selectedAccounts.filter((account) => account !== address)
+      : [...selectedAccounts, address];
+
+    setSelectedAccounts && setSelectedAccounts(newList);
+  }, [address, selectedAccounts, setSelectedAccounts]);
 
   const _onChangeGenesis = useCallback(
     (genesisHash?: string | null): void => {
@@ -107,8 +124,16 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
 
   return (
     <div className={className}>
+      {withCheckbox && (
+        <Checkbox
+          checked={checked}
+          className='accountTree-checkbox'
+          label=''
+          onChange={_onCheckboxChange}
+        />
+      )}
       <Address
-        actions={_actions}
+        actions={withMenu ? _actions : null}
         address={address}
         className='address'
         genesisHash={genesisHash}

@@ -14,7 +14,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ALLOWED_PATH } from '../defaults';
-import { AuthUrls } from './handlers/State';
+import { AuthRes, AuthUrls } from './handlers/State';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -51,6 +51,8 @@ export type AccountsContext = {
   accounts: AccountJson[];
   hierarchy: AccountWithChildren[];
   master?: AccountJson;
+  selectedAccounts?: AccountJson['address'][];
+  setSelectedAccounts?: (address: AccountJson['address'][]) => void;
 }
 
 export interface AuthorizeRequest {
@@ -82,6 +84,7 @@ export interface RequestSignatures {
   'pri(accounts.export)': [RequestAccountExport, ResponseAccountExport];
   'pri(accounts.batchExport)': [RequestAccountBatchExport, ResponseAccountsExport]
   'pri(accounts.forget)': [RequestAccountForget, boolean];
+  'pri(accounts.list)': [RequestAccountList, InjectedAccount[]];
   'pri(accounts.show)': [RequestAccountShow, boolean];
   'pri(accounts.tie)': [RequestAccountTie, boolean];
   'pri(accounts.subscribe)': [RequestAccountSubscribe, boolean, AccountJson[]];
@@ -113,9 +116,9 @@ export interface RequestSignatures {
   'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
   'pri(window.open)': [AllowedPath, boolean];
   // public/external requests, i.e. from a page
-  'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];
-  'pub(accounts.subscribe)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
-  'pub(authorize.tab)': [RequestAuthorizeTab, null];
+  'pub(accounts.listAuthorized)': [RequestAccountList, InjectedAccount[]];
+  'pub(accounts.subscribeAuthorized)': [RequestAccountSubscribe, boolean, InjectedAccount[]];
+  'pub(authorize.tab)': [RequestAuthorizeTab, Promise<AuthRes>];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
@@ -152,6 +155,7 @@ export interface RequestAuthorizeTab {
 
 export interface RequestAuthorizeApprove {
   id: string;
+  authorizedAccounts: string[]
 }
 
 export interface RequestAuthorizeReject {

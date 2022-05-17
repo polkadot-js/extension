@@ -21,7 +21,7 @@ interface Resolver <T> {
   resolve: (result: T) => void;
 }
 
-interface AuthRequest extends Resolver<boolean> {
+interface AuthRequest extends Resolver<AuthRes> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
@@ -36,12 +36,18 @@ export interface AuthUrlInfo {
   isAllowed: boolean;
   origin: string;
   url: string;
+  authorizedAccounts: string[];
 }
 
 interface MetaRequest extends Resolver<boolean> {
   id: string;
   request: MetadataDef;
   url: string;
+}
+
+export interface AuthRes {
+  result: boolean;
+  authorizedAccounts: string[];
 }
 
 // List of providers passed into constructor. This is the list of providers
@@ -219,12 +225,13 @@ export default class State {
         });
   }
 
-  private authComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
-    const complete = (result: boolean | Error) => {
+  private authComplete = (id: string, resolve: (resValue: AuthRes) => void, reject: (error: Error) => void): Resolver<AuthRes> => {
+    const complete = ({ authorizedAccounts = [], result }: {authorizedAccounts: string[], result: boolean | Error}) => {
       const isAllowed = result === true;
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
       this.#authUrls[this.stripUrl(url)] = {
+        authorizedAccounts,
         count: 0,
         id: idStr,
         isAllowed,
@@ -239,12 +246,12 @@ export default class State {
 
     return {
       reject: (error: Error): void => {
-        complete(error);
+        complete({ authorizedAccounts: [], result: error });
         reject(error);
       },
-      resolve: (result: boolean): void => {
-        complete(result);
-        resolve(result);
+      resolve: ({ authorizedAccounts, result }: {result: boolean, authorizedAccounts: string[]}): void => {
+        complete({ authorizedAccounts, result });
+        resolve({ authorizedAccounts, result });
       }
     };
   };
@@ -289,7 +296,7 @@ export default class State {
     };
   };
 
-  private stripUrl (url: string): string {
+  public stripUrl (url: string): string {
     assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
 
     const parts = url.split('/');
@@ -353,7 +360,7 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<boolean> {
+  public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthRes> {
     const idStr = this.stripUrl(url);
 
     // Do not enqueue duplicate authorization requests.
@@ -366,7 +373,7 @@ export default class State {
       // this url was seen in the past
       assert(this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
-      return false;
+      return { authorizedAccounts: [], result: false };
     }
 
     return new Promise((resolve, reject): void => {

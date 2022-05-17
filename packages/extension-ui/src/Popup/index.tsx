@@ -52,20 +52,23 @@ async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
   return false;
 }
 
-function initAccountContext (accounts: AccountJson[]): AccountsContext {
+function initAccountContext ({ accounts, selectedAccounts, setSelectedAccounts }: Omit<AccountsContext, 'hierarchy' | 'master'>): AccountsContext {
   const hierarchy = buildHierarchy(accounts);
   const master = hierarchy.find(({ isExternal, type }) => !isExternal && canDerive(type));
 
   return {
     accounts,
     hierarchy,
-    master
+    master,
+    selectedAccounts,
+    setSelectedAccounts
   };
 }
 
 export default function Popup (): React.ReactElement {
   const [accounts, setAccounts] = useState<null | AccountJson[]>(null);
   const [accountCtx, setAccountCtx] = useState<AccountsContext>({ accounts: [], hierarchy: [] });
+  const [selectedAccounts, setSelectedAccounts] = useState<AccountJson['address'][]>([]);
   const [authRequests, setAuthRequests] = useState<null | AuthorizeRequest[]>(null);
   const [cameraOn, setCameraOn] = useState(startSettings.camera === 'on');
   const [mediaAllowed, setMediaAllowed] = useState(false);
@@ -73,6 +76,14 @@ export default function Popup (): React.ReactElement {
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
+
+  // FIXME TS is not happy when directly playing with setSelectedAccounts
+  const _onChangeSelectedAccounts = useCallback(
+    (newSelection: AccountJson['address'][]) => {
+      setSelectedAccounts(newSelection);
+    }
+    , []
+  );
 
   const _onAction = useCallback(
     (to?: string): void => {
@@ -103,8 +114,8 @@ export default function Popup (): React.ReactElement {
   }, []);
 
   useEffect((): void => {
-    setAccountCtx(initAccountContext(accounts || []));
-  }, [accounts]);
+    setAccountCtx(initAccountContext({ accounts: accounts || [], selectedAccounts, setSelectedAccounts: _onChangeSelectedAccounts }));
+  }, [_onChangeSelectedAccounts, accounts, selectedAccounts]);
 
   useEffect((): void => {
     requestMediaAccess(cameraOn)

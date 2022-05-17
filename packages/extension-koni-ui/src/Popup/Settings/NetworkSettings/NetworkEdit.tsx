@@ -85,6 +85,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
   const [isValidBlockExplorer, setIsValidBlockExplorer] = useState(true);
   const [isValidCrowdloanUrl, setIsValidCrowdloanUrl] = useState(true);
   const [isValidChain, setIsValidChain] = useState(true);
+  const [isProviderPredefined, setIsProviderPredefined] = useState(true);
 
   const onAction = useContext(ActionContext);
   const _goBack = useCallback(
@@ -94,6 +95,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     },
     [onAction]
   );
+
+  useEffect(() => {
+    if (mode === 'init') {
+      _goBack();
+    }
+  }, [_goBack, mode, networkInfo.currentProvider]);
 
   const getValidateErrorMessage = useCallback((input?: string) => {
     if (validateError === NETWORK_ERROR.EXISTED_NETWORK || input === NETWORK_ERROR.EXISTED_NETWORK) {
@@ -116,7 +123,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
         _setIsvalidProvider(true);
 
         if (needValidate && !isCurrentEndpoint) {
-          setNeedValidate(false);
           setLoading(true);
 
           validateNetwork(provider, isEthereum).then((resp) => {
@@ -124,6 +130,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
               setValidateError(resp.error);
             }
 
+            setNeedValidate(false);
             setLoading(false);
             setIsProviderConnected(resp.success);
 
@@ -192,16 +199,20 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     setIsProviderConnected(resp.success);
 
     if (resp.success) {
+      show('Successfully added a new custom provider');
+
       if (networkInfo.customProviders) {
-        const currentCustomProviders = networkInfo.customProviders;
         const providerLength = Object.values(networkInfo.customProviders).length;
 
-        currentCustomProviders[`custom_${providerLength}`] = newProvider;
+        const newCustomProvider = { [`custom_${providerLength}`]: newProvider };
 
         setNetworkInfo({
           ...networkInfo,
           currentProvider: `custom_${providerLength}`,
-          customProviders: currentCustomProviders
+          customProviders: {
+            ...networkInfo.customProviders,
+            ...newCustomProvider
+          }
         });
 
         return `custom_${providerLength}`;
@@ -223,6 +234,8 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     const providerKey = val as string;
 
     if (getAllProviderKeys(networkInfo).includes(providerKey)) {
+      setNeedValidate(false);
+      setIsProviderPredefined(true);
       setNetworkInfo({
         ...networkInfo,
         currentProvider: providerKey
@@ -247,12 +260,12 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
       if (resp) {
         show('Your changes are saved successfully');
         window.localStorage.setItem('popupNavigation', '/');
-        onAction('/');
+        _goBack();
       } else {
         show('Error trying to configure network');
       }
     }).catch(console.error);
-  }, [_isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, onAction, show]);
+  }, [_goBack, _isValidProvider, isCurrentEndpoint, isProviderConnected, networkInfo, show]);
 
   const onChangeChain = useCallback((val: string) => {
     if (val.split(' ').join('') === '') {
@@ -301,8 +314,6 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     });
   }, [networkInfo]);
 
-  console.log((!isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidChain || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '' || networkInfo.chain.length <= 0) && !isCurrentEndpoint);
-
   const onChangeCoingeckoKey = useCallback((val: string) => {
     setNetworkInfo({
       ...networkInfo,
@@ -338,6 +349,14 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
     });
   }, [networkInfo, show]);
 
+  const isDisableSave = useCallback((): boolean => {
+    if (mode === 'create') {
+      return !isValidChain || needValidate || !isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '';
+    } else {
+      return !_isValidProvider || !isValidChain || needValidate || (!isProviderPredefined && !isProviderConnected) || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '';
+    }
+  }, [_isValidProvider, isProviderConnected, isProviderPredefined, isValidBlockExplorer, isValidChain, isValidCrowdloanUrl, mode, needValidate, networkInfo.chain]);
+
   return (
     <>
       <Header
@@ -349,22 +368,26 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
       <div className={className}>
         {
-          mode === 'create'
-            ? <InputWithLabel
+          mode === 'create' &&
+            <InputWithLabel
               label={t<string>('Provider URL (*)')}
               onChange={onChangeProvider}
               value={provider || ''}
             />
-            : <div style={{ marginTop: '12px' }}>
-              <Dropdown
-                allowAdd={true}
-                handleCreate={handleCreateProvider}
-                label={'Provider URL (*)'}
-                onChange={onSelectProvider}
-                options={getAllProviders(networkInfo)}
-                value={networkInfo.currentProvider}
-              />
-            </div>
+        }
+
+        {
+          mode === 'edit' &&
+          <div style={{ marginTop: '12px' }}>
+            <Dropdown
+              allowAdd={true}
+              handleCreate={handleCreateProvider}
+              label={'Provider URL (*)'}
+              onChange={onSelectProvider}
+              options={getAllProviders(networkInfo)}
+              value={networkInfo.currentProvider}
+            />
+          </div>
         }
 
         <InputWithLabel
@@ -451,7 +474,7 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
           </Button>
           <Button
             className='network-edit-button'
-            isDisabled={!isValidChain || ((!isProviderConnected || !_isValidProvider || !isValidBlockExplorer || !isValidCrowdloanUrl || !networkInfo.chain || networkInfo.chain === '') && !isCurrentEndpoint)}
+            isDisabled={isDisableSave()}
             onClick={_onSaveNetwork}
           >
             {t<string>('Save')}

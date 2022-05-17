@@ -23,6 +23,6 @@ export type TokenConfigParams = {
 }
 
 export type NetworkConfigParams = {
-  mode: 'create' | 'edit',
+  mode: 'create' | 'edit' | 'init',
   data: NetworkJson;
 }

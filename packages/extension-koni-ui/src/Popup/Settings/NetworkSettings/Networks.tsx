@@ -105,13 +105,15 @@ function Networks ({ className }: Props): React.ReactElement {
         subHeaderName={t<string>('Network Settings')}
         to='/account/settings'
       >
-        <InputFilter
-          className='networks__input-filter'
-          onChange={_onChangeFilter}
-          placeholder={t<string>('Search network...')}
-          value={searchString}
-          withReset
-        />
+        <div className={'networks-input-filter-container'}>
+          <InputFilter
+            className='networks__input-filter'
+            onChange={_onChangeFilter}
+            placeholder={t<string>('Search network...')}
+            value={searchString}
+            withReset
+          />
+        </div>
       </Header>
 
       <div className='networks__button-area'>
@@ -166,12 +168,17 @@ export default styled(Networks)(({ theme }: Props) => `
     opacity: 1;
   }
 
+  .networks-input-filter-container {
+    padding: 0 15px 12px;
+  }
+
   .add-network-button {
     width: 100%;
     cursor: pointer;
     text-align: center;
     padding: 12px 20px;
     border-radius: 8px;
+    color: white;
     background-color: ${theme.buttonBackground};
     opacity: 1;
   }

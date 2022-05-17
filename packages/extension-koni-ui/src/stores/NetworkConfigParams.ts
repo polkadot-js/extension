@@ -5,7 +5,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { NetworkConfigParams } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
-  mode: 'create',
+  mode: 'init',
   data: {
     active: false,
     currentProvider: '',

@@ -71,17 +71,17 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   return (
     <div className={className}>
-        <Warning className='warningMargin'>
-          <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
-            <a
-              href={url}
-              rel='noopener noreferrer'
-              target='_blank'
-            >
-              <span className='tab-url'>{url}</span>
-            </a>
-          </Trans>
-        </Warning>
+      <Warning className='warningMargin'>
+        <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
+          <a
+            href={url}
+            rel='noopener noreferrer'
+            target='_blank'
+          >
+            <span className='tab-url'>{url}</span>
+          </a>
+        </Trans>
+      </Warning>
       <Checkbox
         checked={areAllAccountsSelected}
         className='accountTree-checkbox'

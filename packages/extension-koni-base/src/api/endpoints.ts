@@ -400,7 +400,8 @@ const NETWORKS: Record<string, NetWorkInfo> = {
     paraId: 2023,
     isEthereum: true,
     nativeToken: 'MOVR',
-    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan'
+    crowdloanUrl: 'https://polkadot.js.org/apps/#/parachains/crowdloan',
+    decimals: 18
   },
   shiden: {
     chain: 'Shiden',

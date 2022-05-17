@@ -77,14 +77,6 @@ export default function Popup (): React.ReactElement {
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
 
-  // FIXME TS is not happy when directly playing with setSelectedAccounts
-  const _onChangeSelectedAccounts = useCallback(
-    (newSelection: AccountJson['address'][]) => {
-      setSelectedAccounts(newSelection);
-    }
-    , []
-  );
-
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
@@ -114,8 +106,8 @@ export default function Popup (): React.ReactElement {
   }, []);
 
   useEffect((): void => {
-    setAccountCtx(initAccountContext({ accounts: accounts || [], selectedAccounts, setSelectedAccounts: _onChangeSelectedAccounts }));
-  }, [_onChangeSelectedAccounts, accounts, selectedAccounts]);
+    setAccountCtx(initAccountContext({ accounts: accounts || [], selectedAccounts, setSelectedAccounts }));
+  }, [accounts, selectedAccounts]);
 
   useEffect((): void => {
     requestMediaAccess(cameraOn)

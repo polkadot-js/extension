@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApiProps, CustomEvmToken, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
-import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 import { AcalaNftApi } from '@subwallet/extension-koni-base/api/nft/acala_nft';
 import { BitCountryNftApi } from '@subwallet/extension-koni-base/api/nft/bit.country';
 import { EvmContracts, SUPPORTED_NFT_NETWORKS } from '@subwallet/extension-koni-base/api/nft/config';
@@ -17,8 +16,9 @@ import { categoryAddresses } from '@subwallet/extension-koni-base/utils/utils';
 import Web3 from 'web3';
 
 function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addresses: string[]): BaseNftApi | null {
+  // @ts-ignore
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-  const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+  const useAddresses = substrateAddresses;
 
   switch (chain) {
     case SUPPORTED_NFT_NETWORKS.karura:
@@ -47,8 +47,9 @@ function createSubstrateNftApi (chain: string, apiProps: ApiProps | null, addres
 }
 
 function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]): BaseNftApi | null {
+  // @ts-ignore
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-  const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+  const useAddresses = evmAddresses;
 
   switch (chain) {
     case SUPPORTED_NFT_NETWORKS.moonbeam:
@@ -63,6 +64,8 @@ function createWeb3NftApi (chain: string, web3: Web3 | null, addresses: string[]
 
   return null;
 }
+
+// TODO: able to get NFTs when adding custom EVM network + EVM token
 
 export class NftHandler {
   apiProps: Record<string, any>[] = [];
@@ -118,7 +121,7 @@ export class NftHandler {
     const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
     for (const handler of this.handlers) {
-      const useAddresses = ethereumChains.indexOf(handler.chain as string) > -1 ? evmAddresses : substrateAddresses;
+      const useAddresses = handler.isEthereum ? evmAddresses : substrateAddresses;
 
       handler.setAddresses(useAddresses);
     }
@@ -157,10 +160,8 @@ export class NftHandler {
         const [substrateAddresses, evmAddresses] = categoryAddresses(this.addresses);
 
         this.apiProps.forEach(({ api: apiPromise, chain }) => {
-          const useAddresses = ethereumChains.indexOf(chain as string) > -1 ? evmAddresses : substrateAddresses;
-
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const handler = createSubstrateNftApi(chain, apiPromise as ApiProps, useAddresses);
+          const handler = createSubstrateNftApi(chain, apiPromise as ApiProps, substrateAddresses);
 
           if (handler && !this.handlers.includes(handler)) {
             this.handlers.push(handler);
@@ -168,8 +169,7 @@ export class NftHandler {
         });
 
         Object.entries(this.web3ApiMap).forEach(([chain, web3]) => {
-          const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
-          const handler = createWeb3NftApi(chain, web3, useAddresses);
+          const handler = createWeb3NftApi(chain, web3, evmAddresses);
 
           if (handler && !this.handlers.includes(handler)) {
             this.handlers.push(handler);

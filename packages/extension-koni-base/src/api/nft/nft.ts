@@ -13,6 +13,7 @@ export abstract class BaseNftApi {
   data: NftCollection[] = [];
   total = 0;
   addresses: string[] = [];
+  isEthereum = false;
 
   protected constructor (api?: ApiProps | null, addresses?: string[], chain?: string, web3?: Web3) {
     if (api) {

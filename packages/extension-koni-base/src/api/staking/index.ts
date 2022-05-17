@@ -6,8 +6,6 @@ import { PREDEFINED_NETWORKS } from '@subwallet/extension-koni-base/api/predefin
 import { IGNORE_GET_SUBSTRATE_FEATURES_LIST } from '@subwallet/extension-koni-base/constants';
 import { categoryAddresses, toUnit } from '@subwallet/extension-koni-base/utils/utils';
 
-import { ethereumChains } from '../dotsama/api-helper';
-
 interface LedgerData {
   active: string,
   claimedRewards: string[],
@@ -50,7 +48,7 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
 
   const unsubPromises = await Promise.all(allApiPromise.map(async ({ api: apiPromise, chain }) => {
     const parentApi = await apiPromise.isReady;
-    const useAddresses = ethereumChains.indexOf(chain) > -1 ? evmAddresses : substrateAddresses;
+    const useAddresses = apiPromise.isEthereum ? evmAddresses : substrateAddresses;
 
     return parentApi.api.query.staking?.ledger.multi(useAddresses, (ledgers: any[]) => {
       let totalBalance = 0;

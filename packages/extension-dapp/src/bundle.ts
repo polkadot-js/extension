@@ -109,7 +109,7 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
 }
 
 // retrieve all the accounts across all providers
-export async function web3Accounts ({ accountType, ss58Format }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
+export async function web3Accounts ({ accountType, ss58Format, extensions }: Web3AccountsOptions = {}): Promise<InjectedAccountWithMeta[]> {
   if (!web3EnablePromise) {
     return throwError('web3Accounts');
   }
@@ -118,7 +118,9 @@ export async function web3Accounts ({ accountType, ss58Format }: Web3AccountsOpt
   const injected = await web3EnablePromise;
 
   const retrieved = await Promise.all(
-    injected.map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
+    injected.filter(
+      ({ name: source }) => !extensions || extensions.includes(source)
+    ).map(async ({ accounts, name: source }): Promise<InjectedAccountWithMeta[]> => {
       try {
         const list = await accounts.get();
 
@@ -141,7 +143,7 @@ export async function web3Accounts ({ accountType, ss58Format }: Web3AccountsOpt
   return accounts;
 }
 
-export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
+export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format, extensions }: Web3AccountsOptions = {}): Promise<Unsubcall> {
   if (!web3EnablePromise) {
     return throwError('web3AccountsSubscribe');
   }
@@ -160,7 +162,9 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
       )
     );
 
-  const unsubs = (await web3EnablePromise).map(
+  const unsubs = (await web3EnablePromise).filter(
+    ({ name: source }) => !extensions || extensions.includes(source)
+  ).map(
     ({ accounts: { subscribe }, name: source }): Unsubcall =>
       subscribe((result): void => {
         accounts[source] = result;
@@ -170,43 +174,6 @@ export async function web3AccountsSubscribe (cb: (accounts: InjectedAccountWithM
         } catch (error) {
           console.error(error);
         }
-      })
-  );
-
-  return (): void => {
-    unsubs.forEach((unsub): void => {
-      unsub();
-    });
-  };
-}
-
-export async function web3ExtensionAccountsSubscribe (extensions: string[], cb: (accounts: InjectedAccountWithMeta[]) => void | Promise<void>, { ss58Format }: Web3AccountsOptions = {}): Promise<Unsubcall> {
-  if (!web3EnablePromise) {
-    return throwError('web3ExtensionAccountsSubscribe');
-  }
-
-  const accounts: Record<string, InjectedAccount[]> = {};
-
-  const triggerUpdate = (): void | Promise<void> =>
-    cb(
-      Object.entries(accounts).reduce(
-        (result: InjectedAccountWithMeta[], [source, list]): InjectedAccountWithMeta[] => {
-          result.push(...mapAccounts(source, list, ss58Format));
-
-          return result;
-        },
-        []
-      )
-    );
-
-  const unsubs = (await web3EnablePromise).filter(
-    ({ name: source }) => extensions.includes(source)
-  ).map(
-    ({ accounts: { subscribe }, name: source }): Unsubcall =>
-      subscribe((result): void => {
-        accounts[source] = result;
-
-        triggerUpdate()?.catch(() => 'web3ExtensionAccountsSubscribe: suppressed subscription callback error.');
       })
   );
 

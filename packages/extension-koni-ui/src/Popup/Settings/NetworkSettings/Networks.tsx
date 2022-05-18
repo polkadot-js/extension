@@ -192,12 +192,6 @@ export default styled(Networks)(({ theme }: Props) => `
     margin-bottom: 15px;
   }
 
-  .networks__input-filter {
-    margin-bottom: 15px;
-    margin-left: 15px;
-    margin-right: 15px;
-  }
-
   .networks__btn {
     position: relative;
     font-size: 14px;

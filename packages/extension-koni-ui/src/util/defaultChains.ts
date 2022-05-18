@@ -35,9 +35,9 @@ function getDefaultHashes (): NetWorkMetadataDef[] {
   return result;
 }
 
-const knowHashes: NetWorkMetadataDef[] = getDefaultHashes();
+const knownHashes: NetWorkMetadataDef[] = getDefaultHashes();
 
-const hashes = [...knowHashes];
+const defaultChains = [...knownHashes];
 
 export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWorkMetadataDef[] {
   const result: NetWorkMetadataDef[] = [];
@@ -72,4 +72,4 @@ export function _getKnownHashes (networkMap: Record<string, NetworkJson>): NetWo
   return result;
 }
 
-export default hashes;
+export default defaultChains;

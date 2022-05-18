@@ -18,6 +18,7 @@ import useAccountBalance from '@subwallet/extension-koni-ui/hooks/screen/home/us
 import useCrowdloanNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useCrowdloanNetworks';
 import useFetchNft from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchNft';
 import useFetchStaking from '@subwallet/extension-koni-ui/hooks/screen/home/useFetchStaking';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useShowedNetworks from '@subwallet/extension-koni-ui/hooks/screen/home/useShowedNetworks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
 // Containers should not be imported lazily
@@ -43,11 +44,11 @@ import sendIcon from '../../assets/send-icon.svg';
 // import swapIcon from '../../assets/swap-icon.svg';
 
 const ActionButton = React.lazy(() => import('./ActionButton'));
-const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/index'));
 const AddAccount = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Accounts/AddAccount'));
 const BalancesVisibility = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/BalancesVisibility'));
 const AccountQrModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/AccountQrModal'));
 const Link = React.lazy(() => import('@subwallet/extension-koni-ui/components/Link'));
+const Header = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header'));
 
 interface WrapperProps extends ThemeProps {
   className?: string;
@@ -167,7 +168,7 @@ function Home ({ chainRegistryMap, className = '', currentAccount, historyMap, n
     showExportButton: true
   });
   const { accounts } = useContext(AccountContext);
-  const { networkMetadata: networkMetadataMap } = useSelector((state: RootState) => state);
+  const networkMetadataMap = useGetNetworkMetadata();
   const showedNetworks = useShowedNetworks(networkKey, address, accounts);
   const crowdloanNetworks = useCrowdloanNetworks(networkKey);
 

@@ -6,7 +6,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { _getKnownHashes } from '../util/chains';
+import { _getKnownHashes } from '../util/defaultChains';
 import useTranslation from './useTranslation';
 
 export interface NetworkSelectOption {
@@ -27,6 +27,7 @@ export default function (): NetworkSelectOption[] {
   const { t } = useTranslation();
   const { networkMap } = useSelector((state: RootState) => state);
   const parsedChains = _getKnownHashes(networkMap);
+
   const availableChains = parsedChains.filter((c) => c.isAvailable);
 
   return useMemo(() => [

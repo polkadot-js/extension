@@ -4,7 +4,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { NetWorkMetadataDef } from '@subwallet/extension-base/background/KoniTypes';
 
-import chains from '../util/chains';
+import defaultChains from '../util/defaultChains';
 
 function getNetworkMetadataMap (networkMetaDataItems: NetWorkMetadataDef[]): Record<string, NetWorkMetadataDef> {
   const result: Record<string, NetWorkMetadataDef> = {};
@@ -16,7 +16,7 @@ function getNetworkMetadataMap (networkMetaDataItems: NetWorkMetadataDef[]): Rec
   return result;
 }
 
-const initialState = getNetworkMetadataMap(chains);
+const initialState = getNetworkMetadataMap(defaultChains);
 // TODO: delete this state
 const networkMetadataSlice = createSlice({
   initialState,

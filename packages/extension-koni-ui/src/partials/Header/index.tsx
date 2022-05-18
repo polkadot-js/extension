@@ -11,6 +11,7 @@ import { AccountContext, Link } from '@subwallet/extension-koni-ui/components';
 import useGenesisHashOptions from '@subwallet/extension-koni-ui/hooks/useGenesisHashOptions';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
 import { showAccount, tieAccount, windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import AccountMenuSettings from '@subwallet/extension-koni-ui/partials/AccountMenuSettings';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateCurrentNetwork } from '@subwallet/extension-koni-ui/stores/updater';
 import { accountAllRecoded, getGenesisOptionsByAddressType, isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -31,7 +32,6 @@ import { Theme } from '../../types';
 const ConfirmModal = React.lazy(() => import('@subwallet/extension-koni-ui/components/ConfirmModal'));
 const Identicon = React.lazy(() => import('@subwallet/extension-koni-ui/components/Identicon'));
 const NetworkMenu = React.lazy(() => import('@subwallet/extension-koni-ui/components/NetworkMenu'));
-const AccountMenuSettings = React.lazy(() => import('@subwallet/extension-koni-ui/partials/AccountMenuSettings'));
 const DetailHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/DetailHeader'));
 const SubHeader = React.lazy(() => import('@subwallet/extension-koni-ui/partials/Header/SubHeader'));
 

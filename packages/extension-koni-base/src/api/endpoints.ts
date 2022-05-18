@@ -4,6 +4,7 @@
 import { NetWorkInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { ethereumChains } from '@subwallet/extension-koni-base/api/dotsama/api-helper';
 
+// deprecated
 const NETWORKS: Record<string, NetWorkInfo> = {
   acala_testnet: {
     chain: 'Acala Mandala TC7',

@@ -8,6 +8,7 @@ import { AccountsWithCurrentAddress, CurrentAccountInfo } from '@subwallet/exten
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { canDerive } from '@subwallet/extension-base/utils';
 import useSetupStore from '@subwallet/extension-koni-ui/hooks/store/useSetupStore';
+import Home from '@subwallet/extension-koni-ui/Popup/Home';
 import { updateCurrentAccount } from '@subwallet/extension-koni-ui/stores/updater';
 import * as Bowser from 'bowser';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -22,7 +23,6 @@ import { saveCurrentAccountAddress, subscribeAccountsWithCurrentAddress, subscri
 import { store } from '../stores';
 import { buildHierarchy } from '../util/buildHierarchy';
 
-const Home = React.lazy(() => import('./Home'));
 const EvmTokenEdit = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenEdit'));
 const EvmTokenSetting = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Settings/TokenSetting/EvmTokenSetting'));
 const Welcome = React.lazy(() => import('./Welcome'));

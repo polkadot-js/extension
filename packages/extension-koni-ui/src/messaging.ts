@@ -19,7 +19,7 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 
 import { SingleAddress } from '@polkadot/ui-keyring/observable/types';
 
-import { _getKnownHashes } from './util/chains';
+import { _getKnownHashes } from './util/defaultChains';
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 interface Handler {

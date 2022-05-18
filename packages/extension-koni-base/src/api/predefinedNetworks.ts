@@ -319,7 +319,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   equilibrium: {
     key: 'equilibrium',
     chain: 'Equilibrium',
-    genesisHash: 'UNKNOWN',
+    genesisHash: '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907',
     ss58Format: 68,
     providers: {
       Equilibrium: 'wss://node.equilibrium.io'
@@ -373,7 +373,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   manta: {
     key: 'manta',
     chain: 'Manta',
-    genesisHash: 'UNKNOWN',
+    genesisHash: '0x7822fe86be209e140e1bdb80fb09539d1825e3d1dfee79ce37c336a832a26d48',
     ss58Format: 77,
     providers: {
       'Manta Kuhlii': 'wss://kuhlii.manta.systems' // https://github.com/polkadot-js/apps/issues/6930
@@ -530,7 +530,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   efinity: {
     key: 'efinity',
     chain: 'Efinity',
-    genesisHash: 'UNKNOWN',
+    genesisHash: '0x335369975fced3fc22e23498da306a712f4fd964c957364d53c49cea9db8bc2f',
     ss58Format: -1,
     providers: {
       Efinity: 'wss://rpc.efinity.io'
@@ -583,7 +583,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   phala: {
     key: 'phala',
     chain: 'Phala Network',
-    genesisHash: 'UNKNOWN',
+    genesisHash: '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
     ss58Format: -1,
     providers: {
       Phala: 'wss://api.phala.network/ws'
@@ -1000,7 +1000,7 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
   sakura: {
     key: 'sakura',
     chain: 'Sakura',
-    genesisHash: 'UNKNOWN',
+    genesisHash: '0x7b0f142a9299b0886595992f8cac58814c8956de6a31c77caca95db01370fc2c',
     ss58Format: -1,
     providers: {
       Clover: 'wss://api-sakura.clover.finance'
@@ -1141,5 +1141,58 @@ export const PREDEFINED_NETWORKS: Record<string, NetworkJson> = {
 export const PREDEFINED_GENESIS_HASHES = {
   '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3': 'polkadot',
   '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe': 'kusama',
-  '0x27b0e1604364f6a7309d31ad60cdfb820666c3095b9f948c4a7d7894b6b3c184': 'rococo'
+  '0x27b0e1604364f6a7309d31ad60cdfb820666c3095b9f948c4a7d7894b6b3c184': 'rococo',
+  '0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e': 'westend',
+  '0x55b88a59dded27563391d619d805572dd6b6b89d302b0dd792d01b3c41cfe5b1': 'rmrk',
+  '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f': 'statemint',
+  '0xfc41b9bd8ef8fe53d58c7ea67c794c7ec9a73daf05e6d54b14ff6342c99ba64c': 'acala',
+  '0xfe58ea77779b7abda7da4ec526d14db9b1e9cd40a217c34892af80a9b332b76d': 'moonbeam',
+  '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6': 'astar',
+  '0x9eb76c5184c4ab8679d2d5d819fdf90b9c001403e9e17da2e14b6d8aec4029c6_evm': 'astarEvm',
+  '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97': 'parallel',
+  '0x5c7bd13edf349b33eb175ffae85210299e324d852916336027391536e686f267': 'clover',
+  '0xd2a620c27ec5cbc5621ff9a522689895074f7cca0d08e7134a7804e1a3ba86fc': 'hydradx',
+  '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b': 'edgeware',
+  '0x67dddf2673b69e5f875f6f25277495834398eafd67f492e09f3f3345e003d1b5': 'centrifuge',
+  '0xed86d448b84db333cdbe07362ddc79530343b907bd88712557c024d7a94296bb': 'interlay',
+  '0x89d3ec46d2fb43ef5a9713833373d5ea666b092fa8fd68fbc34596036571b907': 'equilibrium',
+  '0xa3d114c2b8d0627c1aa9b134eafcf7d05ca561fdc19fb388bb9457f81809fb23': 'nodle',
+  '0x729cb8f2cf428adcf81fe69610edda32c5711b2ff17de747e8604a3587021db8': 'darwinia',
+  '0x7822fe86be209e140e1bdb80fb09539d1825e3d1dfee79ce37c336a832a26d48': 'manta',
+  '0x7e4e32d0feafd4f9c9414b0be86373f9a1efa904809b683453a9af6856d38ad5': 'sora-substrate',
+  '0xe6343cef9167c43305c6f197bbd90d55bf93efc561b3d698845398cd864f6eb3': 'subgame',
+  '0x52097bd7416205228bf13ac3eda6f16de56c19cac3476866b8b8a9c00d515870': 'odyssey',
+  '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c': 'polkadex',
+  '0x70255b4d28de0fc4e1a193d7e175ad1ccef431598211c55538f1018651a0344e': 'aleph',
+  '0x49574664f45654c043c2690b76b5bf4a05c49160e112d32b8b71b0dfb023169c': 'alephTest',
+  '0x3fa374fbc8d0a9077356aefe327c88f447ce7f1fda905b1d4b4a2680a7b5cefa': 'opal',
+  '0x91bc6e169807aaa54802737e1c504b2577d4fafedd5a02c10293b1cd60e39527': 'moonbase',
+  '0x335369975fced3fc22e23498da306a712f4fd964c957364d53c49cea9db8bc2f': 'efinity',
+  '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736': 'phala',
+  '0x8b404e7ed8789d813982b9cb4c8b664c05b3fbf433309f603af014ec9ce56a8c': 'crust',
+  '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a': 'statemine',
+  '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b': 'karura',
+  '0x401a1f9dca3da46f5c4091016c8a2f26dcea05865116b286f60f668207d1474b': 'moonriver',
+  '0xf1cf9022c7ebb34b162d5b5e34e705a5a740b2d0ecc1009fb89023e62a488108': 'shiden',
+  '0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d': 'khala',
+  '0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed': 'bifrost',
+  '0x8b290fa39a8808f29d7309ea99442c95bf964838aef14be5a6449ae48f8a5f1f': 'bifrost_testnet',
+  '0x411f057b9107718c9624d6aa4a3f23c1653898297f3d4d529d9bb6511a39dd21': 'kilt',
+  '0x4ac80c99289841dd946ef92765bf659a307d39189b3ce374a92b5f0415ee17a1': 'calamari',
+  '0xa85cfb9b9fd4d622a5b28289a02347af987d8f73fa3108450e2b4a11c1ce5755': 'basilisk',
+  '0xaa3876c1dc8a1afcc2e9a685a49ff7704cfd36ad8c90bf2702b9d1b00cc40011': 'altair',
+  '0x64a1c658a48b2e70a7fb1ad4c39eea35022568c20fc44a6e2e3d0a57aee6053b': 'heiko',
+  '0x9af9a64e6e4da8e3073901c3ff0cc4c3aad9563786d89daf6ad820b6e14a0b8b': 'kintsugi',
+  '0x6811a339673c9daa897944dcdac99c6e2939cc88245ed21951a0a3c9a2be75bc': 'picasso',
+  '0xf22b7850cdd5a7657bbfd90ac86441275bbc57ace3d2698a740c7b0ec4de5ec3': 'pioneer',
+  '0xcd4d732201ebe5d6b014edda071c4203e16867305332301dc8d092044b28e554': 'quartz',
+  '0x9b8cefc0eb5c568b527998bdd76c184e2b76ae561be76e4667072230217ea243': 'genshiro',
+  '0x0bd72c1c305172e1275278aaeb3f161e02eccb7a819e63f62d47bd53a28189f8': 'subsocial',
+  '0x1bf2a2ecb4a868de66ea8610f2ce7c8c43706561b6476031315f6640fe38e060': 'zeitgeist',
+  '0x7b0f142a9299b0886595992f8cac58814c8956de6a31c77caca95db01370fc2c': 'sakura',
+  '0xd4c0c08ca49dc7c680c3dac71a7c0703e5b222f4b6c03fe4c5219bb8f22c18dc': 'shadow',
+  '0x631ccc82a078481584041656af292834e1ae6daab61d2875b4dd0c14bb9b17bc': 'robonomics',
+  '0xf195ef30c646663a24a3164b307521174a86f437c586397a43183c736a8383c1': 'integritee',
+  '0x34f61bfda344b3fad3c3e38832a91448b3c613b199eb23e5110a635d71c13c65': 'crab',
+  '0xfff6fd94251f570d4c9cdf25a0475da0d7ad35160290da19dad8f9caf8bf31b5': 'bitcountry'
 };

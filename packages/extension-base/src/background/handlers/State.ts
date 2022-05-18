@@ -256,6 +256,11 @@ export default class State {
     };
   };
 
+  public deleteAuthRequest (requestId: string) {
+    delete this.#authRequests[requestId];
+    this.updateIconAuth(true);
+  }
+
   private saveCurrentAuthList () {
     localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
   }

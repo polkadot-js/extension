@@ -507,6 +507,10 @@ export default class Extension {
     return { list: this.#state.removeAuthorization(url) };
   }
 
+  private deleteAuthRequest (requestId: string): void {
+    return this.#state.deleteAuthRequest(requestId);
+  }
+
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -525,6 +529,9 @@ export default class Extension {
 
       case 'pri(authorize.remove)':
         return this.removeAuthorization(request as string);
+
+      case 'pri(authorize.delete.request)':
+        return this.deleteAuthRequest(request as string);
 
       case 'pri(authorize.requests)':
         return this.authorizeSubscribe(id, port);

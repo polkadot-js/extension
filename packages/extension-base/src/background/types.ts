@@ -96,6 +96,7 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.toggle)': [string, ResponseAuthorizeList];
   'pri(authorize.remove)': [string, ResponseAuthorizeList];
+  'pri(authorize.delete.request)': [string, void];
   'pri(derivation.create)': [RequestDeriveCreate, boolean];
   'pri(derivation.validate)': [RequestDeriveValidate, ResponseDeriveValidate];
   'pri(json.restore)': [RequestJsonRestore, void];

@@ -12,6 +12,7 @@ import { AccountContext, ActionBar, ActionContext, Button, Checkbox, Link, Warni
 import useTranslation from '../../hooks/useTranslation';
 import { approveAuthRequest, rejectAuthRequest } from '../../messaging';
 import AccountsTree from '../Accounts/AccountsTree';
+import NoAccount from './NoAccount';
 
 interface Props extends ThemeProps {
   authId: string;
@@ -68,6 +69,10 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
     setSelectedAccounts && setSelectedAccounts(allVisibleAddresses);
   }, [allVisibleAccounts, areAllAccountsSelected, setSelectedAccounts]
   );
+
+  if (!accounts.length) {
+    return <NoAccount authId={authId} />;
+  }
 
   return (
     <div className={className}>

@@ -200,6 +200,10 @@ export async function removeAuthorization (url: string): Promise<ResponseAuthori
   return sendMessage('pri(authorize.remove)', url);
 }
 
+export async function deleteAuthRequest (requestId: string): Promise<void> {
+  return sendMessage('pri(authorize.delete.request)', requestId);
+}
+
 export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(metadata.requests)', null, cb);
 }

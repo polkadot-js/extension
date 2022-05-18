@@ -8,6 +8,7 @@ import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
@@ -725,7 +726,30 @@ export interface RequestSaveRecentAccount {
   accountId: string;
 }
 
+export interface SubstrateNftTransactionRequest {
+  params: Record<string, any>;
+  senderAddress: string;
+  recipientAddress: string;
+  networkKey: string;
+}
+
+export interface SubstrateNftTransaction {
+  error: boolean;
+  estimatedFee?: string;
+  extrinsic?: SubmittableExtrinsic<'promise'>;
+}
+
+export interface SubstrateNftSubmitTransaction {
+  extrinsic: SubmittableExtrinsic<'promise'>;
+}
+
+export interface SubstrateNftTransactionResponse {
+
+}
+
 export interface KoniRequestSignatures {
+  'pri(substrateNft.submitTransaction)': [SubstrateNftSubmitTransaction, SubstrateNftTransactionResponse, SubstrateNftTransactionResponse]
+  'pri(substrateNft.getTransaction)': [SubstrateNftTransactionRequest, SubstrateNftTransaction];
   'pri(networkMap.disableAll)': [null, boolean];
   'pri(networkMap.enableAll)': [null, boolean];
   'pri(networkMap.resetDefault)': [null, boolean];

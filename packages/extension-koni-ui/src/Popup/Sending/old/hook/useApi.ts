@@ -24,6 +24,7 @@ function setupDefaultFormatBalance (apiProps: ApiProps, networkKey: string) {
   TokenUnit.setAbbr(unit as string);
 }
 
+// TODO: deprecated, delete this
 export default function useApi (networkKey: string): ApiProps {
   const [value, setValue] = useState({ isApiReady: false } as ApiProps);
 

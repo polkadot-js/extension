@@ -77,7 +77,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
   const [senderInfoSubstrate, setSenderInfoSubstrate] = useState<AddressProxy>(() => ({ isUnlockCached: false, signAddress: senderAccount.address, signPassword: '' }));
 
   const extrinsic = substrateTransferParams !== null ? substrateTransferParams.extrinsic : null;
-  const txInfo = substrateTransferParams !== null ? substrateTransferParams.txInfo : null;
+  const substrateGas = substrateTransferParams !== null ? substrateTransferParams.estimatedFee : null;
 
   const web3Tx = web3TransferParams !== null ? web3TransferParams.rawTx : null;
   const web3Gas = web3TransferParams !== null ? web3TransferParams.estimatedGas : null;
@@ -261,7 +261,7 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
           <div
             className={'auth-container'}
           >
-            <div className={'fee'}>Fees of {txInfo?.partialFee.toHuman() || web3Gas} will be applied to the submission</div>
+            <div className={'fee'}>Fees of {substrateGas || web3Gas} will be applied to the submission</div>
 
             <Address
               className={'sender-container'}

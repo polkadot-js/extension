@@ -49,7 +49,7 @@ export enum SUPPORTED_NFT_NETWORKS {
   astarEvm = 'astarEvm',
 }
 
-export enum SUPPORTED_TRANSFER_CHAIN_NAME {
+export enum SUPPORTED_TRANSFER_EVM_CHAIN_NAME {
   moonbeam = 'moonbeam',
   moonbase = 'moonbase',
   astarEvm = 'astarEvm',
@@ -59,21 +59,21 @@ export enum SUPPORTED_TRANSFER_CHAIN_NAME {
 }
 
 export const SUPPORTED_TRANSFER_EVM_CHAIN = [
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string,
-  SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string
+  SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbase as string,
+  SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbeam as string,
+  SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonriver as string,
+  SUPPORTED_TRANSFER_EVM_CHAIN_NAME.astarEvm as string,
+  SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shiden as string,
+  SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shibuya as string
 ];
 
 export const TRANSFER_CHAIN_ID = {
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbase as string]: 1287,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonbeam as string]: 1284,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.moonriver as string]: 1285,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.astarEvm as string]: 592,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.shiden as string]: 336,
-  [SUPPORTED_TRANSFER_CHAIN_NAME.shibuya as string]: 81
+  [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbase as string]: 1287,
+  [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbeam as string]: 1284,
+  [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonriver as string]: 1285,
+  [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.astarEvm as string]: 592,
+  [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shiden as string]: 336,
+  [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shibuya as string]: 81
 };
 
 export interface EvmContracts {
@@ -82,4 +82,22 @@ export interface EvmContracts {
   moonriver: CustomEvmToken[];
   moonbase: CustomEvmToken[];
   shidenEvm: CustomEvmToken[];
+}
+
+export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
+  statemine = 'statemine',
+  acala = 'acala',
+  karura = 'karura',
+  kusama = 'kusama',
+  uniqueNft = 'uniqueNft',
+  quartz = 'quartz',
+  opal = 'opal',
+  statemint = 'statemint',
+  bitcountry = 'bitcountry',
+  moonbeam = 'moonbeam',
+  moonbase = 'moonbase',
+  astarEvm = 'astarEvm',
+  moonriver = 'moonriver',
+  shiden = 'shiden',
+  shibuya = 'shibuya'
 }

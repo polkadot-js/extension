@@ -10,7 +10,59 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
-import { AccountsWithCurrentAddress, ApiInitStatus, BalanceJson, ChainRegistry, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, DisableNetworkResponse, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetworkJson, NftCollectionJson, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestCheckTransfer, RequestFreeBalance, RequestNftForceUpdate, RequestSettingsType, RequestSubscribeBalance, RequestSubscribeBalancesVisibility, RequestSubscribeCrowdloan, RequestSubscribeNft, RequestSubscribePrice, RequestSubscribeStaking, RequestSubscribeStakingReward, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseSettingsType, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TransactionHistoryItemType, TransferError, ValidateEvmTokenRequest, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AccountsWithCurrentAddress,
+  ApiInitStatus,
+  BalanceJson,
+  ChainRegistry,
+  CrowdloanJson,
+  CurrentAccountInfo,
+  CustomEvmToken,
+  DeleteEvmTokenParams,
+  DisableNetworkResponse,
+  EvmNftSubmitTransaction,
+  EvmNftTransaction,
+  EvmNftTransactionRequest,
+  EvmNftTransactionResponse,
+  EvmTokenJson,
+  NetworkJson,
+  NftCollectionJson,
+  NftJson,
+  NftTransferExtra,
+  OptionInputAddress,
+  PriceJson,
+  RequestCheckTransfer,
+  RequestFreeBalance,
+  RequestNftForceUpdate,
+  RequestSettingsType,
+  RequestSubscribeBalance,
+  RequestSubscribeBalancesVisibility,
+  RequestSubscribeCrowdloan,
+  RequestSubscribeNft,
+  RequestSubscribePrice,
+  RequestSubscribeStaking,
+  RequestSubscribeStakingReward,
+  RequestTransfer,
+  RequestTransferCheckReferenceCount,
+  RequestTransferCheckSupporting,
+  RequestTransferExistentialDeposit,
+  ResponseAccountCreateSuriV2,
+  ResponseCheckTransfer,
+  ResponsePrivateKeyValidateV2,
+  ResponseSeedCreateV2,
+  ResponseSeedValidateV2,
+  ResponseSettingsType,
+  ResponseTransfer,
+  StakingJson,
+  StakingRewardJson, SubstrateNftTransaction,
+  SubstrateNftTransactionRequest,
+  SupportTransferResponse,
+  ThemeTypes,
+  TransactionHistoryItemType,
+  TransferError,
+  ValidateEvmTokenRequest,
+  ValidateNetworkResponse
+} from '@subwallet/extension-base/background/KoniTypes';
 import { RequestCurrentAccountAddress } from '@subwallet/extension-base/background/types';
 import { PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
@@ -528,4 +580,8 @@ export async function cancelSubscription (request: string): Promise<boolean> {
 
 export async function subscribeFreeBalance (request: RequestFreeBalance, callback: (balance: string) => void): Promise<string> {
   return sendMessage('pri(freeBalance.subscribe)', request, callback);
+}
+
+export async function substrateNftGetTransaction (request: SubstrateNftTransactionRequest): Promise<SubstrateNftTransaction> {
+  return sendMessage('pri(substrateNft.getTransaction)', request);
 }

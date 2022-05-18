@@ -1098,19 +1098,21 @@ export default class KoniState extends State {
       this.networkMap[data.key] = data;
     }
 
-    if (data.key in this.apiMap.dotSama) {
-      await this.apiMap.dotSama[data.key].api.disconnect();
-      delete this.apiMap.dotSama[data.key];
-    }
+    if (this.networkMap[data.key].active) { // update API map if network is active
+      if (data.key in this.apiMap.dotSama) {
+        await this.apiMap.dotSama[data.key].api.disconnect();
+        delete this.apiMap.dotSama[data.key];
+      }
 
-    if (data.isEthereum && data.key in this.apiMap.web3) {
-      delete this.apiMap.web3[data.key];
-    }
+      if (data.isEthereum && data.key in this.apiMap.web3) {
+        delete this.apiMap.web3[data.key];
+      }
 
-    this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data), data.isEthereum);
+      this.apiMap.dotSama[data.key] = initApi(data.key, getCurrentProvider(data), data.isEthereum);
 
-    if (data.isEthereum && data.isEthereum) {
-      this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
+      if (data.isEthereum && data.isEthereum) {
+        this.apiMap.web3[data.key] = initWeb3Api(getCurrentProvider(data));
+      }
     }
 
     this.networkMapSubject.next(this.networkMap);
@@ -1229,6 +1231,10 @@ export default class KoniState extends State {
 
   public getDotSamaApiMap () {
     return this.apiMap.dotSama;
+  }
+
+  public getDotSamaApi (networkKey: string) {
+    return this.apiMap.dotSama[networkKey];
   }
 
   public getWeb3ApiMap () {

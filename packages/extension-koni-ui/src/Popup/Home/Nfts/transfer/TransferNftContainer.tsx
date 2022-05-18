@@ -5,7 +5,6 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { isValidAddress } from '@subwallet/extension-koni-base/utils/utils';
 import logo from '@subwallet/extension-koni-ui/assets/sub-wallet-logo.svg';
 import { ActionContext, Spinner } from '@subwallet/extension-koni-ui/components';
-import LoadingContainer from '@subwallet/extension-koni-ui/components/LoadingContainer';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { Header } from '@subwallet/extension-koni-ui/partials';
 import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
@@ -14,15 +13,12 @@ import AuthTransfer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/
 import InputAddress from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/InputAddress';
 import TransferResult from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
 import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi'; // remove this
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { ApiPromise } from '@polkadot/api';
 
 interface Props extends ThemeProps {
   className?: string;
@@ -31,15 +27,12 @@ interface Props extends ThemeProps {
 interface ContentProps {
   className?: string;
   nftItem: _NftItem;
-  api: ApiPromise;
-  isApiReady: boolean;
   collectionImage?: string;
   collectionId: string;
 }
 
 function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
-  const { currentNetwork, transferNftParams } = useSelector((state: RootState) => state);
-  const { api, isApiReady } = useApi(currentNetwork.networkKey);
+  const { transferNftParams } = useSelector((state: RootState) => state);
 
   return (
     <div className={className}>
@@ -52,26 +45,16 @@ function Wrapper ({ className = '' }: Props): React.ReactElement<Props> {
         subHeaderName={'Send NFT'}
       />
 
-      {
-        isApiReady || currentNetwork.isEthereum || currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()
-          ? (
-            <TransferNftContainer
-              api={api}
-              collectionId={transferNftParams.collectionId}
-              collectionImage={transferNftParams.collectionImage}
-              isApiReady={isApiReady}
-              nftItem={transferNftParams.nftItem}
-            />
-          )
-          : (
-            <LoadingContainer />
-          )
-      }
+      <TransferNftContainer
+        collectionId={transferNftParams.collectionId}
+        collectionImage={transferNftParams.collectionImage}
+        nftItem={transferNftParams.nftItem}
+      />
     </div>
   );
 }
 
-function TransferNftContainer ({ api, className, collectionId, collectionImage, isApiReady, nftItem }: ContentProps): React.ReactElement<ContentProps> {
+function TransferNftContainer ({ className, collectionId, collectionImage, nftItem }: ContentProps): React.ReactElement<ContentProps> {
   const [recipientAddress, setRecipientAddress] = useState<string | null>('');
   const [addressError, setAddressError] = useState(true);
   const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
@@ -130,7 +113,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       return;
     }
 
-    if (!isApiReady || !networkKey) {
+    if (!networkKey) {
       if (currentNetwork.networkKey.toLowerCase() === ALL_ACCOUNT_KEY.toLowerCase()) {
         show(`Please change to ${networkKey.toUpperCase()} network.`);
       }
@@ -148,7 +131,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     // @ts-ignore
     const senderAddress = currentAccount.account.address;
     const params = paramsHandler(nftItem, networkKey);
-    const transferMeta = await transferHandler(api, networkKey, senderAddress, recipientAddress as string, params);
+    const transferMeta = await transferHandler(networkKey, senderAddress, recipientAddress as string, params);
 
     if (transferMeta !== null) {
       // @ts-ignore
@@ -156,8 +139,8 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
         setSubstrateTransferParams({
           // @ts-ignore
           extrinsic: transferMeta.extrinsic,
-          txInfo: transferMeta.info
-        });
+          estimatedFee: transferMeta.estimatedFee
+        } as SubstrateTransferParams);
         // @ts-ignore
       } else if (SUPPORTED_TRANSFER_EVM_CHAIN.indexOf(networkKey) > -1) {
         setWeb3TransferParams({
@@ -172,7 +155,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
     }
 
     setLoading(false);
-  }, [addressError, api, currentAccount.account?.address, currentNetwork.networkKey, isApiReady, networkKey, nftItem, recipientAddress, show]);
+  }, [addressError, currentAccount.account?.address, currentNetwork.networkKey, networkKey, nftItem, recipientAddress, show]);
 
   const handleImageError = useCallback(() => {
     setLoading(false);
@@ -265,7 +248,7 @@ function TransferNftContainer ({ api, className, collectionId, collectionImage, 
       }
 
       {
-        showConfirm && isApiReady && (substrateTransferParams || web3TransferParams) &&
+        showConfirm && (substrateTransferParams || web3TransferParams) &&
           <AuthTransfer
             chain={nftItem.chain}
             collectionId={collectionId}

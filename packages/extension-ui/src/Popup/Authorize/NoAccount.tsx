@@ -25,7 +25,7 @@ function NoAccount ({ authId, className }: Props): React.ReactElement<Props> {
   return (
     <div className={className}>
       <Warning className='warningMargin'>
-        <Trans>You do not have any account. Please create an account and refresh the application page.</Trans>
+        <Trans>You do not have any account. Please create an account and refresh the application&apos;s page.</Trans>
       </Warning>
       <Button
         className='acceptButton'

@@ -17,10 +17,11 @@ interface LedgerData {
 }
 
 export const DEFAULT_STAKING_NETWORKS = {
-  polkadot: NETWORKS.polkadot,
-  kusama: NETWORKS.kusama,
-  hydradx: NETWORKS.hydradx,
-  acala: NETWORKS.acala
+  // polkadot: NETWORKS.polkadot,
+  // kusama: NETWORKS.kusama,
+  // hydradx: NETWORKS.hydradx,
+  // acala: NETWORKS.acala,
+  aleph: NETWORKS.aleph
   // astar: NETWORKS.astar,
   // moonbeam: NETWORKS.moonbeam
 };
@@ -38,7 +39,7 @@ function parseStakingBalance (balance: number, chain: string): number {
   }
 }
 
-export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
+export async function stakingOnChainApi (addresses: string[], dotSamaAPIMap: Record<string, ApiProps>, callback: (networkKey: string, rs: StakingItem) => void, networks: Record<string, NetWorkInfo> = DEFAULT_STAKING_NETWORKS) {
   const allApiPromise: PromiseMapping[] = [];
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
@@ -95,6 +96,7 @@ export async function subscribeStaking (addresses: string[], dotSamaAPIMap: Reco
           } as StakingItem;
         }
 
+        console.log('stakingonchain', stakingItem);
         // eslint-disable-next-line node/no-callback-literal
         callback(chain, stakingItem);
       }

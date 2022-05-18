@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 export function createNamedHook <F extends (...args: any[]) => any> (name: string, fn: F): (...args: Parameters<F>) => ReturnType<F> {

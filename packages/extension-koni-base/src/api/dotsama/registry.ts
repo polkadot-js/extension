@@ -140,18 +140,3 @@ export async function getTokenInfo (networkKey: string, api: ApiPromise, token: 
 
   return tokenMap[token];
 }
-
-// move this to koni-state
-// export function initChainRegistrySubscription () {
-//   state.getEvmTokenStore((evmTokens) => {
-//     const erc20Tokens = evmTokens ? evmTokens.erc20 : [];
-//
-//     Object.entries(dotSamaAPIMap).forEach(([networkKey, { api }]) => {
-//       getRegistry(networkKey, api, erc20Tokens)
-//         .then((rs) => {
-//           state.setChainRegistryItem(networkKey, rs);
-//         })
-//         .catch(console.error);
-//     });
-//   });
-// }

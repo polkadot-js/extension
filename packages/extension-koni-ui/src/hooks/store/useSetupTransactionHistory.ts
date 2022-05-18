@@ -9,7 +9,6 @@ import { store } from '@subwallet/extension-koni-ui/stores';
 import { useEffect } from 'react';
 
 function updateTransactionHistory (historyMap: Record<string, TransactionHistoryItemType[]>): void {
-  console.log(historyMap);
   store.dispatch({ type: 'transactionHistory/update', payload: historyMap });
 }
 

@@ -822,6 +822,17 @@ export default class KoniState extends State {
 
   public initChainRegistry () {
     this.chainRegistryMap = {};
+    this.getEvmTokenStore((evmTokens) => {
+      const erc20Tokens = evmTokens ? evmTokens.erc20 : [];
+
+      Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
+        getRegistry(networkKey, api, erc20Tokens)
+          .then((rs) => {
+            this.setChainRegistryItem(networkKey, rs);
+          })
+          .catch(console.error);
+      });
+    });
     Object.entries(this.apiMap.dotSama).forEach(([networkKey, { api }]) => {
       getRegistry(networkKey, api)
         .then((rs) => {

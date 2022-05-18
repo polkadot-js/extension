@@ -14,7 +14,7 @@ import InputBalance from '@subwallet/extension-koni-ui/Popup/Sending/old/compone
 import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi';
 import { useCall } from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useCall';
 import SendFundResult from '@subwallet/extension-koni-ui/Popup/Sending/old/SendFundResult';
-import { TxResult } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
+import { TxResult } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/util';
@@ -30,7 +30,7 @@ import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/typ
 import { BN, BN_HUNDRED, BN_ZERO, isFunction } from '@polkadot/util';
 
 import Available from './component/Available';
-import InputAddress from './component/InputAddress';
+import InputAddress from '../../Home/Nfts/transfer/components/InputAddress';
 
 interface Props extends ThemeProps {
   className?: string;

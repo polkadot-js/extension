@@ -9,10 +9,10 @@ import Modal from '@subwallet/extension-koni-ui/components/Modal';
 import Output from '@subwallet/extension-koni-ui/components/Output';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { evmNftSubmitTransaction, nftForceUpdate } from '@subwallet/extension-koni-ui/messaging';
+import Address from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/Address';
+import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/types';
+import { cacheUnlock } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/util';
 import { _NftItem, SubstrateTransferParams, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import Address from '@subwallet/extension-koni-ui/Popup/Sending/old/parts/Address';
-import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
-import { cacheUnlock } from '@subwallet/extension-koni-ui/Popup/Sending/old/util';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -66,6 +66,7 @@ function unlockAccount ({ isUnlockCached, signAddress, signPassword }: AddressPr
 function isRecipientSelf (currentAddress: string, recipientAddress: string) {
   return reformatAddress(currentAddress, 1) === reformatAddress(recipientAddress, 1);
 }
+// TODO: migrate api to background and use new UI components
 
 function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddress, senderAccount, setExtrinsicHash, setIsTxSuccess, setShowConfirm, setShowResult, setTxError, substrateTransferParams, web3TransferParams }: Props): React.ReactElement<Props> {
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -157,27 +158,22 @@ function AuthTransfer ({ chain, className, collectionId, nftItem, recipientAddre
       try {
         const isSendingSelf = isRecipientSelf(account?.account?.address as string, recipientAddress);
         const unsubscribe = await extrinsic.signAndSend(pair, (result) => {
-          console.log('sending tx');
-
           if (!result || !result.status) {
             return;
           }
 
           if (result.status.isInBlock || result.status.isFinalized) {
-            console.log('tx in block');
             result.events
               .filter(({ event: { section } }) => section === 'system')
               .forEach(({ event: { method } }): void => {
                 setExtrinsicHash(extrinsic.hash.toHex());
 
                 if (method === 'ExtrinsicFailed') {
-                  console.log('tx fail');
                   setIsTxSuccess(false);
                   setTxError(method);
                   setShowConfirm(false);
                   setShowResult(true);
                 } else if (method === 'ExtrinsicSuccess') {
-                  console.log('tx success');
                   setIsTxSuccess(true);
                   setShowConfirm(false);
                   setShowResult(true);

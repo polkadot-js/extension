@@ -10,7 +10,7 @@ import DONATEINFOS from '@subwallet/extension-koni-base/api/donate';
 import DonateReceiveItem from '@subwallet/extension-koni-ui/components/DonateInputAddress/DonateReceiveItem';
 import Dropdown from '@subwallet/extension-koni-ui/components/InputAddress/Dropdown';
 import { cancelSubscription, saveRecentAccountId, subscribeAccountsInputAddress } from '@subwallet/extension-koni-ui/messaging';
-import createItem from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputAddress/createItem';
+import createItem from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/InputAddress/createItem';
 import LabelHelp from '@subwallet/extension-koni-ui/Popup/Sending/old/component/LabelHelp';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { toAddress } from '@subwallet/extension-koni-ui/util';

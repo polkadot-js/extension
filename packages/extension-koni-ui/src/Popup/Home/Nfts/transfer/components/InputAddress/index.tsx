@@ -14,9 +14,9 @@ import styled from 'styled-components';
 import { createOptionItem } from '@polkadot/ui-keyring/options/item';
 import { isNull, isUndefined } from '@polkadot/util';
 
-import Dropdown from '../Dropdown';
-import Static from '../Static';
-import { toAddress } from '../util';
+import Dropdown from '../../../../../Sending/old/component/Dropdown';
+import Static from '../../../../../Sending/old/component/Static';
+import { toAddress } from '../../../../../Sending/old/component/util';
 import createHeader from './createHeader';
 import createItem from './createItem';
 

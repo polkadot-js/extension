@@ -11,10 +11,10 @@ import { Header } from '@subwallet/extension-koni-ui/partials';
 import paramsHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/paramsHandler';
 import transferHandler from '@subwallet/extension-koni-ui/Popup/Home/Nfts/api/transferHandler';
 import AuthTransfer from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/AuthTransfer';
+import InputAddress from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/InputAddress';
 import TransferResult from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/TransferResult';
 import { _NftItem, SubstrateTransferParams, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN, Web3TransferParams } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
-import InputAddress from '@subwallet/extension-koni-ui/Popup/Sending/old/component/InputAddress';
-import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi';
+import useApi from '@subwallet/extension-koni-ui/Popup/Sending/old/hook/useApi'; // remove this
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { CurrentAccountType } from '@subwallet/extension-koni-ui/stores/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -5,7 +5,7 @@ import type { Signer, SignerResult } from '@polkadot/api/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { Registry, SignerPayloadJSON } from '@polkadot/types/types';
 
-import { lockAccount } from '../util';
+import { lockAccount } from '../../../Home/Nfts/transfer/components/util';
 
 let id = 0;
 

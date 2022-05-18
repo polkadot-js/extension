@@ -6,6 +6,7 @@ import type { AddressFlags } from './types';
 
 import { BackgroundWindow } from '@subwallet/extension-base/background/KoniTypes';
 
+// TODO: fix usage of bWindow
 const bWindow = chrome.extension.getBackgroundPage() as BackgroundWindow;
 const { keyring } = bWindow.pdotApi;
 

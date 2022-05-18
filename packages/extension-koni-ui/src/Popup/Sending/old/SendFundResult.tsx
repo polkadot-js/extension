@@ -5,7 +5,7 @@ import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
 import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
 import { ActionContext, Button } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { TxResult } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
+import { TxResult } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext } from 'react';

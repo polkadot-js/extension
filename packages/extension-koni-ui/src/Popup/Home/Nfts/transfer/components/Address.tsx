@@ -3,13 +3,13 @@
 
 import { Warning } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
-import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Sending/old/types';
+import { AddressProxy } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/transfer/components/types';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import InputAddress from '../component/InputAddress';
-import Password from './Password';
+import InputAddress from './InputAddress';
+import Password from '../../../../Sending/old/parts/Password';
 
 interface Props extends ThemeProps {
   className?: string;

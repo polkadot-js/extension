@@ -5,6 +5,7 @@ import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { CustomEvmToken, NftTransferExtra } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
 import { subscribeCrowdloan } from '@subwallet/extension-koni-base/api/dotsama/crowdloan';
+import { stakingOnChainApi } from '@subwallet/extension-koni-base/api/staking';
 import { getAllSubsquidStaking } from '@subwallet/extension-koni-base/api/staking/subsquidStaking';
 import { dotSamaAPIMap, nftHandler, state } from '@subwallet/extension-koni-base/background/handlers';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';

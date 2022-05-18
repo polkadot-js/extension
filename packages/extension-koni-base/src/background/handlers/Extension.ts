@@ -1,26 +1,26 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import Common from '@ethereumjs/common';
+import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@subwallet/extension-base/background/handlers/Extension';
+import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
+import { createSubscription, isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
+import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponsePrivateKeyValidateV2, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@subwallet/extension-base/background/types';
+import { initApi } from '@subwallet/extension-koni-base/api/dotsama';
+import { getFreeBalance, subscribeFreeBalance } from '@subwallet/extension-koni-base/api/dotsama/balance';
+import { getTokenInfo } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@subwallet/extension-koni-base/api/dotsama/transfer';
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { TRANSFER_CHAIN_ID } from '@subwallet/extension-koni-base/api/nft/config';
+import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@subwallet/extension-koni-base/api/web3/transfer';
+import { getERC20Contract, getERC721Contract, getWeb3Api, TestERC721Contract } from '@subwallet/extension-koni-base/api/web3/web3';
+import { dotSamaAPIMap, rpcsMap, state } from '@subwallet/extension-koni-base/background/handlers/index';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
+import { reformatAddress } from '@subwallet/extension-koni-base/utils/utils';
 import { Transaction } from 'ethereumjs-tx';
 import { Contract } from 'web3-eth-contract';
 
-import Extension, { SEED_DEFAULT_LENGTH, SEED_LENGTHS } from '@polkadot/extension-base/background/handlers/Extension';
-import { AuthUrls } from '@polkadot/extension-base/background/handlers/State';
-import { createSubscription, isSubscriptionRunning, unsubscribe } from '@polkadot/extension-base/background/handlers/subscriptions';
-import { AccountsWithCurrentAddress, ApiInitStatus, BackgroundWindow, BalanceJson, ChainRegistry, CrowdloanJson, CustomEvmToken, DeleteEvmTokenParams, EvmNftSubmitTransaction, EvmNftTransaction, EvmNftTransactionRequest, EvmNftTransactionResponse, EvmTokenJson, NetWorkMetadataDef, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, OptionInputAddress, PriceJson, RequestAccountCreateSuriV2, RequestAccountExportPrivateKey, RequestApi, RequestAuthorization, RequestAuthorizationPerAccount, RequestAuthorizeApproveV2, RequestBatchRestoreV2, RequestCheckTransfer, RequestDeriveCreateV2, RequestForgetSite, RequestFreeBalance, RequestJsonRestoreV2, RequestNftForceUpdate, RequestSaveRecentAccount, RequestSeedCreateV2, RequestSeedValidateV2, RequestSettingsType, RequestTransactionHistoryAdd, RequestTransfer, RequestTransferCheckReferenceCount, RequestTransferCheckSupporting, RequestTransferExistentialDeposit, ResponseAccountCreateSuriV2, ResponseAccountExportPrivateKey, ResponseCheckTransfer, ResponseSeedCreateV2, ResponseSeedValidateV2, ResponseTransfer, StakingJson, StakingRewardJson, SupportTransferResponse, ThemeTypes, TokenInfo, TransactionHistoryItemType, TransferError, TransferErrorCode, TransferStep, ValidateEvmTokenRequest, ValidateEvmTokenResponse } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson, AuthorizeRequest, MessageTypes, RequestAccountForget, RequestAuthorizeReject, RequestCurrentAccountAddress, RequestTypes, ResponseAuthorizeList, ResponseType } from '@polkadot/extension-base/background/types';
-import { initApi } from '@polkadot/extension-koni-base/api/dotsama';
-import { getFreeBalance, subscribeFreeBalance } from '@polkadot/extension-koni-base/api/dotsama/balance';
-import { getTokenInfo } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import { checkReferenceCount, checkSupportTransfer, estimateFee, getExistentialDeposit, makeTransfer } from '@polkadot/extension-koni-base/api/dotsama/transfer';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { TRANSFER_CHAIN_ID } from '@polkadot/extension-koni-base/api/nft/config';
-import { getERC20TransactionObject, getEVMTransactionObject, makeERC20Transfer, makeEVMTransfer } from '@polkadot/extension-koni-base/api/web3/transfer';
-import { getERC20Contract, getERC721Contract, getWeb3Api, TestERC721Contract } from '@polkadot/extension-koni-base/api/web3/web3';
-import { dotSamaAPIMap, rpcsMap, state } from '@polkadot/extension-koni-base/background/handlers/index';
-import { ALL_ACCOUNT_KEY } from '@polkadot/extension-koni-base/constants';
-import { reformatAddress } from '@polkadot/extension-koni-base/utils/utils';
 import { createPair } from '@polkadot/keyring';
 import { decodePair } from '@polkadot/keyring/pair/decode';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -690,6 +690,36 @@ export default class KoniExtension extends Extension {
     });
 
     return rs;
+  }
+
+  private _checkValidatePrivateKey ({ suri, types }: RequestSeedValidateV2, autoAddPrefix = false): ResponsePrivateKeyValidateV2 {
+    const { phrase } = keyExtractSuri(suri);
+    const rs = { autoAddPrefix: autoAddPrefix, addressMap: {} } as ResponsePrivateKeyValidateV2;
+
+    types && types.forEach((type) => {
+      rs.addressMap[type] = '';
+    });
+
+    if (isHex(phrase) && isHex(phrase, 256)) {
+      types && types.forEach((type) => {
+        rs.addressMap[type] = keyring.createFromUri(getSuri(suri, type), {}, type).address;
+      });
+    } else {
+      rs.autoAddPrefix = false;
+      assert(false, 'Not valid private key');
+    }
+
+    return rs;
+  }
+
+  private metamaskPrivateKeyValidateV2 ({ suri, types }: RequestSeedValidateV2): ResponsePrivateKeyValidateV2 {
+    const isValidSuri = suri.startsWith('0x');
+
+    if (isValidSuri) {
+      return this._checkValidatePrivateKey({ suri, types });
+    } else {
+      return this._checkValidatePrivateKey({ suri: `0x${suri}`, types }, true);
+    }
   }
 
   private deriveV2 (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
@@ -1394,10 +1424,24 @@ export default class KoniExtension extends Extension {
     const evmTokenState = state.getEvmTokenState();
     let isExist = false;
 
+    // check exist in evmTokenState
     for (const token of evmTokenState[data.type]) {
-      if (token.smartContract === data.smartContract && token.type === data.type && token.chain === data.chain) {
+      if (token.smartContract.toLowerCase() === data.smartContract.toLowerCase() && token.type === data.type && token.chain === data.chain) {
         isExist = true;
         break;
+      }
+    }
+
+    if (!isExist && data.type === 'erc20') {
+      // check exist in chainRegistry
+      const chainRegistryMap = state.getChainRegistryMap();
+      const tokenMap = chainRegistryMap[data.chain].tokenMap;
+
+      for (const token of Object.values(tokenMap)) {
+        if (token?.erc20Address?.toLowerCase() === data.smartContract.toLowerCase()) {
+          isExist = true;
+          break;
+        }
       }
     }
 
@@ -1509,6 +1553,8 @@ export default class KoniExtension extends Extension {
         return this.seedCreateV2(request as RequestSeedCreateV2);
       case 'pri(seed.validateV2)':
         return this.seedValidateV2(request as RequestSeedValidateV2);
+      case 'pri(privateKey.validateV2)':
+        return this.metamaskPrivateKeyValidateV2(request as RequestSeedValidateV2);
       case 'pri(accounts.exportPrivateKey)':
         return this.accountExportPrivateKey(request as RequestAccountExportPrivateKey);
       case 'pri(accounts.subscribeWithCurrentAddress)':

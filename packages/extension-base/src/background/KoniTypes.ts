@@ -1,11 +1,12 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+import { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
+import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@subwallet/extension-base/background/types';
+import { InjectedAccount, MetadataDefBase } from '@subwallet/extension-inject/types';
 
 import { ApiPromise } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { AccountJson, AuthorizeRequest, RequestAccountList, RequestAccountSubscribe, RequestAuthorizeReject, RequestAuthorizeSubscribe, RequestAuthorizeTab, RequestCurrentAccountAddress, ResponseAuthorizeList, ResponseJsonGetAccountInfo, SeedLengths } from '@polkadot/extension-base/background/types';
-import { InjectedAccount, MetadataDefBase } from '@polkadot/extension-inject/types';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { Registry } from '@polkadot/types/types';
 import { Keyring } from '@polkadot/ui-keyring';
@@ -444,6 +445,11 @@ export interface RequestTransfer extends RequestCheckTransfer {
   password: string;
 }
 
+export interface ResponsePrivateKeyValidateV2 {
+  addressMap: Record<KeypairType, string>,
+  autoAddPrefix: boolean
+}
+
 export type ResponseSeedValidateV2 = ResponseSeedCreateV2
 export type ResponseAccountCreateSuriV2 = Record<KeypairType, string>
 export type AccountRef = Array<string>
@@ -654,6 +660,7 @@ export interface KoniRequestSignatures {
   'pri(authorize.rejectV2)': [RequestAuthorizeReject, boolean];
   'pri(seed.createV2)': [RequestSeedCreateV2, ResponseSeedCreateV2];
   'pri(seed.validateV2)': [RequestSeedValidateV2, ResponseSeedValidateV2];
+  'pri(privateKey.validateV2)': [RequestSeedValidateV2, ResponsePrivateKeyValidateV2];
   'pri(accounts.create.suriV2)': [RequestAccountCreateSuriV2, ResponseAccountCreateSuriV2];
   'pri(accounts.checkTransfer)': [RequestCheckTransfer, ResponseCheckTransfer];
   'pri(accounts.transfer)': [RequestTransfer, Array<TransferError>, ResponseTransfer];

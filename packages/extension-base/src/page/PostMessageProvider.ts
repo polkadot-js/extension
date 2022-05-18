@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-base authors & contributors
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedProvider, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { InjectedProvider, ProviderList, ProviderMeta } from '@subwallet/extension-inject/types';
 import type { ProviderInterfaceEmitCb, ProviderInterfaceEmitted } from '@polkadot/rpc-provider/types';
 import type { AnyFunction } from '@polkadot/types/types';
 import type { SendRequest } from './types';

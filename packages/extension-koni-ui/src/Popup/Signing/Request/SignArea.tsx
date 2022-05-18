@@ -1,11 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { PASSWORD_EXPIRY_MIN } from '@subwallet/extension-base/defaults';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import { ActionContext, Button, Checkbox } from '../../../components';
 import useTranslation from '../../../hooks/useTranslation';
@@ -157,7 +156,7 @@ export default styled(SignArea)(({ theme }: Props) => `
   }
 
   .sign-button:first-child {
-    background-color: #181E42;
+    background-color: ${theme.buttonBackground1};
     margin-right: 8px;
 
     span {

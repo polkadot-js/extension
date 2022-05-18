@@ -1,17 +1,16 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransferError } from '@subwallet/extension-base/background/KoniTypes';
+import failStatus from '@subwallet/extension-koni-ui/assets/fail-status.svg';
+import successStatus from '@subwallet/extension-koni-ui/assets/success-status.svg';
+import { ActionContext } from '@subwallet/extension-koni-ui/components';
+import Button from '@subwallet/extension-koni-ui/components/Button';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { ThemeProps, TransferResultType } from '@subwallet/extension-koni-ui/types';
+import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-
-import { TransferError } from '@polkadot/extension-base/background/KoniTypes';
-import failStatus from '@polkadot/extension-koni-ui/assets/fail-status.svg';
-import successStatus from '@polkadot/extension-koni-ui/assets/success-status.svg';
-import { ActionContext } from '@polkadot/extension-koni-ui/components';
-import Button from '@polkadot/extension-koni-ui/components/Button';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { ThemeProps, TransferResultType } from '@polkadot/extension-koni-ui/types';
-import { getScanExplorerTransactionHistoryUrl, isSupportScanExplorer } from '@polkadot/extension-koni-ui/util';
 
 export interface Props extends ThemeProps {
   className?: string;

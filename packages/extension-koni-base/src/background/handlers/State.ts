@@ -1,28 +1,28 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
+import State, { AuthUrls, Resolver } from '@subwallet/extension-base/background/handlers/State';
+import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@subwallet/extension-base/background/KoniTypes';
+import { AuthorizeRequest, RequestAuthorizeTab } from '@subwallet/extension-base/background/types';
+import { getId } from '@subwallet/extension-base/utils/getId';
+import { getTokenPrice } from '@subwallet/extension-koni-base/api/coingecko';
+import { cacheRegistryMap } from '@subwallet/extension-koni-base/api/dotsama/registry';
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import { DEFAULT_STAKING_NETWORKS } from '@subwallet/extension-koni-base/api/staking';
+// eslint-disable-next-line camelcase
+import { DotSamaCrowdloan_crowdloans_nodes } from '@subwallet/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
+import { fetchDotSamaCrowdloan } from '@subwallet/extension-koni-base/api/subquery/crowdloan';
+import { DEFAULT_EVM_TOKENS } from '@subwallet/extension-koni-base/api/web3/defaultEvmToken';
+import { CurrentAccountStore, PriceStore } from '@subwallet/extension-koni-base/stores';
+import AccountRefStore from '@subwallet/extension-koni-base/stores/AccountRef';
+import AuthorizeStore from '@subwallet/extension-koni-base/stores/Authorize';
+import CustomEvmTokenStore from '@subwallet/extension-koni-base/stores/CustomEvmToken';
+import SettingsStore from '@subwallet/extension-koni-base/stores/Settings';
+import TransactionHistoryStore from '@subwallet/extension-koni-base/stores/TransactionHistory';
+import { convertFundStatus } from '@subwallet/extension-koni-base/utils/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
-import State, { AuthUrls, Resolver } from '@polkadot/extension-base/background/handlers/State';
-import { _ServiceInfo, AccountRefMap, APIItemState, AuthRequestV2, BalanceItem, BalanceJson, ChainRegistry, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, CustomEvmToken, DeleteEvmTokenParams, EvmTokenJson, NftCollection, NftCollectionJson, NftItem, NftJson, NftTransferExtra, PriceJson, RequestSettingsType, ResultResolver, StakingItem, StakingJson, StakingRewardJson, TokenInfo, TransactionHistoryItemType } from '@polkadot/extension-base/background/KoniTypes';
-import { AuthorizeRequest, RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
-import { getId } from '@polkadot/extension-base/utils/getId';
-import { getTokenPrice } from '@polkadot/extension-koni-base/api/coingecko';
-import { cacheRegistryMap } from '@polkadot/extension-koni-base/api/dotsama/registry';
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import { DEFAULT_STAKING_NETWORKS } from '@polkadot/extension-koni-base/api/staking';
-// eslint-disable-next-line camelcase
-import { DotSamaCrowdloan_crowdloans_nodes } from '@polkadot/extension-koni-base/api/subquery/__generated__/DotSamaCrowdloan';
-import { fetchDotSamaCrowdloan } from '@polkadot/extension-koni-base/api/subquery/crowdloan';
-import { DEFAULT_EVM_TOKENS } from '@polkadot/extension-koni-base/api/web3/defaultEvmToken';
-import { CurrentAccountStore, PriceStore } from '@polkadot/extension-koni-base/stores';
-import AccountRefStore from '@polkadot/extension-koni-base/stores/AccountRef';
-import AuthorizeStore from '@polkadot/extension-koni-base/stores/Authorize';
-import CustomEvmTokenStore from '@polkadot/extension-koni-base/stores/CustomEvmToken';
-import SettingsStore from '@polkadot/extension-koni-base/stores/Settings';
-import TransactionHistoryStore from '@polkadot/extension-koni-base/stores/TransactionHistory';
-import { convertFundStatus } from '@polkadot/extension-koni-base/utils/utils';
 import { accounts } from '@polkadot/ui-keyring/observable/accounts';
 import { assert } from '@polkadot/util';
 
@@ -46,12 +46,14 @@ function generateDefaultStakingMap () {
   const stakingMap: Record<string, StakingItem> = {};
 
   Object.keys(DEFAULT_STAKING_NETWORKS).forEach((networkKey) => {
-    stakingMap[networkKey] = {
-      name: NETWORKS[networkKey].chain,
-      chainId: networkKey,
-      nativeToken: NETWORKS[networkKey].nativeToken,
-      state: APIItemState.PENDING
-    } as StakingItem;
+    if (NETWORKS[networkKey]) {
+      stakingMap[networkKey] = {
+        name: NETWORKS[networkKey].chain,
+        chainId: networkKey,
+        nativeToken: NETWORKS[networkKey].nativeToken,
+        state: APIItemState.PENDING
+      } as StakingItem;
+    }
   });
 
   return stakingMap;
@@ -258,12 +260,8 @@ export default class KoniState extends State {
       const isAllowed = result === true;
 
       if (accounts && accounts.length) {
-        Object.keys(isAllowedMap).forEach((address) => {
-          if (accounts.includes(address)) {
-            isAllowedMap[address] = true;
-          } else {
-            isAllowedMap[address] = false;
-          }
+        accounts.forEach((acc) => {
+          isAllowedMap[acc] = true;
         });
       } else {
         // eslint-disable-next-line no-return-assign
@@ -342,7 +340,10 @@ export default class KoniState extends State {
       };
 
       this.updateIconAuthV2();
-      this.popupOpen();
+
+      if (Object.keys(this.#authRequestsV2).length < 2) {
+        this.popupOpen();
+      }
     });
   }
 

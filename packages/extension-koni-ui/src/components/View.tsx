@@ -1,15 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { ThemeProps } from '../types';
 
+import { ResponseSettingsType, ThemeTypes } from '@subwallet/extension-base/background/KoniTypes';
+import { saveTheme, subscribeSettings } from '@subwallet/extension-koni-ui/messaging';
 import React, { useCallback, useEffect, useState } from 'react';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
-import { subscribeSettings } from '@polkadot/extension-koni-ui/messaging';
-
 // FIXME We should not import from index when this one is imported there as well
-import { AvailableThemes, chooseTheme, Main, themes, ThemeSwitchContext } from '.';
+import { chooseTheme, Main, themes, ThemeSwitchContext } from '.';
 
 interface Props {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
   const [theme, setTheme] = useState(chooseTheme());
 
   const switchTheme = useCallback(
-    (theme: AvailableThemes): void => {
+    (theme: ThemeTypes): void => {
       localStorage.setItem('theme', theme);
       setTheme(theme);
     },
@@ -28,15 +28,23 @@ function View ({ children, className }: Props): React.ReactElement<Props> {
   );
 
   useEffect(() => {
-    subscribeSettings(null, (data) => {
-      if (data.theme !== localStorage.getItem('theme')) {
-        switchTheme(data.theme);
+    const _switchTheme = (data: ResponseSettingsType) => {
+      if (!data.theme) {
+        const theme = localStorage.getItem('theme');
+
+        saveTheme(theme as ThemeTypes, () => {
+          console.log('theme', theme);
+        }).catch(() => console.log('There is problem when initTheme'));
+      } else {
+        if (data.theme !== localStorage.getItem('theme')) {
+          switchTheme(data.theme);
+        }
       }
-    }).then((data) => {
-      if (data.theme !== localStorage.getItem('theme')) {
-        switchTheme(data.theme);
-      }
-    }).catch((e) => console.log('There is problem when subscribeSettings', e));
+    };
+
+    subscribeSettings(null, _switchTheme)
+      .then(_switchTheme)
+      .catch((e) => console.log('There is problem when subscribeSettings', e));
   }, [switchTheme]);
 
   const _theme = themes[theme];

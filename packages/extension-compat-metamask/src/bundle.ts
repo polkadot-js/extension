@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-compat-metamask authors & contributors
+// Copyright 2019-2022 @subwallet/extension-compat-metamask authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Injected, InjectedAccount, InjectedWindow } from '@polkadot/extension-inject/types';
+import type { Injected, InjectedAccount, InjectedWindow } from '@subwallet/extension-inject/types';
 import type { SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
 

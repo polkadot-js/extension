@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrentNetworkInfo } from '@polkadot/extension-base/background/KoniTypes';
-import { AccountJson } from '@polkadot/extension-base/background/types';
-import { store } from '@polkadot/extension-koni-ui/stores/index';
+import { CurrentNetworkInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { store } from '@subwallet/extension-koni-ui/stores/index';
 
 export function updateCurrentNetwork (currentNetwork: CurrentNetworkInfo): void {
   store.dispatch({ type: 'currentNetwork/update', payload: currentNetwork });

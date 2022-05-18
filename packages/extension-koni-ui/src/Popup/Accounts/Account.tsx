@@ -1,24 +1,23 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson } from '@polkadot/extension-base/background/types';
+import type { AccountJson } from '@subwallet/extension-base/background/types';
 
+import { CurrentAccountInfo } from '@subwallet/extension-base/background/KoniTypes';
+import check from '@subwallet/extension-koni-ui/assets/check.svg';
+import changeAvatar from '@subwallet/extension-koni-ui/assets/icon/camera.svg';
+import changeAvatarHover from '@subwallet/extension-koni-ui/assets/icon/camera-hover.svg';
+import { AccountContext, AccountInfoEl, ActionContext } from '@subwallet/extension-koni-ui/components';
+import useIsPopup from '@subwallet/extension-koni-ui/hooks/useIsPopup';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { saveAccountAllLogo, saveCurrentAccountAddress, triggerAccountsSubscription } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/util';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { CurrentAccountInfo } from '@polkadot/extension-base/background/KoniTypes';
-import check from '@polkadot/extension-koni-ui/assets/check.svg';
-import changeAvatar from '@polkadot/extension-koni-ui/assets/icon/camera.svg';
-import changeAvatarHover from '@polkadot/extension-koni-ui/assets/icon/camera-hover.svg';
-import { AccountContext, AccountInfoEl, ActionContext } from '@polkadot/extension-koni-ui/components';
-import useIsPopup from '@polkadot/extension-koni-ui/hooks/useIsPopup';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { saveAccountAllLogo, saveCurrentAccountAddress, triggerAccountsSubscription } from '@polkadot/extension-koni-ui/messaging';
-import { RootState } from '@polkadot/extension-koni-ui/stores';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { findAccountByAddress, isAccountAll } from '@polkadot/extension-koni-ui/util';
 
 interface Props extends AccountJson {
   className?: string;
@@ -38,7 +37,7 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
   const isPopup = useIsPopup();
   const isFirefox = window.localStorage.getItem('browserInfo') === 'Firefox';
   const isLinux = window.localStorage.getItem('osInfo') === 'Linux';
-  const { setToastError, show } = useToast();
+  const { show } = useToast();
 
   useEffect((): void => {
     if (currentAccount?.address === address) {
@@ -110,10 +109,9 @@ function Account ({ address, changeAccountCallback, className, closeSetting, gen
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-member-access
         updateAvatar(event.target.files[0]);
       } else {
-        setToastError(true);
-        show(t('File is too large (limited 500KB)'));
+        show(t('File is too large (limited 500KB)'), true);
       }
-    }, [updateAvatar, setToastError, show, t]);
+    }, [updateAvatar, show, t]);
 
   const onSelectImg = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();

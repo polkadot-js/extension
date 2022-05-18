@@ -1,12 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import Warning from '@subwallet/extension-koni-ui/components/Warning';
+import useIsMounted from '@subwallet/extension-koni-ui/hooks/useIsMounted';
+import { Result, Validator } from '@subwallet/extension-koni-ui/util/validators';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-
-import Warning from '@polkadot/extension-koni-ui/components/Warning';
-import useIsMounted from '@polkadot/extension-koni-ui/hooks/useIsMounted';
-import { Result, Validator } from '@polkadot/extension-koni-ui/util/validators';
 
 interface BasicProps {
   isError?: boolean;

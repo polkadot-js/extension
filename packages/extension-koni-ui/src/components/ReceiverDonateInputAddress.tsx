@@ -1,15 +1,14 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import NETWORKS from '@subwallet/extension-koni-base/api/endpoints';
+import FormatBalance from '@subwallet/extension-koni-ui/components/FormatBalance';
+import { useTranslation } from '@subwallet/extension-koni-ui/components/translate';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { toShort } from '@subwallet/extension-koni-ui/util';
+import reformatAddress from '@subwallet/extension-koni-ui/util/reformatAddress';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-
-import NETWORKS from '@polkadot/extension-koni-base/api/endpoints';
-import FormatBalance from '@polkadot/extension-koni-ui/components/FormatBalance';
-import { useTranslation } from '@polkadot/extension-koni-ui/components/translate';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-import { toShort } from '@polkadot/extension-koni-ui/util';
-import reformatAddress from '@polkadot/extension-koni-ui/util/reformatAddress';
 
 import DonateInputAddress from './DonateInputAddress/index';
 

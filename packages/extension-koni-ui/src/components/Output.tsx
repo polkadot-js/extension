@@ -1,15 +1,14 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import cloneIconLight from '@subwallet/extension-koni-ui/assets/clone--color-2.svg';
+import cloneIconDark from '@subwallet/extension-koni-ui/assets/clone--color-3.svg';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/useTranslation';
+import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled, { ThemeContext } from 'styled-components';
-
-import cloneIconLight from '@polkadot/extension-koni-ui/assets/clone--color-2.svg';
-import cloneIconDark from '@polkadot/extension-koni-ui/assets/clone--color-3.svg';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import useTranslation from '@polkadot/extension-koni-ui/hooks/useTranslation';
-import { Theme, ThemeProps } from '@polkadot/extension-koni-ui/types';
 
 import Labelled from './Labelled';
 

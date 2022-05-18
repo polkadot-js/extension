@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TokenInfo } from '@polkadot/extension-base/background/KoniTypes';
+import { TokenInfo } from '@subwallet/extension-base/background/KoniTypes';
 
 export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>> = {
   statemine: {
@@ -90,22 +90,28 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
     }
   },
   karura: {
-    KUSD: {
-      isMainToken: false,
-      symbol: 'KUSD',
-      name: 'KUSD',
-      decimals: 12
-    },
-    KSM: {
-      isMainToken: false,
-      symbol: 'KSM',
-      name: 'KSM',
-      decimals: 12
-    },
     LKSM: {
       isMainToken: false,
       symbol: 'LKSM',
       name: 'LKSM',
+      decimals: 12
+    },
+    KMA: {
+      isMainToken: false,
+      symbol: 'KMA',
+      name: 'KMA',
+      decimals: 12
+    },
+    taiKSM: {
+      isMainToken: false,
+      symbol: 'taiKSM',
+      name: 'taiKSM',
+      decimals: 12
+    },
+    TEER: {
+      isMainToken: false,
+      symbol: 'TEER',
+      name: 'TEER',
       decimals: 12
     },
     BNC: {
@@ -114,11 +120,35 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'BNC',
       decimals: 12
     },
-    VSKSM: {
+    TAI: {
       isMainToken: false,
-      symbol: 'VSKSM',
-      name: 'VSKSM',
+      symbol: 'TAI',
+      name: 'TAI',
       decimals: 12
+    },
+    HKO: {
+      isMainToken: false,
+      symbol: 'HKO',
+      name: 'HKO',
+      decimals: 12
+    },
+    KICO: {
+      isMainToken: false,
+      symbol: 'KICO',
+      name: 'KICO',
+      decimals: 14
+    },
+    QTZ: {
+      isMainToken: false,
+      symbol: 'QTZ',
+      name: 'Quartz',
+      decimals: 18
+    },
+    NEER: {
+      isMainToken: false,
+      symbol: 'NEER',
+      name: 'NEER',
+      decimals: 18
     },
     PHA: {
       isMainToken: false,
@@ -126,10 +156,58 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'PHA',
       decimals: 12
     },
+    PolarisDAO: {
+      isMainToken: false,
+      symbol: 'ARIS',
+      name: 'PolarisDAO',
+      decimals: 8
+    },
     KINT: {
       isMainToken: false,
       symbol: 'KINT',
       name: 'KINT',
+      decimals: 12
+    },
+    RMRK: {
+      isMainToken: false,
+      symbol: 'RMRK',
+      name: 'RMRK',
+      decimals: 10
+    },
+    CSM: {
+      isMainToken: false,
+      symbol: 'CSM',
+      name: 'CSM',
+      decimals: 12
+    },
+    VSKSM: {
+      isMainToken: false,
+      symbol: 'VSKSM',
+      name: 'VSKSM',
+      decimals: 12
+    },
+    USDC: {
+      isMainToken: false,
+      symbol: 'USDC',
+      name: 'USDC',
+      decimals: 6
+    },
+    KSM: {
+      isMainToken: false,
+      symbol: 'KSM',
+      name: 'KSM',
+      decimals: 12
+    },
+    aUSD: {
+      isMainToken: false,
+      symbol: 'aUSD',
+      name: 'aUSD',
+      decimals: 12
+    },
+    BSX: {
+      isMainToken: false,
+      symbol: 'BSX',
+      name: 'BSX',
       decimals: 12
     },
     KBTC: {
@@ -138,11 +216,23 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       name: 'KBTC',
       decimals: 8
     },
-    TAI: {
+    AIR: {
       isMainToken: false,
-      symbol: 'TAI',
-      name: 'TAI',
-      decimals: 12
+      symbol: 'AIR',
+      name: 'AIR',
+      decimals: 18
+    },
+    USDT: {
+      isMainToken: false,
+      symbol: 'USDT',
+      name: 'USDT',
+      decimals: 6
+    },
+    MOVR: {
+      isMainToken: false,
+      symbol: 'MOVR',
+      name: 'MOVR',
+      decimals: 18
     }
   },
   bifrost: {
@@ -419,6 +509,41 @@ export const PREDEFINE_TOKEN_DATA_MAP: Record<string, Record<string, TokenInfo>>
       erc20Address: '0xde2578edec4669ba7f41c5d5d2386300bcea4678',
       decimals: 18,
       name: 'ArthSwap Token'
+    },
+    LAY: {
+      isMainToken: false,
+      symbol: 'LAY',
+      erc20Address: '0xc4335B1b76fA6d52877b3046ECA68F6E708a27dd',
+      decimals: 18,
+      name: 'Lay Token'
+    },
+    BAI: {
+      isMainToken: false,
+      symbol: 'BAI',
+      erc20Address: '0x733ebcc6df85f8266349defd0980f8ced9b45f35',
+      decimals: 18,
+      name: 'BAI Stablecoin'
+    },
+    ATID: {
+      isMainToken: false,
+      symbol: 'ATID',
+      erc20Address: '0x5271d85ce4241b310c0b34b7c2f1f036686a6d7c',
+      decimals: 18,
+      name: 'ATID'
+    },
+    SRS: {
+      isMainToken: false,
+      symbol: 'SRS',
+      erc20Address: '0x9448610696659de8f72e1831d392214ae1ca4838',
+      decimals: 18,
+      name: 'Sirius Finance'
+    },
+    ORU: {
+      isMainToken: false,
+      symbol: 'ORU',
+      erc20Address: '0xcdb32eed99aa19d39e5d6ec45ba74dc4afec549f',
+      decimals: 18,
+      name: 'Orcus Token'
     },
     BNB: {
       isMainToken: false,

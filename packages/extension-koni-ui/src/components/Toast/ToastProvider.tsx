@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
@@ -17,21 +17,18 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
   const [visible, setVisible] = useState(false);
   const [isError, setError] = useState(false);
 
-  const show = useCallback((message: string): () => void => {
+  const show = useCallback((message: string, isError?: boolean): () => void => {
     const timerId = setTimeout(() => setVisible(false), TOAST_TIMEOUT);
 
+    setError(!!isError);
     setContent(message);
     setVisible(true);
 
     return (): void => clearTimeout(timerId);
   }, []);
 
-  const setToastError = useCallback((isError: boolean) => {
-    setError(isError);
-  }, []);
-
   return (
-    <ToastContext.Provider value={{ show, setToastError }}>
+    <ToastContext.Provider value={{ show }}>
       {children}
       <Toast
         content={content}

@@ -1,15 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
+import { ActionContext, Button, Dropdown, InputWithLabel } from '@subwallet/extension-koni-ui/components';
+import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
+import { upsertEvmToken, validateEvmToken } from '@subwallet/extension-koni-ui/messaging';
+import { Header } from '@subwallet/extension-koni-ui/partials';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
-import { ActionContext, Button, Dropdown, InputWithLabel } from '@polkadot/extension-koni-ui/components';
-import useToast from '@polkadot/extension-koni-ui/hooks/useToast';
-import { upsertEvmToken, validateEvmToken } from '@polkadot/extension-koni-ui/messaging';
-import { Header } from '@polkadot/extension-koni-ui/partials';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface Props extends ThemeProps {
@@ -52,7 +52,7 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
   const { show } = useToast();
 
   const onChangeContractAddress = useCallback((val: string) => {
-    setContractAddress(val);
+    setContractAddress(val.toLowerCase());
   }, []);
 
   useEffect(() => {
@@ -83,31 +83,35 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
           })
           .catch(() => {
             show('Invalid contract for the selected chain');
+            setIsValidContract(false);
           });
       }
     }
   }, [contractAddress, chain, show]);
 
   const onChangeSymbol = useCallback((val: string) => {
-    if (val.length > 11 && val !== '') {
+    if ((val.length > 11 && val !== '') || (val.split(' ').join('') === '')) {
       setIsValidSymbol(false);
+      show('Symbol cannot exceed 11 characters or contain spaces');
     } else {
       setIsValidSymbol(true);
     }
 
     setSymbol(val);
-  }, []);
+  }, [show]);
 
   const onChangeDecimals = useCallback((val: string) => {
     const _decimals = parseInt(val);
 
-    if (isNaN(_decimals) && val !== '') {
+    if ((isNaN(_decimals) && val !== '') || (val.split(' ').join('') === '')) {
       setIsValidDecimals(false);
+      show('Invalid token decimals');
     } else {
       setIsValidDecimals(true);
-      setDecimals(val);
     }
-  }, []);
+
+    setDecimals(val);
+  }, [show]);
 
   const onSelectChain = useCallback((val: any) => {
     const _chain = val as string;
@@ -180,18 +184,12 @@ function ImportEvmToken ({ className = '' }: Props): React.ReactElement<Props> {
           onChange={onChangeSymbol}
           value={symbol}
         />
-        {
-          !isValidSymbol && <div className={'invalid-input'}>Token symbol should not exceed 11 characters</div>
-        }
 
         <InputWithLabel
-          label={'Token Decimals'}
+          label={'Token Decimals (*)'}
           onChange={onChangeDecimals}
           value={decimals}
         />
-        {
-          !isValidDecimals && <div className={'invalid-input'}>Token decimals must be an integer</div>
-        }
 
         <div className={'add-token-container'}>
           <Button

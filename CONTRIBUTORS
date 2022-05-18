@@ -1,13 +1,13 @@
      465	Jaco                          	0.42.5 (#969)
-     193	Nam Phạm                      	fix ipfs gateway for Astar NFT
-     176	AnhMTV                        	Add support ERC20 tokens of Moonfit on Moonbase
+     238	Nam Phạm                      	update validate evm token
+     198	AnhMTV                        	Enable publish packages to npm (#169). Add discord hook to notify actions on branch master.
+     122	quangdo                       	fix bug hide account in Create screen
+     102	lw-cdm                        	Remove unused logo referent
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      79	quangdo                       	Change "Seed Phase" to "Seed Phrase"
       55	leewong                       	#118: update balance logic for Kintsugi testnet
       50	Dominhquangdev                	Update Settings screen, Update Restore Json
-      42	lw                            	# update balance display
-      35	Hieu Dao                      	Update Centrifuge Parachain info #203
-      24	lw-cdm                        	
+      40	lw-cdm                        	
+      37	Hieu Dao                      	Update Sakura Parachain
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
@@ -39,6 +39,7 @@
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
        1	murat onur                    	tr language support added (#681)
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
+       1	Quangdm-cdm                   	
        1	Stéphane P                    	README Fix typo (#700)
        1	Tore19                        	Add Stafi network (#454)
        1	Vlad Proshchavaiev            	Update extension with Subsocial SS58 included (#416)

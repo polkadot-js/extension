@@ -1,11 +1,10 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { canDerive } from '@subwallet/extension-base/utils';
+import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-
-import { canDerive } from '@polkadot/extension-base/utils';
-import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 
 import { AccountContext, AccountInfoEl, ActionContext, ButtonArea, Checkbox, InputWithLabel, Label, NextStepButton, Theme, Warning } from '../../components';
 import useTranslation from '../../hooks/useTranslation';

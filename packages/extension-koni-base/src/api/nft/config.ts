@@ -1,7 +1,7 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CustomEvmToken } from '@polkadot/extension-base/background/KoniTypes';
+import { CustomEvmToken } from '@subwallet/extension-base/background/KoniTypes';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk.app/api/rmrk1/account/';
 

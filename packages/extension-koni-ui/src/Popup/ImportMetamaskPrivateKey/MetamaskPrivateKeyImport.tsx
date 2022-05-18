@@ -1,18 +1,16 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ThemeProps } from '../../types';
 import type { AccountInfo } from '.';
 
+import { validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
+import { Password } from '@subwallet/extension-koni-ui/partials';
+import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/Popup/CreateAccount';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
-import { validateSeedV2 } from '@polkadot/extension-koni-ui/messaging';
-import { Password } from '@polkadot/extension-koni-ui/partials';
-import { EVM_ACCOUNT_TYPE } from '@polkadot/extension-koni-ui/Popup/CreateAccount';
 import { objectSpread } from '@polkadot/util';
 
 import { AccountInfoEl, ButtonArea, NextStepButton, TextAreaWithLabel, Warning } from '../../components';
@@ -27,46 +25,63 @@ interface Props {
   type: KeypairType;
   account: AccountInfo | null;
   name: string;
+  isBusy: boolean;
 }
 
-function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
+interface PrivateKeyInfoType {
+  address: string;
+  error: string;
+}
+
+function MetamaskPrivateKeyImport ({ account, className, isBusy, keyTypes, name, onAccountChange, onCreate, type }: Props): React.ReactElement {
   const { t } = useTranslation();
-  const [address, setAddress] = useState('');
+  const [{ address, error }, setPrivateKeyInfo] = useState<PrivateKeyInfoType>({ address: '', error: '' });
   const [seed, setSeed] = useState<string | null>(null);
-  const [error, setError] = useState('');
+  const [autoCorrectedSeed, setAutoCorrectedSeed] = useState<string | null>(null);
   const genesis = '';
   const themeContext = useContext(ThemeContext as React.Context<Theme>);
-  const dep = keyTypes.toString();
   const [password, setPassword] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // No need to validate an empty seed
     // we have a dedicated error for this
+    let isSync = true;
+
     if (!seed) {
       onAccountChange(null);
 
       return;
     }
 
-    const suri = `${seed || ''}`;
+    validateMetamaskPrivateKeyV2(seed, keyTypes)
+      .then(({ addressMap, autoAddPrefix }) => {
+        if (isSync) {
+          const address = addressMap[EVM_ACCOUNT_TYPE];
+          let suri = `${seed || ''}`;
 
-    validateSeedV2(seed, keyTypes)
-      .then(({ addressMap, seed }) => {
-        const address = addressMap[EVM_ACCOUNT_TYPE];
+          if (autoAddPrefix) {
+            suri = `0x${suri}`;
+            setAutoCorrectedSeed(suri);
+          }
 
-        setAddress(address);
-        setError('');
-        onAccountChange(
-          objectSpread<AccountInfo>({}, { address, suri, genesis, EVM_ACCOUNT_TYPE })
-        );
+          setPrivateKeyInfo({ address, error: '' });
+          onAccountChange(
+            objectSpread<AccountInfo>({}, { address, suri, genesis, EVM_ACCOUNT_TYPE })
+          );
+        }
       })
       .catch(() => {
-        setAddress('');
-        onAccountChange(null);
-        setError(t<string>('The private key must be a string of 0x and 64 characters. If it doesn\'t start with 0x, please add it manually.'));
+        if (isSync) {
+          onAccountChange(null);
+          setPrivateKeyInfo({ address: '', error: t<string>('Not a valid private key') });
+        }
       });
-  }, [t, genesis, seed, onAccountChange, type, dep]);
+
+    return () => {
+      isSync = false;
+    };
+  }, [t, genesis, seed, onAccountChange, type, keyTypes]);
 
   const _onCreate = useCallback(
     () => {
@@ -95,6 +110,11 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, []);
 
+  const onChangeSeed = useCallback((text: string | null) => {
+    setAutoCorrectedSeed(null);
+    setSeed(text);
+  }, []);
+
   return (
     <div className={className}>
       <div className='account-info-wrapper'>
@@ -112,9 +132,9 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
             isError={!!error}
             isFocused
             label={t<string>('private key')}
-            onChange={setSeed}
+            onChange={onChangeSeed}
             rowsCount={2}
-            value={seed || ''}
+            value={autoCorrectedSeed || seed || ''}
           />
           {!!error && !seed && (
             <Warning
@@ -122,7 +142,7 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
               isBelowInput
               isDanger
             >
-              {t<string>('Mnemonic needs to contain 12, 15, 18, 21, 24 words')}
+              {t<string>('Private key cannot be empty')}
             </Warning>
           )}
           {!!error && !!seed && (
@@ -143,7 +163,8 @@ function MetamaskPrivateKeyImport ({ account, className, keyTypes, name, onAccou
       <ButtonArea>
         <NextStepButton
           className='next-step-btn'
-          isDisabled={!address || !!error || !seed}
+          isBusy={isBusy}
+          isDisabled={!address || !!error || !seed || !password}
           onClick={_onCreate}
         >
           {t<string>('Add the account with the supplied private key')}

@@ -1,16 +1,15 @@
-// Copyright 2019-2022 @polkadot/extension-koni authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import LogosMap from '@subwallet/extension-koni-ui/assets/logo';
+import { StakingDataType } from '@subwallet/extension-koni-ui/hooks/screen/home/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
 import styled from 'styled-components';
 
-import LogosMap from '@polkadot/extension-koni-ui/assets/logo';
-import { StakingDataType } from '@polkadot/extension-koni-ui/hooks/screen/home/types';
-import { ThemeProps } from '@polkadot/extension-koni-ui/types';
-
 const StakingRow = React.lazy(() => import('./StakingRow'));
-const Spinner = React.lazy(() => import('@polkadot/extension-koni-ui/components/Spinner'));
-const EmptyList = React.lazy(() => import('@polkadot/extension-koni-ui/Popup/Home/Staking/EmptyList'));
+const Spinner = React.lazy(() => import('@subwallet/extension-koni-ui/components/Spinner'));
+const EmptyList = React.lazy(() => import('@subwallet/extension-koni-ui/Popup/Home/Staking/EmptyList'));
 
 interface Props extends ThemeProps {
   className?: string;

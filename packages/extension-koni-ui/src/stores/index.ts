@@ -12,7 +12,6 @@ import CurrentNetworkReducer from './CurrentNetwork';
 import EvmTokenReducer from './EvmToken';
 import NetworkConfigParamsReducer from './NetworkConfigParams';
 import NetworkMapReducer from './NetworkMap';
-import NetworkMetadataReducer from './NetworkMetadata';
 import NftReducer from './Nft';
 import NftCollectionReducer from './NftCollection';
 import PriceReducer from './Price';
@@ -42,7 +41,6 @@ const reducers = {
   currentAccount: CurrentAccountReducer,
   currentNetwork: CurrentNetworkReducer,
   chainRegistry: ChainRegistryReducer,
-  networkMetadata: NetworkMetadataReducer,
   allAccount: AllAccountReducer,
   settings: SettingsReducer
 };

@@ -7,6 +7,7 @@ import { CurrentNetworkInfo, NetWorkMetadataDef } from '@subwallet/extension-bas
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-koni-base/constants';
 import { ActionContext } from '@subwallet/extension-koni-ui/components';
 import Spinner from '@subwallet/extension-koni-ui/components/Spinner';
+import useGetNetworkMetadata from '@subwallet/extension-koni-ui/hooks/screen/home/useGetNetworkMetadata';
 import useToast from '@subwallet/extension-koni-ui/hooks/useToast';
 import { tieAccount } from '@subwallet/extension-koni-ui/messaging';
 import { _NftItem, SUPPORTED_TRANSFER_EVM_CHAIN, SUPPORTED_TRANSFER_SUBSTRATE_CHAIN } from '@subwallet/extension-koni-ui/Popup/Home/Nfts/types';
@@ -48,7 +49,8 @@ function NftItem ({ className, collectionId, collectionImage, data, onClickBack 
   const [loading, setLoading] = useState(true);
   const [showImage, setShowImage] = useState(true);
   const [imageError, setImageError] = useState(false);
-  const { currentAccount: account, currentNetwork, networkMetadata } = useSelector((state: RootState) => state);
+  const { currentAccount: account, currentNetwork } = useSelector((state: RootState) => state);
+  const networkMetadata = useGetNetworkMetadata();
 
   const navigate = useContext(ActionContext);
   const { show } = useToast();

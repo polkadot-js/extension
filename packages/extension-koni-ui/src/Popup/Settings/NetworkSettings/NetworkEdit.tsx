@@ -247,7 +247,11 @@ function NetworkEdit ({ className }: Props): React.ReactElement {
 
   const toggleEthereum = useCallback((val: boolean) => {
     setIsEthereum(val);
-  }, []);
+    setNetworkInfo({
+      ...networkInfo,
+      isEthereum: val
+    });
+  }, [networkInfo]);
 
   const toggleShowMore = useCallback((val: boolean) => {
     setShowMore(val);
